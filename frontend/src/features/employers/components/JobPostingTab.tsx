@@ -366,8 +366,9 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
               <button
                 onClick={() => {
                   if (window.confirm('Are you sure you want to delete this job listing?')) {
+                    // No toast here: the parent reports success or failure after
+                    // the request resolves.
                     onDeleteJob(job.id);
-                    toast.success('Job listing deleted.');
                   }
                 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg text-[10px] font-bold text-[var(--text-primary)] hover:border-red-300 hover:text-red-600 transition-all"
@@ -376,7 +377,7 @@ export const JobPostingTab: React.FC<JobPostingTabProps> = ({ jobs, onPostJob, o
                 Delete
               </button>
               <button
-                onClick={() => { onToggleJobStatus(job.id); toast.success(`Job ${job.status === 'Open' ? 'closed' : 'reopened'}.`); }}
+                onClick={() => { onToggleJobStatus(job.id); }}
                 className={`ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
                   job.status === 'Open'
                     ? 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100'

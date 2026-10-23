@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { HiChevronDown, HiMagnifyingGlass, HiXMark } from "react-icons/hi2";
 import {
   MdEmail,
@@ -8,6 +8,7 @@ import {
   MdWork,
   MdDescription,
   MdGroups,
+  MdEventNote,
   MdQuiz,
   MdFeedback,
 } from "react-icons/md";
@@ -121,7 +122,7 @@ const sections: HelpSection[] = [
   },
   {
     title: "Events & Networking",
-    icon: MdGroups,
+    icon: MdEventNote,
     faqs: [
       {
         question: "How do I register for events?",
@@ -157,6 +158,78 @@ const sections: HelpSection[] = [
   },
 ];
 
+const departmentSections: HelpSection[] = [
+  {
+    title: "Department Portal",
+    icon: MdSchool,
+    faqs: [
+      {
+        question: "What data can I see as a department head?",
+        answer:
+          "The portal loads live data for your assigned department only: alumni directory, employment stats, insights derived from alumni profiles, and surveys you create or institutional milestones you can dispatch.",
+      },
+      {
+        question: "Why is my dashboard empty?",
+        answer:
+          "Empty charts mean no alumni are linked to your department yet, or your account is not assigned a Department Head profile. Contact an administrator to assign your department.",
+      },
+      {
+        question: "I forgot my password. What should I do?",
+        answer:
+          'On the login page, click "Forgot Password" and enter your registered email. Use the reset link from your inbox (check spam if needed).',
+      },
+    ],
+  },
+  {
+    title: "Graduates & Employment",
+    icon: MdWork,
+    faqs: [
+      {
+        question: "How do I export graduate lists?",
+        answer:
+          "Open Graduates or Employment, apply filters if needed, then use Export to download a CSV of the current filtered results from the live department alumni API.",
+      },
+      {
+        question: "Where do employment rates come from?",
+        answer:
+          "Rates and filters are computed from your department alumni records returned by /departments/my-alumni and /departments/my-stats — not demo numbers.",
+      },
+    ],
+  },
+  {
+    title: "Surveys",
+    icon: MdQuiz,
+    faqs: [
+      {
+        question: "Who receives surveys I dispatch?",
+        answer:
+          "Dispatch targets eligible alumni in your department. The preview shows department alumni; the final count may be lower if some are already assigned or not yet eligible.",
+      },
+      {
+        question: "Can I edit institutional milestone surveys?",
+        answer:
+          "You can view and dispatch 6/12/18/24-month milestones to your alumni. Creating, editing, or archiving those templates is reserved for Admin/Registrar. You fully manage your own custom department surveys.",
+      },
+    ],
+  },
+  {
+    title: "Technical Support",
+    icon: MdFeedback,
+    faqs: [
+      {
+        question: "The website is not loading properly. What should I do?",
+        answer:
+          "Clear your browser cache, try Chrome or Firefox, and confirm you are signed in with a real department-head account (not a demo session).",
+      },
+      {
+        question: "How do I report a bug?",
+        answer:
+          "Email support@astu.edu.et with the page, steps to reproduce, and screenshots. Include your department code if known.",
+      },
+    ],
+  },
+];
+
 const quickLinks = [
   { label: "Registration Guide", icon: MdBookOnline, desc: "Step-by-step registration" },
   { label: "Job Search Tips", icon: MdWork, desc: "Optimize your job hunt" },
@@ -165,34 +238,49 @@ const quickLinks = [
   { label: "FAQ", icon: FaQuestionCircle, desc: "Common questions answered" },
 ];
 
+const departmentQuickLinks = [
+  { label: "Dashboard", icon: MdBookOnline, desc: "Live department outcomes" },
+  { label: "Graduates", icon: MdSchool, desc: "Search and export alumni" },
+  { label: "Employment", icon: MdWork, desc: "Placement analytics" },
+  { label: "Surveys", icon: MdQuiz, desc: "Create and dispatch surveys" },
+  { label: "FAQ", icon: FaQuestionCircle, desc: "Department help topics" },
+];
+
 export default function HelpCenter({
   isOpen,
   onClose,
+  darkMode = false,
+  audience = "default",
 }: {
   isOpen: boolean;
   onClose: () => void;
+  darkMode?: boolean;
+  audience?: "default" | "department";
 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [openSection, setOpenSection] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
+  const activeSections = audience === "department" ? departmentSections : sections;
+  const activeQuickLinks = audience === "department" ? departmentQuickLinks : quickLinks;
+
   const toggleSection = (title: string) => {
     setOpenSection(openSection === title ? null : title);
   };
 
   const filteredSections = searchQuery.trim()
-    ? sections
-      .map((s) => ({
-        ...s,
-        faqs: s.faqs.filter(
-          (f) =>
-            f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            f.answer.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-      }))
-      .filter((s) => s.faqs.length > 0)
-    : sections;
+    ? activeSections
+        .map((s) => ({
+          ...s,
+          faqs: s.faqs.filter(
+            (f) =>
+              f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              f.answer.toLowerCase().includes(searchQuery.toLowerCase())
+          ),
+        }))
+        .filter((s) => s.faqs.length > 0)
+    : activeSections;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-12 pb-8 px-4">
@@ -200,31 +288,45 @@ export default function HelpCenter({
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl animate-[mega-menu-fade-in_150ms_ease-out_both] flex flex-col max-h-[90vh]">
+      <div className={`relative w-full max-w-3xl rounded-2xl shadow-2xl animate-[mega-menu-fade-in_150ms_ease-out_both] flex flex-col max-h-[90vh] ${
+        darkMode ? 'bg-slate-900' : 'bg-white'
+      }`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant shrink-0">
+        <div className={`flex items-center justify-between px-6 py-5 border-b shrink-0 ${
+          darkMode ? 'border-slate-700' : 'border-outline-variant'
+        }`}>
           <div>
-            <h2 className="text-xl font-bold text-astu-navy">Help Center</h2>
-            <p className="text-sm text-on-surface-variant/70 mt-0.5">
+            <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-astu-navy'}`}>Help Center</h2>
+            <p className={`text-sm mt-0.5 ${darkMode ? 'text-slate-400' : 'text-on-surface-variant/70'}`}>
               Find answers, guides, and support resources
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-astu-navy/5 text-on-surface-variant hover:text-astu-navy transition-colors"
+            className={`p-2 rounded-xl transition-colors ${
+              darkMode ? 'text-slate-400 hover:bg-white/5 hover:text-white' : 'text-on-surface-variant hover:bg-astu-navy/5 hover:text-astu-navy'
+            }`}
           >
             <HiXMark className="h-5 w-5" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="px-6 py-4 border-b border-outline-variant/50 shrink-0">
+        <div className={`px-6 py-4 border-b shrink-0 ${
+          darkMode ? 'border-slate-700/50' : 'border-outline-variant/50'
+        }`}>
           <div className="relative">
-            <HiMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant" />
+            <HiMagnifyingGlass className={`absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 ${
+              darkMode ? 'text-slate-400' : 'text-on-surface-variant'
+            }`} />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-outline-variant bg-surface-container-low py-3 pl-11 pr-4 text-sm focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all"
+              className={`w-full rounded-xl border py-3 pl-11 pr-4 text-sm transition-all ${
+                darkMode
+                  ? 'border-slate-600 bg-slate-800 text-white placeholder-slate-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20'
+                  : 'border-outline-variant bg-surface-container-low focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/20'
+              } focus:outline-none`}
               placeholder="Search help topics..."
               type="text"
             />
@@ -235,11 +337,13 @@ export default function HelpCenter({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {/* Quick Links */}
           <div className="mb-6">
-            <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3">
+            <h3 className={`text-sm font-bold uppercase tracking-wider mb-3 ${
+              darkMode ? 'text-slate-400' : 'text-on-surface-variant'
+            }`}>
               Quick Links
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {quickLinks.map((link) => {
+              {activeQuickLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <button
@@ -257,12 +361,18 @@ export default function HelpCenter({
                         setSearchQuery("");
                       }
                     }}
-                    className="flex items-start gap-3 rounded-xl border border-outline-variant/60 p-3 text-left hover:border-astu-navy/30 hover:bg-astu-navy/5 transition-all group"
+                    className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-all group ${
+                      darkMode
+                        ? 'border-slate-700 hover:border-blue-500/30 hover:bg-blue-500/5'
+                        : 'border-outline-variant/60 hover:border-astu-navy/30 hover:bg-astu-navy/5'
+                    }`}
                   >
-                    <Icon className="h-5 w-5 text-astu-navy/60 group-hover:text-astu-navy shrink-0 mt-0.5" />
+                    <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${
+                      darkMode ? 'text-blue-400/60 group-hover:text-blue-300' : 'text-astu-navy/60 group-hover:text-astu-navy'
+                    }`} />
                     <div>
-                      <p className="text-sm font-bold text-astu-navy">{link.label}</p>
-                      <p className="text-xs text-on-surface-variant/60">{link.desc}</p>
+                      <p className={`text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-astu-navy'}`}>{link.label}</p>
+                      <p className={`text-xs ${darkMode ? 'text-slate-500' : 'text-on-surface-variant/60'}`}>{link.desc}</p>
                     </div>
                   </button>
                 );
@@ -272,14 +382,16 @@ export default function HelpCenter({
 
           {filteredSections.length === 0 ? (
             <div className="text-center py-12">
-              <MdFeedback className="h-12 w-12 text-on-surface-variant/30 mx-auto mb-3" />
-              <p className="text-on-surface-variant font-semibold">No results found</p>
-              <p className="text-sm text-on-surface-variant/60 mt-1">
+              <MdFeedback className={`h-12 w-12 mx-auto mb-3 ${darkMode ? 'text-slate-600' : 'text-on-surface-variant/30'}`} />
+              <p className={`font-semibold ${darkMode ? 'text-slate-400' : 'text-on-surface-variant'}`}>No results found</p>
+              <p className={`text-sm mt-1 ${darkMode ? 'text-slate-500' : 'text-on-surface-variant/60'}`}>
                 Try different keywords or browse the categories below
               </p>
               <button
                 onClick={() => setSearchQuery("")}
-                className="mt-3 text-sm font-bold text-astu-navy hover:underline"
+                className={`mt-3 text-sm font-bold hover:underline ${
+                  darkMode ? 'text-blue-400' : 'text-astu-navy'
+                }`}
               >
                 Clear search
               </button>
@@ -292,37 +404,52 @@ export default function HelpCenter({
                 return (
                   <div
                     key={section.title}
-                    className="rounded-xl border border-outline-variant/60 overflow-hidden"
+                    className={`rounded-xl border overflow-hidden ${
+                      darkMode ? 'border-slate-700' : 'border-outline-variant/60'
+                    }`}
                   >
                     <button
                       onClick={() => toggleSection(section.title)}
-                      className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-astu-navy/5 transition-colors"
+                      className={`flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors ${
+                        darkMode ? 'hover:bg-white/5' : 'hover:bg-astu-navy/5'
+                      }`}
                     >
                       <span className="flex items-center gap-3">
-                        <Icon className="h-5 w-5 text-astu-navy/60" />
-                        <span className="text-sm font-bold text-astu-navy">
+                        <Icon className={`h-5 w-5 ${darkMode ? 'text-blue-400/60' : 'text-astu-navy/60'}`} />
+                        <span className={`text-sm font-bold ${darkMode ? 'text-blue-300' : 'text-astu-navy'}`}>
                           {section.title}
                         </span>
-                        <span className="text-[11px] text-on-surface-variant/50 font-semibold bg-astu-navy/5 px-2 py-0.5 rounded-full">
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                          darkMode ? 'text-slate-400 bg-white/5' : 'text-on-surface-variant/50 bg-astu-navy/5'
+                        }`}>
                           {section.faqs.length}
                         </span>
                       </span>
                       <HiChevronDown
-                        className={`h-4 w-4 text-on-surface-variant transition-transform duration-200 ${isSectionOpen ? "rotate-180" : ""
-                          }`}
+                        className={`h-4 w-4 transition-transform duration-200 ${
+                          darkMode ? 'text-slate-400' : 'text-on-surface-variant'
+                        } ${isSectionOpen ? "rotate-180" : ""}`}
                       />
                     </button>
                     {isSectionOpen && (
-                      <div className="border-t border-outline-variant/40 px-4 py-2 space-y-1">
+                      <div className={`border-t px-4 py-2 space-y-1 ${
+                        darkMode ? 'border-slate-700/40' : 'border-outline-variant/40'
+                      }`}>
                         {section.faqs.map((faq, i) => (
                           <div
                             key={i}
-                            className="rounded-lg px-3 py-3 hover:bg-astu-navy/5 transition-colors"
+                            className={`rounded-lg px-3 py-3 transition-colors ${
+                              darkMode ? 'hover:bg-white/5' : 'hover:bg-astu-navy/5'
+                            }`}
                           >
-                            <p className="text-sm font-bold text-astu-navy mb-1">
+                            <p className={`text-sm font-bold mb-1 ${
+                              darkMode ? 'text-blue-300' : 'text-astu-navy'
+                            }`}>
                               {faq.question}
                             </p>
-                            <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">
+                            <p className={`text-sm leading-relaxed whitespace-pre-line ${
+                              darkMode ? 'text-slate-400' : 'text-on-surface-variant'
+                            }`}>
                               {faq.answer}
                             </p>
                           </div>
@@ -336,7 +463,7 @@ export default function HelpCenter({
           )}
 
           {/* Contact Support */}
-          <div className="mt-6 rounded-xl bg-gradient-to-r from-astu-navy to-astu-navy/90 p-5 text-white">
+          <div className="mt-6 rounded-xl bg-gradient-to-r from-[#003366] to-[#003366]/90 p-5 text-white">
             <h3 className="text-sm font-bold uppercase tracking-wider text-white/70 mb-3">
               Still need help?
             </h3>

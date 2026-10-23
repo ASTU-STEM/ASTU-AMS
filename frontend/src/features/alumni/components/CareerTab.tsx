@@ -4,9 +4,19 @@ import { CareerEvent, JobMatch, Mentor, SkillPathway, AlumniProfile } from '../t
 import toast from 'react-hot-toast';
 import {
   CalendarDays, MapPin, Users, TrendingUp, Award, FileText, BarChart3, Target,
-  CheckCircle2, AlertCircle, BookOpen, Briefcase, GraduationCap, Rocket, Lightbulb,
-  Code2, Cloud, Shield, Smartphone, Star, ExternalLink, Download, Check, X, Sparkles, Cpu, Wrench
+  CheckCircle2, BookOpen, Briefcase, GraduationCap, Rocket, Lightbulb,
+  Code2, Cloud, Shield, Smartphone, Star, ExternalLink, Download, Check, Cpu, Wrench
 } from 'lucide-react';
+import { EmptyState } from '../../../components/EmptyState';
+import Modal from '../../../components/ui/Modal';
+import { AlumniSectionShell } from './AlumniSectionShell';
+import {
+  alumniCardClass,
+  alumniLabelClass,
+  alumniPanelClass,
+  alumniSectionTitleClass,
+  alumniStatusBadge,
+} from './alumniUi';
 
 interface CareerTabProps {
   events: CareerEvent[];
@@ -379,7 +389,7 @@ Department: ${userDept}
       title: 'Fintech Cover Letters',
       desc: 'Templates for Chapa, Telebirr, and international fintech roles.',
       icon: Award,
-      color: 'text-purple-600',
+      color: 'text-[#003366]',
       stats: '6 templates',
       fileName: 'ASTU_Fintech_Cover_Letter_Templates.md',
       content: `# ASTU Fintech Cover Letter Templates
@@ -411,37 +421,27 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Dynamic Hero Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-astu-navy via-indigo-900 to-purple-900 p-8 md:p-10 text-white shadow-xl">
-        <div className="absolute -top-12 -right-12 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-astu-green/10 rounded-full blur-2xl" />
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-white/15 text-[#FFD700] text-xs font-bold uppercase tracking-wider rounded-full">
-              {profile?.fullName ? `${profile.fullName.split(' ')[0]}'s Career Hub` : 'ASTU Career Hub'}
-            </span>
-            <span className="px-3 py-1 bg-astu-green/20 text-astu-green text-xs font-bold uppercase tracking-wider rounded-full">
-              {userDept}
-            </span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Accelerate Your Professional Growth</h2>
-          <p className="text-md opacity-90 leading-relaxed">
-            Access premium career resources, skill development pathways, and exclusive networking events designed for ASTU {userDept} graduates in modern industries.
-          </p>
-        </div>
-      </section>
+    <AlumniSectionShell
+      eyebrow="Career hub"
+      title="Grow your career"
+      description={`Events, jobs, and mentors tailored for ASTU ${userDept} graduates.`}
+      metrics={[
+        { value: jobs.length > 0 ? jobs.length : (statsData?.openJobMatches || 0), label: 'Job Matches', accent: 'gold' },
+        { value: mentors.length, label: 'Mentors', accent: 'green' },
+        { value: events.length, label: 'Events', accent: 'white' },
+      ]}
+    >
 
       {/* Dynamic Metrics Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm transition-all hover:shadow-md">
+        <div className={`${alumniCardClass} p-5 transition-all hover:shadow-md`}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-astu-navy/10 flex items-center justify-center">
               <Briefcase className="h-5 w-5 text-astu-navy" />
             </div>
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Job Matches Available</p>
+            <p className={`${alumniLabelClass} mb-0`}>Job Matches Available</p>
           </div>
-          <p className="text-3xl font-extrabold text-gray-900">
+          <p className="text-3xl font-extrabold text-[var(--text-primary)]">
             {jobs.length > 0 ? jobs.length : (statsData?.openJobMatches || 0)}
           </p>
           <p className="text-[10px] text-astu-green font-semibold mt-1">
@@ -451,14 +451,14 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm transition-all hover:shadow-md">
+        <div className={`${alumniCardClass} p-5 transition-all hover:shadow-md`}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-astu-green/10 flex items-center justify-center">
               <GraduationCap className="h-5 w-5 text-astu-green" />
             </div>
             <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Skill Pathways</p>
           </div>
-          <p className="text-3xl font-extrabold text-gray-900">{skillPathways.length}</p>
+          <p className="text-3xl font-extrabold text-[var(--text-primary)]">{skillPathways.length}</p>
           <p className="text-[10px] text-astu-navy font-semibold mt-1">
             {enrolledPathways.length > 0
               ? `${enrolledPathways.length} active track(s) enrolled`
@@ -466,14 +466,14 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm transition-all hover:shadow-md">
+        <div className={`${alumniCardClass} p-5 transition-all hover:shadow-md`}>
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
               <Users className="h-5 w-5 text-purple-600" />
             </div>
             <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Alumni Mentors Online</p>
           </div>
-          <p className="text-3xl font-extrabold text-gray-900">
+          <p className="text-3xl font-extrabold text-[var(--text-primary)]">
             {mentors.length > 0 ? mentors.length : (statsData?.activeMentorships || 0)}
           </p>
           <p className="text-[10px] text-purple-600 font-semibold mt-1">
@@ -489,8 +489,8 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
         
         {/* Left Column: Dynamic Resources & Readiness Score */}
         <div className="space-y-6 lg:col-span-1">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/60 space-y-6">
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <div className={`${alumniPanelClass} space-y-6`}>
+            <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
               <BookOpen className="h-5 w-5 text-astu-navy" />
               Career Resource Center
             </h3>
@@ -525,8 +525,8 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           </div>
 
           {/* Dynamic Career Progress Tracker */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/60">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <div className={alumniPanelClass}>
+            <h3 className={`${alumniSectionTitleClass} mb-4 flex items-center gap-2`}>
               <TrendingUp className="h-4 w-4 text-astu-navy" />
               Career Readiness Score
             </h3>
@@ -554,12 +554,12 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
 
         {/* Right Column: Events Portal */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/60 space-y-6">
+          <div className={`${alumniPanelClass} space-y-6`}>
             
             {/* Header and Filter Category Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">Alumni Events Portal</h3>
+                <h3 className={alumniSectionTitleClass}>Alumni Events Portal</h3>
                 <p className="text-sm text-gray-600">Register for exclusive recruitment workshops and technology reunions</p>
               </div>
               <div className="flex gap-1.5 overflow-x-auto py-1">
@@ -569,8 +569,8 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                     onClick={() => setSelectedCategory(cat)}
                     className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all border whitespace-nowrap ${
                       selectedCategory === cat 
-                        ? 'bg-astu-navy border-astu-navy text-white shadow-md' 
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                        ? 'bg-[#003366] border-[#003366] text-white shadow-md'
+                        : 'bg-[var(--bg-page)] border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
                     }`}
                   >
                     {cat}
@@ -584,7 +584,7 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
               {filteredEvents.map(event => (
                 <div 
                   key={event.id}
-                  className="flex flex-col md:flex-row gap-6 p-5 border border-gray-200/70 rounded-2xl bg-gradient-to-r from-gray-50/50 to-white hover:shadow-md transition-all group"
+                  className="group flex flex-col gap-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 transition-all hover:shadow-md"
                 >
                   <img 
                     src={event.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=500&auto=format&fit=crop&q=60'} 
@@ -594,9 +594,7 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                   <div className="flex-1 flex flex-col justify-between">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="px-2.5 py-0.5 bg-astu-navy/10 text-astu-navy text-[10px] font-extrabold uppercase tracking-widest rounded">
-                          {event.category || 'Workshop'}
-                        </span>
+                        <span className={alumniStatusBadge.brand}>{event.category || 'Workshop'}</span>
                         {event.registered && (
                           <span className="flex items-center gap-1 text-xs font-bold text-astu-green bg-astu-green/10 px-2.5 py-0.5 rounded-full">
                             <CheckCircle2 className="h-3.5 w-3.5" />
@@ -653,10 +651,10 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
       </div>
 
       {/* Dynamic Featured Jobs Section */}
-      <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/60 space-y-6">
+      <section className={`${alumniPanelClass} space-y-6`}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
               <Briefcase className="h-5 w-5 text-astu-navy" />
               Featured Job Openings
             </h3>
@@ -683,7 +681,7 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
                     onViewJob(job);
                   }
                 }}
-                className="rounded-2xl border border-gray-200 p-5 hover:border-astu-navy/30 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between bg-white"
+                className={`${alumniCardClass} p-5 hover:border-astu-navy/30 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between`}
               >
                 <div>
                   <div className="flex items-start justify-between mb-3">
@@ -741,19 +739,21 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           })}
 
           {jobs.length === 0 && (
-            <div className="col-span-3 p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl text-gray-500">
-              <Briefcase className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm font-semibold">No active job matches available at the moment.</p>
-            </div>
+            <EmptyState
+              className="col-span-3"
+              icon={<Briefcase className="h-10 w-10 text-slate-400" />}
+              title="No active job matches yet"
+              description="No openings match your profile right now. New roles appear here as employers post them."
+            />
           )}
         </div>
       </section>
 
       {/* Dynamic Top Mentors Section */}
-      <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/60 space-y-6">
+      <section className={`${alumniPanelClass} space-y-6`}>
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
               <Star className="h-5 w-5 text-astu-navy" />
               Top Alumni Mentors
             </h3>
@@ -820,18 +820,20 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           ))}
 
           {mentors.length === 0 && (
-            <div className="col-span-3 p-8 text-center border-2 border-dashed border-gray-200 rounded-2xl text-gray-500">
-              <Users className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm font-semibold">No mentors listed at the moment.</p>
-            </div>
+            <EmptyState
+              className="col-span-3"
+              icon={<Users className="h-10 w-10 text-slate-400" />}
+              title="No mentors listed yet"
+              description="No alumni mentors are available right now. Check back soon, or check the Mentorship tab for the full directory."
+            />
           )}
         </div>
       </section>
 
       {/* Dynamic Skill Pathways Section */}
-      <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/60 space-y-6">
+      <section className={`${alumniPanelClass} space-y-6`}>
         <div>
-          <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <h3 className={`${alumniSectionTitleClass} flex items-center gap-2`}>
             <Rocket className="h-5 w-5 text-astu-navy" />
             Skill Development Pathways
           </h3>
@@ -1014,6 +1016,6 @@ ${profile?.fullName || 'ASTU Engineering Graduate'}
           </div>
         </div>
       )}
-    </div>
+    </AlumniSectionShell>
   );
 };

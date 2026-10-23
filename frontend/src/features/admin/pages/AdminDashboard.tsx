@@ -53,7 +53,6 @@ import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import { adminService } from '../services/admin.service';
 import { useAuth } from '../../../contexts/AuthContext';
-import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 
 type TrendTone = 'success' | 'warning';
 type TimeRange = '7d' | '30d' | '90d' | '1y';
@@ -71,7 +70,7 @@ const statToneClasses: Record<string, { circle: string; label: string; border: s
   '#003580': { circle: 'bg-[#003580]/10 text-[#003580]', label: 'text-[#003580]', border: 'border-[#003580]' },
   '#E8A020': { circle: 'bg-[#E8A020]/10 text-[#B87900]', label: 'text-[#B87900]', border: 'border-[#E8A020]' },
   '#1D9E75': { circle: 'bg-[#1D9E75]/10 text-[#1D9E75]', label: 'text-[#1D9E75]', border: 'border-[#1D9E75]' },
-  '#7C3AED': { circle: 'bg-[#0284C7]/10 text-[#0284C7]', label: 'text-[#0284C7]', border: 'border-[#0284C7]' },
+  '#7C3AED': { circle: 'bg-violet-500/10 text-violet-600', label: 'text-violet-600', border: 'border-violet-500' },
 };
 
 function TrendChip({ text, tone }: { text: string; tone: TrendTone }) {
@@ -80,7 +79,21 @@ function TrendChip({ text, tone }: { text: string; tone: TrendTone }) {
       ? 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15'
       : 'bg-[#EF9F27]/10 text-[#B86D00] border-[#EF9F27]/15';
 
-  return <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[11px] font-semibold ${classes}`}>{text}</span>;
+  return <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold ${classes}`}>{text}</span>;
+}
+
+function StatusDot({ status }: { status: string }) {
+  const classes: Record<string, string> = {
+    healthy: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    critical: 'bg-red-500',
+  };
+  return (
+    <span
+      className={`inline-block h-2 w-2 shrink-0 rounded-full ${classes[status] || 'bg-slate-400'}`}
+      aria-hidden="true"
+    />
+  );
 }
 
 function ChartCard({
@@ -95,28 +108,16 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-card border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
+    <div className="admin-card rounded-[10px] border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-[var(--text-primary)]">{title}</h3>
-          <p className="mt-1 text-xs text-[var(--text-secondary)]">{subtitle}</p>
+          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+          <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
         </div>
         {action}
       </div>
       <div className="mt-4">{children}</div>
     </div>
-  );
-}
-
-function StatusDot({ status }: { status: 'healthy' | 'warning' | 'critical' }) {
-  const colors = {
-    healthy: 'bg-emerald-500',
-    warning: 'bg-amber-500',
-    critical: 'bg-rose-500',
-  };
-
-  return (
-    <span className={`inline-block h-2 w-2 rounded-full ${colors[status]} ${status === 'healthy' ? 'animate-pulse' : ''}`} />
   );
 }
 
@@ -206,7 +207,7 @@ export default function AdminDashboard() {
   const activeStatCards = [
     {
       label: 'Total Alumni',
-      value: metrics?.kpis?.totalAlumni?.toString() || '—',
+      value: metrics?.kpis?.totalAlumni?.toString() || '0',
       trend: 'From database',
       icon: GraduationCap,
       accent: '#003580',
@@ -215,7 +216,7 @@ export default function AdminDashboard() {
     },
     {
       label: 'Total Employers',
-      value: metrics?.kpis?.totalEmployers?.toString() || '—',
+      value: metrics?.kpis?.totalEmployers?.toString() || '0',
       trend: 'From database',
       icon: Building2,
       accent: '#E8A020',
@@ -224,7 +225,7 @@ export default function AdminDashboard() {
     },
     {
       label: 'Survey Completion',
-      value: metrics?.kpis?.surveyCompletion || '—',
+      value: metrics?.kpis?.surveyCompletion || '0%',
       trend: 'Current rate',
       icon: ClipboardCheck,
       accent: '#1D9E75',
@@ -233,7 +234,7 @@ export default function AdminDashboard() {
     },
     {
       label: 'Active Jobs',
-      value: metrics?.kpis?.activeJobs?.toString() || '—',
+      value: metrics?.kpis?.activeJobs?.toString() || '0',
       trend: 'Currently posted',
       icon: Briefcase,
       accent: '#7C3AED',
@@ -281,16 +282,9 @@ export default function AdminDashboard() {
     return allHiringCompanies.filter((c: any) => c.name.toLowerCase().includes(q) || c.industry.toLowerCase().includes(q));
   }, [allHiringCompanies, hiringSearchQuery]);
 
-  // `surveyCompletion` arrives as a display string ("72%"). Parse defensively
-  // so a missing value yields 0 rather than NaN in the donut chart.
-  const surveyCompletionPct = (() => {
-    const parsed = Number.parseFloat(String(metrics?.kpis?.surveyCompletion ?? '').replace(/[^0-9.]/g, ''));
-    return Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : 0;
-  })();
-
   const activeSurveyData = [
-    { name: 'Completed', value: surveyCompletionPct, color: '#1D9E75' },
-    { name: 'Remaining', value: Math.max(0, 100 - surveyCompletionPct), color: '#E8A020' },
+    { name: 'Completed', value: parseInt(metrics?.kpis?.surveyCompletion || '0'), color: '#1D9E75' },
+    { name: 'Remaining', value: Math.max(0, 100 - parseInt(metrics?.kpis?.surveyCompletion || '0')), color: '#E8A020' },
   ];
   const activeSkillGaps: { skill: string; value: number }[] = metrics?.skillGaps || [];
 
@@ -328,22 +322,22 @@ export default function AdminDashboard() {
   }, [loading, metrics]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <style>{`
         @keyframes fade-slide-up {
-          from { opacity: 0; transform: translateY(8px); }
+          from { opacity: 0; transform: translateY(12px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .admin-card {
-          animation: fade-slide-up 0.35s ease-out both;
+          animation: fade-slide-up 0.4s ease-out both;
         }
-        .admin-card:nth-child(2) { animation-delay: 0.04s; }
-        .admin-card:nth-child(3) { animation-delay: 0.08s; }
-        .admin-card:nth-child(4) { animation-delay: 0.12s; }
-        .admin-card:nth-child(5) { animation-delay: 0.16s; }
-        .admin-card:nth-child(6) { animation-delay: 0.2s; }
-        .admin-card:nth-child(7) { animation-delay: 0.24s; }
-        .admin-card:nth-child(8) { animation-delay: 0.28s; }
+        .admin-card:nth-child(2) { animation-delay: 0.05s; }
+        .admin-card:nth-child(3) { animation-delay: 0.1s; }
+        .admin-card:nth-child(4) { animation-delay: 0.15s; }
+        .admin-card:nth-child(5) { animation-delay: 0.2s; }
+        .admin-card:nth-child(6) { animation-delay: 0.25s; }
+        .admin-card:nth-child(7) { animation-delay: 0.3s; }
+        .admin-card:nth-child(8) { animation-delay: 0.35s; }
       `}</style>
 
       <AdminPageHeader
@@ -352,65 +346,63 @@ export default function AdminDashboard() {
         breadcrumbs={[{ label: 'Admin' }, { label: 'Dashboard' }]}
         actions={
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-0.5 border border-white/15 bg-white/5 p-0.5 text-xs text-white">
+            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 p-0.5 text-xs text-white">
               {(['7d', '30d', '90d', '1y'] as TimeRange[]).map((range) => (
                 <button
                   key={range}
                   type="button"
                   onClick={() => setTimeRange(range)}
-                  className={`px-2.5 py-1.5 font-semibold transition-colors cursor-pointer ${
+                  className={`rounded-md px-2.5 py-1.5 font-semibold transition-all ${
                     timeRange === range
-                      ? 'bg-[#FFCC00] text-slate-900'
-                      : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#FFCC00] text-slate-900 shadow-sm'
+                      : 'text-slate-200 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {range}
                 </button>
               ))}
             </div>
-            <span className="border border-[#FFCC00]/30 bg-[#FFCC00]/10 px-2.5 py-1.5 text-xs font-mono font-bold text-[#FFCC00]">v1.4</span>
+            <span className="px-2.5 py-1.5 rounded-lg text-xs font-mono font-extrabold bg-[#FFCC00]/15 text-[#FFCC00] border border-[#FFCC00]/30 shadow-xs">v1.4</span>
           </div>
         }
       >
-        <div className="flex flex-col gap-3 text-xs font-medium text-slate-200/90 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <div className="flex items-center gap-2 border border-white/10 bg-white/5 px-2.5 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#FFCC00] animate-pulse" />
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs text-slate-200/90 font-medium">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5">
+            <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFCC00] animate-pulse" />
               <span>{today}</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-300/85">
-              <RefreshCw className="h-3.5 w-3.5 text-[#FFCC00]" />
+            <div className="flex items-center gap-2 text-slate-300/80">
+              <RefreshCw className="w-3.5 h-3.5 text-[#FFCC00]" />
               <span>Last sync: {metrics?.headerInfo?.lastSync || 'Just now'}</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-300/85">
-              <Database className="h-3.5 w-3.5 text-[#FFCC00]" />
+            <div className="flex items-center gap-2 text-slate-300/80">
+              <Database className="w-3.5 h-3.5 text-[#FFCC00]" />
               <span>{metrics?.headerInfo?.totalRecords || 'Connected'}</span>
             </div>
-            <div className="flex items-center gap-2 text-slate-300/85">
-              <Users className="h-3.5 w-3.5 text-[#FFCC00]" />
+            <div className="flex items-center gap-2 text-slate-300/80">
+              <Users className="w-3.5 h-3.5 text-[#FFCC00]" />
               <span>{metrics?.headerInfo?.activeSessions || 'Active'}</span>
             </div>
           </div>
 
-          <div className={`inline-flex items-center gap-2 self-start border px-3 py-1.5 text-xs font-semibold md:self-auto ${systemStatus.color}`}>
+          <div className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold shadow-sm self-start md:self-auto ${systemStatus.color}`}>
             <span className={`h-2 w-2 rounded-full animate-pulse ${systemStatus.dot}`} />
             {systemStatus.label}
           </div>
         </div>
       </AdminPageHeader>
 
-      <DashboardBroadcastHero actorRole="ADMIN" className="mb-1" />
-
       {/* Admin Command Center */}
-      <section className="border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
-        <div className="mb-5 flex flex-col justify-between gap-3 border-b border-[var(--border-color)] pb-4 md:flex-row md:items-center">
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-100">
           <div>
-            <h2 className="flex items-center gap-2 text-sm font-bold tracking-tight text-[var(--text-primary)]">
-              <Zap className="h-4 w-4 text-[#003580]" />
+            <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#003580]" />
               Admin Command Center
             </h2>
-            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-              System health, approvals, jobs, and database sync status.
+            <p className="text-xs text-slate-500 mt-0.5">
+              Unified governance layer for system health, user approvals, active jobs, and database sync status.
             </p>
           </div>
           <button
@@ -420,13 +412,13 @@ export default function AdminDashboard() {
                 ['Metric', 'Value'],
                 ['Total Alumni', metrics?.kpis?.totalAlumni || 0],
                 ['Total Employers', metrics?.kpis?.totalEmployers || 0],
-                ['Survey Completion', metrics?.kpis?.surveyCompletion || '—'],
+                ['Survey Completion', metrics?.kpis?.surveyCompletion || '0%'],
                 ['Active Jobs', metrics?.kpis?.activeJobs || 0],
-                ['Identity Coverage', metrics?.commandCenter?.identityCoverage || '—'],
+                ['Identity Coverage', metrics?.commandCenter?.identityCoverage || '0%'],
                 ['Approval Queue Count', metrics?.commandCenter?.approvalQueueCount || 0],
-                ['System SLA', metrics?.commandCenter?.systemSLA || '—'],
-                ['Profile Completeness', metrics?.commandCenter?.completeness || '—'],
-                ['Total Database Records', metrics?.headerInfo?.totalRecords || '—'],
+                ['System SLA', metrics?.commandCenter?.systemSLA || '100%'],
+                ['Profile Completeness', metrics?.commandCenter?.completeness || '0%'],
+                ['Total Database Records', metrics?.headerInfo?.totalRecords || '0'],
                 ['Report Generated At', new Date().toISOString()],
               ].map(e => e.join(',')).join('\n');
 
@@ -439,60 +431,60 @@ export default function AdminDashboard() {
               link.click();
               document.body.removeChild(link);
             }}
-            className="inline-flex items-center justify-center gap-2 bg-[#003580] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#002866] cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#003580] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#002866] hover:shadow-md cursor-pointer"
           >
-            <FileSpreadsheet className="h-4 w-4" />
+            <FileSpreadsheet className="w-4 h-4" />
             Export System Report
           </button>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-12">
-          <div className="grid grid-cols-2 gap-3 lg:col-span-7">
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-7 grid grid-cols-2 gap-3.5">
             {[
-              { label: 'IDENTITY COVERAGE', value: metrics?.commandCenter?.identityCoverage || '—', icon: CheckCircle2, tone: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+              { label: 'IDENTITY COVERAGE', value: metrics?.commandCenter?.identityCoverage || '0%', icon: CheckCircle2, tone: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
               { label: 'APPROVAL QUEUE', value: (metrics?.commandCenter?.approvalQueueCount ?? activePendingActions.length).toString(), icon: AlertTriangle, tone: 'text-amber-600 bg-amber-50 border-amber-100' },
-              { label: 'SYSTEM SLA', value: metrics?.commandCenter?.systemSLA || '—', icon: Clock3, tone: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
+              { label: 'SYSTEM SLA', value: metrics?.commandCenter?.systemSLA || '100% On-Time', icon: Clock3, tone: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
               { label: 'EXPORT STATUS', value: metrics?.commandCenter?.exportStatus || 'Ready', icon: FileSpreadsheet, tone: 'text-[#003580] bg-blue-50 border-blue-100' },
             ].map((sig) => {
               const Icon = sig.icon;
               return (
-                <div key={sig.label} className="border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-colors hover:bg-[var(--bg-card)]">
+                <div key={sig.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 transition-all hover:border-slate-200 hover:bg-white hover:shadow-sm">
                   <div className="flex items-center gap-2">
-                    <span className={`border p-1.5 ${sig.tone}`}>
-                      <Icon className="h-4 w-4" />
+                    <span className={`p-1.5 rounded-lg border text-sm ${sig.tone}`}>
+                      <Icon className="w-4 h-4" />
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)]">{sig.label}</span>
+                    <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400">{sig.label}</span>
                   </div>
-                  <p className="mt-3 text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">{sig.value}</p>
+                  <p className="mt-3 text-2xl font-extrabold text-slate-900 tracking-tight">{sig.value}</p>
                 </div>
               );
             })}
           </div>
 
-          <div className="flex flex-col justify-between border border-[var(--border-color)] bg-[var(--bg-page)] p-4 lg:col-span-5">
+          <div className="lg:col-span-5 rounded-xl border border-slate-100 bg-slate-50/60 p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">System Data Quality</span>
-              <span className="border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-700">
+              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">System Data Quality</span>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200">
                 MONITORED
               </span>
             </div>
 
-            <div className="my-3 grid grid-cols-3 gap-2">
-              <div className="border border-[var(--border-color)] bg-[var(--bg-card)] p-3 text-center">
-                <p className="text-lg font-extrabold text-[var(--text-primary)]">{metrics?.commandCenter?.duplicateScan || '—'}</p>
-                <p className="mt-0.5 text-[9px] font-bold uppercase text-[var(--text-muted)]">DUPLICATE SCAN</p>
+            <div className="grid grid-cols-3 gap-2 my-3">
+              <div className="p-3 rounded-lg bg-white border border-slate-100 text-center">
+                <p className="text-lg font-extrabold text-slate-900">{metrics?.commandCenter?.duplicateScan || '0 open'}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">DUPLICATE SCAN</p>
               </div>
-              <div className="border border-[var(--border-color)] bg-[var(--bg-card)] p-3 text-center">
-                <p className="text-lg font-extrabold text-[var(--text-primary)]">{metrics?.commandCenter?.completeness || '—'}</p>
-                <p className="mt-0.5 text-[9px] font-bold uppercase text-[var(--text-muted)]">COMPLETENESS</p>
+              <div className="p-3 rounded-lg bg-white border border-slate-100 text-center">
+                <p className="text-lg font-extrabold text-slate-900">{metrics?.commandCenter?.completeness || '0%'}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">COMPLETENESS</p>
               </div>
-              <div className="border border-[var(--border-color)] bg-[var(--bg-card)] p-3 text-center">
+              <div className="p-3 rounded-lg bg-white border border-slate-100 text-center">
                 <p className="text-lg font-extrabold text-emerald-600">{metrics?.commandCenter?.auditTrail || 'Live'}</p>
-                <p className="mt-0.5 text-[9px] font-bold uppercase text-[var(--text-muted)]">AUDIT TRAIL</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-0.5">AUDIT TRAIL</p>
               </div>
             </div>
 
-            <p className="text-[11px] font-medium text-[var(--text-secondary)]">
+            <p className="text-[11px] text-slate-500 font-medium">
               {metrics?.commandCenter?.healthStatusText || 'System database health verified conflict-free. All audit trails logging active.'}
             </p>
           </div>
@@ -500,7 +492,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* KPI Stats Cards */}
-      <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {activeStatCards.map((card) => {
           const Icon = card.icon;
           const styles = statToneClasses[card.accent];
@@ -509,23 +501,23 @@ export default function AdminDashboard() {
             <div
               key={card.label}
               onClick={() => navigate(card.path)}
-              className="admin-card group cursor-pointer border border-[var(--border-color)] bg-[var(--bg-card)] p-5 transition-colors hover:border-[#003580]/30"
+              className={`admin-card relative group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer`}
             >
-              <div className="mb-3 flex items-center justify-between">
-                <div className={`flex h-10 w-10 items-center justify-center ${styles.circle}`}>
+              <div className="flex items-center justify-between mb-3">
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${styles.circle} transition-transform duration-300 group-hover:scale-105`}>
                   <Icon className={`h-5 w-5 ${styles.label}`} />
                 </div>
-                <span className="border border-emerald-100 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
-                  VERIFIED
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                  SYSTEM VERIFIED
                 </span>
               </div>
               <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">{card.label}</p>
-                <p className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">{card.value}</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-400">{card.label}</p>
+                <p className="text-3xl font-extrabold tracking-tight text-slate-900">{card.value}</p>
               </div>
-              <p className="mt-3 flex items-center justify-between border-t border-[var(--border-color)] pt-3 text-xs font-medium text-[var(--text-secondary)]">
+              <p className="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 font-medium flex items-center justify-between">
                 <span>{card.trend}</span>
-                <ChevronRight className="h-3.5 w-3.5 text-[var(--text-muted)] transition group-hover:translate-x-0.5 group-hover:text-[#003580]" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </p>
             </div>
           );
@@ -533,12 +525,12 @@ export default function AdminDashboard() {
       </section>
 
       {/* Quick Actions Bar */}
-      <section className="admin-card border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <Zap className="h-4 w-4 text-[#E8A020]" />
-          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Quick Actions</span>
+      <section className="admin-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+        <div className="flex items-center gap-2 mb-4">
+          <Zap className="w-4 h-4 text-amber-500" />
+          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">Quick Actions</span>
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
@@ -546,15 +538,15 @@ export default function AdminDashboard() {
                 key={action.label}
                 type="button"
                 onClick={() => navigate(action.path)}
-                className="group flex flex-col items-center gap-2 border border-[var(--border-color)] bg-[var(--bg-page)] p-3 text-center transition-colors hover:border-[#003580]/25 hover:bg-[var(--bg-card)] cursor-pointer"
+                className="group flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/50 p-3.5 text-center transition-all duration-200 hover:border-slate-200 hover:bg-white hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
               >
                 <div
-                  className="flex h-9 w-9 items-center justify-center transition-transform duration-200 group-hover:scale-105"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 shadow-xs"
                   style={{ backgroundColor: `${action.accent}14`, color: action.accent }}
                 >
-                  <Icon className="h-4.5 w-4.5" />
+                  <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">{action.label}</span>
+                <span className="text-xs font-semibold text-slate-700 group-hover:text-slate-900">{action.label}</span>
               </button>
             );
           })}
@@ -562,8 +554,8 @@ export default function AdminDashboard() {
       </section>
 
       {/* Charts Row */}
-      <section className="grid gap-3 xl:grid-cols-5">
-        <div className="admin-card xl:col-span-3">
+      <section className="grid gap-4 xl:grid-cols-5">
+        <div className="xl:col-span-3 admin-card">
           <ChartCard
             title="Employment Rate by Department"
             subtitle="Percentage of alumni employed within each department group."
@@ -573,11 +565,11 @@ export default function AdminDashboard() {
                 onClick={() => navigate('/admin/reports')}
                 className="inline-flex items-center gap-1 text-xs font-bold text-[#003580] hover:underline cursor-pointer"
               >
-                View Full Report <ChevronRight className="h-3 w-3" />
+                View Full Report <ChevronRight className="w-3 h-3" />
               </button>
             }
           >
-            <div className="h-[320px]">
+            <div className="h-[340px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activeEmploymentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
@@ -592,12 +584,12 @@ export default function AdminDashboard() {
                   <Tooltip
                     formatter={(value) => [`${value}%`, 'Employment Rate']}
                     contentStyle={{
-                      borderRadius: 4,
+                      borderRadius: 12,
                       border: '1px solid #E8EDF5',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     }}
                   />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                     {activeEmploymentData.map((entry: any, index: number) => (
                       <Cell key={`cell-${entry.department}`} fill={index === 4 ? '#E8A020' : '#003580'} />
                     ))}
@@ -609,7 +601,7 @@ export default function AdminDashboard() {
           </ChartCard>
         </div>
 
-        <div className="admin-card xl:col-span-2">
+        <div className="xl:col-span-2 admin-card">
           <ChartCard
             title="Survey Completion Rate"
             subtitle="Current tracer survey response distribution."
@@ -619,11 +611,11 @@ export default function AdminDashboard() {
                 onClick={() => navigate('/admin/surveys')}
                 className="inline-flex items-center gap-1 text-xs font-bold text-[#003580] hover:underline cursor-pointer"
               >
-                Manage Surveys <ChevronRight className="h-3 w-3" />
+                Manage Surveys <ChevronRight className="w-3 h-3" />
               </button>
             }
           >
-            <div className="h-[320px]">
+            <div className="h-[340px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -638,7 +630,7 @@ export default function AdminDashboard() {
                       <Cell key={entry.name} fill={entry.color} />
                     ))}
                     <Label
-                      value={metrics?.kpis?.surveyCompletion || '—'}
+                      value={metrics?.kpis?.surveyCompletion || '0%'}
                       position="center"
                       className="text-2xl font-extrabold fill-slate-900"
                     />
@@ -651,9 +643,9 @@ export default function AdminDashboard() {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      borderRadius: 4,
+                      borderRadius: 12,
                       border: '1px solid #E8EDF5',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     }}
                   />
                   <Legend
@@ -668,57 +660,57 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* System Health */}
-      <section className="admin-card border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <Activity className="h-4 w-4 text-emerald-500" />
-          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">System Health</span>
+      {/* System Status */}
+      <section className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
+        <div className="flex items-center gap-2 mb-4">
+          <Activity className="w-4 h-4 text-emerald-500" />
+          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400">System Health</span>
           <span className="ml-auto flex items-center gap-1.5 text-xs font-bold" style={{ color: systemStatus.status === 'healthy' ? '#059669' : systemStatus.status === 'warning' ? '#d97706' : '#dc2626' }}>
             <StatusDot status={systemStatus.status} />
             {systemStatus.label}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'API Response Time', value: metrics?.systemHealth?.apiLatency || '—', status: (metrics?.systemHealth?.apiLatencyNum || 0) < 300 ? ('healthy' as const) : ('warning' as const), trend: metrics?.systemHealth?.latencyTrend || 'Optimal' },
+            { label: 'API Response Time', value: metrics?.systemHealth?.apiLatency || '<20ms', status: (metrics?.systemHealth?.apiLatencyNum || 0) < 300 ? ('healthy' as const) : ('warning' as const), trend: metrics?.systemHealth?.latencyTrend || 'Optimal' },
             { label: 'Database Status', value: metrics?.systemHealth?.dbStatus || metrics?.headerInfo?.totalRecords || 'Connected', status: 'healthy' as const, trend: 'Prisma DB Live' },
-            { label: 'Profile Completeness', value: metrics?.systemHealth?.completeness || metrics?.commandCenter?.completeness || '—', status: 'healthy' as const, trend: 'Data Verified' },
-            { label: 'Active Sessions', value: metrics?.systemHealth?.activeSessions || metrics?.headerInfo?.activeSessions || '—', status: 'healthy' as const, trend: 'User Accounts' },
+            { label: 'Profile Completeness', value: metrics?.systemHealth?.completeness || metrics?.commandCenter?.completeness || '0%', status: 'healthy' as const, trend: 'Data Verified' },
+            { label: 'Active Sessions', value: metrics?.systemHealth?.activeSessions || metrics?.headerInfo?.activeSessions || '1 active session', status: 'healthy' as const, trend: 'User Accounts' },
           ].map((metric) => (
-            <div key={metric.label} className="border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-colors hover:bg-[var(--bg-card)]">
+            <div key={metric.label} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 transition-all duration-200 hover:border-slate-200 hover:bg-white hover:shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)]">{metric.label}</span>
+                <span className={`text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400`}>{metric.label}</span>
                 <StatusDot status={metric.status} />
               </div>
-              <p className="mt-2 text-2xl font-extrabold tracking-tight text-[var(--text-primary)]">{metric.value}</p>
-              <p className="mt-1 text-xs font-medium text-[var(--text-secondary)]">{metric.trend}</p>
+              <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">{metric.value}</p>
+              <p className="mt-1 text-xs text-slate-500 font-medium">{metric.trend}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Bottom Row */}
-      <section className="grid gap-3 xl:grid-cols-3">
-        <div className="admin-card border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
+      <section className="grid gap-4 xl:grid-cols-3">
+        <div className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">Recent System Activity</h3>
-              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">Latest administrative actions and sync events.</p>
+              <h3 className="text-sm font-bold text-slate-900">Recent System Activity</h3>
+              <p className="mt-0.5 text-xs text-slate-500">Latest administrative actions and sync events.</p>
             </div>
             <AdminBadge variant="neutral">Live Feed</AdminBadge>
           </div>
 
-          <div className="mt-5 space-y-3">
+          <div className="mt-5 space-y-4">
             {activeSystemActivities.map((entry: any, index: number) => {
               const Icon = entry.icon;
               return (
-                <div key={index} className="group flex gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center bg-[var(--bg-page)] transition-colors group-hover:bg-[#003580]/5">
-                    <Icon className="h-4 w-4" style={{ color: entry.tone }} />
+                <div key={index} className="flex gap-3 group">
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-blue-50 transition-colors">
+                    <Icon className="h-4.5 w-4.5" style={{ color: entry.tone }} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">{entry.text}</p>
-                    <p className="mt-0.5 text-[11px] font-medium text-[var(--text-muted)]">{entry.time}</p>
+                    <p className="text-sm font-medium text-slate-800">{entry.text}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-400 font-medium">{entry.time}</p>
                   </div>
                 </div>
               );
@@ -726,25 +718,25 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="admin-card border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
+        <div className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div>
-            <h3 className="text-sm font-bold text-[var(--text-primary)]">Pending Actions</h3>
-            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">Tasks waiting for administrative review.</p>
+            <h3 className="text-sm font-bold text-slate-900">Pending Actions</h3>
+            <p className="mt-0.5 text-xs text-slate-500">Tasks waiting for administrative review.</p>
           </div>
 
-          <div className="mt-5 space-y-2.5">
+          <div className="mt-5 space-y-3">
             {activePendingActions.map((task: any, index: number) => (
               <div
                 key={index}
-                className="group border border-[var(--border-color)] border-l-4 bg-[var(--bg-page)] p-3.5 transition-colors hover:bg-[var(--bg-card)]"
+                className="group rounded-xl border border-slate-200 border-l-4 bg-white p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
                 style={{ borderLeftColor: task.tone }}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{task.label}</p>
+                  <p className="text-sm font-semibold text-slate-800">{task.label}</p>
                   <button
                     type="button"
                     onClick={() => navigate(task.path || '/admin/users')}
-                    className="px-3 py-1.5 text-xs font-bold text-white transition hover:brightness-110 cursor-pointer"
+                    className="rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 hover:shadow-md cursor-pointer"
                     style={{ backgroundColor: task.tone }}
                   >
                     {task.action} →
@@ -754,22 +746,22 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          <div className="mt-4 border-t border-[var(--border-color)] pt-3">
+          <div className="mt-4 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => navigate('/admin/users')}
               className="flex items-center gap-1 text-xs font-bold text-[#003580] hover:underline cursor-pointer"
             >
-              View All Tasks <ChevronRight className="h-3.5 w-3.5" />
+              View All Tasks <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        <div className="admin-card border border-[var(--border-color)] bg-[var(--bg-card)] p-5">
+        <div className="admin-card rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">Skill Gap Alert</h3>
-              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">Top Missing Skills Reported by Employers</p>
+              <h3 className="text-sm font-bold text-slate-900">Skill Gap Alert</h3>
+              <p className="mt-0.5 text-xs text-slate-500">Top Missing Skills Reported by Employers</p>
             </div>
             <AdminBadge variant="warning">Curriculum Input</AdminBadge>
           </div>
@@ -778,23 +770,23 @@ export default function AdminDashboard() {
             {activeSkillGaps.length > 0 ? activeSkillGaps.map((item) => (
               <div key={item.skill} className="space-y-2">
                 <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-semibold text-[var(--text-primary)]">{item.skill}</span>
-                  <span className="font-bold text-[var(--text-secondary)]">{item.value}%</span>
+                  <span className="font-semibold text-slate-700">{item.skill}</span>
+                  <span className="font-bold text-slate-500">{item.value}%</span>
                 </div>
-                <div className="h-2 overflow-hidden bg-[var(--bg-page)]">
-                  <div
-                    className="h-full bg-[#003580] transition-all duration-500"
-                    style={{ width: `${item.value}%` }}
-                  />
+                <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                  <div className="relative h-full rounded-full bg-gradient-to-r from-[#003580] via-[#5B7FB8] to-[#E8A020] transition-all duration-500"
+                    style={{ width: `${item.value}%` }}>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                  </div>
                 </div>
               </div>
             )) : (
-              <p className="py-6 text-center text-sm text-[var(--text-muted)]">Skill gap data will appear as employer feedback is collected.</p>
+              <p className="text-sm text-slate-400 py-6 text-center">Skill gap data will appear as employer feedback is collected.</p>
             )}
           </div>
 
-          <div className="mt-5 flex items-center justify-between border-t border-[var(--border-color)] pt-4 text-xs font-medium">
-            <span className="text-[var(--text-secondary)]">Based on employer feedback submissions</span>
+          <div className="mt-5 border-t border-slate-200 pt-4 flex items-center justify-between text-xs font-medium">
+            <span className="text-slate-500">Based on employer feedback submissions</span>
             <button
               type="button"
               onClick={() => navigate('/admin/analytics')}
@@ -817,11 +809,11 @@ export default function AdminDashboard() {
               onClick={() => setIsHiringModalOpen(true)}
               className="inline-flex items-center gap-1 text-xs font-semibold text-[#003580] hover:underline cursor-pointer"
             >
-              View All <ExternalLink className="h-3 w-3" />
+              View All <ExternalLink className="w-3 h-3" />
             </button>
           }
         >
-          <div className="h-[280px] cursor-pointer" onClick={() => setIsHiringModalOpen(true)}>
+          <div className="h-[300px] cursor-pointer" onClick={() => setIsHiringModalOpen(true)}>
             <ResponsiveContainer width="100%" height="100%">
               {activeHiringCompanies.length > 0 ? (
               <BarChart data={activeHiringCompanies} layout="vertical" margin={{ top: 12, right: 24, left: 12, bottom: 0 }}>
@@ -838,12 +830,12 @@ export default function AdminDashboard() {
                 <Tooltip
                   formatter={(value) => [value, 'Hires']}
                   contentStyle={{
-                    borderRadius: 4,
+                    borderRadius: 10,
                     border: '1px solid #E8EDF5',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                   }}
                 />
-                <Bar dataKey="hires" radius={[0, 4, 4, 0]} fill="#003580">
+                <Bar dataKey="hires" radius={[0, 8, 8, 0]} fill="#003580">
                   <LabelList dataKey="hires" position="right" fill="#334155" fontSize={12} />
                 </Bar>
               </BarChart>
@@ -859,94 +851,99 @@ export default function AdminDashboard() {
       {isHiringModalOpen && createPortal(
         <div
           onClick={() => setIsHiringModalOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="flex max-h-[90vh] w-full max-w-[95vw] flex-col overflow-hidden border border-slate-200 bg-white shadow-2xl lg:max-w-6xl"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-[95vw] lg:max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200"
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center bg-[#003580]/10 text-[#003580]">
-                  <Building2 className="h-5 w-5" />
+                <div className="w-10 h-10 rounded-xl bg-[#003580]/10 flex items-center justify-center text-[#003580]">
+                  <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="flex flex-wrap items-center gap-2 text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                     Top Hiring Companies & Employer Market Analytics
-                    <span className="border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200">
                       Verified Placement Analytics
                     </span>
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Graduate hiring statistics, market share, and active job postings across registered organizations.
+                    Comprehensive graduate hiring statistics, market percentage share, and active job postings across registered organizations.
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsHiringModalOpen(false)}
-                className="p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto p-6">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-                <div className="border border-blue-100 bg-blue-50/60 p-4">
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1 min-h-0">
+              {/* Summary KPIs */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100">
                   <div className="text-xs font-semibold text-blue-800">Total System Hires</div>
-                  <div className="mt-1 text-2xl font-black text-[#003580]">{totalSystemHires}</div>
-                  <div className="mt-1 text-[11px] text-blue-600">Verified alumni placements</div>
+                  <div className="text-2xl font-black text-[#003580] mt-1">{totalSystemHires}</div>
+                  <div className="text-[11px] text-blue-600 mt-1">Verified alumni placements</div>
                 </div>
 
-                <div className="border border-emerald-100 bg-emerald-50/60 p-4">
+                <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-100">
                   <div className="text-xs font-semibold text-emerald-800">Registered Companies</div>
-                  <div className="mt-1 text-2xl font-black text-emerald-900">{allHiringCompanies.length}</div>
-                  <div className="mt-1 text-[11px] text-emerald-600">Active employer profiles</div>
+                  <div className="text-2xl font-black text-emerald-900 mt-1">{allHiringCompanies.length}</div>
+                  <div className="text-[11px] text-emerald-600 mt-1">Active employer profiles</div>
                 </div>
 
-                <div className="border border-[#003580]/15 bg-[#003580]/5 p-4">
-                  <div className="text-xs font-semibold text-[#003580]">Top Hiring Partner</div>
-                  <div className="mt-1 truncate text-lg font-bold text-slate-900">{allHiringCompanies[0]?.name || 'N/A'}</div>
-                  <div className="mt-1 text-[11px] text-slate-600">
+                <div className="p-4 rounded-xl bg-purple-50/60 border border-purple-100">
+                  <div className="text-xs font-semibold text-purple-800">Top Hiring Partner</div>
+                  <div className="text-lg font-bold text-purple-950 mt-1 truncate">{allHiringCompanies[0]?.name || 'N/A'}</div>
+                  <div className="text-[11px] text-purple-700 mt-1">
                     {allHiringCompanies[0]?.percentage || 0}% of all graduate hires
                   </div>
                 </div>
 
-                <div className="border border-amber-100 bg-amber-50/60 p-4">
+                <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-100">
                   <div className="text-xs font-semibold text-amber-800">Leading Hiring Sector</div>
-                  <div className="mt-1 truncate text-lg font-bold text-amber-950">{metrics?.leadingSector || allHiringCompanies[0]?.industry || '—'}</div>
-                  <div className="mt-1 text-[11px] text-amber-700">Highest employer placement volume</div>
+                  <div className="text-lg font-bold text-amber-950 mt-1 truncate">{metrics?.leadingSector || allHiringCompanies[0]?.industry || 'Telecommunications'}</div>
+                  <div className="text-[11px] text-amber-700 mt-1">Highest employer placement volume</div>
                 </div>
               </div>
 
+              {/* Search and Filter */}
               <div className="flex items-center justify-between gap-4">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     value={hiringSearchQuery}
                     onChange={(e) => setHiringSearchQuery(e.target.value)}
                     placeholder="Search company by name or industry..."
-                    className="w-full border border-slate-200 py-2 pl-9 pr-4 text-xs focus:border-[#003580] focus:outline-none focus:ring-2 focus:ring-[#003580]/15"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003580]/20 focus:border-[#003580]"
                   />
                 </div>
-                <div className="text-xs font-medium text-slate-500">
+                <div className="text-xs text-slate-500 font-medium">
                   Showing {filteredHiringCompanies.length} of {allHiringCompanies.length} companies
                 </div>
               </div>
 
-              <div className="overflow-x-auto border border-slate-200">
-                <table className="w-full min-w-[920px] border-collapse text-left text-xs">
+              {/* Table of Companies */}
+              <div className="border border-slate-200 rounded-xl overflow-x-auto shadow-sm">
+                <table className="w-full min-w-[920px] text-left text-xs border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50 font-bold text-slate-600">
-                      <th className="w-14 px-4 py-3">Rank</th>
-                      <th className="px-4 py-3">Organization Name</th>
-                      <th className="px-4 py-3">Industry / Sector</th>
-                      <th className="px-4 py-3 text-center">Hired Alumni Placements (Click to view)</th>
-                      <th className="w-40 px-4 py-3">Hiring Share (%)</th>
-                      <th className="px-4 py-3 text-center">Active Jobs</th>
-                      <th className="px-4 py-3 text-center">Action</th>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+                      <th className="py-3 px-4 w-14">Rank</th>
+                      <th className="py-3 px-4">Organization Name</th>
+                      <th className="py-3 px-4">Industry / Sector</th>
+                      <th className="py-3 px-4 text-center">Hired Alumni Placements (Click to view)</th>
+                      <th className="py-3 px-4 w-40">Hiring Share (%)</th>
+                      <th className="py-3 px-4 text-center">Active Jobs</th>
+                      <th className="py-3 px-4 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -954,59 +951,59 @@ export default function AdminDashboard() {
                       <tr
                         key={comp.id || idx}
                         onClick={() => setSelectedCompanyForAlumni(comp)}
-                        className="cursor-pointer transition-colors hover:bg-[#003580]/5"
+                        className="hover:bg-blue-50/80 transition-colors cursor-pointer"
                       >
-                        <td className="px-4 py-3 font-bold text-slate-500">
+                        <td className="py-3 px-4 font-bold text-slate-500">
                           {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                        <td className="py-3 px-4">
+                          <div className="font-bold text-slate-900 flex items-center gap-1.5">
                             {comp.name}
                             {comp.isVerified && (
-                              <CheckCircle2 className="inline-block h-3.5 w-3.5 text-emerald-600" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline-block" />
                             )}
                           </div>
                           <div className="text-[11px] text-slate-400">{comp.location}</div>
                         </td>
-                        <td className="px-4 py-3 font-medium text-slate-600">
+                        <td className="py-3 px-4 text-slate-600 font-medium">
                           {comp.industry}
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="py-3 px-4 text-center">
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedCompanyForAlumni(comp);
                             }}
-                            className="inline-flex items-center gap-1.5 bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-emerald-700 cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-sm transition-all cursor-pointer"
                             title="Click to view full list of hired alumni"
                           >
-                            <Users className="h-3.5 w-3.5" />
+                            <Users className="w-3.5 h-3.5" />
                             <span>{comp.hires} Hired {comp.hires === 1 ? 'Graduate' : 'Graduates'}</span>
-                            <ChevronRight className="ml-0.5 h-3.5 w-3.5" />
+                            <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
                           </button>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="h-2 flex-1 overflow-hidden bg-slate-100">
+                            <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
                               <div
-                                className="h-full bg-[#003580] transition-all duration-300"
+                                className="bg-[#003580] h-full rounded-full transition-all duration-300"
                                 style={{ width: `${Math.min(100, Math.max(5, comp.percentage))}%` }}
                               />
                             </div>
-                            <span className="w-9 text-right font-bold text-[#003580]">{comp.percentage}%</span>
+                            <span className="font-bold text-[#003580] w-9 text-right">{comp.percentage}%</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-center font-semibold text-slate-700">
+                        <td className="py-3 px-4 text-center font-semibold text-slate-700">
                           {comp.postedJobs > 0 ? (
-                            <span className="bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-800">
+                            <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold text-[11px]">
                               {comp.postedJobs} open
                             </span>
                           ) : (
-                            <span className="font-normal text-slate-400">0</span>
+                            <span className="text-slate-400 font-normal">0</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td className="py-3 px-4 text-center">
                           <button
                             type="button"
                             onClick={(e) => {
@@ -1014,7 +1011,7 @@ export default function AdminDashboard() {
                               setIsHiringModalOpen(false);
                               navigate('/admin/users?role=EMPLOYER');
                             }}
-                            className="bg-blue-50 px-2.5 py-1.5 text-[11px] font-semibold text-[#003580] transition-colors hover:bg-blue-100 cursor-pointer"
+                            className="px-2.5 py-1.5 text-[11px] font-semibold text-[#003580] bg-blue-50 hover:bg-blue-100 rounded-md transition-colors cursor-pointer"
                           >
                             Manage User
                           </button>
@@ -1026,12 +1023,13 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-3 text-xs text-slate-500">
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-100 bg-slate-50 text-xs text-slate-500">
               <div>* Placement percentages and market analytics are aggregated from official graduate employment reports and verified partner records.</div>
               <button
                 type="button"
                 onClick={() => setIsHiringModalOpen(false)}
-                className="bg-slate-800 px-4 py-1.5 font-semibold text-white transition-colors hover:bg-slate-900 cursor-pointer"
+                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-colors cursor-pointer"
               >
                 Close Window
               </button>
@@ -1045,22 +1043,23 @@ export default function AdminDashboard() {
       {selectedCompanyForAlumni && createPortal(
         <div
           onClick={() => setSelectedCompanyForAlumni(null)}
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="flex max-h-[85vh] w-full max-w-4xl flex-col overflow-hidden border border-slate-200 bg-white shadow-2xl"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-200"
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/90 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center bg-emerald-500/10 font-bold text-emerald-700">
-                  <GraduationCap className="h-5 w-5" />
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-700 font-bold">
+                  <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                     Hired Alumni at {selectedCompanyForAlumni.name}
                     {selectedCompanyForAlumni.isVerified && (
-                      <CheckCircle2 className="inline-block h-4 w-4 text-emerald-600" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 inline-block" />
                     )}
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -1071,30 +1070,32 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}
-                className="p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-6">
+            {/* Content */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1 min-h-0">
               <div className="flex items-center justify-between gap-4">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     value={alumniSearchQuery}
                     onChange={(e) => setAlumniSearchQuery(e.target.value)}
                     placeholder="Search alumni by name, email, or department..."
-                    className="w-full border border-slate-200 py-2 pl-9 pr-4 text-xs focus:border-[#003580] focus:outline-none focus:ring-2 focus:ring-[#003580]/15"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#003580]/20 focus:border-[#003580]"
                   />
                 </div>
-                <div className="text-xs font-medium text-slate-500">
+                <div className="text-xs text-slate-500 font-medium">
                   {selectedCompanyForAlumni.alumniList?.length || 0} Placements Recorded
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {/* Alumni Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {(selectedCompanyForAlumni.alumniList || []).filter((a: any) => {
                   if (!alumniSearchQuery.trim()) return true;
                   const q = alumniSearchQuery.toLowerCase();
@@ -1103,30 +1104,30 @@ export default function AdminDashboard() {
                          (a.email || '').toLowerCase().includes(q) ||
                          (a.position || '').toLowerCase().includes(q);
                 }).map((alumnus: any, idx: number) => (
-                  <div key={alumnus.id || idx} className="border border-slate-200 bg-slate-50/50 p-4 transition-colors hover:bg-white">
+                  <div key={alumnus.id || idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center bg-[#003580] text-sm font-bold text-white">
+                      <div className="w-10 h-10 rounded-full bg-[#003580] text-white font-bold flex items-center justify-center text-sm shadow-sm">
                         {(alumnus.name || 'A').charAt(0).toUpperCase()}
                       </div>
-                      <div className="min-w-0 flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h4 className="flex items-center gap-1.5 truncate text-sm font-bold text-slate-900">
+                          <h4 className="text-sm font-bold text-slate-900 truncate flex items-center gap-1.5">
                             {alumnus.name}
-                            <CheckCircle2 className="inline-block h-3.5 w-3.5 text-emerald-600" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline-block" />
                           </h4>
-                          <span className="bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-800">
                             {alumnus.source}
                           </span>
                         </div>
-                        <div className="mt-0.5 text-xs font-semibold text-slate-700">
+                        <div className="text-xs font-semibold text-slate-700 mt-0.5">
                           {alumnus.position || 'Hired Graduate'}
                         </div>
-                        <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-500">
+                        <div className="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
                           <span>🎓 {typeof alumnus.department === 'object' ? (alumnus.department?.name || alumnus.department?.code || 'Engineering') : (alumnus.department || 'Engineering')}</span>
                           <span>•</span>
                           <span>{alumnus.graduationYear}</span>
                         </div>
-                        <div className="mt-1 truncate text-[11px] text-slate-400">
+                        <div className="text-[11px] text-slate-400 mt-1 truncate">
                           ✉️ {alumnus.email} {alumnus.phone && `• 📞 ${alumnus.phone}`}
                         </div>
                       </div>
@@ -1136,17 +1137,18 @@ export default function AdminDashboard() {
               </div>
 
               {(!selectedCompanyForAlumni.alumniList || selectedCompanyForAlumni.alumniList.length === 0) && (
-                <div className="py-12 text-center text-xs text-slate-400">
+                <div className="text-center py-12 text-slate-400 text-xs">
                   No individual alumnus profiles recorded for this company entry yet.
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-end border-t border-slate-200 bg-slate-50 px-6 py-3">
+            {/* Footer */}
+            <div className="flex items-center justify-end px-6 py-3 border-t border-slate-100 bg-slate-50">
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}
-                className="bg-slate-800 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-slate-900 cursor-pointer"
+                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
               >
                 Close Breakdown
               </button>

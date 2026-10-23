@@ -59,6 +59,8 @@ import {
   BarChart2,
   BookOpen,
   Plus,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import AlumniDashboard from '../features/alumni/pages/AlumniDashboard';
 import EmployerDashboard from '../features/employers/pages/EmployerDashboard';
@@ -68,6 +70,7 @@ import AdminDashboard from '../features/admin/pages/AdminDashboard';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { useSystemSettings } from '../context/SystemSettingsContext';
+import { useTheme } from '../hooks/useTheme';
 
 // No backend call here (logout is purely local for now)
 const logoutLocally = () => {
@@ -102,6 +105,7 @@ export function DashboardLayout({
   loading = false
 }: DashboardLayoutProps) {
   const { settings } = useSystemSettings();
+  const { darkMode, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem(`dashboard_layout_${role}_collapsed`) === 'true');
   const location = useLocation();
@@ -113,23 +117,23 @@ export function DashboardLayout({
   const sidebarDisplayCollapsed = sidebarCollapsed && !sidebarOpen;
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
+    <div className="app-shell flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 antialiased font-sans">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" />
       )}
 
-{/* Sidebar Container */}
-       <aside className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-shrink-0 flex-col bg-white border-r border-slate-200 transition-all duration-300 lg:relative lg:z-20 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
+       {/* Sidebar Container */}
+       <aside className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-shrink-0 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 lg:relative lg:z-20 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
          
          {/* Sidebar Header */}
-         <div className="p-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
            <Link to="/" className={`flex items-center ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}>
              <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md flex-shrink-0">
                <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
              </div>
              {!sidebarDisplayCollapsed && <div className="overflow-hidden">
-               <span className="font-extrabold text-md tracking-tight text-[#003366] block whitespace-nowrap">{settings.general.abbreviation}-AMS</span>
+               <span className="font-extrabold text-md tracking-tight text-[#003366] dark:text-amber-400 block whitespace-nowrap">{settings.general.abbreviation}-AMS</span>
                <span className="text-[9px] uppercase tracking-widest text-[#CC0033] font-bold block whitespace-nowrap">{role}</span>
              </div>}
            </Link>
@@ -146,11 +150,11 @@ export function DashboardLayout({
                  onClick={() => setSidebarOpen(false)}
                  title={sidebarDisplayCollapsed ? item.label : undefined}
                  className={`w-full flex items-center rounded-xl transition-all duration-200 px-4 py-3 ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-4'} ${isActive
-                   ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-sm'
-                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                   ? 'bg-[#003366]/10 text-[#003366] dark:bg-amber-400/10 dark:text-amber-400 font-bold shadow-sm'
+                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
                    }`}
                >
-                 <item.icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-[#003366]' : 'text-slate-500'}`} />
+                 <item.icon className={`h-5 w-5 flex-shrink-0 ${isActive ? 'text-[#003366] dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'}`} />
                  {!sidebarDisplayCollapsed && <span className="text-sm tracking-wide font-medium truncate">
                    {item.label}
                  </span>}
@@ -160,7 +164,7 @@ export function DashboardLayout({
          </nav>
 
          {/* Sidebar Footer */}
-         <div className="border-t border-slate-100 flex-shrink-0 p-4">
+         <div className="border-t border-slate-100 dark:border-slate-800 flex-shrink-0 p-4">
            <button
              type="button"
              onClick={() => {
@@ -168,7 +172,7 @@ export function DashboardLayout({
                window.location.href = '/login';
              }}
              title={sidebarDisplayCollapsed ? 'Exit Workspace' : undefined}
-             className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-all ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}
+             className={`w-full flex items-center px-4 py-3 rounded-xl text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}
            >
              <LogOut className="h-4 w-4 flex-shrink-0" />
              {!sidebarDisplayCollapsed && <span>Exit Workspace</span>}
@@ -180,32 +184,41 @@ export function DashboardLayout({
        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
          
          {/* Clean Top Header Bar */}
-         <header className="bg-white h-16 border-b border-gray-200 flex items-center px-4 sm:px-6 justify-between flex-shrink-0 z-10">
+         <header className="bg-white dark:bg-slate-900 h-16 border-b border-gray-200 dark:border-slate-800 flex items-center px-4 sm:px-6 justify-between flex-shrink-0 z-10">
            <div className="flex items-center gap-4">
              {/* Mobile menu button */}
-             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
+             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
                <Menu className="h-5 w-5" />
              </button>
              <button
                type="button"
                onClick={() => setSidebarCollapsed((value) => !value)}
-               className="hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl lg:inline-flex"
+               className="hidden p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl lg:inline-flex"
                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
              >
                <Menu className="h-5 w-5" />
              </button>
              {/* Breadcrumbs / Title */}
-             <h1 className="truncate text-base font-bold text-slate-900 tracking-tight sm:text-lg">{title}</h1>
+             <h1 className="truncate text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight sm:text-lg">{title}</h1>
            </div>
 
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 rounded-xl relative shadow-sm">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-xl relative shadow-sm border border-transparent dark:border-slate-700 transition-colors"
+              title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-600" />}
+            </button>
+            <button className="p-2 text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-50 dark:bg-slate-800 rounded-xl relative shadow-sm border border-transparent dark:border-slate-700">
               <Bell className="h-4 w-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#CC0033] rounded-full"></span>
             </button>
-            <div className="h-8 w-[1px] bg-slate-200"></div>
+            <div className="h-8 w-[1px] bg-slate-200 dark:bg-slate-700"></div>
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-slate-200 flex items-center justify-center font-bold text-sm text-[#003366] border border-slate-300">
+              <div className="w-9 h-9 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-bold text-sm text-[#003366] dark:text-amber-400 border border-slate-300 dark:border-slate-700">
                 U
               </div>
             </div>
@@ -213,7 +226,7 @@ export function DashboardLayout({
         </header>
 
         {/* Scrolling Content Panel */}
-        <main className="flex-1 overflow-y-auto bg-gray-50/50 p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-slate-950 p-4 sm:p-6">
           {/* Page Header with Breadcrumbs */}
           {(breadcrumbs || subtitle || headerActions) && (
             <PageHeader
@@ -244,7 +257,7 @@ export function DashboardLayout({
 function LandingPage() {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-slate-50 antialiased font-sans">
+    <div className="app-shell min-h-screen bg-slate-50 antialiased font-sans">
       {/* Structural Navbar */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 py-4 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -751,59 +764,6 @@ function AdminPortal() {
 }
 
 // ==========================================
-// 7. PORTAL 4: DEPARTMENT ANALYTICS
-// ==========================================
-function DepartmentPortal() {
-  const navItems = [
-    { label: "Dashboard", path: "/department", icon: BarChart3 },
-    { label: "Graduate Outcome Analytics", path: "/department/outcome-analytics", icon: BarChart2 },
-    { label: "Curriculum Review", path: "/department/curriculum-review", icon: BookOpen },
-    { label: "Department Ranking", path: "/department/ranking", icon: Award },
-    { label: "Research Collaboration", path: "/department/research", icon: Zap },
-    { label: "Employability Reports", path: "/department/employability", icon: TrendingUp },
-    { label: "KPI Dashboard", path: "/department/kpi", icon: Activity },
-    { label: "Industry Partnership", path: "/department/partnership", icon: Handshake },
-    { label: "Employment Analytics", path: "/department/employment", icon: TrendingUp },
-    { label: "Skill Gap Reports", path: "/department/skill-gap", icon: GraduationCap },
-    { label: "Employer Feedback", path: "/department/employer-feedback", icon: FileText },
-    { label: "Tracer Reports", path: "/department/tracer", icon: FileText },
-    { label: "Curriculum Insights", path: "/department/curriculum", icon: FileText },
-    { label: "Accreditation Reports", path: "/department/accreditation", icon: FileText },
-    { label: "Settings", path: "/department/settings", icon: Settings }
-  ];
-
-  return (
-    <DashboardLayout title="Department Head Portal" role="Department Head" navItems={navItems}>
-      <Routes>
-        <Route path="/dashboard" element={<Navigate to="/department" replace />} />
-        <Route index element={
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-md">
-              <h2 className="text-lg font-black text-[#003366] mb-4">Department Dashboard</h2>
-              <p className="text-sm text-slate-500">Select a module from the sidebar to view analytics.</p>
-            </div>
-          </div>
-        } />
-        <Route path="/outcome-analytics" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Outcome Analytics</h2><p className="text-sm text-slate-500">Track graduate employment outcomes.</p></div>} />
-        <Route path="/curriculum-review" element={<div className="p-6"><h2 className="text-lg font-bold">Curriculum Review Dashboard</h2><p className="text-sm text-slate-500">Review and suggest curriculum updates.</p></div>} />
-        <Route path="/ranking" element={<div className="p-6"><h2 className="text-lg font-bold">Department Ranking Dashboard</h2><p className="text-sm text-slate-500">View department performance rankings.</p></div>} />
-        <Route path="/research" element={<div className="p-6"><h2 className="text-lg font-bold">Research Collaboration Tracking</h2><p className="text-sm text-slate-500">Track research partnerships and outcomes.</p></div>} />
-        <Route path="/employability" element={<div className="p-6"><h2 className="text-lg font-bold">Graduate Employability Reports</h2><p className="text-sm text-slate-500">Generate employability analytics.</p></div>} />
-        <Route path="/kpi" element={<div className="p-6"><h2 className="text-lg font-bold">Department KPI Dashboard</h2><p className="text-sm text-slate-500">Key performance indicators for the department.</p></div>} />
-        <Route path="/partnership" element={<div className="p-6"><h2 className="text-lg font-bold">Industry Partnership Reports</h2><p className="text-sm text-slate-500">Manage and track industry partnerships.</p></div>} />
-        <Route path="/employment" element={<div className="p-6"><h2 className="text-lg font-bold">Employment Analytics</h2><p className="text-sm text-slate-500">Detailed employment statistics.</p></div>} />
-        <Route path="/skill-gap" element={<div className="p-6"><h2 className="text-lg font-bold">Skill Gap Reports</h2><p className="text-sm text-slate-500">Analyze skill gaps from employer feedback.</p></div>} />
-        <Route path="/employer-feedback" element={<div className="p-6"><h2 className="text-lg font-bold">Employer Feedback</h2><p className="text-sm text-slate-500">Review feedback from employers.</p></div>} />
-        <Route path="/tracer" element={<div className="p-6"><h2 className="text-lg font-bold">Tracer Reports</h2><p className="text-sm text-slate-500">Generate tracer study reports.</p></div>} />
-        <Route path="/curriculum" element={<div className="p-6"><h2 className="text-lg font-bold">Curriculum Insights</h2><p className="text-sm text-slate-500">View curriculum analytics.</p></div>} />
-        <Route path="/accreditation" element={<div className="p-6"><h2 className="text-lg font-bold">Accreditation Reports</h2><p className="text-sm text-slate-500">Accreditation-ready reports.</p></div>} />
-        <Route path="/settings" element={<div className="p-6"><h2 className="text-lg font-bold">Settings</h2><p className="text-sm text-slate-500">Manage department preferences.</p></div>} />
-      </Routes>
-    </DashboardLayout>
-  );
-}
-
-// ==========================================
 // 8. CORE APPLICATION EXPORT MODULE
 // ==========================================
 export default function App() {
@@ -817,7 +777,6 @@ export default function App() {
         <Route path="/alumni/*" element={<AlumniPortal />} />
         <Route path="/registrar/*" element={<RegistrarPortal />} />
         <Route path="/employer/*" element={<EmployerPortal />} />
-        <Route path="/department/*" element={<DepartmentPortal />} />
         <Route path="/admin/*" element={<AdminPortal />} />
       </Routes>
     </BrowserRouter>

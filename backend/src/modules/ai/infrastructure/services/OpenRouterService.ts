@@ -62,7 +62,7 @@ export class OpenRouterService {
               'HTTP-Referer': 'https://github.com/astu-ams',
               'Content-Type': 'application/json',
             },
-            timeout: 3000,
+            timeout: 5000,
           }
         );
 

@@ -227,12 +227,15 @@ export default function SystemSettings() {
   const [portalTitle, setPortalTitle] = useState('Alumni Management System');
 
   // --- Email Config State ---
+  // Secrets start empty. These previously shipped as hardcoded literals in the
+  // client bundle, exposing the live SMTP app password and sender account to
+  // anyone who loaded the page. They are now fetched from the server at runtime.
   const [smtpHost, setSmtpHost] = useState('smtp.gmail.com');
   const [smtpPort, setSmtpPort] = useState('465');
-  const [smtpUser, setSmtpUser] = useState('astustun@gmail.com');
-  const [smtpPassword, setSmtpPassword] = useState('hddh dzbs kalr uebf');
+  const [smtpUser, setSmtpUser] = useState('');
+  const [smtpPassword, setSmtpPassword] = useState('');
   const [fromName, setFromName] = useState('ASTU Alumni Management System');
-  const [fromEmail, setFromEmail] = useState('astustun@gmail.com');
+  const [fromEmail, setFromEmail] = useState('');
   const [smtpPasswordVisible, setSmtpPasswordVisible] = useState(false);
 
   // --- Integration Toggles & Credentials ---
@@ -246,9 +249,9 @@ export default function SystemSettings() {
 
   const [regApiEndpoint, setRegApiEndpoint] = useState('https://registrar.astu.edu.et/api/v1');
   const [regApiKey, setRegApiKey] = useState('');
-  const [smsGatewayUser, setSmsGatewayUser] = useState('astu_sms');
-  const [smsGatewayPass, setSmsGatewayPass] = useState('password');
-  const [googleClientId, setGoogleClientId] = useState('google-client-id.apps.googleusercontent.com');
+  const [smsGatewayUser, setSmsGatewayUser] = useState('');
+  const [smsGatewayPass, setSmsGatewayPass] = useState('');
+  const [googleClientId, setGoogleClientId] = useState('');
 
   const [openRouterApiKey, setOpenRouterApiKey] = useState('');
   const [openRouterModel, setOpenRouterModel] = useState('deepseek/deepseek-r1:free');
@@ -418,13 +421,20 @@ export default function SystemSettings() {
       },
     };
 
-    const result = await adminService.updateSettings(settingsPayload);
-    setSaving(false);
-    if (result.ok) {
-      updateSettingsState(settingsPayload);
-      toast.success('Settings saved successfully!');
-    } else {
-      toast.error(result.message || 'Failed to save settings.');
+    try {
+      const result = await adminService.updateSettings(settingsPayload);
+      if (result.ok) {
+        updateSettingsState(settingsPayload);
+        toast.success('Settings saved successfully!');
+      } else {
+        toast.error(result.message || 'Failed to save settings.');
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to save settings.');
+    } finally {
+      // Was only called on the success path, so any network throw left the Save
+      // button disabled forever.
+      setSaving(false);
     }
   };
 
@@ -956,7 +966,7 @@ export default function SystemSettings() {
                   <InputLabel label="Chapa Secret Key">
                     <input
                       type="password"
-                      placeholder="CHAPA_TEST_PRIV_..."
+                      placeholder="Enter your Chapa secret key"
                       value={chapaSecretKey}
                       onChange={(e) => setChapaSecretKey(e.target.value)}
                       className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
@@ -964,7 +974,7 @@ export default function SystemSettings() {
                   </InputLabel>
                   <InputLabel label="Chapa Public Key">
                     <input
-                      placeholder="CHAPA_TEST_PUB_..."
+                      placeholder="Enter your Chapa public key"
                       value={chapaPublicKey}
                       onChange={(e) => setChapaPublicKey(e.target.value)}
                       className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"
@@ -988,7 +998,7 @@ export default function SystemSettings() {
                   <InputLabel label="Didit API Key">
                     <input
                       type="password"
-                      placeholder="fNZOouKi6YdbExgG-..."
+                      placeholder="Enter your Didit API key"
                       value={diditApiKey}
                       onChange={(e) => setDiditApiKey(e.target.value)}
                       className="w-full rounded-[8px] border border-slate-200 px-3 py-2.5 outline-none focus:border-[#003580]"

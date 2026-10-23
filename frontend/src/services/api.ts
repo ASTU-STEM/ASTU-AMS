@@ -52,10 +52,12 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem(config.auth.refreshStorageKey);
         if (refreshToken) {
           const response = await axios.post(`${config.apiUrl}/auth/refresh`, { refreshToken });
-          const { token } = response.data;
-          localStorage.setItem(config.auth.storageKey, token);
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
+          const token = response.data?.data?.accessToken ?? response.data?.data?.token;
+          if (token) {
+            localStorage.setItem(config.auth.storageKey, token);
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          }
         }
       } catch {
         localStorage.removeItem(config.auth.storageKey);

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Mentor, MentorshipSession } from '../types/alumni.types';
 import { alumniService } from '../services/alumni.service';
 import toast from 'react-hot-toast';
+import { AlumniSectionShell } from './AlumniSectionShell';
+import { BrandMark } from './BrandMark';
+import { alumniTabRailClass } from './alumniUi';
 
 interface MentorReview {
   id: number;
@@ -184,58 +187,24 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
   const connectedMentors = mentors.filter(m => m.status === 'CONNECTED');
 
   return (
-    <div className="space-y-6">
-      {/* ── Hero Banner with ASTU Branding ── */}
-      <section
-        className="rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #003366 0%, #001a33 50%, #0d2b4d 100%)' }}
-      >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#FFCC00]/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="flex items-start gap-4">
-            <img
-              alt="ASTU Logo"
-              className="h-14 w-14 object-contain scale-110 shrink-0"
-              src="/images/astu-seal-logo.png"
-            />
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#FFCC00]/20 text-[#FFD700] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#FFCC00]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FFCC00]"></span>
-                ASTU Professional Network
-              </span>
-              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                Peer Mentorship Network
-              </h2>
-              <p className="text-sm text-white/70 leading-relaxed max-w-xl">
-                Connect with seasoned ASTU graduates, schedule 1-on-1 virtual sessions,
-                or serve as a mentor to senior undergraduates.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center">
-              <div className="text-2xl font-extrabold text-[#FFCC00]">{mentors.length}</div>
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Mentors</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center">
-              <div className="text-2xl font-extrabold text-white">{connectedMentors.length}</div>
-              <div className="text-[10px] text-white/50 font-bold uppercase tracking-wider">Connected</div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <AlumniSectionShell
+      eyebrow="Mentorship"
+      title="Find a mentor — or become one"
+      description="Book 1:1 sessions with experienced ASTU graduates, or offer guidance to peers and students."
+      metrics={[
+        { value: mentors.length, label: 'Mentors', accent: 'gold' },
+        { value: connectedMentors.length, label: 'Connected', accent: 'white' },
+      ]}
+    >
 
       {/* ── Role Navigation Tabs ── */}
-      <div className="flex gap-1 border-b border-gray-200 bg-gray-50/50 rounded-xl p-1">
+      <div className={`${alumniTabRailClass}`}>
         <button
           onClick={() => setActiveTab('find')}
           className={`flex-1 py-2.5 px-3 rounded-lg font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5 ${
             activeTab === 'find'
-              ? 'bg-white text-[#003366] shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-[#003366] text-white shadow-md'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
           }`}
         >
           <span className="material-symbols-outlined text-base">person_search</span>
@@ -245,8 +214,8 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           onClick={() => setActiveTab('become')}
           className={`flex-1 py-2.5 px-3 rounded-lg font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5 ${
             activeTab === 'become'
-              ? 'bg-white text-[#003366] shadow-sm'
-              : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-[#003366] text-white shadow-md'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
           }`}
         >
           <span className="material-symbols-outlined text-base">school</span>
@@ -260,7 +229,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           {/* Left: Mentors List */}
           <div className="lg:col-span-2 space-y-4">
             {/* Search bar */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200/60">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-200/60 dark:border-slate-800 transition-colors">
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
                 <input
@@ -268,7 +237,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search mentors by name, company, role, or skill..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] focus:bg-white transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] focus:bg-white dark:focus:bg-slate-800 transition-all"
                 />
               </div>
             </div>
@@ -277,7 +246,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
               {filteredMentors.map((mentor) => (
                 <div
                   key={mentor.id}
-                  className="bg-white border border-gray-200/60 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                  className="bg-white dark:bg-slate-900 border border-gray-200/60 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
@@ -290,13 +259,13 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                         className="w-14 h-14 rounded-full object-cover border-2 border-[#003366]/15 shadow-sm shrink-0"
                       />
                       <div>
-                        <h4 className="font-bold text-gray-900 text-sm">{mentor.name}</h4>
-                        <p className="text-[11px] text-[#003366] font-bold">{mentor.role}</p>
-                        <p className="text-[10px] text-gray-500">{mentor.company} · {mentor.batch}</p>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm">{mentor.name}</h4>
+                        <p className="text-[11px] text-[#003366] dark:text-blue-300 font-bold">{mentor.role}</p>
+                        <p className="text-[10px] text-gray-500 dark:text-slate-400">{mentor.company} · {mentor.batch}</p>
                       </div>
                     </div>
 
-                    <p className="text-[11px] text-gray-500 leading-relaxed line-clamp-3">{mentor.bio}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed line-clamp-3">{mentor.bio}</p>
 
                     {/* Mentor Rating Stars */}
                     <div className="flex items-center gap-1">
@@ -306,33 +275,33 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                           ? mentorReviews.reduce((sum, r) => sum + r.rating, 0) / mentorReviews.length
                           : 0;
                         return (
-                          <svg key={star} className={`w-3.5 h-3.5 ${star <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
+                          <svg key={star} className={`w-3.5 h-3.5 ${star <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200 dark:text-slate-700'}`} fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                           </svg>
                         );
                       })}
-                      <button onClick={() => setSelectedMentorForReviews(selectedMentorForReviews === mentor.id ? null : mentor.id)} className="text-[9px] text-[#003366] font-bold hover:underline ml-1">
+                      <button onClick={() => setSelectedMentorForReviews(selectedMentorForReviews === mentor.id ? null : mentor.id)} className="text-[9px] text-[#003366] dark:text-blue-300 font-bold hover:underline ml-1">
                         {reviews.filter(r => r.mentorId === mentor.id).length} reviews
                       </button>
                     </div>
 
                     {/* Reviews Expand */}
                     {selectedMentorForReviews === mentor.id && (
-                      <div className="space-y-2 mt-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                      <div className="space-y-2 mt-2 p-3 bg-gray-50 dark:bg-slate-800/60 rounded-xl border border-gray-100 dark:border-slate-700">
                         {reviews.filter(r => r.mentorId === mentor.id).map(review => (
-                          <div key={review.id} className="border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                          <div key={review.id} className="border-b border-gray-100 dark:border-slate-700 last:border-0 pb-2 last:pb-0">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-gray-800">{review.author}</span>
+                              <span className="text-[10px] font-bold text-gray-800 dark:text-slate-200">{review.author}</span>
                               <div className="flex items-center gap-0.5">
                                 {[1, 2, 3, 4, 5].map(s => (
-                                  <svg key={s} className={`w-2.5 h-2.5 ${s <= review.rating ? 'text-amber-400' : 'text-gray-200'}`} fill="currentColor" viewBox="0 0 20 20">
+                                  <svg key={s} className={`w-2.5 h-2.5 ${s <= review.rating ? 'text-amber-400' : 'text-gray-200 dark:text-slate-700'}`} fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                   </svg>
                                 ))}
                               </div>
                             </div>
-                            <p className="text-[10px] text-gray-500 mt-0.5">{review.text}</p>
-                            <p className="text-[8px] text-gray-400 mt-0.5">{review.date}</p>
+                            <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">{review.text}</p>
+                            <p className="text-[8px] text-gray-400 dark:text-slate-500 mt-0.5">{review.date}</p>
                           </div>
                         ))}
                       </div>
@@ -340,14 +309,14 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
 
                     <div className="flex flex-wrap gap-1.5">
                       {mentor.skills.map(skill => (
-                        <span key={skill} className="px-2 py-0.5 bg-[#003366]/5 text-[10px] font-bold text-[#003366] rounded-md">
+                        <span key={skill} className="px-2 py-0.5 bg-[#003366]/5 dark:bg-blue-900/30 text-[10px] font-bold text-[#003366] dark:text-blue-300 rounded-md">
                           {skill}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-3 border-t border-gray-100 flex gap-2">
+                  <div className="pt-4 mt-3 border-t border-gray-100 dark:border-slate-800 flex gap-2">
                     {mentor.status === 'CONNECTED' ? (
                       <>
                         <span className="flex-1 text-center py-2 rounded-xl text-[11px] font-bold bg-[#1D9E75]/10 text-[#1D9E75] border border-[#1D9E75]/20">
@@ -388,9 +357,9 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
 
           {/* Right: Scheduled Sessions */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm space-y-4">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200/60 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
               <div>
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <span
                     className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold material-symbols-outlined"
                     style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
@@ -399,22 +368,22 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                   </span>
                   Scheduled Sessions
                 </h3>
-                <p className="text-[10px] text-gray-500 mt-1 ml-9">Track your upcoming consultations</p>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1 ml-9">Track your upcoming consultations</p>
               </div>
 
               <div className="space-y-3">
                 {connectedMentors.map(m =>
                   m.sessions?.map(sess => (
-                    <div key={sess.id} className="p-3 border border-[#003366]/10 bg-[#003366]/[0.02] rounded-xl space-y-2">
+                    <div key={sess.id} className="p-3 border border-[#003366]/10 dark:border-blue-900/40 bg-[#003366]/[0.02] dark:bg-blue-950/20 rounded-xl space-y-2">
                       <div>
-                        <span className="px-2 py-0.5 bg-[#003366]/10 text-[10px] font-extrabold uppercase text-[#003366] rounded-md">
+                        <span className="px-2 py-0.5 bg-[#003366]/10 dark:bg-blue-900/40 text-[10px] font-extrabold uppercase text-[#003366] dark:text-blue-300 rounded-md">
                           {sess.status}
                         </span>
-                        <h4 className="font-bold text-xs text-gray-900 mt-1.5">{sess.topic}</h4>
-                        <p className="text-[10px] text-gray-500 font-medium">with {m.name}</p>
+                        <h4 className="font-bold text-xs text-gray-900 dark:text-white mt-1.5">{sess.topic}</h4>
+                        <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">with {m.name}</p>
                       </div>
 
-                      <div className="flex flex-col gap-0.5 text-[10px] text-gray-500">
+                      <div className="flex flex-col gap-0.5 text-[10px] text-gray-500 dark:text-slate-400">
                         <span className="flex items-center gap-1 font-semibold">
                           <span className="material-symbols-outlined text-xs">calendar_month</span>
                           {sess.date}
@@ -446,7 +415,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                             href={sess.meetLink}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold transition-all text-center flex items-center justify-center gap-1 hover:bg-slate-200"
+                            className="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold transition-all text-center flex items-center justify-center gap-1 hover:bg-slate-200 dark:hover:bg-slate-700"
                           >
                             <span className="material-symbols-outlined text-xs">link</span>
                             Link
@@ -471,25 +440,25 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
         /* ── BECOME A MENTOR TAB ── */
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-4">
-            <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200/60 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold material-symbols-outlined" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>school</span>
                 Mentorship Status
               </h3>
-              <p className="text-[11px] text-gray-500 leading-relaxed">
+              <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed">
                 Enable mentor status to let ASTU senior students and junior alumni view your bio and submit guidance requests.
               </p>
 
-              <div className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-100 rounded-xl">
+              <div className="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700 rounded-xl">
                 <div>
-                  <span className="text-xs font-bold text-gray-900 block">Accepting Students</span>
-                  <span className="text-[10px] text-gray-500 font-medium">{isAvailableAsMentor ? 'Active & Visible' : 'Inactive'}</span>
+                  <span className="text-xs font-bold text-gray-900 dark:text-white block">Accepting Students</span>
+                  <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">{isAvailableAsMentor ? 'Active & Visible' : 'Inactive'}</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleToggleMentorStatus}
                   className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 ${
-                    isAvailableAsMentor ? 'bg-[#003366]' : 'bg-gray-300'
+                    isAvailableAsMentor ? 'bg-[#003366]' : 'bg-gray-300 dark:bg-slate-700'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded-full bg-white transition-transform duration-300 shadow-sm ${
@@ -500,38 +469,38 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
             </div>
 
             {/* Mentor Profile Setup Form */}
-            <form onSubmit={handleSaveMentorProfile} className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm space-y-3.5">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#003366]">Mentor Profile Details</h4>
+            <form onSubmit={handleSaveMentorProfile} className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200/60 dark:border-slate-800 shadow-sm space-y-3.5 transition-colors">
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#003366] dark:text-blue-300">Mentor Profile Details</h4>
               
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-600 uppercase">Expertise Topics (Comma Separated)</label>
+                <label className="text-[10px] font-bold text-gray-600 dark:text-slate-300 uppercase">Expertise Topics (Comma Separated)</label>
                 <input
                   type="text"
                   value={mentorProfileForm.expertise}
                   onChange={(e) => setMentorProfileForm(p => ({ ...p, expertise: e.target.value }))}
-                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                  className="w-full text-xs p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
                   placeholder="e.g. System Design, AI Research, Full-Stack"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-600 uppercase">Years of Experience</label>
+                <label className="text-[10px] font-bold text-gray-600 dark:text-slate-300 uppercase">Years of Experience</label>
                 <input
                   type="number"
                   value={mentorProfileForm.yearsExperience}
                   onChange={(e) => setMentorProfileForm(p => ({ ...p, yearsExperience: e.target.value }))}
-                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                  className="w-full text-xs p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
                   placeholder="e.g. 5"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-600 uppercase">Availability Schedule</label>
+                <label className="text-[10px] font-bold text-gray-600 dark:text-slate-300 uppercase">Availability Schedule</label>
                 <input
                   type="text"
                   value={mentorProfileForm.availability}
                   onChange={(e) => setMentorProfileForm(p => ({ ...p, availability: e.target.value }))}
-                  className="w-full text-xs p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                  className="w-full text-xs p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
                   placeholder="e.g. Available 2h/week on weekends"
                 />
               </div>
@@ -546,8 +515,8 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           </div>
 
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl p-5 border border-gray-200/60 shadow-sm space-y-4">
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-200/60 dark:border-slate-800 shadow-sm space-y-4 transition-colors">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <span
                   className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-bold"
                   style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}
@@ -556,20 +525,20 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                 </span>
                 Incoming Student Requests
               </h3>
-              <p className="text-[11px] text-gray-500">Review guidance requests from ASTU students</p>
+              <p className="text-[11px] text-gray-500 dark:text-slate-400">Review guidance requests from ASTU students</p>
 
               <div className="space-y-3">
                 {isAvailableAsMentor ? (
                   studentRequests.map((req) => (
                     <div
                       key={req.id}
-                      className="p-4 border border-gray-100 rounded-xl hover:shadow-sm transition-all"
+                      className="p-4 border border-gray-100 dark:border-slate-800 rounded-xl hover:shadow-sm transition-all"
                     >
                       <div className="space-y-2.5">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h4 className="font-bold text-gray-900 text-sm">{req.name}</h4>
-                            <p className="text-[10px] text-[#003366] font-bold">{req.department} · {req.year}</p>
+                            <h4 className="font-bold text-gray-900 dark:text-white text-sm">{req.name}</h4>
+                            <p className="text-[10px] text-[#003366] dark:text-blue-300 font-bold">{req.department} · {req.year}</p>
                           </div>
                           {req.status === 'CONNECTED' ? (
                             <span className="text-[10px] font-bold text-[#1D9E75] bg-[#1D9E75]/10 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -581,10 +550,10 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                           )}
                         </div>
 
-                        <p className="text-[11px] text-gray-500 leading-relaxed">{req.message}</p>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400 leading-relaxed">{req.message}</p>
 
                         {req.status === 'PENDING' && (
-                          <div className="flex gap-2 pt-2 mt-1 border-t border-gray-100">
+                          <div className="flex gap-2 pt-2 mt-1 border-t border-gray-100 dark:border-slate-800">
                             <button
                               onClick={() => handleAcceptStudent(req.id, req.name)}
                               className="flex-1 py-2 text-white rounded-xl text-[11px] font-bold transition-colors shadow-sm"
@@ -594,7 +563,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                             </button>
                             <button
                               onClick={() => handleDeclineStudent(req.id)}
-                              className="flex-1 py-2 border border-gray-200 hover:bg-gray-50 text-gray-500 rounded-xl text-[11px] font-bold transition-colors"
+                              className="flex-1 py-2 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-xl text-[11px] font-bold transition-colors"
                             >
                               Decline
                             </button>
@@ -618,14 +587,13 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
       {/* ── REQUEST MESSAGE MODAL ── */}
       {selectedMentorForRequest && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-200/50 dark:border-slate-800 overflow-hidden">
             <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <img
-                    alt="ASTU"
-                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                    src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                  <BrandMark
+                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20 text-[10px]"
+                    tone="dark"
                   />
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">Mentorship Request</span>
@@ -643,11 +611,11 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
 
             <div className="p-5 space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Introduction Message</label>
+                <label className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Introduction Message</label>
                 <textarea
                   value={requestMessage}
                   onChange={(e) => setRequestMessage(e.target.value)}
-                  className="w-full text-sm p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all h-32 resize-none"
+                  className="w-full text-sm p-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366] transition-all h-32 resize-none"
                   placeholder="Why do you want to connect with this mentor?"
                   required
                 />
@@ -656,7 +624,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
               <div className="flex gap-3">
                 <button
                   onClick={() => setSelectedMentorForRequest(null)}
-                  className="flex-1 py-2.5 border border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-bold text-gray-600 transition-colors"
+                  className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-gray-600 dark:text-slate-300 transition-colors"
                 >
                   Cancel
                 </button>
@@ -678,15 +646,14 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleBookSessionSubmit}
-            className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-200/50 dark:border-slate-800 overflow-hidden"
           >
             <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, #003366, #001a33)' }}>
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <img
-                    alt="ASTU"
-                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                    src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                  <BrandMark
+                    className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20 text-[10px]"
+                    tone="dark"
                   />
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">Schedule Session</span>
@@ -705,44 +672,44 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
 
             <div className="p-5 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-gray-500 uppercase">Consulting Topic</label>
+                <label className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase">Consulting Topic</label>
                 <input
                   type="text"
                   value={sessionForm.topic}
                   onChange={(e) => setSessionForm(prev => ({ ...prev, topic: e.target.value }))}
-                  className="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                  className="w-full text-sm p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase">Date</label>
+                  <label className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase">Date</label>
                   <input
                     type="date"
                     value={sessionForm.date}
                     onChange={(e) => setSessionForm(prev => ({ ...prev, date: e.target.value }))}
-                    className="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                    className="w-full text-sm p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
                     required
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase">Time Slot</label>
+                  <label className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase">Time Slot</label>
                   <input
                     type="time"
                     value={sessionForm.time}
                     onChange={(e) => setSessionForm(prev => ({ ...prev, time: e.target.value }))}
-                    className="w-full text-sm p-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
+                    className="w-full text-sm p-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-[#003366]/20 focus:outline-none focus:border-[#003366]"
                     required
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-3 border-t border-gray-100">
+              <div className="flex gap-3 pt-3 border-t border-gray-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setSelectedMentorForSession(null)}
-                  className="flex-1 py-2.5 border border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-bold text-gray-600 transition-colors"
+                  className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl text-xs font-bold text-gray-600 dark:text-slate-300 transition-colors"
                 >
                   Cancel
                 </button>
@@ -758,6 +725,6 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
           </form>
         </div>
       )}
-    </div>
+    </AlumniSectionShell>
   );
 };

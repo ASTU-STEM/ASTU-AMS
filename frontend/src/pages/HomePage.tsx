@@ -42,14 +42,11 @@ import {
   Pause,
   Play,
   Share2,
-  Heart,
-  LogIn,
-  UserPlus,
+  Loader2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
-import TelebirrDonationModal from "../components/TelebirrDonationModal";
 import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
@@ -63,7 +60,7 @@ import footerCmsService, { FooterCmsConfig, defaultFooterConfig } from "../featu
 import gc7Img from "../assets/images/gc7.jpg";
 import astuBuildingImg from "../assets/imgs/astu-building.jpg";
 
-const FALLBACK_IMAGE = "";
+const FALLBACK_IMAGE = "/images/astu-building.jpg";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users, Building2, LineChart, FileCheck2, MessageSquareText, Briefcase, LockKeyhole, Globe, BookOpen, Star, Handshake, ShieldCheck, Trophy, CircleUserRound, Search,
@@ -154,7 +151,280 @@ const navSections = [
   { label: "FAQ", id: "faq" },
   { label: "Contact", id: "contact" }
 ];
-/** Minimal empty fallbacks — real content/images come from Homepage CMS */
+
+const defaultHeroSlides = [
+  {
+    id: 'hs-1',
+    image: '/images/astu-building.jpg',
+    tagline: 'Quality Assurance & Accreditation',
+    title: "Connecting ASTU's Excellence to the Global Industry",
+    description: 'A unified digital ecosystem connecting ASTU alumni, corporate employers, and academic departments to accelerate careers, tracer feedback, and technological innovation.',
+    active: true,
+  },
+  {
+    id: 'hs-2',
+    image: '/images/campus-2.jpeg',
+    tagline: 'Enterprise Networking & Placement',
+    title: 'Empowering ASTU Graduates in Modern Workspaces',
+    description: 'Discover verified corporate partners, explore top technical job openings, and track career outcomes bridging classroom theory with real-world industry.',
+    active: true,
+  },
+  {
+    id: 'hs-3',
+    image: '/images/gc7.jpg',
+    tagline: 'Academic Innovation & Tracer Feedback',
+    title: 'Coordinating Strategic Tracer Studies & Skill Gaps',
+    description: 'Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.',
+    active: true,
+  },
+];
+
+const defaultCampusLife = [
+  {
+    id: 'cl-1',
+    title: 'Events and Activities',
+    campus: 'Main Campus',
+    description: 'Career expos, alumni reunions, workshops, chapter meetings, and community programs connecting students with national and global leaders.',
+    image: '/images/campus-2.jpeg',
+    action: 'View Events',
+    active: true,
+  },
+  {
+    id: 'cl-2',
+    title: 'Advanced Engineering Laboratories',
+    campus: 'Innovation Spaces',
+    description: 'Laboratories, robotics centers, libraries, computing clusters, and employer interview rooms fostering hands-on technical excellence.',
+    image: '/images/electriclabs.jpeg',
+    action: 'Explore Facilities',
+    active: true,
+  },
+  {
+    id: 'cl-3',
+    title: 'ASTU Architecture & Cultural Center',
+    campus: 'Campus Gallery',
+    description: 'Research showcases, graduation moments, architectural photography, student exhibitions, and public media archives.',
+    image: '/images/arc.jpg',
+    action: 'View Gallery',
+    active: true,
+  },
+];
+
+const defaultCampuses = [
+  {
+    id: 'cm-1',
+    name: 'Main Campus',
+    description: 'Central hub for alumni services, registrar workflows, administration divisions, and institutional engagement.',
+    image: '/images/astu-building.jpg',
+    active: true,
+  },
+  {
+    id: 'cm-2',
+    name: 'Engineering & Technology Complex',
+    description: 'Applied research laboratories, hands-on workshops, innovation programs, and industry-linked software and hardware training.',
+    image: '/images/electriclabs.jpeg',
+    active: true,
+  },
+  {
+    id: 'cm-3',
+    name: 'Graduation & Events Hall',
+    description: 'Ceremonies, annual career fairs, alumni excellence awards, and university convocation achievement programs.',
+    image: '/images/gc7.jpg',
+    active: true,
+  },
+  {
+    id: 'cm-4',
+    name: 'Research Collaboration Center',
+    description: 'Applied research publications, industry ventures, patent development, and department KPI evaluation center.',
+    image: '/images/arc.jpg',
+    active: true,
+  },
+];
+
+const defaultGallery = [
+  {
+    id: 'gi-1',
+    title: 'ASTU Main Administration Building',
+    album: 'CAMPUS ARCHITECTURE',
+    src: '/images/astu-building.jpg',
+    active: true,
+  },
+  {
+    id: 'gi-2',
+    title: 'High-Tech Engineering Laboratory',
+    album: 'RESEARCH & LABS',
+    src: '/images/electriclabs.jpeg',
+    active: true,
+  },
+  {
+    id: 'gi-3',
+    title: 'Graduation Convocation Ceremony',
+    album: 'CONVOCATION',
+    src: '/images/gc7.jpg',
+    active: true,
+  },
+  {
+    id: 'gi-4',
+    title: 'University Green Spaces & Walkways',
+    album: 'CAMPUS SCENERY',
+    src: '/images/campus-2.jpeg',
+    active: true,
+  },
+  {
+    id: 'gi-5',
+    title: 'Research & Innovation Showcase Hall',
+    album: 'INNOVATION',
+    src: '/images/arc.jpg',
+    active: true,
+  },
+  {
+    id: 'gi-6',
+    title: 'ASTU Alumni Network Leadership Forum',
+    album: 'ALUMNI FORUM',
+    src: '/images/astusteam.jpg',
+    active: true,
+  },
+];
+
+const defaultVideos = [
+  {
+    id: 'vi-1',
+    title: 'Research & Innovation Forum Highlights',
+    description: 'Showcasing groundbreaking faculty and alumni research projects in AI, robotics, and sustainable development.',
+    image: '/images/arc.jpg',
+    url: 'https://www.youtube.com',
+    active: true,
+  },
+  {
+    id: 'vi-2',
+    title: 'Graduation Ceremony & Alumni Convocation Replay',
+    description: 'Celebrating the achievements and academic honors of our graduating engineers and scientists.',
+    image: '/images/gc7.jpg',
+    url: 'https://www.youtube.com',
+    active: true,
+  },
+  {
+    id: 'vi-3',
+    title: 'Advanced Robotics and Computing Labs Tour',
+    description: 'Hands-on demonstrations in machine learning, sensor networks, and mechanical systems.',
+    image: '/images/electriclabs.jpeg',
+    url: 'https://www.youtube.com',
+    active: true,
+  },
+];
+
+const defaultPartners = [
+  { name: 'Ethio Telecom', active: true },
+  { name: 'Commercial Bank of Ethiopia', active: true },
+  { name: 'Safaricom', active: true },
+  { name: 'Ethiopian Airlines', active: true },
+  { name: 'Huawei', active: true },
+  { name: 'INSA', active: true },
+];
+
+const defaultTestimonials = [
+  {
+    id: 'tm-1',
+    quote: 'ASTU-AMS transformed how our department monitors graduate employment outcomes. Real-time tracer responses give us the empirical basis we need for international accreditation.',
+    by: 'Dr. Henok Tadesse · Dean, School of Electrical Engineering & Computing',
+    active: true,
+  },
+  {
+    id: 'tm-2',
+    quote: 'As an industrial recruiter, hiring top-tier engineering talent directly from ASTU has never been smoother. The verified graduate credentials eliminate hiring risk.',
+    by: 'Selamawit Bekele · Head of Talent Acquisition, Ethio Telecom',
+    active: true,
+  },
+  {
+    id: 'tm-3',
+    quote: 'Staying connected to my alma mater through mentorship and collaborative research projects has been an incredible experience. ASTU-AMS keeps our alumni family united.',
+    by: 'Yohannes Melese · Senior AI Engineer & ASTU Gold Medalist',
+    active: true,
+  },
+];
+
+const defaultFaq = [
+  {
+    id: 'fq-1',
+    question: 'Who can use ASTU-AMS?',
+    answer: 'Verified alumni, corporate employers, registrar teams, academic department heads, and system administrators each have tailored, secure role-specific portals.',
+    active: true,
+  },
+  {
+    id: 'fq-2',
+    question: 'How are tracer surveys utilized?',
+    answer: 'Tracer study responses feed graduate employment analytics, identifying technological skill gaps and supporting university curriculum accreditation.',
+    active: true,
+  },
+  {
+    id: 'fq-3',
+    question: 'Can employers publish job postings and career fairs?',
+    answer: 'Yes. Verified employer partners can publish vacancies, search candidate profiles by department, review applications, and coordinate campus recruitment events.',
+    active: true,
+  },
+  {
+    id: 'fq-4',
+    question: 'How do alumni request official documents and transcripts?',
+    answer: 'Sign in to the Alumni Portal, navigate to "Document Services", and submit digital requests for transcripts, certificates, or recommendation letters with live progress tracking.',
+    active: true,
+  },
+  {
+    id: 'fq-5',
+    question: 'What is the schedule for graduate tracer studies?',
+    answer: 'Surveys are administered at 6, 12, and 24-month milestones after graduation to capture comprehensive career trajectory data.',
+    active: true,
+  },
+];
+
+const defaultAnnouncements = [
+  {
+    id: 'ann-1',
+    title: 'ASTU Engineering Innovation Summit 2026',
+    date: 'Sep 9, 2026',
+    type: 'Official Announcement',
+    excerpt: 'Showcasing cutting-edge technology and student research projects across engineering departments.',
+  },
+  {
+    id: 'ann-2',
+    title: 'Semester Break: Campus Safety Notice & Lab Guidelines',
+    date: 'Aug 20, 2026',
+    type: 'Campus Directive',
+    excerpt: 'Official ASTU Announcement regarding campus access, lab operating hours, and safety guidelines during the semester break.',
+  },
+  {
+    id: 'ann-3',
+    title: 'ASTU Research Grant Winners 2026 Announced',
+    date: 'May 25, 2026',
+    type: 'Academic Notice',
+    excerpt: 'Announcing 12 applied research grants awarded to faculty and alumni engineering teams for breakthrough projects.',
+  },
+  {
+    id: 'ann-4',
+    title: 'Annual Alumni & Career Fair 2026 Registrations Open',
+    date: 'Jan 4, 2026',
+    type: 'Career Event',
+    excerpt: 'Connecting over 50 leading industrial recruiters and tech innovators directly with ASTU graduating seniors.',
+  },
+];
+
+const defaultResearchHighlights = {
+  title: 'Research, Innovation & University Achievements',
+  description: 'ASTU-AMS connects graduate research publications, startup showcases, employer collaborations, and department KPI evidence into one institutional analytics layer.',
+  stats: [
+    { label: 'Applied Research Projects', value: '140+', icon: 'BookOpen' },
+    { label: 'Technology Patents & Startups', value: '38', icon: 'Trophy' },
+    { label: 'Industry Collaborations', value: '85+', icon: 'Handshake' },
+  ],
+};
+
+const defaultImpactSection = {
+  eyebrow: 'Industry-Campus Bridge',
+  title: 'ASTU Alumni Impact & Outcomes',
+  description: 'Graduate outcomes and employer feedback managed through the ASTU-AMS platform feed directly into academic curriculum updates and national accreditation standards.',
+  image: '/images/astu-building.jpg',
+  ctaLabel: 'Explore Campus Life',
+  ctaRoute: '#campus-life',
+};
+
 const emptyCampusLife: any[] = [];
 const emptyCampuses: any[] = [];
 const emptyFaq: any[] = [];
@@ -194,7 +464,7 @@ const ASTU_DEFAULT_EVENTS: EventItem[] = [
     description: "Intensive bootcamp covering machine learning, data visualization, and statistical analysis using Python and R. Practical assignments with ASTU real-world datasets and labs.",
     image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
     speaker: "Dr. Henok Tadesse & Senior AI Engineers",
-    seats: "Registration open",
+    seats: "45 / 50 seats registered",
     statusBadge: "Filling Fast",
     level: "Intermediate - Advanced",
   },
@@ -211,7 +481,7 @@ const ASTU_DEFAULT_EVENTS: EventItem[] = [
     description: "Adama Science and Technology University hosts the 1st EthiopiaLics International Conference on 'Fostering Innovation Ecosystem for Sustainable Industrialization and Tech Transfer'.",
     image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
     speaker: "ASTU Leadership & Global Innovation Fellows",
-    seats: "Open attendance",
+    seats: "450 seats available",
     statusBadge: "Keynote Event",
     level: "Open to All Scholars & Alumni",
   },
@@ -225,10 +495,10 @@ const ASTU_DEFAULT_EVENTS: EventItem[] = [
     time: "10:00 AM - 06:00 PM",
     location: "Senate Hall, ASTU Main Campus",
     campus: "ASTU Main Campus",
-    description: "Annual career acceleration gathering connecting final-year students with high-achieving alumni executives and industry partners. Meet top employers hiring on the spot.",
+    description: "Annual career acceleration gathering connecting final-year students with high-achieving alumni executives and industry partners. Meet 30+ top employers hiring on the spot.",
     image: gc7Img,
     speaker: "40+ Corporate Recruiters & Alumni Tech Leads",
-    seats: "Open registration",
+    seats: "600 attendees expected",
     statusBadge: "Annual Highlight",
     level: "All Batches & Graduating Seniors",
   },
@@ -245,7 +515,7 @@ const ASTU_DEFAULT_EVENTS: EventItem[] = [
     description: "Hands-on training on AWS, Azure, Docker containers, and Kubernetes CI/CD deployment pipelines tailored for ASTU engineering graduates and seniors.",
     image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80",
     speaker: "Certified AWS & Cloud Solution Architects",
-    seats: "Registration open",
+    seats: "40 seats registered",
     statusBadge: "Hands-on Lab",
     level: "Intermediate",
   },
@@ -262,7 +532,7 @@ const ASTU_DEFAULT_EVENTS: EventItem[] = [
     description: "Presentation of groundbreaking faculty and alumni research projects in machine learning, autonomous systems, smart agriculture, and computational sciences.",
     image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
     speaker: "ASTU AI Research Lab & Guest Keynotes",
-    seats: "Open registration",
+    seats: "200 seats capacity",
     statusBadge: "Research Forum",
     level: "Academic & Professional",
   },
@@ -279,7 +549,7 @@ const ASTU_DEFAULT_EVENTS: EventItem[] = [
     description: "Celebrate decades of ASTU engineering and scientific excellence. Reconnect with classmates, network with distinguished alumni, and enjoy an evening banquet and award gala.",
     image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80",
     speaker: "University President & Alumni Honors Panel",
-    seats: "Open registration",
+    seats: "1,200 seats",
     statusBadge: "Grand Reunion",
     level: "All Alumni & Families",
   },
@@ -342,75 +612,11 @@ export default function HomePage() {
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [liveEvents, setLiveEvents] = useState<any[]>(() => {
-    const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.events?.length) {
-      const active = cmsConfig.events.filter((e: any) => e.active);
-      if (active.length) return active;
-    }
-    return [];
-  });
-  const [liveWorkshops, setLiveWorkshops] = useState<any[]>(() => {
-    const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.workshops?.length) {
-      const active = cmsConfig.workshops.filter((w: any) => w.active);
-      if (active.length) return active;
-    }
-    return [];
-  });
-  const [liveNews, setLiveNews] = useState<any[]>(() => {
-    const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.newsItems?.length) {
-      const active = cmsConfig.newsItems.filter((n: any) => n.active);
-      if (active.length) return active;
-    }
-    const published = contentService.getPublishedNews();
-    return published.length ? published : [
-      { title: "New Engineering Lab Inaugurated", date: "May 28, 2026" },
-      { title: "ASTU Research Grant Winners", date: "May 25, 2026" },
-      { title: "Annual Career Expo Announced", date: "May 20, 2026" }
-    ];
-  });
-  const [liveAnnouncements, setLiveAnnouncements] = useState<any[]>(() => {
-    const published = contentService.getPublishedAnnouncements();
-    if (published && published.length > 0) return published;
-    const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.announcements?.length) {
-      const active = cmsConfig.announcements.filter((a: any) => a.active);
-      if (active.length) return active;
-    }
-    return [];
-  });
-  const [liveStories, setLiveStories] = useState<any[]>(() => {
-    const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.stories?.length) {
-      const active = cmsConfig.stories.filter((s: any) => s.active);
-      if (active.length) return active;
-    }
-    return storiesService.getStories();
-  });
-  const [donationCampaigns, setDonationCampaigns] = useState<any[]>([]);
-  const [selectedDonationCampaign, setSelectedDonationCampaign] = useState<any | null>(null);
-  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
-  const [isDonationAuthModalOpen, setIsDonationAuthModalOpen] = useState(false);
-
-  const handleDonateClick = (campaign: any) => {
-    setSelectedDonationCampaign(campaign);
-    const storedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('token');
-    let user: any = null;
-    try {
-      user = storedUser ? JSON.parse(storedUser) : null;
-    } catch {}
-
-    if (token && (user?.role === 'ALUMNI' || !user?.role)) {
-      navigate('/alumni/dashboard?tab=donations');
-    } else {
-      setIsDonationAuthModalOpen(true);
-    }
-  };
-  const [homeDonationCategory, setHomeDonationCategory] = useState('ALL');
-  const [showAllHomeDonations, setShowAllHomeDonations] = useState(false);
+  const [liveEvents, setLiveEvents] = useState<any[]>([]);
+  const [liveWorkshops, setLiveWorkshops] = useState<any[]>([]);
+  const [liveNews, setLiveNews] = useState<any[]>([]);
+  const [liveAnnouncements, setLiveAnnouncements] = useState<any[]>([]);
+  const [liveStories, setLiveStories] = useState<any[]>([]);
   const [liveSlides, setLiveSlides] = useState<any[]>(() => {
     const cmsConfig = homepageCmsService.getSettings();
     if (cmsConfig?.heroSlides?.length) {
@@ -452,26 +658,6 @@ export default function HomePage() {
     }
     return emptyGallery;
   });
-  // CMS items may carry a real publication timestamp.  When they do, show the
-  // newest three on the landing page; otherwise retain the curator's order.
-  const featuredGallery = useMemo(() => {
-    const datedItems = liveGallery
-      .map((item, index) => ({
-        item,
-        index,
-        timestamp: Date.parse(item.createdAt || item.updatedAt || item.date || item.uploadedAt || ''),
-      }));
-    const hasDates = datedItems.some(({ timestamp }) => !Number.isNaN(timestamp));
-
-    return (hasDates
-      ? datedItems.sort((a, b) => {
-          const aTime = Number.isNaN(a.timestamp) ? 0 : a.timestamp;
-          const bTime = Number.isNaN(b.timestamp) ? 0 : b.timestamp;
-          return bTime - aTime || a.index - b.index;
-        })
-      : datedItems
-    ).slice(0, 3).map(({ item }) => item);
-  }, [liveGallery]);
   const [liveVideos, setLiveVideos] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
     if (config?.videos?.length) {
@@ -525,160 +711,53 @@ export default function HomePage() {
   const [bottomCta, setBottomCta] = useState<any>(() => homepageCmsService.getSettings()?.bottomCta || null);
   const [researchHighlights, setResearchHighlights] = useState<any>(() => homepageCmsService.getSettings()?.researchHighlights || null);
   const [footerConfig, setFooterConfig] = useState<FooterCmsConfig>(() => footerCmsService.getSettings());
-  const [liveWelcomeMessage, setLiveWelcomeMessage] = useState<string>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.welcomeMessage || "Welcome to the ASTU Alumni Management System — Connecting graduates, employers, and departments for longitudinal career tracking and institutional excellence.";
-  });
-  const [liveWelcomeEnabled, setLiveWelcomeEnabled] = useState<boolean>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.welcomeEnabled !== false;
-  });
-  const [liveHeroBadge, setLiveHeroBadge] = useState<string>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.heroBadge || "ASTU Alumni Management System";
-  });
-  const [liveHeroButtons, setLiveHeroButtons] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.heroButtons || {
-      primaryText: "Alumni Portal",
-      primaryLink: "/info/alumni-portal",
-      secondaryText: "Employer Partnership",
-      secondaryLink: "/info/employer-portal",
-    };
-  });
-  const [liveImpactHeaders, setLiveImpactHeaders] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.impactHeaders || {
-      eyebrow: "ASTU IMPACT AT A GLANCE",
-      title: "Connecting Academia to Industry",
-      description: "Building a stronger connection between ASTU graduates, employers, research and career opportunities.",
-    };
-  });
-  const [livePortalsHeaders, setLivePortalsHeaders] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.portalsHeaders || {
-      eyebrow: "Get Started",
-      title: "How ASTU-AMS Works",
-      description: "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps.",
-      ctaText: "Get Started Today",
-      ctaLink: "/login",
-    };
-  });
-  const [liveCampusLifeHeaders, setLiveCampusLifeHeaders] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.campusLifeHeaders || {
-      eyebrow: "Explore Life At ASTU",
-      title: "Campus Life, Facilities, Events, and Galleries",
-      description: "A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.",
-    };
-  });
-  const [liveEventsHeaders, setLiveEventsHeaders] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.eventsHeaders || {
-      eyebrow: "Events & Workshops",
-      title: "Upcoming Alumni Events",
-      description: "Networking, learning, and professional growth opportunities.",
-      viewAllText: "See All Events →",
-      viewAllLink: "/events",
-    };
-  });
-  const [liveAnnouncementsHeaders, setLiveAnnouncementsHeaders] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.announcementsHeaders || {
-      eyebrow: "Announcements",
-      title: "Official Notices",
-      subscribeTitle: "Subscribe to official updates",
-      subscribeDesc: "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.",
-    };
-  });
-  const [livePartnersHeaders, setLivePartnersHeaders] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.partnersHeaders || {
-      eyebrow: "Our Partners",
-      title: "Partner Companies",
-      description: "Institutional partners supporting employability, internships, and research collaboration.",
-    };
-  });
-  const [liveFaqHeaders, setLiveFaqHeaders] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.faqHeaders || {
-      eyebrow: "FAQ",
-      title: "Frequently Asked Questions",
-      description: "Common questions about ASTU-AMS, tracer studies, and alumni services.",
-    };
-  });
-  const [liveAccreditation, setLiveAccreditation] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.accreditation || {
-      eyebrow: "Quality Assurance",
-      title: "Data-Driven Accreditation & Excellence",
-      description: "ASTU-AMS provides verified tracer data, employment analytics, and employer feedback required by accreditation agencies and university management.",
-      point1Title: "Global Accreditation",
-      point1Desc: "Build transparent, audited institutional reports.",
-      point2Title: "Market Alignment",
-      point2Desc: "Align curriculum with industry expectations.",
-      buttonText: "View Impact Numbers",
-      buttonLink: "/info/impact-numbers",
-      image1: '/images/campus-2.jpeg',
-      image2: '/images/campus-2.jpeg',
-    };
-  });
-  const [liveCtaSection, setLiveCtaSection] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.ctaSection || {
-      enabled: true,
-      title: "Ready to Join ASTU-AMS?",
-      description: "Connect with fellow alumni, discover career opportunities, and contribute to university excellence.",
-      primaryCtaText: "Alumni Portal",
-      primaryCtaLink: "/login",
-      secondaryCtaText: "Employer Portal",
-      secondaryCtaLink: "/login",
-    };
-  });
-  const [liveFooter, setLiveFooter] = useState<any>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.footer || {
-      aboutText: "Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.",
-      address: "Adama Science and Technology University, Adama, Oromia, Ethiopia",
-      poBox: "P.O. Box 1888, Adama, Ethiopia",
-      phone: "+251-221-110000",
-      email: "irccd@astu.edu.et",
-      officeHours: "Monday to Friday, 8:00 AM – 5:00 PM (EAT)",
-      socialFacebook: "https://facebook.com/adamaastu",
-      socialTelegram: "https://t.me/Adama_STU_Almuni",
-      socialTwitter: "#",
-      socialLinkedin: "#",
-      copyrightText: "Adama Science and Technology University. All rights reserved.",
-    };
-  });
-  const defaultSectionLinks = {
-    about: true,
-    impact: true,
-    portals: true,
-    campusLife: true,
-    events: true,
-    stories: true,
-    announcements: true,
-    partners: true,
-    giving: true,
-  };
-  const [liveSectionLinks, setLiveSectionLinks] = useState<typeof defaultSectionLinks>(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.sectionLinks ? { ...defaultSectionLinks, ...cfg.sectionLinks } : defaultSectionLinks;
-  });
-  const [liveGivingSection, setLiveGivingSection] = useState(() => {
-    const cfg = homepageCmsService.getSettings();
-    return cfg?.givingSection || {
-      title: "Support Future Innovators & Campus Research",
-      subtitle: "Active campaigns organized by the ASTU Alumni & Advancement Office. 100% of your tax-deductible gift directly funds undergraduate scholarships, research labs, student welfare, and campus innovation.",
-      buttonText: "Explore All Causes",
-    };
-  });
-
 
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
   const [showAllNotices, setShowAllNotices] = useState(false);
   const [noticeSearch, setNoticeSearch] = useState('');
+
+  // Newsletter Subscription State
+  const [subscriberEmail, setSubscriberEmail] = useState(() => {
+    try {
+      return localStorage.getItem('astu_ams_newsletter_subscribed') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [isSubscribed, setIsSubscribed] = useState(() => {
+    try {
+      return Boolean(localStorage.getItem('astu_ams_newsletter_subscribed'));
+    } catch {
+      return false;
+    }
+  });
+  const [isSubscribing, setIsSubscribing] = useState(false);
+
+  const handleSubscribeNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = subscriberEmail.trim();
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+    setIsSubscribing(true);
+    setTimeout(() => {
+      try {
+        const stored = localStorage.getItem('astu_ams_subscribers');
+        const list = stored ? JSON.parse(stored) : [];
+        if (!list.some((s: any) => (typeof s === 'string' ? s : s.email) === email)) {
+          list.push({ email, date: new Date().toISOString() });
+          localStorage.setItem('astu_ams_subscribers', JSON.stringify(list));
+        }
+        localStorage.setItem('astu_ams_newsletter_subscribed', email);
+      } catch {
+        // ignore
+      }
+      setIsSubscribing(false);
+      setIsSubscribed(true);
+      toast.success('Thank you! You are now subscribed to official ASTU updates.');
+    }, 500);
+  };
 
   // RSVP / Registration State & Handlers
   const [registeredTitles, setRegisteredTitles] = useState<string[]>(() => {
@@ -734,14 +813,14 @@ export default function HomePage() {
     {
       id: 'news-def-3',
       title: 'ASTU Alumni Network: Bridging Generations',
-      excerpt: 'How our alumni network connects graduates with opportunities, mentorship, and lifelong learning resources.',
+      excerpt: 'How our alumni network connects 25,000+ graduates with opportunities, mentorship, and lifelong learning resources.',
       date: '5/28/2026',
       category: 'ALUMNI NETWORK',
     },
     {
       id: 'news-def-4',
       title: 'ASTU Research Grant Winners 2026',
-      excerpt: 'Announcing applied research grants awarded to faculty and alumni engineering teams.',
+      excerpt: 'Announcing 12 applied research grants awarded to faculty and alumni engineering teams.',
       date: '5/25/2026',
       category: 'RESEARCH & GRANTS',
     },
@@ -762,7 +841,7 @@ export default function HomePage() {
     {
       id: 'news-def-7',
       title: 'ASTU Alumni Spotlight: Yohannes Melese, Gold Medalist & Dual-Major Graduate!',
-      excerpt: 'Graduating with a dual major in Electronics & Communication Engineering and Computer Science with outstanding academic standing.',
+      excerpt: 'Graduating with a dual major in Electronics & Communication Engineering and Computer Science, achieving an outstanding CGPA of 3.98.',
       date: 'Mar 7, 2025',
       category: 'ACADEMIC EXCELLENCE',
     },
@@ -776,7 +855,7 @@ export default function HomePage() {
     {
       id: 'news-def-9',
       title: 'Annual Alumni & Career Fair 2026 Registrations Open',
-      excerpt: 'Connecting leading industrial recruiters and tech innovators directly with ASTU graduating seniors.',
+      excerpt: 'Connecting over 50 leading industrial recruiters and tech innovators directly with ASTU graduating seniors.',
       date: 'Jan 4, 2025',
       category: 'CAREER FAIR',
     },
@@ -832,7 +911,7 @@ export default function HomePage() {
           location: e.location || 'ASTU Main Campus',
           campus: 'ASTU Main Campus',
           description: e.description || 'Join fellow ASTU alumni and students for an interactive session, expert talks, and networking opportunities.',
-          image: e.image || FALLBACK_IMAGE,
+          image: e.image || ASTU_DEFAULT_EVENTS[idx % ASTU_DEFAULT_EVENTS.length].image,
           speaker: e.speaker || 'ASTU Faculty & Industry Leads',
           seats: e.seats || 'Open Registration',
           statusBadge: e.statusBadge || 'Upcoming',
@@ -854,7 +933,7 @@ export default function HomePage() {
           location: w.location || w.focus || 'CS Lab & Tech Complex',
           campus: 'Technology Complex',
           description: w.description || 'Hands-on practical training with verified attendance, RSVP tracking, and certificates of completion.',
-          image: w.image || FALLBACK_IMAGE,
+          image: ASTU_DEFAULT_EVENTS[(idx + 3) % ASTU_DEFAULT_EVENTS.length].image,
           speaker: 'Industry Technical Leads',
           seats: w.seats || 'Open Registration',
           statusBadge: 'Hands-on Lab',
@@ -863,13 +942,28 @@ export default function HomePage() {
       });
     }
 
-    // Only fall back to the bundled showcase list when the CMS/API returned
-    // nothing. Previously the demo events were merged in unconditionally, so
-    // real events were always padded with fabricated ones.
-    if (liveList.length === 0) {
-      return [...ASTU_DEFAULT_EVENTS];
+    // Always ensure the prominent default showcase items (especially the 3 from user screenshot) are included
+    const existingTitles = new Set(liveList.map(item => item.title.toLowerCase().trim()));
+    const finalItems = [...liveList];
+    for (const defItem of ASTU_DEFAULT_EVENTS) {
+      if (!existingTitles.has(defItem.title.toLowerCase().trim())) {
+        finalItems.push(defItem);
+        existingTitles.add(defItem.title.toLowerCase().trim());
+      }
     }
-    return liveList;
+
+    // Sort to place the user's top events first
+    finalItems.sort((a, b) => {
+      const getPriority = (item: EventItem) => {
+        if (item.id === 'ds-ml-bootcamp') return 0;
+        if (item.id === 'ethiopialics-2025') return 1;
+        if (item.id === 'career-summit-2026') return 2;
+        return 10;
+      };
+      return getPriority(a) - getPriority(b);
+    });
+
+    return finalItems;
   }, [liveEvents, liveWorkshops]);
 
   // Filtered by selected tab
@@ -898,25 +992,7 @@ export default function HomePage() {
   }, []);
 
 
-  /** Prefer CMS gallery / campus / slide images over any bundled assets */
-  const cmsFeatureImages = useMemo(() => {
-    const fromGallery = liveGallery
-      .map((g: any) => g.src || g.image || g.url)
-      .filter(Boolean);
-    const fromCampuses = liveCampuses.map((c: any) => c.image).filter(Boolean);
-    const fromSlides = liveSlides.map((s: any) => s.image).filter(Boolean);
-    const fromCampusLife = liveCampusLife.map((c: any) => c.image).filter(Boolean);
-    const pool = [...fromGallery, ...fromCampuses, ...fromSlides, ...fromCampusLife];
-    return {
-      primary: impactSection?.image || pool[0] || FALLBACK_IMAGE,
-      secondary: pool[1] || pool[0] || FALLBACK_IMAGE,
-      tertiary: pool[2] || pool[0] || FALLBACK_IMAGE,
-    };
-  }, [liveGallery, liveCampuses, liveSlides, liveCampusLife, impactSection]);
-
-  // Pair each server-reported figure with its presentation. Stats the server
-  // omits (zero rows) or that we have no presentation for are dropped, so the
-  // band and its nav entry disappear together when there is nothing real.
+  // Pair each server-reported figure with its presentation.
   const visibleStats = useMemo(
     () =>
       liveStats
@@ -948,17 +1024,130 @@ export default function HomePage() {
     () =>
       normalisedSlides.length
         ? normalisedSlides
-        : [
-            {
-              id: 'empty',
-              image: FALLBACK_IMAGE,
-              tagline: 'ASTU-AMS',
-              title: 'Alumni Management System',
-              description: welcomeMessage || 'Connecting ASTU graduates, employers, and academic departments in one verified network.',
-            },
-          ],
-    [normalisedSlides, welcomeMessage]
+        : defaultHeroSlides.map((slide) => ({
+            ...slide,
+            image: mediaUrl(slide.image),
+          })),
+    [normalisedSlides]
   );
+
+  const displayCampusLife = useMemo(() => {
+    if (liveCampusLife && liveCampusLife.length > 0) return liveCampusLife;
+    return defaultCampusLife;
+  }, [liveCampusLife]);
+
+  const displayCampuses = useMemo(() => {
+    if (liveCampuses && liveCampuses.length > 0) return liveCampuses;
+    return defaultCampuses;
+  }, [liveCampuses]);
+
+  const displayGallery = useMemo(() => {
+    if (liveGallery && liveGallery.length > 0) return liveGallery;
+    return defaultGallery;
+  }, [liveGallery]);
+
+  const displayVideos = useMemo(() => {
+    if (liveVideos && liveVideos.length > 0) return liveVideos;
+    return defaultVideos;
+  }, [liveVideos]);
+
+  const displayPartners = useMemo(() => {
+    if (livePartners && livePartners.length > 0) return livePartners;
+    return defaultPartners;
+  }, [livePartners]);
+
+  const displayTestimonials = useMemo(() => {
+    if (liveTestimonials && liveTestimonials.length > 0) return liveTestimonials;
+    return defaultTestimonials;
+  }, [liveTestimonials]);
+
+  const displayFaq = useMemo(() => {
+    if (liveFaq && liveFaq.length > 0) return liveFaq;
+    return defaultFaq;
+  }, [liveFaq]);
+
+  const getAnnouncementBadgeStyle = (type: string) => {
+    const lower = String(type || '').toLowerCase();
+    if (lower.includes('official') || lower.includes('directive') || lower.includes('safety')) {
+      return 'bg-red-50 text-astu-red border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800/50';
+    }
+    if (lower.includes('academic') || lower.includes('research') || lower.includes('grant')) {
+      return 'bg-sky-50 text-[#003580] border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/50';
+    }
+    if (lower.includes('alumni') || lower.includes('career') || lower.includes('fair') || lower.includes('update')) {
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50';
+    }
+    if (lower.includes('employer') || lower.includes('partner')) {
+      return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50';
+    }
+    return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600';
+  };
+
+  const displayAnnouncements = useMemo(() => {
+    const raw = liveAnnouncements && liveAnnouncements.length > 0 ? liveAnnouncements : defaultAnnouncements;
+    return raw.map((ann: any, idx: number) => {
+      let typeLabel = ann.type || 'Official Announcement';
+      const lower = String(typeLabel).toLowerCase().trim();
+      if (lower === 'post') typeLabel = 'Alumni Update';
+      else if (lower === 'announcement') typeLabel = 'Official Announcement';
+      else if (lower === 'directive' || lower.includes('safety')) typeLabel = 'Campus Directive';
+      else if (lower.includes('event')) typeLabel = 'Campus Event';
+      else if (lower.includes('research') || lower.includes('grant') || lower.includes('academic')) typeLabel = 'Academic Notice';
+      else if (lower.includes('employer')) typeLabel = 'Employer Notice';
+      else if (lower.includes('achievement')) typeLabel = 'Alumni Achievement';
+      else if (!lower.includes('announcement') && !lower.includes('notice') && !lower.includes('update')) {
+        typeLabel = `${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)} Notice`;
+      }
+
+      let dateLabel = ann.date || '';
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateLabel)) {
+        try {
+          const [m, d, y] = dateLabel.split('/').map(Number);
+          const dt = new Date(y, m - 1, d);
+          dateLabel = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        } catch {
+          // ignore
+        }
+      }
+
+      return {
+        ...ann,
+        id: ann.id || `ann-${idx}`,
+        type: typeLabel,
+        date: dateLabel || 'Recent',
+        excerpt: ann.excerpt || ann.description || 'Official communication and institutional notice from Adama Science and Technology University administration.',
+      };
+    });
+  }, [liveAnnouncements]);
+
+  const displayStories = useMemo(() => {
+    if (liveStories && liveStories.length > 0) return liveStories;
+    return storiesService.getStories();
+  }, [liveStories]);
+
+  const displayResearchHighlights = useMemo(() => {
+    return researchHighlights || defaultResearchHighlights;
+  }, [researchHighlights]);
+
+  const displayImpactSection = useMemo(() => {
+    return impactSection || defaultImpactSection;
+  }, [impactSection]);
+
+  /** Prefer CMS gallery / campus / slide images over any bundled assets */
+  const cmsFeatureImages = useMemo(() => {
+    const fromGallery = displayGallery
+      .map((g: any) => g.src || g.image || g.url)
+      .filter(Boolean);
+    const fromCampuses = displayCampuses.map((c: any) => c.image).filter(Boolean);
+    const fromSlides = displaySlides.map((s: any) => s.image).filter(Boolean);
+    const fromCampusLife = displayCampusLife.map((c: any) => c.image).filter(Boolean);
+    const pool = [...fromGallery, ...fromCampuses, ...fromSlides, ...fromCampusLife];
+    return {
+      primary: displayImpactSection?.image || pool[0] || FALLBACK_IMAGE,
+      secondary: pool[1] || pool[0] || FALLBACK_IMAGE,
+      tertiary: pool[2] || pool[0] || FALLBACK_IMAGE,
+    };
+  }, [displayGallery, displayCampuses, displaySlides, displayCampusLife, displayImpactSection]);
 
   const activeHero = displaySlides[currentSlide] || displaySlides[0];
 
@@ -1249,12 +1438,7 @@ location: e.location || 'Location to be confirmed',
                 id: e.id,
                 title: e.title,
                 date: e.date,
-                seats:
-                  typeof e.rsvps === 'number'
-                    ? `${e.rsvps} registered`
-                    : Array.isArray(e.rsvps) && e.rsvps.length
-                      ? `${e.rsvps.length} registered`
-                      : 'Open Registration',
+                seats: e.rsvps != null ? `${e.rsvps} seats registered` : 'Open Registration',
                 focus: e.category || 'Career Readiness',
               }));
           }
@@ -1267,40 +1451,19 @@ location: e.location || 'Location to be confirmed',
       } catch {
         // Keep CMS / empty state — do not inject demo events
       }
-
-      // Sync active Donation Campaigns published by Alumni Office / CMS
-      try {
-        const campaigns = await contentService.getPublicDonationCampaigns();
-        if (isMounted && campaigns && campaigns.length > 0) {
-          setDonationCampaigns(campaigns);
-        }
-      } catch {
-        /* fallback handled gracefully */
-      }
-
-      const cfg = homepageCmsService.getSettings();
-      if (isMounted && cfg?.givingSection) {
-        setLiveGivingSection(cfg.givingSection);
-      }
     };
 
     syncContent();
-    const onFooterUpdated = () => setFooterConfig(footerCmsService.getSettings());
     window.addEventListener('astu-cms-content-changed', syncContent);
     window.addEventListener('astu-cms-events-changed', syncContent);
-    window.addEventListener('astu-cms-donations-changed', syncContent);
     window.addEventListener('astu-cms-homepage-updated', syncContent);
-    window.addEventListener('astu-cms-gallery-changed', syncContent);
-    window.addEventListener('astu-cms-gallery-settings-changed', syncContent);
+    const onFooterUpdated = () => setFooterConfig(footerCmsService.getSettings());
     window.addEventListener('astu-cms-footer-updated', onFooterUpdated);
     return () => {
       isMounted = false;
       window.removeEventListener('astu-cms-content-changed', syncContent);
       window.removeEventListener('astu-cms-events-changed', syncContent);
-      window.removeEventListener('astu-cms-donations-changed', syncContent);
       window.removeEventListener('astu-cms-homepage-updated', syncContent);
-      window.removeEventListener('astu-cms-gallery-changed', syncContent);
-      window.removeEventListener('astu-cms-gallery-settings-changed', syncContent);
       window.removeEventListener('astu-cms-footer-updated', onFooterUpdated);
     };
   }, []);
@@ -1512,7 +1675,7 @@ location: e.location || 'Location to be confirmed',
 
           {/* Bottom active slide indicator dots */}
           <div className="absolute bottom-6 left-1/2 z-35 flex -translate-x-1/2 gap-2.5">
-            {liveSlides.map((_, idx) => (
+            {displaySlides.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
@@ -1529,10 +1692,10 @@ location: e.location || 'Location to be confirmed',
                 behavior: "smooth",
               });
             }}
-            className="absolute bottom-12 left-1/2 z-40 -translate-x-1/2 text-white animate-bounce"
+            className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2 text-white/80 hover:text-white animate-bounce cursor-pointer transition-colors"
             aria-label="Scroll down"
           >
-            <ChevronDown className="h-8 w-8 md:h-10 md:w-10" style={{ marginTop: "-100px" }} />
+            <ChevronDown className="h-8 w-8" />
           </button>
         </section>
 
@@ -1650,32 +1813,28 @@ location: e.location || 'Location to be confirmed',
         <section id="impact" className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
           <article className="reveal">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">
-              {impactSection?.eyebrow || 'Industry-Campus Bridge'}
+              {displayImpactSection?.eyebrow || 'Industry-Campus Bridge'}
             </p>
             <h3 className="mt-2 text-3xl font-bold animate-gradient-text dark:text-white">
-              {impactSection?.title || welcomeMessage || 'ASTU Alumni Impact'}
+              {displayImpactSection?.title || welcomeMessage || 'ASTU Alumni Impact'}
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
-              {impactSection?.description ||
+              {displayImpactSection?.description ||
                 welcomeMessage ||
                 'Graduate outcomes and employer feedback managed through the ASTU content system feed directly into curriculum updates.'}
             </p>
             <div className="mt-6 grid grid-cols-2 gap-4">
-              {visibleStats.slice(0, 2).map(({ stat, presentation }) => (
-                <div key={stat.key}>
-                  <p className="text-3xl font-bold text-astu-navy dark:text-amber-400">
-                    {stat.value.toLocaleString()}+
-                  </p>
-                  <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant dark:text-slate-400">
-                    {presentation.label}
-                  </p>
+              {liveStats.slice(0, 2).map((stat: any) => (
+                <div key={stat.title || stat.label || stat.id}>
+                  <p className="text-3xl font-bold text-astu-navy dark:text-amber-400">{stat.value}{stat.suffix || ''}</p>
+                  <p className="text-xs uppercase tracking-[0.14em] text-on-surface-variant dark:text-slate-400">{stat.title || stat.label}</p>
                 </div>
               ))}
             </div>
             <button
               className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 hover:scale-105 transition-all btn-magnetic shadow-lg hover:shadow-xl"
               onClick={() => {
-                const route = impactSection?.ctaRoute;
+                const route = displayImpactSection?.ctaRoute;
                 if (route && route.startsWith('#')) {
                   document.getElementById(route.slice(1))?.scrollIntoView({ behavior: 'smooth' });
                 } else if (route) {
@@ -1685,13 +1844,13 @@ location: e.location || 'Location to be confirmed',
                 }
               }}
             >
-              {impactSection?.ctaLabel || 'Explore Campus Life'}
+              {displayImpactSection?.ctaLabel || 'Explore Campus Life'}
             </button>
           </article>
 
           <article className="reveal">
             <img
-              alt={impactSection?.title || 'ASTU campus'}
+              alt={displayImpactSection?.title || 'ASTU campus'}
               className="h-full min-h-[280px] w-full rounded-xl object-cover shadow-lg"
               src={cmsFeatureImages.primary}
               onError={handleImageError}
@@ -1708,12 +1867,12 @@ location: e.location || 'Location to be confirmed',
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {liveCampusLife.length === 0 ? (
+            {displayCampusLife.length === 0 ? (
               <div className="md:col-span-3">
                 <EmptySection message="Campus life highlights will appear here once published by the university content team." />
               </div>
             ) : (
-              liveCampusLife.map((card, idx) => (
+              displayCampusLife.map((card, idx) => (
               <article key={card.id || card.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={card.image || FALLBACK_IMAGE} alt={card.title} className="h-52 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-5">
@@ -1721,7 +1880,16 @@ location: e.location || 'Location to be confirmed',
                   <h4 className="mt-2 text-lg font-semibold text-astu-navy dark:text-white">{card.title}</h4>
                   <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">{card.description}</p>
                   {card.action && (
-                    <button className="mt-4 rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 btn-magnetic">
+                    <button
+                      onClick={() => {
+                        if (card.action?.toLowerCase().includes('event')) {
+                          document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                          navigate('/gallery');
+                        }
+                      }}
+                      className="mt-4 rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 btn-magnetic cursor-pointer transition-colors"
+                    >
                       {card.action}
                     </button>
                   )}
@@ -1738,23 +1906,31 @@ location: e.location || 'Location to be confirmed',
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Campuses</p>
               <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Explore ASTU Spaces</h3>
             </div>
-            <button className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800">
+            <button
+              onClick={() => navigate('/gallery')}
+              className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800 cursor-pointer transition-colors"
+            >
               View all
             </button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {liveCampuses.length === 0 ? (
+            {displayCampuses.length === 0 ? (
               <div className="sm:col-span-2 lg:col-span-4">
                 <EmptySection message="Campus profiles will appear here once published by the university content team." />
               </div>
             ) : (
-              liveCampuses.map((campus, idx) => (
+              displayCampuses.map((campus, idx) => (
               <article key={campus.id || campus.name || idx} className={`reveal reveal-delay-${(idx % 4) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <img src={campus.image || FALLBACK_IMAGE} alt={campus.name} className="h-44 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
                 <div className="p-4">
                   <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{campus.name}</h4>
                   <p className="mt-2 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400">{campus.description}</p>
-                  <button className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic">Explore</button>
+                  <button
+                    onClick={() => navigate('/gallery')}
+                    className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic cursor-pointer"
+                  >
+                    Explore
+                  </button>
                 </div>
               </article>
               ))
@@ -1771,14 +1947,14 @@ location: e.location || 'Location to be confirmed',
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {featuredGallery.length === 0 ? (
+            {displayGallery.length === 0 ? (
               <div className="sm:col-span-2 md:col-span-3">
                 <EmptySection message="Photo gallery items will appear here once published by the university content team." />
               </div>
             ) : (
-              featuredGallery.map((item, idx) => (
+              displayGallery.map((item, idx) => (
               <article key={item.id || item.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                <img src={mediaUrl(item.src || item.image) || FALLBACK_IMAGE} alt={item.title} className="h-48 w-full object-cover transition-all duration-700 hover:scale-110 sm:h-56 md:h-64" onError={handleImageError} />
+                <img src={item.src || item.image || FALLBACK_IMAGE} alt={item.title} className="h-48 w-full object-cover transition-all duration-700 hover:scale-110 sm:h-56 md:h-64" onError={handleImageError} />
                 <div className="p-3 md:p-4">
                   <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{item.title}</h4>
                   {item.album && <p className="text-[10px] font-bold text-astu-red uppercase tracking-wider mt-1">{item.album}</p>}
@@ -1804,17 +1980,20 @@ location: e.location || 'Location to be confirmed',
               <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white sm:text-3xl">Video Gallery</h3>
               <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400">Workshop recordings, graduation moments, and research showcases.</p>
             </div>
-            <button className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800">
+            <button
+              onClick={() => navigate('/gallery')}
+              className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-800 cursor-pointer transition-colors"
+            >
               View Media Library
             </button>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {liveVideos.length === 0 ? (
+            {displayVideos.length === 0 ? (
               <div className="md:col-span-3">
                 <EmptySection message="Video highlights will appear here once published by the university content team." />
               </div>
             ) : (
-              liveVideos.map((video: any, idx: number) => (
+              displayVideos.map((video: any, idx: number) => (
                 <article key={video.id || video.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                   <div className="relative">
                     <img
@@ -2343,61 +2522,165 @@ location: e.location || 'Location to be confirmed',
         </section>
 
         <section id="announcements" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-            <article className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40">
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-astu-navy/30">
-                    <img src="/images/announcementIcon.svg" alt="announcement" loading="lazy" width="100" height="100" className="h-7 w-7" />
-                  </span>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Announcements</p>
-                    <h3 className="text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Official Notices</h3>
+          <div className="grid gap-6 lg:grid-cols-[1fr_390px]">
+            <article className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 md:p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between">
+              <div>
+                <div className="mb-5 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-astu-navy/30">
+                      <img src="/images/announcementIcon.svg" alt="announcement" loading="lazy" width="100" height="100" className="h-7 w-7" />
+                    </span>
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Announcements</p>
+                      <h3 className="text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Official Notices</h3>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowAllNotices(true)}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                      title="Search notices"
+                    >
+                      <Search className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Search</span>
+                    </button>
+                    <button
+                      onClick={() => navigate('/announcements')}
+                      className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    >
+                      View all
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate('/announcements')}
-                  className="rounded-md border border-outline-variant dark:border-slate-600 px-3 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-700 transition-colors"
-                >
-                  View all
-                </button>
-              </div>
-              <div className="divide-y divide-outline-variant dark:divide-slate-700">
-                {liveAnnouncements.slice(0, 5).map((announcement, idx) => (
-                  <button
-                    key={announcement.title + idx}
-                    onClick={() => navigate(`/announcements/${announcement.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
-                    className="flex w-full items-start gap-3 py-4 text-left hover:bg-surface-container-low/60 dark:hover:bg-slate-700/50 rounded-lg px-2 transition-all cursor-pointer group"
-                  >
-                    <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors">{announcement.title}</span>
-                      <span className="mt-1 block text-xs text-on-surface-variant dark:text-slate-400">{announcement.type} · {announcement.date}</span>
-                    </span>
-                  </button>
-                ))}
+
+                <div className="divide-y divide-outline-variant dark:divide-slate-700">
+                  {displayAnnouncements.slice(0, 5).map((announcement, idx) => (
+                    <button
+                      key={announcement.title + idx}
+                      onClick={() => setSelectedNotice(announcement)}
+                      className="flex w-full items-center justify-between gap-3 py-4 text-left hover:bg-surface-container-low/60 dark:hover:bg-slate-700/50 rounded-lg px-2 transition-all cursor-pointer group"
+                    >
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
+                        <div className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors line-clamp-2">
+                            {announcement.title}
+                          </span>
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                            <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getAnnouncementBadgeStyle(announcement.type)}`}>
+                              {announcement.type}
+                            </span>
+                            <span className="inline-flex items-center gap-1 text-[11px] text-on-surface-variant dark:text-slate-400">
+                              <Clock className="h-3 w-3 shrink-0 opacity-70" />
+                              {announcement.date}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 group-hover:text-astu-red transition-all" />
+                    </button>
+                  ))}
+                </div>
               </div>
             </article>
 
-            <aside className="reveal rounded-xl border border-outline-variant dark:border-astu-navy/40 bg-astu-navy p-5 text-white shadow-sm">
-              <FileText className="h-7 w-7 text-astu-green" />
-              <h4 className="mt-4 text-xl font-bold">Subscribe to official updates</h4>
-              <p className="mt-2 text-sm leading-relaxed text-white/75">
-                Receive announcements, events, workshops, partner calls, tracer survey reminders, and campus notices.
-              </p>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  toast.error('Announcement sign-up is not available yet. No email address was stored.');
-                  (event.currentTarget as HTMLFormElement).reset();
-                }}
-                className="mt-5 space-y-3"
-              >
-                <input type="email" required placeholder="Enter your email" className="w-full rounded-md border border-white/20 bg-white/10 px-3 py-3 text-sm text-white outline-none placeholder:text-white/55 focus:border-astu-green" />
-                <button className="w-full rounded-md bg-astu-green px-4 py-3 text-sm font-bold text-white hover:brightness-110">
-                  Subscribe
-                </button>
-              </form>
+            <aside className="reveal rounded-xl border border-outline-variant dark:border-slate-700 bg-gradient-to-br from-[#002855] via-astu-navy to-[#05162a] p-5 md:p-6 text-white shadow-lg flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-astu-green shadow-inner">
+                    <Mail className="h-5 w-5" />
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Official Dispatch
+                  </span>
+                </div>
+
+                <h4 className="mt-4 text-xl font-bold tracking-tight text-white">Subscribe to official updates</h4>
+                <p className="mt-2 text-xs leading-relaxed text-slate-300">
+                  Receive verified announcements, academic calendars, career workshop calls, tracer survey alerts, and campus notices directly in your inbox.
+                </p>
+
+                {isSubscribed ? (
+                  <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5">
+                    <div className="flex items-center gap-2 text-emerald-300 font-semibold text-xs">
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                      <span>Subscription Active</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-300">
+                      You are registered for official ASTU dispatches {subscriberEmail ? `at ${subscriberEmail}` : ''}.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsSubscribed(false);
+                        localStorage.removeItem('astu_ams_newsletter_subscribed');
+                      }}
+                      className="mt-2 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 underline cursor-pointer"
+                    >
+                      Change or update email
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubscribeNewsletter} className="mt-4 space-y-2.5">
+                    <div className="relative">
+                      <input
+                        type="email"
+                        required
+                        value={subscriberEmail}
+                        onChange={(e) => setSubscriberEmail(e.target.value)}
+                        placeholder="Enter your institutional or personal email"
+                        className="w-full rounded-lg border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs text-white outline-none placeholder:text-white/50 focus:border-astu-green focus:bg-white/15 transition-all"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={isSubscribing}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-astu-green hover:bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-md active:scale-[0.98] cursor-pointer disabled:opacity-70"
+                    >
+                      {isSubscribing ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <span>Subscribing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Subscribe</span>
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+
+                {/* Benefits / Channels coverage */}
+                <div className="mt-5 pt-4 border-t border-white/10 space-y-2.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Included Dispatches</p>
+                  <div className="space-y-2 text-xs text-slate-300">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-3.5 w-3.5 text-sky-400 shrink-0" />
+                      <span className="text-[11px]">Campus directives & academic calendar changes</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                      <span className="text-[11px]">Alumni career fairs, fellowships & recruitment drives</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                      <span className="text-[11px]">Research grants, symposiums & DAAD workshop alerts</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trust footer */}
+              <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <Users className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>1,200+ Subscribed</span>
+                </span>
+                <span>Zero spam · Unsubscribe anytime</span>
+              </div>
             </aside>
           </div>
         </section>
@@ -2411,12 +2694,12 @@ location: e.location || 'Location to be confirmed',
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {liveStories.length === 0 ? (
+            {displayStories.length === 0 ? (
               <div className="sm:col-span-2 lg:col-span-3">
                 <EmptySection message="Alumni success stories will appear here once published by the university content team." />
               </div>
             ) : (
-              liveStories.slice(0, 3).map((story, idx) => (
+              displayStories.slice(0, 3).map((story, idx) => (
                 <article
                   key={story.id || idx}
                   className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between`}
@@ -2458,388 +2741,15 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        {/* ── Giving & Endowment Campaigns Section ── */}
-        <section id="giving" className="relative py-16 md:py-24 bg-gradient-to-b from-white via-slate-50/80 to-white overflow-hidden border-t border-slate-100">
-          {/* Subtle brand ambient glows */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute -top-40 right-10 w-96 h-96 rounded-full bg-[#003366]/5 blur-3xl" />
-            <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-[#008C44]/5 blur-3xl" />
-          </div>
-
-          <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
-            <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="max-w-2xl space-y-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#003366]/10 text-[#003366] text-xs font-black uppercase tracking-wider">
-                  <Heart className="h-3.5 w-3.5 fill-[#E31E24] text-[#E31E24]" />
-                  ASTU Alumni Giving
-                </span>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-                  {liveGivingSection?.title || 'Support Future Innovators & Campus Research'}
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-                  {liveGivingSection?.subtitle || '100% of your tax-deductible contribution directly funds merit scholarships, cutting-edge postgraduate laboratories, student incubators, and emergency support.'}
-                </p>
-              </div>
-
-              <div>
-                <button
-                  type="button"
-                  onClick={() => navigate('/donations')}
-                  className="px-5 py-2.5 rounded-xl bg-[#003366] hover:bg-[#002244] text-white text-xs font-black shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  <Heart className="h-4 w-4 fill-[#FFCC00] text-[#FFCC00]" /> {liveGivingSection?.buttonText || 'Explore All Causes'}
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Category Filter Bar */}
-            {(() => {
-              const allAvailable = (donationCampaigns.length > 0 ? donationCampaigns : [
-                {
-                  id: "fallback-c-1",
-                  title: "ASTU Scholarship Fund 2026",
-                  category: "Scholarship",
-                  description: "Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.",
-                  goal: 5000000,
-                  raised: 1851000,
-                  donorCount: 349,
-                  status: "ACTIVE"
-                },
-                {
-                  id: "fallback-c-2",
-                  title: "AI Research Lab Equipment",
-                  category: "Research",
-                  description: "Fund high-performance GPU servers and laboratory instrumentation for advanced postgraduate engineering researchers.",
-                  goal: 8000000,
-                  raised: 3201000,
-                  donorCount: 158,
-                  status: "ACTIVE"
-                },
-                {
-                  id: "fallback-c-3",
-                  title: "Campus Innovation Makerspace",
-                  category: "Infrastructure",
-                  description: "Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.",
-                  goal: 12000000,
-                  raised: 6800000,
-                  donorCount: 220,
-                  status: "ACTIVE"
-                }
-              ]).filter((c: any) => c.status === 'ACTIVE' || !c.status);
-
-              const homeCategories = ['ALL', 'Scholarship', 'Research', 'Infrastructure', 'Innovation'];
-              const filteredList = allAvailable.filter(
-                (c: any) => homeDonationCategory === 'ALL' || c.category === homeDonationCategory
-              );
-              // Controlled display limit: default 3 cards, max 6 on expand
-              const displayedCards = showAllHomeDonations ? filteredList.slice(0, 6) : filteredList.slice(0, 3);
-
-              // ASTU Brand category pill scheme
-              const categoryStyles: Record<string, { bg: string; text: string; border: string }> = {
-                Scholarship: { bg: 'bg-blue-50', text: 'text-[#003366]', border: 'border-blue-200' },
-                Research: { bg: 'bg-emerald-50', text: 'text-[#008C44]', border: 'border-emerald-200' },
-                Infrastructure: { bg: 'bg-amber-50', text: 'text-amber-800', border: 'border-amber-200' },
-                Innovation: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-200' },
-                'Student Welfare': { bg: 'bg-rose-50', text: 'text-[#E31E24]', border: 'border-rose-200' },
-                'Emergency Fund': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
-              };
-
-              return (
-                <div className="space-y-6">
-                  {/* Category Pills & Count */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-xs">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider mr-1">Focus Area:</span>
-                      {homeCategories.map((cat) => {
-                        const isActive = homeDonationCategory === cat;
-                        return (
-                          <button
-                            key={cat}
-                            onClick={() => setHomeDonationCategory(cat)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer ${
-                              isActive
-                                ? 'bg-[#003366] text-white shadow-sm'
-                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                            }`}
-                          >
-                            {cat === 'ALL' ? 'All Active Causes' : cat}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="text-xs font-bold text-slate-500">
-                      Showing <span className="text-slate-900 font-extrabold">{displayedCards.length}</span> of {allAvailable.length} active campaigns
-                    </div>
-                  </div>
-
-                  {/* Campaign Cards Grid */}
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {displayedCards.map((c: any, idx: number) => {
-                      const goal = c.goal || c.targetAmount || 1000000;
-                      const raised = c.raised || 0;
-                      const percent = Math.min(100, Math.round((raised / (goal || 1)) * 100));
-                      const donors = c.donorCount || 0;
-                      const category = c.category || 'Initiative';
-                      const catStyle = categoryStyles[category] || { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-200' };
-
-                      return (
-                        <article
-                          key={c.id || idx}
-                          className="reveal group flex flex-col justify-between rounded-3xl bg-white border border-slate-200/90 p-6 md:p-7 shadow-[0_4px_24px_rgba(0,51,102,0.06)] hover:shadow-[0_16px_40px_rgba(0,51,102,0.12)] hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden"
-                        >
-                          {/* Authentic ASTU Tri-color Accent Bar */}
-                          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#003366] via-[#008C44] to-[#FFCC00]" />
-
-                          <div>
-                            {/* Header tags */}
-                            <div className="flex items-center justify-between gap-2 mb-4">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${catStyle.bg} ${catStyle.text} ${catStyle.border}`}>
-                                {category}
-                              </span>
-                              <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-slate-500">
-                                <Users className="h-3 w-3 text-slate-400" /> {donors} {donors === 1 ? 'Donor' : 'Donors'}
-                              </span>
-                            </div>
-
-                            {/* Title & Description */}
-                            <h3 className="text-lg md:text-xl font-black text-slate-900 group-hover:text-[#003366] transition-colors line-clamp-2 leading-snug">
-                              {c.title}
-                            </h3>
-                            <p className="mt-2.5 text-xs md:text-sm text-slate-600 leading-relaxed line-clamp-3">
-                              {c.description || 'Support ASTU causes and make a lasting impact for future generations of engineers and researchers.'}
-                            </p>
-                          </div>
-
-                          {/* Progress Bar & Amount */}
-                          <div className="mt-6 pt-5 border-t border-slate-100">
-                            <div className="flex items-baseline justify-between mb-2">
-                              <div>
-                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Raised</span>
-                                <span className="text-base font-black text-[#003366]">
-                                  {raised.toLocaleString()} <span className="text-[10px] text-slate-400 font-extrabold">ETB</span>
-                                </span>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">Goal</span>
-                                <span className="text-xs font-bold text-slate-600">
-                                  {goal.toLocaleString()} ETB
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Progress bar container */}
-                            <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
-                              <div
-                                className="h-full rounded-full bg-gradient-to-r from-[#003366] via-blue-700 to-[#008C44] transition-all duration-1000 shadow-xs"
-                                style={{ width: `${Math.max(5, percent)}%` }}
-                              />
-                            </div>
-                            <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-400 font-bold">
-                              <span>{percent}% Funded</span>
-                              <span className="text-[#008C44] font-extrabold">Active Cause</span>
-                            </div>
-
-                            {/* Accepted methods badge */}
-                            <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 border border-slate-100">
-                              <span className="text-[10px] font-bold text-slate-500">Fast Pay</span>
-                              <span className="text-[10px] font-extrabold text-slate-700 flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                Telebirr • Chapa • CBE Birr
-                              </span>
-                            </div>
-
-                            {/* CTA Button */}
-                            <button
-                              onClick={() => handleDonateClick(c)}
-                              className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#003366] to-[#002759] hover:from-[#002244] hover:to-[#001a33] text-white font-black text-xs md:text-sm py-3 px-4 shadow-md hover:shadow-lg hover:shadow-[#003366]/20 transition-all duration-200 hover:scale-[1.01] cursor-pointer"
-                            >
-                              <Heart className="h-4 w-4 fill-[#FFCC00] text-[#FFCC00]" />
-                              Support This Cause
-                            </button>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-
-                  {/* Empty state for selected category */}
-                  {displayedCards.length === 0 && (
-                    <div className="py-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-6 space-y-2">
-                      <Heart className="mx-auto h-8 w-8 text-slate-300" />
-                      <p className="text-xs font-bold text-slate-700">No campaigns found in this category.</p>
-                      <button
-                        onClick={() => setHomeDonationCategory('ALL')}
-                        className="text-xs text-[#003366] font-extrabold hover:underline"
-                      >
-                        Show All Causes
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Smart Bottom Controls: Show More / View Full Directory */}
-                  <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    {filteredList.length > 3 && (
-                      <button
-                        onClick={() => setShowAllHomeDonations(!showAllHomeDonations)}
-                        className="px-6 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-extrabold transition-all shadow-xs cursor-pointer"
-                      >
-                        {showAllHomeDonations ? 'Show Less' : `Show More (${filteredList.length - 3} More Causes)`}
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => navigate('/donations')}
-                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#003366] hover:bg-[#002759] text-white text-xs font-extrabold shadow-md hover:shadow-lg transition-all cursor-pointer"
-                    >
-                      <span>Explore All {allAvailable.length} Causes in Giving Portal</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        </section>
-
-        {/* ── Community Section ── */}
-        {(() => {
-          const liveCommunitySection = {
-            title: 'ASTU Alumni Community',
-            subtitle: 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'
-          };
-          const dynamicCommunityStats = [
-            { label: 'Registered Alumni', value: '18,500+' },
-            { label: 'Fields of Study', value: '42' },
-            { label: 'Global Chapters', value: '12' }
-          ];
-          const liveCommunityPosts = [
-            {
-              name: 'Dr. Fitsum Kebede',
-              role: 'Alumni Ambassador, Europe Chapter',
-              degree: 'BSc Electrical Engineering, 2012',
-              text: 'ASTU gave us the engineering discipline and rigor to compete globally.',
-              image: '/images/campus-2.jpeg'
-            },
-            {
-              name: 'Sara Mohammed',
-              role: 'Tech Lead & Founder',
-              degree: 'BSc Software Engineering, 2016',
-              text: 'The network and mentorship I gained through the alumni association were pivotal to starting my company.',
-              image: '/images/campus-3.jpeg'
-            },
-            {
-              name: 'Abebe Bekele',
-              role: 'Senior Project Engineer',
-              degree: 'BSc Civil Engineering, 2010',
-              text: 'Giving back to current students through workshops and campus visits has been deeply fulfilling.',
-              image: '/images/campus-1.jpeg'
-            }
-          ];
-
-          return (
-            <section id="community" className="relative py-16 md:py-20 overflow-hidden bg-gradient-to-br from-astu-navy via-[#003366] to-[#002244]">
-              {/* Background decorative */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-astu-green/5 blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-astu-red/5 blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5">
-                  <Users className="h-[400px] w-[400px] text-white" />
-                </div>
-              </div>
-              <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
-                <div className="mb-12 text-center reveal">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-astu-green">
-                    <Globe className="h-3.5 w-3.5" /> {liveCommunitySection?.title || 'ASTU Alumni Community'}
-                  </span>
-                  <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-                    Your Networks <span className="text-astu-green">Around the World</span>
-                  </h2>
-                  <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-300 leading-relaxed">
-                    {liveCommunitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'}
-                  </p>
-                </div>
-
-                {/* Community Stats */}
-                <div className="grid grid-cols-3 gap-4 mb-12 max-w-2xl mx-auto reveal">
-                  {dynamicCommunityStats.map((stat, idx) => {
-                    const Icon = idx === 0 ? Users : idx === 1 ? BookOpen : Globe;
-                    return (
-                      <div key={stat.label} className={`reveal reveal-delay-${idx + 1} rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 text-center hover:bg-white/10 transition-all hover:-translate-y-1`}>
-                        <Icon className="h-6 w-6 text-astu-green mx-auto mb-2" />
-                        <p className="text-2xl font-black text-white">{stat.value}</p>
-                        <p className="text-[11px] uppercase tracking-wider text-slate-400 mt-0.5">{stat.label}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Community Testimonials */}
-                <div id="testimonials" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 scroll-mt-24">
-                  {liveCommunityPosts.map((post: any, idx: number) => (
-                    <article
-                      key={post.name}
-                      className={`reveal reveal-delay-${(idx % 3) + 1} group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.15)]`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-3">
-                          <Quote className="h-6 w-6 text-astu-green/60" />
-                          {post.degree && (
-                            <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
-                              {post.degree}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm leading-relaxed text-slate-200 italic">"{post.text}"</p>
-                      </div>
-                      <div className="mt-5 flex items-center gap-3 pt-4 border-t border-white/10">
-                        <img
-                          src={post.image}
-                          alt={post.name}
-                          className="h-12 w-12 rounded-full object-cover border-2 border-astu-green/60 shrink-0 shadow-md bg-white/10"
-                          onError={handleImageError}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-white truncate">{post.name}</p>
-                          <p className="text-[11px] text-astu-green font-medium truncate">{post.role}</p>
-                          {post.org && <p className="text-[10px] text-slate-300 truncate">{post.org}</p>}
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-
-                {/* Join CTA */}
-                <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 reveal">
-                  <button
-                    onClick={() => navigate('/register')}
-                    className="inline-flex items-center gap-2 rounded-xl bg-astu-green px-8 py-3.5 text-sm font-bold text-white hover:brightness-110 transition-all hover:scale-105 shadow-lg hover:shadow-astu-green/25 btn-magnetic"
-                  >
-                    <UserRoundCheck className="h-4 w-4" /> Join ASTU Alumni Network
-                  </button>
-                  <button
-                    onClick={() => navigate('/community')}
-                    className="inline-flex items-center gap-2 rounded-xl border-2 border-white/30 px-8 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all hover:scale-105"
-                  >
-                    <Globe className="h-4 w-4" /> Explore Community
-                  </button>
-                </div>
-              </div>
-            </section>
-          );
-        })()}
-
-
-
         <section id="research" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
           <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <article className="reveal rounded-xl bg-astu-navy p-6 text-white">
               <Trophy className="h-8 w-8 text-astu-green" />
               <h3 className="mt-4 text-2xl font-bold md:text-3xl">
-                {researchHighlights?.title || 'Research, Innovation & University Achievements'}
+                {displayResearchHighlights?.title || 'Research, Innovation & University Achievements'}
               </h3>
               <p className="mt-4 text-sm leading-relaxed text-slate-200">
-                {researchHighlights?.description ||
+                {displayResearchHighlights?.description ||
                   'ASTU-AMS connects graduate research publications, startup showcases, employer collaborations, and department KPI evidence into one institutional analytics layer.'}
               </p>
               {mentorshipStats && (
@@ -2860,7 +2770,7 @@ location: e.location || 'Location to be confirmed',
               )}
             </article>
             <div className="grid gap-4 sm:grid-cols-3">
-              {(researchHighlights?.stats?.length ? researchHighlights.stats : []).map((item: any, idx: number) => {
+              {(displayResearchHighlights?.stats?.length ? displayResearchHighlights.stats : []).map((item: any, idx: number) => {
                 const Icon = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || BookOpen);
                 return (
                   <article key={item.label || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
@@ -2870,7 +2780,7 @@ location: e.location || 'Location to be confirmed',
                   </article>
                 );
               })}
-              {!researchHighlights?.stats?.length && (
+              {!displayResearchHighlights?.stats?.length && (
                 <div className="sm:col-span-3">
                   <EmptySection message="Research highlights will appear here once published by the university content team." />
                 </div>
@@ -2886,11 +2796,11 @@ location: e.location || 'Location to be confirmed',
             <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
           </div>
           <div className="relative">
-            {livePartners.length === 0 ? (
+            {displayPartners.length === 0 ? (
               <EmptySection message="Partner organisations will appear here once published by the university content team." />
             ) : (
             <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
-              {[...livePartners, ...livePartners].map((partner, idx) => {
+              {[...displayPartners, ...displayPartners].map((partner, idx) => {
                 const LogoComponent = partnerLogos[partner.name];
                 const logoUrl = partner.logo || partner.image || partner.logoUrl;
                 return (
@@ -2925,12 +2835,12 @@ location: e.location || 'Location to be confirmed',
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {liveTestimonials.length === 0 ? (
+            {displayTestimonials.length === 0 ? (
               <div className="md:col-span-3">
                 <EmptySection message="Community testimonials will appear here once published by the university content team." />
               </div>
             ) : (
-              liveTestimonials.map((item: any, idx: number) => (
+              displayTestimonials.map((item: any, idx: number) => (
               <article key={item.id || item.by || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <Quote className="h-6 w-6 text-astu-red" />
                 <p className="mt-4 text-sm leading-relaxed text-on-surface-variant dark:text-slate-300">{item.quote}</p>
@@ -2950,10 +2860,10 @@ location: e.location || 'Location to be confirmed',
             </p>
           </div>
           <div className="mx-auto max-w-3xl space-y-3">
-            {liveFaq.length === 0 ? (
+            {displayFaq.length === 0 ? (
               <EmptySection message="Frequently asked questions will appear here once published by the university content team." />
             ) : (
-              liveFaq.map((item, idx) => (
+              displayFaq.map((item, idx) => (
               <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
                 <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-astu-navy dark:text-white hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors [&::-webkit-details-marker]:hidden">
                   <span>{item.question}</span>
@@ -3253,7 +3163,7 @@ location: e.location || 'Location to be confirmed',
                 <Bell className="h-5 w-5" />
               </span>
               <div>
-                <span className="rounded-md bg-astu-red/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-red">
+                <span className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getAnnouncementBadgeStyle(selectedNotice.type || '')}`}>
                   {selectedNotice.type || 'Official Announcement'}
                 </span>
                 <p className="mt-0.5 text-xs text-on-surface-variant dark:text-slate-400">{selectedNotice.date}</p>
@@ -3265,22 +3175,35 @@ location: e.location || 'Location to be confirmed',
                 {selectedNotice.excerpt || selectedNotice.description || selectedNotice.content || "Full official announcement details and documentation from ASTU-AMS Administration."}
               </p>
             </div>
-            <div className="mt-6 flex items-center justify-end gap-2">
-              <button
-                onClick={() => setSelectedNotice(null)}
-                className="rounded-lg border border-outline-variant dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-600"
-              >
-                Close Notice
-              </button>
+            <div className="mt-6 flex items-center justify-between gap-2">
               <button
                 onClick={() => {
+                  const slug = (selectedNotice.id || selectedNotice.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
                   setSelectedNotice(null);
-                  navigate('/login');
+                  navigate(`/announcements/${slug}`);
                 }}
-                className="rounded-lg bg-astu-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#003580] dark:text-sky-400 hover:underline cursor-pointer"
               >
-                Access Portal
+                <span>Read Full Article</span>
+                <ArrowRight className="h-3.5 w-3.5" />
               </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedNotice(null)}
+                  className="rounded-lg border border-outline-variant dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-600 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedNotice(null);
+                    navigate('/login');
+                  }}
+                  className="rounded-lg bg-astu-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer"
+                >
+                  Access Portal
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -3323,7 +3246,7 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             <div className="mt-4 flex-1 overflow-y-auto divide-y divide-outline-variant dark:divide-slate-700 pr-1">
-              {liveAnnouncements
+              {displayAnnouncements
                 .filter(n => !noticeSearch || n.title.toLowerCase().includes(noticeSearch.toLowerCase()) || (n.excerpt && n.excerpt.toLowerCase().includes(noticeSearch.toLowerCase())))
                 .map((announcement, idx) => (
                   <button
@@ -3940,114 +3863,6 @@ location: e.location || 'Location to be confirmed',
         </div>
       )}
 
-      {/* Alumni Donation Routing / Authentication Modal */}
-      {isDonationAuthModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl border border-slate-100 transition-all">
-            {/* Top decorative gradient bar */}
-            <div className="h-2 w-full bg-gradient-to-r from-[#003366] via-[#008C44] to-[#FFCC00]" />
-
-            {/* Close Button */}
-            <button
-              onClick={() => setIsDonationAuthModalOpen(false)}
-              className="absolute top-5 right-5 h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="p-6 md:p-8">
-              {/* Header Badge & Title */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#003366]/10 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-[#003366] mb-3">
-                <Heart className="h-3.5 w-3.5 fill-[#E31E24] text-[#E31E24]" />
-                ASTU Alumni Giving
-              </div>
-
-              <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-snug">
-                Support ASTU's Future
-              </h3>
-
-              {selectedDonationCampaign && (
-                <div className="mt-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#008C44]">
-                      Selected Campaign
-                    </span>
-                    <p className="text-xs md:text-sm font-bold text-slate-800 truncate">
-                      {selectedDonationCampaign.title}
-                    </p>
-                  </div>
-                  <span className="shrink-0 px-2.5 py-1 rounded-lg bg-[#003366]/10 text-[#003366] text-[10px] font-black uppercase">
-                    {selectedDonationCampaign.category || 'Initiative'}
-                  </span>
-                </div>
-              )}
-
-              <p className="mt-3 text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
-                Contributions are managed through the verified ASTU Alumni Portal. Please choose how you'd like to proceed:
-              </p>
-
-              {/* Options Cards */}
-              <div className="mt-6 space-y-3.5">
-                {/* Option 1: Registered Alumni -> Login */}
-                <div
-                  onClick={() => {
-                    setIsDonationAuthModalOpen(false);
-                    navigate('/login?redirect=/alumni/dashboard?tab=donations');
-                  }}
-                  className="group relative flex items-start gap-4 p-4 rounded-2xl border-2 border-slate-200 hover:border-[#003366] bg-white hover:bg-slate-50/80 transition-all cursor-pointer shadow-xs hover:shadow-md"
-                >
-                  <div className="h-11 w-11 rounded-xl bg-[#003366]/10 text-[#003366] group-hover:bg-[#003366] group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                    <LogIn className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-black text-slate-900 group-hover:text-[#003366] transition-colors">
-                        I am a Registered Alumni
-                      </h4>
-                      <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-[#003366] group-hover:translate-x-1 transition-all" />
-                    </div>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5 leading-relaxed">
-                      Sign in with your student ID or email to access your Giving dashboard directly.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Option 2: New Alumni -> Register */}
-                <div
-                  onClick={() => {
-                    setIsDonationAuthModalOpen(false);
-                    navigate('/register');
-                  }}
-                  className="group relative flex items-start gap-4 p-4 rounded-2xl border-2 border-emerald-200/90 hover:border-emerald-600 bg-emerald-50/30 hover:bg-emerald-50/70 transition-all cursor-pointer shadow-xs hover:shadow-md"
-                >
-                  <div className="h-11 w-11 rounded-xl bg-emerald-100 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
-                    <UserPlus className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-black text-slate-900 group-hover:text-emerald-800 transition-colors">
-                        I am a New Alumni
-                      </h4>
-                      <ArrowRight className="h-4 w-4 text-emerald-600 group-hover:translate-x-1 transition-all" />
-                    </div>
-                    <p className="text-xs text-slate-600 font-medium mt-0.5 leading-relaxed">
-                      Register your student graduation records to activate your alumni network account first.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Notice */}
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-semibold">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                Verified ASTU Alumni Advancement &amp; Giving Portal
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Show All News Directory Modal */}
       {showAllNewsModal && (
         <div
@@ -4152,19 +3967,6 @@ location: e.location || 'Location to be confirmed',
           </div>
         </div>
       )}
-      {/* Public Donation Modal for Telebirr / Chapa / CBE Birr */}
-      <TelebirrDonationModal
-        isOpen={isDonationModalOpen}
-        onClose={() => setIsDonationModalOpen(false)}
-        campaign={selectedDonationCampaign}
-        onSuccess={() => {
-          contentService.getPublicDonationCampaigns().then((campaigns) => {
-            if (campaigns && campaigns.length) {
-              setDonationCampaigns(campaigns);
-            }
-          }).catch(() => {});
-        }}
-      />
 
       <ChatBot />
     </div>

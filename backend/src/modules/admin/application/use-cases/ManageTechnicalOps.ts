@@ -83,11 +83,15 @@ export class ManageTechnicalOps {
 
   // Security Governance Persistence in SystemSetting
   async getSecurityGovernance() {
-    const setting = await prisma.systemSetting.findUnique({
-      where: { key: 'SECURITY_GOVERNANCE_CONFIG' },
-    });
-    if (setting && setting.value) {
-      return setting.value;
+    try {
+      const setting = await (prisma as any).systemSetting?.findUnique({
+        where: { key: 'SECURITY_GOVERNANCE_CONFIG' },
+      });
+      if (setting && setting.value) {
+        return setting.value;
+      }
+    } catch {
+      // Fallback
     }
     return { mfa: true, exportAudit: true, keyRot: false };
   }
@@ -101,11 +105,15 @@ export class ManageTechnicalOps {
       updatedAt: new Date().toISOString(),
     };
 
-    const setting = await prisma.systemSetting.upsert({
-      where: { key: 'SECURITY_GOVERNANCE_CONFIG' },
-      update: { value: updated, updatedAt: new Date() },
-      create: { key: 'SECURITY_GOVERNANCE_CONFIG', value: updated },
-    });
+    try {
+      await (prisma as any).systemSetting?.upsert({
+        where: { key: 'SECURITY_GOVERNANCE_CONFIG' },
+        update: { value: updated, updatedAt: new Date() },
+        create: { key: 'SECURITY_GOVERNANCE_CONFIG', value: updated },
+      });
+    } catch {
+      // Fallback
+    }
 
     try {
       await prisma.auditLog.create({
@@ -116,25 +124,43 @@ export class ManageTechnicalOps {
       });
     } catch (_) {}
 
-    return setting.value;
+    return updated;
   }
 
   // 2. DDoS & Security Defense Controls
   async getDdosAndSecurityStatus() {
+    const securityLogs = await prisma.auditLog.findMany({
+      where: {
+        OR: [
+          { action: { contains: 'BLOCK' } },
+          { action: { contains: 'DENIED' } },
+          { action: { contains: 'SECURITY' } },
+          { action: { contains: 'FAILED' } },
+        ],
+      },
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+    }).catch(() => []);
+
+    const recentThreatEvents = securityLogs.map((log: any) => ({
+      id: log.id,
+      timestamp: log.createdAt ? new Date(log.createdAt).toISOString() : new Date().toISOString(),
+      ip: log.ipAddress || '127.0.0.1',
+      type: log.action || 'SECURITY_EVENT',
+      action: 'LOGGED',
+      detail: log.details || 'Security audit entry recorded',
+    }));
+
     return {
       protectionMode: 'ADAPTIVE_STRICT',
       ddosMitigationStatus: 'ACTIVE_SHIELD_ENABLED',
-      droppedPacketsLastHour: 1420,
+      droppedPacketsLastHour: 0,
       rateLimitRequestsPerMin: 120,
-      currentThreatLevel: 'LOW',
-      activeIpBlacklistCount: 28,
-      activeIpWhitelistCount: 14,
-      recentThreatEvents: [
-        { id: 'evt-901', timestamp: new Date(Date.now() - 120000).toISOString(), ip: '197.156.92.14', type: 'RATE_LIMIT_EXCEEDED', action: 'TEMP_BLOCKED', detail: '340 requests/min to /api/auth/login' },
-        { id: 'evt-902', timestamp: new Date(Date.now() - 900000).toISOString(), ip: '45.133.1.88', type: 'SQL_INJECTION_ATTEMPT', action: 'PERMANENT_BLACKLIST', detail: 'Payload flagged by WAF Filter #41' },
-        { id: 'evt-903', timestamp: new Date(Date.now() - 3600000).toISOString(), ip: '102.217.18.2', type: 'BRUTE_FORCE_PROBE', action: 'CHALLENGE_CAPTCHA', detail: 'Failed 15 consecutive login attempts' },
-      ],
-      wafRulesCount: 42,
+      currentThreatLevel: recentThreatEvents.length > 0 ? 'MODERATE' : 'LOW',
+      activeIpBlacklistCount: 0,
+      activeIpWhitelistCount: 0,
+      recentThreatEvents,
+      wafRulesCount: 10,
       geoFencingEnabled: true,
       allowedCountries: ['ET', 'US', 'DE', 'UK', 'CA'],
     };
@@ -143,22 +169,20 @@ export class ManageTechnicalOps {
   // 3. Load Balancing & Traffic Routing
   async getLoadBalancerStatus() {
     return {
-      balancerName: 'ASTU NGINX Enterprise Ingress Router',
+      balancerName: 'ASTU NGINX Ingress Router',
       algorithm: 'LEAST_CONNECTIONS_ROUND_ROBIN',
       sslCertificate: {
         domain: '*.astu.edu.et',
-        issuer: "Let's Encrypt Authority X3",
+        issuer: "Let's Encrypt Authority",
         validUntil: '2027-01-15T00:00:00.000Z',
         daysRemaining: 124,
         status: 'HEALTHY',
       },
       upstreamPool: [
-        { name: 'App Core Server 1 (Addis Ababa Pop)', ip: '10.0.4.12', port: 5000, weight: 5, activeConns: 142, status: 'HEALTHY' },
-        { name: 'App Core Server 2 (Adama Main Campus)', ip: '10.0.4.13', port: 5000, weight: 5, activeConns: 128, status: 'HEALTHY' },
-        { name: 'Failover Backup Standby Node', ip: '10.0.4.99', port: 5000, weight: 1, activeConns: 0, status: 'STANDBY' },
+        { name: 'App Core Server (Local Cluster)', ip: '127.0.0.1', port: 5000, weight: 1, activeConns: 1, status: 'HEALTHY' },
       ],
-      totalTrafficTodayMB: 8490,
-      requestsPerSecond: 14.8,
+      totalTrafficTodayMB: 0,
+      requestsPerSecond: 0,
     };
   }
 
@@ -167,20 +191,16 @@ export class ManageTechnicalOps {
     const logsCount = await prisma.auditLog.count().catch(() => 0);
 
     return {
-      activeApiKeysCount: 8,
-      registeredWebhooksCount: 5,
-      totalApiRequestsToday: logsCount * 4 + 1250,
+      activeApiKeysCount: 0,
+      registeredWebhooksCount: 0,
+      totalApiRequestsToday: logsCount,
       apiHealthStatus: 'ALL_ENDPOINTS_OPERATIONAL',
       integrations: [
-        { id: 'int-01', name: 'ASTU Registrar SIS DB Connector', type: 'REST_SYNC', status: 'CONNECTED', lastSync: new Date().toISOString() },
-        { id: 'int-02', name: 'Ethio Telecom SMS Gateway', type: 'SOAP_HTTP', status: 'ACTIVE', lastSync: new Date().toISOString() },
-        { id: 'int-03', name: 'Chapa & CBE Payment Engine', type: 'WEBHOOK_LISTEN', status: 'READY', lastSync: new Date().toISOString() },
-        { id: 'int-04', name: 'Ministry of Education National Portal', type: 'OAUTH2_FEDERATED', status: 'CONNECTED', lastSync: new Date().toISOString() },
+        { id: 'int-01', name: 'ASTU Registrar SIS Connector', type: 'REST_SYNC', status: 'READY', lastSync: new Date().toISOString() },
+        { id: 'int-02', name: 'Email Dispatcher (SMTP)', type: 'SMTP', status: 'READY', lastSync: new Date().toISOString() },
+        { id: 'int-03', name: 'Chapa Payment Gateway', type: 'WEBHOOK', status: 'READY', lastSync: new Date().toISOString() },
       ],
-      apiKeys: [
-        { id: 'key-101', clientName: 'Registrar SIS Auto-Sync Client', keyPrefix: 'astu_live_reg_88a', permissions: 'READ_WRITE_STUDENTS', rateLimit: '1000/min', createdAt: '2026-01-10' },
-        { id: 'key-102', clientName: 'Career Office Mobile App Gateway', keyPrefix: 'astu_live_mob_41b', permissions: 'READ_JOBS_EVENTS', rateLimit: '500/min', createdAt: '2026-02-14' },
-      ]
+      apiKeys: []
     };
   }
 
@@ -190,26 +210,18 @@ export class ManageTechnicalOps {
     const userCount = await prisma.user.count().catch(() => 0);
 
     return {
-      dbEngine: 'PostgreSQL 16.2 Enterprise Engine',
-      dbSizeBytesMB: 480,
-      activeConnections: 14,
+      dbEngine: 'PostgreSQL Enterprise Engine',
+      dbSizeBytesMB: 48,
+      activeConnections: 1,
       connectionPoolSize: 20,
-      slowQueriesCount24h: 3,
-      slowQueries: [
-        { durationMs: 420, query: 'SELECT * FROM "User" INNER JOIN "AlumniProfile" ON ...', timestamp: new Date(Date.now() - 14000000).toISOString() },
-        { durationMs: 310, query: 'SELECT COUNT(*) FROM "AuditLog" WHERE action = ...', timestamp: new Date(Date.now() - 48000000).toISOString() },
-      ],
-      redisCacheStatus: {
-        engine: 'Redis 7.2 In-Memory Store',
-        memoryUsedMB: 42.4,
-        keysCount: 1420,
-        hitRatioPct: 94.8,
-      },
+      slowQueriesCount24h: 0,
+      slowQueries: [],
+      redisCacheStatus: null,
       tablesOverview: [
         { table: 'User', rowCount: userCount },
         { table: 'AuditLog', rowCount: auditCount },
       ],
-      lastBackupTimestamp: new Date(Date.now() - 86400000).toISOString(),
+      lastBackupTimestamp: null,
     };
   }
 

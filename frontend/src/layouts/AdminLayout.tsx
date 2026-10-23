@@ -10,7 +10,6 @@ import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
 import { notificationService } from '../features/notifications/services/notification.service';
 import { useTheme } from '../hooks/useTheme';
-import { sidebarContentMarginClass } from './sidebarShared';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -251,7 +250,7 @@ export default function AdminLayout() {
 
   return (
     <>
-    <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="admin-shell app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes astu-admin-fade-in {
           from { opacity: 0; transform: translateY(4px); }
@@ -277,7 +276,9 @@ export default function AdminLayout() {
         onOpenAiAssistant={() => setAiAssistantOpen(true)}
       />
 
-       <div className={sidebarContentMarginClass(sidebarCollapsed)}>
+       <div
+         className={`min-h-screen transition-[margin-left] duration-[250ms] ease-in-out ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}
+       >
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
           style={{
@@ -368,7 +369,9 @@ export default function AdminLayout() {
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-1 p-1">
                     {displayNotifications.length === 0 ? (
-                      <p className="px-3 py-8 text-center text-sm text-slate-500">No notifications yet</p>
+                      <div className="py-8 text-center text-xs text-slate-400">
+                        No new notifications
+                      </div>
                     ) : (
                       displayNotifications.map((item: any, idx: number) => {
                         const isUnread = !item.isRead && !item.read;
@@ -436,7 +439,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1}className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
             <Outlet />
           </AdminRouteBoundary>

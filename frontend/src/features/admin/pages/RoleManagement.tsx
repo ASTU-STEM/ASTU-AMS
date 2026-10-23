@@ -586,16 +586,17 @@ export default function RoleManagement() {
     const currentRoleObj = draftPermissions[selectedRole] || defaultPermissions[selectedRole] || {};
     const nextValue = currentRoleObj[key] === false ? true : false;
 
+    // Snapshot for rollback: the toggle is optimistic, and adminService resolves
+    // { ok: false } rather than throwing, so a rejected change used to stay on
+    // screen (and poison the permission cache) with no error shown.
+    const previous = draftPermissions;
+
     if (!nextValue) {
       toast(`🔒 Toggle Disabled: "${label}" policy is now OFF for ${selectedMeta.name}`, {
         icon: '⚠️',
         duration: 3500,
       });
       permissionService.showComingSoon(label);
-    } else {
-      toast.success(`Allowed & Active: "${label}" policy is now ON for ${selectedMeta.name}`, {
-        duration: 3500,
-      });
     }
 
     const updated = {
@@ -609,11 +610,17 @@ export default function RoleManagement() {
     setDraftPermissions(updated);
     permissionService.setCache(updated);
 
-    try {
-      await adminService.updateRolePermissions(updated);
-    } catch (err) {
-      console.error('Auto-save permission toggle error:', err);
+    // adminService never throws - it resolves { ok: false } - so the catch below
+    // was dead code and a rejected permission change stayed on screen (and in
+    // the permission cache) as if it had been saved.
+    const result = await adminService.updateRolePermissions(updated);
+    if (!result.ok) {
+      setDraftPermissions(previous);
+      permissionService.setCache(previous);
+      toast.error(result.message || 'Could not save that permission change.');
+      return;
     }
+    toast.success(`"${label}" ${nextValue ? 'enabled' : 'disabled'} for ${selectedMeta.name}.`);
   };
 
   const revertToDefault = async () => {
@@ -621,14 +628,15 @@ export default function RoleManagement() {
       ...draftPermissions,
       [selectedRole]: { ...(defaultPermissions[selectedRole] || defaultPermissions['ADMIN']) },
     };
+    // Was: success toast fired BEFORE the await, and the result was ignored.
+    const result = await adminService.updateRolePermissions(updated);
+    if (!result.ok) {
+      toast.error(result.message || 'Could not save the reverted permissions.');
+      return;
+    }
     setDraftPermissions(updated);
     permissionService.setCache(updated);
     toast.success(`Reverted ${selectedMeta.name} permissions to default settings`);
-    try {
-      await adminService.updateRolePermissions(updated);
-    } catch (err) {
-      console.error('Failed to save reverted permissions to DB:', err);
-    }
   };
 
   const handleSavePermissions = async () => {
@@ -700,13 +708,14 @@ export default function RoleManagement() {
 
     permissionService.setCache(updatedDraft);
 
-    try {
-      await adminService.updateRolePermissions(updatedDraft);
-      toast.success(`Custom role "${rawName.toUpperCase()}" created and saved to PostgreSQL database!`);
-    } catch (err) {
-      console.error('Failed saving custom role to DB:', err);
-      toast.error('Error saving custom role to database');
+    const result = await adminService.updateRolePermissions(updatedDraft);
+    if (!result.ok) {
+      permissionService.setCache(draftPermissions);
+      setDraftPermissions(draftPermissions);
+      toast.error(result.message || 'Could not save the new role.');
+      return;
     }
+    toast.success(`Custom role "${rawName.toUpperCase()}" created.`);
   };
 
 

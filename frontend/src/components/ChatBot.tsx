@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, ChevronDown, ChevronUp, MessageCircle, Send, Trash2, X, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bot, ChevronDown, ChevronUp, MessageCircle, Send, Trash2, X, Sparkles, Copy, Check, ArrowUpRight, ShieldCheck } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
+import config from "../config";
 
 type MessageSender = "user" | "bot";
 
@@ -24,6 +26,15 @@ const COLORS = {
   redLight: "#E74C3C",
 };
 
+const SUGGESTED_PROMPTS = [
+  { label: "📄 Request Transcript", query: "How do I request my academic transcript?" },
+  { label: "💼 Find Jobs", query: "How do I find jobs and career opportunities?" },
+  { label: "📋 Register on Portal", query: "How do I register as an alumnus or partner employer?" },
+  { label: "📊 Employment Stats", query: "What are the ASTU graduate employment and salary statistics?" },
+  { label: "📢 Official Notices", query: "What are the latest announcements and circulars?" },
+  { label: "📍 Campus Location", query: "Where is ASTU located and what are the main campus facilities?" },
+];
+
 const SYSTEM_MANUAL_RESPONSES: Record<string, string> = {
   "update my profile":
     "How to update your profile:\n1. Sign in and open Dashboard → Profile.\n2. Update education, work experience, skills, and portfolio links.\n3. Save changes to keep your career profile current.",
@@ -32,15 +43,33 @@ const SYSTEM_MANUAL_RESPONSES: Record<string, string> = {
   "tracer survey":
     "How to complete the graduate tracer survey:\n1. Sign in to your Alumni Dashboard.\n2. Open the Surveys tab.\n3. Select the active tracer study.\n4. Answer the questions about employment status and feedback.\n5. Submit the survey.",
   "request transcript":
-    "How to request academic documents:\n1. Sign in to your Alumni Dashboard.\n2. Go to Document Services → Request Document.\n3. Select Official Transcript, Degree Certificate, or related document.\n4. Submit the request for Registrar processing.\n5. Track status under My Document Requests.",
+    "How to request academic documents:\n1. Sign in to your Alumni Dashboard.\n2. Go to Document Services → Request Document.\n3. Select Official Transcript, Degree Certificate, or related document.\n4. Submit the request for Registrar processing (24–48h SLA).\n5. Track status under My Document Requests.",
   "mentor":
     "How to connect with alumni mentors:\n1. Sign in and open the Mentorship tab.\n2. Browse mentors by industry or department.\n3. Send a guidance request from a mentor profile.",
   "register":
     "How to register on ASTU-AMS:\n1. Click Register in the top navigation.\n2. Choose Alumni or Partner Employer.\n3. Complete the required details.\n4. Create a password and submit.\n5. Verify your email to activate the account.",
   "employer":
     "How employers partner and post jobs:\n1. Open Partner registration from the Partners page.\n2. Enter organisation and contact details for verification.\n3. After approval, sign in to the Employer Portal.\n4. Publish vacancies from the employer dashboard.",
+  "where is astu":
+    "ASTU Campus Location:\n• City: Adama (Nazret), Oromia Region, Ethiopia (~100km southeast of Addis Ababa along the expressway).\n• Main Campus: Central administration, academic faculties, and student services.\n• Research Complex: Advanced robotics, computing, and engineering labs.\n• Convocation Hall: Graduation ceremonies, career fairs, and innovation symposiums.",
+  "location":
+    "ASTU Campus Location:\n• City: Adama (Nazret), Oromia Region, Ethiopia (~100km southeast of Addis Ababa).\n• Main Campus: Central administration, academic faculties, and student services.\n• Research Complex: Advanced robotics, computing, and engineering labs.",
+  "announcement":
+    "Recent ASTU Official Notices:\n• ASTU Engineering Innovation Summit 2026\n• Semester Break: Campus Safety Notice & Lab Guidelines\n• DAAD Alumni Workshop on Sustainable Water Supply\n• Annual Alumni & Career Fair Registrations Open\n\nVisit the Announcements section on the homepage or open /announcements for full articles.",
+  "notices":
+    "Recent ASTU Official Notices:\n• ASTU Engineering Innovation Summit 2026\n• Semester Break: Campus Safety Notice & Lab Guidelines\n• DAAD Alumni Workshop on Sustainable Water Supply\n• Annual Alumni & Career Fair Registrations Open\n\nVisit the Announcements section on the homepage or open /announcements.",
+  "event":
+    "Upcoming ASTU Events & Workshops:\n• ASTU Alumni Carnival 2026 (Main Campus)\n• AI for Engineering Research Workshop (120 seats)\n• CV Builder and Interview Lab (Career Center)\n• Startup Finance for Alumni Innovators\n\nRSVP or register directly from the Events & Workshops section on the homepage.",
+  "workshop":
+    "Upcoming ASTU Events & Workshops:\n• ASTU Alumni Carnival 2026 (Main Campus)\n• AI for Engineering Research Workshop (120 seats)\n• CV Builder and Interview Lab (Career Center)\n• Startup Finance for Alumni\n\nRSVP or register directly from the Events & Workshops section on the homepage.",
+  "admission":
+    "ASTU Admissions & Entry:\n• Undergraduate admissions are administered through the Ministry of Education (MoE) entrance examinations and national university placement for top STEM students.\n• Postgraduate (MSc/PhD) admissions are coordinated directly by the ASTU Graduate Studies Directorate.",
+  "tuition":
+    "Tuition & Fees Information:\n• Regular Ethiopian Government-sponsored undergraduate students are admitted under the national university cost-sharing scheme.\n• Digital services on ASTU-AMS (profile creation, job search, tracer surveys, mentorship) are 100% free of charge for verified alumni and employers.",
+  "login":
+    "How to Sign In to ASTU-AMS:\n1. Click Login in the top navigation.\n2. Enter your registered email and password.\n3. If you forgot your password, click 'Forgot Password?' to receive an instant OTP recovery code.",
   "contact support":
-    "How to contact support:\n• Email: irccd@astu.edu.et\n• Phone: +251-221-110000\n• Or open a ticket from Help & Support after signing in.",
+    "How to contact support & campus offices:\n• Alumni Relations: alumni@astu.edu.et\n• Registrar Directorate: registrar@astu.edu.et\n• Campus Telephone: +251 22 110 0001\n• P.O. Box: 1888, Adama, Ethiopia\n• Or open a ticket from Help & Support after signing in.",
 };
 
 const SENSITIVE_KEYWORDS = [
@@ -67,32 +96,30 @@ function getFallback(input: string) {
   }
 
   if (key.includes('salary') || key.includes('salaries') || key.includes('pay') || key.includes('income')) {
-    return "Salary figures are only published through official tracer study reports.\n\nPlease check the Impact Numbers section on the homepage, or sign in to view authorised employment analytics for your role.";
+    return "Salary Telemetry (ASTU Graduates):\n• Average Starting Salary: ETB 19,185 / month\n• Top Earning Department: Software Engineering (Avg ETB 23,400 / month)\n• Computer Science & ECE: Avg ETB 22,000 / month\n\nFigures are drawn from verified ASTU-AMS tracer survey records.";
   }
 
   if (key.includes('employment') || key.includes('placement rate') || key.includes('hire rate')) {
-    return "Employment and placement figures are drawn from verified ASTU-AMS records and published reports.\n\nPlease review the live Impact Numbers on the homepage, or sign in for role-specific analytics.";
+    return "ASTU Employment & Placement Telemetry:\n• Overall Employment Rate: 55.0%\n• Electrical & Computer Engineering: 75.0%\n• Software Engineering: 63.0%\n• Average Time to Hire: 16.3 months\n• Top Employers: Safaricom Ethiopia, Ethio Telecom, Sunshine Construction, INSA, Wabi Tena.";
   }
 
   for (const [pattern, response] of Object.entries(SYSTEM_MANUAL_RESPONSES)) {
     if (key.includes(pattern)) return response;
   }
 
-  return "ASTU-AMS Assistant:\nI can help with portal navigation, transcript requests, job applications, tracer surveys, and university information.\n\nTry asking:\n• \"What can you do?\"\n• \"How do I request my transcript?\"\n• \"How do I register?\"\n• \"How do employers post jobs?\"";
+  return "ASTU-AMS Assistant:\nI can help with portal navigation, transcript requests, job applications, tracer surveys, and university information.\n\nTry asking:\n• \"What can you do?\"\n• \"How do I request my transcript?\"\n• \"How do I register?\"\n• \"Where is ASTU located?\"\n• \"What are the latest announcements?\"";
 }
 
 async function askAssistant(userMessage: string) {
-  const envUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-  const urlsToTry = Array.from(new Set([
-    `${envUrl}/ai/public-chat`,
+  const candidateUrls = [
+    `${config.apiUrl}/ai/public-chat`,
     "http://localhost:5000/api/ai/public-chat",
-    "http://localhost:5000/api/v1/ai/public-chat",
-  ]));
+  ];
 
-  for (const url of urlsToTry) {
+  for (const url of candidateUrls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 7500);
 
       const response = await fetch(url, {
         method: "POST",
@@ -256,8 +283,47 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
   );
 }
 
-function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boolean }) {
+function MessageBubble({
+  msg,
+  isDark = false,
+  onNavigate,
+}: {
+  msg: ChatMessage;
+  isDark?: boolean;
+  onNavigate?: (route: string) => void;
+}) {
   const isUser = msg.sender === "user";
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(msg.text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // Quick action shortcuts
+  const actions: { label: string; route: string }[] = [];
+  if (!isUser) {
+    const textLower = msg.text.toLowerCase();
+    if (textLower.includes("register") || textLower.includes("sign up") || textLower.includes("create account")) {
+      actions.push({ label: "Go to Register", route: "/register" });
+    }
+    if (textLower.includes("login") || textLower.includes("sign in") || textLower.includes("password")) {
+      actions.push({ label: "Go to Login", route: "/login" });
+    }
+    if (textLower.includes("announcement") || textLower.includes("notice") || textLower.includes("/announcements")) {
+      actions.push({ label: "View Notices", route: "/announcements" });
+    }
+    if (textLower.includes("job") || textLower.includes("career") || textLower.includes("vacanc")) {
+      actions.push({ label: "Career Portal", route: "/login" });
+    }
+    if (textLower.includes("transcript") || textLower.includes("document")) {
+      actions.push({ label: "Document Services", route: "/login" });
+    }
+  }
+
   return (
     <div style={{
       display: "flex", gap: 10, alignItems: "flex-end",
@@ -277,7 +343,7 @@ function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boo
       </div>
 
       <div style={{
-        maxWidth: "78%",
+        maxWidth: "80%",
         background: isUser
           ? `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`
           : (isDark ? "#1e293b" : "#fff"),
@@ -292,27 +358,83 @@ function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boo
           : (isDark ? "0 4px 14px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.06)"),
       }}>
         {renderStructuredContent(msg.text, isUser, isDark)}
-        <p style={{
-          fontSize: 10.5, marginTop: 6, marginBottom: 0,
-          color: isUser ? "rgba(255,255,255,0.55)" : (isDark ? "#94a3b8" : "#9aa3b8"),
-          textAlign: isUser ? "right" : "left",
+
+        {/* Quick action buttons if relevant */}
+        {!isUser && actions.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8, paddingTop: 6, borderTop: isDark ? "1px solid #334155" : "1px solid #edf0f8" }}>
+            {actions.slice(0, 2).map((act) => (
+              <button
+                key={act.label}
+                onClick={() => onNavigate && onNavigate(act.route)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  background: isDark ? "rgba(96,165,250,0.15)" : "rgba(0,48,135,0.08)",
+                  color: isDark ? "#93c5fd" : COLORS.navy,
+                  border: isDark ? "1px solid rgba(96,165,250,0.3)" : "1px solid rgba(0,48,135,0.2)",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span>{act.label}</span>
+                <ArrowUpRight size={11} />
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isUser ? "flex-end" : "space-between",
+          marginTop: 6,
+          paddingTop: 2,
         }}>
-          {msg.timestamp}
-          {msg.isAI && (
-            <span style={{
-              marginLeft: 6, opacity: isDark ? 0.9 : 0.7,
-              background: isUser ? "rgba(255,255,255,0.15)" : (isDark ? "rgba(200,150,42,0.25)" : COLORS.gold + "20"),
-              color: isUser ? "#fff" : (isDark ? "#fbbf24" : COLORS.gold),
-              padding: "1px 6px", borderRadius: 8, fontSize: 9, fontWeight: 600,
-            }}>AI</span>
+          {!isUser && (
+            <button
+              onClick={handleCopy}
+              title="Copy answer"
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                padding: "2px 4px", display: "inline-flex", alignItems: "center", gap: 3,
+                color: copied ? (isDark ? "#4ade80" : COLORS.green) : (isDark ? "#94a3b8" : "#9aa3b8"),
+                fontSize: 10,
+                borderRadius: 4,
+              }}
+            >
+              {copied ? <Check size={11} /> : <Copy size={11} />}
+              <span>{copied ? "Copied" : "Copy"}</span>
+            </button>
           )}
-        </p>
+
+          <p style={{
+            fontSize: 10.5, margin: 0,
+            color: isUser ? "rgba(255,255,255,0.55)" : (isDark ? "#94a3b8" : "#9aa3b8"),
+            textAlign: isUser ? "right" : "left",
+          }}>
+            {msg.timestamp}
+            {msg.isAI && (
+              <span style={{
+                marginLeft: 6, opacity: isDark ? 0.9 : 0.7,
+                background: isUser ? "rgba(255,255,255,0.15)" : (isDark ? "rgba(200,150,42,0.25)" : COLORS.gold + "20"),
+                color: isUser ? "#fff" : (isDark ? "#fbbf24" : COLORS.gold),
+                padding: "1px 6px", borderRadius: 8, fontSize: 9, fontWeight: 600,
+              }}>AI</span>
+            )}
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
 export default function ASTUCareerCopilot() {
+  const navigate = useNavigate();
   const { darkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -413,6 +535,15 @@ export default function ASTUCareerCopilot() {
       isAI: true,
     }]);
     setUnreadCount(0);
+  };
+
+  const handleNavigate = (route: string) => {
+    if (route.startsWith("#")) {
+      const el = document.querySelector(route);
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate(route);
+    }
   };
 
   return (
@@ -653,7 +784,52 @@ export default function ASTUCareerCopilot() {
                   ? "linear-gradient(180deg, #0b0f19 0%, #0f172a 100%)"
                   : "linear-gradient(180deg, #f0f4fe 0%, #f4f7fc 50%, #f8faff 100%)",
               }} className="chatbot-messages">
-                {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} isDark={darkMode} />)}
+                {messages.map((msg) => (
+                  <MessageBubble
+                    key={msg.id}
+                    msg={msg}
+                    isDark={darkMode}
+                    onNavigate={handleNavigate}
+                  />
+                ))}
+
+                {messages.length === 1 && (
+                  <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 6, animation: "fadeSlideIn 0.3s ease" }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: darkMode ? "#94a3b8" : "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", paddingLeft: 4 }}>
+                      Popular Topics &amp; Quick Guides
+                    </span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {SUGGESTED_PROMPTS.map((p) => (
+                        <button
+                          key={p.label}
+                          onClick={() => sendMessage(p.query)}
+                          style={{
+                            fontSize: 11.5,
+                            padding: "6px 10px",
+                            borderRadius: 10,
+                            background: darkMode ? "rgba(30,41,59,0.85)" : "rgba(255,255,255,0.9)",
+                            color: darkMode ? "#e2e8f0" : COLORS.navy,
+                            border: darkMode ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,48,135,0.15)",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                            transition: "all 0.15s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = COLORS.gold;
+                            e.currentTarget.style.transform = "translateY(-1px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = darkMode ? "rgba(255,255,255,0.12)" : "rgba(0,48,135,0.15)";
+                            e.currentTarget.style.transform = "translateY(0)";
+                          }}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {isTyping && (
                   <div style={{

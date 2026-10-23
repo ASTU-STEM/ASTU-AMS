@@ -15,8 +15,8 @@ const footerSections = [
   {
     title: "About ASTU",
     links: [
-      { label: "University Overview", href: "/" },
-      { label: "Stakeholder Portals", id: "stakeholders", scroll: true },
+      { label: "About ASTU & AMS", href: "/about" },
+      { label: "How It Works", id: "how-it-works", scroll: true },
       { label: "Impact & Accreditation", id: "impact", scroll: true },
       { label: "Research Highlights", id: "research", scroll: true },
     ],
@@ -35,7 +35,7 @@ const footerSections = [
     links: [
       { label: "Contact Us", id: "contact", scroll: true },
       { label: "Photo Gallery", id: "gallery", scroll: true },
-      { label: "Community Feed", id: "community", scroll: true },
+      { label: "Community Voices", id: "testimonials", scroll: true },
       { label: "Join Alumni", href: "/register" },
     ],
   },
@@ -112,10 +112,10 @@ export default function Footer() {
             <a href="https://web.facebook.com/adamaastu/" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="Facebook">
               <Facebook className="h-5 w-5" />
             </a>
-            <a href="https://t.me/Adama_STU_Almuni" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="Telegram">
+            <a href="https://t.me/Adama_STU_Alumni" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="Telegram">
               <Send className="h-5 w-5" />
             </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="LinkedIn">
+            <a href="https://www.linkedin.com/school/adama-science-and-technology-university/" target="_blank" rel="noopener noreferrer" className="text-slate-400 transition-colors hover:text-white" title="LinkedIn">
               <Linkedin className="h-5 w-5" />
             </a>
           </div>

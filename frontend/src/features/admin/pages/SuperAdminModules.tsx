@@ -21,7 +21,8 @@ import {
   MailCheck,
   MessageCircle,
   MonitorDot,
-  PanelTop,
+  Menu,
+  GalleryHorizontalEnd,
   Search,
   Shield,
   SlidersHorizontal,
@@ -86,7 +87,7 @@ const moduleGroups: GroupDefinition[] = [
       {
         id: 'menu-management',
         title: 'Homepage Menu Management',
-        icon: PanelTop,
+        icon: Menu,
         defaultStatus: 'Live',
         route: '/cms/footer',
         description: 'Header navigation items, dropdowns, and footer links.',
@@ -148,7 +149,7 @@ const moduleGroups: GroupDefinition[] = [
       {
         id: 'ad-banners',
         title: 'Advertisement Banner Management',
-        icon: PanelTop,
+        icon: GalleryHorizontalEnd,
         defaultStatus: 'Live',
         route: '/cms/gallery',
         description: 'Campus sponsorship banners, event promos, and workshop highlights.',
@@ -362,11 +363,11 @@ export default function SuperAdminModules() {
     fetchLiveTelemetry();
   }, []);
 
-  const saveGovernanceToDB = (updatedConfigs: Record<string, ModuleConfigState>) => {
+  // Returns the ApiResult so callers can report a real failure instead of
+  // announcing success for a write that only landed in localStorage.
+  const saveGovernanceToDB = async (updatedConfigs: Record<string, ModuleConfigState>) => {
     localStorage.setItem('astu_super_admin_modules_config', JSON.stringify(updatedConfigs));
-    adminService.updateModuleGovernance({
-      configs: updatedConfigs,
-    }).catch((err) => console.warn('Database governance sync warning:', err));
+    return adminService.updateModuleGovernance({ configs: updatedConfigs });
   };
 
   useEffect(() => {
@@ -404,12 +405,12 @@ export default function SuperAdminModules() {
       },
     };
     setModuleConfigs(updated);
-    saveGovernanceToDB(updated);
+    void saveGovernanceToDB(updated);
     toast.success(`Saved governance rules for "${selectedModule.title}" to PostgreSQL Database!`);
     setSelectedModule(null);
   };
 
-  const handleConfigureGroupBulk = (newStatus: ModuleStatus) => {
+  const handleConfigureGroupBulk = async (newStatus: ModuleStatus) => {
     const groupDef = moduleGroups.find((g) => g.name === activeGroup);
     if (!groupDef) return;
 
@@ -421,10 +422,15 @@ export default function SuperAdminModules() {
       };
     });
 
+    // Was: "in Database!" fired before saveGovernanceToDB resolved.
+    const result = await saveGovernanceToDB(updated);
+    if (result && result.ok === false) {
+      toast.error(result.message || 'Could not save module statuses.');
+      return;
+    }
     setModuleConfigs(updated);
-    saveGovernanceToDB(updated);
-    toast.success(`Updated status of all ${groupDef.modules.length} modules in "${activeGroup}" to ${newStatus} in Database!`);
     setShowGroupModal(false);
+    toast.success(`Updated ${groupDef.modules.length} module(s) in "${activeGroup}" to ${newStatus}.`);
   };
 
   const handleToggleSecuritySetting = async (key: 'mfa' | 'export' | 'keyRot') => {
@@ -432,30 +438,32 @@ export default function SuperAdminModules() {
     let nextExport = exportAudited;
     let nextKeyRot = keyRotation;
 
-    if (key === 'mfa') {
-      nextMfa = !mfaEnforced;
-      setMfaEnforced(nextMfa);
-      toast.success(nextMfa ? 'MFA Requirement Enforced in PostgreSQL Database' : 'MFA Enforcement Disabled');
-    } else if (key === 'export') {
-      nextExport = !exportAudited;
-      setExportAudited(nextExport);
-      toast.success(nextExport ? 'Export Audit Logging Enabled in PostgreSQL Database' : 'Export Audit Logging Disabled');
-    } else if (key === 'keyRot') {
-      nextKeyRot = !keyRotation;
-      setKeyRotation(nextKeyRot);
-      toast.success(nextKeyRot ? 'API Key Rotation Scheduled in PostgreSQL Database' : 'API Key Rotation Disabled');
+    const labels = { mfa: 'MFA enforcement', export: 'export audit logging', keyRot: 'API key rotation' } as const;
+
+    if (key === 'mfa') { nextMfa = !mfaEnforced; }
+    else if (key === 'export') { nextExport = !exportAudited; }
+    else { nextKeyRot = !keyRotation; }
+    const nextValue = key === 'mfa' ? nextMfa : key === 'export' ? nextExport : nextKeyRot;
+
+    // These toasts used to claim the change was "Enforced in PostgreSQL
+    // Database" BEFORE the request was sent, and the result was never checked.
+    const result = await adminService.updateSecurityGovernance({
+      mfa: nextMfa,
+      exportAudit: nextExport,
+      keyRot: nextKeyRot,
+    });
+
+    if (!result.ok) {
+      toast.error(result.message || `Could not save ${labels[key]}.`);
+      return;
     }
 
-    try {
-      await adminService.updateSecurityGovernance({
-        mfa: nextMfa,
-        exportAudit: nextExport,
-        keyRot: nextKeyRot,
-      });
-      fetchLiveTelemetry();
-    } catch (err) {
-      console.error('Failed to sync security governance to database:', err);
-    }
+    if (key === 'mfa') setMfaEnforced(nextMfa);
+    else if (key === 'export') setExportAudited(nextExport);
+    else setKeyRotation(nextKeyRot);
+
+    toast.success(`${labels[key]} ${nextValue ? 'enabled' : 'disabled'}.`);
+    fetchLiveTelemetry();
   };
 
   const handleRefreshTelemetry = async () => {

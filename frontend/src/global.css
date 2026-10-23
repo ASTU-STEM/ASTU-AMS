@@ -1,3 +1,5 @@
+@import "./styles/dark-mode.css";
+
 /* ── Import additional animation styles (must be first) ── */
 @import "./styles/animations.css";
 
@@ -35,18 +37,13 @@
   --card-padding: 16px;
 }
 
-/* Dark theme overrides */
-.dark {
-  --bg-page: #0f1117;
-  --bg-card: #1a1d27;
-  --bg-sidebar: #080d18;
-  --bg-navbar: #13161f;
-  --border-color: #2a2d3a;
-  --text-primary: #f1f3f9;
-  --text-secondary: #8b91a8;
-  --text-muted: #555b72;
-}
-
+/* Theme token overrides.
+   ORDER MATTERS: .light was previously declared after .dark. Both selectors have
+   the same specificity, so when a stale `light` class was left on <html> the
+   light tokens won and the dark-mode button appeared to do nothing. .dark is now
+   declared last so an explicitly requested dark theme always takes effect, even
+   if a caller forgets to remove `light`. Callers should still remove both
+   classes first - useTheme() does exactly that. */
 .light {
   --bg-page: #f4f6fa;
   --bg-card: #ffffff;
@@ -56,6 +53,23 @@
   --text-primary: #0a0e1a;
   --text-secondary: #5a6278;
   --text-muted: #9ba3b8;
+  --focus-ring: #1d4ed8;
+}
+
+.dark {
+  --bg-page: #0f1117;
+  --bg-card: #1a1d27;
+  --bg-sidebar: #080d18;
+  --bg-navbar: #13161f;
+  --border-color: #2a2d3a;
+  --text-primary: #f1f3f9;
+  --text-secondary: #8b91a8;
+  --text-muted: #555b72;
+  --focus-ring: #93c5fd;
+  /* Surface tokens wired for dark mode */
+  --on-surface-variant: #8b91a8;
+  --outline-variant: #2a2d3a;
+  --surface-container-low: #16181f;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -87,6 +101,55 @@ body {
   background: var(--bg-page);
   color: var(--text-primary);
   overflow-x: hidden;
+}
+
+/* ───────────────────────────────────────────────────────────
+   FOCUS VISIBILITY
+   ───────────────────────────────────────────────────────────
+   558 elements use Tailwind's `outline-none`, which sets
+   `outline: 2px solid transparent` — and there was no :focus-visible
+   rule anywhere in the app, so keyboard focus was invisible almost
+   everywhere. :focus-visible keeps the ring off for mouse interaction.
+
+   !important is required: `.outline-none` is a single-class selector and
+   would otherwise outrank a bare element selector. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* Material Symbols — self-hosted; force weight so parent font-bold
+   cannot break ligatures into plain icon-name text */
+.material-symbols-outlined,
+.material-icons,
+.material-icons-outlined,
+.material-symbols-rounded,
+.material-symbols-sharp {
+  font-family: "Material Symbols Outlined" !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  font-size: 1.25em;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga" 1;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  user-select: none;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
 ::-webkit-scrollbar {
@@ -126,11 +189,22 @@ a {
    Applies to admin-shell, role-shell, and any dashboard layout.
    ═══════════════════════════════════════════════════════════ */
 
-/* ── Normalize scrollable content, never a layout wrapper or its header ── */
+/* ── Normalize main content padding across all shells ── */
+.admin-shell > div > main,
+.role-shell > div > main,
+.role-shell main,
+.admin-shell .flex-grow,
+.role-shell .flex-grow,
 .admin-shell main,
-.role-shell main[class*="overflow-y-auto"],
-.dashboard-content {
+.role-shell main {
   padding: var(--content-padding) !important;
+}
+
+/* ── Ensure flex-grow children in nested structures have proper padding ── */
+.admin-shell .flex-grow > div,
+.role-shell .flex-grow > div {
+  padding: var(--content-padding) !important;
+  margin: 0 !important;
 }
 
 /* ── Standardize vertical section spacing ── */
@@ -356,9 +430,8 @@ a {
 .admin-shell main section,
 .admin-shell main article,
 .admin-shell main .admin-card,
-/* Attribute matching avoids a brittle selector for Tailwind arbitrary shadow
-   values (whose commas must otherwise be escaped in raw CSS). */
-.admin-shell main [class*="shadow-\["] {
+.admin-shell main .shadow-\[0_1px_3px_rgba\(0,0,0,0.06\)\],
+.admin-shell main .shadow-\[0_4px_16px_rgba\(0,0,0,0.08\)\] {
   animation: admin-float-in 260ms ease-out both;
 }
 
@@ -378,131 +451,47 @@ a {
    DARK MODE OVERRIDES
    ═══════════════════════════════════════════════════════════ */
 
-/* Admin / ICT / CMS dashboard shells share the same dark remaps */
+/* Admin shell dark mode */
 .dark .admin-card {
   background: var(--bg-card);
   border-color: var(--border-color);
 }
 
-.dark .admin-shell .bg-white,
-.dark .ict-shell .bg-white {
+.dark .admin-shell .bg-white {
   background-color: var(--bg-card) !important;
 }
 
-.dark .admin-shell .bg-slate-50,
-.dark .ict-shell .bg-slate-50 {
+.dark .admin-shell .bg-slate-50 {
   background-color: rgba(255, 255, 255, 0.04) !important;
 }
 
-.dark .admin-shell .bg-slate-100,
-.dark .ict-shell .bg-slate-100 {
+.dark .admin-shell .bg-slate-100 {
   background-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-.dark .admin-shell .bg-slate-50\/50,
-.dark .admin-shell .bg-slate-50\/60,
-.dark .admin-shell .bg-slate-50\/80,
-.dark .admin-shell .bg-slate-50\/90,
-.dark .ict-shell .bg-slate-50\/50,
-.dark .ict-shell .bg-slate-50\/60,
-.dark .ict-shell .bg-slate-50\/80,
-.dark .ict-shell .bg-slate-50\/90 {
-  background-color: #171b27 !important;
-}
-
 .dark .admin-shell .border-slate-200,
-.dark .admin-shell .border-slate-200\/80,
-.dark .admin-shell .border-slate-200\/60,
-.dark .admin-shell .border-slate-100,
-.dark .ict-shell .border-slate-200,
-.dark .ict-shell .border-slate-200\/80,
-.dark .ict-shell .border-slate-200\/60,
-.dark .ict-shell .border-slate-100 {
+.dark .admin-shell .border-slate-100 {
   border-color: var(--border-color) !important;
 }
 
 .dark .admin-shell .text-slate-900,
-.dark .admin-shell .text-slate-800,
-.dark .ict-shell .text-slate-900,
-.dark .ict-shell .text-slate-800 {
+.dark .admin-shell .text-slate-800 {
   color: var(--text-primary) !important;
 }
 
 .dark .admin-shell .text-slate-700,
-.dark .admin-shell .text-slate-600,
-.dark .ict-shell .text-slate-700,
-.dark .ict-shell .text-slate-600 {
+.dark .admin-shell .text-slate-600 {
   color: var(--text-secondary) !important;
 }
 
 .dark .admin-shell .text-slate-500,
-.dark .admin-shell .text-slate-400,
-.dark .ict-shell .text-slate-500,
-.dark .ict-shell .text-slate-400 {
+.dark .admin-shell .text-slate-400 {
   color: var(--text-muted) !important;
 }
 
-.dark .admin-shell .hover\:bg-white:hover,
-.dark .admin-shell .hover\:bg-slate-50:hover,
-.dark .admin-shell .hover\:bg-slate-100:hover,
-.dark .ict-shell .hover\:bg-white:hover,
-.dark .ict-shell .hover\:bg-slate-50:hover,
-.dark .ict-shell .hover\:bg-slate-100:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Soft tint panels (tabs, telemetry cards) inside admin/ICT shells */
-.dark .admin-shell .bg-indigo-50\/40,
-.dark .admin-shell .bg-blue-50\/60,
-.dark .admin-shell .bg-emerald-50\/60,
-.dark .admin-shell .bg-purple-50\/60,
-.dark .admin-shell .bg-amber-50\/60,
-.dark .ict-shell .bg-indigo-50\/40,
-.dark .ict-shell .bg-blue-50\/60,
-.dark .ict-shell .bg-emerald-50\/60,
-.dark .ict-shell .bg-purple-50\/60,
-.dark .ict-shell .bg-amber-50\/60,
-.dark .ict-shell .bg-blue-50,
-.dark .ict-shell .bg-blue-500\/10 {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-.dark .admin-shell .border-indigo-100,
-.dark .admin-shell .border-blue-100,
-.dark .admin-shell .border-emerald-100,
-.dark .admin-shell .border-purple-100,
-.dark .admin-shell .border-amber-100,
-.dark .ict-shell .border-indigo-100,
-.dark .ict-shell .border-blue-100,
-.dark .ict-shell .border-emerald-100,
-.dark .ict-shell .border-purple-100,
-.dark .ict-shell .border-amber-100,
-.dark .ict-shell .border-blue-200\/60,
-.dark .ict-shell .border-blue-500\/20 {
-  border-color: var(--border-color) !important;
-}
-
-.dark .admin-shell [class*="shadow-\["],
-.dark .ict-shell [class*="shadow-\["] {
+.dark .admin-shell .shadow-\[0_1px_3px_rgba\(0,0,0,0.06\)\],
+.dark .admin-shell .shadow-\[0_4px_16px_rgba\(0,0,0,0.08\)\] {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.16) !important;
-}
-
-/* ICT sidebar active / AI assistant accents stay readable on dark surfaces */
-.dark .ict-shell .text-blue-900,
-.dark .ict-shell .text-blue-800,
-.dark .ict-shell .text-blue-700,
-.dark .ict-shell .text-blue-700\/80 {
-  color: #93c5fd !important;
-}
-
-.dark .ict-shell .bg-rose-50\/50,
-.dark .ict-shell .bg-rose-50,
-.dark .ict-shell .bg-rose-100 {
-  background-color: rgba(244, 63, 94, 0.12) !important;
-}
-
-.dark .ict-shell .border-rose-100 {
-  border-color: rgba(244, 63, 94, 0.35) !important;
 }
 
 .dark table tr:hover {
@@ -526,6 +515,8 @@ a {
   color: var(--text-muted);
 }
 
+/* Alumni dashboard dark mode lives in styles/dark-mode.css (generated). */
+
 /* Role shell dark mode - main content background */
 .role-shell main > div {
   background: var(--bg-page);
@@ -537,28 +528,6 @@ a {
 .dark .role-shell .from-gray-50,
 .dark .role-shell .to-white {
   background-color: var(--bg-card) !important;
-}
-
-/* Alumni shell uses a few fixed slate utilities for its navigation and dialogs. */
-.dark .role-shell aside.bg-white,
-.dark .role-shell .bg-white.border-slate-200,
-.dark .role-shell .bg-white.border-slate-200\/80,
-.dark .role-shell .bg-white.shadow-2xl {
-  background-color: var(--bg-sidebar) !important;
-  color: var(--text-primary) !important;
-}
-
-.dark .role-shell .border-slate-100,
-.dark .role-shell .border-slate-200,
-.dark .role-shell .border-slate-200\/80 {
-  border-color: var(--border-color) !important;
-}
-
-.dark .role-shell .bg-slate-50\/80,
-.dark .role-shell .bg-slate-50\/70,
-.dark .role-shell .bg-slate-50\/50,
-.dark .role-shell .bg-slate-50\/40 {
-  background-color: #171b27 !important;
 }
 
 .dark .role-shell .border-gray-200,
@@ -609,9 +578,9 @@ a {
    ANIMATIONS
    ═══════════════════════════════════════════════════════════ */
 .reveal {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 .reveal.is-visible {
@@ -640,7 +609,7 @@ a {
     opacity: 1;
   }
   50% {
-    opacity: 1;
+    opacity: 0.3;
   }
 }
 
@@ -671,25 +640,11 @@ a {
    ═══════════════════════════════════════════════════════════ */
 
 /* Staggered reveal delays */
-.reveal-delay-1 { transition-delay: 0.04s; }
-.reveal-delay-2 { transition-delay: 0.08s; }
-.reveal-delay-3 { transition-delay: 0.12s; }
-.reveal-delay-4 { transition-delay: 0.16s; }
-.reveal-delay-5 { transition-delay: 0.20s; }
-
-/* Animatic Spring Card Hover Effect */
-.animatic-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.animatic-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -6px rgba(0, 51, 102, 0.1);
-}
-
-.animatic-node {
-  transition: transform 0.3s ease;
-}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
 
 /* Floating animation */
 @keyframes float {
@@ -703,16 +658,21 @@ a {
 }
 
 .animate-float {
-  transform: none;
+  animation: float 4s ease-in-out infinite;
 }
 
 .animate-float-slow {
-  transform: none;
+  animation: float-slow 6s ease-in-out infinite;
 }
 
 /* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 51, 102, 0.1); }
+  50% { box-shadow: 0 0 30px rgba(0, 51, 102, 0.2); }
+}
+
 .animate-glow {
-  box-shadow: 0 0 15px rgba(0, 51, 102, 0.1);
+  animation: glow-pulse 3s ease-in-out infinite;
 }
 
 /* Gradient text animation */
@@ -723,10 +683,12 @@ a {
 }
 
 .animate-gradient-text {
-  background: linear-gradient(135deg, #003366, #006633);
+  background: linear-gradient(135deg, #003366, #008C44, #E31E24, #003366);
+  background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: gradient-shift 6s ease infinite;
 }
 
 /* Scale on hover */
@@ -801,6 +763,12 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Dark mode glassmorphism override */
+.dark .glass {
+  background: rgba(26, 29, 39, 0.85);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
 /* Scrolling partners carousel */
 @keyframes scroll-loop {
   0% { transform: translateX(0); }
@@ -857,133 +825,37 @@ a {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-
-/* ═══════════════════════════════════════════════════════════
-   PUBLIC PAGE DARK MODE
-   The public content pages (Partners, Info, Announcements, Gallery,
-   Stories, Events, Community) are authored against Tailwind's light
-   palette with no `dark:` variants. <body> carries `public-shell` on
-   those routes only (HomePage, which ships its own dark palette, is
-   excluded), so these rules repaint the shared light utilities without
-   touching the dashboards.
-   ═══════════════════════════════════════════════════════════ */
-
-body.public-shell {
-  background: var(--bg-page);
-  color: var(--text-primary);
+/* ───────────────────────────────────────────────────────────
+   GLOBAL ASTU THEME ENHANCEMENTS FOR DARK MODE & APP-SHELL
+   ─────────────────────────────────────────────────────────── */
+.dark .app-shell .text-astu-navy:not([class*="dark:text-"]) {
+  color: #93c5fd !important;
 }
 
-.dark body.public-shell .bg-white,
-.dark body.public-shell .bg-white\/60,
-.dark body.public-shell .bg-white\/80,
-.dark body.public-shell .bg-white\/95 {
-  background-color: var(--bg-card) !important;
+.dark .app-shell .border-outline-variant:not([class*="dark:border-"]) {
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-.dark body.public-shell .bg-slate-50,
-.dark body.public-shell .bg-slate-50\/50,
-.dark body.public-shell .bg-slate-50\/60,
-.dark body.public-shell .bg-slate-50\/80,
-.dark body.public-shell .bg-gray-50,
-.dark body.public-shell .bg-surface {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-}
-
-.dark body.public-shell .bg-slate-100,
-.dark body.public-shell .bg-slate-100\/60,
-.dark body.public-shell .bg-gray-100 {
-  background-color: rgba(255, 255, 255, 0.07) !important;
-}
-
-.dark body.public-shell .from-white,
-.dark body.public-shell .from-slate-50,
-.dark body.public-shell .from-slate-100 {
-  --tw-gradient-from: var(--bg-page) var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(15 17 23 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-
-.dark body.public-shell .to-white,
-.dark body.public-shell .to-slate-50 {
-  --tw-gradient-to: var(--bg-page) var(--tw-gradient-to-position);
-}
-
-.dark body.public-shell .border-slate-100,
-.dark body.public-shell .border-slate-200,
-.dark body.public-shell .border-slate-200\/80,
-.dark body.public-shell .border-slate-300,
-.dark body.public-shell .border-gray-200,
-.dark body.public-shell .border-outline-variant {
-  border-color: var(--border-color) !important;
-}
-
-.dark body.public-shell .text-slate-900,
-.dark body.public-shell .text-slate-800,
-.dark body.public-shell .text-gray-900,
-.dark body.public-shell .text-on-surface,
-.dark body.public-shell .text-\[\#003366\],
-.dark body.public-shell .text-astu-navy {
-  color: var(--text-primary) !important;
-}
-
-.dark body.public-shell .bg-surface,
-.dark body.public-shell .bg-background {
+.dark .app-shell .bg-surface:not([class*="dark:bg-"]),
+.dark .app-shell .bg-background:not([class*="dark:bg-"]) {
   background-color: var(--bg-page) !important;
 }
 
-.dark body.public-shell .text-slate-700,
-.dark body.public-shell .text-slate-600,
-.dark body.public-shell .text-gray-700,
-.dark body.public-shell .text-gray-600 {
+.dark .app-shell .text-on-surface:not([class*="dark:text-"]) {
+  color: var(--text-primary) !important;
+}
+
+.dark .app-shell .text-on-surface-variant:not([class*="dark:text-"]) {
   color: var(--text-secondary) !important;
 }
 
-.dark body.public-shell .text-slate-500,
-.dark body.public-shell .text-slate-400,
-.dark body.public-shell .text-gray-500,
-.dark body.public-shell .text-on-surface-variant {
-  color: var(--text-muted) !important;
+.dark .app-shell .bg-surface-container-low:not([class*="dark:bg-"]),
+.dark .app-shell .bg-surface-container:not([class*="dark:bg-"]),
+.dark .app-shell .bg-surface-container-high:not([class*="dark:bg-"]) {
+  background-color: var(--bg-card) !important;
 }
 
-.dark body.public-shell .divide-slate-100,
-.dark body.public-shell .divide-slate-200,
-.dark body.public-shell .divide-gray-100,
-.dark body.public-shell .divide-outline-variant {
-  border-color: var(--border-color) !important;
+.dark .app-shell .card-hover:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
 }
 
-.dark body.public-shell .hover\:bg-slate-50:hover,
-.dark body.public-shell .hover\:bg-slate-100:hover,
-.dark body.public-shell .hover\:bg-gray-50:hover,
-.dark body.public-shell .hover\:bg-white:hover {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-}
-
-/* Forms + tables inside public pages */
-.dark body.public-shell input,
-.dark body.public-shell select,
-.dark body.public-shell textarea {
-  background: #1e2130;
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-.dark body.public-shell input::placeholder,
-.dark body.public-shell textarea::placeholder {
-  color: var(--text-muted);
-}
-
-.dark body.public-shell table thead {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.dark body.public-shell table tr:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-/* Soft shadows read as harsh white glow on dark surfaces */
-.dark body.public-shell .shadow-sm,
-.dark body.public-shell .shadow,
-.dark body.public-shell .shadow-md {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
-}

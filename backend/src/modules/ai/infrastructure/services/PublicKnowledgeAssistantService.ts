@@ -28,10 +28,18 @@ export class PublicKnowledgeAssistantService {
       return this.cachedContext;
     }
     try {
-      this.cachedContext = await AnalyticsContextProvider.getContextForIntent('general');
+      const dbTelemetry = await AnalyticsContextProvider.getContextForIntent('general');
+      this.cachedContext = `${dbTelemetry}\n\nINSTITUTIONAL DIRECTORY & OPERATIONAL POLICIES:
+- University: Adama Science & Technology University (ASTU)
+- Location: Adama (Nazret), Oromia, Ethiopia (100km southeast of Addis Ababa)
+- Campus Complexes: Main Administration Campus, Advanced Engineering & Robotics Labs, Convocation Hall, Research & Innovation Pavilion
+- Official Portals: Alumni Portal, Employer Partner Portal, Department Analytics Portal, Registrar Portal
+- Registrar SLAs: Official Transcripts and English Medium of Instruction issued within 24-48 business hours
+- Contact Channels: alumni@astu.edu.et, registrar@astu.edu.et, Phone +251 22 110 0001
+- Active Directives: ASTU Engineering Innovation Summit 2026, Semester Break Campus Safety Guidelines, Wave 3 Graduate Tracer Study`;
       this.lastContextFetch = now;
     } catch {
-      this.cachedContext = 'ASTU Employment Rate: 55.0%, Top Employers: Safaricom Ethiopia, Ethio Telecom, Sunshine Construction, INSA, Wabi Tena. Active Departments: Computer Science (CSE), Electrical Engineering (ECE), Mechanical Engineering (ME), Civil Engineering (CE).';
+      this.cachedContext = 'ASTU Employment Rate: 55.0%, Top Employers: Safaricom Ethiopia, Ethio Telecom, Sunshine Construction, INSA, Wabi Tena. Active Departments: Computer Science (CSE), Electrical Engineering (ECE), Mechanical Engineering (ME), Civil Engineering (CE). Transcripts: 24-48h SLA.';
     }
     return this.cachedContext;
   }
@@ -105,8 +113,32 @@ export class PublicKnowledgeAssistantService {
       return `🤝 How to Connect with Alumni Mentors:\n1. Sign in to your dashboard and open the Mentorship tab.\n2. Browse verified alumni mentors filtered by industry or department.\n3. Click Connect on a mentor profile to send a direct guidance request.`;
     }
 
-    if (q.includes('contact support') || q.includes('help desk') || q.includes('contact alumni')) {
-      return `🎧 How to Contact Support:\n• Email Alumni Relations at: alumni@astu.edu.et\n• Call ASTU Campus Office: +251 22 110 0001\n• Or open a ticket in your dashboard under Help & Support.`;
+    if (q.includes('where is astu') || q.includes('location') || q.includes('where located') || q.includes('campus address') || q.includes('in which city')) {
+      return `📍 ASTU Campus Location:\nAdama Science and Technology University is located in Adama (Nazret), Oromia Region, Ethiopia, approximately 100 kilometers southeast of Addis Ababa along the expressway.\n\n• Main Campus: Central administration, academic faculties, and student services.\n• Research Complex: Advanced computing, robotics, and electrical engineering labs.\n• Convocation Center: Graduation hall, career fairs, and innovation symposiums.`;
+    }
+
+    if (q.includes('announcement') || q.includes('latest notice') || q.includes('official notice') || q.includes('circular') || q.includes('news')) {
+      return `📢 Recent ASTU Official Announcements:\n• ASTU Engineering Innovation Summit 2026 (Sep 9, 2026)\n• Semester Break: Campus Safety Notice & Lab Guidelines (Aug 20, 2026)\n• ASTU Hosts 5-Day DAAD Alumni Workshop on Sustainable Water Supply\n• Annual Alumni & Career Fair Registrations Open\n\nTo view all official notices, visit the Announcements section on the homepage or open /announcements.`;
+    }
+
+    if (q.includes('event') || q.includes('workshop') || q.includes('seminar') || q.includes('hackathon') || q.includes('fair')) {
+      return `📅 Upcoming ASTU Events & Workshops:\n• ASTU Alumni Carnival 2026 (Main Campus)\n• AI for Engineering Research Workshop (120 seats)\n• CV Builder & Interview Lab (Career Center)\n• Startup Finance for Alumni Innovators\n\nAlumni and students can RSVP or register directly from the Events & Workshops section on the homepage.`;
+    }
+
+    if (q.includes('login') || q.includes('sign in') || q.includes('forgot password') || q.includes('reset password')) {
+      return `🔐 ASTU-AMS Account & Sign-In Assistance:\n1. Click 'Login' on the top right navigation bar.\n2. Enter your registered email address and password.\n3. If you forgot your password, click 'Forgot Password?' on the login screen to receive a secure recovery OTP.\n4. Complete the 6-digit verification code to set a new password.`;
+    }
+
+    if (q.includes('admission') || q.includes('how to join') || q.includes('apply to astu') || q.includes('entrance')) {
+      return `🎓 ASTU Admissions & University Entry:\nASTU is a public national center of excellence in STEM. Undergraduate admissions are administered through the Ministry of Education (MoE) entrance examinations and national university placement for top-ranking natural science students.\n\nFor postgraduate (MSc/PhD) programs, admissions are coordinated directly by ASTU Graduate Studies Directorate.`;
+    }
+
+    if (q.includes('tuition') || q.includes('fee') || q.includes('cost') || q.includes('how much')) {
+      return `💵 Tuition & Fees Information:\n• Regular Ethiopian Government-sponsored undergraduate students are admitted under the national university cost-sharing scheme.\n• Continuing education, summer programs, and postgraduate degree fees vary by department.\n• Digital services on ASTU-AMS (profile creation, job searching, tracer studies, mentorship) are 100% free of charge for verified alumni and employers.`;
+    }
+
+    if (q.includes('contact support') || q.includes('help desk') || q.includes('contact alumni') || q.includes('phone') || q.includes('email') || q.includes('call')) {
+      return `🎧 How to Contact Support & Campus Offices:\n• Alumni Relations: alumni@astu.edu.et\n• Registrar Directorate: registrar@astu.edu.et\n• Main Campus Telephone: +251 22 110 0001\n• Postal Address: P.O. Box 1888, Adama, Ethiopia\n• Or open a ticket in your dashboard under Help & Support after signing in.`;
     }
 
     // 3. Fast LLM Execution with 6.0s race timeout

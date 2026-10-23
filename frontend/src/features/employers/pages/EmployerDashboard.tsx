@@ -23,7 +23,6 @@ import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTim
 import { JobPostingTab } from '../components/JobPostingTab';
 import { ApplicationsTab } from '../components/ApplicationsTab';
 import { TalentSearchTab } from '../components/TalentSearchTab';
-import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 import { FeedbackTab } from '../components/FeedbackTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
@@ -31,8 +30,8 @@ import { CandidateProfileModal } from '../components/CandidateProfileModal';
 import { useTheme } from '../../../hooks/useTheme';
 
 const EmployerDashboard = () => {
-  const { logout } = useAuth();
   const { darkMode, toggleTheme } = useTheme();
+  const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('employer_sidebar_collapsed') === 'true');
@@ -40,15 +39,13 @@ const EmployerDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSearchCandidate, setSelectedSearchCandidate] = useState<CandidateApplication | null>(null);
 
+  // Theme Dark / Light mode
+
   // Notifications Bell dropdown
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Abebe Bikila applied for Senior Fullstack Engineer.', unread: true, time: '2 hours ago' },
-    { id: 2, text: 'New messaging update from ASTU Placement Officer.', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Feedback audit verified by CSE Department Dean.', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
   const [activeChatTarget, setActiveChatTarget] = useState<any>(null);
@@ -75,9 +72,9 @@ const EmployerDashboard = () => {
       color: 'astu-navy',
       icon: 'work',
       bgGradient: 'from-blue-50 to-indigo-50',
-      trend: '+1 this week',
-      trendIcon: 'trending_up',
-      trendColor: 'astu-green'
+      trend: `${jobs.length} total posts`,
+      trendIcon: 'post_add',
+      trendColor: 'astu-navy'
     },
     {
       id: 2,
@@ -97,8 +94,8 @@ const EmployerDashboard = () => {
       color: 'astu-red',
       icon: 'check_circle',
       bgGradient: 'from-red-50 to-orange-50',
-      trend: 'Ready for interview',
-      trendIcon: 'schedule',
+      trend: `${shortlistedApplicationsCount} shortlisted`,
+      trendIcon: 'fact_check',
       trendColor: 'astu-red'
     },
     {
@@ -119,7 +116,7 @@ const EmployerDashboard = () => {
       color: 'purple-600',
       icon: 'rate_review',
       bgGradient: 'from-purple-50 to-pink-50',
-      trend: 'Curriculum reports',
+      trend: 'Graduate feedback',
       trendIcon: 'assignment_turned_in',
       trendColor: 'astu-green'
     }
@@ -157,9 +154,9 @@ const EmployerDashboard = () => {
 
   const demandSignals = React.useMemo(() => [
     { label: 'Top Skill Demand', value: topSkillDemand, tone: 'text-astu-navy', icon: 'monitoring' },
-    { label: 'Time to Hire', value: '18 days', tone: 'text-astu-green', icon: 'timer' },
+    { label: 'Time to Hire', value: hiredApplicationsCount > 0 ? '18 days' : 'No hires yet', tone: 'text-astu-green', icon: 'timer' },
     { label: 'Interview Queue', value: `${interviewQueueCount} candidate${interviewQueueCount === 1 ? '' : 's'}`, tone: 'text-astu-red', icon: 'calendar_month' },
-  ], [topSkillDemand, interviewQueueCount]);
+  ], [topSkillDemand, hiredApplicationsCount, interviewQueueCount]);
 
   const monthlySubmissionsData = React.useMemo(() => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -184,21 +181,18 @@ const EmployerDashboard = () => {
       }
     });
 
-    return last6Months.map((m) => ({
-      month: m,
-      // Real monthly count only — no synthetic ramp when there is no activity.
-      applications: monthCounts[m] || 0
-    }));
+    return last6Months.map((m) => {
+      const realCount = monthCounts[m] || 0;
+      return {
+        month: m,
+        applications: realCount,
+      };
+    });
   }, [applications]);
 
   const evaluationRatingsData = React.useMemo(() => {
     if (feedbacks.length === 0) {
-      // No fabricated 3/2/1 split: with no evaluations the chart is empty.
-      return [
-        { name: 'Exceeds Expectations', value: 0 },
-        { name: 'Fully Competent', value: 0 },
-        { name: 'Needs Development', value: 0 }
-      ];
+      return [];
     }
 
     let exceeds = 0;
@@ -213,9 +207,9 @@ const EmployerDashboard = () => {
     });
 
     return [
-      { name: 'Exceeds Expectations', value: exceeds || 1 },
-      { name: 'Fully Competent', value: competent || 1 },
-      { name: 'Needs Development', value: needsDev || 0 }
+      { name: 'Exceeds Expectations', value: exceeds },
+      { name: 'Fully Competent', value: competent },
+      { name: 'Needs Development', value: needsDev }
     ];
   }, [feedbacks]);
 
@@ -228,7 +222,7 @@ const EmployerDashboard = () => {
         id: currentId++,
         type: 'job',
         title: `Application for ${app.jobTitle}`,
-        description: `${app.alumnusName} applied with CGPA ${app.cgpa || '—'}. Status: ${app.status}.`,
+        description: `${app.alumnusName} applied${app.cgpa ? ` with CGPA ${app.cgpa}` : ''}. Status: ${app.status}.`,
         timestamp: app.appliedDate || 'Recently',
         unread: app.status === 'Pending'
       });
@@ -652,7 +646,7 @@ const EmployerDashboard = () => {
 
   return (
     <>
-      <div className="role-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+      <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
         <style>{`
         @keyframes gradient-shift {
           0% { background-position: 0% 50%; }
@@ -1134,11 +1128,9 @@ const EmployerDashboard = () => {
           </header>
 
           {/* Main Content */}
-          <main className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
-                {/* Official Alumni Officer Broadcast Hero Banner */}
-                <DashboardBroadcastHero actorRole="EMPLOYER" className="mb-2" />
 
                 {/* Welcome banner */}
                 <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">

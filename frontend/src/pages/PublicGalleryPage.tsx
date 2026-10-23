@@ -12,7 +12,6 @@ import {
   Microscope,
   PlayCircle,
   Search,
-  Sparkles,
   Tag,
   User,
   X,
@@ -20,10 +19,6 @@ import {
 import Navbar from '../components/Navbar';
 import ChatBot from '../components/ChatBot';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
-import { mediaUrl } from '../config';
-import gallerySettingsService, {
-  GalleryPageSettings,
-} from '../features/admin/services/gallerySettings.service';
 
 interface GalleryItem {
   id: string;
@@ -79,16 +74,6 @@ const defaultGalleryItems: GalleryItem[] = [
     date: '5 hours ago',
   },
   {
-    id: 'M-005',
-    title: 'Campus Innovation Labs',
-    type: 'Photo',
-    album: 'Campus Gallery',
-    src: '/images/humanitary building.jpg',
-    status: 'Approved',
-    uploadedBy: 'Public Relations',
-    date: '1 day ago',
-  },
-  {
     id: 'M-006',
     title: 'Engineering Fair 2026',
     type: 'Photo',
@@ -97,16 +82,6 @@ const defaultGalleryItems: GalleryItem[] = [
     status: 'Approved',
     uploadedBy: 'Engineering Faculty',
     date: '2 weeks ago',
-  },
-  {
-    id: 'M-007',
-    title: 'Cloud Computing Workshop',
-    type: 'Video',
-    album: 'Workshop Gallery',
-    src: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80',
-    status: 'Approved',
-    uploadedBy: 'ICT Directorate',
-    date: '30 min ago',
   },
   {
     id: 'M-008',
@@ -122,20 +97,8 @@ const defaultGalleryItems: GalleryItem[] = [
 
 export default function PublicGalleryPage() {
   const navigate = useNavigate();
-  const [settings, setSettings] = useState<GalleryPageSettings>(() => gallerySettingsService.getSettings());
 
-  const loadMedia = (): GalleryItem[] => {
-    const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.gallery?.length) {
-      return cmsConfig.gallery
-        .filter((item: any) => item.active !== false)
-        .map((item: any) => ({
-          ...item,
-          type: item.type === 'Video' ? 'Video' : 'Photo',
-          album: item.album || 'Campus Gallery',
-        }));
-    }
-
+  const loadMedia = () => {
     try {
       const stored = localStorage.getItem('astu_ams_cms_gallery_items');
       if (stored) {
@@ -145,6 +108,11 @@ export default function PublicGalleryPage() {
         }
       }
     } catch {}
+
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.gallery?.length) {
+      return cmsConfig.gallery;
+    }
 
     return defaultGalleryItems;
   };
@@ -156,25 +124,12 @@ export default function PublicGalleryPage() {
   const [activeModalItem, setActiveModalItem] = useState<GalleryItem | null>(null);
 
   useEffect(() => {
-    const syncMedia = () => setItems(loadMedia());
-    const syncSettings = () => setSettings(gallerySettingsService.getSettings());
-
-    window.addEventListener('astu-cms-gallery-changed', syncMedia);
-    window.addEventListener('astu-cms-homepage-updated', syncMedia);
-    window.addEventListener('astu-cms-gallery-settings-changed', syncSettings);
-
-    // The public gallery must use the shared backend configuration, rather
-    // than a potentially stale gallery cache from a previous browser session.
-    homepageCmsService.fetchFromApi().then((cmsConfig) => {
-      if (cmsConfig?.gallery?.length) {
-        syncMedia();
-      }
-    });
-
+    const sync = () => setItems(loadMedia());
+    window.addEventListener('astu-cms-gallery-changed', sync);
+    window.addEventListener('astu-cms-homepage-updated', sync);
     return () => {
-      window.removeEventListener('astu-cms-gallery-changed', syncMedia);
-      window.removeEventListener('astu-cms-homepage-updated', syncMedia);
-      window.removeEventListener('astu-cms-gallery-settings-changed', syncSettings);
+      window.removeEventListener('astu-cms-gallery-changed', sync);
+      window.removeEventListener('astu-cms-homepage-updated', sync);
     };
   }, []);
 
@@ -197,54 +152,21 @@ export default function PublicGalleryPage() {
   }, [items, selectedAlbum, selectedType, search]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
+    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar />
 
-      {/* Header Banner (Fully Controlled by CMS Admin) */}
-      <div
-        className="relative overflow-hidden text-white py-12 px-4 sm:px-6 transition-all"
-        style={{ backgroundColor: settings.bannerBgColor || '#003366' }}
-      >
-        {settings.showBannerImage && settings.bannerImage && (
-          <div className="absolute inset-0 z-0">
-            <img
-              src={settings.bannerImage}
-              alt="Gallery Banner"
-              className="h-full w-full object-cover object-center opacity-25"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-astu-navy/85 to-astu-navy/90" />
-          </div>
-        )}
-
-        <div className="relative z-10 mx-auto max-w-[1240px]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-start sm:items-center gap-4">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-[#FFD700] backdrop-blur-md border border-white/15">
-                <ImageIcon className="h-7 w-7" />
-              </span>
-              <div>
-                {settings.bannerBadge && (
-                  <span className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#FFD700] mb-2 backdrop-blur-sm border border-white/10">
-                    <Sparkles className="h-3 w-3" />
-                    {settings.bannerBadge}
-                  </span>
-                )}
-                <h1 className="text-2xl font-black sm:text-3xl lg:text-4xl tracking-tight leading-tight">
-                  {settings.bannerTitle || 'ASTU Media & Photo Gallery'}
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-200 mt-2 max-w-2xl leading-relaxed">
-                  {settings.bannerSubtitle ||
-                    'Visual showcases, event archives, research expos, graduation ceremonies, and campus life at Adama Science and Technology University.'}
-                </p>
-              </div>
-            </div>
-
-            <div className="hidden lg:flex items-center gap-3 self-end rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur-md border border-white/15 text-xs text-slate-200">
-              <CheckCircle2 className="h-5 w-5 text-astu-green" />
-              <div>
-                <p className="font-bold text-white">Verified ASTU Archive</p>
-                <p className="text-[10px] text-slate-300">Managed by Directorate of Communication</p>
-              </div>
+      {/* Header Banner */}
+      <div className="bg-[#003580] text-white py-12 px-4 sm:px-6">
+        <div className="mx-auto max-w-[1240px]">
+          <div className="flex items-center gap-3">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#FFD700]">
+              <ImageIcon className="h-6 w-6" />
+            </span>
+            <div>
+              <h1 className="text-2xl font-black sm:text-4xl">ASTU Media & Photo Gallery</h1>
+              <p className="text-xs sm:text-sm text-slate-200 mt-1">
+                Visual showcases, event archives, research expos, graduation ceremonies, and campus life at Adama Science and Technology University.
+              </p>
             </div>
           </div>
         </div>
@@ -253,33 +175,34 @@ export default function PublicGalleryPage() {
       {/* Main Container */}
       <main className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
         {/* Filters & Search */}
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm md:flex-row md:items-center md:justify-between transition-colors">
           {/* Album Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-            {albumsList.map((album) => (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {albumsList.map((albumName) => (
               <button
-                key={album}
-                onClick={() => setSelectedAlbum(album)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                  selectedAlbum === album
-                    ? 'bg-astu-navy text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                key={albumName}
+                type="button"
+                onClick={() => setSelectedAlbum(albumName)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                  selectedAlbum === albumName
+                    ? 'bg-[#003580] text-white shadow-sm'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                 }`}
               >
-                {album}
+                {albumName}
               </button>
             ))}
           </div>
 
-          {/* Type Toggle & Search Bar */}
+          {/* Type Filter & Search */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs">
+            <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1 text-xs">
               {(['All', 'Photo', 'Video'] as const).map((type) => (
                 <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className={`rounded-lg px-2.5 py-1 font-semibold transition-all cursor-pointer ${
-                    selectedType === type ? 'bg-astu-navy text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200'
+                  className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
+                    selectedType === type ? 'bg-[#003580] text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {type}
@@ -288,12 +211,12 @@ export default function PublicGalleryPage() {
             </div>
 
             <div className="relative w-48 sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={settings.searchPlaceholder || 'Search gallery...'}
-                className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10"
+                placeholder="Search gallery..."
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white py-1.5 pl-9 pr-3 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 transition-colors"
               />
             </div>
           </div>
@@ -305,49 +228,37 @@ export default function PublicGalleryPage() {
             <article
               key={item.id}
               onClick={() => setActiveModalItem(item)}
-              className="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-astu-navy/40"
+              className="group cursor-pointer overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="relative h-56 w-full overflow-hidden bg-slate-900">
                 <img
-                  src={mediaUrl(item.src || item.image) || '/images/astu-building.jpg'}
+                  src={item.src || item.image || '/images/fallback-campus.svg'}
                   alt={item.title}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
-                    const el = e.target as HTMLImageElement;
-                    if (el.src.includes('astu-building.jpg')) {
-                      el.src = '/images/fallback-campus.svg';
-                    } else {
-                      el.src = '/images/astu-building.jpg';
-                    }
+                    (e.target as HTMLImageElement).src = '/images/fallback-campus.svg';
                   }}
                 />
                 {item.type === 'Video' && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/35 backdrop-blur-[1px]">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]">
                     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110">
                       <PlayCircle className="h-7 w-7" />
                     </span>
                   </div>
                 )}
                 <div className="absolute top-3 left-3">
-                  <span className="rounded-md bg-slate-950/70 backdrop-blur-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white border border-white/10">
-                    {item.album}
+                  <span className="rounded-md bg-black/60 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
+                    {item.album || 'Gallery'}
                   </span>
                 </div>
               </div>
-
               <div className="p-4">
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-astu-navy transition-colors line-clamp-1">
+                <h3 className="text-base font-bold text-[#003580] dark:text-blue-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                   {item.title}
                 </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2.5">
-                  <span className="flex items-center gap-1">
-                    <User className="h-3.5 w-3.5 text-slate-400" />
-                    {item.uploadedBy || 'ASTU Media'}
-                  </span>
-                  <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                    <Calendar className="h-3 w-3" />
-                    {item.date || 'Recently'}
-                  </span>
+                <div className="mt-2 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                  <span>{item.uploadedBy || 'ASTU Directorate'}</span>
+                  <span>{item.date || 'Recent'}</span>
                 </div>
               </div>
             </article>
@@ -355,92 +266,57 @@ export default function PublicGalleryPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
-            <ImageIcon className="mx-auto h-12 w-12 text-slate-300" />
-            <h3 className="mt-3 text-base font-bold text-slate-700">
-              {settings.emptyTitle || 'No media items found'}
-            </h3>
-            <p className="mt-1 text-xs text-slate-500">
-              {settings.emptySubtitle || 'Try adjusting your search terms or selecting a different album.'}
-            </p>
-            <button
-              onClick={() => {
-                setSelectedAlbum('All');
-                setSelectedType('All');
-                setSearch('');
-              }}
-              className="mt-4 rounded-xl bg-astu-navy px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#001a41]"
-            >
-              Reset Filters
-            </button>
+          <div className="py-16 text-center bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+            <ImageIcon className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
+            <h3 className="mt-3 text-base font-bold text-slate-700 dark:text-slate-200">No media items found</h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Try adjusting your album or filter search term.</p>
           </div>
         )}
       </main>
 
-      {/* Lightbox / Video Preview Modal */}
+      {/* Lightbox Modal */}
       {activeModalItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
           onClick={() => setActiveModalItem(null)}
         >
           <div
-            className="relative max-w-4xl w-full overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="relative max-w-4xl w-full rounded-2xl bg-white dark:bg-slate-900 border border-transparent dark:border-slate-800 p-4 shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-100 p-4">
+            <button
+              onClick={() => setActiveModalItem(null)}
+              className="absolute top-4 right-4 z-10 rounded-full bg-slate-900/60 p-2 text-white hover:bg-slate-900 transition-all"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="max-h-[75vh] overflow-hidden rounded-xl bg-black flex items-center justify-center">
+              <img
+                src={activeModalItem.src || activeModalItem.image || '/images/fallback-campus.svg'}
+                alt={activeModalItem.title}
+                className="max-h-[75vh] w-auto object-contain"
+              />
+            </div>
+            <div className="mt-4 flex items-center justify-between">
               <div>
-                <span className="rounded-md bg-astu-navy/10 px-2 py-0.5 text-[10px] font-bold uppercase text-astu-navy">
+                <span className="rounded-md bg-blue-100 dark:bg-blue-900/40 text-[#003580] dark:text-blue-300 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
                   {activeModalItem.album}
                 </span>
-                <h3 className="mt-1 text-base font-bold text-slate-900">{activeModalItem.title}</h3>
+                <h2 className="mt-2 text-lg font-bold text-slate-900 dark:text-slate-100">{activeModalItem.title}</h2>
               </div>
-              <button
-                onClick={() => setActiveModalItem(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="relative max-h-[70vh] bg-black flex items-center justify-center">
-              <img
-                src={mediaUrl(activeModalItem.src || activeModalItem.image) || '/images/astu-building.jpg'}
-                alt={activeModalItem.title}
-                className="max-h-[70vh] w-auto object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
-                }}
-              />
-              {activeModalItem.type === 'Video' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white">
-                  <PlayCircle className="h-16 w-16 mb-2 text-[#FFD700]" />
-                  <p className="text-xs font-semibold">Video preview stream ready</p>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between bg-slate-50 p-4 text-xs text-slate-500">
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <User className="h-3.5 w-3.5 text-slate-400" />
-                  {activeModalItem.uploadedBy || 'ASTU Communication Office'}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                  {activeModalItem.date || 'Recently'}
-                </span>
+              <div className="text-right text-xs text-slate-500 dark:text-slate-400">
+                <p className="font-semibold text-slate-700 dark:text-slate-300">{activeModalItem.uploadedBy || 'ASTU Office'}</p>
+                <p>{activeModalItem.date || 'Recent'}</p>
               </div>
-              <button
-                onClick={() => setActiveModalItem(null)}
-                className="rounded-lg bg-astu-navy px-4 py-1.5 text-xs font-semibold text-white shadow-xs"
-              >
-                Close Preview
-              </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* Footer */}
+      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
+        © 2026 Adama Science and Technology University (ASTU) — All Rights Reserved.
+      </footer>
       <ChatBot />
     </div>
   );

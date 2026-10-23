@@ -32,13 +32,13 @@ export default function FormField({
 
   const inputClasses = `
     w-full rounded-lg border px-4 py-3 text-sm
-    transition-all duration-200 bg-white text-on-surface
-    placeholder:text-on-surface-variant/40
+    transition-all duration-200 bg-white text-on-surface dark:bg-slate-800/80 dark:text-white
+    placeholder:text-on-surface-variant/40 dark:placeholder:text-slate-500
     focus:outline-none focus:ring-2
     disabled:cursor-not-allowed disabled:opacity-50
     ${hasError
-      ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5'
-      : 'border-outline-variant focus:border-astu-navy focus:ring-astu-navy/20 hover:border-outline-variant/80'
+      ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5 dark:bg-red-950/20 dark:border-red-500'
+      : 'border-outline-variant focus:border-astu-navy focus:ring-astu-navy/20 hover:border-outline-variant/80 dark:border-slate-700 dark:focus:border-blue-400 dark:focus:ring-blue-400/20'
     }
   `;
 
@@ -46,7 +46,7 @@ export default function FormField({
     <div className={`space-y-1.5 ${className}`}>
       <label 
         htmlFor={fieldId} 
-        className="block text-sm font-semibold text-on-surface-variant"
+        className="block text-sm font-semibold text-on-surface-variant dark:text-slate-300"
       >
         {label}
         {required && <span className="text-astu-red ml-1">*</span>}

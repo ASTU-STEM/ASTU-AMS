@@ -2,6 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { ToolItem, ToolCategory, ToolType, SavedToolResult } from '../types/tools.types';
 import { TOOL_REGISTRY } from '../data/toolRegistry';
 import { TOOL_CATEGORIES } from '../data/toolCategories';
+
+// Categories that actually contain tools
+const POPULATED_CATEGORY_COUNT = new Set(TOOL_REGISTRY.map((t) => t.category)).size;
 import { toolsService } from '../services/toolsService';
 
 import { ToolCard } from '../components/ToolCard';
@@ -11,7 +14,7 @@ import { ToolFilters } from '../components/ToolFilters';
 import { ToolRunnerModal } from '../components/ToolRunnerModal';
 import { SavedResultsView } from '../components/SavedResultsView';
 
-import { Wrench, History, Compass, LayoutGrid } from 'lucide-react';
+import { Wrench, History, Compass, Database, Sparkles, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface AlumniToolsPageProps {
@@ -78,6 +81,14 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
     }
   };
 
+  const handleClearRecentTools = () => {
+    try {
+      localStorage.removeItem('astu_alumni_tools_recent');
+    } catch (_) {}
+    setRecentToolIds([]);
+    toast.success('Recent tools cleared');
+  };
+
   // Category counts calculation
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -128,34 +139,44 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* ── 1. Hero Product Header Banner (Restored from Screenshot) ────────────── */}
-      <section className="relative overflow-hidden rounded-3xl border border-[var(--border-color)] bg-gradient-to-r from-[#003366] via-[#004d99] to-[#1d9e75] p-6 sm:p-8 text-white shadow-xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FFD700]/15 rounded-full blur-xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+      {/* ── 1. Hero Product Header Banner ────────────────────────────── */}
+      <section className="relative overflow-hidden rounded-3xl border border-slate-700/60 dark:border-slate-800 bg-gradient-to-r from-slate-950 via-[#0a1c38] to-[#002855] p-6 sm:p-8 text-white shadow-2xl backdrop-blur-xl">
+        {/* Top university brand stripe */}
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#003087] via-[#FFD700] to-[#006B3C]" />
+
+        {/* Ambient glow accents */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-400/10 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[10px] font-extrabold uppercase tracking-widest text-emerald-200 border border-white/20">
-              <Wrench className="h-3.5 w-3.5" />
-              ASTU ALUMNI DIGITAL TOOLBOX
+          <div className="space-y-2.5 max-w-3xl">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-extrabold uppercase tracking-widest text-emerald-300 border border-emerald-400/20 shadow-xs">
+                <Wrench className="h-3 w-3 text-emerald-400" />
+                ASTU Career &amp; Innovation Suite
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400/10 text-[10px] font-bold text-amber-300 border border-amber-400/20">
+                <Sparkles className="h-3 w-3" />
+                Local Templates &amp; AI Integration
+              </span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
-              Alumni Tools Center
+              Alumni tools
             </h1>
 
-            <p className="text-xs sm:text-sm text-white/90 leading-relaxed max-w-2xl">
-              Practical digital tools designed to help ASTU alumni build careers, find opportunities, manage professional life, continue education, start businesses, and navigate everyday challenges in Ethiopia.
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+              Calculators, CV helpers, financial guides, and career utilities tailored for ASTU graduates in Ethiopia and abroad.
             </p>
           </div>
 
-          {/* Quick Metrics Banner */}
+          {/* Quick Metrics & Tab Switcher */}
           <div className="flex flex-row md:flex-col items-center md:items-end gap-3 shrink-0">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15">
+            <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/15 shadow-sm">
               <span className="material-symbols-outlined text-amber-300 text-2xl">construction</span>
               <div>
-                <p className="text-sm font-black text-white">{TOOL_REGISTRY.length}+ Practical Tools</p>
-                <p className="text-[10px] text-white/70">Across 16 Professional Categories</p>
+                <p className="text-sm font-black text-white">{TOOL_REGISTRY.length} tools</p>
+                <p className="text-[10px] text-slate-300">{POPULATED_CATEGORY_COUNT} active categories</p>
               </div>
             </div>
 
@@ -163,22 +184,26 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('catalog')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === 'catalog' ? 'bg-white text-[#003366] shadow-sm' : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === 'catalog'
+                    ? 'bg-white text-[#003366] shadow-md scale-102'
+                    : 'bg-white/10 text-white hover:bg-white/20 border border-white/15'
                 }`}
               >
-                Tools Catalog
+                Browse tools
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('history')}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === 'history' ? 'bg-white text-[#003366] shadow-sm' : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'
+                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === 'history'
+                    ? 'bg-white text-[#003366] shadow-md scale-102'
+                    : 'bg-white/10 text-white hover:bg-white/20 border border-white/15'
                 }`}
               >
                 <History className="h-3.5 w-3.5" />
-                <span>Saved Results ({savedResults.length})</span>
+                <span>Saved ({savedResults.length})</span>
               </button>
             </div>
           </div>
@@ -198,12 +223,19 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
 
           {/* ── 4. Recently Used Tools (if any) ──────────────────────── */}
           {recentTools.length > 0 && (
-            <div className="space-y-2">
+            <div className="space-y-2.5 rounded-2xl border border-slate-700/50 bg-slate-900/60 p-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <History className="h-4 w-4 text-[#003366] dark:text-blue-400" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <History className="h-4 w-4 text-blue-400" />
                   Recently Used
                 </h3>
+                <button
+                  type="button"
+                  onClick={handleClearRecentTools}
+                  className="text-[10px] font-semibold text-slate-400 hover:text-slate-200 transition-colors"
+                >
+                  Clear recent
+                </button>
               </div>
 
               <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-thin">
@@ -212,12 +244,12 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
                     key={tool.id}
                     type="button"
                     onClick={() => handleOpenTool(tool)}
-                    className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-2xs hover:border-[#003366] transition-all dark:border-slate-800 dark:bg-slate-900"
+                    className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-700/60 bg-slate-800/80 px-3.5 py-2 shadow-xs hover:border-blue-400 hover:bg-slate-800 transition-all dark:border-slate-700/60 dark:bg-slate-800/80 text-left"
                   >
-                    <span className="material-symbols-outlined text-base text-[#003366] dark:text-blue-400">
+                    <span className="material-symbols-outlined text-base text-blue-400">
                       {tool.icon}
                     </span>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">
+                    <span className="text-xs font-bold text-slate-200 truncate max-w-[160px]">
                       {tool.name}
                     </span>
                   </button>
@@ -250,14 +282,14 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
                     ? 'My Favorite Tools'
                     : TOOL_CATEGORIES.find((c) => c.id === selectedCategory)?.name || 'Category Tools'}
                 </h2>
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:text-slate-300">
                   {filteredTools.length} tools
                 </span>
               </div>
 
-                <span className="text-xs text-slate-400 hidden sm:inline-block">
-                  Showing 50 production-grade tools across 16 categories
-                </span>
+              <span className="text-xs text-slate-400 hidden sm:inline-block">
+                Showing {filteredTools.length} of {TOOL_REGISTRY.length} tools across {POPULATED_CATEGORY_COUNT} categories
+              </span>
             </div>
 
             {/* Grid of Cards */}
@@ -276,9 +308,19 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
             ) : (
               <div className="flex flex-col items-center justify-center p-12 rounded-3xl border border-dashed border-slate-200 bg-white text-center dark:border-slate-800 dark:bg-slate-900">
                 <Compass className="h-10 w-10 text-slate-300 mb-3" />
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">No tools found</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {searchQuery
+                    ? 'No tools matched your search'
+                    : selectedCategory !== 'all'
+                      ? 'This category has no tools yet'
+                      : 'No tools found'}
+                </h3>
                 <p className="mt-1 text-xs text-slate-500 max-w-sm dark:text-slate-400">
-                  No tools matched your search query "{searchQuery}" or selected filters. Try searching for terms like "salary", "CV", "GPA", or "Ethiopia".
+                  {searchQuery
+                    ? `Nothing matched "${searchQuery}". Try a broader term such as "salary", "CV", "GPA" or "Ethiopia".`
+                    : selectedCategory !== 'all'
+                      ? `"${TOOL_CATEGORIES.find((c) => c.id === selectedCategory)?.name || selectedCategory}" is defined but no tools have been added to it yet.`
+                      : 'No tools match the selected filters.'}
                 </p>
                 <button
                   type="button"
@@ -287,7 +329,7 @@ export const AlumniToolsPage: React.FC<AlumniToolsPageProps> = ({
                     setSelectedCategory('all');
                     setSelectedType('all');
                   }}
-                  className="mt-4 rounded-xl bg-[#003366] px-4 py-2 text-xs font-bold text-white shadow-xs"
+                  className="mt-4 rounded-xl bg-[#003366] hover:bg-[#002244] dark:bg-blue-600 dark:hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors"
                 >
                   Reset All Filters
                 </button>

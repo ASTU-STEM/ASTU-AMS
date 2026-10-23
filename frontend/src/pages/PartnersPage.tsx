@@ -1,302 +1,578 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Briefcase,
   Users,
   Building2,
+  CheckCircle2,
   ArrowRight,
   Handshake,
-  Search,
   MessageSquare,
   TrendingUp,
+  ShieldCheck,
   ChevronDown,
-  ChevronUp,
-  Mail,
-  Phone,
+  Star,
+  Sparkles,
   MapPin,
-  ExternalLink,
-  CheckCircle2,
+  Phone,
+  Mail,
+  GraduationCap,
   Clock,
+  ArrowUpRight,
+  Search,
+  Filter,
+  X,
+  FileCheck2,
+  Award,
+  Layers,
+  Calendar,
+  ExternalLink,
+  DollarSign,
+  Laptop,
+  Check,
+  Building,
+  BadgeCheck,
+  Send,
+  HelpCircle,
+  FileText,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { partnerLogos, PartnerLogoBadge } from '../components/PartnerLogos';
-import homepageCmsService, {
-  defaultPartnersPageConfig,
-  PartnersPageConfig,
-  Partner,
-} from '../features/admin/services/homepageCms.service';
-import { usePublicMetrics } from '../services/publicMetrics.service';
-import CompanyDetailModal from '../components/CompanyDetailModal';
+import { partnerLogos } from '../components/PartnerLogos';
+import { useTheme } from '../hooks/useTheme';
+import toast from 'react-hot-toast';
 
-const DEFAULT_BENEFITS = [
-  {
-    icon: Users,
-    title: 'Hire Talented Graduates',
-    description: 'Access verified ASTU graduates with practical training in engineering, technology, and sciences.',
-  },
-  {
-    icon: Briefcase,
-    title: 'Post Job Opportunities',
-    description: 'Publish jobs, internships, and graduate trainee programs directly to the alumni network.',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Shape the Curriculum',
-    description: 'Share employer feedback that informs biennial curriculum reviews and competency alignment.',
-  },
-  {
-    icon: Search,
-    title: 'Verified Profiles',
-    description: 'Search by department, skills, credentials, and graduation cohort with registrar-verified records.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Recruitment Insights',
-    description: 'Track applications, hiring outcomes, and employment trends from one employer dashboard.',
-  },
-  {
-    icon: Handshake,
-    title: 'Strategic Partnerships',
-    description: 'Build long-term collaboration for research, internships, campus events, and sponsorships.',
-  },
-];
+interface TalentCandidate {
+  id: string;
+  name: string;
+  degree: string;
+  department: string;
+  discipline: string;
+  gradYear: string;
+  honors: string;
+  gpa: string;
+  skills: string[];
+  status: string;
+  location: string;
+  avatarBg: string;
+  bio: string;
+}
 
-const DEFAULT_FEATURES = [
-  'TIN-verified employer accounts',
-  'Direct access to verified alumni',
-  'Curriculum-aligned skill matching',
-  'Accreditation-ready tracer reporting',
-  'Priority campus recruitment support',
-  'Direct faculty and department liaison',
-];
-
-const BENEFIT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Users,
-  Briefcase,
-  MessageSquare,
-  Search,
-  TrendingUp,
-  Handshake,
-};
-
-const HERO_IMAGE = '/images/astu-building.jpg';
+interface PartnerJob {
+  id: string;
+  title: string;
+  company: string;
+  logoKey: string;
+  type: 'FULL_TIME' | 'TRAINEE' | 'INTERNSHIP' | 'FELLOWSHIP';
+  typeLabel: string;
+  location: string;
+  salary: string;
+  department: string;
+  deadline: string;
+  tags: string[];
+  description: string;
+  requirements: string[];
+}
 
 export default function PartnersPage() {
   const navigate = useNavigate();
-  const { metrics, loading: metricsLoading } = usePublicMetrics();
+  const { darkMode } = useTheme();
 
-  const [config, setConfig] = useState<PartnersPageConfig>(() => {
-    const s = homepageCmsService.getSettings();
-    return s?.partnersPage || defaultPartnersPageConfig;
-  });
+  // State filters
+  const [talentSearch, setTalentSearch] = useState('');
+  const [selectedDiscipline, setSelectedDiscipline] = useState('ALL');
+  const [selectedJobType, setSelectedJobType] = useState('ALL');
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [activeSchoolTab, setActiveSchoolTab] = useState<'seec' | 'smcme' | 'scea' | 'sans'>('seec');
 
-  const [partnersList, setPartnersList] = useState<Partner[]>(() => {
-    const s = homepageCmsService.getSettings();
-    return Array.isArray(s?.partners) ? s.partners.filter((p) => p.active !== false) : [];
-  });
-  const [partnersLoading, setPartnersLoading] = useState(true);
-  const [selectedCompanyModal, setSelectedCompanyModal] = useState<Partner | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
-  const [heroReady, setHeroReady] = useState(false);
+  // Modals state
+  const [selectedCandidate, setSelectedCandidate] = useState<TalentCandidate | null>(null);
+  const [selectedJob, setSelectedJob] = useState<PartnerJob | null>(null);
+  const [interviewNote, setInterviewNote] = useState('');
+  const [isSubmittingInterview, setIsSubmittingInterview] = useState(false);
 
-  const isCmsAdmin = (() => {
-    try {
-      const raw = localStorage.getItem('user');
-      const role = raw ? JSON.parse(raw)?.role?.toUpperCase() : localStorage.getItem('astu_ams_user_role')?.toUpperCase();
-      return ['ADMIN', 'SUPER_ADMIN', 'CMS_MANAGER', 'ALUMNI_OFFICE'].includes(role || '');
-    } catch {
-      return false;
-    }
-  })();
+  const stats = [
+    { label: 'Verified Alumni Pool', value: '35,000+', subtext: 'Accredited STEM & Computing Graduates' },
+    { label: 'Active Partner Employers', value: '120+', subtext: 'National & Global Tech Companies' },
+    { label: 'Open Opportunities', value: '450+', subtext: 'Direct Roles & Graduate Trainee Tracks' },
+    { label: 'Placement Velocity', value: '94%', subtext: 'Employed Within 6 Months of Graduation' },
+  ];
 
-  useEffect(() => {
-    const t = requestAnimationFrame(() => setHeroReady(true));
-    return () => cancelAnimationFrame(t);
-  }, []);
+  const benefits = [
+    {
+      icon: Users,
+      title: 'Hire Verified STEM Graduates',
+      tag: 'Talent Sourcing',
+      description: 'Access accredited ASTU graduates with practical skills verified against official Student Information System (SIS) records.',
+    },
+    {
+      icon: Briefcase,
+      title: 'Direct Job & Trainee Postings',
+      tag: 'Job Board',
+      description: 'Publish employment vacancies, internships, and graduate trainee roles directly to graduating batches and verified alumni.',
+    },
+    {
+      icon: MessageSquare,
+      title: 'Curriculum Co-Creation & Feedback',
+      tag: 'Academic Impact',
+      description: 'Provide structured competency ratings on graduate performance to guide biennial syllabus reforms across ASTU engineering departments.',
+    },
+    {
+      icon: ShieldCheck,
+      title: 'TIN-Verified Security',
+      tag: 'Verified Trust',
+      description: 'Every corporate profile is validated with official Tax Identification Numbers (TIN) to guarantee high-integrity recruitment channels.',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Real-Time Recruitment Analytics',
+      tag: 'Recruiter Insights',
+      description: 'Track applicant conversion, interview milestones, and hiring outcomes via a dedicated enterprise recruiter dashboard.',
+    },
+    {
+      icon: Handshake,
+      title: 'Strategic Institutional MoUs',
+      tag: 'Collaborative MoUs',
+      description: 'Formalize university-industry memorandums of understanding for sponsored research, capstone hackathons, and laboratory equipment.',
+    },
+  ];
 
-  useEffect(() => {
-    let isMounted = true;
-    homepageCmsService
-      .fetchFromApi()
-      .then((live) => {
-        if (!isMounted) return;
-        if (live?.partnersPage) setConfig(live.partnersPage);
-        if (Array.isArray(live?.partners)) {
-          setPartnersList(live.partners.filter((p) => p.active !== false));
-        }
-        setPartnersLoading(false);
-      })
-      .catch(() => {
-        if (isMounted) setPartnersLoading(false);
-      });
+  const verifiedPartners = [
+    {
+      name: 'Ethio Telecom',
+      industry: 'Telecom, Cloud & FinTech',
+      status: 'Tier 1 Strategic Partner',
+      hiredCount: '340+ ASTU Alumni',
+      mouYear: 'Since 2018',
+    },
+    {
+      name: 'INSA',
+      industry: 'Cybersecurity & Defense Intelligence',
+      status: 'Govt Research Partner',
+      hiredCount: '190+ ASTU Alumni',
+      mouYear: 'Since 2019',
+    },
+    {
+      name: 'Ethiopian Airlines',
+      industry: 'Aviation Engineering & ICT',
+      status: 'Aviation Tech Partner',
+      hiredCount: '280+ ASTU Alumni',
+      mouYear: 'Since 2017',
+    },
+    {
+      name: 'Safaricom',
+      industry: 'Telecommunications & 5G Infrastructure',
+      status: 'Strategic Corporate Partner',
+      hiredCount: '160+ ASTU Alumni',
+      mouYear: 'Since 2021',
+    },
+    {
+      name: 'Huawei',
+      industry: 'ICT Academy & Enterprise Networking',
+      status: 'Global Innovation Partner',
+      hiredCount: '220+ ASTU Alumni',
+      mouYear: 'Since 2016',
+    },
+    {
+      name: 'Commercial Bank of Ethiopia',
+      industry: 'Financial Technology & Digital Banking',
+      status: 'Enterprise Banking Partner',
+      hiredCount: '410+ ASTU Alumni',
+      mouYear: 'Since 2015',
+    },
+  ];
 
-    const handleUpdate = () => {
-      const s = homepageCmsService.getSettings();
-      if (s?.partnersPage) setConfig(s.partnersPage);
-      if (Array.isArray(s?.partners)) {
-        setPartnersList(s.partners.filter((p) => p.active !== false));
-      }
-    };
+  const talentPool: TalentCandidate[] = [
+    {
+      id: 'ALUM-901',
+      name: 'Binyam Tesfaye',
+      degree: 'B.Sc. Software Engineering',
+      department: 'Software Engineering',
+      discipline: 'SOFTWARE',
+      gradYear: 'Class of 2025',
+      honors: 'Very Great Distinction',
+      gpa: '3.88 / 4.00',
+      skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Docker'],
+      status: 'Available Immediately',
+      location: 'Addis Ababa / Adama',
+      avatarBg: 'from-blue-600 to-indigo-700',
+      bio: 'Fullstack software engineer with strong background in distributed systems, RESTful API design, and cloud architecture. Winner of the 2024 ASTU Innovation Hackathon.',
+    },
+    {
+      id: 'ALUM-902',
+      name: 'Hanan Mohammed',
+      degree: 'B.Sc. Electrical & Computer Engineering',
+      department: 'Electrical & Computer Engineering',
+      discipline: 'ELECTRICAL',
+      gradYear: 'Class of 2024',
+      honors: 'Great Distinction',
+      gpa: '3.82 / 4.00',
+      skills: ['Embedded C', 'IoT', 'Python', 'FPGA', 'Power Systems'],
+      status: 'Actively Interviewing',
+      location: 'Addis Ababa',
+      avatarBg: 'from-emerald-600 to-teal-700',
+      bio: 'Hardware-software co-design specialist with industrial internship experience at Ethio Telecom. Experienced in IoT sensor networks and smart grid instrumentation.',
+    },
+    {
+      id: 'ALUM-903',
+      name: 'Yared Alemu',
+      degree: 'B.Sc. Mechanical Engineering',
+      department: 'Mechanical Design & Manufacturing',
+      discipline: 'MECHANICAL',
+      gradYear: 'Class of 2025',
+      honors: 'Great Distinction',
+      gpa: '3.75 / 4.00',
+      skills: ['SolidWorks', 'AutoCAD', 'Finite Element Analysis', 'CNC Machining', 'Thermodynamics'],
+      status: 'Available Immediately',
+      location: 'Adama / Hawassa',
+      avatarBg: 'from-amber-600 to-orange-700',
+      bio: 'Mechanical engineer specialized in CAD prototyping, stress analysis, and industrial automation equipment. Capstone on renewable solar-thermal grain drying units.',
+    },
+    {
+      id: 'ALUM-904',
+      name: 'Selamawit Kebede',
+      degree: 'B.Sc. Civil Engineering & Architecture',
+      department: 'Civil Engineering',
+      discipline: 'CIVIL',
+      gradYear: 'Class of 2024',
+      honors: 'Very Great Distinction',
+      gpa: '3.91 / 4.00',
+      skills: ['BIM / Revit', 'ETABS', 'Structural Design', 'Soil Mechanics', 'Project Management'],
+      status: 'Available Immediately',
+      location: 'Addis Ababa',
+      avatarBg: 'from-purple-600 to-violet-800',
+      bio: 'Structural civil engineer trained in seismic resilience modeling and sustainable building materials. Experienced in BIM modeling and construction quality auditing.',
+    },
+    {
+      id: 'ALUM-905',
+      name: 'Natnael Girma',
+      degree: 'B.Sc. Chemical Engineering',
+      department: 'Chemical & Materials Engineering',
+      discipline: 'CHEMICAL',
+      gradYear: 'Class of 2025',
+      honors: 'Great Distinction',
+      gpa: '3.79 / 4.00',
+      skills: ['Process Simulation (Aspen Plus)', 'Water Treatment', 'Polymer Science', 'Safety Engineering'],
+      status: 'Open to Remote / On-Site',
+      location: 'Adama / Bishoftu',
+      avatarBg: 'from-rose-600 to-pink-700',
+      bio: 'Process engineer with focus on green chemical synthesis and industrial wastewater recycling. Hands-on experience operating pilot bioreactors at ASTU Innovation Hub.',
+    },
+    {
+      id: 'ALUM-906',
+      name: 'Frehiwot Bekele',
+      degree: 'B.Sc. Applied Mathematics & Computing',
+      department: 'Applied Natural Sciences',
+      discipline: 'SCIENCES',
+      gradYear: 'Class of 2024',
+      honors: 'Summa Cum Laude',
+      gpa: '3.96 / 4.00',
+      skills: ['Python / PyTorch', 'Data Analysis', 'SQL', 'Statistical Modeling', 'Machine Learning'],
+      status: 'Actively Interviewing',
+      location: 'Addis Ababa',
+      avatarBg: 'from-cyan-600 to-blue-800',
+      bio: 'Data scientist and mathematical modeler. Co-authored predictive models for agricultural yield forecasting using satellite telemetry and neural networks.',
+    },
+  ];
 
-    window.addEventListener('astu-cms-homepage-updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
-    return () => {
-      isMounted = false;
-      window.removeEventListener('astu-cms-homepage-updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
-    };
-  }, []);
+  const partnerJobs: PartnerJob[] = [
+    {
+      id: 'JOB-ETHIO-01',
+      title: 'Cloud Infrastructure & DevOps Engineer',
+      company: 'Ethio Telecom',
+      logoKey: 'Ethio Telecom',
+      type: 'FULL_TIME',
+      typeLabel: 'Full-Time',
+      location: 'Addis Ababa (Headquarters)',
+      salary: 'ETB 28,000 - 38,000 / mo',
+      department: 'Software / Computer Science',
+      deadline: 'Nov 15, 2026',
+      tags: ['Kubernetes', 'Linux', 'CI/CD', 'Docker', 'OpenStack'],
+      description: 'Join the Telecloud Operations team to manage hyperscale enterprise infrastructure, orchestrate container clusters, and automate deployment pipelines for telecommunication services.',
+      requirements: [
+        'B.Sc. in Software Engineering, Computer Science or Electrical & Computer Engineering from ASTU',
+        'Strong fundamentals in Linux systems administration and container orchestration',
+        'Familiarity with GitOps workflows and scripting with Python or Bash',
+      ],
+    },
+    {
+      id: 'JOB-EAL-02',
+      title: 'Avionics Systems Engineering Trainee',
+      company: 'Ethiopian Airlines',
+      logoKey: 'Ethiopian Airlines',
+      type: 'TRAINEE',
+      typeLabel: 'Graduate Trainee',
+      location: 'Bole International Airport, Addis Ababa',
+      salary: 'ETB 22,000 - 30,000 / mo + Benefits',
+      department: 'Electrical / Mechanical',
+      deadline: 'Nov 20, 2026',
+      tags: ['Avionics', 'Sensors', 'Embedded Systems', 'Aeronautics'],
+      description: 'Comprehensive 12-month technical training program at the Ethiopian Aviation University, leading to certified avionics software maintenance and system integration assignments on modern Boeing and Airbus fleets.',
+      requirements: [
+        'Graduating B.Sc. in Electrical Engineering, Mechanical Engineering or Software Engineering with GPA ≥ 3.50',
+        'High aptitude in embedded hardware, signal processing and diagnostics',
+        'Excellent technical communication skills in English',
+      ],
+    },
+    {
+      id: 'JOB-INSA-03',
+      title: 'SOC Cybersecurity Incident Analyst',
+      company: 'INSA',
+      logoKey: 'INSA',
+      type: 'FULL_TIME',
+      typeLabel: 'Full-Time',
+      location: 'Addis Ababa',
+      salary: 'ETB 26,000 - 35,000 / mo',
+      department: 'Computer Science / SEEC',
+      deadline: 'Nov 30, 2026',
+      tags: ['SOC Level 1', 'Wireshark', 'SIEM', 'Network Security', 'Python'],
+      description: 'Defend national critical information infrastructure. Monitor 24/7 security event telemetry, triage zero-day intrusion attempts, and produce digital forensics reports for national cyber defense.',
+      requirements: [
+        'B.Sc. in Software Engineering, Computer Science, or Information Security from ASTU',
+        'Understanding of TCP/IP, cryptographic primitives, and SIEM tooling (Splunk/Elastic)',
+        'Clearance readiness and strong ethical orientation',
+      ],
+    },
+    {
+      id: 'JOB-SAF-04',
+      title: '5G RAN Network Optimization Specialist',
+      company: 'Safaricom',
+      logoKey: 'Safaricom',
+      type: 'FULL_TIME',
+      typeLabel: 'Full-Time',
+      location: 'Hawassa / Adama / Addis Ababa',
+      salary: 'ETB 30,000 - 40,000 / mo',
+      department: 'Electrical & Computer Engineering',
+      deadline: 'Dec 05, 2026',
+      tags: ['5G NR', 'Radio Access Network', 'RF Engineering', 'Telecommunications'],
+      description: 'Conduct drive tests, analyze KPI drops, tune antenna azimuths, and optimize high-throughput 5G radio access network cells across high-density regional urban corridors.',
+      requirements: [
+        'B.Sc. in Electrical & Computer Engineering from ASTU (Telecommunications or Electronics focus)',
+        'Understanding of 4G/5G air interface specifications and cellular topology',
+        'Proficiency in RF modeling software and geographic data tools',
+      ],
+    },
+    {
+      id: 'JOB-HUA-05',
+      title: 'AI & Edge Computing Research Fellow',
+      company: 'Huawei',
+      logoKey: 'Huawei',
+      type: 'FELLOWSHIP',
+      typeLabel: 'R&D Fellowship',
+      location: 'ASTU ICT Incubation Center, Adama',
+      salary: 'ETB 24,000 - 32,000 / mo + Research Grant',
+      department: 'Applied Sciences / SEEC',
+      deadline: 'Dec 10, 2026',
+      tags: ['Ascend AI', 'MindSpore', 'Computer Vision', 'Edge Computing'],
+      description: 'Joint ASTU-Huawei research fellowship targeting localized computer vision applications in agricultural monitoring and smart city traffic analysis running on edge hardware.',
+      requirements: [
+        'Final-year graduating senior or M.Sc. candidate in Computing or Applied Mathematics',
+        'Demonstrated project work in deep learning and model quantization',
+        'Passion for applied academic research and technology patents',
+      ],
+    },
+    {
+      id: 'JOB-CBE-06',
+      title: 'FinTech Systems Associate (Core Banking)',
+      company: 'Commercial Bank of Ethiopia',
+      logoKey: 'Commercial Bank of Ethiopia',
+      type: 'FULL_TIME',
+      typeLabel: 'Full-Time',
+      location: 'CBE Tower, Addis Ababa',
+      salary: 'ETB 32,000 - 44,000 / mo',
+      department: 'Software Engineering',
+      deadline: 'Dec 15, 2026',
+      tags: ['Java / Spring Boot', 'Oracle Database', 'Microservices', 'FinTech'],
+      description: 'Build and maintain mission-critical transactional services for Ethiopia’s largest commercial financial institution, processing over 10 million daily electronic transactions.',
+      requirements: [
+        'B.Sc. in Software Engineering or Computer Science from ASTU',
+        'Strong command of Java, OOP design patterns, and relational SQL transactions',
+        'Knowledge of banking security protocols and API gateways',
+      ],
+    },
+  ];
 
-  const features = config.features?.length ? config.features : DEFAULT_FEATURES;
+  const onboardingSteps = [
+    {
+      step: '01',
+      title: 'Register Organisation & TIN',
+      description: 'Provide company registration details, industry sector, contact email, and official Ethiopian Tax Identification Number (TIN). Takes under 3 minutes.',
+      icon: Building2,
+    },
+    {
+      step: '02',
+      title: 'Registrar & Corporate Review',
+      description: 'ASTU administration reviews the submission against official national business licensing records to guarantee authenticated employer access.',
+      icon: FileCheck2,
+    },
+    {
+      step: '03',
+      title: 'Instant Dashboard Activation',
+      description: 'Once verified, your account unlocks full recruiter tools: search the verified talent pool, post vacancies, and access direct applicant pipelines.',
+      icon: BadgeCheck,
+    },
+    {
+      step: '04',
+      title: 'Campus Drives & Curriculum Input',
+      description: 'Host on-campus interviews, participate in annual career fairs, and submit structured graduate competency ratings that directly influence ASTU curricula.',
+      icon: Handshake,
+    },
+  ];
 
-  const cmsBenefits = (config.benefits || []).filter((b) => b.active !== false);
-  const benefitCards =
-    cmsBenefits.length > 0
-      ? cmsBenefits.map((b) => ({
-          icon: BENEFIT_ICONS[b.icon || ''] || Users,
-          title: b.title,
-          description: b.description,
-        }))
-      : DEFAULT_BENEFITS;
+  const faqs = [
+    {
+      q: 'Why is an Ethiopian Tax Identification Number (TIN) required?',
+      a: 'A valid TIN prevents unauthorized or fraudulent recruiters from contacting students. ASTU validates every employer against national business registries to ensure graduate data privacy and legitimate employment opportunities.',
+    },
+    {
+      q: 'Does it cost anything for companies to post jobs or partner with ASTU?',
+      a: 'No. Registering as an employer partner, posting job openings, reviewing applicants, and searching verified graduate talent pools are 100% free of charge as part of ASTU’s national academic mandate.',
+    },
+    {
+      q: 'How quickly is an employer registration approved?',
+      a: 'The ASTU Corporate Relations and Registrar office typically reviews and approves valid registrations within 24 to 48 business hours.',
+    },
+    {
+      q: 'Can employers organize on-campus interview drives and technical talks?',
+      a: 'Yes! Verified partner employers can schedule interview rooms, campus tech talks, and project showcase visits directly through the employer portal or by contacting the ASTU Industry Linkage Director.',
+    },
+    {
+      q: 'How does employer feedback shape university curricula?',
+      a: 'After hiring an ASTU graduate or intern, employers submit structured competency feedback (e.g. software practices, lab safety, communication). This data is aggregated in real-time by Department Heads and directly informs biennial syllabus revisions required by ETA.',
+    },
+  ];
 
-  const faqs = config.faqs?.length ? config.faqs : defaultPartnersPageConfig.faqs || [];
+  // Filtering candidates
+  const filteredCandidates = useMemo(() => {
+    return talentPool.filter((c) => {
+      const matchesSearch =
+        c.name.toLowerCase().includes(talentSearch.toLowerCase()) ||
+        c.department.toLowerCase().includes(talentSearch.toLowerCase()) ||
+        c.skills.some((s) => s.toLowerCase().includes(talentSearch.toLowerCase()));
+      const matchesDiscipline = selectedDiscipline === 'ALL' || c.discipline === selectedDiscipline;
+      return matchesSearch && matchesDiscipline;
+    });
+  }, [talentSearch, selectedDiscipline]);
 
-  const metricDisplay = (value: string) => (metricsLoading ? '…' : value);
+  // Filtering jobs
+  const filteredJobs = useMemo(() => {
+    return partnerJobs.filter((j) => {
+      if (selectedJobType === 'ALL') return true;
+      return j.type === selectedJobType;
+    });
+  }, [selectedJobType]);
 
-  const filteredPartners = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return partnersList;
-    return partnersList.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        (p.industry && p.industry.toLowerCase().includes(q)) ||
-        (p.location && p.location.toLowerCase().includes(q))
-    );
-  }, [partnersList, searchQuery]);
-
-  const heroBg = config.heroBackgroundImage || HERO_IMAGE;
+  const handleSendInterviewRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingInterview(true);
+    setTimeout(() => {
+      setIsSubmittingInterview(false);
+      toast.success(`Interview inquiry for ${selectedCandidate?.name} submitted! The Alumni Office will coordinate contact.`);
+      setSelectedCandidate(null);
+      setInterviewNote('');
+    }, 600);
+  };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f8] text-slate-900 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
       <Navbar />
 
-      {isCmsAdmin && (
-        <aside className="fixed bottom-6 right-6 z-40">
-          <button
-            type="button"
-            onClick={() => navigate('/cms/partners')}
-            className="inline-flex items-center gap-2 rounded-md bg-astu-navy px-4 py-2.5 text-xs font-semibold text-white shadow-lg hover:bg-[#001a41] transition-colors cursor-pointer"
-          >
-            Edit in CMS
-          </button>
-        </aside>
-      )}
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-slate-900 to-astu-blue py-20 lg:py-28 text-white">
+        <div className="absolute inset-0 bg-grid-white/[0.04] bg-[size:3rem_3rem]" />
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
-      {/* ── HERO: full-bleed campus + brand-first composition ── */}
-      <section className="relative isolate min-h-[88vh] overflow-hidden text-white">
-        <img
-          src={heroBg}
-          alt="Adama Science and Technology University campus"
-          className={`absolute inset-0 h-full w-full object-cover transition-transform duration-[1.4s] ease-out ${
-            heroReady ? 'scale-100' : 'scale-105'
-          }`}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#001433]/96 via-[#002866]/88 to-[#003580]/55" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#001433]/70 via-transparent to-[#001433]/35" />
-
-        <div
-          className={`relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 md:px-8 md:pb-20 md:pt-32 transition-all duration-700 ${
-            heroReady ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-          }`}
-        >
-          <p className="mb-3 text-[13px] font-bold uppercase tracking-[0.28em] text-[#FFCC00]">ASTU</p>
-          <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
-            {config.heroBadge || 'Employer & Industry Partnerships'}
-          </p>
-
-          <h1 className="max-w-3xl text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl leading-[1.08]">
-            {config.heroTitle || 'Partner with ASTU to Access'}{' '}
-            <span className="text-astu-green">
-              {config.heroHighlight || 'Top Engineering & Tech Graduates'}
-            </span>
-          </h1>
-
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
-            {config.heroSubtitle ||
-              'Connect with verified alumni talent, publish career opportunities, and collaborate on technical education.'}
-          </p>
-
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              onClick={() => navigate(config.heroPrimaryCtaLink || '/employers/register')}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-astu-green px-8 py-3.5 text-sm font-bold text-white transition hover:brightness-110 cursor-pointer"
-            >
-              {config.heroPrimaryCtaText || 'Register as Employer'}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate(config.heroSecondaryCtaLink || '/login')}
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-white/35 bg-white/5 px-8 py-3.5 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/12 cursor-pointer"
-            >
-              {config.heroSecondaryCtaText || 'Employer Portal Login'}
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── IMPACT STRIP ── */}
-      <section className="border-b border-slate-200/80 bg-white">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-slate-100 md:grid-cols-4">
-          {[
-            { value: metricDisplay(metrics.registeredAlumniFormatted), label: 'Alumni Members' },
-            { value: metricDisplay(String(metrics.fieldsOfStudy || '—')), label: 'Fields of Study' },
-            { value: metricDisplay(metrics.corporatePartnersFormatted), label: 'Partners' },
-            { value: metricDisplay(metrics.employmentRateFormatted), label: 'Employment Rate' },
-          ].map((item) => (
-            <div key={item.label} className="bg-white px-4 py-9 text-center md:py-10">
-              <div className="text-2xl font-extrabold tracking-tight text-astu-navy md:text-3xl">{item.value}</div>
-              <div className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                {item.label}
-              </div>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold uppercase tracking-wider text-astu-gold mb-6">
+              <Building2 className="w-4 h-4 text-astu-gold" />
+              ASTU Corporate Relations & Industry Partnerships
             </div>
-          ))}
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
+              Recruit Accredited STEM Talent from{' '}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-emerald-300 to-yellow-200">
+                ASTU's Graduate Network
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg lg:text-xl text-slate-300 leading-relaxed max-w-2xl mx-auto mb-8">
+              Connect directly with over 35,000 verified engineering, computing, and applied science alumni. Publish vacancies, search live talent pools, and shape future curricula through structured industry feedback.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              <button
+                onClick={() => navigate('/employers/register')}
+                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-astu-red to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-sm shadow-xl shadow-rose-900/30 transition-all hover:scale-105"
+              >
+                Register Your Organisation
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => navigate('/login')}
+                className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-sm transition-all hover:scale-105"
+              >
+                Employer Portal Sign In
+              </button>
+            </div>
+          </div>
+
+          {/* KPI Stat Cards */}
+          <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 pt-10 border-t border-white/10">
+            {stats.map((s, idx) => (
+              <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="text-3xl sm:text-4xl font-black text-white">{s.value}</div>
+                <div className="text-sm font-bold text-blue-300 mt-1">{s.label}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{s.subtext}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── WHY PARTNER ── */}
-      <section id="benefits" className="scroll-mt-20 bg-[#f3f5f8]">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-8 md:py-24">
-          <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-astu-green">
-              {config.benefitsEyebrow || 'Why Partner'}
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-astu-navy md:text-4xl">
-              {config.benefitsTitle || 'Why Partner with ASTU?'}
+      {/* Verified Partner Companies Logo Showcase */}
+      <section className="py-16 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              National Strategic Alliances
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1">
+              Trusted by Ethiopia's Leading Tech & Industrial Enterprises
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-slate-600">
-              {config.benefitsSubtitle ||
-                'Join industry, public institutions, and research partners recruiting and collaborating with ASTU.'}
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
+              Verified corporate partners collaborating with ASTU on graduate placement, sponsored R&D, and curriculum review.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {benefitCards.map((benefit, index) => {
-              const Icon = benefit.icon;
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-stretch">
+            {verifiedPartners.map((partner) => {
+              const LogoComponent = partnerLogos[partner.name];
               return (
                 <div
-                  key={benefit.title}
-                  className="group"
-                  style={{ animationDelay: `${index * 60}ms` }}
+                  key={partner.name}
+                  className="flex flex-col justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 shadow-sm hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all text-center group"
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center bg-astu-navy text-white transition-transform duration-300 group-hover:scale-105">
-                    <Icon className="h-5 w-5" />
+                  <div className="flex h-16 items-center justify-center mb-3">
+                    {LogoComponent ? (
+                      <LogoComponent className="max-h-12 w-auto" />
+                    ) : (
+                      <span className="text-base font-black text-slate-700 dark:text-slate-200">{partner.name}</span>
+                    )}
                   </div>
-                  <h3 className="text-lg font-bold text-astu-navy">{benefit.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{benefit.description}</p>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {partner.name}
+                    </h4>
+                    <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">
+                      {partner.status}
+                    </span>
+                    <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-2 font-medium">
+                      {partner.hiredCount}
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -304,315 +580,628 @@ export default function PartnersPage() {
         </div>
       </section>
 
-      {/* ── PARTNER DIRECTORY ── */}
-      <section className="border-y border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-8 md:py-24">
-          <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <div className="max-w-xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-astu-green">Directory</p>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-astu-navy md:text-4xl">
-                {config.partnersCarouselTitle || 'Corporate & Institutional Partners'}
+      {/* 6 Key Benefits for Employers */}
+      <section className="py-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            Employer Value Proposition
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-2">
+            Why Partner with Adama Science & Technology University?
+          </h2>
+          <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+            ASTU-AMS offers an integrated recruitment bridge designed specifically for modern industrial and technological enterprises.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {benefits.map((b, idx) => {
+            const Icon = b.icon;
+            return (
+              <div
+                key={idx}
+                className="group p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                    <Icon className="w-7 h-7" />
+                  </div>
+                  <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    {b.tag}
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{b.title}</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{b.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Interactive Alumni Talent Pool Explorer */}
+      <section className="py-20 bg-slate-100/70 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800 transition-colors">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                Verified Candidate Database
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+                Explore the ASTU Talent Pool
               </h2>
-              <p className="mt-4 text-base leading-relaxed text-slate-600">
-                {config.partnersCarouselSubtitle ||
-                  'Employers collaborating with ASTU across technology, industry, and public sectors.'}
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                Sample preview of verified graduating engineers and alumni available for interviews and recruitment.
               </p>
             </div>
 
-            {partnersList.length > 0 && (
-              <div className="relative w-full md:w-80">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative min-w-[260px]">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
-                  type="search"
-                  placeholder="Search partners…"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full border border-slate-200 bg-[#f8fafc] py-3 pl-11 pr-3 text-sm outline-none transition focus:border-astu-navy focus:bg-white focus:ring-2 focus:ring-astu-navy/10"
+                  type="text"
+                  value={talentSearch}
+                  onChange={(e) => setTalentSearch(e.target.value)}
+                  placeholder="Filter by skill, name, degree..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
                 />
               </div>
-            )}
-          </div>
 
-          <div className="mt-12">
-            {partnersLoading ? (
-              <p className="py-16 text-center text-sm text-slate-500">Loading partners…</p>
-            ) : filteredPartners.length === 0 ? (
-              <div className="border border-dashed border-slate-300 py-16 text-center">
-                <Building2 className="mx-auto h-9 w-9 text-slate-300" />
-                <p className="mt-4 text-sm font-semibold text-astu-navy">No partners listed yet</p>
-                <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-                  Partner organizations appear here once published. Register as an employer to join.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => navigate('/employers/register')}
-                  className="mt-6 inline-flex items-center gap-2 bg-astu-green px-5 py-2.5 text-xs font-bold text-white hover:brightness-110 cursor-pointer"
-                >
-                  Register as Employer <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            ) : (
-              <ul className="divide-y divide-slate-200 border-y border-slate-200">
-                {filteredPartners.map((partner) => {
-                  const LogoComponent = partnerLogos[partner.name];
-                  return (
-                    <li key={partner.id || partner.name}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCompanyModal(partner)}
-                        className="group flex w-full items-start gap-5 py-6 text-left transition hover:bg-[#f8fafc] cursor-pointer sm:items-center sm:gap-6"
-                      >
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center bg-slate-50 ring-1 ring-slate-200">
-                          {partner.logo ? (
-                            <PartnerLogoBadge name={partner.name} src={partner.logo} className="h-10 w-10 !shadow-none" />
-                          ) : LogoComponent ? (
-                            <LogoComponent className="h-10 w-10" />
-                          ) : (
-                            <span className="text-sm font-bold text-astu-navy">{partner.name.slice(0, 3)}</span>
-                          )}
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                            <h3 className="text-base font-bold text-astu-navy transition-colors group-hover:text-astu-green">
-                              {partner.name}
-                            </h3>
-                            {partner.industry && (
-                              <span className="text-xs font-medium text-slate-500">{partner.industry}</span>
-                            )}
-                          </div>
-                          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600">
-                            {partner.description ||
-                              'ASTU partner supporting collaboration, internships, and talent pipelines.'}
-                          </p>
-                          {partner.location && (
-                            <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-                              <MapPin className="h-3 w-3" />
-                              {partner.location}
-                            </p>
-                          )}
-                        </div>
-
-                        <span className="mt-1 hidden shrink-0 items-center gap-1 text-xs font-bold text-astu-navy sm:inline-flex">
-                          View profile
-                          <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHAT PARTNERS GET ── */}
-      <section className="bg-[#f3f5f8]">
-        <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 md:grid-cols-12 md:px-8 md:py-24">
-          <div className="md:col-span-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-astu-green">
-              {config.featuresEyebrow || 'Employer Account'}
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-astu-navy md:text-4xl">
-              {config.featuresTitle || 'What Partners Get'}
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-slate-600">
-              {config.featuresSubtitle ||
-                'Tools to source talent, collaborate with academic departments, and support institutional excellence.'}
-            </p>
-
-            <button
-              type="button"
-              onClick={() => navigate(config.ctaCardButtonLink || '/employers/register')}
-              className="mt-8 inline-flex items-center gap-2 bg-astu-navy px-6 py-3 text-sm font-bold text-white transition hover:bg-[#001a41] cursor-pointer"
-            >
-              {config.ctaCardButtonText || 'Register as Partner'}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="md:col-span-7">
-            <ul className="space-y-0 border-t border-slate-200">
-              {features.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-3 border-b border-slate-200 py-4 text-sm text-slate-700"
-                >
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-astu-green" />
-                  <span className="leading-relaxed">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-8 border-l-4 border-astu-green bg-white px-5 py-5">
-              <h3 className="text-lg font-bold text-astu-navy">
-                {config.ctaCardTitle || 'Accelerate Your Hiring Pipeline'}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                {config.ctaCardDescription ||
-                  'Register today for verified graduate profiles and dedicated recruitment support.'}
-              </p>
+              <button
+                onClick={() => navigate('/employers/register')}
+                className="px-5 py-2.5 rounded-xl bg-astu-navy text-white text-xs sm:text-sm font-bold hover:bg-blue-700 transition-all shadow-sm"
+              >
+                Access Full Directory
+              </button>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* ── FAQ ── */}
-      {faqs.length > 0 && (
-        <section className="border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-3xl px-4 py-20 md:px-8 md:py-24">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-astu-green">FAQ</p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-astu-navy md:text-4xl">
-              Partnership Questions
-            </h2>
+          {/* Discipline Filter Buttons */}
+          <div className="flex overflow-x-auto space-x-2 pb-4 mb-6 no-scrollbar">
+            {[
+              { id: 'ALL', label: 'All Disciplines' },
+              { id: 'SOFTWARE', label: 'Software & Computing' },
+              { id: 'ELECTRICAL', label: 'Electrical & Electronics' },
+              { id: 'MECHANICAL', label: 'Mechanical & Automotive' },
+              { id: 'CIVIL', label: 'Civil & Architecture' },
+              { id: 'CHEMICAL', label: 'Chemical & Materials' },
+              { id: 'SCIENCES', label: 'Applied Natural Sciences' },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setSelectedDiscipline(f.id)}
+                className={`whitespace-nowrap px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  selectedDiscipline === f.id
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
 
-            <div className="mt-12 divide-y divide-slate-200 border-y border-slate-200">
-              {faqs.map((faq) => {
-                const isOpen = openFaqId === faq.id;
-                return (
-                  <div key={faq.id}>
-                    <button
-                      type="button"
-                      onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
-                      className="flex w-full items-center justify-between gap-4 py-5 text-left cursor-pointer"
-                    >
-                      <span className="text-sm font-bold text-astu-navy md:text-base">{faq.question}</span>
-                      {isOpen ? (
-                        <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
-                      )}
-                    </button>
-                    <div
-                      className={`grid transition-all duration-300 ease-out ${
-                        isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                      }`}
-                    >
-                      <div className="overflow-hidden">
-                        <p className="pb-5 text-sm leading-relaxed text-slate-600">{faq.answer}</p>
+          {/* Candidate Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCandidates.map((candidate) => (
+              <div
+                key={candidate.id}
+                className="flex flex-col justify-between p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-all"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${candidate.avatarBg} text-white font-black text-sm flex items-center justify-center shadow-md`}>
+                        {candidate.name.split(' ').map((n) => n[0]).join('')}
+                      </div>
+                      <div>
+                        <h4 className="text-base font-bold text-slate-900 dark:text-white">{candidate.name}</h4>
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold">{candidate.degree}</div>
                       </div>
                     </div>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 shrink-0">
+                      {candidate.status}
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs py-3 border-y border-slate-100 dark:border-slate-800 mb-4">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Academic Standing</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{candidate.honors}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">Graduation Batch</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">{candidate.gradYear}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-4">
+                    {candidate.bio}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 mb-6">
+                    {candidate.skills.map((skill, sIdx) => (
+                      <span
+                        key={sIdx}
+                        className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedCandidate(candidate)}
+                  className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-astu-navy hover:text-white dark:hover:bg-blue-600 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all"
+                >
+                  View Profile & Request Interview
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
           </div>
-        </section>
+        </div>
+      </section>
+
+      {/* Live Partner Opportunities / Job Board */}
+      <section className="py-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              Live Career Opportunities
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+              Active Vacancies from Partner Employers
+            </h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+              Explore open positions published directly by verified partner organizations for ASTU graduates.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+            {[
+              { id: 'ALL', label: 'All Openings' },
+              { id: 'FULL_TIME', label: 'Full-Time' },
+              { id: 'TRAINEE', label: 'Graduate Trainee' },
+              { id: 'FELLOWSHIP', label: 'R&D Fellowship' },
+            ].map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setSelectedJobType(t.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                  selectedJobType === t.id
+                    ? 'bg-astu-navy text-white dark:bg-blue-600 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredJobs.map((job) => {
+            const LogoComp = partnerLogos[job.company];
+            return (
+              <div
+                key={job.id}
+                className="flex flex-col justify-between p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-lg transition-all"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="h-10 w-28 flex items-center justify-start">
+                      {LogoComp ? (
+                        <LogoComp className="max-h-10 w-auto" />
+                      ) : (
+                        <span className="text-xs font-bold text-slate-800 dark:text-white">{job.company}</span>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/60">
+                      {job.typeLabel}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">{job.title}</h3>
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-3">
+                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{job.location}</span>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-xs mb-4">
+                    <div className="flex items-center justify-between text-slate-700 dark:text-slate-300">
+                      <span className="font-medium text-slate-400">Compensation</span>
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{job.salary}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mt-1">
+                      <span className="font-medium text-slate-400">Apply by</span>
+                      <span className="font-semibold">{job.deadline}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-1.5 mb-6">
+                    {job.tags.map((tag, tIdx) => (
+                      <span
+                        key={tIdx}
+                        className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedJob(job)}
+                  className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-astu-navy to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-bold transition-all shadow-sm"
+                >
+                  View Details & Apply
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 4-Step Onboarding Roadmap */}
+      <section className="py-20 bg-slate-100/70 dark:bg-slate-900/40 border-y border-slate-200 dark:border-slate-800 transition-colors">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              Clear & Transparent Workflow
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+              How Employer Registration Works
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              From business registration to active campus recruitment in four simple, auditable steps.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {onboardingSteps.map((step, idx) => {
+              const Icon = step.icon;
+              return (
+                <div
+                  key={idx}
+                  className="relative p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono">
+                      {step.step}
+                    </span>
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                  </div>
+
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{step.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{step.description}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Corporate Testimonials */}
+      <section className="py-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+            Employer Voices
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mt-1">
+            What Our Corporate Partners Say
+          </h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            Endorsements from top technology leaders hiring ASTU graduates.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              quote: "ASTU software and electrical engineering graduates arrive with genuine practical laboratory experience. They adapt into our cloud operations teams faster than graduates from any other institution in the region.",
+              author: "Engineering Director",
+              company: "Ethio Telecom",
+              badge: "Over 340 Hired",
+            },
+            {
+              quote: "In cybersecurity and defense analytics, theoretical knowledge is never enough. ASTU alumni possess hands-on Linux, network analysis, and reverse-engineering skills that make them immediate contributors to national defense.",
+              author: "Head of Talent Acquisition",
+              company: "INSA",
+              badge: "Govt Defense Partner",
+            },
+            {
+              quote: "Our aircraft maintenance and systems engineering units rely on ASTU mechanical and electrical engineers. Their mathematical rigor and mechanical aptitude consistently exceed international standards.",
+              author: "Aviation Maintenance Lead",
+              company: "Ethiopian Airlines",
+              badge: "Strategic Partner",
+            },
+          ].map((t, idx) => (
+            <div
+              key={idx}
+              className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-1 text-amber-400 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 italic leading-relaxed mb-6">
+                  "{t.quote}"
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">{t.author}</h4>
+                  <span className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold">{t.company}</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  {t.badge}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pre-Registration FAQ */}
+      <section className="py-20 bg-slate-100/70 dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-800 transition-colors">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+              Employer Inquiries
+            </span>
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white mt-1">
+              Frequently Asked Questions for Employers
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              Everything you need to know about partnering, TIN validation, and recruitment.
+            </p>
+          </div>
+
+          <div className="divide-y divide-slate-200 dark:divide-slate-800 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div key={idx}>
+                  <button
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="flex w-full items-center justify-between gap-4 p-5 text-left font-bold text-sm sm:text-base text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                  >
+                    <span>{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-500 transition-transform duration-300 shrink-0 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Grand Closing CTA Banner */}
+      <section className="py-20 bg-gradient-to-r from-astu-navy via-slate-900 to-blue-900 text-white text-center">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4 tracking-tight">
+            Ready to Connect with Top ASTU Graduates?
+          </h2>
+          <p className="text-slate-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+            Register your organisation today. One simple form, official TIN verification, and zero partnership fees.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <button
+              onClick={() => navigate('/employers/register')}
+              className="px-8 py-4 rounded-xl bg-gradient-to-r from-astu-red to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-sm shadow-xl shadow-rose-950/40 transition-all hover:scale-105"
+            >
+              Start Free Employer Registration
+            </button>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-sm transition-all hover:scale-105"
+            >
+              Sign In to Recruiter Dashboard
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* MODAL: Candidate Detail & Interview Request */}
+      {selectedCandidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setSelectedCandidate(null)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr ${selectedCandidate.avatarBg} text-white font-black text-lg flex items-center justify-center shadow-lg`}>
+                {selectedCandidate.name.split(' ').map((n) => n[0]).join('')}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">{selectedCandidate.name}</h3>
+                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">{selectedCandidate.degree}</p>
+                <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-2">
+                  <span>{selectedCandidate.department}</span> · <span>{selectedCandidate.gradYear}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-2 text-xs mb-6">
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Cumulative GPA:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{selectedCandidate.gpa}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Academic Standing:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{selectedCandidate.honors}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Current Availability:</span>
+                <span className="font-bold text-blue-600 dark:text-blue-400">{selectedCandidate.status}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Preferred Location:</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedCandidate.location}</span>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                Candidate Bio & Background
+              </h5>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                {selectedCandidate.bio}
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                Verified Technical Skills
+              </h5>
+              <div className="flex flex-wrap gap-1.5">
+                {selectedCandidate.skills.map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="text-xs font-semibold px-3 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/60"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <form onSubmit={handleSendInterviewRequest} className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                Request Interview / Candidate Profile
+              </h5>
+              <textarea
+                required
+                rows={3}
+                value={interviewNote}
+                onChange={(e) => setInterviewNote(e.target.value)}
+                placeholder="Include your company name, target role title, and brief interview details..."
+                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCandidate(null)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingInterview}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-astu-navy text-white text-xs font-bold hover:bg-blue-700 transition-all disabled:opacity-50"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  {isSubmittingInterview ? 'Submitting...' : 'Send Inquiry to Alumni Office'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
-      {/* ── CONTACT ── */}
-      <section id="contact" className="scroll-mt-20 bg-[#f3f5f8]">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-8 md:py-24">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-astu-green">Contact</p>
-          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-astu-navy md:text-4xl">
-            Corporate & Alumni Relations
-          </h2>
-          <p className="mt-4 max-w-xl text-base text-slate-600">
-            Reach the ASTU Industry Linkage office for partnership onboarding and campus recruitment.
-          </p>
+      {/* MODAL: Job Detail & Apply */}
+      {selectedJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setSelectedJob(null)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
 
-          <div className="mt-12 grid gap-10 border-t border-slate-200 pt-10 sm:grid-cols-3">
-            <div>
-              <MapPin className="mb-4 h-5 w-5 text-astu-navy" />
-              <h3 className="text-sm font-bold text-astu-navy">Address</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Adama Science and Technology University
-                <br />
-                Adama, Oromia, Ethiopia
-              </p>
-              <a
-                href="https://maps.google.com/?q=Adama+Science+and+Technology+University"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy hover:text-astu-green"
-              >
-                Open in Maps <ExternalLink className="h-3 w-3" />
-              </a>
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/60">
+                {selectedJob.typeLabel}
+              </span>
+              <span className="text-xs font-semibold text-slate-400">Deadline: {selectedJob.deadline}</span>
             </div>
 
-            <div>
-              <Phone className="mb-4 h-5 w-5 text-astu-navy" />
-              <h3 className="text-sm font-bold text-astu-navy">Phone</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                {config.contactPhone || '+251-221-110000'}
-                <br />
-                Ext: 204 / 205
-              </p>
-              <a
-                href={`tel:${(config.contactPhone || '+251-221-110000').replace(/[^\d+]/g, '')}`}
-                className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy hover:text-astu-green"
-              >
-                Call office
-              </a>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-1">{selectedJob.title}</h3>
+            <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mb-4">{selectedJob.company}</div>
+
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-2 text-xs mb-6">
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Location:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{selectedJob.location}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Compensation:</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">{selectedJob.salary}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 dark:text-slate-400">Target Department:</span>
+                <span className="font-semibold text-slate-900 dark:text-white">{selectedJob.department}</span>
+              </div>
             </div>
 
-            <div>
-              <Mail className="mb-4 h-5 w-5 text-astu-navy" />
-              <h3 className="text-sm font-bold text-astu-navy">Email</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                {config.contactEmail || 'irccd@astu.edu.et'}
-                <br />
-                Corporate & Alumni Relations
+            <div className="mb-6">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                Job Overview
+              </h5>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                {selectedJob.description}
               </p>
-              <a
-                href={`mailto:${config.contactEmail || 'irccd@astu.edu.et'}`}
-                className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy hover:text-astu-green"
-              >
-                Send email
-              </a>
             </div>
-          </div>
 
-          <p className="mt-12 flex items-center gap-2 text-xs text-slate-500">
-            <Clock className="h-3.5 w-3.5 text-astu-green" />
-            Monday – Friday, 8:30 AM – 5:30 PM (EAT)
-          </p>
-        </div>
-      </section>
+            <div className="mb-6">
+              <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+                Candidate Requirements
+              </h5>
+              <div className="space-y-2">
+                {selectedJob.requirements.map((req, idx) => (
+                  <div key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>{req}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-      {/* ── BOTTOM CTA ── */}
-      <section className="relative overflow-hidden bg-astu-navy text-white">
-        <div className="pointer-events-none absolute -right-20 top-0 h-72 w-72 rounded-full bg-astu-green/20 blur-3xl" />
-        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-8 md:py-24">
-          <div className="max-w-2xl">
-            <p className="text-[13px] font-bold uppercase tracking-[0.28em] text-[#FFCC00]">ASTU</p>
-            <h2 className="mt-4 text-3xl font-extrabold tracking-tight md:text-4xl">
-              {config.bottomCtaTitle || 'Start Building Your Talent Pipeline'}
-            </h2>
-            <p className="mt-4 text-base leading-relaxed text-slate-300">
-              {config.bottomCtaDescription ||
-                "Join ASTU's partner network and connect with Ethiopia's engineering and technology graduates."}
-            </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
-                onClick={() => navigate(config.bottomCtaButtonLink || '/employers/register')}
-                className="inline-flex items-center gap-2 rounded-md bg-astu-green px-8 py-3.5 text-sm font-bold text-white hover:brightness-110 cursor-pointer"
+                onClick={() => setSelectedJob(null)}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
-                {config.bottomCtaButtonText || 'Register Your Organization'}
-                <ArrowRight className="h-4 w-4" />
+                Close
               </button>
-              <a
-                href="#contact"
-                className="inline-flex items-center gap-2 rounded-md border border-white/30 px-8 py-3.5 text-sm font-bold text-white hover:bg-white/10 cursor-pointer"
+              <button
+                onClick={() => {
+                  toast.success('Redirecting to the Alumni Application Portal...');
+                  setSelectedJob(null);
+                  navigate('/login');
+                }}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-astu-navy text-white text-xs font-bold hover:bg-blue-700 transition-all shadow-md"
               >
-                Contact Directorate
-              </a>
+                Sign In & Apply via Portal
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
-      </section>
-
-      {selectedCompanyModal && (
-        <CompanyDetailModal
-          company={selectedCompanyModal}
-          onClose={() => setSelectedCompanyModal(null)}
-          onRegisterInterest={(company) => {
-            setSelectedCompanyModal(null);
-            navigate(`/employers/register?partner=${encodeURIComponent(company.name)}`);
-          }}
-        />
       )}
 
       <Footer />

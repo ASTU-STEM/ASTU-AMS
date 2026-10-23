@@ -1,12 +1,4 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark';
 
@@ -30,67 +22,42 @@ export function applyTheme(theme: Theme): void {
   root.style.colorScheme = theme;
 }
 
-interface ThemeContextValue {
-  theme: Theme;
-  darkMode: boolean;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextValue | null>(null);
-
 /**
- * Single source of truth for light/dark across public pages and every dashboard.
- * Mount once near the app root so toggles stay in sync (same tab + localStorage).
+ * Single source of truth for the light/dark theme.
+ *
+ * Previously every dashboard re-implemented this inline: read localStorage into
+ * a useState, then an effect that swapped the `light`/`dark` class on <html>.
+ * Ten files carried a copy, and `uiSlice.setDarkMode` wrote localStorage
+ * without ever touching the class, so the UI and the stored preference drifted
+ * apart.
  */
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => readStoredTheme());
+export function useTheme() {
+  const [theme, setThemeState] = useState<Theme>(readStoredTheme);
 
   useEffect(() => {
     applyTheme(theme);
     window.localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
+  // Keep multiple open tabs in sync.
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
-        setThemeState(e.newValue === 'dark' ? 'dark' : 'light');
-      }
+      if (e.key === STORAGE_KEY) setThemeState(e.newValue === 'dark' ? 'dark' : 'light');
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, []);
-
-  const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
   }, []);
 
   const toggleTheme = useCallback(() => {
     setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
   }, []);
 
-  const value = useMemo(
-    () => ({
-      theme,
-      darkMode: theme === 'dark',
-      setTheme,
-      toggleTheme,
-    }),
-    [theme, setTheme, toggleTheme]
-  );
-
-  return React.createElement(ThemeContext.Provider, { value }, children);
-}
-
-/**
- * Shared theme hook. Must be used under ThemeProvider.
- */
-export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
-  return ctx;
+  return {
+    theme,
+    darkMode: theme === 'dark',
+    setTheme: setThemeState,
+    toggleTheme,
+  };
 }
 
 export default useTheme;
