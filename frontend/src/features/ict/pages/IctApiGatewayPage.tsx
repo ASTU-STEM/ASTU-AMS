@@ -61,9 +61,9 @@ export default function IctApiGatewayPage() {
   const [activeTab, setActiveTab] = useState<'KEYS' | 'HEALTH' | 'STREAM'>('KEYS');
 
   React.useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     fetch('/api/admin/technical-ops/api-gateway', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
       .then(r => r.json())
       .then(d => {

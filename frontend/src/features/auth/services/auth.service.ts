@@ -31,6 +31,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token expired or unauthorized
       localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       localStorage.removeItem('astu_ams_user_role');
@@ -125,6 +126,7 @@ export const authService = {
       if (data.success && (data.data?.token || (data.data as any)?.requires2FA)) {
         if (data.data?.token) {
           localStorage.setItem('authToken', data.data.token);
+          localStorage.setItem('token', data.data.token);
           if (data.data.refreshToken) {
             localStorage.setItem('refreshToken', data.data.refreshToken);
           }
@@ -286,6 +288,7 @@ export const authService = {
     } finally {
       // Always clear local data
       localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       localStorage.removeItem('astu_ams_user_role');

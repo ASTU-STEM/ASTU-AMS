@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import eventsService, { ApiEvent } from '../features/admin/services/events.service';
 
 const DEFAULT_EVENT_IMAGES: Record<string, string> = {
@@ -472,6 +473,8 @@ export default function EventDetailPage() {
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   );
 }

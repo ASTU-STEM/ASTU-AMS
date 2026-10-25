@@ -25,9 +25,9 @@ export default function IctObservabilityPage() {
   useEffect(() => {
     const fetchLive = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
         const res = await fetch('/api/admin/technical-ops/telemetry/live', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         const d = await res.json();
         if (d.success && d.data) {

@@ -11,6 +11,7 @@ import {
   Tag,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
 import contentService from '../features/admin/services/content.service';
 import { ContentCardItem } from '../features/admin/components/ContentCard';
@@ -163,6 +164,7 @@ export default function AnnouncementListPage() {
         )}
       </main>
 
+      <Footer />
       <ChatBot />
     </div>
   );

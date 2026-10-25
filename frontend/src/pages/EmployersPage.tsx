@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, MapPin, Briefcase, Phone, Mail, ArrowRight } from "lucide-react";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 import electricLabs from "../assets/images/electriclabs.jpeg";
 import gc7 from "../assets/images/gc7.jpg";
@@ -58,14 +59,14 @@ export default function EmployersPage() {
   }, []);
 
   return (
-    <div className="app-shell min-h-screen bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col">
       <Navbar />
 
-      <header className="border-b border-outline-variant bg-white dark:bg-slate-900/90 dark:border-slate-800 transition-colors">
+      <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 transition-colors">
         <div className="mx-auto max-w-[1440px] px-4 py-8 md:px-8">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Employer Network</p>
           <h1 className="mt-2 text-3xl font-bold text-astu-navy dark:text-white">Featured Employers and Partners</h1>
-          <p className="mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400">
+          <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
             Organisations collaborating with ASTU on graduate recruitment, internships, and industry feedback.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
@@ -77,7 +78,7 @@ export default function EmployersPage() {
             </button>
             <button
               onClick={() => navigate("/employers/register")}
-              className="inline-flex items-center gap-2 rounded-lg border border-outline-variant dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-astu-navy dark:text-blue-300 hover:bg-surface-container-low dark:hover:bg-slate-800"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-astu-navy dark:text-blue-300 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               Register as Employer
             </button>
@@ -85,24 +86,24 @@ export default function EmployersPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1440px] px-4 py-12 md:px-8">
+      <main className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 flex-1 w-full">
         <section className="mb-16">
           <div className="mb-8 reveal">
-            <h2 className="text-2xl font-bold text-astu-navy">Featured Employers</h2>
-            <p className="mt-2 text-sm text-on-surface-variant">Leading organisations hiring ASTU graduates</p>
+            <h2 className="text-2xl font-bold text-astu-navy dark:text-white">Featured Employers</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Leading organisations hiring ASTU graduates</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featuredEmployers.map((employer) => (
-              <article key={employer.name} className="reveal rounded-xl border border-outline-variant bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+              <article key={employer.name} className="reveal rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                 {employer.image && (
                   <img src={employer.image} alt={employer.name} className="h-40 w-full rounded-lg object-cover" />
                 )}
                 <div className="mt-4">
-                  <h3 className="font-semibold text-astu-navy">{employer.name}</h3>
-                  <p className="mt-1 text-xs text-on-surface-variant">{employer.area}</p>
+                  <h3 className="font-semibold text-astu-navy dark:text-white">{employer.name}</h3>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{employer.area}</p>
                   <div className="mt-3 flex items-center gap-2 text-xs">
                     <Briefcase className="h-3 w-3 text-astu-green" />
-                    <span className="text-on-surface-variant">{employer.openings}</span>
+                    <span className="text-slate-600 dark:text-slate-400">{employer.openings}</span>
                   </div>
                   <button
                     onClick={() => navigate("/partners")}
@@ -118,18 +119,18 @@ export default function EmployersPage() {
 
         <section className="mb-16">
           <div className="mb-8 reveal">
-            <h2 className="text-2xl font-bold text-astu-navy">Partner Companies</h2>
-            <p className="mt-2 text-sm text-on-surface-variant">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
+            <h2 className="text-2xl font-bold text-astu-navy dark:text-white">Partner Companies</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {partnerCompanies.map((company) => (
-              <div key={company.name} className="reveal rounded-xl border border-outline-variant bg-white p-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-lg bg-astu-navy/10 mb-3">
-                  <Building2 className="h-7 w-7 text-astu-navy" />
+              <div key={company.name} className="reveal rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 text-center transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-lg bg-astu-navy/10 dark:bg-blue-900/30 mb-3">
+                  <Building2 className="h-7 w-7 text-astu-navy dark:text-blue-300" />
                 </div>
-                <h4 className="font-semibold text-astu-navy">{company.name}</h4>
-                <p className="mt-1 text-xs text-on-surface-variant">{company.industry}</p>
-                <div className="mt-2 flex items-center justify-center gap-1 text-xs text-on-surface-variant">
+                <h4 className="font-semibold text-astu-navy dark:text-white">{company.name}</h4>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">{company.industry}</p>
+                <div className="mt-2 flex items-center justify-center gap-1 text-xs text-slate-500 dark:text-slate-400">
                   <MapPin className="h-3 w-3" />
                   <span>{company.location}</span>
                 </div>
@@ -140,14 +141,14 @@ export default function EmployersPage() {
 
         <section className="mb-16">
           <div className="mb-8 reveal">
-            <h2 className="text-2xl font-bold text-astu-navy">Frequently Asked Questions</h2>
-            <p className="mt-2 text-sm text-on-surface-variant">Common questions about ASTU-AMS</p>
+            <h2 className="text-2xl font-bold text-astu-navy dark:text-white">Frequently Asked Questions</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Common questions about ASTU-AMS</p>
           </div>
           <div className="max-w-4xl space-y-4">
             {faqItems.map((item, idx) => (
-              <div key={idx} className="reveal border-b border-outline-variant pb-4">
-                <h3 className="font-semibold text-astu-navy">{item.question}</h3>
-                <p className="mt-2 text-sm text-on-surface-variant">{item.answer}</p>
+              <div key={idx} className="reveal border-b border-slate-200 dark:border-slate-800 pb-4">
+                <h3 className="font-semibold text-astu-navy dark:text-blue-200">{item.question}</h3>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{item.answer}</p>
               </div>
             ))}
           </div>
@@ -155,28 +156,30 @@ export default function EmployersPage() {
 
         <section>
           <div className="mb-8 reveal">
-            <h2 className="text-2xl font-bold text-astu-navy">Contact Us</h2>
-            <p className="mt-2 text-sm text-on-surface-variant">Connect with the ASTU Alumni Relations Office</p>
+            <h2 className="text-2xl font-bold text-astu-navy dark:text-white">Contact Us</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Connect with the ASTU Alumni Relations Office</p>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
-            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <MapPin className="h-8 w-8 mx-auto text-astu-navy mb-3" />
-              <h4 className="font-semibold text-astu-navy">Address</h4>
-              <p className="mt-1 text-xs text-on-surface-variant">Adama, Oromia, Ethiopia</p>
+            <div className="reveal text-center p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <MapPin className="h-8 w-8 mx-auto text-astu-navy dark:text-blue-400 mb-3" />
+              <h4 className="font-semibold text-astu-navy dark:text-white">Address</h4>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Adama, Oromia, Ethiopia</p>
             </div>
-            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <Phone className="h-8 w-8 mx-auto text-astu-navy mb-3" />
-              <h4 className="font-semibold text-astu-navy">Phone</h4>
-              <p className="mt-1 text-xs text-on-surface-variant">+251-221-110000</p>
+            <div className="reveal text-center p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <Phone className="h-8 w-8 mx-auto text-astu-navy dark:text-blue-400 mb-3" />
+              <h4 className="font-semibold text-astu-navy dark:text-white">Phone</h4>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">+251-221-110000</p>
             </div>
-            <div className="reveal text-center p-6 rounded-xl border border-outline-variant bg-white">
-              <Mail className="h-8 w-8 mx-auto text-astu-navy mb-3" />
-              <h4 className="font-semibold text-astu-navy">Email</h4>
-              <p className="mt-1 text-xs text-on-surface-variant">irccd@astu.edu.et</p>
+            <div className="reveal text-center p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <Mail className="h-8 w-8 mx-auto text-astu-navy dark:text-blue-400 mb-3" />
+              <h4 className="font-semibold text-astu-navy dark:text-white">Email</h4>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">irccd@astu.edu.et</p>
             </div>
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
   );
 }

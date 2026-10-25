@@ -100,8 +100,8 @@ const [telemetry, setTelemetry] = useState<{
     }
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const authHeader = { Authorization: `Bearer ${token}` };
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const authHeader: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
       const res = await fetch('/api/admin/technical-ops/telemetry', { headers: authHeader });
       const data = await res.json();
@@ -157,10 +157,13 @@ const [telemetry, setTelemetry] = useState<{
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       const res = await fetch('/api/admin/technical-ops/action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ action: actionName })
       });
       const data = await res.json();

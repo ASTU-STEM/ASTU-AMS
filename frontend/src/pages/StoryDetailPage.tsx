@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
 import storiesService, { AlumniStory } from '../features/admin/services/stories.service';
 
@@ -227,6 +228,7 @@ export default function StoryDetailPage() {
         </div>
       </div>
 
+      <Footer />
       <ChatBot />
     </div>
   );

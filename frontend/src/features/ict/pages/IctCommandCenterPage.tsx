@@ -28,9 +28,9 @@ export default function IctCommandCenterPage() {
 
   const fetchTelemetry = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       const res = await fetch('/api/admin/technical-ops/telemetry', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
       const data = await res.json();
       if (data.success && data.data) {

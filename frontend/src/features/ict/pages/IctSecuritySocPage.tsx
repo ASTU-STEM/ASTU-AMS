@@ -130,9 +130,9 @@ export default function IctSecuritySocPage() {
   const [blacklistedIps, setBlacklistedIps] = useState<Array<{ ip: string; reason: string; added: string; count: number }>>([]);
 
   React.useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     fetch('/api/admin/technical-ops/security', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
       .then(r => r.json())
       .then(d => {

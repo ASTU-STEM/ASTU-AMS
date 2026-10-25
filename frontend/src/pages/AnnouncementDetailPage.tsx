@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
 import contentService from '../features/admin/services/content.service';
 import { ContentCardItem } from '../features/admin/components/ContentCard';
@@ -292,6 +293,7 @@ export default function AnnouncementDetailPage() {
         </div>
       </main>
 
+      <Footer />
       <ChatBot />
     </div>
   );

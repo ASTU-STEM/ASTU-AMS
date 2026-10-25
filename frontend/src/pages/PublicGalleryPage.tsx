@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
 
@@ -313,10 +314,7 @@ export default function PublicGalleryPage() {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
-        © 2026 Adama Science and Technology University (ASTU) — All Rights Reserved.
-      </footer>
+      <Footer />
       <ChatBot />
     </div>
   );
