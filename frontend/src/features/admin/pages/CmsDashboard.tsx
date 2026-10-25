@@ -445,7 +445,7 @@ export default function CmsDashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [refreshMetrics]);
 
   useEffect(() => {
     refreshAllData();

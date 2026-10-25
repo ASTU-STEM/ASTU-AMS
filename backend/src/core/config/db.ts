@@ -4,7 +4,9 @@ import fs from 'fs';
 import path from 'path';
 
 // ─── In-memory dev DB helpers ───
-const DEV_DB_PATH = path.join(process.cwd(), 'data', 'dev-db.json');
+const DEV_DB_PATH = process.env.NODE_ENV === 'test'
+  ? path.join(process.cwd(), 'data', 'test-db.json')
+  : path.join(process.cwd(), 'data', 'dev-db.json');
 const CMS_CONTENT_PATH = path.join(process.cwd(), 'data', 'cms-content.json');
 
 function readDevDb(): any {
@@ -12,6 +14,11 @@ function readDevDb(): any {
   try {
     if (fs.existsSync(DEV_DB_PATH)) {
       store = JSON.parse(fs.readFileSync(DEV_DB_PATH, 'utf-8'));
+    } else if (process.env.NODE_ENV === 'test') {
+      const templatePath = path.join(process.cwd(), 'data', 'dev-db.json');
+      if (fs.existsSync(templatePath)) {
+        store = JSON.parse(fs.readFileSync(templatePath, 'utf-8'));
+      }
     }
   } catch { /* ignore */ }
   if (!store) {

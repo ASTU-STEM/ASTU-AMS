@@ -129,5 +129,8 @@ export const usePublicMetrics = () => {
     };
   }, [loadData]);
 
-  return { metrics, loading, error, refresh: () => loadData(false) };
+  const refresh = useCallback(() => loadData(false), [loadData]);
+
+  return { metrics, loading, error, refresh };
 };
+

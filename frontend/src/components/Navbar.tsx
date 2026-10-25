@@ -4,6 +4,7 @@ import {
   Bell,
   Building2,
   ChevronDown,
+  Heart,
   Home,
   Info,
   Menu,
@@ -22,7 +23,8 @@ import { useTheme } from "../hooks/useTheme";
 
 interface MegaMenuItem {
   label: string;
-  sectionId: string;
+  sectionId?: string;
+  route?: string;
   description?: string;
 }
 
@@ -37,7 +39,7 @@ const megaMenus: MegaMenu[] = [
     label: "About",
     icon: Info,
     items: [
-      { label: "About ASTU", sectionId: "impact", description: "Mission, vision and institutional impact" },
+      { label: "About ASTU", route: "/about", description: "Mission, vision and institutional impact" },
       { label: "Campuses", sectionId: "campuses", description: "Campuses and facilities" },
       { label: "Campus Life", sectionId: "campus-life", description: "Student activities and culture" },
       { label: "Research", sectionId: "research", description: "Research and innovation highlights" },
@@ -48,9 +50,11 @@ const megaMenus: MegaMenu[] = [
     label: "Services",
     icon: Building2,
     items: [
-      { label: "How It Works", sectionId: "how-it-works", description: "Portals for alumni, employers and departments" },
+      { label: "Alumni Community", route: "/community", description: "Directory of graduates, chapters and mentors" },
+      { label: "Giving & Donations", route: "/donations", description: "Support student scholarships and campus labs" },
+      { label: "Industry Partners", route: "/partners", description: "Strategic corporate and institutional partners" },
       { label: "Career Opportunities", sectionId: "career-opportunities", description: "Jobs and internships" },
-      { label: "Partners", sectionId: "partners", description: "Industry and institutional partners" },
+      { label: "How It Works", sectionId: "how-it-works", description: "Portals for alumni, employers and departments" },
       { label: "Community Voices", sectionId: "testimonials", description: "What alumni and partners say" },
     ],
   },
@@ -58,12 +62,11 @@ const megaMenus: MegaMenu[] = [
     label: "Media",
     icon: Megaphone,
     items: [
-      { label: "Events", sectionId: "events", description: "Upcoming gatherings" },
-      { label: "Workshops", sectionId: "workshops", description: "Skill-building sessions" },
-      { label: "News", sectionId: "news", description: "Latest updates" },
-      { label: "Announcements", sectionId: "announcements", description: "Official notices" },
-      { label: "Gallery", sectionId: "gallery", description: "Photo moments" },
-      { label: "Video Gallery", sectionId: "video-gallery", description: "Video highlights" },
+      { label: "Events & Workshops", route: "/events", description: "Upcoming gatherings, workshops & summits" },
+      { label: "News & Bulletins", sectionId: "news", description: "Latest university updates" },
+      { label: "Announcements", route: "/announcements", description: "Official notices and memos" },
+      { label: "Photo Gallery", route: "/gallery", description: "Campus and event photo moments" },
+      { label: "Video Highlights", sectionId: "video-gallery", description: "Video highlights" },
     ],
   },
 ];
@@ -78,15 +81,18 @@ interface SimpleNavItem {
 const simpleItems: SimpleNavItem[] = [
   { label: "Home", sectionId: "home", icon: Home },
   { label: "About", route: "/about", icon: Info },
-  { label: "Partners", route: "/partners", icon: Users },
+  { label: "Community", route: "/community", icon: Users },
+  { label: "Giving", route: "/donations", icon: Heart },
+  { label: "Partners", route: "/partners", icon: Building2 },
 ];
 
 const searchItems = [
   ...megaMenus.flatMap((m) => m.items),
-  ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId })),
+  ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId, route: s.route })),
 ].map((item) => ({
   label: item.label,
   sectionId: item.sectionId,
+  route: item.route,
 }));
 
 function scrollToSection(sectionId: string) {
@@ -138,7 +144,11 @@ export default function Navbar() {
   const handleSearchSelect = (item: (typeof searchItems)[number]) => {
     setSearchQuery("");
     setIsSearchOpen(false);
-    if (item.sectionId) navigateToSection(item.sectionId);
+    if (item.route) {
+      navigate(item.route);
+    } else if (item.sectionId) {
+      navigateToSection(item.sectionId);
+    }
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -186,10 +196,14 @@ export default function Navbar() {
     }
   };
 
-  const handleMegaItemClick = (sectionId: string) => {
+  const handleMegaItemClick = (item: MegaMenuItem) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    navigateToSection(sectionId);
+    if (item.route) {
+      navigate(item.route);
+    } else if (item.sectionId) {
+      navigateToSection(item.sectionId);
+    }
   };
 
   const handleMegaEnter = (label: string) => {
@@ -299,8 +313,8 @@ export default function Navbar() {
                       <div className="p-2">
                         {menu.items.map((item) => (
                           <button
-                            key={item.sectionId}
-                            onClick={() => handleMegaItemClick(item.sectionId)}
+                            key={item.label}
+                            onClick={() => handleMegaItemClick(item)}
                             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                           >
                             <div>
@@ -511,8 +525,8 @@ export default function Navbar() {
                     <div className="ml-8 space-y-1 pb-1">
                       {menu.items.map((item) => (
                         <button
-                          key={item.sectionId}
-                          onClick={() => handleMegaItemClick(item.sectionId)}
+                          key={item.label}
+                          onClick={() => handleMegaItemClick(item)}
                           className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-astu-navy/5 transition-all text-left"
                         >
                           {item.label}

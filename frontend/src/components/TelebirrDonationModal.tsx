@@ -79,7 +79,7 @@ export default function TelebirrDonationModal({
     setLookupQuery("");
     setLookupResult(null);
     setCopiedRef(false);
-  }, [isOpen, campaign?.id, initialMethod]);
+  }, [isOpen, campaign, initialMethod]);
 
   if (!isOpen || !campaign) return null;
 

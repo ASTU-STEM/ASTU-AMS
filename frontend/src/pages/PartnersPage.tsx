@@ -182,7 +182,7 @@ export default function PartnersPage() {
     },
   ];
 
-  const talentPool: TalentCandidate[] = [
+  const talentPool = useMemo<TalentCandidate[]>(() => [
     {
       id: 'ALUM-901',
       name: 'Binyam Tesfaye',
@@ -273,9 +273,9 @@ export default function PartnersPage() {
       avatarBg: 'from-cyan-600 to-blue-800',
       bio: 'Data scientist and mathematical modeler. Co-authored predictive models for agricultural yield forecasting using satellite telemetry and neural networks.',
     },
-  ];
+  ], []);
 
-  const partnerJobs: PartnerJob[] = [
+  const partnerJobs = useMemo<PartnerJob[]>(() => [
     {
       id: 'JOB-ETHIO-01',
       title: 'Cloud Infrastructure & DevOps Engineer',
@@ -390,7 +390,7 @@ export default function PartnersPage() {
         'Knowledge of banking security protocols and API gateways',
       ],
     },
-  ];
+  ], []);
 
   const onboardingSteps = [
     {
@@ -452,7 +452,7 @@ export default function PartnersPage() {
       const matchesDiscipline = selectedDiscipline === 'ALL' || c.discipline === selectedDiscipline;
       return matchesSearch && matchesDiscipline;
     });
-  }, [talentSearch, selectedDiscipline]);
+  }, [talentPool, talentSearch, selectedDiscipline]);
 
   // Filtering jobs
   const filteredJobs = useMemo(() => {
@@ -460,7 +460,7 @@ export default function PartnersPage() {
       if (selectedJobType === 'ALL') return true;
       return j.type === selectedJobType;
     });
-  }, [selectedJobType]);
+  }, [partnerJobs, selectedJobType]);
 
   const handleSendInterviewRequest = (e: React.FormEvent) => {
     e.preventDefault();
