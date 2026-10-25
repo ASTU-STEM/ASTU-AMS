@@ -41177,6 +41177,22 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1792511414811",
       "createdAt": "2026-10-20T15:50:14.811Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1792946641377",
+      "createdAt": "2026-10-25T16:44:01.377Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1792946857893",
+      "createdAt": "2026-10-25T16:47:37.893Z"
     }
   ],
   "notifications": [
@@ -64688,9 +64704,218 @@
         "stats": {
           "graduates": "45,000+",
           "chapters": "12"
+        },
+        "welcomeMessage": "Welcome to the ASTU Alumni Management System, a digital bridge between graduates, employers, departments, and university services.",
+        "impactStats": [
+          {
+            "id": "IS-1",
+            "label": "Registered Alumni Members",
+            "value": "1,239",
+            "suffix": "+",
+            "detail": "Registered in the alumni network",
+            "icon": "Users",
+            "active": true
+          },
+          {
+            "id": "IS-2",
+            "label": "Partner Organizations",
+            "value": "500",
+            "suffix": "+",
+            "detail": "Hiring, internships, and feedback",
+            "icon": "Building2",
+            "active": true
+          },
+          {
+            "id": "IS-3",
+            "label": "Employment Rate",
+            "value": "87",
+            "suffix": "%",
+            "detail": "Graduate employment rate",
+            "icon": "LineChart",
+            "active": true
+          },
+          {
+            "id": "IS-4",
+            "label": "Digital Requests",
+            "value": "6K",
+            "suffix": "+",
+            "detail": "Transcript and certificate requests",
+            "icon": "FileCheck2",
+            "active": true
+          },
+          {
+            "id": "IS-5",
+            "label": "Engagement Hub",
+            "value": "24/7",
+            "suffix": "",
+            "detail": "Always-on alumni engagement",
+            "icon": "MessageSquareText",
+            "active": true
+          }
+        ],
+        "portals": [
+          {
+            "id": "SP-1",
+            "title": "Alumni",
+            "icon": "Users",
+            "points": [
+              "Create and maintain your professional profile.",
+              "Access verified job listings and internship opportunities.",
+              "Complete tracer surveys to guide curriculum development.",
+              "Mentor current students and connect with peers."
+            ],
+            "cta": "Access Alumni Portal",
+            "route": "/info/alumni-portal",
+            "active": true
+          },
+          {
+            "id": "SP-2",
+            "title": "Employers",
+            "icon": "Briefcase",
+            "points": [
+              "Post employment opportunities for ASTU graduates.",
+              "Search alumni by expertise, skills, and department.",
+              "Provide feedback to enhance curriculum relevance."
+            ],
+            "cta": "Partner With ASTU",
+            "route": "/info/employer-portal",
+            "active": true
+          },
+          {
+            "id": "SP-3",
+            "title": "Departments",
+            "icon": "LineChart",
+            "points": [
+              "Monitor graduate employment outcomes and metrics.",
+              "Identify skill gaps through employer analytics.",
+              "Generate accreditation-ready reports."
+            ],
+            "cta": "View Department Analytics",
+            "route": "/info/department-portal",
+            "active": true
+          },
+          {
+            "id": "SP-4",
+            "title": "Registrar",
+            "icon": "FileCheck2",
+            "points": [
+              "Validate alumni credentials against SIS records.",
+              "Process transcript and certificate requests.",
+              "Send tracer study reminders and audit notifications."
+            ],
+            "cta": "Open Registrar Portal",
+            "route": "/info/registrar-portal",
+            "active": true
+          },
+          {
+            "id": "SP-5",
+            "title": "Administrator",
+            "icon": "LockKeyhole",
+            "points": [
+              "Manage users, roles, and department records.",
+              "Monitor system logs, backups, and security protocols.",
+              "Oversee institutional analytics and accreditation reports."
+            ],
+            "cta": "Admin Console",
+            "route": "/admin",
+            "active": true
+          }
+        ],
+        "newsItems": [
+          {
+            "id": "NW-1",
+            "title": "New Engineering Lab Inaugurated",
+            "date": "May 28, 2026",
+            "active": true
+          },
+          {
+            "id": "NW-2",
+            "title": "ASTU Research Grant Winners",
+            "date": "May 25, 2026",
+            "active": true
+          },
+          {
+            "id": "NW-3",
+            "title": "Annual Career Expo Announced",
+            "date": "May 20, 2026",
+            "active": true
+          }
+        ],
+        "testimonials": [
+          {
+            "id": "TT-1",
+            "quote": "ASTU-AMS gave our department the evidence we needed for skill-gap review.",
+            "by": "Department Head",
+            "active": true
+          },
+          {
+            "id": "TT-2",
+            "quote": "The candidate search and feedback tools improved our campus recruitment cycle.",
+            "by": "Employer Partner",
+            "active": true
+          },
+          {
+            "id": "TT-3",
+            "quote": "I found mentorship, events, and job matches without leaving the alumni portal.",
+            "by": "ASTU Alumna",
+            "active": true
+          }
+        ],
+        "faq": [
+          {
+            "id": "FQ-1",
+            "question": "Who can use ASTU-AMS?",
+            "answer": "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.",
+            "active": true
+          },
+          {
+            "id": "FQ-2",
+            "question": "How are tracer studies used?",
+            "answer": "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.",
+            "active": true
+          },
+          {
+            "id": "FQ-3",
+            "question": "Can employers register events?",
+            "answer": "Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports.",
+            "active": true
+          },
+          {
+            "id": "FQ-4",
+            "question": "How do I request a transcript?",
+            "answer": "Log into your alumni profile, navigate to \"Document Requests\", and submit a digital request through the Registrar portal.",
+            "active": true
+          },
+          {
+            "id": "FQ-5",
+            "question": "What is the Tracer Study?",
+            "answer": "A longitudinal survey that tracks graduate employment outcomes at 6, 12, and 24-month intervals for accreditation.",
+            "active": true
+          }
+        ],
+        "tracerSpotlight": {
+          "enabled": true,
+          "title": "Tracer Study 2026",
+          "description": "Help ASTU maintain accreditation by completing your career outcome survey. Your responses drive curriculum updates and institutional quality assurance.",
+          "responseRate": "67.9%",
+          "targetBatch": "2024",
+          "deadline": "August 31, 2026"
+        },
+        "employerFeedback": {
+          "enabled": true,
+          "title": "Employer Competency Feedback",
+          "description": "Partner employers rate graduate competencies to help departments align curricula with industry needs.",
+          "submissions": 128,
+          "companies": 24
+        },
+        "mentorshipStats": {
+          "enabled": true,
+          "mentors": 45,
+          "mentees": 210,
+          "sessions": 380
         }
       },
-      "updatedAt": "2026-10-22T18:54:56.675Z",
+      "updatedAt": "2026-10-25T16:51:22.891Z",
       "updatedBy": "CMS Admin"
     }
   ],
