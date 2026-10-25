@@ -56,4 +56,5 @@ const config = {
   toastDuration: 4000,
 };
 
+export { mediaUrl };
 export default config;

@@ -13,7 +13,10 @@ import AnnouncementListPage from "./pages/AnnouncementListPage";
 import AnnouncementDetailPage from "./pages/AnnouncementDetailPage";
 import PublicGalleryPage from "./pages/PublicGalleryPage";
 import StoryDetailPage from "./pages/StoryDetailPage";
+import EventsPage from "./pages/EventsPage";
 import EventDetailPage from "./pages/EventDetailPage";
+import AlumniCommunityPage from "./pages/AlumniCommunityPage";
+import DonationsPage from "./pages/DonationsPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
@@ -48,13 +51,16 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/partners" element={<PartnersPage />} />
+        <Route path="/faq" element={<Navigate to="/info/faq" replace />} />
         <Route path="/info/:slug" element={<PublicInfoPage />} />
         <Route path="/announcements" element={<AnnouncementListPage />} />
         <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
         <Route path="/gallery" element={<PublicGalleryPage />} />
         <Route path="/stories/:id" element={<StoryDetailPage />} />
-        <Route path="/events" element={<HomePage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
+        <Route path="/community" element={<AlumniCommunityPage />} />
+        <Route path="/donations" element={<DonationsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/employers" element={<EmployersPage />} />

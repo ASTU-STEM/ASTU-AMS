@@ -44,21 +44,15 @@ export interface ApiEvent {
   rsvps?: any[];
   createdAt?: string;
   updatedAt?: string;
-  /**
-   * Presentation-only fields. The Event model does not persist these, so the
-   * API omits them and callers must supply their own fallback.
-   */
-  slug?: string;
-  image?: string;
-  coverImage?: string;
-  bannerUrl?: string;
-  capacity?: number;
-  category?: string;
-  tags?: string[];
 }
 
 export const eventsService = {
-  async getAllEvents(): Promise<ApiEvent[]> {
+  /**
+   * Public event directory. The `/events` API returns the full list (no
+   * page/limit query params today), so callers paginate client-side.
+   * Pass `{ throwOnError: true }` when the UI must show an error state.
+   */
+  async getAllEvents(options?: { throwOnError?: boolean }): Promise<ApiEvent[]> {
     try {
       const response = await apiClient.get<{ success: boolean; data: ApiEvent[] }>('/events');
       if (response.data.success && Array.isArray(response.data.data)) {
@@ -67,6 +61,7 @@ export const eventsService = {
       return [];
     } catch (error) {
       console.warn('Failed to fetch events from API:', error);
+      if (options?.throwOnError) throw error;
       return [];
     }
   },

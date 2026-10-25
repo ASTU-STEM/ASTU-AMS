@@ -42,26 +42,54 @@ import {
   Pause,
   Play,
   Share2,
-  Loader2,
+  Heart,
+  LogIn,
+  UserPlus,
+  CreditCard,
+  TrendingUp,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import ChatBot from "../components/ChatBot";
-import { useTheme } from "../hooks/useTheme";
-import { partnerLogos } from "../components/PartnerLogos";
+import ShareCampaignModal from "../components/ShareCampaignModal";
+import TelebirrDonationModal from "../components/TelebirrDonationModal";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
 import storiesService from "../features/admin/services/stories.service";
-import homepageCmsService from "../features/admin/services/homepageCms.service";
+import homepageCmsService, { Partner } from "../features/admin/services/homepageCms.service";
 import publicStatsService, { PublicStat } from "../features/public/services/publicStats.service";
 import config from "../config";
 
 const { mediaUrl } = config;
 import footerCmsService, { FooterCmsConfig, defaultFooterConfig } from "../features/admin/services/footerCms.service";
-import gc7Img from "../assets/images/gc7.jpg";
 import astuBuildingImg from "../assets/imgs/astu-building.jpg";
 
-const FALLBACK_IMAGE = "/images/astu-building.jpg";
+const FALLBACK_IMAGE = "/images/fallback-campus.svg";
+const DEFAULT_HERO_IMAGE = astuBuildingImg;
+const DEFAULT_HERO_SLIDES = [
+  {
+    id: "default-hero-campus",
+    image: DEFAULT_HERO_IMAGE,
+    tagline: "ASTU-AMS",
+    title: "Alumni Management System",
+    description: "Connecting ASTU graduates, employers, and academic departments in one verified network.",
+  },
+  {
+    id: "default-hero-innovation",
+    image: "/images/campus-2.jpeg",
+    tagline: "ASTU Community",
+    title: "Connecting Talent, Industry, and Innovation",
+    description: "Discover opportunities, strengthen professional networks, and contribute to ASTU's future.",
+  },
+  {
+    id: "default-hero-research",
+    image: "/images/arc.jpg",
+    tagline: "Career and Community",
+    title: "Build Your Next Chapter with ASTU",
+    description: "Access career services, alumni programs, and university-wide connections in one place.",
+  },
+];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users, Building2, LineChart, FileCheck2, MessageSquareText, Briefcase, LockKeyhole, Globe, BookOpen, Star, Handshake, ShieldCheck, Trophy, CircleUserRound, Search,
@@ -101,8 +129,8 @@ const howItWorksSteps = [
     title: "Grow & Give Back",
     description:
       "Complete tracer surveys, mentor current students, and contribute to curriculum development that shapes the next generation.",
-    color: "from-violet-600 to-violet-800",
-    iconBg: "bg-violet-100 text-violet-700",
+    color: "from-amber-600 to-amber-800",
+    iconBg: "bg-amber-100 text-amber-800",
   },
 ];
 
@@ -138,299 +166,126 @@ const STAT_PRESENTATION: Record<
 
 const navSections = [
   { label: "Home", id: "home" },
-  { label: "Impact Numbers", id: "impact-numbers" },
-  { label: "How It Works", id: "how-it-works" },
-  { label: "Impact", id: "impact" },
-  { label: "Gallery", id: "gallery" },
-  { label: "Campuses", id: "campuses" },
-  { label: "Announcements", id: "announcements" },
-  { label: "Community", id: "testimonials" },
+  { label: "Impact", id: "impact-numbers" },
+  { label: "Campus Life", id: "campus-life" },
   { label: "Events", id: "events" },
-  { label: "Workshops", id: "workshops" },
   { label: "News", id: "news" },
-  { label: "Success Stories", id: "success-stories" },
+  { label: "Stories", id: "success-stories" },
+  { label: "Giving", id: "giving" },
+  { label: "Partners", id: "partners" },
   { label: "FAQ", id: "faq" },
+  { label: "Community", id: "community" },
   { label: "Contact", id: "contact" }
 ];
 
-const defaultHeroSlides = [
+/** Soft defaults so Campus Life / FAQ / Network voices stay visible when CMS has not published yet */
+export const DEFAULT_CAMPUS_LIFE = [
   {
-    id: 'hs-1',
-    image: '/images/astu-building.jpg',
-    tagline: 'Quality Assurance & Accreditation',
-    title: "Connecting ASTU's Excellence to the Global Industry",
-    description: 'A unified digital ecosystem connecting ASTU alumni, corporate employers, and academic departments to accelerate careers, tracer feedback, and technological innovation.',
-    active: true,
-  },
-  {
-    id: 'hs-2',
-    image: '/images/campus-2.jpeg',
-    tagline: 'Enterprise Networking & Placement',
-    title: 'Empowering ASTU Graduates in Modern Workspaces',
-    description: 'Discover verified corporate partners, explore top technical job openings, and track career outcomes bridging classroom theory with real-world industry.',
-    active: true,
-  },
-  {
-    id: 'hs-3',
-    image: '/images/gc7.jpg',
-    tagline: 'Academic Innovation & Tracer Feedback',
-    title: 'Coordinating Strategic Tracer Studies & Skill Gaps',
-    description: 'Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.',
-    active: true,
-  },
-];
-
-const defaultCampusLife = [
-  {
-    id: 'cl-1',
+    id: 'CL-1',
     title: 'Events and Activities',
     campus: 'Main Campus',
-    description: 'Career expos, alumni reunions, workshops, chapter meetings, and community programs connecting students with national and global leaders.',
-    image: '/images/campus-2.jpeg',
+    description: 'Career expos, alumni reunions, workshops, chapter meetings, and community programs.',
+    image: '/images/astusteam.jpg',
     action: 'View Events',
+    link: '/events',
     active: true,
   },
   {
-    id: 'cl-2',
-    title: 'Advanced Engineering Laboratories',
+    id: 'CL-2',
+    title: 'Facilities & Innovation Spaces',
     campus: 'Innovation Spaces',
-    description: 'Laboratories, robotics centers, libraries, computing clusters, and employer interview rooms fostering hands-on technical excellence.',
+    description: 'Laboratories, research centers, libraries, student services, and employer interview rooms.',
     image: '/images/electriclabs.jpeg',
     action: 'Explore Facilities',
+    link: '/info/facilities',
     active: true,
   },
   {
-    id: 'cl-3',
-    title: 'ASTU Architecture & Cultural Center',
+    id: 'CL-3',
+    title: 'ASTU Museums & Gallery',
     campus: 'Campus Gallery',
-    description: 'Research showcases, graduation moments, architectural photography, student exhibitions, and public media archives.',
+    description: 'Research showcases, graduation moments, campus photography, and public video archives.',
     image: '/images/arc.jpg',
     action: 'View Gallery',
+    link: '/gallery',
     active: true,
   },
 ];
 
-const defaultCampuses = [
+export const DEFAULT_FAQ = [
   {
-    id: 'cm-1',
-    name: 'Main Campus',
-    description: 'Central hub for alumni services, registrar workflows, administration divisions, and institutional engagement.',
-    image: '/images/astu-building.jpg',
-    active: true,
-  },
-  {
-    id: 'cm-2',
-    name: 'Engineering & Technology Complex',
-    description: 'Applied research laboratories, hands-on workshops, innovation programs, and industry-linked software and hardware training.',
-    image: '/images/electriclabs.jpeg',
-    active: true,
-  },
-  {
-    id: 'cm-3',
-    name: 'Graduation & Events Hall',
-    description: 'Ceremonies, annual career fairs, alumni excellence awards, and university convocation achievement programs.',
-    image: '/images/gc7.jpg',
-    active: true,
-  },
-  {
-    id: 'cm-4',
-    name: 'Research Collaboration Center',
-    description: 'Applied research publications, industry ventures, patent development, and department KPI evaluation center.',
-    image: '/images/arc.jpg',
-    active: true,
-  },
-];
-
-const defaultGallery = [
-  {
-    id: 'gi-1',
-    title: 'ASTU Main Administration Building',
-    album: 'CAMPUS ARCHITECTURE',
-    src: '/images/astu-building.jpg',
-    active: true,
-  },
-  {
-    id: 'gi-2',
-    title: 'High-Tech Engineering Laboratory',
-    album: 'RESEARCH & LABS',
-    src: '/images/electriclabs.jpeg',
-    active: true,
-  },
-  {
-    id: 'gi-3',
-    title: 'Graduation Convocation Ceremony',
-    album: 'CONVOCATION',
-    src: '/images/gc7.jpg',
-    active: true,
-  },
-  {
-    id: 'gi-4',
-    title: 'University Green Spaces & Walkways',
-    album: 'CAMPUS SCENERY',
-    src: '/images/campus-2.jpeg',
-    active: true,
-  },
-  {
-    id: 'gi-5',
-    title: 'Research & Innovation Showcase Hall',
-    album: 'INNOVATION',
-    src: '/images/arc.jpg',
-    active: true,
-  },
-  {
-    id: 'gi-6',
-    title: 'ASTU Alumni Network Leadership Forum',
-    album: 'ALUMNI FORUM',
-    src: '/images/astusteam.jpg',
-    active: true,
-  },
-];
-
-const defaultVideos = [
-  {
-    id: 'vi-1',
-    title: 'Research & Innovation Forum Highlights',
-    description: 'Showcasing groundbreaking faculty and alumni research projects in AI, robotics, and sustainable development.',
-    image: '/images/arc.jpg',
-    url: 'https://www.youtube.com',
-    active: true,
-  },
-  {
-    id: 'vi-2',
-    title: 'Graduation Ceremony & Alumni Convocation Replay',
-    description: 'Celebrating the achievements and academic honors of our graduating engineers and scientists.',
-    image: '/images/gc7.jpg',
-    url: 'https://www.youtube.com',
-    active: true,
-  },
-  {
-    id: 'vi-3',
-    title: 'Advanced Robotics and Computing Labs Tour',
-    description: 'Hands-on demonstrations in machine learning, sensor networks, and mechanical systems.',
-    image: '/images/electriclabs.jpeg',
-    url: 'https://www.youtube.com',
-    active: true,
-  },
-];
-
-const defaultPartners = [
-  { name: 'Ethio Telecom', active: true },
-  { name: 'Commercial Bank of Ethiopia', active: true },
-  { name: 'Safaricom', active: true },
-  { name: 'Ethiopian Airlines', active: true },
-  { name: 'Huawei', active: true },
-  { name: 'INSA', active: true },
-];
-
-const defaultTestimonials = [
-  {
-    id: 'tm-1',
-    quote: 'ASTU-AMS transformed how our department monitors graduate employment outcomes. Real-time tracer responses give us the empirical basis we need for international accreditation.',
-    by: 'Dr. Henok Tadesse · Dean, School of Electrical Engineering & Computing',
-    active: true,
-  },
-  {
-    id: 'tm-2',
-    quote: 'As an industrial recruiter, hiring top-tier engineering talent directly from ASTU has never been smoother. The verified graduate credentials eliminate hiring risk.',
-    by: 'Selamawit Bekele · Head of Talent Acquisition, Ethio Telecom',
-    active: true,
-  },
-  {
-    id: 'tm-3',
-    quote: 'Staying connected to my alma mater through mentorship and collaborative research projects has been an incredible experience. ASTU-AMS keeps our alumni family united.',
-    by: 'Yohannes Melese · Senior AI Engineer & ASTU Gold Medalist',
-    active: true,
-  },
-];
-
-const defaultFaq = [
-  {
-    id: 'fq-1',
+    id: 'FAQ-1',
     question: 'Who can use ASTU-AMS?',
-    answer: 'Verified alumni, corporate employers, registrar teams, academic department heads, and system administrators each have tailored, secure role-specific portals.',
+    answer: 'Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.',
     active: true,
   },
   {
-    id: 'fq-2',
-    question: 'How are tracer surveys utilized?',
-    answer: 'Tracer study responses feed graduate employment analytics, identifying technological skill gaps and supporting university curriculum accreditation.',
+    id: 'FAQ-2',
+    question: 'How are tracer studies used?',
+    answer: 'Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.',
     active: true,
   },
   {
-    id: 'fq-3',
-    question: 'Can employers publish job postings and career fairs?',
-    answer: 'Yes. Verified employer partners can publish vacancies, search candidate profiles by department, review applications, and coordinate campus recruitment events.',
+    id: 'FAQ-3',
+    question: 'Can employers register events?',
+    answer: 'Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports.',
     active: true,
   },
   {
-    id: 'fq-4',
-    question: 'How do alumni request official documents and transcripts?',
-    answer: 'Sign in to the Alumni Portal, navigate to "Document Services", and submit digital requests for transcripts, certificates, or recommendation letters with live progress tracking.',
-    active: true,
-  },
-  {
-    id: 'fq-5',
-    question: 'What is the schedule for graduate tracer studies?',
-    answer: 'Surveys are administered at 6, 12, and 24-month milestones after graduation to capture comprehensive career trajectory data.',
+    id: 'FAQ-4',
+    question: 'How does Alumni Giving work?',
+    answer: 'Alumni and partners can contribute directly via Chapa, Telebirr, and CBE to verified departmental, research, and scholarship campaigns with transparent receipts.',
     active: true,
   },
 ];
 
-const defaultAnnouncements = [
+export const DEFAULT_NETWORK_VOICES = [
   {
-    id: 'ann-1',
-    title: 'ASTU Engineering Innovation Summit 2026',
-    date: 'Sep 9, 2026',
-    type: 'Official Announcement',
-    excerpt: 'Showcasing cutting-edge technology and student research projects across engineering departments.',
+    id: 'network-voice-1',
+    name: 'Dr. Ruth Alemu',
+    role: 'Lead AI Researcher',
+    company: 'Ethiopian Artificial Intelligence Institute',
+    message: 'ASTU gave me the computational rigor and research mindset that propelled my career in machine learning. Staying connected through ASTU-AMS keeps our alumni knowledge exchange alive.',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
+    source: 'testimonial' as const,
   },
   {
-    id: 'ann-2',
-    title: 'Semester Break: Campus Safety Notice & Lab Guidelines',
-    date: 'Aug 20, 2026',
-    type: 'Campus Directive',
-    excerpt: 'Official ASTU Announcement regarding campus access, lab operating hours, and safety guidelines during the semester break.',
+    id: 'network-voice-2',
+    name: 'Eng. Yonas Bekele',
+    role: 'Senior Embedded Systems Engineer',
+    company: 'Ethio Telecom',
+    message: 'The hands-on lab projects and industry linkages at ASTU prepared our cohort to design mission-critical telecommunications infrastructure across East Africa.',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+    source: 'community' as const,
   },
   {
-    id: 'ann-3',
-    title: 'ASTU Research Grant Winners 2026 Announced',
-    date: 'May 25, 2026',
-    type: 'Academic Notice',
-    excerpt: 'Announcing 12 applied research grants awarded to faculty and alumni engineering teams for breakthrough projects.',
-  },
-  {
-    id: 'ann-4',
-    title: 'Annual Alumni & Career Fair 2026 Registrations Open',
-    date: 'Jan 4, 2026',
-    type: 'Career Event',
-    excerpt: 'Connecting over 50 leading industrial recruiters and tech innovators directly with ASTU graduating seniors.',
+    id: 'network-voice-3',
+    name: 'Kalkidan Tadesse',
+    role: 'Fintech Innovation Lead',
+    company: 'Commercial Bank of Ethiopia',
+    message: 'Mentoring junior ASTU graduates through AMS has been an incredible experience. The university continues to cultivate world-class software engineers and innovators.',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    source: 'story' as const,
   },
 ];
 
-const defaultResearchHighlights = {
-  title: 'Research, Innovation & University Achievements',
-  description: 'ASTU-AMS connects graduate research publications, startup showcases, employer collaborations, and department KPI evidence into one institutional analytics layer.',
-  stats: [
-    { label: 'Applied Research Projects', value: '140+', icon: 'BookOpen' },
-    { label: 'Technology Patents & Startups', value: '38', icon: 'Trophy' },
-    { label: 'Industry Collaborations', value: '85+', icon: 'Handshake' },
-  ],
+const getHomeCampaignImage = (campaign: any) => {
+  if (campaign?.image && typeof campaign.image === 'string' && campaign.image.trim() !== '') {
+    return mediaUrl(campaign.image) || campaign.image;
+  }
+  const cat = (campaign?.category || '').toLowerCase();
+  const title = (campaign?.title || '').toLowerCase();
+  if (title.includes('scholarship') || cat.includes('scholarship')) return '/images/gc7.jpg';
+  if (title.includes('solar') || title.includes('energy') || cat.includes('research')) return '/images/arc.jpg';
+  if (title.includes('robot') || title.includes('innovation') || cat.includes('innovation')) return '/images/astusteam.jpg';
+  if (title.includes('lab') || title.includes('equipment')) return '/images/electriclabs.jpeg';
+  if (title.includes('welfare') || title.includes('emergency')) return '/images/campus-2.jpeg';
+  return '/images/astu-building.jpg';
 };
 
-const defaultImpactSection = {
-  eyebrow: 'Industry-Campus Bridge',
-  title: 'ASTU Alumni Impact & Outcomes',
-  description: 'Graduate outcomes and employer feedback managed through the ASTU-AMS platform feed directly into academic curriculum updates and national accreditation standards.',
-  image: '/images/astu-building.jpg',
-  ctaLabel: 'Explore Campus Life',
-  ctaRoute: '#campus-life',
-};
-
-const emptyCampusLife: any[] = [];
+/** Minimal empty fallbacks — real content/images come from Homepage CMS */
 const emptyCampuses: any[] = [];
-const emptyFaq: any[] = [];
 const emptyGallery: any[] = [];
-const emptyPartners: any[] = [];
 const emptyImpactStats: any[] = [];
 
 export interface EventItem {
@@ -451,110 +306,7 @@ export interface EventItem {
   level?: string;
 }
 
-const ASTU_DEFAULT_EVENTS: EventItem[] = [
-  {
-    id: "ds-ml-bootcamp",
-    title: "Data Science & Machine Learning Bootcamp",
-    category: "TECHNICAL TRAINING & LABS",
-    type: "bootcamp",
-    kind: "Workshop",
-    date: "2026-11-20",
-    time: "09:00 AM - 04:30 PM",
-    location: "Engineering Building Room 305",
-    campus: "ASTU Main Campus",
-    description: "Intensive bootcamp covering machine learning, data visualization, and statistical analysis using Python and R. Practical assignments with ASTU real-world datasets and labs.",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
-    speaker: "Dr. Henok Tadesse & Senior AI Engineers",
-    seats: "45 / 50 seats registered",
-    statusBadge: "Filling Fast",
-    level: "Intermediate - Advanced",
-  },
-  {
-    id: "ethiopialics-2025",
-    title: "EthiopiaLics International Conference 2025",
-    category: "EVENT",
-    type: "conference",
-    kind: "Event",
-    date: "2025-06-13",
-    time: "08:30 AM - 05:00 PM",
-    location: "ASTU Main Campus Auditorium",
-    campus: "ASTU Main Campus",
-    description: "Adama Science and Technology University hosts the 1st EthiopiaLics International Conference on 'Fostering Innovation Ecosystem for Sustainable Industrialization and Tech Transfer'.",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
-    speaker: "ASTU Leadership & Global Innovation Fellows",
-    seats: "450 seats available",
-    statusBadge: "Keynote Event",
-    level: "Open to All Scholars & Alumni",
-  },
-  {
-    id: "career-summit-2026",
-    title: "ASTU Alumni Career & Innovation Summit",
-    category: "EVENT",
-    type: "career",
-    kind: "Event",
-    date: "2026-12-05",
-    time: "10:00 AM - 06:00 PM",
-    location: "Senate Hall, ASTU Main Campus",
-    campus: "ASTU Main Campus",
-    description: "Annual career acceleration gathering connecting final-year students with high-achieving alumni executives and industry partners. Meet 30+ top employers hiring on the spot.",
-    image: gc7Img,
-    speaker: "40+ Corporate Recruiters & Alumni Tech Leads",
-    seats: "600 attendees expected",
-    statusBadge: "Annual Highlight",
-    level: "All Batches & Graduating Seniors",
-  },
-  {
-    id: "cloud-devops-bootcamp",
-    title: "Cloud & DevOps Architecture Bootcamp",
-    category: "TECHNICAL TRAINING & LABS",
-    type: "bootcamp",
-    kind: "Workshop",
-    date: "2026-06-18",
-    time: "09:30 AM - 03:30 PM",
-    location: "CS Lab 101, Technology Complex",
-    campus: "Technology Complex",
-    description: "Hands-on training on AWS, Azure, Docker containers, and Kubernetes CI/CD deployment pipelines tailored for ASTU engineering graduates and seniors.",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80",
-    speaker: "Certified AWS & Cloud Solution Architects",
-    seats: "40 seats registered",
-    statusBadge: "Hands-on Lab",
-    level: "Intermediate",
-  },
-  {
-    id: "aiml-research-symposium",
-    title: "AI/ML Research & Robotics Symposium",
-    category: "EVENT",
-    type: "conference",
-    kind: "Event",
-    date: "2026-07-05",
-    time: "09:00 AM - 05:00 PM",
-    location: "Engineering Complex Hall B",
-    campus: "Engineering Complex",
-    description: "Presentation of groundbreaking faculty and alumni research projects in machine learning, autonomous systems, smart agriculture, and computational sciences.",
-    image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80",
-    speaker: "ASTU AI Research Lab & Guest Keynotes",
-    seats: "200 seats capacity",
-    statusBadge: "Research Forum",
-    level: "Academic & Professional",
-  },
-  {
-    id: "grand-homecoming-gala",
-    title: "ASTU Annual Grand Alumni Homecoming & Gala",
-    category: "EVENT",
-    type: "career",
-    kind: "Event",
-    date: "2026-09-12",
-    time: "02:00 PM - 09:30 PM",
-    location: "ASTU Grand Sports Arena & Gardens",
-    campus: "Main Campus",
-    description: "Celebrate decades of ASTU engineering and scientific excellence. Reconnect with classmates, network with distinguished alumni, and enjoy an evening banquet and award gala.",
-    image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80",
-    speaker: "University President & Alumni Honors Panel",
-    seats: "1,200 seats",
-    statusBadge: "Grand Reunion",
-    level: "All Alumni & Families",
-  },
-];
+/** Showcase demo events removed — homepage lists only CMS/API-published events. */
 
 const getNewsCategoryMeta = (item: any) => {
   const t = ((item?.title || '') + ' ' + (item?.category || '')).toLowerCase();
@@ -601,24 +353,109 @@ const getNewsCategoryMeta = (item: any) => {
 };
 
 const EmptySection = ({ message }: { message: string }) => (
-  <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 px-6 py-10 text-center">
-    <p className="text-sm text-slate-500 dark:text-slate-400">{message}</p>
+  <div className="rounded-xl border border-dashed border-outline-variant dark:border-slate-600 bg-white/60 dark:bg-slate-800/40 px-6 py-10 text-center">
+    <p className="text-sm text-on-surface-variant dark:text-slate-400">{message}</p>
   </div>
 );
 
+
+const formatHomepageDate = (value?: string | null) => {
+  if (!value) return 'Date to be announced';
+  const parsed = Date.parse(value);
+  if (Number.isNaN(parsed)) return value;
+  return new Date(parsed).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+};
+
 export default function HomePage() {
   const navigate = useNavigate();
-  const { darkMode } = useTheme();
 
   const [activeSection, setActiveSection] = useState("home");
   const [user, setUser] = useState<any>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [liveEvents, setLiveEvents] = useState<any[]>([]);
-  const [liveWorkshops, setLiveWorkshops] = useState<any[]>([]);
-  const [liveNews, setLiveNews] = useState<any[]>([]);
-  const [liveAnnouncements, setLiveAnnouncements] = useState<any[]>([]);
-  const [liveStories, setLiveStories] = useState<any[]>([]);
+  const [liveEvents, setLiveEvents] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.events?.length) {
+      const active = cmsConfig.events.filter((e: any) => e.active);
+      if (active.length) return active;
+    }
+    return [];
+  });
+  const [liveWorkshops, setLiveWorkshops] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.workshops?.length) {
+      const active = cmsConfig.workshops.filter((w: any) => w.active);
+      if (active.length) return active;
+    }
+    return [];
+  });
+  const [liveNews, setLiveNews] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.newsItems?.length) {
+      const active = cmsConfig.newsItems.filter((n: any) => n.active);
+      if (active.length) return active;
+    }
+    const published = contentService.getPublishedNews();
+    return published.length ? published : [];
+  });
+  const [liveAnnouncements, setLiveAnnouncements] = useState<any[]>(() => {
+    const published = contentService.getPublishedAnnouncements();
+    if (published && published.length > 0) return published;
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.announcements?.length) {
+      const active = cmsConfig.announcements.filter((a: any) => a.active);
+      if (active.length) return active;
+    }
+    return [];
+  });
+  const [liveStories, setLiveStories] = useState<any[]>(() => {
+    const cmsConfig = homepageCmsService.getSettings();
+    if (cmsConfig?.stories?.length) {
+      const active = cmsConfig.stories.filter((s: any) => s.active !== false);
+      if (active.length) return storiesService.fromConfig(active);
+    }
+    // Do not seed fabricated localStorage stories on the public homepage.
+    return [];
+  });
+  const [donationCampaigns, setDonationCampaigns] = useState<any[]>([]);
+  const [selectedDonationCampaign, setSelectedDonationCampaign] = useState<any | null>(null);
+  const [isDonationAuthModalOpen, setIsDonationAuthModalOpen] = useState(false);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [donationPayMethod, setDonationPayMethod] = useState<'telebirr' | 'cbe' | 'card'>('telebirr');
+  const [shareModalCampaign, setShareModalCampaign] = useState<any | null>(null);
+  const [sharePageContent, setSharePageContent] = useState<any | null>(null);
+
+  const donationDashboardPath = (campaignId?: string) => {
+    const params = new URLSearchParams({ tab: 'donations' });
+    if (campaignId) params.set('campaign', campaignId);
+    return `/alumni/dashboard?${params.toString()}`;
+  };
+
+  const loginForDonation = (campaignId?: string) => {
+    navigate(`/login?redirect=${encodeURIComponent(donationDashboardPath(campaignId))}`);
+  };
+
+  const handleDonateClick = (campaign: any) => {
+    setSelectedDonationCampaign(campaign);
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    let user: any = null;
+    try {
+      user = storedUser ? JSON.parse(storedUser) : null;
+    } catch {}
+
+    if (token && user?.role?.toUpperCase() === 'ALUMNI') {
+      navigate(donationDashboardPath(campaign.id));
+    } else {
+      setIsDonationAuthModalOpen(true);
+    }
+  };
+  const [homeDonationCategory, setHomeDonationCategory] = useState('ALL');
+  const [showAllHomeDonations, setShowAllHomeDonations] = useState(false);
   const [liveSlides, setLiveSlides] = useState<any[]>(() => {
     const cmsConfig = homepageCmsService.getSettings();
     if (cmsConfig?.heroSlides?.length) {
@@ -638,11 +475,11 @@ export default function HomePage() {
   });
   const [liveCampusLife, setLiveCampusLife] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
-    if (config?.campusLife?.length) {
-      const active = config.campusLife.filter((c: any) => c.active);
-      if (active.length) return active;
+    if (Array.isArray(config?.campusLife) && config.campusLife.length > 0) {
+      const active = config.campusLife.filter((c: any) => c.active !== false);
+      if (active.length > 0) return active;
     }
-    return emptyCampusLife;
+    return DEFAULT_CAMPUS_LIFE;
   });
   const [liveCampuses, setLiveCampuses] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
@@ -660,6 +497,26 @@ export default function HomePage() {
     }
     return emptyGallery;
   });
+  // CMS items may carry a real publication timestamp.  When they do, show the
+  // newest three on the landing page; otherwise retain the curator's order.
+  const featuredGallery = useMemo(() => {
+    const datedItems = liveGallery
+      .map((item, index) => ({
+        item,
+        index,
+        timestamp: Date.parse(item.createdAt || item.updatedAt || item.date || item.uploadedAt || ''),
+      }));
+    const hasDates = datedItems.some(({ timestamp }) => !Number.isNaN(timestamp));
+
+    return (hasDates
+      ? datedItems.sort((a, b) => {
+          const aTime = Number.isNaN(a.timestamp) ? 0 : a.timestamp;
+          const bTime = Number.isNaN(b.timestamp) ? 0 : b.timestamp;
+          return bTime - aTime || a.index - b.index;
+        })
+      : datedItems
+    ).slice(0, 3).map(({ item }) => item);
+  }, [liveGallery]);
   const [liveVideos, setLiveVideos] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
     if (config?.videos?.length) {
@@ -668,22 +525,38 @@ export default function HomePage() {
     }
     return [];
   });
-  const [livePartners, setLivePartners] = useState<any[]>(() => {
-    const config = homepageCmsService.getSettings();
-    if (config?.partners?.length) {
-      const active = config.partners.filter((p: any) => p.active);
-      if (active.length) return active;
-    }
-    return emptyPartners;
-  });
+  const [livePartners, setLivePartners] = useState<Partner[]>([]);
+  const [partnersLoading, setPartnersLoading] = useState(true);
+  const [failedPartnerLogos, setFailedPartnerLogos] = useState<Set<string>>(() => new Set());
   const [liveFaq, setLiveFaq] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
-    if (config?.faq?.length) {
-      const active = config.faq.filter((f: any) => f.active);
-      if (active.length) return active;
+    if (Array.isArray(config?.faq) && config.faq.length > 0) {
+      const active = config.faq.filter((f: any) => f.active !== false);
+      if (active.length > 0) return active;
     }
-    return emptyFaq;
+    return DEFAULT_FAQ;
   });
+  const [liveCommunityPosts, setLiveCommunityPosts] = useState<any[]>(() => {
+    const config = homepageCmsService.getSettings();
+    if (Array.isArray(config?.communityPosts)) {
+      return config.communityPosts.filter((p: any) => p.active !== false);
+    }
+    if (Array.isArray(config?.liveCommunityPosts)) {
+      return config.liveCommunityPosts.filter((p: any) => p.active !== false);
+    }
+    return [];
+  });
+  const [liveCommunitySection, setLiveCommunitySection] = useState<any>(() => {
+    const config = homepageCmsService.getSettings();
+    return (
+      config?.liveCommunitySection || {
+        title: 'ASTU Alumni Community',
+        subtitle:
+          'Connect with graduates worldwide, share opportunities, and help grow the Adama Science and Technology University alumni network.',
+      }
+    );
+  });
+  const [openFaqId, setOpenFaqId] = useState<string | null>(null);
   const [liveTestimonials, setLiveTestimonials] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
     if (config?.testimonials?.length) {
@@ -708,58 +581,164 @@ export default function HomePage() {
     const config = homepageCmsService.getSettings();
     return config?.employerFeedback?.enabled ? config.employerFeedback : null;
   });
-  const [impactSection, setImpactSection] = useState<any>(() => homepageCmsService.getSettings()?.impactSection || null);
   const [careerCta, setCareerCta] = useState<any>(() => homepageCmsService.getSettings()?.careerCta || null);
   const [bottomCta, setBottomCta] = useState<any>(() => homepageCmsService.getSettings()?.bottomCta || null);
   const [researchHighlights, setResearchHighlights] = useState<any>(() => homepageCmsService.getSettings()?.researchHighlights || null);
   const [footerConfig, setFooterConfig] = useState<FooterCmsConfig>(() => footerCmsService.getSettings());
+  const [liveWelcomeMessage, setLiveWelcomeMessage] = useState<string>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.welcomeMessage || "Welcome to the ASTU Alumni Management System — Connecting graduates, employers, and departments for longitudinal career tracking and institutional excellence.";
+  });
+  const [liveWelcomeEnabled, setLiveWelcomeEnabled] = useState<boolean>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.welcomeEnabled !== false;
+  });
+  const [liveHeroBadge, setLiveHeroBadge] = useState<string>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.heroBadge || "ASTU Alumni Management System";
+  });
+  const [liveHeroButtons, setLiveHeroButtons] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.heroButtons || {
+      primaryText: "Alumni Portal",
+      primaryLink: "/info/alumni-portal",
+      secondaryText: "Employer Partnership",
+      secondaryLink: "/info/employer-portal",
+    };
+  });
+  const [liveImpactHeaders, setLiveImpactHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.impactHeaders || {
+      eyebrow: "ASTU IMPACT AT A GLANCE",
+      title: "Connecting Academia to Industry",
+      description: "Building a stronger connection between ASTU graduates, employers, research and career opportunities.",
+    };
+  });
+  const [livePortalsHeaders, setLivePortalsHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.portalsHeaders || {
+      eyebrow: "Get Started",
+      title: "How ASTU-AMS Works",
+      description: "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps.",
+      ctaText: "Get Started Today",
+      ctaLink: "/login",
+    };
+  });
+  const [liveCampusLifeHeaders, setLiveCampusLifeHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.campusLifeHeaders || {
+      eyebrow: "Explore Life At ASTU",
+      title: "Campus Life, Facilities, Events, and Galleries",
+      description: "Discover events, facilities, campus activities, and galleries that define life at Adama Science and Technology University.",
+    };
+  });
+  const [liveEventsHeaders, setLiveEventsHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.eventsHeaders || {
+      eyebrow: "Events & Workshops",
+      title: "Upcoming Alumni Events",
+      description: "Networking, learning, and professional growth opportunities.",
+      viewAllText: "See All Events →",
+      viewAllLink: "/events",
+    };
+  });
+  const [liveAnnouncementsHeaders, setLiveAnnouncementsHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.announcementsHeaders || {
+      eyebrow: "Announcements",
+      title: "Official Notices",
+      subscribeTitle: "Subscribe to official updates",
+      subscribeDesc: "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.",
+    };
+  });
+  const [livePartnersHeaders, setLivePartnersHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.partnersHeaders || {
+      eyebrow: "Our Partners",
+      title: "Partner Companies",
+      description: "Institutional partners supporting employability, internships, and research collaboration.",
+    };
+  });
+  const [liveFaqHeaders, setLiveFaqHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.faqHeaders || {
+      eyebrow: "FAQ",
+      title: "Frequently Asked Questions",
+      description: "Common questions about ASTU-AMS, tracer studies, and alumni services.",
+    };
+  });
+  const [liveAccreditation, setLiveAccreditation] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.accreditation || {
+      eyebrow: "Quality Assurance",
+      title: "Data-Driven Accreditation & Excellence",
+      description: "ASTU-AMS provides verified tracer data, employment analytics, and employer feedback required by accreditation agencies and university management.",
+      point1Title: "Global Accreditation",
+      point1Desc: "Build transparent, audited institutional reports.",
+      point2Title: "Market Alignment",
+      point2Desc: "Align curriculum with industry expectations.",
+      buttonText: "View Impact Numbers",
+      buttonLink: "/info/impact-numbers",
+      image1: '/images/campus-2.jpeg',
+      image2: '/images/campus-2.jpeg',
+    };
+  });
+  const [liveCtaSection, setLiveCtaSection] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.ctaSection || {
+      enabled: true,
+      title: "Ready to Join ASTU-AMS?",
+      description: "Connect with fellow alumni, discover career opportunities, and contribute to university excellence.",
+      primaryCtaText: "Alumni Portal",
+      primaryCtaLink: "/login",
+      secondaryCtaText: "Employer Portal",
+      secondaryCtaLink: "/login",
+    };
+  });
+  const [liveFooter, setLiveFooter] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.footer || {
+      aboutText: "Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.",
+      address: "Adama Science and Technology University, Adama, Oromia, Ethiopia",
+      poBox: "P.O. Box 1888, Adama, Ethiopia",
+      phone: "+251-221-110000",
+      email: "irccd@astu.edu.et",
+      officeHours: "Monday to Friday, 8:00 AM – 5:00 PM (EAT)",
+      socialFacebook: "https://facebook.com/adamaastu",
+      socialTelegram: "https://t.me/Adama_STU_Almuni",
+      socialTwitter: "#",
+      socialLinkedin: "#",
+      copyrightText: "Adama Science and Technology University. All rights reserved.",
+    };
+  });
+  const defaultSectionLinks = {
+    about: true,
+    impact: true,
+    portals: true,
+    campusLife: true,
+    events: true,
+    stories: true,
+    announcements: true,
+    partners: true,
+    giving: true,
+  };
+  const [liveSectionLinks, setLiveSectionLinks] = useState<typeof defaultSectionLinks>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.sectionLinks ? { ...defaultSectionLinks, ...cfg.sectionLinks } : defaultSectionLinks;
+  });
+  const [liveGivingSection, setLiveGivingSection] = useState(() => {
+    const cfg = homepageCmsService.getSettings();
+    return cfg?.givingSection || {
+      title: "Support Future Innovators & Campus Research",
+      subtitle: "Active campaigns organized by the ASTU Alumni & Advancement Office. Gifts support undergraduate scholarships, research labs, student welfare, and campus innovation. Confirm any tax treatment with your advisor or the Alumni Office.",
+      buttonText: "Explore All Causes",
+    };
+  });
+
 
   const [selectedNotice, setSelectedNotice] = useState<any | null>(null);
   const [showAllNotices, setShowAllNotices] = useState(false);
   const [noticeSearch, setNoticeSearch] = useState('');
-
-  // Newsletter Subscription State
-  const [subscriberEmail, setSubscriberEmail] = useState(() => {
-    try {
-      return localStorage.getItem('astu_ams_newsletter_subscribed') || '';
-    } catch {
-      return '';
-    }
-  });
-  const [isSubscribed, setIsSubscribed] = useState(() => {
-    try {
-      return Boolean(localStorage.getItem('astu_ams_newsletter_subscribed'));
-    } catch {
-      return false;
-    }
-  });
-  const [isSubscribing, setIsSubscribing] = useState(false);
-
-  const handleSubscribeNewsletter = (e: React.FormEvent) => {
-    e.preventDefault();
-    const email = subscriberEmail.trim();
-    if (!email || !email.includes('@') || !email.includes('.')) {
-      toast.error('Please enter a valid email address.');
-      return;
-    }
-    setIsSubscribing(true);
-    setTimeout(() => {
-      try {
-        const stored = localStorage.getItem('astu_ams_subscribers');
-        const list = stored ? JSON.parse(stored) : [];
-        if (!list.some((s: any) => (typeof s === 'string' ? s : s.email) === email)) {
-          list.push({ email, date: new Date().toISOString() });
-          localStorage.setItem('astu_ams_subscribers', JSON.stringify(list));
-        }
-        localStorage.setItem('astu_ams_newsletter_subscribed', email);
-      } catch {
-        // ignore
-      }
-      setIsSubscribing(false);
-      setIsSubscribed(true);
-      toast.success('Thank you! You are now subscribed to official ASTU updates.');
-    }, 500);
-  };
 
   // RSVP / Registration State & Handlers
   const [registeredTitles, setRegisteredTitles] = useState<string[]>(() => {
@@ -796,84 +775,25 @@ export default function HomePage() {
   const [showAllNewsModal, setShowAllNewsModal] = useState(false);
   const [newsSearchQuery, setNewsSearchQuery] = useState('');
 
-  // Fallback news list if liveNews is empty to ensure rich preview matching user data
-  const defaultNewsList = useMemo(() => [
-    {
-      id: 'news-def-1',
-      title: 'ASTU Engineering Innovation Summit 2026',
-      excerpt: 'Showcasing cutting-edge technology and student research projects across engineering departments.',
-      date: '9/9/2026',
-      category: 'INNOVATION & TECH',
-    },
-    {
-      id: 'news-def-2',
-      title: 'Semester Break: Campus Safety Notice',
-      excerpt: 'Official ASTU Announcement regarding campus access, lab operating hours, and safety guidelines.',
-      date: '8/20/2026',
-      category: 'CAMPUS NOTICE',
-    },
-    {
-      id: 'news-def-3',
-      title: 'ASTU Alumni Network: Bridging Generations',
-      excerpt: 'How our alumni network connects 25,000+ graduates with opportunities, mentorship, and lifelong learning resources.',
-      date: '5/28/2026',
-      category: 'ALUMNI NETWORK',
-    },
-    {
-      id: 'news-def-4',
-      title: 'ASTU Research Grant Winners 2026',
-      excerpt: 'Announcing 12 applied research grants awarded to faculty and alumni engineering teams.',
-      date: '5/25/2026',
-      category: 'RESEARCH & GRANTS',
-    },
-    {
-      id: 'news-def-5',
-      title: 'ASTU Hosts a Five-Day DAAD Alumni Workshop on Sustainable Water Supply & Environmental Protection',
-      excerpt: 'Promoting the capacity of local actors for sustainable water supply, sanitation, and environmental protection measures in East Africa.',
-      date: 'Mar 7, 2025',
-      category: 'GLOBAL OUTREACH',
-    },
-    {
-      id: 'news-def-6',
-      title: 'ASTU Alumni Association Inspires Graduating Class with Career Tips!',
-      excerpt: 'Navigating the Transition: Former graduates and industry leaders guide graduating seniors with high-impact labor market strategies.',
-      date: 'Mar 7, 2025',
-      category: 'ALUMNI SPOTLIGHT',
-    },
-    {
-      id: 'news-def-7',
-      title: 'ASTU Alumni Spotlight: Yohannes Melese, Gold Medalist & Dual-Major Graduate!',
-      excerpt: 'Graduating with a dual major in Electronics & Communication Engineering and Computer Science, achieving an outstanding CGPA of 3.98.',
-      date: 'Mar 7, 2025',
-      category: 'ACADEMIC EXCELLENCE',
-    },
-    {
-      id: 'news-def-8',
-      title: 'ASTU Alumni Serving as Model United Nations Secretariats & Global Delegates',
-      excerpt: 'Recognizing outstanding ASTU graduates who served as secretariats for Model United Nations and international diplomatic tech forums.',
-      date: 'Jan 7, 2025',
-      category: 'GLOBAL OUTREACH',
-    },
-    {
-      id: 'news-def-9',
-      title: 'Annual Alumni & Career Fair 2026 Registrations Open',
-      excerpt: 'Connecting over 50 leading industrial recruiters and tech innovators directly with ASTU graduating seniors.',
-      date: 'Jan 4, 2025',
-      category: 'CAREER FAIR',
-    },
-  ], []);
+  // Published news only — never invent placeholder articles for the public homepage.
+  const displayNewsList = useMemo(() => liveNews || [], [liveNews]);
 
-  // Display list: liveNews if available and populated, else defaultNewsList
-  const displayNewsList = useMemo(() => {
-    if (liveNews && liveNews.length > 0) return liveNews;
-    return defaultNewsList;
-  }, [liveNews, defaultNewsList]);
+  // Three notices per row on the homepage preview, matching every other public grid.
+  const NEWS_PER_SLIDE = 3;
+  const totalNewsSlides = displayNewsList.length ? Math.ceil(displayNewsList.length / NEWS_PER_SLIDE) : 0;
 
-  const totalNewsSlides = Math.max(1, Math.ceil(displayNewsList.length / 3));
+  // Keep the slide index valid when the published list shrinks.
+  useEffect(() => {
+    setNewsSlideIndex((prev) => Math.min(prev, Math.max(0, totalNewsSlides - 1)));
+  }, [totalNewsSlides]);
 
   // Auto-Slide Timer with animated progress bar (5s duration per slide)
   useEffect(() => {
     if (totalNewsSlides <= 1 || isNewsTimerPaused) return;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setIsNewsTimerPaused(true);
+      return;
+    }
 
     const intervalMs = 50;
     const durationMs = 5000;
@@ -897,7 +817,65 @@ export default function HomePage() {
     setNewsTimerProgress(0);
   };
 
-  // Combine liveEvents from CMS/API with ASTU_DEFAULT_EVENTS
+  /** Network voices: CMS testimonials + approved community posts + published stories (API only). */
+  const networkVoices = useMemo(() => {
+    const demoName = /^(dr\.?\s*)?(abebe yosef|bekele kebede|helina sileshi|helen mekonnen)$/i;
+    const isRealVoice = (name?: string) => Boolean(name && !demoName.test(String(name).trim()));
+
+    const fromTestimonials = (liveTestimonials || [])
+      .filter((t: any) => t && (t.quote || t.message || t.text) && isRealVoice(t.by || t.name))
+      .map((t: any, idx: number) => ({
+        id: t.id || `testimonial-${idx}`,
+        name: t.by || t.name,
+        role: t.role || t.title || 'ASTU Community',
+        company: t.company || t.org || '',
+        message: t.quote || t.message || t.text,
+        image: t.image || t.avatar || '',
+        source: 'testimonial' as const,
+      }));
+
+    const fromPosts = (liveCommunityPosts || [])
+      .filter((p: any) => p && (p.message || p.text || p.quote) && isRealVoice(p.name))
+      .map((p: any, idx: number) => ({
+        id: p.id || `community-${idx}`,
+        name: p.name,
+        role: p.role || 'Alumni',
+        company: p.company || p.org || '',
+        message: p.message || p.text || p.quote,
+        image: p.image || '',
+        source: 'community' as const,
+      }));
+
+    const fromStories = (liveStories || [])
+      .filter((s: any) => s && isRealVoice(s.name) && (s.text || s.message || s.quote))
+      .map((s: any, idx: number) => ({
+        id: s.id || `story-voice-${idx}`,
+        name: s.name,
+        role: s.role || 'Alumni',
+        company: s.company || '',
+        message: s.text || s.message || s.quote,
+        image: s.image || '',
+        source: 'story' as const,
+      }));
+
+    // Prefer authored testimonials, then community posts, then success stories
+    const merged = [...fromTestimonials, ...fromPosts];
+    if (merged.length > 0) return merged.slice(0, 6);
+    if (fromStories.length > 0) return fromStories.slice(0, 6);
+    return DEFAULT_NETWORK_VOICES;
+  }, [liveTestimonials, liveCommunityPosts, liveStories]);
+
+  // Alumni stories carousel state
+  const [storySlideIndex, setStorySlideIndex] = useState(0);
+  const totalStorySlides = liveStories.length ? Math.ceil(liveStories.length / 3) : 0;
+  const handleStorySlideChange = (newIdx: number) => {
+    setStorySlideIndex((newIdx + totalStorySlides) % totalStorySlides);
+  };
+  useEffect(() => {
+    setStorySlideIndex((prev) => Math.min(prev, Math.max(0, totalStorySlides - 1)));
+  }, [totalStorySlides]);
+
+  // Combine liveEvents and workshops from CMS/API only
   const allEventsList = useMemo<EventItem[]>(() => {
     const liveList: EventItem[] = [];
     if (liveEvents && liveEvents.length > 0) {
@@ -909,13 +887,13 @@ export default function HomePage() {
           type: e.title.toLowerCase().includes('bootcamp') ? 'bootcamp' : e.title.toLowerCase().includes('conference') ? 'conference' : 'career',
           kind: 'Event',
           date: e.date,
-          time: e.time || '09:00 AM - 05:00 PM',
-          location: e.location || 'ASTU Main Campus',
+          time: e.time || undefined,
+          location: e.location || 'Location to be confirmed',
           campus: 'ASTU Main Campus',
           description: e.description || 'Join fellow ASTU alumni and students for an interactive session, expert talks, and networking opportunities.',
-          image: e.image || ASTU_DEFAULT_EVENTS[idx % ASTU_DEFAULT_EVENTS.length].image,
-          speaker: e.speaker || 'ASTU Faculty & Industry Leads',
-          seats: e.seats || 'Open Registration',
+          image: e.image || FALLBACK_IMAGE,
+          speaker: e.speaker || undefined,
+          seats: e.seats || undefined,
           statusBadge: e.statusBadge || 'Upcoming',
           level: 'All Alumni & Students',
         });
@@ -931,41 +909,21 @@ export default function HomePage() {
           type: 'bootcamp',
           kind: 'Workshop',
           date: w.date,
-          time: '09:00 AM - 04:00 PM',
-          location: w.location || w.focus || 'CS Lab & Tech Complex',
-          campus: 'Technology Complex',
-          description: w.description || 'Hands-on practical training with verified attendance, RSVP tracking, and certificates of completion.',
-          image: ASTU_DEFAULT_EVENTS[(idx + 3) % ASTU_DEFAULT_EVENTS.length].image,
-          speaker: 'Industry Technical Leads',
-          seats: w.seats || 'Open Registration',
-          statusBadge: 'Hands-on Lab',
-          level: 'Practical Workshop',
+          time: w.time || undefined,
+          location: w.location || w.focus || 'Location to be confirmed',
+          campus: w.campus || 'ASTU Campus',
+          description: w.description || 'Hands-on workshop hosted by Adama Science and Technology University.',
+          image: w.image || FALLBACK_IMAGE,
+          speaker: w.speaker || undefined,
+          seats: w.seats || undefined,
+          statusBadge: w.statusBadge || 'Workshop',
+          level: w.level || undefined,
         });
       });
     }
 
-    // Always ensure the prominent default showcase items (especially the 3 from user screenshot) are included
-    const existingTitles = new Set(liveList.map(item => item.title.toLowerCase().trim()));
-    const finalItems = [...liveList];
-    for (const defItem of ASTU_DEFAULT_EVENTS) {
-      if (!existingTitles.has(defItem.title.toLowerCase().trim())) {
-        finalItems.push(defItem);
-        existingTitles.add(defItem.title.toLowerCase().trim());
-      }
-    }
-
-    // Sort to place the user's top events first
-    finalItems.sort((a, b) => {
-      const getPriority = (item: EventItem) => {
-        if (item.id === 'ds-ml-bootcamp') return 0;
-        if (item.id === 'ethiopialics-2025') return 1;
-        if (item.id === 'career-summit-2026') return 2;
-        return 10;
-      };
-      return getPriority(a) - getPriority(b);
-    });
-
-    return finalItems;
+    // Empty when CMS/API have nothing — do not inject showcase/demo events.
+    return liveList;
   }, [liveEvents, liveWorkshops]);
 
   // Filtered by selected tab
@@ -982,19 +940,26 @@ export default function HomePage() {
     return allEventsList;
   }, [allEventsList, eventFilterTab]);
 
+  const eventTotalPages = Math.max(1, Math.ceil(filteredEventsList.length / 3));
+  const safeEventSlideIndex = Math.min(eventSlideIndex, eventTotalPages - 1);
+
+  // When filters shrink the list, clamp the slide so pagination never overflows.
   useEffect(() => {
-    if (window.location.pathname === '/events' || window.location.hash === '#events' || window.location.hash === '#workshops') {
+    setEventSlideIndex((prev) => Math.min(prev, Math.max(0, eventTotalPages - 1)));
+  }, [eventTotalPages]);
+
+  useEffect(() => {
+    if (window.location.hash === '#events' || window.location.hash === '#workshops') {
       setTimeout(() => {
-        const el = document.getElementById('events');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        document.getElementById('events')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 400);
     }
   }, []);
 
 
-  // Pair each server-reported figure with its presentation.
+  // Pair each server-reported figure with its presentation. Stats the server
+  // omits (zero rows) or that we have no presentation for are dropped, so the
+  // band and its nav entry disappear together when there is nothing real.
   const visibleStats = useMemo(
     () =>
       liveStats
@@ -1005,7 +970,38 @@ export default function HomePage() {
     [liveStats]
   );
 
-  const hasImpactNumbers = visibleStats.length > 0;
+  /** Live donation campaigns only — ordered for the homepage, never static demos. */
+  const orderedDonationCampaigns = useMemo(() => {
+    return [...donationCampaigns]
+      .filter((c: any) => {
+        const status = String(c.status || 'ACTIVE').toUpperCase();
+        return status === 'ACTIVE' || status === 'OPEN';
+      })
+      .sort((a: any, b: any) => {
+        const orderA = a.displayOrder ?? a.order ?? a.sortOrder;
+        const orderB = b.displayOrder ?? b.order ?? b.sortOrder;
+        if (orderA != null && orderB != null && Number(orderA) !== Number(orderB)) {
+          return Number(orderA) - Number(orderB);
+        }
+        if (Boolean(b.featured) !== Boolean(a.featured)) {
+          return Number(Boolean(b.featured)) - Number(Boolean(a.featured));
+        }
+        const raisedDiff = (Number(b.raised) || 0) - (Number(a.raised) || 0);
+        if (raisedDiff !== 0) return raisedDiff;
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      });
+  }, [donationCampaigns]);
+
+  const donationCategories = useMemo(() => {
+    const cats = Array.from(
+      new Set(
+        orderedDonationCampaigns
+          .map((c: any) => c.category)
+          .filter((cat: unknown): cat is string => typeof cat === 'string' && cat.trim().length > 0)
+      )
+    );
+    return ['ALL', ...cats];
+  }, [orderedDonationCampaigns]);
 
   // A slide published from the CMS may carry no `image`, and CMS authors write
   // `subtitle` where the template reads `tagline`. Normalising here means the
@@ -1015,7 +1011,10 @@ export default function HomePage() {
     () =>
       liveSlides.map((slide: any) => ({
         ...slide,
-        image: mediaUrl(slide.image || slide.backgroundImage || slide.bgImage),
+        // A partial CMS save or a deleted upload must not leave the public
+        // homepage with an empty hero. Use the bundled campus image until the
+        // editor supplies a working URL.
+        image: mediaUrl(slide.image || slide.backgroundImage || slide.bgImage) || DEFAULT_HERO_IMAGE,
         tagline: slide.tagline || slide.subtitle || slide.kicker || '',
         description: slide.description || slide.body || slide.text || '',
       })),
@@ -1026,132 +1025,15 @@ export default function HomePage() {
     () =>
       normalisedSlides.length
         ? normalisedSlides
-        : defaultHeroSlides.map((slide) => ({
+        : DEFAULT_HERO_SLIDES.map((slide) => ({
             ...slide,
-            image: mediaUrl(slide.image),
+            description: slide.description || welcomeMessage,
           })),
-    [normalisedSlides]
+    [normalisedSlides, welcomeMessage]
   );
 
-  const displayCampusLife = useMemo(() => {
-    if (liveCampusLife && liveCampusLife.length > 0) return liveCampusLife;
-    return defaultCampusLife;
-  }, [liveCampusLife]);
-
-  const displayCampuses = useMemo(() => {
-    if (liveCampuses && liveCampuses.length > 0) return liveCampuses;
-    return defaultCampuses;
-  }, [liveCampuses]);
-
-  const displayGallery = useMemo(() => {
-    if (liveGallery && liveGallery.length > 0) return liveGallery;
-    return defaultGallery;
-  }, [liveGallery]);
-
-  const displayVideos = useMemo(() => {
-    if (liveVideos && liveVideos.length > 0) return liveVideos;
-    return defaultVideos;
-  }, [liveVideos]);
-
-  const displayPartners = useMemo(() => {
-    if (livePartners && livePartners.length > 0) return livePartners;
-    return defaultPartners;
-  }, [livePartners]);
-
-  const displayTestimonials = useMemo(() => {
-    if (liveTestimonials && liveTestimonials.length > 0) return liveTestimonials;
-    return defaultTestimonials;
-  }, [liveTestimonials]);
-
-  const displayFaq = useMemo(() => {
-    if (liveFaq && liveFaq.length > 0) return liveFaq;
-    return defaultFaq;
-  }, [liveFaq]);
-
-  const getAnnouncementBadgeStyle = (type: string) => {
-    const lower = String(type || '').toLowerCase();
-    if (lower.includes('official') || lower.includes('directive') || lower.includes('safety')) {
-      return 'bg-red-50 text-astu-red border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800/50';
-    }
-    if (lower.includes('academic') || lower.includes('research') || lower.includes('grant')) {
-      return 'bg-sky-50 text-[#003580] border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/50';
-    }
-    if (lower.includes('alumni') || lower.includes('career') || lower.includes('fair') || lower.includes('update')) {
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50';
-    }
-    if (lower.includes('employer') || lower.includes('partner')) {
-      return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50';
-    }
-    return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600';
-  };
-
-  const displayAnnouncements = useMemo(() => {
-    const raw = liveAnnouncements && liveAnnouncements.length > 0 ? liveAnnouncements : defaultAnnouncements;
-    return raw.map((ann: any, idx: number) => {
-      let typeLabel = ann.type || 'Official Announcement';
-      const lower = String(typeLabel).toLowerCase().trim();
-      if (lower === 'post') typeLabel = 'Alumni Update';
-      else if (lower === 'announcement') typeLabel = 'Official Announcement';
-      else if (lower === 'directive' || lower.includes('safety')) typeLabel = 'Campus Directive';
-      else if (lower.includes('event')) typeLabel = 'Campus Event';
-      else if (lower.includes('research') || lower.includes('grant') || lower.includes('academic')) typeLabel = 'Academic Notice';
-      else if (lower.includes('employer')) typeLabel = 'Employer Notice';
-      else if (lower.includes('achievement')) typeLabel = 'Alumni Achievement';
-      else if (!lower.includes('announcement') && !lower.includes('notice') && !lower.includes('update')) {
-        typeLabel = `${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)} Notice`;
-      }
-
-      let dateLabel = ann.date || '';
-      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateLabel)) {
-        try {
-          const [m, d, y] = dateLabel.split('/').map(Number);
-          const dt = new Date(y, m - 1, d);
-          dateLabel = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        } catch {
-          // ignore
-        }
-      }
-
-      return {
-        ...ann,
-        id: ann.id || `ann-${idx}`,
-        type: typeLabel,
-        date: dateLabel || 'Recent',
-        excerpt: ann.excerpt || ann.description || 'Official communication and institutional notice from Adama Science and Technology University administration.',
-      };
-    });
-  }, [liveAnnouncements]);
-
-  const displayStories = useMemo(() => {
-    if (liveStories && liveStories.length > 0) return liveStories;
-    return storiesService.getStories();
-  }, [liveStories]);
-
-  const displayResearchHighlights = useMemo(() => {
-    return researchHighlights || defaultResearchHighlights;
-  }, [researchHighlights]);
-
-  const displayImpactSection = useMemo(() => {
-    return impactSection || defaultImpactSection;
-  }, [impactSection]);
-
-  /** Prefer CMS gallery / campus / slide images over any bundled assets */
-  const cmsFeatureImages = useMemo(() => {
-    const fromGallery = displayGallery
-      .map((g: any) => g.src || g.image || g.url)
-      .filter(Boolean);
-    const fromCampuses = displayCampuses.map((c: any) => c.image).filter(Boolean);
-    const fromSlides = displaySlides.map((s: any) => s.image).filter(Boolean);
-    const fromCampusLife = displayCampusLife.map((c: any) => c.image).filter(Boolean);
-    const pool = [...fromGallery, ...fromCampuses, ...fromSlides, ...fromCampusLife];
-    return {
-      primary: displayImpactSection?.image || pool[0] || FALLBACK_IMAGE,
-      secondary: pool[1] || pool[0] || FALLBACK_IMAGE,
-      tertiary: pool[2] || pool[0] || FALLBACK_IMAGE,
-    };
-  }, [displayGallery, displayCampuses, displaySlides, displayCampusLife, displayImpactSection]);
-
-  const activeHero = displaySlides[currentSlide] || displaySlides[0];
+  const activeSlideIndex = Math.min(currentSlide, Math.max(displaySlides.length - 1, 0));
+  const activeHero = displaySlides[activeSlideIndex];
 
   const handleRegisterClick = (item: { title: string; kind: 'Event' | 'Workshop'; date: string; location?: string; id?: string }) => {
     if (registeredTitles.includes(item.title)) {
@@ -1207,7 +1089,7 @@ export default function HomePage() {
     setRegisteredTitles(updated);
     localStorage.setItem('astu_user_registered_events', JSON.stringify(updated));
 
-    toast.success(`Registration Confirmed for "${rsvpModalItem.title}"! Ticket emailed to ${rsvpEmail}.`);
+    toast.success(`Registration confirmed for "${rsvpModalItem.title}".`);
     setConfirmedQrPass(`ASTU-PASS-${Date.now()}-${rsvpName.replace(/\s+/g, '-')}`);
   };
 
@@ -1220,6 +1102,42 @@ export default function HomePage() {
     });
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    let refreshTimer: number | undefined;
+
+    const loadPublishedPartners = async () => {
+      setPartnersLoading(true);
+      try {
+        const partners = await homepageCmsService.fetchPublishedPartners();
+        if (isMounted) {
+          setLivePartners(partners);
+          setFailedPartnerLogos(new Set());
+        }
+      } catch {
+        if (isMounted) setLivePartners([]);
+      } finally {
+        if (isMounted) setPartnersLoading(false);
+      }
+    };
+
+    const queuePartnerRefresh = () => {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => void loadPublishedPartners(), 400);
+    };
+
+    void loadPublishedPartners();
+    window.addEventListener('astu-cms-homepage-updated', queuePartnerRefresh);
+    window.addEventListener('focus', queuePartnerRefresh);
+
+    return () => {
+      isMounted = false;
+      window.clearTimeout(refreshTimer);
+      window.removeEventListener('astu-cms-homepage-updated', queuePartnerRefresh);
+      window.removeEventListener('focus', queuePartnerRefresh);
     };
   }, []);
 
@@ -1239,45 +1157,45 @@ export default function HomePage() {
         const active = cmsConfig.portals.filter((p: any) => p.active !== false);
         if (active.length) setLivePortals(active);
       }
-      if (cmsConfig.campusLife?.length) {
+      if (Array.isArray(cmsConfig.campusLife)) {
         const active = cmsConfig.campusLife.filter((c: any) => c.active !== false);
-        if (active.length) setLiveCampusLife(active);
+        setLiveCampusLife(active.length > 0 ? active : DEFAULT_CAMPUS_LIFE);
       }
-      if (cmsConfig.campuses?.length) {
-        const active = cmsConfig.campuses.filter((c: any) => c.active !== false);
-        if (active.length) setLiveCampuses(active);
+      if (cmsConfig.campusLifeHeaders) setLiveCampusLifeHeaders(cmsConfig.campusLifeHeaders);
+      if (Array.isArray(cmsConfig.campuses)) {
+        setLiveCampuses(cmsConfig.campuses.filter((c: any) => c.active !== false));
       }
-      if (cmsConfig.gallery?.length) {
-        const active = cmsConfig.gallery.filter((g: any) => g.active !== false);
-        if (active.length) setLiveGallery(active);
+      if (Array.isArray(cmsConfig.gallery)) {
+        setLiveGallery(cmsConfig.gallery.filter((g: any) => g.active !== false));
       }
-      if (cmsConfig.videos?.length) {
-        const active = cmsConfig.videos.filter((v: any) => v.active !== false);
-        if (active.length) setLiveVideos(active);
+      if (Array.isArray(cmsConfig.videos)) {
+        setLiveVideos(cmsConfig.videos.filter((v: any) => v.active !== false));
       }
-      if (cmsConfig.newsItems?.length) {
-        const active = cmsConfig.newsItems.filter((n: any) => n.active !== false);
-        if (active.length) setLiveNews(active);
+      if (Array.isArray(cmsConfig.newsItems)) {
+        setLiveNews(cmsConfig.newsItems.filter((n: any) => n.active !== false));
       }
-      if (cmsConfig.announcements?.length) {
-        const active = cmsConfig.announcements.filter((a: any) => a.active !== false);
-        if (active.length) setLiveAnnouncements(active);
+      if (Array.isArray(cmsConfig.announcements)) {
+        setLiveAnnouncements(cmsConfig.announcements.filter((a: any) => a.active !== false));
       }
-      if (cmsConfig.stories?.length) {
+      if (Array.isArray(cmsConfig.stories)) {
         const active = cmsConfig.stories.filter((s: any) => s.active !== false);
-        if (active.length) setLiveStories(storiesService.fromConfig(active));
+        setLiveStories(active.length ? storiesService.fromConfig(active) : []);
       }
-      if (cmsConfig.partners?.length) {
-        const active = cmsConfig.partners.filter((p: any) => p.active !== false);
-        if (active.length) setLivePartners(active);
-      }
-      if (cmsConfig.faq?.length) {
+      if (cmsConfig.partnersHeaders) setLivePartnersHeaders(cmsConfig.partnersHeaders);
+      if (Array.isArray(cmsConfig.faq)) {
         const active = cmsConfig.faq.filter((f: any) => f.active !== false);
-        if (active.length) setLiveFaq(active);
+        setLiveFaq(active.length > 0 ? active : DEFAULT_FAQ);
       }
-      if (cmsConfig.testimonials?.length) {
-        const active = cmsConfig.testimonials.filter((t: any) => t.active !== false);
-        if (active.length) setLiveTestimonials(active);
+      if (cmsConfig.faqHeaders) setLiveFaqHeaders(cmsConfig.faqHeaders);
+      if (Array.isArray(cmsConfig.communityPosts) || Array.isArray(cmsConfig.liveCommunityPosts)) {
+        const source = Array.isArray(cmsConfig.communityPosts)
+          ? cmsConfig.communityPosts
+          : cmsConfig.liveCommunityPosts;
+        setLiveCommunityPosts((source || []).filter((p: any) => p.active !== false));
+      }
+      if (cmsConfig.liveCommunitySection) setLiveCommunitySection(cmsConfig.liveCommunitySection);
+      if (Array.isArray(cmsConfig.testimonials)) {
+        setLiveTestimonials(cmsConfig.testimonials.filter((t: any) => t.active !== false));
       }
       if (cmsConfig.events?.length) {
         const active = cmsConfig.events.filter((e: any) => e.active !== false);
@@ -1285,7 +1203,7 @@ export default function HomePage() {
           setLiveEvents(active.map((e: any) => ({
             title: e.title,
             date: e.date,
-            location: e.location || 'ASTU Main Campus',
+            location: e.location || 'Location to be confirmed',
             image: e.image || FALLBACK_IMAGE,
             id: e.id,
           })));
@@ -1321,8 +1239,9 @@ export default function HomePage() {
       } else if (cmsConfig.employerFeedback) {
         setEmployerFeedback(null);
       }
-      if (cmsConfig.impactSection) setImpactSection(cmsConfig.impactSection);
       if (cmsConfig.careerCta) setCareerCta(cmsConfig.careerCta);
+      if (cmsConfig.heroBadge) setLiveHeroBadge(cmsConfig.heroBadge);
+      if (cmsConfig.heroButtons) setLiveHeroButtons(cmsConfig.heroButtons);
       if (cmsConfig.bottomCta) setBottomCta(cmsConfig.bottomCta);
       if (cmsConfig.researchHighlights) setResearchHighlights(cmsConfig.researchHighlights);
       if (cmsConfig.footer) {
@@ -1339,11 +1258,10 @@ export default function HomePage() {
       if (publishedNews.length && isMounted) setLiveNews(publishedNews);
       const publishedAnnounce = contentService.getPublishedAnnouncements();
       if (publishedAnnounce.length && isMounted) setLiveAnnouncements(publishedAnnounce);
-      // Stories: only fill from storiesService when homepage CMS has none yet
+      // Stories: homepage CMS only — never seed fabricated localStorage stories.
       const homepageStories = storiesService.fromConfig(localConfig?.stories);
       if (isMounted) {
-        if (homepageStories.length) setLiveStories(homepageStories);
-        else setLiveStories(storiesService.getStories());
+        setLiveStories(homepageStories.length ? homepageStories : []);
       }
 
       // 2. Fetch live data from backend API — drives real CMS→Homepage integration
@@ -1440,7 +1358,12 @@ location: e.location || 'Location to be confirmed',
                 id: e.id,
                 title: e.title,
                 date: e.date,
-                seats: e.rsvps != null ? `${e.rsvps} seats registered` : 'Open Registration',
+                seats:
+                  typeof e.rsvps === 'number'
+                    ? `${e.rsvps} registered`
+                    : Array.isArray(e.rsvps) && e.rsvps.length
+                      ? `${e.rsvps.length} registered`
+                      : 'Open Registration',
                 focus: e.category || 'Career Readiness',
               }));
           }
@@ -1453,28 +1376,57 @@ location: e.location || 'Location to be confirmed',
       } catch {
         // Keep CMS / empty state — do not inject demo events
       }
+
+      // Sync active Donation Campaigns published by Alumni Office / CMS (ordered, never static demos)
+      try {
+        const campaigns = await contentService.getPublicDonationCampaigns({ status: 'ACTIVE' });
+        if (isMounted) {
+          setDonationCampaigns(Array.isArray(campaigns) ? campaigns : []);
+        }
+      } catch {
+        if (isMounted) setDonationCampaigns([]);
+      }
+
+      const cfg = homepageCmsService.getSettings();
+      if (isMounted && cfg?.givingSection) {
+        setLiveGivingSection(cfg.givingSection);
+      }
     };
 
     syncContent();
+    const onFooterUpdated = () => setFooterConfig(footerCmsService.getSettings());
     window.addEventListener('astu-cms-content-changed', syncContent);
     window.addEventListener('astu-cms-events-changed', syncContent);
+    window.addEventListener('astu-cms-donations-changed', syncContent);
     window.addEventListener('astu-cms-homepage-updated', syncContent);
-    const onFooterUpdated = () => setFooterConfig(footerCmsService.getSettings());
+    window.addEventListener('astu-cms-gallery-changed', syncContent);
+    window.addEventListener('astu-cms-gallery-settings-changed', syncContent);
     window.addEventListener('astu-cms-footer-updated', onFooterUpdated);
     return () => {
       isMounted = false;
       window.removeEventListener('astu-cms-content-changed', syncContent);
       window.removeEventListener('astu-cms-events-changed', syncContent);
+      window.removeEventListener('astu-cms-donations-changed', syncContent);
       window.removeEventListener('astu-cms-homepage-updated', syncContent);
+      window.removeEventListener('astu-cms-gallery-changed', syncContent);
+      window.removeEventListener('astu-cms-gallery-settings-changed', syncContent);
       window.removeEventListener('astu-cms-footer-updated', onFooterUpdated);
     };
   }, []);
 
   useEffect(() => {
+    if (displaySlides.length <= 1) return;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % (displaySlides.length || 1));
     }, 6000);
     return () => clearInterval(timer);
+  }, [displaySlides.length]);
+
+  useEffect(() => {
+    setCurrentSlide((prev) => (prev >= displaySlides.length ? 0 : prev));
   }, [displaySlides.length]);
 
   const nextSlide = () => {
@@ -1516,11 +1468,25 @@ location: e.location || 'Location to be confirmed',
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // A hero image always comes from the backend. If that URL fails we remove the
-  // <img> and let the section gradient stand in — never substitute a
-  // fabricated local asset, and never re-point at a failing URL (onError loop).
   const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    event.currentTarget.style.display = 'none';
+    const image = event.currentTarget;
+    if (image.dataset.fallbackApplied === 'true') {
+      image.src = FALLBACK_IMAGE || DEFAULT_HERO_IMAGE;
+      return;
+    }
+    image.dataset.fallbackApplied = 'true';
+    image.src = DEFAULT_HERO_IMAGE;
+  };
+
+  const handleHeroImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const image = event.currentTarget;
+    if (image.dataset.fallbackApplied === 'true') {
+      image.style.display = 'none';
+      return;
+    }
+
+    image.dataset.fallbackApplied = 'true';
+    image.src = DEFAULT_HERO_IMAGE;
   };
 
   useEffect(() => {
@@ -1549,7 +1515,7 @@ location: e.location || 'Location to be confirmed',
     }, 150);
 
     return () => observer.disconnect();
-  }, [liveEvents, liveWorkshops, liveNews, liveAnnouncements, liveStories, liveSlides, liveGallery]);
+  }, [liveEvents, liveWorkshops, liveNews, liveAnnouncements, liveStories, liveSlides, liveGallery, liveCampusLife, liveFaq, liveCommunityPosts, liveTestimonials, networkVoices, liveStats]);
 
   useEffect(() => {
     const sectionObserver = new IntersectionObserver(
@@ -1576,10 +1542,10 @@ location: e.location || 'Location to be confirmed',
   // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
-    <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+    <div className="home-shell flex min-h-screen flex-col bg-background text-on-surface dark:bg-[var(--bg-page)] dark:text-slate-100 transition-colors duration-200">
       <Navbar />
 
-      <div className="fixed top-0 left-0 z-[60] w-full h-0.5 bg-slate-800/20">
+      <div className="fixed top-0 left-0 z-[60] w-full h-0.5 bg-slate-800/20 dark:bg-white/10">
         <div
           className="h-full bg-gradient-to-r from-astu-green via-astu-navy to-astu-red transition-all duration-150 ease-out"
           style={{ width: `${scrollProgress}%` }}
@@ -1587,46 +1553,42 @@ location: e.location || 'Location to be confirmed',
       </div>
 
       <main id="home">
-        <section className="relative overflow-hidden min-h-[700px] md:h-[580px] lg:h-[750px] bg-slate-950">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-            <div className="absolute top-20 left-[10%] w-2 h-2 rounded-full bg-astu-green/30 animate-float" style={{ animationDelay: "0s", animationDuration: "5s" }} />
-            <div className="absolute top-40 left-[30%] w-1.5 h-1.5 rounded-full bg-astu-red/30 animate-float" style={{ animationDelay: "1s", animationDuration: "7s" }} />
-            <div className="absolute top-60 left-[60%] w-2.5 h-2.5 rounded-full bg-astu-green/20 animate-float" style={{ animationDelay: "2s", animationDuration: "6s" }} />
-            <div className="absolute top-32 right-[20%] w-1.5 h-1.5 rounded-full bg-white/20 animate-float" style={{ animationDelay: "0.5s", animationDuration: "8s" }} />
-            <div className="absolute bottom-20 right-[40%] w-2 h-2 rounded-full bg-astu-red/20 animate-float" style={{ animationDelay: "1.5s", animationDuration: "5.5s" }} />
-            <div className="absolute bottom-40 left-[50%] w-1 h-1 rounded-full bg-white/15 animate-float" style={{ animationDelay: "3s", animationDuration: "9s" }} />
-          </div>
-          {/* Background Slides */}
+        <section className="relative overflow-hidden min-h-[520px] h-[70vh] max-h-[620px] md:h-[520px] lg:h-[560px] bg-slate-950">
+          {/* Background Slides — photo stays dominant; text uses a local scrim only */}
           <div className="absolute inset-0 w-full h-full">
             {displaySlides.map((slide, idx) => (
               <div
                 key={slide.id || idx}
                 className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                  idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+                  idx === activeSlideIndex ? "opacity-100 z-10" : "opacity-0 z-0"
                 }`}
               >
-                {/* Background image, sourced from the backend CMS */}
-                {slide.image && (
+                {slide.image ? (
                   <img
                     alt={slide.title}
-                    className="h-full w-full object-cover object-[center_30%]"
+                    className={`h-full w-full object-cover object-center scale-105 transition-transform duration-[8000ms] ease-out ${
+                      idx === activeSlideIndex ? "scale-100" : "scale-105"
+                    }`}
                     src={slide.image}
-                    onError={handleImageError}
+                    onError={handleHeroImageError}
                   />
+                ) : (
+                  <div className="h-full w-full bg-gradient-to-br from-astu-navy via-slate-900 to-slate-950" />
                 )}
-                {/* Gentle overlay for rich aesthetic with high photo transparency */}
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,25,50,0.55),rgba(0,10,25,0.78))]" />
+                {/* Soft left scrim for copy — keeps the right side of the photo visible */}
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent md:via-slate-950/25 md:to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-slate-950/20" />
               </div>
             ))}
           </div>
 
-          {/* Compact text - hero is immediately visible below navbar */}
-          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-16 md:px-6 lg:py-20">
-            <div className="max-w-2xl space-y-4">
-              <span className="inline-block rounded-full bg-astu-red px-3 py-1 text-xs font-bold uppercase tracking-widest text-white shadow-lg animate-glow">
-                {activeHero?.tagline}
+          {/* Hero copy — brand-first: one brand signal, one headline, one CTA group */}
+          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-12 md:px-6 md:py-14">
+            <div className="max-w-2xl space-y-4 rounded-2xl bg-slate-950/30 p-5 backdrop-blur-[2px] md:bg-transparent md:p-0 md:backdrop-blur-none animate-slide-up">
+              <span className="inline-block rounded-full bg-astu-red px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-white shadow-lg animate-glow">
+                {activeHero?.tagline || liveHeroBadge || 'ASTU-AMS'}
               </span>
-              <h1 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+              <h1 className="text-3xl font-black leading-[1.15] tracking-tight text-white drop-shadow-sm md:text-4xl lg:text-5xl">
                 {(activeHero?.title || '').includes(" to the ") ? (
                   <>
                     {activeHero?.title.split(" to the ")[0]}
@@ -1634,79 +1596,91 @@ location: e.location || 'Location to be confirmed',
                     to the <span className="text-astu-green">{activeHero?.title.split(" to the ")[1]}</span>
                   </>
                 ) : (
-                  activeHero?.title
+                  activeHero?.title || 'Alumni Management System'
                 )}
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-100 md:text-base">
+              <p className="max-w-xl text-sm leading-relaxed text-white/90 md:text-base">
                 {activeHero?.description || welcomeMessage || 'Connecting ASTU graduates, employers, and academic departments through verified career and alumni services.'}
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-5 flex flex-wrap gap-3">
                 <button
-                  className="inline-flex items-center gap-2 rounded-md bg-astu-red px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-lg hover:shadow-xl hover:shadow-astu-red/20 hover:scale-105 btn-magnetic"
-                  onClick={() => navigate("/info/alumni-portal")}
+                  type="button"
+                  className="home-btn home-btn--primary"
+                  onClick={() => navigate(liveHeroButtons?.primaryLink || '/info/alumni-portal')}
                 >
-                  Alumni Portal
+                  <Users className="home-btn__icon" aria-hidden="true" />
+                  {liveHeroButtons?.primaryText || 'Alumni Portal'}
+                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
                 </button>
                 <button
-                  className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-all hover:scale-105 btn-magnetic backdrop-blur-sm"
-                  onClick={() => navigate("/info/employer-portal")}
+                  type="button"
+                  className="home-btn home-btn--secondary"
+                  onClick={() => navigate(liveHeroButtons?.secondaryLink || '/info/employer-portal')}
                 >
-                  Employer Partnership
-                  <Handshake className="h-4 w-4" />
+                  {liveHeroButtons?.secondaryText || 'Employer Partnership'}
+                  <Handshake className="home-btn__icon" aria-hidden="true" />
                 </button>
               </div>
             </div>
           </div>
 
           {/* Left/Right navigation arrow buttons */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
-            aria-label="Previous slide"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
-            aria-label="Next slide"
-          >
-            <ArrowRight className="h-5 w-5" />
-          </button>
-
-          {/* Bottom active slide indicator dots */}
-          <div className="absolute bottom-6 left-1/2 z-35 flex -translate-x-1/2 gap-2.5">
-            {displaySlides.map((_, idx) => (
+          {displaySlides.length > 1 && (
+            <>
               <button
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? "w-6 bg-[#FFD700]" : "w-2.5 bg-white/40 hover:bg-white/60"
-                  }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
+                type="button"
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
+                aria-label="Previous slide"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
+                aria-label="Next slide"
+              >
+                <ArrowRight className="h-5 w-5" />
+              </button>
+              <div className="absolute bottom-5 left-1/2 z-35 flex -translate-x-1/2 gap-2" role="tablist" aria-label="Hero slides">
+                {displaySlides.map((_, idx) => (
+                  <button
+                    type="button"
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`h-2 rounded-full transition-all duration-300 ${idx === activeSlideIndex ? "w-6 bg-amber-400" : "w-2 bg-white/40 hover:bg-white/60"
+                      }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    aria-selected={idx === activeSlideIndex}
+                  />
+                ))}
+              </div>
+            </>
+          )}
           <button
+            type="button"
             onClick={() => {
-              window.scrollTo({
-                top: window.innerHeight,
-                behavior: "smooth",
-              });
+              const target =
+                document.getElementById('impact-numbers') ||
+                document.getElementById('campus-life') ||
+                document.getElementById('events');
+              target?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="absolute bottom-6 left-1/2 z-40 -translate-x-1/2 text-white/80 hover:text-white animate-bounce cursor-pointer transition-colors"
+            className="absolute bottom-10 left-1/2 z-40 -translate-x-1/2 text-white/90 animate-bounce motion-reduce:animate-none"
             aria-label="Scroll down"
           >
-            <ChevronDown className="h-8 w-8" />
+            <ChevronDown className="h-7 w-7" />
           </button>
         </section>
 
         {visibleStats.length > 0 && (
-          <section id="impact-numbers" className="relative z-20 mx-auto my-10 md:my-14 max-w-[1440px] px-4 md:px-8">
-            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-[0_12px_40px_rgba(0,51,102,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+          <section id="impact-numbers" className="relative z-20 mx-auto -mt-8 mb-6 md:-mt-10 md:mb-8 max-w-[1440px] px-4 md:px-8">
+            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[var(--bg-card)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] backdrop-blur-xl">
               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green" />
               <div
-                className={`grid divide-y sm:divide-y-0 sm:divide-x divide-slate-200/90 dark:divide-slate-800 ${
+                className={`grid divide-y sm:divide-y-0 sm:divide-x divide-slate-200/90 dark:divide-[var(--border-color)] ${
                   visibleStats.length === 1
                     ? "grid-cols-1"
                     : visibleStats.length === 2
@@ -1723,15 +1697,15 @@ location: e.location || 'Location to be confirmed',
                   return (
                     <article
                       key={stat.key || idx}
-                      className="group flex flex-col items-center gap-3.5 p-8 text-center transition-all duration-300 hover:bg-slate-50/70 dark:hover:bg-slate-800/40"
+                      className="group flex flex-col items-center gap-2.5 p-5 md:p-6 text-center transition-all duration-300 hover:bg-slate-50/70 dark:hover:bg-white/[0.04]"
                     >
-                      <div className={`rounded-2xl p-3.5 ${presentation.accent} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
-                        <Icon className="h-6 w-6" />
+                      <div className={`rounded-xl p-2.5 ${presentation.accent} shadow-sm transition-transform duration-300 group-hover:scale-110`}>
+                        <Icon className="h-5 w-5" />
                       </div>
-                      <h2 className="text-3xl lg:text-4xl font-extrabold text-astu-navy dark:text-white tracking-tight">
+                      <h2 className="text-2xl lg:text-3xl font-extrabold text-astu-navy dark:text-white tracking-tight">
                         {stat.value.toLocaleString()}
                       </h2>
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                         {presentation.label}
                       </p>
                     </article>
@@ -1742,380 +1716,104 @@ location: e.location || 'Location to be confirmed',
           </section>
         )}
 
-        <section id="how-it-works" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-12 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Get Started</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">How ASTU-AMS Works</h3>
-            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-              From registration to real impact — here's how our platform empowers alumni,
-              employers, and the university community in four simple steps.
-            </p>
-          </div>
+        <section id="campus-life" className="relative mx-auto max-w-[1440px] px-4 py-10 md:px-8 md:py-12">
+          <div className="pointer-events-none absolute -top-10 right-0 h-56 w-56 rounded-full bg-gradient-to-br from-astu-green/10 via-sky-400/5 to-transparent blur-3xl dark:from-emerald-500/15" />
 
-          <div className="relative">
-            {/* Connector line for desktop */}
-            <div className="absolute left-0 right-0 top-[60px] hidden h-0.5 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green lg:block" />
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {livePortals.map((item, idx) => {
-                const Icon = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || Users);
-                const descText = item.description || (Array.isArray(item.points) ? item.points[0] : item.text || '');
-                return (
-                  <article
-                    key={item.id || item.step || item.title || idx}
-                    className={`reveal reveal-delay-${(idx % 4) + 1} group relative rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_24px_rgba(0,51,102,0.12)]`}
-                  >
-                    <div className="mb-5 flex items-center gap-3">
-                      <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${item.color || 'from-astu-navy to-[#1a4f8a]'} text-lg font-bold text-white shadow-md transition-transform duration-300 group-hover:scale-110`}
-                      >
-                        {item.step || idx + 1}
-                      </div>
-                      <div className={`rounded-lg p-2.5 ${item.iconBg || 'bg-astu-navy/10 text-astu-navy dark:bg-sky-500/10 dark:text-sky-400'} transition-colors`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                    </div>
-
-                    <h4 className="mb-2 text-lg font-bold text-astu-navy dark:text-white">
-                      {item.title}
-                    </h4>
-                    <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-3">
-                      {descText}
-                    </p>
-
-                    {item.cta && (
-                      <button
-                        onClick={() => navigate(item.route || '/login')}
-                        className="mt-3 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        {item.cta} <ArrowRight className="h-3 w-3" />
-                      </button>
-                    )}
-
-                    <div
-                      className={`absolute bottom-0 left-0 right-0 h-1 rounded-b-2xl bg-gradient-to-r ${item.color || 'from-astu-navy to-[#1a4f8a]'} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
-                    />
-                  </article>
-                );
-              })}
+          <div className="relative mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+            <div className="max-w-2xl reveal">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                {liveCampusLifeHeaders?.eyebrow || 'Explore Life At ASTU'}
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                {liveCampusLifeHeaders?.title || 'Campus Life & Facilities'}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                {liveCampusLifeHeaders?.description ||
+                  'Discover campus activities, research facilities, and galleries that define life at Adama Science and Technology University.'}
+              </p>
             </div>
-          </div>
-
-          <div className="mt-10 flex justify-center reveal">
             <button
-              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy dark:bg-blue-600 px-7 py-3 text-sm font-bold text-white shadow-md transition-all hover:brightness-110 hover:shadow-lg hover:scale-105"
-              onClick={() => navigate("/login")}
+              type="button"
+              onClick={() => navigate('/info/campus-life')}
+              className="home-btn home-btn--navy home-btn--sm"
             >
-              Get Started Today
-              <ArrowRight className="h-4 w-4" />
+              Explore Campus Life
+              <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
             </button>
           </div>
-        </section>
 
-        <section id="impact" className="mx-auto grid max-w-[1440px] gap-8 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
-          <article className="reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">
-              {displayImpactSection?.eyebrow || 'Industry-Campus Bridge'}
-            </p>
-            <h3 className="mt-2 text-3xl font-bold animate-gradient-text dark:text-white">
-              {displayImpactSection?.title || welcomeMessage || 'ASTU Alumni Impact'}
-            </h3>
-            <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              {displayImpactSection?.description ||
-                welcomeMessage ||
-                'Graduate outcomes and employer feedback managed through the ASTU content system feed directly into curriculum updates.'}
-            </p>
-            <div className="mt-6 grid grid-cols-2 gap-4">
-              {liveStats.slice(0, 2).map((stat: any) => (
-                <div key={stat.title || stat.label || stat.id}>
-                  <p className="text-3xl font-bold text-astu-navy dark:text-blue-400">{stat.value}{stat.suffix || ''}</p>
-                  <p className="text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{stat.title || stat.label}</p>
-                </div>
-              ))}
-            </div>
-            <button
-              className="mt-7 rounded-md bg-astu-navy px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 hover:scale-105 transition-all btn-magnetic shadow-lg hover:shadow-xl"
-              onClick={() => {
-                const route = displayImpactSection?.ctaRoute;
-                if (route && route.startsWith('#')) {
-                  document.getElementById(route.slice(1))?.scrollIntoView({ behavior: 'smooth' });
-                } else if (route) {
-                  navigate(route);
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {(liveCampusLife.length > 0 ? liveCampusLife : DEFAULT_CAMPUS_LIFE).slice(0, 3).map((card: any, idx: number) => {
+              const targetRoute =
+                card.link ||
+                (card.action?.toLowerCase().includes('event')
+                  ? '/events'
+                  : card.action?.toLowerCase().includes('facilit')
+                    ? '/info/facilities'
+                    : card.action?.toLowerCase().includes('gallery')
+                      ? '/gallery'
+                      : '/info/campus-life');
+
+              const handleNavigate = () => {
+                if (typeof targetRoute === 'string' && targetRoute.startsWith('#')) {
+                  document.getElementById(targetRoute.slice(1))?.scrollIntoView({ behavior: 'smooth' });
                 } else {
-                  document.getElementById('campus-life')?.scrollIntoView({ behavior: 'smooth' });
+                  navigate(targetRoute);
                 }
-              }}
-            >
-              {displayImpactSection?.ctaLabel || 'Explore Campus Life'}
-            </button>
-          </article>
+              };
 
-          <article className="reveal">
-            <img
-              alt={displayImpactSection?.title || 'ASTU campus'}
-              className="h-full min-h-[280px] w-full rounded-xl object-cover shadow-lg"
-              src={cmsFeatureImages.primary}
-              onError={handleImageError}
-            />
-          </article>
-        </section>
-
-        <section id="campus-life" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Explore Life At ASTU</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Campus Life, Facilities, Events, and Galleries</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-              Discover events, facilities, campus activities, media galleries, and student services that define life at Adama Science and Technology University.
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {displayCampusLife.length === 0 ? (
-              <div className="md:col-span-3">
-                <EmptySection message="Campus life highlights will appear here once published by the university content team." />
-              </div>
-            ) : (
-              displayCampusLife.map((card, idx) => (
-              <article key={card.id || card.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                <img src={card.image || FALLBACK_IMAGE} alt={card.title} className="h-52 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
-                <div className="p-5">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-astu-red">{card.campus}</p>
-                  <h4 className="mt-2 text-lg font-semibold text-astu-navy dark:text-white">{card.title}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{card.description}</p>
-                  {card.action && (
-                    <button
-                      onClick={() => {
-                        if (card.action?.toLowerCase().includes('event')) {
-                          document.getElementById('events')?.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                          navigate('/gallery');
-                        }
-                      }}
-                      className="mt-4 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 btn-magnetic cursor-pointer transition-colors"
-                    >
-                      {card.action}
-                    </button>
-                  )}
-                </div>
-              </article>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section id="campuses" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Campuses</p>
-              <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Explore ASTU Spaces</h3>
-            </div>
-            <button
-              onClick={() => navigate('/gallery')}
-              className="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors"
-            >
-              View all
-            </button>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {displayCampuses.length === 0 ? (
-              <div className="sm:col-span-2 lg:col-span-4">
-                <EmptySection message="Campus profiles will appear here once published by the university content team." />
-              </div>
-            ) : (
-              displayCampuses.map((campus, idx) => (
-              <article key={campus.id || campus.name || idx} className={`reveal reveal-delay-${(idx % 4) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                <img src={campus.image || FALLBACK_IMAGE} alt={campus.name} className="h-44 w-full object-cover transition-transform duration-700 hover:scale-105" onError={handleImageError} />
-                <div className="p-4">
-                  <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{campus.name}</h4>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{campus.description}</p>
-                  <button
-                    onClick={() => navigate('/gallery')}
-                    className="mt-3 text-xs font-semibold text-astu-red hover:underline btn-magnetic cursor-pointer"
-                  >
-                    Explore
-                  </button>
-                </div>
-              </article>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section id="gallery" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-10 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Photo Gallery</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-              Campus life, events, and institutional moments from Adama Science and Technology University.
-            </p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {displayGallery.length === 0 ? (
-              <div className="sm:col-span-2 md:col-span-3">
-                <EmptySection message="Photo gallery items will appear here once published by the university content team." />
-              </div>
-            ) : (
-              displayGallery.map((item, idx) => (
-              <article key={item.id || item.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                <img src={item.src || item.image || FALLBACK_IMAGE} alt={item.title} className="h-48 w-full object-cover transition-all duration-700 hover:scale-110 sm:h-56 md:h-64" onError={handleImageError} />
-                <div className="p-3 md:p-4">
-                  <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{item.title}</h4>
-                  {item.album && <p className="text-[10px] font-bold text-astu-red uppercase tracking-wider mt-1">{item.album}</p>}
-                </div>
-              </article>
-              ))
-            )}
-          </div>
-          <div className="mt-8 text-center">
-            <button
-              onClick={() => navigate('/gallery')}
-              className="inline-flex items-center gap-2 rounded-lg bg-astu-navy dark:bg-blue-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white hover:brightness-110 shadow-md hover:shadow-lg transition-all cursor-pointer"
-            >
-              Explore Full Gallery & Albums <ExternalLink className="h-4 w-4 text-[#FFD700]" />
-            </button>
-          </div>
-        </section>
-
-        <section id="video-gallery" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="reveal mb-8 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Media</p>
-              <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white sm:text-3xl">Video Gallery</h3>
-              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Workshop recordings, graduation moments, and research showcases.</p>
-            </div>
-            <button
-              onClick={() => navigate('/gallery')}
-              className="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors"
-            >
-              View Media Library
-            </button>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {displayVideos.length === 0 ? (
-              <div className="md:col-span-3">
-                <EmptySection message="Video highlights will appear here once published by the university content team." />
-              </div>
-            ) : (
-              displayVideos.map((video: any, idx: number) => (
-                <article key={video.id || video.title || idx} className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                  <div className="relative">
+              return (
+                <article
+                  key={card.id || card.title || idx}
+                  className={`reveal reveal-delay-${(idx % 3) + 1} group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]`}
+                >
+                  <button type="button" onClick={handleNavigate} className="relative block h-44 w-full overflow-hidden text-left">
                     <img
-                      src={video.thumbnail || video.image || video.cover || cmsFeatureImages.primary}
-                      alt={video.title}
-                      className="h-52 w-full object-cover"
+                      src={mediaUrl(card.image) || card.image || DEFAULT_HERO_IMAGE}
+                      alt={card.title}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       onError={handleImageError}
                     />
-                    <a
-                      href={video.url || video.link || '#'}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="absolute inset-0 flex items-center justify-center bg-slate-950/20 text-white"
-                      aria-label={`Play ${video.title}`}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
+                    <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-navy">
+                      {card.campus || 'ASTU Campus'}
+                    </span>
+                  </button>
+                  <div className="flex flex-1 flex-col justify-between p-5">
+                    <div>
+                      <button
+                        type="button"
+                        onClick={handleNavigate}
+                        className="cursor-pointer text-left text-lg font-bold text-astu-navy transition-colors hover:text-astu-red dark:text-white dark:hover:text-amber-400"
+                      >
+                        {card.title}
+                      </button>
+                      <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-3">
+                        {card.description}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleNavigate}
+                      className="mt-4 inline-flex items-center gap-1.5 self-start text-xs font-bold text-astu-navy transition-all hover:gap-2 dark:text-sky-300"
                     >
-                      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-all hover:scale-110 hover:bg-white/30">
-                        <PlayCircle className="h-8 w-8" />
-                      </span>
-                    </a>
-                  </div>
-                  <div className="p-4">
-                    <h4 className="text-sm font-semibold text-astu-navy dark:text-white">{video.title}</h4>
-                    {video.description && (
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-slate-400">{video.description}</p>
-                    )}
+                      {card.action || 'Learn more'}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </article>
-              ))
-            )}
+              );
+            })}
           </div>
         </section>
 
-
-
-        <section className="relative bg-gradient-to-r from-astu-navy to-primary-container py-14 md:py-20 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-astu-green/5 animate-float-slow" />
-            <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-astu-red/5 animate-float" style={{ animationDelay: "2s" }} />
-          </div>
-          <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-2 md:px-8 relative z-10">
-            <article className="reveal text-white">
-              <p className="inline-flex rounded-full bg-astu-red px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]">
-                Quality Assurance
-              </p>
-              <h3 className="mt-4 text-3xl font-bold">
-                {employerFeedback?.title || 'Data-Driven Accreditation & Excellence'}
-              </h3>
-              <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-200">
-                {employerFeedback?.description ||
-                  'ASTU-AMS provides verified tracer data, employment analytics, and employer feedback required by accreditation agencies and university management.'}
-              </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border border-white/20 bg-white/5 p-4">
-                  <Globe className="mb-2 h-5 w-5 text-astu-green" />
-                  <h4 className="text-sm font-semibold">
-                    {employerFeedback?.companies != null ? `${employerFeedback.companies} Companies` : 'Global Accreditation'}
-                  </h4>
-                  <p className="mt-1 text-xs text-slate-300">
-                    {employerFeedback?.submissions != null
-                      ? `${employerFeedback.submissions} employer feedback submissions`
-                      : 'Build transparent, audited institutional reports.'}
-                  </p>
-                </div>
-                <div className="rounded-lg border border-white/20 bg-white/5 p-4">
-                  <Handshake className="mb-2 h-5 w-5 text-astu-green" />
-                  <h4 className="text-sm font-semibold">
-                    {tracerSpotlight?.title || 'Market Alignment'}
-                  </h4>
-                  <p className="mt-1 text-xs text-slate-300">
-                    {tracerSpotlight?.responseRate
-                      ? `Tracer response rate: ${tracerSpotlight.responseRate}`
-                      : 'Align curriculum with industry expectations.'}
-                  </p>
-                </div>
-              </div>
-              <button
-                className="mt-6 rounded-md bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-astu-navy hover:bg-slate-100"
-                onClick={() => navigate("/info/impact-numbers")}
-              >
-                View Impact Numbers
-              </button>
-            </article>
-
-            <article className="reveal grid gap-2 sm:col-span-2 sm:grid-cols-2 md:col-span-1">
-              <img
-                alt="ASTU campus highlight"
-                className="h-40 w-full rounded-xl border border-white/10 object-cover shadow-lg sm:h-48"
-                src={cmsFeatureImages.primary}
-                onError={handleImageError}
-              />
-              <img
-                alt="ASTU facilities"
-                className="h-40 w-full rounded-xl border border-white/10 object-cover shadow-lg sm:h-48"
-                src={cmsFeatureImages.secondary}
-                onError={handleImageError}
-              />
-            </article>
-          </div>
-        </section>
-
-        {/* Unified Upcoming Events & Workshops Showcase with Professional Curved Aesthetic & Carousel Slider */}
-        <section id="events" className="relative mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
+        <section id="events" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
           <div id="workshops" className="sr-only" />
 
-          {/* Curved Decorative Ambient Lighting Glows */}
-          <div className="pointer-events-none absolute -top-12 -right-12 h-96 w-96 rounded-full bg-gradient-to-br from-astu-navy/15 via-rose-500/10 to-transparent blur-3xl dark:from-sky-500/15 dark:via-rose-500/10" />
-          <div className="pointer-events-none absolute -bottom-12 -left-12 h-96 w-96 rounded-full bg-gradient-to-tr from-astu-green/15 via-amber-500/10 to-transparent blur-3xl dark:from-emerald-500/15" />
+          <div className="pointer-events-none absolute -top-8 -right-8 h-64 w-64 rounded-full bg-gradient-to-br from-astu-navy/10 via-rose-500/8 to-transparent blur-3xl dark:from-sky-500/12 dark:via-rose-500/8" />
 
-          {/* Curved Shell Canvas Container */}
-          <div className="relative rounded-[2.5rem] md:rounded-[3.2rem] bg-gradient-to-b from-slate-50/95 via-white to-blue-50/30 dark:from-slate-900/95 dark:via-slate-800/85 dark:to-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,51,102,0.06)] dark:shadow-slate-950/50 p-6 md:p-10 lg:p-12 overflow-hidden">
-            
-            {/* Top Organic Wave Curve Accent */}
-            <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 overflow-hidden opacity-30 dark:opacity-15">
-              <svg viewBox="0 0 1440 40" fill="none" className="w-full h-full preserve-3d" preserveAspectRatio="none">
-                <path d="M0,20 C320,40 460,0 720,20 C980,40 1140,0 1440,20 L1440,0 L0,0 Z" fill="currentColor" className="text-astu-navy/20 dark:text-sky-400/20" />
-              </svg>
-            </div>
-
-            {/* Header Area matching screenshot */}
-            <div className="mb-8 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
+          <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-blue-50/30 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
               <div>
                 {/* CALENDAR Badge Pill matching user screenshot */}
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
@@ -2124,30 +1822,30 @@ location: e.location || 'Location to be confirmed',
                 </div>
 
                 {/* Main Heading */}
-                <h3 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
-                  Upcoming Events & Workshops
-                </h3>
+                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
+                  Upcoming Events and Workshops
+                </h2>
 
                 {/* Subtitle matching user screenshot */}
-                <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
                   Join campus career expos, technical workshops, and alumni reunions.
                 </p>
               </div>
 
-              {/* Action Button: See All Events → */}
               <div className="flex flex-wrap items-center gap-3">
                 <button
-                  className="inline-flex items-center gap-2 rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-astu-navy/20 dark:shadow-blue-900/30 transition-all duration-200 hover:bg-astu-navy/90 dark:hover:bg-blue-500 hover:shadow-lg active:scale-95 group"
-                  onClick={() => setShowAllEventsModal(true)}
+                  type="button"
+                  className="home-btn home-btn--navy home-btn--sm"
+                  onClick={() => navigate(liveEventsHeaders?.viewAllLink || '/events')}
                 >
-                  <span>See All Events</span>
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                  <span>{liveEventsHeaders?.viewAllText?.replace(/→/g, '').trim() || 'See All Events'}</span>
+                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
                 </button>
               </div>
             </div>
 
             {/* Filter Tabs & Carousel Navigation Controls Bar */}
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-800 pb-5">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-700/60 pb-4">
               {/* Curved Pill Filter Tabs */}
               <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 w-fit">
                 {[
@@ -2158,13 +1856,15 @@ location: e.location || 'Location to be confirmed',
                 ].map(tab => (
                   <button
                     key={tab.id}
+                    type="button"
+                    aria-pressed={eventFilterTab === tab.id}
                     onClick={() => {
                       setEventFilterTab(tab.id as any);
                       setEventSlideIndex(0);
                     }}
                     className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
                       eventFilterTab === tab.id
-                        ? 'bg-astu-navy text-white shadow-sm dark:bg-blue-600'
+                        ? 'bg-astu-navy text-white shadow-sm dark:bg-sky-600'
                         : 'text-slate-600 hover:text-astu-navy dark:text-slate-300 dark:hover:text-white'
                     }`}
                   >
@@ -2173,45 +1873,50 @@ location: e.location || 'Location to be confirmed',
                 ))}
               </div>
 
-              {/* Slider Navigation Buttons (Circular Curve Controls) */}
+              {/* Slider Navigation Buttons — only when there is more than one page */}
+              {filteredEventsList.length > 3 && (
               <div className="flex items-center gap-2 self-end sm:self-auto">
                 <span className="text-xs font-medium text-slate-500 dark:text-slate-400 mr-2 hidden md:inline-block">
-                  Page {eventSlideIndex + 1} of {Math.max(1, Math.ceil(filteredEventsList.length / 3))}
+                  Page {safeEventSlideIndex + 1} of {eventTotalPages}
                 </span>
                 <button
+                  type="button"
                   onClick={() => {
-                    const totalPages = Math.max(1, Math.ceil(filteredEventsList.length / 3));
-                    setEventSlideIndex((prev) => (prev - 1 + totalPages) % totalPages);
+                    setEventSlideIndex((prev) => (prev - 1 + eventTotalPages) % eventTotalPages);
                   }}
                   aria-label="Previous Events Slide"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-blue-400 dark:hover:text-blue-300 hover:scale-105 active:scale-95"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-sky-400 dark:hover:text-sky-300 hover:scale-105 active:scale-95"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
-                    const totalPages = Math.max(1, Math.ceil(filteredEventsList.length / 3));
-                    setEventSlideIndex((prev) => (prev + 1) % totalPages);
+                    setEventSlideIndex((prev) => (prev + 1) % eventTotalPages);
                   }}
                   aria-label="Next Events Slide"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-blue-400 dark:hover:text-blue-300 hover:scale-105 active:scale-95"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 hover:border-astu-navy hover:text-astu-navy dark:hover:border-sky-400 dark:hover:text-sky-300 hover:scale-105 active:scale-95"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
               </div>
+              )}
             </div>
 
             {/* Event Cards Grid / Slider View (3 cards side-by-side matching screenshot) */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredEventsList.length === 0 ? (
+              <EmptySection message="No upcoming events or workshops are published yet. Check back soon or visit the full events calendar." />
+            ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" key={`home-events-${safeEventSlideIndex}-${eventFilterTab}`}>
               {filteredEventsList
-                .slice(eventSlideIndex * 3, eventSlideIndex * 3 + 3)
+                .slice(safeEventSlideIndex * 3, safeEventSlideIndex * 3 + 3)
                 .map((event, idx) => (
                   <article
                     key={event.id + '-' + idx}
-                    className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300"
+                    className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300"
                   >
                     {/* Top Image Frame with Smooth Curved Top */}
-                    <div className="relative h-52 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
+                    <div className="relative h-40 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
                       <img
                         alt={event.title}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -2235,7 +1940,7 @@ location: e.location || 'Location to be confirmed',
                       )}
 
                       {/* Bottom Image Curved Wave Accent */}
-                      <div className="pointer-events-none absolute -bottom-1 left-0 right-0 h-4 text-white dark:text-slate-900">
+                      <div className="pointer-events-none absolute -bottom-1 left-0 right-0 h-4 text-white dark:text-slate-800">
                         <svg viewBox="0 0 500 20" preserveAspectRatio="none" className="h-full w-full fill-current">
                           <path d="M0,0 C150,20 350,20 500,0 L500,20 L0,20 Z" />
                         </svg>
@@ -2247,17 +1952,24 @@ location: e.location || 'Location to be confirmed',
                       <div>
                         {/* Title */}
                         <h4
-                          onClick={() => setSelectedEventModal(event)}
-                          className="text-base sm:text-lg font-bold text-astu-navy dark:text-white line-clamp-1 hover:text-astu-red dark:hover:text-blue-400 transition-colors cursor-pointer"
+                          onClick={() =>
+                            navigate(
+                              `/events/${event.id || String(event.title || '')
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')}`,
+                              { state: { event } }
+                            )
+                          }
+                          className="text-base sm:text-lg font-bold text-astu-navy dark:text-white line-clamp-1 hover:text-astu-red dark:hover:text-amber-400 transition-colors cursor-pointer"
                         >
                           {event.title}
                         </h4>
 
                         {/* Date & Location Chips */}
-                        <div className="mt-3 flex flex-col gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                        <div className="mt-3 flex flex-col gap-1.5 text-xs text-on-surface-variant dark:text-slate-300">
                           <p className="inline-flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-200">
                             <CalendarDays className="h-4 w-4 text-astu-red shrink-0" />
-                            <span>{event.date}</span>
+                            <time dateTime={event.date}>{formatHomepageDate(event.date)}</time>
                             {event.time && <span className="text-slate-400 dark:text-slate-500">· {event.time.split(' - ')[0]}</span>}
                           </p>
                           <p className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-300 line-clamp-1">
@@ -2273,12 +1985,13 @@ location: e.location || 'Location to be confirmed',
                       </div>
 
                       {/* Action Buttons: Register | View Details (Matching Screenshot) */}
-                      <div className="mt-5 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <div className="mt-5 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/60">
                         <button
+                          type="button"
                           className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 shadow-sm active:scale-95 ${
                             registeredTitles.includes(event.title)
                               ? 'bg-emerald-600 text-white cursor-default shadow-emerald-600/20'
-                              : 'bg-astu-navy text-white hover:bg-astu-navy/90 hover:shadow-md hover:shadow-astu-navy/20 dark:bg-blue-600 dark:hover:bg-blue-500'
+                              : 'bg-astu-navy text-white hover:bg-astu-navy/90 hover:shadow-md hover:shadow-astu-navy/20 dark:bg-sky-600 dark:hover:bg-sky-500'
                           }`}
                           onClick={() => handleRegisterClick({ title: event.title, kind: event.kind, date: event.date, location: event.location, id: event.id })}
                         >
@@ -2286,8 +1999,16 @@ location: e.location || 'Location to be confirmed',
                         </button>
 
                         <button
-                          onClick={() => setSelectedEventModal(event)}
-                          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                          type="button"
+                          onClick={() =>
+                            navigate(
+                              `/events/${event.id || String(event.title || '')
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')}`,
+                              { state: { event } }
+                            )
+                          }
+                          className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                         >
                           View Details
                         </button>
@@ -2296,17 +2017,20 @@ location: e.location || 'Location to be confirmed',
                   </article>
                 ))}
             </div>
+            )}
 
             {/* Slide Pagination Dots / Indicators (Curved Pill Indicators) */}
-            {Math.ceil(filteredEventsList.length / 3) > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
-                {Array.from({ length: Math.ceil(filteredEventsList.length / 3) }).map((_, i) => (
+            {eventTotalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2" role="tablist" aria-label="Events slides">
+                {Array.from({ length: eventTotalPages }).map((_, i) => (
                   <button
                     key={i}
+                    type="button"
                     onClick={() => setEventSlideIndex(i)}
                     aria-label={`Go to slide ${i + 1}`}
+                    aria-selected={safeEventSlideIndex === i}
                     className={`h-2.5 rounded-full transition-all duration-300 ${
-                      eventSlideIndex === i
+                      safeEventSlideIndex === i
                         ? 'w-8 bg-astu-navy dark:bg-sky-400'
                         : 'w-2.5 bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600'
                     }`}
@@ -2315,40 +2039,18 @@ location: e.location || 'Location to be confirmed',
               </div>
             )}
 
-            {/* Bottom Organic Wave Curve Accent */}
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 overflow-hidden opacity-30 dark:opacity-15">
-              <svg viewBox="0 0 1440 40" fill="none" className="w-full h-full preserve-3d" preserveAspectRatio="none">
-                <path d="M0,0 C320,40 460,0 720,20 C980,40 1140,0 1440,0 L1440,40 L0,40 Z" fill="currentColor" className="text-astu-navy/20 dark:text-sky-400/20" />
-              </svg>
-            </div>
           </div>
         </section>
 
-        {/* =========================================================================
-            LATEST NEWS & ACADEMIC NOTICES (CURVED SLIDER WITH AUTO-TIMER)
-            Exactly 3 visible cards at a time on desktop with auto-slide timer,
-            progress bar, play/pause controls, popup details modal, and curved aesthetic.
-            ========================================================================= */}
-        <section id="news" className="relative mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          {/* Subtle Ambient Background Halos */}
-          <div className="pointer-events-none absolute -top-10 -left-10 h-80 w-80 rounded-full bg-gradient-to-br from-astu-navy/10 via-sky-500/5 to-transparent blur-3xl dark:from-sky-500/10" />
-          <div className="pointer-events-none absolute -bottom-10 -right-10 h-80 w-80 rounded-full bg-gradient-to-tl from-rose-500/10 via-amber-500/5 to-transparent blur-3xl dark:from-rose-500/10" />
+        <section id="news" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+          <div className="pointer-events-none absolute -top-8 -left-8 h-56 w-56 rounded-full bg-gradient-to-br from-astu-navy/8 via-sky-500/5 to-transparent blur-3xl dark:from-sky-500/10" />
 
-          {/* Curved Outer Showcase Canvas */}
           <div 
-            className="relative rounded-[2.5rem] md:rounded-[3.2rem] bg-gradient-to-b from-slate-50/95 via-white to-slate-50/60 dark:from-slate-900/95 dark:via-slate-800/85 dark:to-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,51,102,0.06)] dark:shadow-slate-950/50 p-6 md:p-10 lg:p-12 overflow-hidden"
+            className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-slate-50/60 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden"
             onMouseEnter={() => setIsNewsTimerPaused(true)}
             onMouseLeave={() => setIsNewsTimerPaused(false)}
           >
-            {/* Top Organic Wave Curve Accent */}
-            <div className="pointer-events-none absolute top-0 left-0 right-0 h-6 overflow-hidden opacity-30 dark:opacity-15">
-              <svg viewBox="0 0 1440 40" fill="none" className="w-full h-full preserve-3d" preserveAspectRatio="none">
-                <path d="M0,20 C320,40 460,0 720,20 C980,40 1140,0 1440,20 L1440,0 L0,0 Z" fill="currentColor" className="text-astu-navy/20 dark:text-sky-400/20" />
-              </svg>
-            </div>
-
-            {/* Header Area */}
-            <div className="mb-8 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
               <div>
                 {/* Curved Badge Pill */}
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
@@ -2357,100 +2059,123 @@ location: e.location || 'Location to be confirmed',
                 </div>
 
                 {/* Main Heading */}
-                <h3 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
-                  Latest News
-                </h3>
+                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
+                  News and Announcements
+                </h2>
 
                 {/* Subtitle */}
-                <p className="mt-2 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
+                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
                   University updates, academic notices, and alumni network news.
                 </p>
               </div>
 
-              {/* Action Button: See All News → */}
               <div className="flex flex-wrap items-center gap-3">
                 <button
-                  className="inline-flex items-center gap-2 rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-astu-navy/20 dark:shadow-blue-900/30 transition-all duration-200 hover:bg-astu-navy/90 dark:hover:bg-blue-500 hover:shadow-lg active:scale-95 group"
-                  onClick={() => setShowAllNewsModal(true)}
+                  type="button"
+                  className="home-btn home-btn--navy home-btn--sm"
+                  onClick={() => navigate('/announcements')}
                 >
                   <span>See All News</span>
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
                 </button>
               </div>
             </div>
 
-            {/* Slider Controls Bar with Auto-play Progress Timer */}
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-800 pb-5">
+            {/* Slider Controls Bar with Auto-play Progress Timer — only when content exists */}
+            {totalNewsSlides > 0 && (
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-700/60 pb-4">
               {/* Timer Progress Indicator & Status */}
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setIsNewsTimerPaused(!isNewsTimerPaused)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border transition-all ${
-                    isNewsTimerPaused
-                      ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300'
-                      : 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-950/40 dark:text-emerald-300'
-                  }`}
-                  title={isNewsTimerPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
-                >
-                  {isNewsTimerPaused ? (
-                    <>
-                      <Play className="h-3.5 w-3.5 fill-current" />
-                      <span>Paused</span>
-                    </>
-                  ) : (
-                    <>
-                      <Pause className="h-3.5 w-3.5 fill-current" />
-                      <span>Auto-sliding (5s)</span>
-                    </>
-                  )}
-                </button>
+                {totalNewsSlides > 1 ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setIsNewsTimerPaused(!isNewsTimerPaused)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border transition-all ${
+                        isNewsTimerPaused
+                          ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300'
+                          : 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-950/40 dark:text-emerald-300'
+                      }`}
+                      title={isNewsTimerPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
+                      aria-label={isNewsTimerPaused ? "Resume news auto-rotation" : "Pause news auto-rotation"}
+                      aria-pressed={isNewsTimerPaused}
+                    >
+                      {isNewsTimerPaused ? (
+                        <>
+                          <Play className="h-3.5 w-3.5 fill-current" />
+                          <span>Paused</span>
+                        </>
+                      ) : (
+                        <>
+                          <Pause className="h-3.5 w-3.5 fill-current" />
+                          <span>Auto-sliding (5s)</span>
+                        </>
+                      )}
+                    </button>
 
-                {/* Animated Timer Progress Line */}
-                <div className="relative h-1.5 w-32 sm:w-44 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                  <div
-                    className={`h-full bg-gradient-to-r from-astu-navy to-sky-500 dark:from-sky-400 dark:to-emerald-400 transition-all duration-75 rounded-full ${
-                      isNewsTimerPaused ? 'opacity-50' : 'opacity-100'
-                    }`}
-                    style={{ width: `${newsTimerProgress}%` }}
-                  />
-                </div>
+                    <div className="relative h-1.5 w-32 sm:w-44 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden" aria-hidden="true">
+                      <div
+                        className={`h-full bg-gradient-to-r from-astu-navy to-sky-500 dark:from-sky-400 dark:to-emerald-400 transition-all duration-75 rounded-full ${
+                          isNewsTimerPaused ? 'opacity-50' : 'opacity-100'
+                        }`}
+                        style={{ width: `${newsTimerProgress}%` }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Latest notices</span>
+                )}
               </div>
 
               {/* Slider Pagination Controls */}
+              {totalNewsSlides > 1 && (
               <div className="flex items-center justify-end gap-3 self-end sm:self-auto">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   Slide {newsSlideIndex + 1} of {totalNewsSlides}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
+                    type="button"
                     onClick={() => handleNewsSlideChange(newsSlideIndex - 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 disabled:opacity-40"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 disabled:opacity-40"
                     aria-label="Previous slide"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleNewsSlideChange(newsSlideIndex + 1)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-800 hover:scale-105 active:scale-95 disabled:opacity-40"
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 disabled:opacity-40"
                     aria-label="Next slide"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
               </div>
+              )}
             </div>
+            )}
 
-            {/* Exactly 3 Visible News Cards Grid on Desktop */}
+            {/* News cards — published content only */}
+            {displayNewsList.length === 0 ? (
+              <EmptySection message="No news or announcements are published yet. Official notices will appear here when available." />
+            ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {displayNewsList
-                .slice(newsSlideIndex * 3, newsSlideIndex * 3 + 3)
+                .slice(newsSlideIndex * NEWS_PER_SLIDE, newsSlideIndex * NEWS_PER_SLIDE + NEWS_PER_SLIDE)
                 .map((news: any, idx: number) => {
                   const categoryMeta = getNewsCategoryMeta(news);
                   return (
                     <article
                       key={news.id || `news-${newsSlideIndex}-${idx}`}
-                      onClick={() => setSelectedNewsModal(news)}
-                      className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300 cursor-pointer"
+                      onClick={() =>
+                        navigate(
+                          `/announcements/${news.id || String(news.title || '')
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')}`
+                        )
+                      }
+                      className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 p-6 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300 cursor-pointer"
                     >
                       {/* Top Category Badge & Pill */}
                       <div className="flex items-center justify-between gap-2 mb-4">
@@ -2465,7 +2190,7 @@ location: e.location || 'Location to be confirmed',
 
                       {/* Middle: Title & Excerpt */}
                       <div className="flex-1">
-                        <h4 className="text-base sm:text-lg font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
+                        <h4 className="text-base sm:text-lg font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors line-clamp-2 leading-snug">
                           {news.title}
                         </h4>
                         <p className="mt-2.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
@@ -2474,18 +2199,22 @@ location: e.location || 'Location to be confirmed',
                       </div>
 
                       {/* Bottom: Date, Read Time & Action */}
-                      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 text-xs">
+                      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-3 text-xs">
                         <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-medium">
                           <CalendarDays className="h-3.5 w-3.5 text-astu-red dark:text-rose-400 shrink-0" />
-                          <span>{news.date || 'Recent'}</span>
+                          <span>{formatHomepageDate(news.date)}</span>
                         </div>
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedNewsModal(news);
+                            navigate(
+                              `/announcements/${news.id || String(news.title || '')
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]+/g, '-')}`
+                            );
                           }}
-                          className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-blue-400 group-hover:translate-x-1 transition-transform"
+                          className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-amber-400 group-hover:translate-x-1 transition-transform"
                         >
                           <span>Read More</span>
                           <ArrowRight className="h-3.5 w-3.5" />
@@ -2495,6 +2224,7 @@ location: e.location || 'Location to be confirmed',
                   );
                 })}
             </div>
+            )}
 
             {/* Pagination Dots at Bottom */}
             {totalNewsSlides > 1 && (
@@ -2514,204 +2244,44 @@ location: e.location || 'Location to be confirmed',
               </div>
             )}
 
-            {/* Bottom Organic Wave Curve Accent */}
-            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6 overflow-hidden opacity-30 dark:opacity-15">
-              <svg viewBox="0 0 1440 40" fill="none" className="w-full h-full preserve-3d" preserveAspectRatio="none">
-                <path d="M0,0 C320,40 460,0 720,20 C980,40 1140,0 1440,0 L1440,40 L0,40 Z" fill="currentColor" className="text-astu-navy/20 dark:text-sky-400/20" />
-              </svg>
+          </div>
+        </section>
+
+        <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+          <div className="mb-6 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
+            <div className="max-w-2xl reveal">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Success Stories</p>
+              <h2 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Alumni Success Stories</h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400 md:mx-0">
+                Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.
+              </p>
             </div>
-          </div>
-        </section>
-
-        <section id="announcements" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="grid gap-6 lg:grid-cols-[1fr_390px]">
-            <article className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 md:p-6 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between">
-              <div>
-                <div className="mb-5 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-sky-500/15">
-                      <img src="/images/announcementIcon.svg" alt="announcement" loading="lazy" width="100" height="100" className="h-7 w-7" />
-                    </span>
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Announcements</p>
-                      <h3 className="text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Official Notices</h3>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setShowAllNotices(true)}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                      title="Search notices"
-                    >
-                      <Search className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Search</span>
-                    </button>
-                    <button
-                      onClick={() => navigate('/announcements')}
-                      className="rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                    >
-                      View all
-                    </button>
-                  </div>
-                </div>
-
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {displayAnnouncements.slice(0, 5).map((announcement, idx) => (
-                    <button
-                      key={announcement.title + idx}
-                      onClick={() => setSelectedNotice(announcement)}
-                      className="flex w-full items-center justify-between gap-3 py-4 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-lg px-2 transition-all cursor-pointer group"
-                    >
-                      <div className="flex items-start gap-3 min-w-0 flex-1">
-                        <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
-                        <div className="min-w-0 flex-1">
-                          <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors line-clamp-2">
-                            {announcement.title}
-                          </span>
-                          <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                            <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getAnnouncementBadgeStyle(announcement.type)}`}>
-                              {announcement.type}
-                            </span>
-                            <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-                              <Clock className="h-3 w-3 shrink-0 opacity-70" />
-                              {announcement.date}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 group-hover:text-astu-red transition-all" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </article>
-
-            <aside className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-br from-[#002855] via-astu-navy to-[#05162a] p-5 md:p-6 text-white shadow-lg flex flex-col justify-between h-full">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-astu-green shadow-inner">
-                    <Mail className="h-5 w-5" />
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Official Dispatch
-                  </span>
-                </div>
-
-                <h4 className="mt-4 text-xl font-bold tracking-tight text-white">Subscribe to official updates</h4>
-                <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                  Receive verified announcements, academic calendars, career workshop calls, tracer survey alerts, and campus notices directly in your inbox.
-                </p>
-
-                {isSubscribed ? (
-                  <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5">
-                    <div className="flex items-center gap-2 text-emerald-300 font-semibold text-xs">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-                      <span>Subscription Active</span>
-                    </div>
-                    <p className="mt-1 text-[11px] text-slate-300">
-                      You are registered for official ASTU dispatches {subscriberEmail ? `at ${subscriberEmail}` : ''}.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsSubscribed(false);
-                        localStorage.removeItem('astu_ams_newsletter_subscribed');
-                      }}
-                      className="mt-2 text-[11px] font-medium text-emerald-400 hover:text-emerald-300 underline cursor-pointer"
-                    >
-                      Change or update email
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubscribeNewsletter} className="mt-4 space-y-2.5">
-                    <div className="relative">
-                      <input
-                        type="email"
-                        required
-                        value={subscriberEmail}
-                        onChange={(e) => setSubscriberEmail(e.target.value)}
-                        placeholder="Enter your institutional or personal email"
-                        className="w-full rounded-lg border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs text-white outline-none placeholder:text-white/50 focus:border-astu-green focus:bg-white/15 transition-all"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={isSubscribing}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-astu-green hover:bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white transition-all shadow-md active:scale-[0.98] cursor-pointer disabled:opacity-70"
-                    >
-                      {isSubscribing ? (
-                        <>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          <span>Subscribing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Subscribe</span>
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </>
-                      )}
-                    </button>
-                  </form>
-                )}
-
-                {/* Benefits / Channels coverage */}
-                <div className="mt-5 pt-4 border-t border-white/10 space-y-2.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Included Dispatches</p>
-                  <div className="space-y-2 text-xs text-slate-300">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-3.5 w-3.5 text-sky-400 shrink-0" />
-                      <span className="text-[11px]">Campus directives & academic calendar changes</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                      <span className="text-[11px]">Alumni career fairs, fellowships & recruitment drives</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                      <span className="text-[11px]">Research grants, symposiums & DAAD workshop alerts</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust footer */}
-              <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <Users className="h-3.5 w-3.5 text-emerald-400" />
-                  <span>1,200+ Subscribed</span>
-                </span>
-                <span>Zero spam · Unsubscribe anytime</span>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-10 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Success Stories</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Alumni Success Stories</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-              Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.
-            </p>
+            <button
+              type="button"
+              onClick={() => navigate('/info/alumni-stories')}
+              className="home-btn home-btn--navy home-btn--sm"
+            >
+              See All Stories
+              <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+            </button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {displayStories.length === 0 ? (
+            {liveStories.length === 0 ? (
               <div className="sm:col-span-2 lg:col-span-3">
                 <EmptySection message="Alumni success stories will appear here once published by the university content team." />
               </div>
             ) : (
-              displayStories.slice(0, 3).map((story, idx) => (
+              liveStories.slice(storySlideIndex * 3, storySlideIndex * 3 + 3).map((story, idx) => (
                 <article
                   key={story.id || idx}
-                  className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40 flex flex-col justify-between`}
+                  className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-4 card-hover shadow-[var(--shadow-soft)] flex flex-col justify-between`}
                 >
                   <div>
                     {story.image ? (
                       <img
                         src={story.image}
-                        alt=""
-                        className="h-40 w-full rounded-xl object-cover mb-3 bg-slate-100 dark:bg-slate-800"
+                        alt={story.name ? `Portrait of ${story.name}` : 'Alumni success story'}
+                        className="h-36 w-full rounded-xl object-cover mb-3 bg-slate-100 dark:bg-slate-800"
                         onError={(e) => {
                           const img = e.currentTarget;
                           img.onerror = null;
@@ -2720,13 +2290,14 @@ location: e.location || 'Location to be confirmed',
                       />
                     ) : null}
                     <h4 className="font-semibold text-astu-navy dark:text-white">{story.name}</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-on-surface-variant dark:text-slate-400">
                       {[story.role, story.company].filter(Boolean).join(' · ')}
                     </p>
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 line-clamp-3">{story.text}</p>
+                    <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400 line-clamp-3">{story.text}</p>
                   </div>
                   <button
-                    className="mt-4 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline self-start cursor-pointer inline-flex items-center gap-1"
+                    type="button"
+                    className="mt-4 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:underline self-start cursor-pointer inline-flex items-center gap-1"
                     onClick={() =>
                       navigate(
                         `/stories/${story.id || String(story.name || '')
@@ -2741,222 +2312,680 @@ location: e.location || 'Location to be confirmed',
               ))
             )}
           </div>
-        </section>
 
-        <section id="research" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-            <article className="reveal rounded-xl bg-astu-navy p-6 text-white">
-              <Trophy className="h-8 w-8 text-astu-green" />
-              <h3 className="mt-4 text-2xl font-bold md:text-3xl">
-                {displayResearchHighlights?.title || 'Research, Innovation & University Achievements'}
-              </h3>
-              <p className="mt-4 text-sm leading-relaxed text-slate-200">
-                {displayResearchHighlights?.description ||
-                  'ASTU-AMS connects graduate research publications, startup showcases, employer collaborations, and department KPI evidence into one institutional analytics layer.'}
-              </p>
-              {mentorshipStats && (
-                <div className="mt-6 grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <p className="text-2xl font-bold">{mentorshipStats.mentors}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-slate-300">Mentors</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{mentorshipStats.mentees}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-slate-300">Mentees</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{mentorshipStats.sessions}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-slate-300">Sessions</p>
-                  </div>
-                </div>
-              )}
-            </article>
-            <div className="grid gap-4 sm:grid-cols-3">
-              {(displayResearchHighlights?.stats?.length ? displayResearchHighlights.stats : []).map((item: any, idx: number) => {
-                const Icon = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || BookOpen);
-                return (
-                  <article key={item.label || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                    <Icon className="h-6 w-6 text-astu-navy dark:text-blue-400" />
-                    <p className="mt-4 text-2xl font-bold text-astu-navy dark:text-white">{item.value || '—'}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{item.label}</p>
-                  </article>
-                );
-              })}
-              {!displayResearchHighlights?.stats?.length && (
-                <div className="sm:col-span-3">
-                  <EmptySection message="Research highlights will appear here once published by the university content team." />
-                </div>
-              )}
+          {totalStorySlides > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleStorySlideChange(storySlideIndex - 1)}
+                aria-label="Previous stories slide"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                Slide {storySlideIndex + 1} of {totalStorySlides}
+              </span>
+              <button
+                type="button"
+                onClick={() => handleStorySlideChange(storySlideIndex + 1)}
+                aria-label="Next stories slide"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-sm transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
             </div>
-          </div>
+          )}
         </section>
 
-        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] dark:from-slate-900/50 to-white dark:to-slate-950 rounded-2xl my-8">
-          <div className="mb-10 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Partners</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Partner Organisations</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.</p>
+        <section id="giving" className="relative py-8 md:py-10 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-[var(--bg-page)] dark:via-[var(--bg-card)] dark:to-[var(--bg-page)] overflow-hidden border-t border-slate-100 dark:border-[var(--border-color)]">
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute -top-24 right-8 w-64 h-64 rounded-full bg-astu-navy/5 dark:bg-sky-500/10 blur-3xl" />
+            <div className="absolute -bottom-12 left-8 w-64 h-64 rounded-full bg-astu-green/5 dark:bg-emerald-500/10 blur-3xl" />
           </div>
-          <div className="relative">
-            {displayPartners.length === 0 ? (
-              <EmptySection message="Partner organisations will appear here once published by the university content team." />
-            ) : (
-            <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
-              {[...displayPartners, ...displayPartners].map((partner, idx) => {
-                const LogoComponent = partnerLogos[partner.name];
-                const logoUrl = partner.logo || partner.image || partner.logoUrl;
-                return (
-                  <div
-                    key={`${partner.name}-${idx}`}
-                    className="flex min-w-[180px] flex-col items-center gap-3 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40"
-                  >
-                    {logoUrl ? (
-                      <img src={logoUrl} alt={partner.name} className="h-14 w-14 object-contain" onError={handleImageError} />
-                    ) : LogoComponent ? (
-                      <LogoComponent />
-                    ) : (
-                      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-astu-navy text-white text-sm font-bold shadow-md">
-                        {(partner.name || '??').slice(0, 2).toUpperCase()}
+
+          <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
+            <div className="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-3">
+              <div className="max-w-2xl space-y-1.5">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-astu-navy/10 text-astu-navy dark:bg-sky-500/15 dark:text-sky-300 text-xs font-bold uppercase tracking-wider">
+                  <Heart className="h-3.5 w-3.5 fill-astu-red text-astu-red" />
+                  ASTU Alumni Giving
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {liveGivingSection?.title || 'Support Future Innovators & Campus Research'}
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  {liveGivingSection?.subtitle || 'Gifts support merit scholarships, research laboratories, student incubators, and emergency support. Confirm any tax treatment with your advisor or the Alumni Office.'}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate('/donations')}
+                className="home-btn home-btn--navy home-btn--sm shrink-0"
+              >
+                <Heart className="home-btn__icon fill-amber-400 text-amber-400" aria-hidden="true" />
+                {liveGivingSection?.buttonText || 'Explore All Causes'}
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
+            </div>
+
+            {(() => {
+              const activeCampaigns = orderedDonationCampaigns;
+              const filteredList = activeCampaigns.filter(
+                (c: any) => homeDonationCategory === 'ALL' || c.category === homeDonationCategory
+              );
+              const displayedCards = filteredList.slice(0, 3);
+
+              const categoryBadges: Record<string, { bg: string; text: string; ring: string }> = {
+                Scholarship: { bg: 'bg-blue-600/95', text: 'text-white', ring: 'ring-blue-400/40' },
+                Research: { bg: 'bg-emerald-600/95', text: 'text-white', ring: 'ring-emerald-400/40' },
+                Infrastructure: { bg: 'bg-amber-600/95', text: 'text-white', ring: 'ring-amber-400/40' },
+                Innovation: { bg: 'bg-indigo-600/95', text: 'text-white', ring: 'ring-indigo-400/40' },
+                'Student Welfare': { bg: 'bg-rose-600/95', text: 'text-white', ring: 'ring-rose-400/40' },
+                'Emergency Fund': { bg: 'bg-red-600/95', text: 'text-white', ring: 'ring-red-400/40' },
+              };
+
+              return (
+                <div className="space-y-4">
+                  {donationCategories.length > 1 && (
+                    <div className="flex flex-wrap items-center justify-between gap-2.5 bg-white/90 dark:bg-[var(--bg-card)] px-3 py-2.5 rounded-xl border border-slate-200/80 dark:border-[var(--border-color)] shadow-xs">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mr-0.5">Focus:</span>
+                        {donationCategories.map((cat) => {
+                          const isActive = homeDonationCategory === cat;
+                          return (
+                            <button
+                              key={cat}
+                              type="button"
+                              aria-pressed={homeDonationCategory === cat}
+                              onClick={() => {
+                                setHomeDonationCategory(cat);
+                                setShowAllHomeDonations(false);
+                              }}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
+                                isActive
+                                  ? 'bg-astu-navy text-white shadow-sm dark:bg-sky-600'
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'
+                              }`}
+                            >
+                              {cat === 'ALL' ? 'All Causes' : cat}
+                            </button>
+                          );
+                        })}
                       </div>
-                    )}
-                    <span className="text-xs font-semibold text-astu-navy dark:text-white text-center leading-tight">{partner.name}</span>
+
+                      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span>
+                          <span className="text-slate-900 dark:text-white font-bold">{displayedCards.length}</span> featured
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    {displayedCards.map((c: any, idx: number) => {
+                      const goal = Number(c.goal || c.targetAmount) || 0;
+                      const raised = Number(c.raised) || 0;
+                      const percent = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+                      const donors = Number(c.donorCount) || 0;
+                      const remaining = Math.max(0, goal - raised);
+                      const category = c.category || 'Initiative';
+                      const catBadge = categoryBadges[category] || { bg: 'bg-slate-800/95', text: 'text-white', ring: 'ring-white/20' };
+                      const campaignImage = getHomeCampaignImage(c);
+
+                      const isFullyFunded = goal > 0 && percent >= 100;
+                      const isAlmostFunded = goal > 0 && percent >= 75 && !isFullyFunded;
+                      const isUrgent = goal > 0 && percent < 40;
+
+                      let statusConfig: {
+                        label: string;
+                        badgeClass: string;
+                        dotColor: string;
+                        isPulsing: boolean;
+                      };
+
+                      if (isFullyFunded) {
+                        statusConfig = {
+                          label: 'Goal Reached',
+                          badgeClass: 'bg-emerald-950/80 text-emerald-300 border-emerald-400/40',
+                          dotColor: 'bg-emerald-400',
+                          isPulsing: false,
+                        };
+                      } else if (isAlmostFunded) {
+                        statusConfig = {
+                          label: `Nearly Funded • ${percent}%`,
+                          badgeClass: 'bg-emerald-950/80 text-emerald-300 border-emerald-400/40',
+                          dotColor: 'bg-emerald-400',
+                          isPulsing: true,
+                        };
+                      } else if (isUrgent) {
+                        statusConfig = {
+                          label: 'Needs Support',
+                          badgeClass: 'bg-amber-950/80 text-amber-300 border-amber-400/40',
+                          dotColor: 'bg-amber-400',
+                          isPulsing: true,
+                        };
+                      } else {
+                        statusConfig = {
+                          label: 'Active Campaign',
+                          badgeClass: 'bg-slate-900/80 text-sky-300 border-sky-400/40',
+                          dotColor: 'bg-sky-400',
+                          isPulsing: false,
+                        };
+                      }
+
+                      const barColor = isFullyFunded || isAlmostFunded
+                        ? 'from-emerald-500 via-teal-400 to-emerald-400'
+                        : isUrgent
+                          ? 'from-amber-400 via-orange-400 to-rose-400'
+                          : 'from-astu-navy via-blue-600 to-astu-green dark:from-sky-500 dark:via-blue-500 dark:to-emerald-400';
+
+                      return (
+                        <article
+                          key={c.id || idx}
+                          className={`reveal reveal-delay-${(idx % 3) + 1} group flex flex-col rounded-2xl bg-white dark:bg-[var(--bg-card)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] hover:-translate-y-1.5 hover:shadow-xl hover:border-astu-navy/35 dark:hover:border-sky-500/40 transition-all duration-300 overflow-hidden`}
+                        >
+                          {/* Campaign photo cover */}
+                          <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+                            <img
+                              src={campaignImage}
+                              alt={c.title}
+                              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              loading="lazy"
+                              onError={handleImageError}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/15 pointer-events-none" />
+
+                            <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
+                              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-md backdrop-blur-md ring-1 ${catBadge.bg} ${catBadge.text} ${catBadge.ring}`}>
+                                {category}
+                              </span>
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border ${statusConfig.badgeClass}`}>
+                                <span className="relative flex h-1.5 w-1.5">
+                                  {statusConfig.isPulsing && (
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${statusConfig.dotColor}`} />
+                                  )}
+                                  <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ${statusConfig.dotColor}`} />
+                                </span>
+                                {statusConfig.label}
+                              </span>
+                            </div>
+
+                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between z-10">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/55 backdrop-blur-md text-[11px] font-bold text-white border border-white/10">
+                                <Users className="h-3.5 w-3.5 text-amber-400" />
+                                {donors.toLocaleString()} {donors === 1 ? 'donor' : 'donors'}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setShareModalCampaign({ ...c, image: campaignImage, goal })}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 backdrop-blur-md text-[11px] font-bold text-white border border-white/20 transition-all cursor-pointer"
+                                title="Share this cause"
+                                aria-label={`Share ${c.title}`}
+                              >
+                                <Share2 className="h-3.5 w-3.5" />
+                                Share
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-1 flex-col p-4 md:p-5">
+                            <h3 className="text-base font-black text-slate-900 dark:text-white group-hover:text-astu-navy dark:group-hover:text-sky-300 transition-colors line-clamp-2 leading-snug">
+                              {c.title}
+                            </h3>
+                            <p className="mt-1.5 text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+                              {c.description || 'Support ASTU causes and make a lasting impact for future generations of engineers and researchers.'}
+                            </p>
+
+                            <div className="mt-auto pt-4">
+                              <div className="flex items-end justify-between mb-2">
+                                <div>
+                                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Raised</span>
+                                  <div className="flex items-baseline gap-1">
+                                    <span className="text-lg font-black text-astu-navy dark:text-white tracking-tight">
+                                      {raised.toLocaleString()}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 font-bold">ETB</span>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Target</span>
+                                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                                    {goal > 0 ? `${goal.toLocaleString()} ETB` : 'Open'}
+                                  </span>
+                                  {goal > raised && (
+                                    <span className="block text-[9px] font-bold text-emerald-600 dark:text-emerald-400">
+                                      {remaining.toLocaleString()} left
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden border border-slate-200/70 dark:border-slate-700">
+                                <div
+                                  className={`h-full rounded-full bg-gradient-to-r ${barColor} transition-all duration-1000 relative`}
+                                  style={{ width: `${Math.max(goal > 0 ? 5 : 100, percent)}%` }}
+                                  role="progressbar"
+                                  aria-valuemin={0}
+                                  aria-valuemax={100}
+                                  aria-valuenow={percent}
+                                  aria-label={`${c.title} funding progress`}
+                                >
+                                  <div className="absolute inset-0 bg-white/20 rounded-full opacity-40 animate-pulse pointer-events-none" />
+                                </div>
+                              </div>
+
+                              <div className="mt-2 flex items-center justify-between text-[11px]">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 border border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-300 font-bold">
+                                  <TrendingUp className="h-3 w-3 text-emerald-500 shrink-0" />
+                                  {goal > 0 ? `${percent}% funded` : 'Open cause'}
+                                </span>
+                              </div>
+
+                              {/* Fast Pay Strip */}
+                              <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-1.5">
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                                  <ShieldCheck className="h-3 w-3 text-emerald-500" />
+                                  Fast Pay:
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedDonationCampaign(c);
+                                      setDonationPayMethod('telebirr');
+                                      setIsDonationModalOpen(true);
+                                    }}
+                                    className="text-[9px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200/60 dark:border-amber-700/50 hover:scale-105 transition-transform cursor-pointer"
+                                    title="Telebirr instant payment"
+                                  >
+                                    Telebirr
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedDonationCampaign(c);
+                                      setDonationPayMethod('cbe');
+                                      setIsDonationModalOpen(true);
+                                    }}
+                                    className="text-[9px] font-extrabold text-blue-700 dark:text-sky-300 bg-blue-50 dark:bg-sky-950/40 px-2 py-0.5 rounded border border-blue-200/60 dark:border-sky-700/50 hover:scale-105 transition-transform cursor-pointer"
+                                    title="CBE Birr instant payment"
+                                  >
+                                    CBE Birr
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedDonationCampaign(c);
+                                      setDonationPayMethod('card');
+                                      setIsDonationModalOpen(true);
+                                    }}
+                                    className="inline-flex items-center gap-1 text-[9px] font-black text-emerald-800 dark:text-emerald-200 bg-emerald-100/90 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-300 dark:border-emerald-700 hover:scale-105 transition-transform cursor-pointer"
+                                    title="Chapa Live Checkout"
+                                  >
+                                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    Chapa
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="mt-3 flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDonateClick(c)}
+                                  className="flex-1 group/btn inline-flex items-center justify-center gap-2 rounded-xl bg-astu-navy dark:bg-sky-600 hover:brightness-110 text-white font-bold text-xs py-2.5 px-3 shadow-md shadow-astu-navy/15 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer"
+                                >
+                                  <Heart className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0 group-hover/btn:scale-110 transition-transform" />
+                                  <span>Support This Cause</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setShareModalCampaign({ ...c, image: campaignImage, goal })}
+                                  className="shrink-0 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-astu-navy/5 hover:text-astu-navy hover:border-astu-navy/30 dark:hover:bg-sky-950/40 dark:hover:text-sky-300 dark:hover:border-sky-500 transition-all cursor-pointer"
+                                  title="Share on Telegram, LinkedIn, WhatsApp, or copy link"
+                                  aria-label={`Share ${c.title}`}
+                                >
+                                  <Share2 className="h-4 w-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => navigate(`/donations?cause=${encodeURIComponent(c.id)}`)}
+                                  className="shrink-0 inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-200 font-bold text-xs py-2.5 px-3 hover:bg-slate-50 dark:hover:bg-white/10 transition-all cursor-pointer"
+                                  title="View campaign details"
+                                >
+                                  Details
+                                  <ArrowRight className="h-3 w-3" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-            )}
+
+                  {displayedCards.length === 0 && (
+                    <div className="py-10 text-center bg-white dark:bg-[var(--bg-card)] rounded-2xl border border-dashed border-slate-200 dark:border-[var(--border-color)] p-6 space-y-2">
+                      <Heart className="mx-auto h-8 w-8 text-slate-300 dark:text-slate-600" />
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No campaigns found in this category.</p>
+                      <button
+                        onClick={() => setHomeDonationCategory('ALL')}
+                        className="text-xs text-astu-navy dark:text-sky-300 font-extrabold hover:underline"
+                      >
+                        Show All Causes
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="pt-1 flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/donations')}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-astu-navy dark:bg-sky-600 text-white text-xs font-bold shadow-md hover:shadow-lg hover:brightness-110 transition-all cursor-pointer"
+                    >
+                      Explore all causes in Giving Portal
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </section>
 
-        <section id="testimonials" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Community Voices</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">What Our Community Says</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-              Reflections from alumni, employers, and partners connected through the ASTU network.
-            </p>
+        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-10 md:px-8 md:py-12">
+          <div className="mb-8 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
+            <div className="max-w-2xl reveal">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                {livePartnersHeaders?.eyebrow || 'Our Partners'}
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                {livePartnersHeaders?.title || 'Partner Companies'}
+              </h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400 md:mx-0">
+                {livePartnersHeaders?.description ||
+                  'Institutional partners supporting employability, internships, and research collaboration.'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/partners')}
+              className="inline-flex items-center gap-2 text-sm font-bold text-astu-navy transition-colors hover:text-astu-red dark:text-sky-300 dark:hover:text-amber-400"
+            >
+              View all partners
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {displayTestimonials.length === 0 ? (
-              <div className="md:col-span-3">
-                <EmptySection message="Community testimonials will appear here once published by the university content team." />
+
+          <div className="relative overflow-hidden">
+            {partnersLoading ? (
+              <div className="flex items-center justify-center gap-10 py-8" aria-label="Loading partners">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-14 w-28 shrink-0 animate-pulse rounded-lg bg-slate-200/80 dark:bg-slate-700/60"
+                  />
+                ))}
+              </div>
+            ) : livePartners.length === 0 ? (
+              <div className="flex min-h-[120px] flex-col items-center justify-center px-6 py-10 text-center">
+                <Building2 className="h-7 w-7 text-slate-400" />
+                <p className="mt-3 text-sm font-bold text-astu-navy dark:text-white">No published partners yet</p>
+                <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                  Partner logos will appear here once published from the ASTU CMS.
+                </p>
               </div>
             ) : (
-              displayTestimonials.map((item: any, idx: number) => (
-              <article key={item.id || item.by || idx} className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                <Quote className="h-6 w-6 text-astu-red" />
-                <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.quote}</p>
-                <p className="mt-4 text-sm font-semibold text-astu-navy dark:text-white">{item.by}</p>
-              </article>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section id="faq" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-10 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">FAQ</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Frequently Asked Questions</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-              Common questions about ASTU-AMS, tracer studies, and alumni services.
-            </p>
-          </div>
-          <div className="mx-auto max-w-3xl space-y-3">
-            {displayFaq.length === 0 ? (
-              <EmptySection message="Frequently asked questions will appear here once published by the university content team." />
-            ) : (
-              displayFaq.map((item, idx) => (
-              <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] dark:shadow-slate-900/40`}>
-                <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors [&::-webkit-details-marker]:hidden">
-                  <span>{item.question}</span>
-                  <HelpCircle className="h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 group-open:rotate-180" />
-                </summary>
-                <div className="border-t border-slate-100 dark:border-slate-800 px-5 py-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                  {item.answer}
-                </div>
-              </details>
-              ))
-            )}
-          </div>
-        </section>
-
-        <section id="career-opportunities" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 card-hover shadow-[0_4px_16px_rgba(0,51,102,0.08)] dark:shadow-slate-900/40">
-            <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">
-                  {careerCta?.eyebrow || 'Career Opportunities'}
-                </p>
-                <h3 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white">
-                  {careerCta?.title || 'Jobs, internships, AI matching, and candidate shortlisting'}
-                </h3>
-                <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-400">
-                  {careerCta?.description ||
-                    'Employers can post bulk jobs, manage talent pools, shortlist candidates, schedule interviews, and join job fairs.'}
-                </p>
-              </div>
-              <button
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-astu-red px-5 py-3 text-sm font-semibold text-white hover:brightness-110"
-                onClick={() => navigate(careerCta?.route || '/employers')}
-              >
-                <UserRoundCheck className="h-4 w-4" />
-                {careerCta?.buttonLabel || 'Explore Opportunities'}
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {tracerSpotlight && (
-          <section id="tracer-spotlight" className="mx-auto max-w-[1440px] px-4 pb-12 md:px-8">
-            <div className="reveal rounded-xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-r from-blue-50/50 dark:from-slate-900 via-white dark:via-slate-900 to-slate-50/50 dark:to-slate-900 p-6 shadow-sm">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-astu-red">Tracer Study</p>
-                  <h3 className="mt-2 text-xl font-bold text-astu-navy dark:text-white">{tracerSpotlight.title}</h3>
-                  <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-400">{tracerSpotlight.description}</p>
-                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
-                    {tracerSpotlight.targetBatch && <span>Batch: <strong className="dark:text-slate-200">{tracerSpotlight.targetBatch}</strong></span>}
-                    {tracerSpotlight.responseRate && <span>Response rate: <strong className="dark:text-slate-200">{tracerSpotlight.responseRate}</strong></span>}
-                    {tracerSpotlight.deadline && <span>Deadline: <strong className="dark:text-slate-200">{tracerSpotlight.deadline}</strong></span>}
-                  </div>
-                </div>
-                <button
-                  className="rounded-md bg-astu-navy dark:bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:brightness-110"
-                  onClick={() => navigate('/login')}
+              <>
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--bg-page,#ffffff)] to-transparent dark:from-[var(--bg-page)]" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--bg-page,#ffffff)] to-transparent dark:from-[var(--bg-page)]" />
+                <div
+                  role="list"
+                  className="flex w-max items-center gap-10 py-6 animate-scroll hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] motion-reduce:animate-none md:gap-14"
+                  style={{ animationDuration: `${Math.max(28, livePartners.length * 5)}s` }}
                 >
-                  Complete Tracer Survey
-                </button>
-              </div>
-            </div>
-          </section>
-        )}
+                  {[...livePartners, ...livePartners].map((partner, index) => {
+                    const logoUrl = partner.logo ? mediaUrl(partner.logo) : '';
+                    const logoFailed = failedPartnerLogos.has(partner.id);
+                    const isDuplicate = index >= livePartners.length;
 
-        <section id="cta" className="relative bg-gradient-to-r from-astu-navy via-primary-container to-slate-900 py-16 text-center overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-10 left-[20%] w-3 h-3 rounded-full bg-astu-green/20 animate-float" style={{ animationDelay: "0s" }} />
-            <div className="absolute bottom-10 right-[30%] w-2 h-2 rounded-full bg-astu-red/20 animate-float" style={{ animationDelay: "1.5s" }} />
-            <div className="absolute top-20 right-[15%] w-1.5 h-1.5 rounded-full bg-white/15 animate-float" style={{ animationDelay: "3s" }} />
+                    return (
+                      <article
+                        key={`${partner.id}-${index}`}
+                        role="listitem"
+                        aria-hidden={isDuplicate}
+                        title={partner.name}
+                        className="group flex h-20 w-36 shrink-0 items-center justify-center md:h-24 md:w-44"
+                      >
+                        {logoUrl && !logoFailed ? (
+                          <img
+                            src={logoUrl}
+                            alt={`${partner.name} logo`}
+                            loading="lazy"
+                            decoding="async"
+                            className="max-h-14 max-w-full object-contain opacity-80 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0 md:max-h-16"
+                            onError={() =>
+                              setFailedPartnerLogos((current) => new Set(current).add(partner.id))
+                            }
+                          />
+                        ) : (
+                          <span className="text-center text-xs font-bold uppercase tracking-wide text-astu-navy/70 transition group-hover:text-astu-navy dark:text-slate-300 dark:group-hover:text-white md:text-sm">
+                            {partner.name}
+                          </span>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
-          <div className="max-w-[1440px] mx-auto px-4 reveal relative z-10">
-            <h3 className="text-3xl font-bold text-white md:text-4xl">
-              {bottomCta?.title || 'Ready to Join ASTU-AMS?'}
-            </h3>
-            <p className="mt-4 text-slate-200 max-w-2xl mx-auto">
-              {bottomCta?.description ||
-                'Connect with fellow alumni, discover career opportunities, and contribute to university excellence.'}
+        </section>
+
+
+        <section id="faq" className="relative mx-auto max-w-[1440px] px-4 py-10 md:px-8 md:py-12">
+          <div className="mb-8 text-center reveal">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+              {liveFaqHeaders?.eyebrow || 'FAQ'}
             </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+              {liveFaqHeaders?.title || 'Frequently Asked Questions'}
+            </h2>
+            <p className="mx-auto mt-2 max-w-xl text-sm text-on-surface-variant dark:text-slate-400">
+              {liveFaqHeaders?.description ||
+                'Common questions about ASTU-AMS, tracer studies, and alumni services.'}
+            </p>
+          </div>
+
+          <div className="mx-auto max-w-3xl space-y-3">
+            {(liveFaq.length > 0 ? liveFaq : DEFAULT_FAQ).slice(0, 4).map((item: any, idx: number) => {
+              const itemId = String(item.id || idx);
+              const isOpen = openFaqId === itemId;
+              return (
+                <div
+                  key={itemId}
+                  className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] transition-all dark:border-[var(--border-color)] dark:bg-[var(--bg-card)] ${
+                    isOpen ? 'ring-1 ring-astu-navy/20 dark:ring-sky-400/30' : ''
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqId(isOpen ? null : itemId)}
+                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+                    aria-expanded={isOpen}
+                    aria-controls={`faq-panel-${itemId}`}
+                    id={`faq-button-${itemId}`}
+                  >
+                    <span className="text-sm font-bold text-astu-navy dark:text-white md:text-base">
+                      {item.question}
+                    </span>
+                    <HelpCircle
+                      className={`h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div
+                      id={`faq-panel-${itemId}`}
+                      role="region"
+                      aria-labelledby={`faq-button-${itemId}`}
+                      className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-on-surface-variant dark:border-[var(--border-color)] dark:text-slate-300"
+                    >
+                      {item.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 flex justify-center reveal">
+            <button
+              type="button"
+              onClick={() => navigate('/info/faq')}
+              className="inline-flex items-center gap-2 text-sm font-bold text-astu-navy hover:text-astu-red dark:text-sky-300 dark:hover:text-amber-400"
+            >
+              View all FAQs
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </section>
+
+        <section
+          id="community"
+          className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-slate-900 py-12 md:py-16"
+        >
+          <div id="cta" className="sr-only" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute top-0 right-0 h-80 w-80 rounded-full bg-astu-green/10 blur-3xl" />
+            <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-astu-red/10 blur-3xl" />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
+            <div className="mb-10 text-center reveal">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-green">
+                <Globe className="h-3.5 w-3.5" />
+                {liveCommunitySection?.title || 'ASTU Alumni Community'}
+              </span>
+              <h2 className="mt-4 text-2xl font-black text-white md:text-4xl">
+                Your Network <span className="text-astu-green">Around the World</span>
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-200">
+                {liveCommunitySection?.subtitle ||
+                  bottomCta?.description ||
+                  'Connect with fellow alumni, discover career opportunities, and contribute to university excellence.'}
+              </p>
+            </div>
+
+            {networkVoices.length > 0 ? (
+              <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {networkVoices.slice(0, 3).map((post: any, idx: number) => (
+                  <article
+                    key={post.id || post.name || idx}
+                    className={`reveal reveal-delay-${(idx % 3) + 1} group flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:bg-white/10 hover:border-astu-green/30 hover:shadow-[0_20px_40px_-20px_rgba(16,185,129,0.35)]`}
+                  >
+                    <div>
+                      <div className="mb-3 flex items-center justify-between gap-2">
+                        <Quote className="h-5 w-5 text-astu-green/70 transition group-hover:text-astu-green" />
+                        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-300">
+                          {post.source === 'story' ? 'Success Story' : post.source === 'community' ? 'Community' : 'Testimonial'}
+                        </span>
+                      </div>
+                      <p className="text-sm italic leading-relaxed text-slate-100 line-clamp-5">
+                        &ldquo;{post.message}&rdquo;
+                      </p>
+                    </div>
+                    <div className="mt-5 flex items-center gap-3 border-t border-white/10 pt-4">
+                      {post.image ? (
+                        <img
+                          src={mediaUrl(post.image) || post.image}
+                          alt={post.name}
+                          className="h-11 w-11 rounded-full object-cover border border-astu-green/50 bg-white/10"
+                          onError={handleImageError}
+                        />
+                      ) : (
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-astu-green/20 text-sm font-black text-astu-green ring-2 ring-astu-green/20">
+                          {String(post.name || 'A').slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-white">{post.name}</p>
+                        <p className="truncate text-[11px] font-medium text-astu-green">{post.role}</p>
+                        {post.company && (
+                          <p className="truncate text-[10px] text-slate-300">{post.company}</p>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="mb-10 reveal rounded-2xl border border-dashed border-white/20 bg-white/5 px-6 py-12 text-center backdrop-blur-sm">
+                <Globe className="mx-auto mb-3 h-8 w-8 text-astu-green/70" />
+                <p className="text-sm font-semibold text-white">Community voices coming soon</p>
+                <p className="mx-auto mt-2 max-w-md text-xs leading-relaxed text-slate-300">
+                  Published CMS testimonials, community posts, and alumni success stories will appear here automatically from the backend.
+                </p>
+              </div>
+            )}
+
+            {liveStats.length > 0 && (
+              <div className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-4 reveal">
+                {liveStats.slice(0, 4).map((stat) => {
+                  const meta = STAT_PRESENTATION[stat.key] || {
+                    label: String(stat.key),
+                    Icon: Users,
+                    accent: 'text-astu-green bg-astu-green/15',
+                  };
+                  const Icon = meta.Icon;
+                  return (
+                    <div
+                      key={stat.key}
+                      className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center backdrop-blur-sm"
+                    >
+                      <div className={`mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full ${meta.accent}`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <p className="text-lg font-black text-white md:text-xl">
+                        {Number(stat.value).toLocaleString()}
+                      </p>
+                      <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-300">
+                        {meta.label}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-center gap-3 reveal">
               <button
-                className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md hover:scale-105 btn-magnetic"
-                onClick={() => navigate(bottomCta?.primaryRoute || '/login')}
+                type="button"
+                className="home-btn home-btn--ghost-light"
+                onClick={() => navigate(bottomCta?.primaryRoute || '/info/alumni-portal')}
               >
+                <Users className="home-btn__icon" aria-hidden="true" />
                 {bottomCta?.primaryLabel || 'Alumni Portal'}
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
               </button>
               <button
-                className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all hover:scale-105 btn-magnetic"
-                onClick={() => navigate(bottomCta?.secondaryRoute || '/login')}
+                type="button"
+                className="home-btn home-btn--outline-light"
+                onClick={() => navigate(bottomCta?.secondaryRoute || '/info/employer-portal')}
               >
+                <Briefcase className="home-btn__icon" aria-hidden="true" />
                 {bottomCta?.secondaryLabel || 'Employer Portal'}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/community')}
+                className="home-btn home-btn--soft"
+              >
+                <Globe className="home-btn__icon" aria-hidden="true" />
+                Explore Community
               </button>
             </div>
           </div>
@@ -2965,198 +2994,15 @@ location: e.location || 'Location to be confirmed',
 
       </main>
 
-      <footer id="contact" className="border-t-2 border-astu-green/30 bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950 py-16 text-slate-300">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8 space-y-12">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-10 border-b border-white/5">
-            <div className="max-w-md">
-              <h5 className="text-base font-bold text-white uppercase tracking-wider">
-                {footerConfig.newsletterTitle || 'Stay Connected with ASTU'}
-              </h5>
-              <p className="text-xs text-slate-400 mt-1">
-                {footerConfig.newsletterSubtitle || 'Get updates on reunions, career expos, and employment reports.'}
-              </p>
-            </div>
-            <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  // There is no newsletter endpoint, so this previously toasted
-                  // "You are subscribed" without storing anything or telling the
-                  // server. It now says plainly that no address was recorded.
-                  toast.error('Newsletter sign-up is not available yet. No email address was stored.');
-                }}
-                className="flex w-full lg:w-auto max-w-md gap-2"
-              >
-              <input
-                type="email"
-                placeholder="Enter email for campus news..."
-                className="w-full lg:w-64 text-xs px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFD700]/30 text-white"
-                required
-              />
-              <button
-                type="submit"
-                className="px-5 py-3 bg-[#FFD700] hover:bg-[#FFD700]/95 text-indigo-950 font-bold text-xs rounded-xl hover:scale-105 transition-all shadow-md whitespace-nowrap"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-
-          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img
-                  alt="ASTU Official Emblem"
-                  className="h-12 w-12 object-contain scale-110 shrink-0"
-                  src="/images/astu-seal-logo.png"
-                />
-                <div>
-                  <h5 className="text-lg font-black text-white tracking-wider uppercase">ASTU-AMS</h5>
-                  <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Alumni Network</p>
-                </div>
-              </div>
-              <p className="text-xs leading-relaxed text-slate-400">
-                {welcomeMessage ||
-                  'Connecting graduates, corporate employers, and department heads in one unified ecosystem.'}
-              </p>
-              <div className="flex flex-wrap gap-2 pt-2">
-                {(footerConfig.socialLinks || []).map((social) => (
-                  <a
-                    key={social.id}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all"
-                  >
-                    {social.platform}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {(footerConfig.sections || []).slice(0, 2).map((section) => (
-              <div key={section.id}>
-                <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">
-                  {section.title}
-                </h6>
-                <ul className="space-y-3 text-xs text-slate-400">
-                  {section.links.map((link) => (
-                    <li key={link.id}>
-                      {link.href.startsWith('http') || link.href.startsWith('#') ? (
-                        <a
-                          href={link.href}
-                          className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                          {...(link.href.startsWith('http')
-                            ? { target: '_blank', rel: 'noopener noreferrer' }
-                            : {})}
-                        >
-                          {link.label}
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                          onClick={() => navigate(link.href)}
-                        >
-                          {link.label}
-                        </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-            <div>
-              <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">
-                Official Contact Details
-              </h6>
-              <ul className="space-y-3 text-xs text-slate-400">
-                <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-astu-green mt-0.5 shrink-0" />
-                  <span>{footerConfig.contactInfo?.address}</span>
-                </li>
-                {footerConfig.contactInfo?.poBox && (
-                  <li className="flex items-start gap-2">
-                    <Globe className="h-4 w-4 text-astu-green mt-0.5 shrink-0" />
-                    <span>{footerConfig.contactInfo.poBox}</span>
-                  </li>
-                )}
-                <li className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-astu-green shrink-0" />
-                  <span>{footerConfig.contactInfo?.phone}</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-astu-green shrink-0" />
-                  <a
-                    href={`mailto:${footerConfig.contactInfo?.email}`}
-                    className="hover:text-white transition-colors"
-                  >
-                    {footerConfig.contactInfo?.email}
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {(footerConfig.sections || []).length > 2 && (
-            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4 border-t border-white/5 pt-8">
-              {(footerConfig.sections || []).slice(2).map((section) => (
-                <div key={section.id}>
-                  <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">
-                    {section.title}
-                  </h6>
-                  <ul className="space-y-3 text-xs text-slate-400">
-                    {section.links.map((link) => (
-                      <li key={link.id}>
-                        {link.href.startsWith('http') || link.href.startsWith('#') ? (
-                          <a href={link.href} className="transition-all duration-300 hover:text-white hover:translate-x-1 inline-block">
-                            {link.label}
-                          </a>
-                        ) : (
-                          <button
-                            type="button"
-                            className="transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                            onClick={() => navigate(link.href)}
-                          >
-                            {link.label}
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/5 pt-8 text-xs text-slate-500 font-semibold">
-            <div className="flex flex-wrap items-center gap-3">
-              <p>{footerConfig.copyright}</p>
-              {footerConfig.credit && (
-                <>
-                  <span>&bull;</span>
-                  <p className="text-astu-green">{footerConfig.credit}</p>
-                </>
-              )}
-            </div>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="flex items-center gap-1 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl text-slate-300 hover:text-white transition-all hover:scale-105"
-            >
-              Back to Top
-              <ArrowLeft className="h-4 w-4 rotate-180" />
-            </button>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Notice Detail Modal */}
       {selectedNotice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-2xl">
             <button
               onClick={() => setSelectedNotice(null)}
-              className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
+              className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
             >
               <X className="h-5 w-5" />
             </button>
@@ -3165,47 +3011,34 @@ location: e.location || 'Location to be confirmed',
                 <Bell className="h-5 w-5" />
               </span>
               <div>
-                <span className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getAnnouncementBadgeStyle(selectedNotice.type || '')}`}>
+                <span className="rounded-md bg-astu-red/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-red">
                   {selectedNotice.type || 'Official Announcement'}
                 </span>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{selectedNotice.date}</p>
+                <p className="mt-0.5 text-xs text-on-surface-variant dark:text-slate-400">{selectedNotice.date}</p>
               </div>
             </div>
             <h3 className="mt-4 text-xl font-bold text-astu-navy dark:text-white">{selectedNotice.title}</h3>
-            <div className="mt-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
+            <div className="mt-4 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/50 p-4">
               <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line">
                 {selectedNotice.excerpt || selectedNotice.description || selectedNotice.content || "Full official announcement details and documentation from ASTU-AMS Administration."}
               </p>
             </div>
-            <div className="mt-6 flex items-center justify-between gap-2">
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setSelectedNotice(null)}
+                className="rounded-lg border border-outline-variant dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-surface-container-low dark:hover:bg-slate-600"
+              >
+                Close Notice
+              </button>
               <button
                 onClick={() => {
-                  const slug = (selectedNotice.id || selectedNotice.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
                   setSelectedNotice(null);
-                  navigate(`/announcements/${slug}`);
+                  navigate('/login');
                 }}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                className="rounded-lg bg-astu-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110"
               >
-                <span>Read Full Article</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                Access Portal
               </button>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSelectedNotice(null)}
-                  className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedNotice(null);
-                    navigate('/login');
-                  }}
-                  className="rounded-lg bg-astu-navy dark:bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:brightness-110 cursor-pointer"
-                >
-                  Access Portal
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -3214,15 +3047,15 @@ location: e.location || 'Location to be confirmed',
       {/* View All Notices Modal */}
       {showAllNotices && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fade-in">
-          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-outline-variant dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-outline-variant dark:border-slate-700 pb-4">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-sky-500/20 text-astu-navy dark:text-sky-400">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-astu-navy/30 text-astu-navy dark:text-amber-400">
                   <Bell className="h-5 w-5" />
                 </span>
                 <div>
                   <h3 className="text-xl font-bold text-astu-navy dark:text-white">Official Notices & Announcements</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">All public university announcements and official directives.</p>
+                  <p className="text-xs text-on-surface-variant dark:text-slate-400">All public university announcements and official directives.</p>
                 </div>
               </div>
               <button
@@ -3230,7 +3063,7 @@ location: e.location || 'Location to be confirmed',
                   setShowAllNotices(false);
                   setNoticeSearch('');
                 }}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200"
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -3243,12 +3076,12 @@ location: e.location || 'Location to be confirmed',
                 value={noticeSearch}
                 onChange={(e) => setNoticeSearch(e.target.value)}
                 placeholder="Search notices by keyword..."
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 py-2.5 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:bg-white dark:focus:bg-slate-800"
+                className="w-full rounded-lg border border-outline-variant dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-9 pr-3 text-sm text-astu-navy dark:text-white outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:bg-white dark:focus:bg-slate-800"
               />
             </div>
 
-            <div className="mt-4 flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 pr-1">
-              {displayAnnouncements
+            <div className="mt-4 flex-1 overflow-y-auto divide-y divide-outline-variant dark:divide-slate-700 pr-1">
+              {liveAnnouncements
                 .filter(n => !noticeSearch || n.title.toLowerCase().includes(noticeSearch.toLowerCase()) || (n.excerpt && n.excerpt.toLowerCase().includes(noticeSearch.toLowerCase())))
                 .map((announcement, idx) => (
                   <button
@@ -3257,15 +3090,15 @@ location: e.location || 'Location to be confirmed',
                       setShowAllNotices(false);
                       setSelectedNotice(announcement);
                     }}
-                    className="flex w-full items-start gap-3.5 py-3.5 px-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 rounded-xl transition-all cursor-pointer group"
+                    className="flex w-full items-start gap-3.5 py-3.5 px-2 text-left hover:bg-surface-container-low/80 dark:hover:bg-slate-700/50 rounded-xl transition-all cursor-pointer group"
                   >
                     <Bell className="mt-1 h-4 w-4 shrink-0 text-astu-red group-hover:scale-110 transition-transform" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors">{announcement.title}</span>
+                        <span className="block text-sm font-semibold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors">{announcement.title}</span>
                         <span className="shrink-0 text-[10px] font-bold text-slate-400 dark:text-slate-500">{announcement.date}</span>
                       </div>
-                      <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">{announcement.type}</span>
+                      <span className="mt-1 block text-xs text-on-surface-variant dark:text-slate-400">{announcement.type}</span>
                       {announcement.excerpt && (
                         <p className="mt-1 text-xs text-slate-600 dark:text-slate-400 line-clamp-2">{announcement.excerpt}</p>
                       )}
@@ -3274,13 +3107,13 @@ location: e.location || 'Location to be confirmed',
                 ))}
             </div>
 
-            <div className="mt-4 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-end">
+            <div className="mt-4 border-t border-outline-variant dark:border-slate-700 pt-3 flex justify-end">
               <button
                 onClick={() => {
                   setShowAllNotices(false);
                   setNoticeSearch('');
                 }}
-                className="rounded-lg bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-semibold text-white hover:brightness-110"
+                className="rounded-lg bg-astu-navy px-5 py-2 text-xs font-semibold text-white hover:brightness-110"
               >
                 Close List
               </button>
@@ -3292,20 +3125,20 @@ location: e.location || 'Location to be confirmed',
       {/* RSVP & Full Event Registration Modal */}
       {rsvpModalItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-md animate-fade-in" onClick={() => setRsvpModalItem(null)}>
-          <div className="relative max-w-lg w-full rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-w-lg w-full rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {!confirmedQrPass ? (
               <>
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center justify-between border-b dark:border-slate-700 pb-3 border-slate-100">
                   <div>
-                    <span className="rounded-md bg-astu-navy dark:bg-blue-600 px-2.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">{rsvpModalItem.kind} Registration</span>
+                    <span className="rounded-md bg-astu-navy px-2.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider">{rsvpModalItem.kind} Registration</span>
                     <h3 className="mt-1.5 text-lg font-bold text-astu-navy dark:text-white">{rsvpModalItem.title}</h3>
                   </div>
-                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200">
+                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200">
                     <X className="h-4 w-4" />
                   </button>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3.5 text-xs space-y-1 border border-slate-200/80 dark:border-slate-700/80">
+                <div className="rounded-xl bg-slate-50 dark:bg-slate-900/50 p-3.5 text-xs space-y-1 border border-slate-100 dark:border-slate-700">
                   <p className="text-slate-600 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-white">Scheduled Date:</span> {rsvpModalItem.date}</p>
                   {rsvpModalItem.location && <p className="text-slate-600 dark:text-slate-300"><span className="font-semibold text-slate-900 dark:text-white">Venue / Location:</span> {rsvpModalItem.location}</p>}
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium pt-1">Free Admission • A registration reference is generated after you submit</p>
@@ -3320,7 +3153,7 @@ location: e.location || 'Location to be confirmed',
                         value={rsvpName}
                         onChange={(e) => setRsvpName(e.target.value)}
                         placeholder="e.g. Dr. Abebe Yosef"
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       />
                     </div>
                     <div>
@@ -3330,7 +3163,7 @@ location: e.location || 'Location to be confirmed',
                         value={rsvpEmail}
                         onChange={(e) => setRsvpEmail(e.target.value)}
                         placeholder="e.g. abebe@astu.edu.et"
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       />
                     </div>
                   </div>
@@ -3343,7 +3176,7 @@ location: e.location || 'Location to be confirmed',
                         value={rsvpPhone}
                         onChange={(e) => setRsvpPhone(e.target.value)}
                         placeholder="e.g. +251 911 234 567"
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       />
                     </div>
                     <div>
@@ -3351,7 +3184,7 @@ location: e.location || 'Location to be confirmed',
                       <select
                         value={rsvpRole}
                         onChange={(e) => setRsvpRole(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
+                        className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                       >
                         <option value="Alumni">ASTU Alumni</option>
                         <option value="Student">Graduating Senior Student</option>
@@ -3368,7 +3201,7 @@ location: e.location || 'Location to be confirmed',
                       value={rsvpAffiliation}
                       onChange={(e) => setRsvpAffiliation(e.target.value)}
                       placeholder="e.g. School of Electrical Engineering & Computing"
-                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                     />
                   </div>
 
@@ -3379,16 +3212,16 @@ location: e.location || 'Location to be confirmed',
                       value={rsvpNotes}
                       onChange={(e) => setRsvpNotes(e.target.value)}
                       placeholder="e.g. Wheelchair access / Vegetarian meal"
-                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/70 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500/20"
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white px-3.5 py-2 text-sm outline-none focus:border-astu-navy dark:focus:border-amber-400 focus:ring-1 focus:ring-astu-navy dark:focus:ring-amber-400"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+                  <button onClick={() => setRsvpModalItem(null)} className="rounded-lg border border-slate-200 dark:border-slate-600 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700">
                     Cancel
                   </button>
-                  <button onClick={confirmRsvpRegistration} className="rounded-lg bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md">
+                  <button onClick={confirmRsvpRegistration} className="rounded-lg bg-astu-navy px-5 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md">
                     Complete & Confirm RSVP
                   </button>
                 </div>
@@ -3404,7 +3237,7 @@ location: e.location || 'Location to be confirmed',
                   <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Participant: {rsvpName} ({rsvpEmail})</p>
                 </div>
 
-                <div className="mx-auto w-48 h-48 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-3 bg-white dark:bg-slate-100 flex items-center justify-center shadow-inner">
+                <div className="mx-auto w-48 h-48 rounded-xl border-2 border-slate-200 dark:border-slate-600 p-3 bg-white dark:bg-slate-100 flex items-center justify-center shadow-inner">
                   <img
                     src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(confirmedQrPass)}`}
                     alt="Entry Ticket Code"
@@ -3419,7 +3252,7 @@ location: e.location || 'Location to be confirmed',
 
                 <button
                   onClick={() => setRsvpModalItem(null)}
-                  className="w-full rounded-xl bg-astu-navy dark:bg-blue-600 py-2.5 text-xs font-semibold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500"
+                  className="w-full rounded-xl bg-slate-900 dark:bg-slate-700 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 dark:hover:bg-slate-600"
                 >
                   Done & Close
                 </button>
@@ -3436,7 +3269,7 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setSelectedEventModal(null)}
         >
           <div
-            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col"
+            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Banner Image with Curved Bottom */}
@@ -3477,7 +3310,7 @@ location: e.location || 'Location to be confirmed',
             <div className="p-6 overflow-y-auto space-y-5">
               {/* Event Meta Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-red/10 text-astu-red">
                     <CalendarDays className="h-5 w-5" />
                   </div>
@@ -3489,7 +3322,7 @@ location: e.location || 'Location to be confirmed',
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-sky-500/20 text-astu-navy dark:text-sky-400">
                     <MapPin className="h-5 w-5" />
                   </div>
@@ -3502,7 +3335,7 @@ location: e.location || 'Location to be confirmed',
                 </div>
 
                 {selectedEventModal.speaker && (
-                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
                       <CircleUserRound className="h-5 w-5" />
                     </div>
@@ -3515,7 +3348,7 @@ location: e.location || 'Location to be confirmed',
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/60">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
                     <Users className="h-5 w-5" />
                   </div>
@@ -3539,7 +3372,7 @@ location: e.location || 'Location to be confirmed',
               </div>
 
               {/* Agenda Highlights */}
-              <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-slate-800/50 border border-blue-100 dark:border-slate-700/80">
+              <div className="p-4 rounded-2xl bg-blue-50/60 dark:bg-slate-900/40 border border-blue-100 dark:border-slate-700/50">
                 <h5 className="text-xs font-bold text-astu-navy dark:text-sky-400 uppercase tracking-wider mb-2">
                   Session Highlights
                 </h5>
@@ -3561,10 +3394,10 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Modal Action Footer */}
-            <div className="p-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/80">
+            <div className="p-5 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
               <button
                 onClick={() => setSelectedEventModal(null)}
-                className="rounded-xl border border-slate-200 dark:border-slate-700 px-5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="rounded-xl border border-slate-200 dark:border-slate-700 px-5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
               >
                 Close
               </button>
@@ -3584,7 +3417,7 @@ location: e.location || 'Location to be confirmed',
                 className={`rounded-xl px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all duration-200 ${
                   registeredTitles.includes(selectedEventModal.title)
                     ? 'bg-emerald-600 cursor-default'
-                    : 'bg-astu-navy hover:bg-astu-navy/90 hover:shadow-lg dark:bg-blue-600 dark:hover:bg-blue-500'
+                    : 'bg-astu-navy hover:bg-astu-navy/90 hover:shadow-lg dark:bg-sky-600 dark:hover:bg-sky-500'
                 }`}
               >
                 {registeredTitles.includes(selectedEventModal.title) ? '✓ Registered' : 'Register for Event'}
@@ -3601,11 +3434,11 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setShowAllEventsModal(false)}
         >
           <div
-            className="relative max-w-4xl w-full rounded-[2rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col"
+            className="relative max-w-4xl w-full rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/80 dark:bg-slate-900/80">
               <div>
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400">
                   <CalendarDays className="h-3 w-3" />
@@ -3624,14 +3457,14 @@ location: e.location || 'Location to be confirmed',
                   setShowAllEventsModal(false);
                   setAllEventsSearch('');
                 }}
-                className="self-end sm:self-auto rounded-full p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                className="self-end sm:self-auto rounded-full p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Search & Filter Toolbar */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row gap-3">
+            <div className="p-4 border-b border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-800 flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
@@ -3639,7 +3472,7 @@ location: e.location || 'Location to be confirmed',
                   value={allEventsSearch}
                   onChange={(e) => setAllEventsSearch(e.target.value)}
                   placeholder="Search events by title, keyword, or venue..."
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 dark:focus:border-blue-400"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 py-2.5 pl-10 pr-4 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-astu-navy dark:focus:border-sky-400"
                 />
               </div>
 
@@ -3655,8 +3488,8 @@ location: e.location || 'Location to be confirmed',
                     onClick={() => setEventFilterTab(tab.id as any)}
                     className={`rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all ${
                       eventFilterTab === tab.id
-                        ? 'bg-astu-navy text-white shadow-sm dark:bg-blue-600'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
+                        ? 'bg-astu-navy text-white shadow-sm dark:bg-sky-600'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {tab.label}
@@ -3681,7 +3514,7 @@ location: e.location || 'Location to be confirmed',
                 .map((event, idx) => (
                   <div
                     key={event.id + '-all-' + idx}
-                    className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all group"
+                    className="flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-sm hover:shadow-md transition-all group"
                   >
                     <div className="relative h-40 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
                       <img
@@ -3710,7 +3543,7 @@ location: e.location || 'Location to be confirmed',
                         </p>
                       </div>
 
-                      <div className="mt-4 flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                      <div className="mt-4 flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
                         <button
                           onClick={() => {
                             setShowAllEventsModal(false);
@@ -3725,7 +3558,7 @@ location: e.location || 'Location to be confirmed',
                           className={`flex-1 rounded-lg py-1.5 text-xs font-bold text-white transition-all ${
                             registeredTitles.includes(event.title)
                               ? 'bg-emerald-600'
-                              : 'bg-astu-navy hover:bg-astu-navy/90 dark:bg-blue-600 dark:hover:bg-blue-500'
+                              : 'bg-astu-navy hover:bg-astu-navy/90 dark:bg-sky-600'
                           }`}
                         >
                           {registeredTitles.includes(event.title) ? '✓ Registered' : 'Register'}
@@ -3735,7 +3568,7 @@ location: e.location || 'Location to be confirmed',
                             setShowAllEventsModal(false);
                             setSelectedEventModal(event);
                           }}
-                          className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                          className="rounded-lg border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                           Details
                         </button>
@@ -3746,13 +3579,13 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
               <button
                 onClick={() => {
                   setShowAllEventsModal(false);
                   setAllEventsSearch('');
                 }}
-                className="rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500"
+                className="rounded-xl bg-astu-navy px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90"
               >
                 Close Directory
               </button>
@@ -3768,7 +3601,7 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setSelectedNewsModal(null)}
         >
           <div
-            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col animate-modal-enter"
+            className="relative max-w-2xl w-full rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col animate-modal-enter"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header Bar with Gradient */}
@@ -3816,26 +3649,34 @@ location: e.location || 'Location to be confirmed',
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-4">
+              <div className="rounded-2xl border border-slate-100 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900/60 p-4">
                 <h5 className="text-xs font-bold uppercase tracking-wider text-astu-navy dark:text-white mb-2">
                   Key Guidance & Inquiries
                 </h5>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   For questions regarding this release, contact the university coordination office at{' '}
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">irccd@astu.edu.et</span> or phone{' '}
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">+251-221-110000</span>.
+                  <span className="font-semibold text-astu-navy dark:text-amber-400">irccd@astu.edu.et</span> or phone{' '}
+                  <span className="font-semibold text-astu-navy dark:text-amber-400">+251-221-110000</span>.
                 </p>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard?.writeText(window.location.href);
-                    toast.success('Announcement link copied to clipboard!');
+                    const slug = selectedNewsModal.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                    setSharePageContent({
+                      id: selectedNewsModal.id || slug,
+                      title: selectedNewsModal.title,
+                      category: selectedNewsModal.category || 'Announcement',
+                      description: selectedNewsModal.excerpt,
+                      image: selectedNewsModal.image,
+                      url: `${window.location.origin}/announcements/${slug}`,
+                      contentType: 'announcement',
+                    });
                   }}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
                 >
                   <Share2 className="h-4 w-4" />
                   <span>Share Notice</span>
@@ -3847,18 +3688,227 @@ location: e.location || 'Location to be confirmed',
                       const slug = selectedNewsModal.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
                       navigate(`/announcements/${slug}`);
                     }}
-                    className="inline-flex items-center gap-2 rounded-xl bg-astu-navy dark:bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500 transition-all shadow-sm"
+                    className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 transition-all shadow-sm"
                   >
                     <span>Full Notice Page</span>
                     <ExternalLink className="h-3.5 w-3.5" />
                   </button>
                   <button
                     onClick={() => setSelectedNewsModal(null)}
-                    className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                    className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
                   >
                     Close
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ShareCampaignModal
+        isOpen={!!shareModalCampaign}
+        onClose={() => setShareModalCampaign(null)}
+        campaign={shareModalCampaign ? {
+          id: shareModalCampaign.id,
+          title: shareModalCampaign.title,
+          category: shareModalCampaign.category,
+          description: shareModalCampaign.description,
+          goal: Number(shareModalCampaign.goal || shareModalCampaign.targetAmount) || 0,
+          raised: Number(shareModalCampaign.raised) || 0,
+          donorCount: Number(shareModalCampaign.donorCount) || 0,
+          image: shareModalCampaign.image || getHomeCampaignImage(shareModalCampaign),
+          contentType: 'campaign',
+        } : null}
+      />
+
+      <ShareCampaignModal
+        isOpen={!!sharePageContent}
+        onClose={() => setSharePageContent(null)}
+        campaign={sharePageContent}
+      />
+
+      {/* Direct Instant Giving Modal for Homepage */}
+      <TelebirrDonationModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        campaign={selectedDonationCampaign}
+        initialMethod={donationPayMethod}
+        onSuccess={() => {
+          setIsDonationModalOpen(false);
+          toast.success('Donation completed successfully!');
+        }}
+      />
+
+      {/* Alumni Donation Routing / Authentication Modal */}
+      {isDonationAuthModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in"
+          onClick={() => setIsDonationAuthModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white dark:bg-[#0f172a] shadow-2xl border border-slate-200/90 dark:border-slate-800 transition-all text-slate-800 dark:text-slate-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top decorative gradient bar */}
+            <div className="h-2 w-full bg-gradient-to-r from-astu-navy via-astu-green to-amber-400" />
+
+            {/* Close Button */}
+            <button
+              onClick={() => setIsDonationAuthModalOpen(false)}
+              className="absolute top-5 right-5 h-9 w-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="p-6 md:p-8">
+              {/* Header Badge & Title */}
+              <div className="inline-flex items-center gap-2 rounded-full bg-astu-navy/10 dark:bg-sky-500/15 border border-transparent dark:border-sky-500/30 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-astu-navy dark:text-sky-300 mb-3">
+                <Heart className="h-3.5 w-3.5 fill-astu-red text-astu-red" />
+                ASTU Alumni Giving
+              </div>
+
+              <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+                Support ASTU&apos;s Future
+              </h3>
+
+              {selectedDonationCampaign && (
+                <div className="mt-3.5 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green dark:text-emerald-400">
+                        Selected Campaign
+                      </span>
+                      <p className="text-xs md:text-sm font-black text-slate-900 dark:text-white truncate">
+                        {selectedDonationCampaign.title}
+                      </p>
+                    </div>
+                    <span className="shrink-0 px-2.5 py-1 rounded-lg bg-astu-navy/10 dark:bg-sky-500/20 text-astu-navy dark:text-sky-300 text-[10px] font-black uppercase">
+                      {selectedDonationCampaign.category || 'Initiative'}
+                    </span>
+                  </div>
+                  {Number(selectedDonationCampaign.goal || selectedDonationCampaign.targetAmount) > 0 && (
+                    <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                      <div className="flex justify-between text-[10px] font-extrabold text-slate-500 dark:text-slate-400 mb-1">
+                        <span>{(Number(selectedDonationCampaign.raised) || 0).toLocaleString()} ETB raised</span>
+                        <span>
+                          {Math.round(
+                            ((Number(selectedDonationCampaign.raised) || 0) /
+                              Number(selectedDonationCampaign.goal || selectedDonationCampaign.targetAmount)) *
+                              100
+                          )}
+                          % of{' '}
+                          {Number(selectedDonationCampaign.goal || selectedDonationCampaign.targetAmount).toLocaleString()} ETB
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-astu-navy via-astu-green to-emerald-400"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              Math.round(
+                                ((Number(selectedDonationCampaign.raised) || 0) /
+                                  Number(selectedDonationCampaign.goal || selectedDonationCampaign.targetAmount)) *
+                                  100
+                              )
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <p className="mt-3 text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                Choose how you would like to proceed with your contribution:
+              </p>
+
+              {/* Options Cards */}
+              <div className="mt-5 space-y-3">
+                {/* Option 1: Direct Instant Giving (Telebirr / CBE / Card) */}
+                <div
+                  onClick={() => {
+                    setIsDonationAuthModalOpen(false);
+                    setDonationPayMethod('telebirr');
+                    setIsDonationModalOpen(true);
+                  }}
+                  className="group relative flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl border-2 border-amber-300/80 dark:border-amber-500/50 hover:border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-all cursor-pointer shadow-xs hover:shadow-md"
+                >
+                  <div className="h-11 w-11 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors flex items-center gap-1.5">
+                        <span>Direct Online Giving</span>
+                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-200/80 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200">
+                          Instant
+                        </span>
+                      </h4>
+                      <ArrowRight className="h-4 w-4 text-amber-500 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5 leading-relaxed">
+                      Donate immediately with Telebirr, CBE Birr, or Credit Card without logging in.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Option 2: Registered Alumni -> Login */}
+                <div
+                  onClick={() => {
+                    setIsDonationAuthModalOpen(false);
+                    loginForDonation(selectedDonationCampaign?.id);
+                  }}
+                  className="group relative flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700/80 hover:border-astu-navy dark:hover:border-sky-400 bg-white dark:bg-slate-800/60 hover:bg-slate-50/80 dark:hover:bg-slate-800 transition-all cursor-pointer shadow-xs hover:shadow-md"
+                >
+                  <div className="h-11 w-11 rounded-xl bg-astu-navy/10 dark:bg-sky-500/20 text-astu-navy dark:text-sky-300 group-hover:bg-astu-navy dark:group-hover:bg-sky-500 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                    <LogIn className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-astu-navy dark:group-hover:text-sky-300 transition-colors">
+                        I am a Registered Alumni
+                      </h4>
+                      <ArrowRight className="h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-astu-navy dark:group-hover:text-sky-300 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 leading-relaxed">
+                      Sign in with your student ID or email to access your Giving dashboard and alumni donor records.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Option 3: New Alumni -> Register */}
+                <div
+                  onClick={() => {
+                    setIsDonationAuthModalOpen(false);
+                    navigate(`/register?redirect=${encodeURIComponent(donationDashboardPath(selectedDonationCampaign?.id))}`);
+                  }}
+                  className="group relative flex items-start gap-3.5 p-3.5 md:p-4 rounded-2xl border-2 border-emerald-200/90 dark:border-emerald-800/70 hover:border-emerald-600 dark:hover:border-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 hover:bg-emerald-50/70 dark:hover:bg-emerald-950/40 transition-all cursor-pointer shadow-xs hover:shadow-md"
+                >
+                  <div className="h-11 w-11 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 group-hover:bg-emerald-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                    <UserPlus className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
+                        I am a New Alumni
+                      </h4>
+                      <ArrowRight className="h-4 w-4 text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 font-medium mt-0.5 leading-relaxed">
+                      Register your graduation record to activate your verified alumni network account first.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Notice */}
+              <div className="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-center gap-2 text-[11px] text-slate-400 dark:text-slate-500 font-semibold text-center">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Verified ASTU Alumni Advancement &amp; Giving Portal &bull; Secure 256-bit Encryption</span>
               </div>
             </div>
           </div>
@@ -3872,11 +3922,11 @@ location: e.location || 'Location to be confirmed',
           onClick={() => setShowAllNewsModal(false)}
         >
           <div
-            className="relative max-w-4xl w-full rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 max-h-[90vh] flex flex-col animate-modal-enter"
+            className="relative max-w-4xl w-full rounded-[2.5rem] bg-white dark:bg-slate-800 shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-700 max-h-[90vh] flex flex-col animate-modal-enter"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
+            <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-astu-red">
                   Official Directory
@@ -3890,14 +3940,14 @@ location: e.location || 'Location to be confirmed',
                   setShowAllNewsModal(false);
                   setNewsSearchQuery('');
                 }}
-                className="rounded-full bg-slate-100 dark:bg-slate-800 p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all"
+                className="rounded-full bg-slate-100 dark:bg-slate-700 p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white transition-all"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Search Input */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-900/50">
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
@@ -3905,7 +3955,7 @@ location: e.location || 'Location to be confirmed',
                   placeholder="Search all announcements by title or keyword..."
                   value={newsSearchQuery}
                   onChange={(e) => setNewsSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-900 dark:text-white outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/20"
                 />
               </div>
             </div>
@@ -3927,7 +3977,7 @@ location: e.location || 'Location to be confirmed',
                         setShowAllNewsModal(false);
                         setSelectedNewsModal(n);
                       }}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-all cursor-pointer group"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 hover:border-astu-navy/30 dark:hover:border-sky-500/30 hover:bg-slate-50/80 dark:hover:bg-slate-700/40 transition-all cursor-pointer group"
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 mb-1.5">
@@ -3936,7 +3986,7 @@ location: e.location || 'Location to be confirmed',
                           </span>
                           <span className="text-[11px] text-slate-400">{n.date || 'Recent'}</span>
                         </div>
-                        <h4 className="text-sm font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-blue-400 transition-colors truncate">
+                        <h4 className="text-sm font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors truncate">
                           {n.title}
                         </h4>
                         {n.excerpt && (
@@ -3945,7 +3995,7 @@ location: e.location || 'Location to be confirmed',
                           </p>
                         )}
                       </div>
-                      <button className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-astu-navy dark:text-blue-400 group-hover:translate-x-1 transition-transform">
+                      <button className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-astu-navy dark:text-amber-400 group-hover:translate-x-1 transition-transform">
                         <span>Read</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </button>
@@ -3955,13 +4005,13 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end bg-slate-50/80 dark:bg-slate-900/80">
               <button
                 onClick={() => {
                   setShowAllNewsModal(false);
                   setNewsSearchQuery('');
                 }}
-                className="rounded-xl bg-astu-navy dark:bg-blue-600 px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90 dark:hover:bg-blue-500"
+                className="rounded-xl bg-astu-navy px-5 py-2 text-xs font-bold text-white hover:bg-astu-navy/90"
               >
                 Close Directory
               </button>
@@ -3969,7 +4019,6 @@ location: e.location || 'Location to be confirmed',
           </div>
         </div>
       )}
-
       <ChatBot />
     </div>
   );

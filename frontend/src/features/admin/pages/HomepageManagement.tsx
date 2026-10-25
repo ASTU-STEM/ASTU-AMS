@@ -79,7 +79,7 @@ interface EventItem {
   id: string; title: string; date: string; location: string; image: string; active: boolean;
 }
 interface WorkshopItem {
-  id: string; title: string; date: string; seats: string; focus: string; active: boolean;
+  id: string; title: string; date: string; seats: string; focus?: string; active: boolean;
 }
 interface NewsItem {
   id: string; title: string; date: string; active: boolean;
@@ -244,7 +244,7 @@ function useModalState<T>() {
 }
 
 /* ─── Main Component ─── */
-export default function HomepageManagement() {
+export default function HomepageManagement({ initialCategory }: { initialCategory?: string } = {}) {
   const [activeTab, setActiveTab] = useState<SectionTab>('hero');
   const [welcomeMessage, setWelcomeMessage] = useState('Welcome to the ASTU Alumni Management System, a digital bridge between graduates, employers, departments, and university services.');
   const [welcomeSaved, setWelcomeSaved] = useState(false);

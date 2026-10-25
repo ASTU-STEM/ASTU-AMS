@@ -386,7 +386,7 @@ export const GraduatesDirectory: React.FC<GraduatesDirectoryProps> = ({
                   </th>
                   {columns.map(([field, label]) => (
                     <th
-                      key={field}
+                      key={String(field)}
                       onClick={() => handleSort(field)}
                       className={`cursor-pointer select-none px-4 py-3 text-left font-semibold ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}
                     >

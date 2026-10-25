@@ -174,10 +174,10 @@ export default function EventDetailPage() {
       <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-colors">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/events')}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
           >
-            <ArrowLeft className="h-4 w-4 text-[#003580] dark:text-blue-300" /> Back to Homepage
+            <ArrowLeft className="h-4 w-4 text-[#003580] dark:text-blue-300" /> Back to Events & Workshops
           </button>
           <div className="flex items-center gap-2">
             <button
