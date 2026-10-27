@@ -21,7 +21,12 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
+  Sparkles,
+  Tag,
+  Copy,
+  Check,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PaginationBar from '../components/PaginationBar';
@@ -237,6 +242,8 @@ const SEED_PARTNERS: Partner[] = [
   },
 ];
 
+const POPULAR_SEARCH_TOPICS = ['Telecom', 'Cloud', 'AI', 'Aviation', 'FinTech', 'Cybersecurity', 'Energy'];
+
 export default function PartnersPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -259,6 +266,7 @@ export default function PartnersPage() {
 
   // Featured carousel state
   const [featuredSlideIndex, setFeaturedSlideIndex] = useState(0);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Modal states
   const [selectedCompanyModal, setSelectedCompanyModal] = useState<Partner | null>(null);
@@ -266,7 +274,23 @@ export default function PartnersPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
 
   const directoryRef = useRef<HTMLDivElement>(null);
-  const featuredRailRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Quick keyboard focus shortcut (press / to focus search)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key === 'k')) &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Load backend partner settings on mount
   const loadPartnerData = useCallback(async () => {
@@ -280,14 +304,12 @@ export default function PartnersPage() {
 
       const backendPartners = settings?.partners;
       if (Array.isArray(backendPartners) && backendPartners.length > 0) {
-        // Merge backend partners with seed metadata where applicable
         const seedMap = new Map(SEED_PARTNERS.map((sp) => [sp.name.toLowerCase().trim(), sp]));
         const merged: Partner[] = backendPartners.map((bp) => {
           const match = seedMap.get(bp.name?.toLowerCase().trim());
           return match ? { ...match, ...bp } : bp;
         });
 
-        // Add any verified seed partners not yet in backend CMS list
         SEED_PARTNERS.forEach((sp) => {
           if (!merged.some((m) => m.name?.toLowerCase().trim() === sp.name.toLowerCase().trim())) {
             merged.push(sp);
@@ -335,10 +357,10 @@ export default function PartnersPage() {
     const raw = (searchParams.get('tab') || '').toLowerCase();
     if (!raw) return;
     const tabMap: Record<string, string> = {
-      stakeholders: 'partner-directory',
-      employers: 'partner-directory',
-      recruitment: 'partner-directory',
-      tracks: 'partner-directory',
+      stakeholders: 'partner-discovery',
+      employers: 'partner-discovery',
+      recruitment: 'partner-discovery',
+      tracks: 'partner-discovery',
       benefits: 'partner-stats',
     };
     const targetId = tabMap[raw] || raw;
@@ -466,7 +488,8 @@ export default function PartnersPage() {
 
   // Featured carousel navigation
   const FEATURED_PER_VIEW = 3;
-  const maxFeaturedSlide = Math.max(0, Math.ceil(featuredPartners.length / FEATURED_PER_VIEW) - 1);
+  const totalFeaturedSlides = Math.max(1, Math.ceil(featuredPartners.length / FEATURED_PER_VIEW));
+  const maxFeaturedSlide = totalFeaturedSlides - 1;
 
   const handleNextFeatured = () => {
     setFeaturedSlideIndex((prev) => (prev < maxFeaturedSlide ? prev + 1 : 0));
@@ -474,6 +497,19 @@ export default function PartnersPage() {
 
   const handlePrevFeatured = () => {
     setFeaturedSlideIndex((prev) => (prev > 0 ? prev - 1 : maxFeaturedSlide));
+  };
+
+  const handleCopyPartnerLink = (partner: Partner) => {
+    const url = `${window.location.origin}/partners?partner=${encodeURIComponent(partner.id)}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopiedId(partner.id);
+        toast.success(`Copied link for ${partner.name}!`);
+        setTimeout(() => setCopiedId(null), 2000);
+      });
+    } else {
+      toast.success(url);
+    }
   };
 
   // Render standardized partner logo
@@ -509,6 +545,24 @@ export default function PartnersPage() {
     );
   };
 
+  // Partnership badge color mapping
+  const getBadgeStyle = (type?: string) => {
+    switch (type?.toLowerCase()) {
+      case 'strategic':
+        return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border-blue-200/80 dark:border-blue-900/60';
+      case 'research':
+        return 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 border-purple-200/80 dark:border-purple-900/60';
+      case 'technology':
+        return 'text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/60 border-teal-200/80 dark:border-teal-900/60';
+      case 'recruitment':
+        return 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200/80 dark:border-emerald-900/60';
+      case 'government':
+        return 'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border-amber-200/80 dark:border-amber-900/60';
+      default:
+        return 'text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
       {/* ── Strict Constraint: Navbar is untouched ── */}
@@ -521,6 +575,7 @@ export default function PartnersPage() {
           className="relative overflow-hidden bg-gradient-to-b from-[#001f3f] via-[#002b5c] to-[#001830] text-white pt-10 pb-12 sm:pt-14 sm:pb-16 border-b border-blue-900/40"
         >
           <div className="absolute inset-0 bg-grid-white/[0.03] bg-[size:2rem_2rem] pointer-events-none" />
+          <div className="absolute -top-24 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
@@ -542,7 +597,7 @@ export default function PartnersPage() {
                 <button
                   type="button"
                   onClick={() => navigate(pageConfig.heroPrimaryCtaLink || '/employers/register')}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs sm:text-sm shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-950/40 transition-all hover:-translate-y-0.5 cursor-pointer"
                 >
                   <span>Register as Partner</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -551,7 +606,7 @@ export default function PartnersPage() {
                 <button
                   type="button"
                   onClick={() => navigate(pageConfig.heroSecondaryCtaLink || '/login')}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs sm:text-sm transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs sm:text-sm transition-all hover:-translate-y-0.5 cursor-pointer backdrop-blur-xs"
                 >
                   <Building className="w-3.5 h-3.5 text-blue-300" />
                   <span>Employer Portal</span>
@@ -570,7 +625,7 @@ export default function PartnersPage() {
                     });
                     setIsShareOpen(true);
                   }}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs sm:text-sm transition-all cursor-pointer"
+                  className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium text-xs sm:text-sm transition-all cursor-pointer backdrop-blur-xs"
                   title="Share partner directory"
                 >
                   <Share2 className="w-3.5 h-3.5 text-blue-300" />
@@ -589,56 +644,64 @@ export default function PartnersPage() {
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-blue-500/30 transition-colors">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {partners.length}
                   </span>
-                  <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400">
+                    <Building2 className="w-4 h-4" />
+                  </div>
                 </div>
                 <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">Active Partners</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Verified Organizations</div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Enterprise &amp; Public Allies</div>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-emerald-500/30 transition-colors">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {distinctSectorsCount}
                   </span>
-                  <Briefcase className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+                    <Briefcase className="w-4 h-4" />
+                  </div>
                 </div>
                 <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">Industry Sectors</div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Telecom, AI, Energy, Aviation</div>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-amber-500/30 transition-colors">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {partners.filter((p) => p.featured || p.partnershipType === 'Strategic').length}
                   </span>
-                  <Handshake className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                  <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-500 dark:text-amber-400">
+                    <Handshake className="w-4 h-4" />
+                  </div>
                 </div>
                 <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">Strategic MoUs</div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Formal University Agreements</div>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-sky-500/30 transition-colors">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {metrics.registeredAlumniFormatted && metrics.registeredAlumniFormatted !== '—'
                       ? metrics.registeredAlumniFormatted
                       : '1,215+'}
                   </span>
-                  <Users className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                  <div className="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+                    <Users className="w-4 h-4" />
+                  </div>
                 </div>
                 <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">Verified Alumni</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Registered in AMS</div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Registered in AMS Platform</div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 3. Partner Discovery (Search & Dynamic Category Filters) ── */}
+        {/* ── 3. Partner Discovery (Search, Dynamic Topic Chips & Filters) ── */}
         <section
           id="partner-discovery"
           ref={directoryRef}
@@ -646,7 +709,7 @@ export default function PartnersPage() {
           aria-label="Partner Discovery"
         >
           {/* Search Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
             <div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-1.5">
                 <Search className="w-3 h-3" />
@@ -657,31 +720,56 @@ export default function PartnersPage() {
               </h2>
             </div>
 
-            {/* Search Input Box */}
+            {/* Search Input Box with keyboard hint */}
             <div className="relative w-full sm:w-80 md:w-96">
               <label htmlFor="partner-search-input" className="sr-only">
                 Search partners by company name, sector, or keyword
               </label>
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                ref={searchInputRef}
                 id="partner-search-input"
                 type="text"
                 value={partnerSearch}
                 onChange={(e) => setPartnerSearch(e.target.value)}
                 placeholder="Search by name, sector, location, skills..."
-                className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs transition-all"
+                className="w-full pl-10 pr-16 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs transition-all"
               />
-              {partnerSearch && (
-                <button
-                  type="button"
-                  onClick={() => setPartnerSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
-                  title="Clear search"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                {partnerSearch ? (
+                  <button
+                    type="button"
+                    onClick={() => setPartnerSearch('')}
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded">
+                    /
+                  </kbd>
+                )}
+              </div>
             </div>
+          </div>
+
+          {/* Quick topic tags */}
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 text-xs text-slate-500 dark:text-slate-400 no-scrollbar">
+            <span className="font-medium shrink-0 flex items-center gap-1">
+              <Tag className="w-3 h-3 text-blue-500" />
+              <span>Topics:</span>
+            </span>
+            {POPULAR_SEARCH_TOPICS.map((topic) => (
+              <button
+                key={topic}
+                type="button"
+                onClick={() => setPartnerSearch(topic)}
+                className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 font-medium transition-colors shrink-0 cursor-pointer"
+              >
+                #{topic}
+              </button>
+            ))}
           </div>
 
           {/* Dynamic Category Filter Pills */}
@@ -720,7 +808,7 @@ export default function PartnersPage() {
             })}
           </div>
 
-          {/* Controls Bar: Results Count, Clear Filters, Sorting, View Toggle */}
+          {/* Active filter chips & Controls Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3 mb-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -736,14 +824,43 @@ export default function PartnersPage() {
                 {sortedPartners.length !== partners.length && ` (filtered from ${partners.length})`}
               </span>
 
+              {/* Individual Active Filter Chips */}
+              {debouncedSearch && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[11px] font-semibold border border-blue-200 dark:border-blue-900">
+                  <span>"{debouncedSearch}"</span>
+                  <button
+                    type="button"
+                    onClick={() => setPartnerSearch('')}
+                    className="hover:text-blue-900 dark:hover:text-white cursor-pointer ml-0.5"
+                    title="Remove query filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
+              {typeFilter !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[11px] font-semibold border border-purple-200 dark:border-purple-900">
+                  <span>{typeFilter}</span>
+                  <button
+                    type="button"
+                    onClick={() => setTypeFilter('All')}
+                    className="hover:text-purple-900 dark:hover:text-white cursor-pointer ml-0.5"
+                    title="Remove category filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+
               {(typeFilter !== 'All' || debouncedSearch) && (
                 <button
                   type="button"
                   onClick={handleClearFilters}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline ml-2 cursor-pointer"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline ml-1 cursor-pointer"
                 >
                   <RefreshCw className="w-3 h-3" />
-                  <span>Clear all filters</span>
+                  <span>Clear all</span>
                 </button>
               )}
             </div>
@@ -838,6 +955,9 @@ export default function PartnersPage() {
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
                     Featured Strategic Partners
                   </h3>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    ({featuredSlideIndex + 1}/{totalFeaturedSlides})
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
@@ -861,10 +981,7 @@ export default function PartnersPage() {
               </div>
 
               {/* Featured Cards Rail */}
-              <div
-                ref={featuredRailRef}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
-              >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 {featuredPartners
                   .slice(
                     featuredSlideIndex * FEATURED_PER_VIEW,
@@ -874,7 +991,7 @@ export default function PartnersPage() {
                     <div
                       key={partner.id}
                       onClick={() => setSelectedCompanyModal(partner)}
-                      className="group flex items-start gap-3.5 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500/60 transition-all cursor-pointer shadow-xs"
+                      className="group flex items-start gap-3.5 p-3.5 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500/60 transition-all cursor-pointer shadow-xs hover:-translate-y-0.5"
                     >
                       <div className="flex h-11 w-11 items-center justify-center shrink-0 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 p-1">
                         {renderLogo(partner, 'h-8 w-8')}
@@ -966,7 +1083,7 @@ export default function PartnersPage() {
               {pagedPartners.map((partner) => (
                 <div
                   key={partner.id}
-                  className="group flex flex-col justify-between p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 relative"
+                  className="group flex flex-col justify-between p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-0.5 transition-all duration-300 relative"
                 >
                   {/* Featured Indicator */}
                   {partner.featured && (
@@ -979,7 +1096,9 @@ export default function PartnersPage() {
                   <div>
                     {/* Standardized Logo Container */}
                     <div className="flex h-14 items-center justify-start mb-3.5 pr-14">
-                      {renderLogo(partner, 'h-11 w-11 sm:h-12 sm:w-12')}
+                      <div className="p-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 shadow-xs">
+                        {renderLogo(partner, 'h-11 w-11 sm:h-12 sm:w-12')}
+                      </div>
                     </div>
 
                     {/* Organization Name & Sector */}
@@ -992,7 +1111,7 @@ export default function PartnersPage() {
 
                     {/* Category Badge & Openings Tag */}
                     <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/80 dark:border-emerald-900/60">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${getBadgeStyle(partner.partnershipType)}`}>
                         {partner.partnershipType || 'Enterprise'}
                       </span>
                       {partner.openings && (
@@ -1008,6 +1127,20 @@ export default function PartnersPage() {
                         `${partner.name} collaborates with ASTU through accredited graduate hiring pipelines and curriculum competency reviews.`}
                     </p>
 
+                    {/* Tags preview */}
+                    {Array.isArray(partner.tags) && partner.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2.5">
+                        {partner.tags.slice(0, 3).map((t, idx) => (
+                          <span
+                            key={idx}
+                            className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Location */}
                     {partner.location && (
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 pt-3 mt-3 border-t border-slate-100 dark:border-slate-800">
@@ -1018,7 +1151,7 @@ export default function PartnersPage() {
                   </div>
 
                   {/* Card Actions: Non-conflicting buttons */}
-                  <div className="pt-3.5 mt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                  <div className="pt-3.5 mt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => setSelectedCompanyModal(partner)}
@@ -1039,6 +1172,19 @@ export default function PartnersPage() {
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
+
+                    <button
+                      type="button"
+                      onClick={() => handleCopyPartnerLink(partner)}
+                      className="p-1.5 rounded-xl text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                      title={copiedId === partner.id ? 'Copied!' : 'Copy direct link'}
+                    >
+                      {copiedId === partner.id ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
 
                     <button
                       type="button"
@@ -1105,7 +1251,7 @@ export default function PartnersPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3.5 whitespace-nowrap">
-                          <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getBadgeStyle(partner.partnershipType)}`}>
                             {partner.partnershipType || 'Partner'}
                           </span>
                         </td>
