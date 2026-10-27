@@ -21,10 +21,10 @@ import {
   ChevronLeft,
   ChevronRight,
   AlertCircle,
-  Sparkles,
   Tag,
   Copy,
   Check,
+  Calendar,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
@@ -55,6 +55,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Telecom, Cloud & FinTech',
     partnershipType: 'Strategic',
     status: 'Tier 1 Strategic Partner',
+    mouYear: '2021',
     location: 'Addis Ababa & Regional Hubs',
     openings: '14+ Graduate Engineering Tracks',
     website: 'https://www.ethiotelecom.et',
@@ -71,6 +72,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Aviation Engineering & ICT',
     partnershipType: 'Strategic',
     status: 'Aviation Tech Partner',
+    mouYear: '2020',
     location: 'Bole, Addis Ababa',
     openings: '8 Aviation Cadet & Internship Tracks',
     website: 'https://www.ethiopianairlines.com',
@@ -87,6 +89,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Cybersecurity & Defense Intelligence',
     partnershipType: 'Research',
     status: 'Govt Research Partner',
+    mouYear: '2022',
     location: 'Addis Ababa',
     openings: '6 Advanced Research Placements',
     website: 'https://www.insa.gov.et',
@@ -103,6 +106,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'ICT Infrastructure & 5G',
     partnershipType: 'Technology',
     status: 'Global Innovation Partner',
+    mouYear: '2019',
     location: 'Adama & Addis Ababa',
     openings: '11 ICT Academy Certification Paths',
     website: 'https://www.huawei.com',
@@ -119,6 +123,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Telecommunications & 5G Infrastructure',
     partnershipType: 'Recruitment',
     status: 'Strategic Corporate Partner',
+    mouYear: '2022',
     location: 'Ethiopia Network Hubs',
     openings: '12 Digital Engineering Roles',
     website: 'https://www.safaricom.et',
@@ -135,6 +140,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Financial Technology & Digital Banking',
     partnershipType: 'Recruitment',
     status: 'Enterprise Banking Partner',
+    mouYear: '2021',
     location: 'CBE Tower, Addis Ababa',
     openings: '20+ IT & Security Openings',
     website: 'https://www.combanketh.et',
@@ -151,6 +157,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'International Academic & Research Consortia',
     partnershipType: 'Research',
     status: 'Academic Consortia Partner',
+    mouYear: '2018',
     location: 'Bonn, Germany / Addis Ababa',
     openings: 'Joint Research & Exchange Fellowships',
     website: 'https://www.daad.de',
@@ -167,6 +174,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Enterprise Software & Cloud Systems',
     partnershipType: 'Internship',
     status: 'Software Solutions Partner',
+    mouYear: '2023',
     location: 'Addis Ababa',
     openings: '5 Full-Stack Developer Roles',
     website: 'https://metafinetec.com',
@@ -183,6 +191,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Government Digital Transformation',
     partnershipType: 'Government',
     status: 'Government Strategic Partner',
+    mouYear: '2021',
     location: 'Addis Ababa',
     openings: 'National Hackathons & Tech Incubation',
     website: 'https://mint.gov.et',
@@ -199,6 +208,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Applied AI & Cognitive Computing',
     partnershipType: 'Research',
     status: 'Advanced AI Research Partner',
+    mouYear: '2022',
     location: 'Addis Ababa',
     openings: 'AI Fellowships & Lab Internships',
     website: 'https://ai.et',
@@ -215,6 +225,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'High-Voltage Grids & Renewable Energy',
     partnershipType: 'Strategic',
     status: 'National Energy Partner',
+    mouYear: '2020',
     location: 'Addis Ababa / Regional Substations',
     openings: 'Electrical & Power Systems Trainees',
     website: 'https://www.eep.com.et',
@@ -231,6 +242,7 @@ const SEED_PARTNERS: Partner[] = [
     industry: 'Industrial Manufacturing & Engineering',
     partnershipType: 'Strategic',
     status: 'Industrial Conglomerate Partner',
+    mouYear: '2019',
     location: 'Addis Ababa / Regional Hubs',
     openings: 'Process Automation & Design Trainees',
     website: 'https://midroc-ethiopia.com.et',
@@ -266,6 +278,7 @@ export default function PartnersPage() {
 
   // Featured carousel state
   const [featuredSlideIndex, setFeaturedSlideIndex] = useState(0);
+  const [isFeaturedPaused, setIsFeaturedPaused] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Modal states
@@ -276,7 +289,7 @@ export default function PartnersPage() {
   const directoryRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Quick keyboard focus shortcut (press / to focus search)
+  // Quick keyboard shortcuts (press / or ⌘K to focus search, Esc to clear search if focused)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -286,11 +299,17 @@ export default function PartnersPage() {
       ) {
         e.preventDefault();
         searchInputRef.current?.focus();
+      } else if (e.key === 'Escape' && document.activeElement === searchInputRef.current) {
+        if (partnerSearch) {
+          setPartnerSearch('');
+        } else {
+          searchInputRef.current?.blur();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [partnerSearch]);
 
   // Load backend partner settings on mount
   const loadPartnerData = useCallback(async () => {
@@ -491,16 +510,25 @@ export default function PartnersPage() {
   const totalFeaturedSlides = Math.max(1, Math.ceil(featuredPartners.length / FEATURED_PER_VIEW));
   const maxFeaturedSlide = totalFeaturedSlides - 1;
 
-  const handleNextFeatured = () => {
+  const handleNextFeatured = useCallback(() => {
     setFeaturedSlideIndex((prev) => (prev < maxFeaturedSlide ? prev + 1 : 0));
-  };
+  }, [maxFeaturedSlide]);
 
-  const handlePrevFeatured = () => {
+  const handlePrevFeatured = useCallback(() => {
     setFeaturedSlideIndex((prev) => (prev > 0 ? prev - 1 : maxFeaturedSlide));
-  };
+  }, [maxFeaturedSlide]);
+
+  // Auto-advance featured partners carousel every 6 seconds when not paused
+  useEffect(() => {
+    if (totalFeaturedSlides <= 1 || isFeaturedPaused) return;
+    const interval = setInterval(() => {
+      handleNextFeatured();
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [totalFeaturedSlides, isFeaturedPaused, handleNextFeatured]);
 
   const handleCopyPartnerLink = (partner: Partner) => {
-    const url = `${window.location.origin}/partners?partner=${encodeURIComponent(partner.id)}`;
+    const url = `${window.location.origin}/partners?partner=${encodeURIComponent(partner.id || partner.name)}`;
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(url).then(() => {
         setCopiedId(partner.id);
@@ -509,6 +537,17 @@ export default function PartnersPage() {
       });
     } else {
       toast.success(url);
+    }
+  };
+
+  const handleTopicClick = (topic: string) => {
+    if (partnerSearch.toLowerCase() === topic.toLowerCase()) {
+      setPartnerSearch('');
+    } else {
+      setPartnerSearch(topic);
+    }
+    if (directoryRef.current) {
+      directoryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -584,7 +623,7 @@ export default function PartnersPage() {
                 <span>ASTU Industry Linkage &amp; Corporate Alliances</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-3">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-3 leading-tight">
                 {pageConfig.heroTitle || 'Our Partners & Industry Collaborators'}
               </h1>
 
@@ -644,7 +683,7 @@ export default function PartnersPage() {
         >
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-blue-500/30 transition-colors">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-blue-500/40 transition-all hover:shadow-xs">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {partners.length}
@@ -657,7 +696,7 @@ export default function PartnersPage() {
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Enterprise &amp; Public Allies</div>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-emerald-500/30 transition-colors">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-emerald-500/40 transition-all hover:shadow-xs">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {distinctSectorsCount}
@@ -670,7 +709,7 @@ export default function PartnersPage() {
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Telecom, AI, Energy, Aviation</div>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-amber-500/30 transition-colors">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-amber-500/40 transition-all hover:shadow-xs">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {partners.filter((p) => p.featured || p.partnershipType === 'Strategic').length}
@@ -683,7 +722,7 @@ export default function PartnersPage() {
                 <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Formal University Agreements</div>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-sky-500/30 transition-colors">
+              <div className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-sky-500/40 transition-all hover:shadow-xs">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {metrics.registeredAlumniFormatted && metrics.registeredAlumniFormatted !== '—'
@@ -741,7 +780,7 @@ export default function PartnersPage() {
                     type="button"
                     onClick={() => setPartnerSearch('')}
                     className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 cursor-pointer"
-                    title="Clear search"
+                    title="Clear search (Esc)"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -754,22 +793,30 @@ export default function PartnersPage() {
             </div>
           </div>
 
-          {/* Quick topic tags */}
+          {/* Quick topic tags with active toggle */}
           <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-1 text-xs text-slate-500 dark:text-slate-400 no-scrollbar">
             <span className="font-medium shrink-0 flex items-center gap-1">
               <Tag className="w-3 h-3 text-blue-500" />
               <span>Topics:</span>
             </span>
-            {POPULAR_SEARCH_TOPICS.map((topic) => (
-              <button
-                key={topic}
-                type="button"
-                onClick={() => setPartnerSearch(topic)}
-                className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 font-medium transition-colors shrink-0 cursor-pointer"
-              >
-                #{topic}
-              </button>
-            ))}
+            {POPULAR_SEARCH_TOPICS.map((topic) => {
+              const isActive = partnerSearch.toLowerCase() === topic.toLowerCase();
+              return (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => handleTopicClick(topic)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer flex items-center gap-1 ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400'
+                  }`}
+                >
+                  <span>#{topic}</span>
+                  {isActive && <X className="w-3 h-3 ml-0.5" />}
+                </button>
+              );
+            })}
           </div>
 
           {/* Dynamic Category Filter Pills */}
@@ -941,12 +988,14 @@ export default function PartnersPage() {
           </div>
         </section>
 
-        {/* ── 4. Featured Partners (Supported Records Only) ── */}
+        {/* ── 4. Featured Partners (Supported Records Only with Auto-Advance) ── */}
         {featuredPartners.length > 0 && !debouncedSearch && typeFilter === 'All' && (
           <section
             id="featured-partners"
             className="pb-8 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
             aria-label="Featured Strategic Partners"
+            onMouseEnter={() => setIsFeaturedPaused(true)}
+            onMouseLeave={() => setIsFeaturedPaused(false)}
           >
             <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900/40 to-blue-950/40 border border-blue-900/30">
               <div className="flex items-center justify-between mb-3.5">
@@ -960,23 +1009,45 @@ export default function PartnersPage() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={handlePrevFeatured}
-                    aria-label="Previous featured partners"
-                    className="p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNextFeatured}
-                    aria-label="Next featured partners"
-                    className="p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+                <div className="flex items-center gap-2">
+                  {/* Slide Indicator Dots */}
+                  {totalFeaturedSlides > 1 && (
+                    <div className="hidden sm:flex items-center gap-1.5 mr-2">
+                      {Array.from({ length: totalFeaturedSlides }).map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setFeaturedSlideIndex(idx)}
+                          className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                            featuredSlideIndex === idx
+                              ? 'w-5 bg-blue-500'
+                              : 'w-1.5 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400'
+                          }`}
+                          title={`Go to slide ${idx + 1}`}
+                          aria-label={`Slide ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={handlePrevFeatured}
+                      aria-label="Previous featured partners"
+                      className="p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextFeatured}
+                      aria-label="Next featured partners"
+                      className="p-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -1052,28 +1123,57 @@ export default function PartnersPage() {
             </div>
           )}
 
-          {/* Zero State / Empty State */}
+          {/* Zero State / Empty State with Interactive Suggestions */}
           {!isLoading && sortedPartners.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-12 text-center bg-white dark:bg-slate-900 my-4">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 mb-3">
+            <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 p-8 sm:p-12 text-center bg-white dark:bg-slate-900 my-4 shadow-xs">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 mb-3 shadow-xs">
                 <Search className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
-                No Matching Partner Records
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1">
+                No Matching Partner Records Found
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-5 leading-relaxed">
-                We couldn't find any partner records matching{' '}
-                <strong className="text-slate-700 dark:text-slate-300">"{debouncedSearch}"</strong> in category{' '}
-                <strong className="text-slate-700 dark:text-slate-300">"{typeFilter}"</strong>. Try refining your keywords or resetting filters.
+                {debouncedSearch ? (
+                  <>
+                    We couldn't find any partners matching{' '}
+                    <strong className="text-slate-800 dark:text-slate-200">"{debouncedSearch}"</strong>
+                    {typeFilter !== 'All' ? ` in category "${typeFilter}"` : ''}. Try another keyword or explore suggested topics below.
+                  </>
+                ) : (
+                  <>No partners found for the selected category <strong className="text-slate-800 dark:text-slate-200">"{typeFilter}"</strong>.</>
+                )}
               </p>
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Reset Search &amp; Filters</span>
-              </button>
+
+              {/* Clickable suggested searches */}
+              <div className="flex flex-col items-center justify-center gap-2 mb-6">
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Suggested searches:</span>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {['Telecom', 'Aviation', 'Cybersecurity', 'Huawei', 'Banking', 'Energy'].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => {
+                        setPartnerSearch(suggestion);
+                        setTypeFilter('All');
+                      }}
+                      className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                    >
+                      #{suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Reset All Filters</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -1083,22 +1183,33 @@ export default function PartnersPage() {
               {pagedPartners.map((partner) => (
                 <div
                   key={partner.id}
-                  className="group flex flex-col justify-between p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-lg hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-0.5 transition-all duration-300 relative"
+                  className="group flex flex-col justify-between p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-500 hover:-translate-y-0.5 transition-all duration-300 relative"
                 >
-                  {/* Featured Indicator */}
-                  {partner.featured && (
-                    <span className="absolute top-4 right-4 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                      <span>Featured</span>
-                    </span>
-                  )}
+                  {/* Top Badges */}
+                  <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                    {partner.featured && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                        <span>Featured</span>
+                      </span>
+                    )}
+                  </div>
 
                   <div>
-                    {/* Standardized Logo Container */}
-                    <div className="flex h-14 items-center justify-start mb-3.5 pr-14">
-                      <div className="p-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 shadow-xs">
-                        {renderLogo(partner, 'h-11 w-11 sm:h-12 sm:w-12')}
+                    {/* Standardized Logo Container with Status Pulse */}
+                    <div className="flex items-center justify-between mb-3.5 pr-14">
+                      <div className="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 shadow-xs">
+                        {renderLogo(partner, 'h-10 w-10 sm:h-11 sm:w-11')}
                       </div>
+                      
+                      {/* Active Status Pulse Indicator */}
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/60">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                        </span>
+                        <span>Active Partner</span>
+                      </span>
                     </div>
 
                     {/* Organization Name & Sector */}
@@ -1114,6 +1225,12 @@ export default function PartnersPage() {
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${getBadgeStyle(partner.partnershipType)}`}>
                         {partner.partnershipType || 'Enterprise'}
                       </span>
+                      {partner.mouYear && (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md">
+                          <Calendar className="w-2.5 h-2.5 text-blue-500" />
+                          <span>Est. {partner.mouYear}</span>
+                        </span>
+                      )}
                       {partner.openings && (
                         <span className="text-[10px] font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md truncate max-w-[180px]">
                           {partner.openings}
@@ -1127,16 +1244,22 @@ export default function PartnersPage() {
                         `${partner.name} collaborates with ASTU through accredited graduate hiring pipelines and curriculum competency reviews.`}
                     </p>
 
-                    {/* Tags preview */}
+                    {/* Interactive Tags preview (clicking sets search) */}
                     {Array.isArray(partner.tags) && partner.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2.5">
                         {partner.tags.slice(0, 3).map((t, idx) => (
-                          <span
+                          <button
                             key={idx}
-                            className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTopicClick(t);
+                            }}
+                            className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-300 transition-colors cursor-pointer"
+                            title={`Filter by ${t}`}
                           >
-                            {t}
-                          </span>
+                            #{t}
+                          </button>
                         ))}
                       </div>
                     )}
@@ -1194,7 +1317,7 @@ export default function PartnersPage() {
                           title: `${partner.name} — ASTU Industry Partner`,
                           subtitle: partner.industry || 'Corporate Partner',
                           text: `${partner.name} is an official partner organization of ASTU (${partner.partnershipType}). Explore graduate recruitment and collaborative innovation pipelines.`,
-                          url: `/partners?partner=${encodeURIComponent(partner.id)}`,
+                          url: `/partners?partner=${encodeURIComponent(partner.id || partner.name)}`,
                           badge: 'ASTU Partner',
                           type: 'page',
                         });
@@ -1238,7 +1361,7 @@ export default function PartnersPage() {
                               {renderLogo(partner, 'h-6 w-6')}
                             </div>
                             <div>
-                              <div className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-1">
+                              <div className="font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-1.5">
                                 <span>{partner.name}</span>
                                 {partner.featured && (
                                   <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400 shrink-0" />
@@ -1289,6 +1412,37 @@ export default function PartnersPage() {
                                 <ExternalLink className="w-3.5 h-3.5" />
                               </a>
                             )}
+                            <button
+                              type="button"
+                              onClick={() => handleCopyPartnerLink(partner)}
+                              className="p-1 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                              title={copiedId === partner.id ? 'Copied!' : 'Copy direct link'}
+                            >
+                              {copiedId === partner.id ? (
+                                <Check className="w-3.5 h-3.5 text-emerald-500" />
+                              ) : (
+                                <Copy className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShareItem({
+                                  id: partner.id,
+                                  title: `${partner.name} — ASTU Industry Partner`,
+                                  subtitle: partner.industry || 'Corporate Partner',
+                                  text: `${partner.name} is an official partner organization of ASTU (${partner.partnershipType}). Explore graduate recruitment and collaborative innovation pipelines.`,
+                                  url: `/partners?partner=${encodeURIComponent(partner.id || partner.name)}`,
+                                  badge: 'ASTU Partner',
+                                  type: 'page',
+                                });
+                                setIsShareOpen(true);
+                              }}
+                              className="p-1 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                              title={`Share ${partner.name}`}
+                            >
+                              <Share2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1323,6 +1477,21 @@ export default function PartnersPage() {
           onRegisterInterest={(company) => {
             setSelectedCompanyModal(null);
             navigate(`/employers/register?partner=${encodeURIComponent(company.name)}`);
+          }}
+          onSelectTag={(tag) => {
+            handleTopicClick(tag);
+          }}
+          onShare={(company) => {
+            setShareItem({
+              id: company.id,
+              title: `${company.name} — ASTU Industry Partner`,
+              subtitle: company.industry || 'Corporate Partner',
+              text: `${company.name} is an official partner organization of ASTU (${company.partnershipType}). Explore graduate recruitment and collaborative innovation pipelines.`,
+              url: `/partners?partner=${encodeURIComponent(company.id || company.name)}`,
+              badge: 'ASTU Partner',
+              type: 'page',
+            });
+            setIsShareOpen(true);
           }}
         />
       )}
