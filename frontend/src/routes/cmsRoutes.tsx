@@ -27,6 +27,7 @@ const SurveyManagement = lazy(() => import('../features/admin/pages/SurveyManage
 const ReportsCenter = lazy(() => import('../features/admin/pages/ReportsCenter'));
 const AnalyticsOverview = lazy(() => import('../features/admin/pages/AnalyticsOverview'));
 const UserManagement = lazy(() => import('../features/admin/pages/UserManagement'));
+const AdminProfile = lazy(() => import('../features/admin/pages/AdminProfile'));
 
 export default function CmsRoutes() {
   return (
@@ -67,6 +68,7 @@ export default function CmsRoutes() {
         <Route path="templates" element={<ContentTemplates />} />
         <Route path="messages" element={<CmsChatPage />} />
         <Route path="notifications" element={<NotificationCenter />} />
+        <Route path="profile" element={<AdminProfile />} />
         <Route path="settings" element={<CmsSettings />} />
       </Route>
     </Routes>

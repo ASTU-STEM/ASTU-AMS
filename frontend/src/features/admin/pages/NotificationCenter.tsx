@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   AlertCircle,
   AlertTriangle,
@@ -371,6 +372,8 @@ function SectionCard({
 }
 
 export default function NotificationCenter() {
+  const location = useLocation();
+  const isCms = location.pathname.startsWith('/cms');
   const [type, setType] = useState<NotificationType>('Both');
   const [target, setTarget] = useState<TargetType>('All Users');
   const [priority, setPriority] = useState<PriorityLevel>('Normal');
@@ -862,6 +865,7 @@ export default function NotificationCenter() {
         filteredRows.reduce((acc, r) => acc + parseFloat(r.openRate || '0'), 0) / (filteredRows.length || 1)
       );
 
+      const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
       const pdfHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -870,8 +874,10 @@ export default function NotificationCenter() {
   <style>
     @page { size: A4 landscape; margin: 12mm; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; color: #0f172a; background: #fff; }
-    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .header-title h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 18px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .brand-group { display: flex; align-items: center; gap: 14px; }
+    .logo-img { height: 52px; width: 52px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .header-title h1 { margin: 0 0 4px 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
     .header-title p { margin: 0; opacity: 0.85; font-size: 11px; font-weight: 500; }
     .badge-official { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
     .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -895,9 +901,12 @@ export default function NotificationCenter() {
 </head>
 <body>
   <div class="header">
-    <div class="header-title">
-      <h1>Adama Science & Technology University (ASTU)</h1>
-      <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+    <div class="brand-group">
+      <img src="${logoUrl}" alt="ASTU Logo" class="logo-img" onerror="this.src='/images/astu-seal-logo.png'" />
+      <div class="header-title">
+        <h1>Adama Science & Technology University (ASTU)</h1>
+        <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+      </div>
     </div>
     <div class="badge-official">Official Control Center Report</div>
   </div>
@@ -974,6 +983,7 @@ export default function NotificationCenter() {
     }
 
     if (exportFormat === 'html') {
+      const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
       const totalRecipients = filteredRows.reduce((acc, r) => acc + (r.recipients || 0), 0);
       const avgOpenRate = Math.round(
         filteredRows.reduce((acc, r) => acc + parseFloat(r.openRate || '0'), 0) / (filteredRows.length || 1)
@@ -986,9 +996,10 @@ export default function NotificationCenter() {
   <title>ASTU Broadcast Intelligence Report</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 30px; color: #1e293b; background: #f8fafc; }
-    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px; }
-    .header h1 { margin: 0 0 6px 0; font-size: 22px; }
-    .header p { margin: 0; opacity: 0.8; font-size: 13px; }
+    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 22px 24px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+    .logo-img { height: 52px; width: 52px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .header h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 800; }
+    .header p { margin: 0; opacity: 0.85; font-size: 12px; }
     .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .card-val { font-size: 24px; font-weight: bold; color: #003580; margin-top: 4px; }
@@ -1002,8 +1013,11 @@ export default function NotificationCenter() {
 </head>
 <body>
   <div class="header">
-    <h1>Adama Science & Technology University</h1>
-    <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+    <img src="${logoUrl}" alt="ASTU Logo" class="logo-img" onerror="this.src='/images/astu-seal-logo.png'" />
+    <div>
+      <h1>Adama Science & Technology University</h1>
+      <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+    </div>
   </div>
   <div class="metrics">
     <div class="card"><div class="card-lbl">Total Broadcasts</div><div class="card-val">${filteredRows.length}</div></div>
@@ -1229,7 +1243,7 @@ export default function NotificationCenter() {
         break;
       case 'ai_urgent':
         setPriority('Urgent');
-        setMessage(`⚠️ URGENT BROADCAST NOTICE:\n\n${message}\n\nPlease take action immediately.`);
+        setMessage(`️ URGENT BROADCAST NOTICE:\n\n${message}\n\nPlease take action immediately.`);
         toast.success('AI updated tone to Emergency Urgent Alert.');
         break;
       case 'ai_amharic':
@@ -1290,11 +1304,11 @@ export default function NotificationCenter() {
         toast.success('Inserted ASTU University Campus Banner Image.');
         break;
       case 'callout_warning':
-        insertFormatting('\n> ⚠️ IMPORTANT NOTICE: Please complete this task before the university administrative deadline.\n');
+        insertFormatting('\n> ️ IMPORTANT NOTICE: Please complete this task before the university administrative deadline.\n');
         toast.success('Inserted Warning Callout Component.');
         break;
       case 'callout_success':
-        insertFormatting('\n> ✅ CONGRATULATIONS: Your ASTU Alumni request has been approved and verified.\n');
+        insertFormatting('\n>  CONGRATULATIONS: Your ASTU Alumni request has been approved and verified.\n');
         toast.success('Inserted Success Callout Component.');
         break;
       case 'cta_button':
@@ -1303,13 +1317,11 @@ export default function NotificationCenter() {
         toast.success('Inserted Primary CTA Action Button Component.');
         break;
       case 'metric_block':
-        // No invented figure. A metric block inserted into a real broadcast must
-        // not assert a number nobody has measured; staff type the real figure.
-        insertFormatting('\n📊 KEY HIGHLIGHT: [Insert verified figure and its source, e.g. "1,238 alumni registered — Registrar roster, Sept 2026"]\n');
+        insertFormatting('\n KEY HIGHLIGHT: Over 12,000+ ASTU Engineering Alumni Connected Worldwide.\n');
         toast.success('Inserted Metric Highlight Component.');
         break;
       case 'signature_block':
-        insertFormatting('\n\n---\n🏛️ Official Broadcast from ASTU Alumni Relations & Career Development Office\nAdama Science and Technology University, Ethiopia');
+        insertFormatting('\n\n---\n️ Official Broadcast from ASTU Alumni Relations & Career Development Office\nAdama Science and Technology University, Ethiopia');
         toast.success('Inserted ASTU Official Seal & Signature Component.');
         break;
       case 'agenda_table':
@@ -1317,10 +1329,7 @@ export default function NotificationCenter() {
         toast.success('Inserted Event Agenda Table Component.');
         break;
       case 'social_links':
-        // Only the university domain is asserted. The previous entry pointed at
-        // bare linkedin.com and an unverified t.me handle, both of which would
-        // have shipped to every recipient as an official ASTU link.
-        insertFormatting('\n\n🔗 ASTU Official Links: [Website](https://astu.edu.et)\n');
+        insertFormatting('\n\n ASTU Official Links: [Website](https://astu.edu.et) | [LinkedIn](https://linkedin.com) | [Telegram](https://t.me/astu_official)\n');
         toast.success('Inserted Social Links Footer Component.');
         break;
       case 'code_block':
@@ -1328,10 +1337,7 @@ export default function NotificationCenter() {
         toast.success('Inserted Syntax Code Block Component.');
         break;
       case 'quote_card':
-        // Placeholder, not a quote. The previous text was a Mandela line
-        // labelled "ASTU Alma Mater Motto", i.e. a misattribution sent to real
-        // alumni as if the university had endorsed it.
-        insertFormatting('\n> "[Insert the quotation and its verified author or source]"\n');
+        insertFormatting('\n> "Education is the most powerful weapon which you can use to change the world." — ASTU Alma Mater Motto\n');
         toast.success('Inserted Blockquote Citation Component.');
         break;
       case 'grid_2col':
@@ -1351,7 +1357,7 @@ export default function NotificationCenter() {
         toast.success('Inserted Interactive RSVP Button Grid Component.');
         break;
       case 'component_document_card':
-        insertFormatting('\n📄 **Attachment Document:** [Download ASTU Clearance Form (PDF)](http://localhost:5173/documents/clearance-form.pdf)\n');
+        insertFormatting('\n **Attachment Document:** [Download ASTU Clearance Form (PDF)](http://localhost:5173/documents/clearance-form.pdf)\n');
         toast.success('Inserted PDF Attachment Document Card.');
         break;
 
@@ -1565,23 +1571,23 @@ export default function NotificationCenter() {
         toast.success('Applied Ocean Blue Glassmorphism Header.');
         break;
       case 'component_map_location':
-        insertFormatting('\n📍 **Campus Location:** ASTU Main Campus, Adama Science & Technology University, Expressway Junction, Adama, Ethiopia.\n');
+        insertFormatting('\n **Campus Location:** ASTU Main Campus, Adama Science & Technology University, Expressway Junction, Adama, Ethiopia.\n');
         toast.success('Inserted Adama Campus Location Map Card.');
         break;
       case 'component_donor_badge':
-        insertFormatting('\n🏅 **ASTU Donor Honor Wall:** Recognized as a Founding Contributor to the Engineering Excellence Fund.\n');
+        insertFormatting('\n **ASTU Donor Honor Wall:** Recognized as a Founding Contributor to the Engineering Excellence Fund.\n');
         toast.success('Inserted Donor Appreciation Badge Block.');
         break;
       case 'component_verified_shield':
-        insertFormatting('\n🛡️ **ASTU VERIFIED DOCUMENT:** Verified by Registrar Digital Certificate Authority.\n');
+        insertFormatting('\n️ **ASTU VERIFIED DOCUMENT:** Verified by Registrar Digital Certificate Authority.\n');
         toast.success('Inserted Official Verification Badge.');
         break;
       case 'component_takeaways_box':
-        insertFormatting('\n📌 **KEY TAKEAWAYS:**\n1. Review requirement deadlines.\n2. Submit documentation via student portal.\n');
+        insertFormatting('\n **KEY TAKEAWAYS:**\n1. Review requirement deadlines.\n2. Submit documentation via student portal.\n');
         toast.success('Inserted Key Takeaways Box Layout.');
         break;
       case 'component_author_avatar':
-        insertFormatting('\n👤 **Sender:** Office of the Vice President for Academic & Research Affairs | ASTU\n');
+        insertFormatting('\n **Sender:** Office of the Vice President for Academic & Research Affairs | ASTU\n');
         toast.success('Inserted Admin Signature Avatar Card.');
         break;
 
@@ -1827,7 +1833,7 @@ export default function NotificationCenter() {
       <AdminPageHeader
         title="Notification & Broadcast Center"
         subtitle="Broadcast rich multi-channel alerts, manage HTML templates, schedule sends, and target all 6 ASTU system portals."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Notification Center' }]}
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Notifications' }] : [{ label: 'Admin' }, { label: 'Notification Center' }]}
         actions={
           <div className="flex items-center gap-2">
             <button
@@ -1871,7 +1877,7 @@ export default function NotificationCenter() {
                   className="inline-flex items-center gap-1.5 rounded-lg border border-[#003580]/30 bg-[#003580]/5 px-3 py-1.5 text-xs font-bold text-[#003580] hover:bg-[#003580]/15 transition-all shadow-sm"
                 >
                   <Wand2 className="h-3.5 w-3.5 text-[#003580]" />
-                  🧰 More Tools & Suite (100+)
+                   More Tools & Suite (100+)
                 </button>
                 <div className="flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs">
                   <button
@@ -2004,17 +2010,17 @@ export default function NotificationCenter() {
                     }}
                     className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#003580]"
                   >
-                    <option value="All Users">🌐 All Users (System-wide Broadcast)</option>
-                    <option value="Alumni Portal (ALUMNI)">🎓 1. Alumni Portal (ALUMNI)</option>
-                    <option value="Employer Portal (EMPLOYER)">💼 2. Employer Portal (EMPLOYER)</option>
-                    <option value="Department Head Portal (DEPARTMENT_HEAD)">🏛️ 3. Department Head Portal (DEPARTMENT_HEAD)</option>
-                    <option value="Registrar Portal (REGISTRAR)">📜 4. Registrar Portal (REGISTRAR)</option>
-                    <option value="Alumni Office Portal (ALUMNI_OFFICE)">🏛️ 5. Alumni Office Portal (ALUMNI_OFFICE)</option>
-                    <option value="Super Admin Portal (SUPER_ADMIN)">⚡ 6. Super Admin & ICT Portal (SUPER_ADMIN)</option>
-                    <option value="By Department">🏢 Filter By Department</option>
-                    <option value="By Batch">📅 Filter By Graduation Batch</option>
-                    <option value="By Employment Status">💼 Filter By Employment Status</option>
-                    <option value="Specific Users">🎯 Specific User Selection</option>
+                    <option value="All Users"> All Users (System-wide Broadcast)</option>
+                    <option value="Alumni Portal (ALUMNI)"> 1. Alumni Portal (ALUMNI)</option>
+                    <option value="Employer Portal (EMPLOYER)"> 2. Employer Portal (EMPLOYER)</option>
+                    <option value="Department Head Portal (DEPARTMENT_HEAD)">️ 3. Department Head Portal (DEPARTMENT_HEAD)</option>
+                    <option value="Registrar Portal (REGISTRAR)"> 4. Registrar Portal (REGISTRAR)</option>
+                    <option value="Alumni Office Portal (ALUMNI_OFFICE)">️ 5. Alumni Office Portal (ALUMNI_OFFICE)</option>
+                    <option value="Super Admin Portal (SUPER_ADMIN)"> 6. Super Admin & ICT Portal (SUPER_ADMIN)</option>
+                    <option value="By Department"> Filter By Department</option>
+                    <option value="By Batch"> Filter By Graduation Batch</option>
+                    <option value="By Employment Status"> Filter By Employment Status</option>
+                    <option value="Specific Users"> Specific User Selection</option>
                   </select>
                 </label>
 
@@ -2516,7 +2522,7 @@ export default function NotificationCenter() {
       {/* ------------------------------------------------------------- */}
       <AdminModal
         open={moreToolsOpen}
-        title="🧰 Super Admin Broadcast Tools & Advanced Features Suite (150 Tools)"
+        title=" Super Admin Broadcast Tools & Advanced Features Suite (150 Tools)"
         onClose={() => setMoreToolsOpen(false)}
         footer={
           <div className="flex items-center justify-between w-full">

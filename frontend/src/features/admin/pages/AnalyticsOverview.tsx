@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import {
   Area,
@@ -1390,6 +1391,8 @@ function PrintDashboardModal({
 }
 
 export default function AnalyticsOverview() {
+  const location = useLocation();
+  const isCms = location.pathname.startsWith('/cms');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [printModalOpen, setPrintModalOpen] = useState(false);
@@ -1981,7 +1984,7 @@ export default function AnalyticsOverview() {
       <AdminPageHeader
         title="Analytics Overview"
         subtitle="System-wide intelligence center for alumni outcomes, skills, and employer feedback."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Analytics Overview' }]}
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Analytics & Insights' }] : [{ label: 'Admin' }, { label: 'Analytics Overview' }]}
         actions={<AdminBadge variant="success">Insights Live</AdminBadge>}
       />
 

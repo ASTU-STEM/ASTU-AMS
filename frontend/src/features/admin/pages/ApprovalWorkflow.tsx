@@ -18,7 +18,6 @@ import {
   X,
   Search,
   Plus,
-  RotateCcw,
   FileText,
   Check,
   ArrowRight,
@@ -163,7 +162,7 @@ export default function ApprovalWorkflow() {
       setItems(approvalService.getItems());
       setChangeRequestReason('');
       setChangeRequestModalOpen(false);
-      toast.success('Changes requested and author notified.');
+      toast.success('Changes requested. Status updated in the review queue.');
     }
   };
 
@@ -172,7 +171,7 @@ export default function ApprovalWorkflow() {
     const updated = approvalService.publishItem(selected.id, 'Alumni Relations Officer');
     if (updated) {
       setItems(approvalService.getItems());
-      toast.success(`"${selected.title}" approved & published to all actor dashboard hero portals!`);
+      toast.success(`"${selected.title}" marked published in the approval queue.`);
     }
   };
 
@@ -234,22 +233,13 @@ export default function ApprovalWorkflow() {
     }
   };
 
-  const handleResetDefaults = () => {
-    if (window.confirm('Reset approval queue to default university demo items?')) {
-      const reset = approvalService.resetDefaults();
-      setItems(reset);
-      setSelectedId(reset[0]?.id || '');
-      toast.success('Approval queue reset to default items.');
-    }
-  };
-
   return (
     <div className="space-y-5">
       {/* ── HEADER ── */}
       <AdminPageHeader
         title="Approval Workflow & Editorial Governance"
         subtitle="Multi-stage review pipeline for university announcements, events, policies, and public homepage updates before live publication."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Approvals' }]}
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'Approvals' }]}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <AdminBadge variant="warning">{counts['Pending Review'] ?? 0} Awaiting Review</AdminBadge>
@@ -268,14 +258,6 @@ export default function ApprovalWorkflow() {
             >
               <Plus className="h-4 w-4" />
               <span>Submit for Review</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleResetDefaults}
-              className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
-              title="Reset queue to demo items"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
             </button>
           </div>
         }
@@ -379,10 +361,29 @@ export default function ApprovalWorkflow() {
         {/* Left: Queue List */}
         <div className="space-y-3">
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-xs dark:border-slate-800 dark:bg-slate-900">
               <ShieldCheck className="mx-auto h-10 w-10 text-slate-300 mb-2" />
-              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">No review submissions found</h3>
-              <p className="text-xs text-slate-400 mt-1">There are no items matching your current filters in the pipeline.</p>
+              {items.length === 0 ? (
+                <>
+                  <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">Approval queue is empty</h3>
+                  <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                    Submissions from content managers and the registrar will appear here for multi-stage review before publication.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSubmitModalOpen(true)}
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-[#003366] text-white px-3.5 py-2 text-xs font-bold hover:bg-[#002244] shadow-sm cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Submit for Review
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">No matching submissions</h3>
+                  <p className="text-xs text-slate-400 mt-1">Try clearing search or adjusting status, type, or priority filters.</p>
+                </>
+              )}
             </div>
           ) : (
             filtered.map((item) => (
@@ -617,7 +618,17 @@ export default function ApprovalWorkflow() {
               </div>
             </div>
           ) : (
-            <div className="py-12 text-center text-sm text-slate-400">Select an item from the queue to review.</div>
+            <div className="py-12 text-center px-4">
+              <FileText className="mx-auto h-9 w-9 text-slate-300 mb-2" />
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                {items.length === 0 ? 'Nothing to review yet' : 'Select a submission'}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                {items.length === 0
+                  ? 'When content enters the pipeline, details and actions will appear here.'
+                  : 'Choose an item from the queue to inspect stages, comments, and approve or reject.'}
+              </p>
+            </div>
           )}
         </aside>
       </div>

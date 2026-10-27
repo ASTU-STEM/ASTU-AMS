@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation } from 'react-router-dom';
 import {
   BarChart3,
   BriefcaseBusiness,
@@ -40,13 +41,6 @@ import {
   TrendingDown,
   Layers,
   Cpu,
-  ChartSpline,
-  Plane,
-  School,
-  ScrollText,
-  Fingerprint,
-  IdCard,
-  Server,
   Compass,
   MessageSquare,
   Gift,
@@ -91,7 +85,7 @@ const reports: ReportItem[] = [
   // 2. Tracer Studies Domain (9 Reports)
   { title: 'Geographic Distribution Reports', area: 'Tracer Studies', cadence: 'Monthly', owner: 'Registrar', icon: MapPinned },
   { title: 'Tracer Study Reports', area: 'Tracer Studies', cadence: 'Wave Based', owner: 'Registrar', icon: FileSpreadsheet },
-  { title: 'Graduate Migration & Brain Drain Reports', area: 'Tracer Studies', cadence: 'Annual', owner: 'International Relations', icon: Plane },
+  { title: 'Graduate Migration & Brain Drain Reports', area: 'Tracer Studies', cadence: 'Annual', owner: 'International Relations', icon: Globe2 },
   { title: 'Gender & Equity Outcome Reports', area: 'Tracer Studies', cadence: 'Biannual', owner: 'Gender & Diversity Office', icon: Scale },
   { title: 'Tracer Survey Response & Completion Audit Reports', area: 'Tracer Studies', cadence: 'Per Wave', owner: 'Registrar', icon: FileCheck },
   { title: 'Postgraduate & Academic Progression Reports', area: 'Tracer Studies', cadence: 'Annual', owner: 'Postgraduate Directorate', icon: GradCap },
@@ -128,36 +122,39 @@ const reports: ReportItem[] = [
   { title: 'Campus Reunion & Networking Event Participation Reports', area: 'Events', cadence: 'Annual', owner: 'Alumni Directorate', icon: PartyPopper },
 
   // 6. Accreditation & Quality Domain (6 Reports)
-  { title: 'ABET Outcome & Accreditation Compliance Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Quality Assurance', icon: ScrollText },
+  { title: 'ABET Outcome & Accreditation Compliance Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Quality Assurance', icon: BadgeCheck },
   { title: 'HERQA Institutional Standard Audit Reports', area: 'Accreditation & Quality', cadence: 'Biannual', owner: 'Institutional Audit', icon: ShieldCheck },
   { title: 'Curriculum Relevancy & Course Evaluation Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Curriculum Directorate', icon: FileCheck2 },
-  { title: 'CGPA & Academic Performance Outcome Correlation Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Registrar & Analytics', icon: ChartSpline },
-  { title: 'Faculty Performance & Alumni Rating Benchmark Reports', area: 'Accreditation & Quality', cadence: 'Biannual', owner: 'Academic Senate', icon: School },
+  { title: 'CGPA & Academic Performance Outcome Correlation Reports', area: 'Accreditation & Quality', cadence: 'Annual', owner: 'Registrar & Analytics', icon: BarChart3 },
+  { title: 'Faculty Performance & Alumni Rating Benchmark Reports', area: 'Accreditation & Quality', cadence: 'Biannual', owner: 'Academic Senate', icon: Award },
   { title: 'Institutional Quality Continuous Improvement Reports', area: 'Accreditation & Quality', cadence: 'Quarterly', owner: 'Quality Audit Committee', icon: LineChart },
 
   // 7. Governance & Security Domain (5 Reports)
   { title: 'System Audit Log & Security Compliance Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'ICT Security', icon: Lock },
-  { title: 'Admin Access Control & Role Permission Audit Reports', area: 'Governance & Security', cadence: 'Quarterly', owner: 'System Administrator', icon: Fingerprint },
-  { title: 'Data Privacy & Student Identity Verification Audit Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'Registrar & Legal', icon: IdCard },
-  { title: 'System Telemetry & API Performance Reports', area: 'Governance & Security', cadence: 'Weekly', owner: 'DevOps & Infrastructure', icon: Server },
+  { title: 'Admin Access Control & Role Permission Audit Reports', area: 'Governance & Security', cadence: 'Quarterly', owner: 'System Administrator', icon: ShieldCheck },
+  { title: 'Data Privacy & Student Identity Verification Audit Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'Registrar & Legal', icon: UserCheck },
+  { title: 'System Telemetry & API Performance Reports', area: 'Governance & Security', cadence: 'Weekly', owner: 'DevOps & Infrastructure', icon: Cpu },
   { title: 'Registrar Data Sync & Integrity Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'Registrar ICT', icon: RefreshCw },
 ];
 
 const areas: ReportArea[] = ['Employment', 'Tracer Studies', 'Industry', 'Engagement', 'Events', 'Accreditation & Quality', 'Governance & Security'];
 
+const UNAVAILABLE = 'Unavailable';
+
 export default function ReportsCenter() {
   const [area, setArea] = useState<ReportArea>('Employment');
   const [metricsLoading, setMetricsLoading] = useState(true);
+  const [metricsError, setMetricsError] = useState(false);
   const [metrics, setMetrics] = useState<{
     employmentRate: string;
     employerSatisfaction: string;
     mappedCountries: number | string;
-    exportedThisMonth: number;
+    exportedThisMonth: number | string;
   }>({
-    employmentRate: '...',
-    employerSatisfaction: '...',
-    mappedCountries: '...',
-    exportedThisMonth: 0,
+    employmentRate: '—',
+    employerSatisfaction: '—',
+    mappedCountries: '—',
+    exportedThisMonth: '—',
   });
 
   const [downloadingReportTitle, setDownloadingReportTitle] = useState<string | null>(null);
@@ -174,17 +171,35 @@ export default function ReportsCenter() {
   const filteredReports = useMemo(() => reports.filter((report) => report.area === area), [area]);
 
   const fetchMetrics = async () => {
+    setMetricsLoading(true);
+    setMetricsError(false);
     try {
       const res = await adminService.getReportsMetrics();
       if (res.ok && res.data) {
         setMetrics({
-          employmentRate: res.data.employmentRate,
-          employerSatisfaction: res.data.employerSatisfaction,
-          mappedCountries: res.data.mappedCountries,
-          exportedThisMonth: res.data.exportedThisMonth,
+          employmentRate: res.data.employmentRate ?? UNAVAILABLE,
+          employerSatisfaction: res.data.employerSatisfaction ?? UNAVAILABLE,
+          mappedCountries: res.data.mappedCountries ?? UNAVAILABLE,
+          exportedThisMonth: res.data.exportedThisMonth ?? UNAVAILABLE,
         });
+        setMetricsError(false);
+      } else {
+        setMetrics({
+          employmentRate: UNAVAILABLE,
+          employerSatisfaction: UNAVAILABLE,
+          mappedCountries: UNAVAILABLE,
+          exportedThisMonth: UNAVAILABLE,
+        });
+        setMetricsError(true);
       }
     } catch (_) {
+      setMetrics({
+        employmentRate: UNAVAILABLE,
+        employerSatisfaction: UNAVAILABLE,
+        mappedCountries: UNAVAILABLE,
+        exportedThisMonth: UNAVAILABLE,
+      });
+      setMetricsError(true);
     } finally {
       setMetricsLoading(false);
     }
@@ -313,21 +328,42 @@ export default function ReportsCenter() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Institutional Reports"
-        subtitle="Accreditation-ready exports for employment, top hiring companies, salary benchmarks, geographic mobility, tracer studies, industry demand, skill gaps, alumni engagement, events, and employer satisfaction."
+        subtitle="Generate and download accreditation-ready PDF exports across employment, tracer studies, industry, engagement, events, and quality domains."
         breadcrumbs={[{ label: 'Admin' }, { label: 'Reports' }]}
         actions={
           <div className="flex items-center gap-2">
             <button
               onClick={fetchMetrics}
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-xs"
+              disabled={metricsLoading}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-2 text-xs font-semibold text-white transition-colors disabled:opacity-60"
               title="Refresh Metrics"
             >
-              <RefreshCw className={`h-4 w-4 ${metricsLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-3.5 w-3.5 ${metricsLoading ? 'animate-spin' : ''}`} />
+              Refresh
             </button>
-            <AdminBadge variant="success">Export Center ({reports.length} Reports)</AdminBadge>
+            <AdminBadge variant="success">Export Center ({reports.length})</AdminBadge>
           </div>
         }
       />
+
+      {metricsError && !metricsLoading && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
+          <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-amber-900">Report metrics unavailable</p>
+            <p className="text-[11px] text-amber-700 mt-0.5">
+              Could not load live summary metrics. Catalog exports still work — retry refresh or check the API connection.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={fetchMetrics}
+            className="ml-auto shrink-0 text-[11px] font-bold text-amber-800 hover:underline"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* Metric Cards */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -338,13 +374,14 @@ export default function ReportsCenter() {
           { label: 'Exported This Month', value: metrics.exportedThisMonth, icon: Download, color: 'text-[#003580]' },
         ].map((metric) => {
           const Icon = metric.icon;
+          const isUnavailable = !metricsLoading && (metric.value === UNAVAILABLE || metricsError);
           return (
             <div key={metric.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:shadow-md">
               <div className="flex items-center justify-between">
                 <Icon className={`h-6 w-6 ${metric.color}`} />
               </div>
               <p className="mt-3 text-xs font-black uppercase tracking-wide text-slate-500">{metric.label}</p>
-              <p className="mt-1 text-2xl font-black text-slate-900 font-mono">
+              <p className={`mt-1 text-2xl font-black font-mono ${isUnavailable ? 'text-slate-400 text-lg' : 'text-slate-900'}`}>
                 {metricsLoading ? <RefreshCw className="h-5 w-5 animate-spin text-slate-400" /> : metric.value}
               </p>
             </div>

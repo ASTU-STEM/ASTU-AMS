@@ -1,28 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Image as ImageIcon,
   GalleryHorizontal,
-  FolderOpen,
-  Sparkles,
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import MediaLibrary from './MediaLibrary';
 import GalleryManagement from './GalleryManagement';
 
+type HubTab = 'media' | 'gallery';
+
 export default function MediaGalleryHub() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'gallery' ? 'gallery' : 'media';
-  const [activeTab, setActiveTab] = useState<'media' | 'gallery'>(initialTab);
+  const tabFromUrl: HubTab = searchParams.get('tab') === 'gallery' ? 'gallery' : 'media';
+  const [activeTab, setActiveTab] = useState<HubTab>(tabFromUrl);
 
-  const switchTab = (tab: 'media' | 'gallery') => {
+  useEffect(() => {
+    setActiveTab(tabFromUrl);
+  }, [tabFromUrl]);
+
+  const switchTab = (tab: HubTab) => {
     setActiveTab(tab);
-    setSearchParams(tab === 'gallery' ? { tab: 'gallery' } : {});
+    setSearchParams(tab === 'gallery' ? { tab: 'gallery' } : {}, { replace: true });
   };
 
   return (
     <div className="space-y-6">
-      {/* Unified Header & Switcher */}
       <AdminPageHeader
         title="Media & Gallery Hub"
         subtitle="Unified asset manager for uploaded files, documents, hero banners, and campus photo exhibitions."
@@ -59,7 +62,6 @@ export default function MediaGalleryHub() {
         </div>
       </AdminPageHeader>
 
-      {/* Render Active Component */}
       <div className="pt-2">
         {activeTab === 'media' ? (
           <MediaLibrary hideHeader={true} />

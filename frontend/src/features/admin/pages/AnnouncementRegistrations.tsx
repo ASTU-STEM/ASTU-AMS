@@ -310,14 +310,22 @@ export default function AnnouncementRegistrations() {
 
   const handleSendReminderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!reminderMessage.trim()) {
+      toast.error('Enter a reminder message before sending.');
+      return;
+    }
+    if (filteredRegistrations.length === 0) {
+      toast.error('No registrations in the current filter to remind.');
+      return;
+    }
     setSendingReminder(true);
+    // Reminder delivery API is not wired yet — keep roster actions honest.
     setTimeout(() => {
       setSendingReminder(false);
-      setBroadcastReminderOpen(false);
-      toast.success(
-        `Broadcast alert dispatched via ${reminderChannel.toUpperCase()} to ${filteredRegistrations.length} registered alumni!`
+      toast.error(
+        `Reminder delivery is not connected yet (${reminderChannel.toUpperCase()} → ${filteredRegistrations.length} alumni). Use Notifications to send a real broadcast.`
       );
-    }, 600);
+    }, 300);
   };
 
   const selectedNotice = contentItems.find((i) => i.id === selectedContentId);
@@ -512,7 +520,7 @@ export default function AnnouncementRegistrations() {
       <AdminPageHeader
         title="Alumni Registrations & Roster Manager"
         subtitle="Manage graduate campaign rosters, contact coordinates, accreditation verification, and customize the registration form."
-        breadcrumbs={[{ label: 'Alumni Directorate' }, { label: 'Registrations & Roster' }]}
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Registrations' }]}
         actions={
           <div className="flex items-center gap-2">
             <button

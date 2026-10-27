@@ -28,6 +28,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
 import CommunityMemberModal from '../components/CommunityMemberModal';
@@ -472,60 +473,50 @@ export default function CommunityManagement() {
 
   return (
     <div className="space-y-6">
-      {/* ── UNIFIED MODERN TOP HERO BANNER ── */}
-      <div className="rounded-3xl bg-gradient-to-r from-astu-navy via-[#003366] to-[#001f3f] p-6 text-white shadow-xl relative overflow-hidden">
-        {/* Glow backdrop */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
-          <div>
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-amber-400 bg-white/10 px-3 py-1 rounded-full border border-white/20">
-              COMMUNITY CMS DASHBOARD
-            </span>
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white mt-1.5 tracking-tight">
-              Community Management & Live Page Editor
-            </h1>
-            <p className="text-xs md:text-sm text-slate-200 mt-1 max-w-2xl leading-relaxed">
-              Customize text, stats, sections, regional hubs, and member roster with real-time live preview.
-            </p>
-          </div>
-
-          {/* Integrated Toolbar */}
-          <div className="flex flex-wrap items-center gap-2.5">
+      <AdminPageHeader
+        title="Community Management"
+        subtitle="Customize community page text, stats, regional hubs, and member roster with a live preview canvas."
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'Community' }]}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
             <button
+              type="button"
               onClick={() => setShowLivePreview(!showLivePreview)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 border transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold transition-all cursor-pointer ${
                 showLivePreview
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40 shadow-xs'
-                  : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                  ? 'border-emerald-300/50 bg-emerald-500/20 text-emerald-200'
+                  : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              {showLivePreview ? <Eye className="h-4 w-4 text-emerald-400" /> : <EyeOff className="h-4 w-4" />}
+              {showLivePreview ? <Eye className="h-4 w-4 text-emerald-300" /> : <EyeOff className="h-4 w-4" />}
               <span>{showLivePreview ? 'Live Preview On' : 'Show Canvas'}</span>
             </button>
 
             {showLivePreview && (
-              <div className="flex items-center gap-1 bg-white/10 p-1 rounded-2xl border border-white/20">
+              <div className="flex items-center gap-1 rounded-xl border border-white/20 bg-white/10 p-1">
                 <button
+                  type="button"
                   onClick={() => setDeviceView('desktop')}
-                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                    deviceView === 'desktop' ? 'bg-white text-[#003366] font-bold shadow-xs' : 'text-slate-200 hover:text-white'
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                    deviceView === 'desktop' ? 'bg-white text-[#003366] font-bold' : 'text-slate-200 hover:text-white'
                   }`}
                 >
                   <Laptop className="h-3.5 w-3.5" /> Desktop
                 </button>
                 <button
+                  type="button"
                   onClick={() => setDeviceView('tablet')}
-                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                    deviceView === 'tablet' ? 'bg-white text-[#003366] font-bold shadow-xs' : 'text-slate-200 hover:text-white'
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                    deviceView === 'tablet' ? 'bg-white text-[#003366] font-bold' : 'text-slate-200 hover:text-white'
                   }`}
                 >
                   <Tablet className="h-3.5 w-3.5" /> Tablet
                 </button>
                 <button
+                  type="button"
                   onClick={() => setDeviceView('mobile')}
-                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                    deviceView === 'mobile' ? 'bg-white text-[#003366] font-bold shadow-xs' : 'text-slate-200 hover:text-white'
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer ${
+                    deviceView === 'mobile' ? 'bg-white text-[#003366] font-bold' : 'text-slate-200 hover:text-white'
                   }`}
                 >
                   <Smartphone className="h-3.5 w-3.5" /> Mobile
@@ -534,14 +525,15 @@ export default function CommunityManagement() {
             )}
 
             <button
+              type="button"
               onClick={handleSaveAll}
-              className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#FFCC00] px-4 py-2 text-xs font-black text-[#003366] shadow-md hover:brightness-105 transition-all cursor-pointer"
             >
               <Save className="h-4 w-4" /> Save All Changes
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* ── MAIN SPLIT SCREEN WORKSPACE ── */}
       <div className="flex flex-col lg:flex-row items-start gap-6">

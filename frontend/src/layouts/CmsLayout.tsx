@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Plus, Search, Sun, User, UserCircle2, Sparkles, Command, Clock } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import CmsSidebar from './CmsSidebar';
 import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import { useTheme } from '../hooks/useTheme';
+import { sidebarContentMarginClass } from './sidebarShared';
+import { notificationService } from '../features/notifications/services/notification.service';
 
 class CmsRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -40,30 +42,60 @@ class CmsRouteBoundary extends React.Component<
 }
 
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
-  '/cms/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'CMS' }, { label: 'Dashboard' }] },
-  '/cms/messages': { title: 'ASTU_AMS Hub', breadcrumb: [{ label: 'CMS' }, { label: 'Messages' }] },
-  '/cms/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'CMS' }, { label: 'Homepage' }] },
-  '/cms/content': { title: 'All Content', breadcrumb: [{ label: 'CMS' }, { label: 'Content' }] },
-  '/cms/community': { title: 'News & Community', breadcrumb: [{ label: 'CMS' }, { label: 'Community' }] },
-  '/cms/gallery': { title: 'Gallery', breadcrumb: [{ label: 'CMS' }, { label: 'Gallery' }] },
-  '/cms/events': { title: 'Events & Workshops', breadcrumb: [{ label: 'CMS' }, { label: 'Events' }] },
-  '/cms/media': { title: 'Media Library', breadcrumb: [{ label: 'CMS' }, { label: 'Media' }] },
-  '/cms/seo': { title: 'SEO Management', breadcrumb: [{ label: 'CMS' }, { label: 'SEO' }] },
-  '/cms/templates': { title: 'Content Templates', breadcrumb: [{ label: 'CMS' }, { label: 'Templates' }] },
-  '/cms/approvals': { title: 'Approval Workflow', breadcrumb: [{ label: 'CMS' }, { label: 'Approvals' }] },
-  '/cms/settings': { title: 'CMS Settings', breadcrumb: [{ label: 'CMS' }, { label: 'Settings' }] },
-  '/cms/profile':  { title: 'My Profile',   breadcrumb: [{ label: 'CMS' }, { label: 'Profile' }] },
+  '/cms/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Dashboard' }] },
+  '/cms/alumni-directory': { title: 'Alumni Directory', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Alumni Directory' }] },
+  '/cms/users': { title: 'User Management', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Users' }] },
+  '/cms/surveys': { title: 'Tracer Studies & Surveys', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Tracer Surveys' }] },
+  '/cms/tracer-studies': { title: 'Tracer Studies & Surveys', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Tracer Surveys' }] },
+  '/cms/analytics': { title: 'Analytics & Insights', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Analytics' }] },
+  '/cms/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Reports' }] },
+  '/cms/registrations': { title: 'Registrations', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Registrations' }] },
+  '/cms/events': { title: 'Events & Workshops', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Events' }] },
+  '/cms/jobs': { title: 'Jobs & Placement Hub', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] },
+  '/cms/careers': { title: 'Jobs & Placement Hub', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] },
+  '/cms/donations': { title: 'Donations & Giving', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Donations & Giving' }] },
+  '/cms/messages': { title: 'Messages', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Messages' }] },
+  '/cms/notifications': { title: 'Notifications', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Notifications' }] },
+  '/cms/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'Content Management' }, { label: 'Homepage' }] },
+  '/cms/partners': { title: 'Partners & Employers', breadcrumb: [{ label: 'Content Management' }, { label: 'Partners & Employers' }] },
+  '/cms/employers': { title: 'Partners & Employers', breadcrumb: [{ label: 'Content Management' }, { label: 'Partners & Employers' }] },
+  '/cms/institutional-pages': { title: 'Institutional Pages Manager', breadcrumb: [{ label: 'Content Management' }, { label: 'Institutional Pages' }] },
+  '/cms/content': { title: 'Announcements', breadcrumb: [{ label: 'Content Management' }, { label: 'Announcements' }] },
+  '/cms/announcements': { title: 'Announcements', breadcrumb: [{ label: 'Content Management' }, { label: 'Announcements' }] },
+  '/cms/community': { title: 'Community', breadcrumb: [{ label: 'Content Management' }, { label: 'Community' }] },
+  '/cms/community-members': { title: 'Community Members', breadcrumb: [{ label: 'Content Management' }, { label: 'Community Members' }] },
+  '/cms/media-gallery': { title: 'Media & Gallery Hub', breadcrumb: [{ label: 'Content Management' }, { label: 'Media & Gallery' }] },
+  '/cms/gallery': { title: 'Campus Gallery', breadcrumb: [{ label: 'Content Management' }, { label: 'Media & Gallery' }] },
+  '/cms/media': { title: 'Media Library', breadcrumb: [{ label: 'Content Management' }, { label: 'Media & Gallery' }] },
+  '/cms/seo': { title: 'SEO Management', breadcrumb: [{ label: 'Content Management' }, { label: 'SEO' }] },
+  '/cms/approvals': { title: 'Approval Workflow', breadcrumb: [{ label: 'Content Management' }, { label: 'Approvals' }] },
+  '/cms/templates': { title: 'Content Templates', breadcrumb: [{ label: 'Content Management' }, { label: 'Templates' }] },
+  '/cms/settings': { title: 'Settings', breadcrumb: [{ label: 'Content Management' }, { label: 'Settings' }] },
+  '/cms/profile': { title: 'My Profile', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Profile' }] },
 };
 
 const searchSuggestions = [
-  { label: 'Edit homepage hero', path: '/cms/homepage' },
+  { label: 'Search verified alumni directory', path: '/cms/alumni-directory' },
+  { label: 'Schedule & monitor tracer surveys', path: '/cms/surveys' },
+  { label: 'View employment analytics & skill gaps', path: '/cms/analytics' },
+  { label: 'Generate ETA accreditation reports', path: '/cms/reports' },
+  { label: 'View registrations & roster', path: '/cms/registrations' },
+  { label: 'Moderate jobs & career listings', path: '/cms/jobs' },
+  { label: 'Fundraising campaigns & donors', path: '/cms/donations' },
+  { label: 'Manage homepage content', path: '/cms/homepage' },
+  { label: 'Create announcement', path: '/cms/content' },
+  { label: 'Manage events & workshops', path: '/cms/events' },
+  { label: 'Manage community content', path: '/cms/community' },
+  { label: 'Manage gallery images', path: '/cms/gallery' },
+  { label: 'Upload & browse media library', path: '/cms/media' },
+  { label: 'Manage SEO & metadata', path: '/cms/seo' },
   { label: 'Review pending approvals', path: '/cms/approvals' },
-  { label: 'Upload new media', path: '/cms/media' },
-  { label: 'Create new event', path: '/cms/events' },
-  { label: 'Manage gallery', path: '/cms/gallery' },
-  { label: 'Update SEO settings', path: '/cms/seo' },
-  { label: 'Manage templates', path: '/cms/templates' },
-  { label: 'Content settings', path: '/cms/settings' },
+  { label: 'Open messages hub', path: '/cms/messages' },
+  { label: 'Notification center', path: '/cms/notifications' },
+  { label: 'Community members roster', path: '/cms/community-members' },
+  { label: 'Partners & employers portal', path: '/cms/partners' },
+  { label: 'Content templates', path: '/cms/templates' },
+  { label: 'CMS settings', path: '/cms/settings' },
 ];
 
 function formatHeaderDate() {
@@ -85,11 +117,43 @@ export default function CmsLayout() {
   const searchRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const [headerTime, setHeaderTime] = useState(formatHeaderDate());
+  const [notifications, setNotifications] = useState<{ id: string; color: string; text: string; time: string }[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setHeaderTime(formatHeaderDate()), 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadNotifications = async () => {
+      setNotificationsLoading(true);
+      try {
+        const items = await notificationService.getMyNotifications();
+        if (cancelled) return;
+        const mapped = (Array.isArray(items) ? items : [])
+          .slice(0, 5)
+          .map((n: any, idx: number) => ({
+            id: String(n.id ?? n._id ?? idx),
+            color: n.read || n.isRead ? 'bg-slate-300' : 'bg-emerald-500',
+            text: n.title || n.message || n.body || 'Notification update',
+            time: n.createdAt
+              ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(n.createdAt))
+              : 'Recently',
+          }));
+        setNotifications(mapped);
+      } catch {
+        if (!cancelled) setNotifications([]);
+      } finally {
+        if (!cancelled) setNotificationsLoading(false);
+      }
+    };
+    loadNotifications();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
 
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed((prev) => {
@@ -150,8 +214,6 @@ export default function CmsLayout() {
     navigate('/login');
   };
 
-  const notifications: Array<{ color: string; text: string; time: string }> = [];
-
   const filteredSuggestions = searchQuery.trim()
     ? searchSuggestions.filter(s => s.label.toLowerCase().includes(searchQuery.toLowerCase()))
     : searchSuggestions;
@@ -192,7 +254,7 @@ export default function CmsLayout() {
 
   return (
     <>
-    <div className="admin-shell app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
+    <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
       {mobileSidebarOpen && (
         <button type="button" aria-label="Close navigation"
           onClick={() => setMobileSidebarOpen(false)}
@@ -203,11 +265,11 @@ export default function CmsLayout() {
         onLogout={handleLogout}
         isOpen={mobileSidebarOpen}
         onNavigate={() => setMobileSidebarOpen(false)}
-        collapsed={sidebarCollapsed}
+        collapsed={sidebarCollapsed && !mobileSidebarOpen}
         onToggleCollapse={toggleSidebarCollapse}
       />
 
-      <div className={`min-h-screen transition-[margin-left] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-72'}`}>
+      <div className={sidebarContentMarginClass(sidebarCollapsed)}>
         {/* Clean White Top Header */}
         <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6">
@@ -296,10 +358,8 @@ export default function CmsLayout() {
                 <button type="button" onClick={() => setNotificationOpen(v => !v)}
                   className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-page)] transition-all">
                   <Bell className="h-4.5 w-4.5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold leading-none text-white shadow-sm">
-                      {notifications.length}
-                    </span>
+                  {notifications.some((n) => n.color === 'bg-emerald-500') && (
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
                   )}
                 </button>
                 {notificationOpen && (
@@ -309,29 +369,41 @@ export default function CmsLayout() {
                         <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
                         <div className="text-xs text-[var(--text-secondary)]">Your latest content updates</div>
                       </div>
-                      {notifications.length > 0 && (
-                        <span className="rounded-full bg-rose-100 dark:bg-rose-950/40 px-2 py-0.5 text-[11px] font-semibold text-rose-700 dark:text-rose-400">{notifications.length} new</span>
-                      )}
                     </div>
                     <div className="py-1">
-                      {notifications.length === 0 ? (
-                        <div className="py-8 text-center text-xs text-[var(--text-secondary)]">
-                          No new content notifications
-                        </div>
+                      {notificationsLoading ? (
+                        <p className="px-4 py-8 text-center text-sm text-[var(--text-secondary)]">Loading…</p>
+                      ) : notifications.length === 0 ? (
+                        <p className="px-4 py-8 text-center text-sm text-[var(--text-secondary)]">No notifications yet</p>
                       ) : (
                         notifications.map((item) => (
-                          <div key={item.text} className="flex items-start gap-3 px-4 py-2.5 hover:bg-[var(--bg-page)] transition-all cursor-pointer">
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setNotificationOpen(false);
+                              navigate('/cms/notifications');
+                            }}
+                            className="flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-[var(--bg-page)] transition-all cursor-pointer"
+                          >
                             <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${item.color}`} />
                             <div className="min-w-0">
-                              <p className="text-sm text-[var(--text-primary)]">{item.text}</p>
+                              <p className="text-sm text-[var(--text-primary)] line-clamp-2">{item.text}</p>
                               <p className="text-xs text-[var(--text-muted)] mt-0.5">{item.time}</p>
                             </div>
-                          </div>
+                          </button>
                         ))
                       )}
                     </div>
                     <div className="border-t border-[var(--border-color)] px-4 py-3">
-                      <button type="button" className="text-sm font-semibold text-[#003366] dark:text-[#3b82f6] hover:text-[#002a55] dark:hover:text-[#60a5fa] transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNotificationOpen(false);
+                          navigate('/cms/notifications');
+                        }}
+                        className="text-sm font-semibold text-[#003366] dark:text-[#3b82f6] hover:text-[#002a55] dark:hover:text-[#60a5fa] transition-colors cursor-pointer"
+                      >
                         View all notifications →
                       </button>
                     </div>
@@ -343,11 +415,11 @@ export default function CmsLayout() {
               <div className="relative" data-cms-menu>
                 <button type="button" onClick={() => setMenuOpen(v => !v)}
                   className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:shadow transition-all">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#F4B400] to-[#E8A020] text-xs font-bold text-[#0B1A2E] shadow-sm">
-                    {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'CM'}
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#003366] to-[#002244] dark:from-[#004080] dark:to-[#002855] text-xs font-bold text-[#FFCC00] shadow-sm border border-white/10">
+                    {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'AO'}
                   </div>
                   <div className="hidden text-left sm:block">
-                    <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}` : 'Content Manager'}</div>
+                    <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : 'Alumni Office Officer'}</div>
                     <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
                       <span className="relative flex h-1.5 w-1.5">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
@@ -365,7 +437,7 @@ export default function CmsLayout() {
         </header>
 
         {/* Main Content */}
-        <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 transition-colors text-slate-900 dark:text-slate-100" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
+        <main className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 transition-colors text-slate-900 dark:text-slate-100" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
           <style>{`@keyframes cms-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <CmsRouteBoundary key={location.pathname}>
             <Outlet />

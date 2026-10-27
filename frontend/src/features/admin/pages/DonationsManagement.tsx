@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Heart,
@@ -39,6 +39,7 @@ import {
 import toast from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
 import { homepageCmsService } from '../services/homepageCms.service';
+import AdminPageHeader from '../components/AdminPageHeader';
 
 interface Campaign {
   id: string;
@@ -148,7 +149,7 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
   return fallback;
 };
 
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     setIsLoading(true);
     try {
       const [campaignsRes, donorsRes] = await Promise.all([
@@ -197,11 +198,11 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
 
   useEffect(() => {
     if (showCreateModal || selectedDonor || showEditBannerModal) {
@@ -694,61 +695,55 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
 
   return (
     <div className="space-y-6">
-      {/* Header & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Heart className="h-7 w-7 text-rose-500 fill-rose-500" />
-            Donations & Giving Management
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Manage ASTU fundraising campaigns, create new causes, and monitor Chapa donor records.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={loadData}
-            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-sm"
-            title="Refresh Data"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-
-          <button
-            onClick={() => setActiveTab('page-content')}
-            className={`px-3.5 py-2.5 rounded-xl border text-xs font-extrabold shadow-sm transition-all flex items-center gap-2 hover:scale-[1.01] ${
-              activeTab === 'page-content'
-                ? 'bg-[#003580] text-white border-[#003580]'
-                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
-            }`}
-            title="Edit the Public Giving Portal page content, banner title, subtitle, and commitment features"
-          >
-            <SlidersHorizontal className="h-4 w-4 text-blue-600" />
-            <span>Edit Public Donations Page</span>
-          </button>
-
-          <a
-            href="/donations"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold shadow-sm transition-all flex items-center gap-1.5"
-            title="Open Live Public Donations Page in new tab"
-          >
-            <Globe className="h-3.5 w-3.5 text-slate-500" />
-            <span>View Live Page</span>
-            <ExternalLink className="h-3 w-3 text-slate-400" />
-          </a>
-
-          <button
-            onClick={handleOpenCreate}
-            className="px-4 py-2.5 rounded-xl bg-[#003580] text-white text-xs font-extrabold shadow-md hover:bg-[#002866] transition-all flex items-center gap-2 hover:scale-[1.01]"
-          >
-            <Plus className="h-4 w-4" />
-            Create Campaign
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Donations & Giving"
+        subtitle="Manage ASTU fundraising campaigns, create new causes, and monitor Chapa / Telebirr donor records."
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Donations & Giving' }]}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={loadData}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer"
+              title="Refresh Data"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('page-content')}
+              className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+                activeTab === 'page-content'
+                  ? 'border-[#FFCC00] bg-[#FFCC00] text-[#003366]'
+                  : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+              }`}
+              title="Edit the Public Giving Portal page content"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>Edit Public Page</span>
+            </button>
+            <a
+              href="/donations"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/20 transition-all"
+              title="Open Live Public Donations Page in new tab"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              <span>View Live</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+            <button
+              type="button"
+              onClick={handleOpenCreate}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#FFCC00] px-4 py-2 text-xs font-extrabold text-[#003366] shadow-md hover:brightness-105 transition-all cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              Create Campaign
+            </button>
+          </div>
+        }
+      />
 
       {/* Analytics Metric Cards (100% Dynamic Database Values) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

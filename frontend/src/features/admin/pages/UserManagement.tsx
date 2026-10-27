@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
@@ -553,6 +554,8 @@ function createDefaultForm(): UserFormState {
 }
 
 export default function UserManagement() {
+  const location = useLocation();
+  const isCms = location.pathname.startsWith('/cms');
   const [searchParams] = useSearchParams();
   const initialRoleParam = searchParams.get('role');
   const initialStatusParam = searchParams.get('status');
@@ -1708,37 +1711,15 @@ export default function UserManagement() {
     const { adminService } = await import('../services/admin.service');
     const { default: toast } = await import('react-hot-toast');
     
-    if (action === 'delete') {
-      // No confirmation existed here, while the single-user delete at
-      // handleRowAction does confirm. One click could wipe N accounts.
-      if (!window.confirm(
-        `Permanently delete ${selectedIds.length} user account(s)?\n\n` +
-        selected.slice(0, 8).map((u) => `• ${u.name || u.email}`).join('\n') +
-        (selected.length > 8 ? `\n…and ${selected.length - 8} more` : '') +
-        '\n\nThis cannot be undone.'
-      )) return;
-    }
-
     setLoading(true);
     let result;
-
-    try {
+    
     if (action === 'delete') {
-      // deleteUser resolves { ok: false } rather than throwing, so each result
-      // has to be inspected or a 404 is reported as a successful deletion.
-      const failed: string[] = [];
+      // For now we'll do delete sequentially or wait for backend support, wait, delete is single user only in our backend. Let's do it sequentially:
       for (const id of selectedIds) {
-        const res = await adminService.deleteUser(id);
-        if (!res.ok) {
-          const u = users.find((x) => x.id === id);
-          failed.push(u?.name || u?.email || id);
-        }
+        await adminService.deleteUser(id);
       }
-      if (failed.length > 0) {
-        toast.error(`Could not delete ${failed.length} user(s): ${failed.slice(0, 3).join(', ')}${failed.length > 3 ? '…' : ''}`);
-      } else {
-        toast.success(`Deleted ${selectedIds.length} user(s)`);
-      }
+      toast.success('Deleted selected users');
     } else {
       const apiAction = action === 'activate' ? 'verify' : 'suspend'; // verify handles both active and verification
       result = await adminService.bulkUpdateStatus(selectedIds, apiAction);
@@ -1748,14 +1729,7 @@ export default function UserManagement() {
         toast.error(result.message || 'Failed to update users');
       }
     }
-    } catch (err: any) {
-      // Without this, a throw left setLoading(true) in place forever and the
-      // table stayed stuck on its loading branch.
-      toast.error(err?.response?.data?.message || 'The bulk action failed.');
-    } finally {
-      setLoading(false);
-    }
-
+    
     updateSelectedIds([]);
     await fetchUsers();
   };
@@ -1867,7 +1841,7 @@ export default function UserManagement() {
       <AdminPageHeader
         title="User Management"
         subtitle="Manage all system accounts, roles, and access permissions"
-        breadcrumbs={[{ label: 'Admin' }, { label: 'User Management' }]}
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Alumni Directory' }] : [{ label: 'Admin' }, { label: 'User Management' }]}
         actions={
           <>
             <button

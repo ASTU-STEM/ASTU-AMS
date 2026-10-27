@@ -42,76 +42,21 @@ export type SeoItem = {
 
 const SEO_STORAGE_KEY = 'astu_cms_seo_records';
 
+/** Core public routes officers can optimize — no fabricated traffic/ranking figures. */
 const defaultSeoItems: SeoItem[] = [
   {
-    id: 'seo-1',
+    id: 'seo-home',
     url: '/',
     title: 'ASTU Alumni Management & Engagement Portal — Adama Science and Technology University',
-    description: 'Connect with over 25,000 verified ASTU graduates, access academic tracer study campaigns, and explore career opportunities across East Africa.',
-    keywords: ['ASTU alumni', 'university portal', 'Ethiopia technology graduates', 'tracer study'],
+    description: 'Connect with verified ASTU graduates, access tracer study campaigns, and explore career opportunities through the official alumni portal.',
+    keywords: ['ASTU alumni', 'university portal', 'Ethiopia technology graduates'],
     canonicalUrl: 'https://astu-ams.et/',
     robots: 'index, follow',
-    status: 'Excellent',
-    score: 96,
+    status: 'Good',
+    score: 85,
     issues: 0,
-    traffic: 8420,
-    position: 1.4,
-  },
-  {
-    id: 'seo-2',
-    url: '/events',
-    title: 'Campus Events & Workshops — ASTU Public Portal',
-    description: 'Explore upcoming academic conferences, career fairs, alumni summits, and coding bootcamps organized by Adama Science and Technology University.',
-    keywords: ['career fair', 'ASTU events', 'engineering workshops', 'alumni summit'],
-    canonicalUrl: 'https://astu-ams.et/events',
-    robots: 'index, follow',
-    status: 'Good',
-    score: 84,
-    issues: 1,
-    traffic: 3120,
-    position: 3.2,
-  },
-  {
-    id: 'seo-3',
-    url: '/alumni/stories',
-    title: 'Distinguished Alumni Career Spotlights — ASTU',
-    description: 'Inspiring career journeys and innovations from ASTU graduates leading high-impact engineering and tech companies worldwide.',
-    keywords: ['alumni success', 'ASTU graduates', 'innovation spotlight'],
-    canonicalUrl: 'https://astu-ams.et/alumni/stories',
-    robots: 'index, follow',
-    status: 'Good',
-    score: 79,
-    issues: 1,
-    traffic: 2450,
-    position: 4.8,
-  },
-  {
-    id: 'seo-4',
-    url: '/tracer-study',
-    title: 'Annual Graduate Tracer Study Campaign 2026 — ASTU',
-    description: 'Participate in the official ASTU alumni tracer study to measure employment outcomes and enhance curriculum relevance.',
-    keywords: ['tracer study', 'graduate survey', 'employment survey', 'ASTU'],
-    canonicalUrl: 'https://astu-ams.et/tracer-study',
-    robots: 'index, follow',
-    status: 'Needs Work',
-    score: 65,
-    issues: 3,
-    traffic: 1120,
-    position: 8.5,
-  },
-  {
-    id: 'seo-5',
-    url: '/about',
-    title: 'About Adama Science and Technology University (ASTU)',
-    description: 'Learn about ASTU mission, technological research directorate, academic schools, and institutional heritage since 1993.',
-    keywords: ['ASTU about', 'Ethiopia science university', 'Adama technology'],
-    canonicalUrl: 'https://astu-ams.et/about',
-    robots: 'index, follow',
-    status: 'Good',
-    score: 82,
-    issues: 1,
-    traffic: 2900,
-    position: 2.7,
+    traffic: 0,
+    position: 0,
   },
 ];
 
@@ -167,13 +112,21 @@ export default function SEOManagement() {
   const [statusFilter, setStatusFilter] = useState<'all' | SeoStatus>('all');
   const [isAuditing, setIsAuditing] = useState(false);
 
-  // Persistent SEO state
+  // Persistent SEO state — drop legacy demo URL seeds once
   const [seoItems, setSeoItems] = useState<SeoItem[]>(() => {
     try {
       const saved = localStorage.getItem(SEO_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const legacyDemoIds = new Set(['seo-1', 'seo-2', 'seo-3', 'seo-4', 'seo-5']);
+          const cleaned = parsed.filter((it: SeoItem) => !legacyDemoIds.has(it.id));
+          const next = cleaned.length > 0 ? cleaned : defaultSeoItems;
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(SEO_STORAGE_KEY, JSON.stringify(next));
+          }
+          return next;
+        }
       }
     } catch {
       /* ignore */
@@ -210,8 +163,8 @@ export default function SEOManagement() {
               status: audit.status,
               score: audit.score,
               issues: audit.issues,
-              traffic: c.views || 140,
-              position: 5.0,
+              traffic: typeof c.views === 'number' ? c.views : 0,
+              position: 0,
             });
           }
         });
@@ -311,8 +264,8 @@ export default function SEOManagement() {
       });
       saveItems(reaudited);
       setIsAuditing(false);
-      toast.success(`Audit finished! Recalculated SEO scores for ${reaudited.length} pages.`);
-    }, 600);
+      toast.success(`Metadata check complete for ${reaudited.length} URL(s). Scores use local title/description rules — not live Search Console rankings.`);
+    }, 250);
   };
 
   // Generate & Download real sitemap.xml
@@ -365,19 +318,20 @@ ${xmlUrls}
     <div className="space-y-5">
       <AdminPageHeader
         title="SEO Management"
-        subtitle="Monitor and optimize public portal search engine visibility. Audit metadata, generate sitemaps, and preview SERP snippets."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'SEO' }]}
+        subtitle="Optimize public portal metadata, generate sitemaps, and preview SERP snippets. Scores are computed from title/description/keyword quality on this workstation."
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'SEO' }]}
         actions={
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={generateAndDownloadSitemap}
-              className="inline-flex items-center gap-1.5 rounded-[8px] bg-white/10 hover:bg-white/20 text-white px-3 py-2 text-xs font-semibold backdrop-blur-sm border border-white/20 transition-all cursor-pointer"
+              disabled={seoItems.length === 0}
+              className="inline-flex items-center gap-1.5 rounded-[8px] bg-white/10 hover:bg-white/20 text-white px-3 py-2 text-xs font-semibold backdrop-blur-sm border border-white/20 transition-all cursor-pointer disabled:opacity-50"
             >
               <Download className="h-3.5 w-3.5" />
               Download Sitemap.xml
             </button>
-            <AdminBadge variant="success">Indexing: Active</AdminBadge>
+            <AdminBadge variant="info">Local metadata workspace</AdminBadge>
           </div>
         }
       />
@@ -385,9 +339,9 @@ ${xmlUrls}
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {[
-          { label: 'Average SEO Score', value: `${aggregateScore}/100`, icon: Sparkles, color: '#003580' },
-          { label: 'Monthly Organic Traffic', value: totalTraffic.toLocaleString(), icon: TrendingUp, color: '#1D9E75' },
-          { label: 'Indexed URLs', value: seoItems.length, icon: FileSearch, color: '#E8A020' },
+          { label: 'Average SEO Score', value: seoItems.length ? `${aggregateScore}/100` : '—', icon: Sparkles, color: '#003580' },
+          { label: 'Tracked Page Views', value: totalTraffic > 0 ? totalTraffic.toLocaleString() : '—', icon: TrendingUp, color: '#1D9E75' },
+          { label: 'Managed URLs', value: seoItems.length, icon: FileSearch, color: '#E8A020' },
           { label: 'Identified Issues', value: totalIssues, icon: XCircle, color: totalIssues > 5 ? '#E24B4A' : '#1D9E75' },
         ].map((s) => {
           const Icon = s.icon;
