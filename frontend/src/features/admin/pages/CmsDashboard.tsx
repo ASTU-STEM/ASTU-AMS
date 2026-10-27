@@ -1,68 +1,31 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowRight,
-  ArrowUpRight,
-  Award,
-  BarChart3,
-  Bell,
-  Briefcase,
-  Building2,
-  Calendar,
+  AlertCircle,
   CalendarDays,
   CheckCircle2,
   CheckSquare,
   ClipboardCheck,
-  Clock,
-  Edit3,
   ExternalLink,
-  Eye,
-  FileSpreadsheet,
-  FileText,
-  Filter,
   Globe,
   GraduationCap,
-  HeartHandshake,
-  HelpCircle,
-  Image as ImageIcon,
-  Layers3,
-  MapPin,
-  Menu,
   Megaphone,
   MessageSquare,
-  MessageSquareText,
   Newspaper,
   Plus,
   Printer,
   RefreshCw,
-  Save,
-  Search,
-  Send,
   ShieldCheck,
   Sparkles,
   Square,
-  Star,
   Trash2,
-  Upload,
-  Users,
-  X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import axios from 'axios';
 import contentService from '../services/content.service';
-import eventsService, { ApiEvent } from '../services/events.service';
-import homepageCmsService, {
-  HomepageCmsConfig,
-  HeroSlide,
-  ImpactStat,
-  SuccessStory,
-  Partner,
-} from '../services/homepageCms.service';
-import storiesService, { AlumniStory } from '../services/stories.service';
-import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
+import homepageCmsService, { HomepageCmsConfig } from '../services/homepageCms.service';
 import registrationService, { AlumniRegistration } from '../services/registration.service';
-import AdminModal from '../components/AdminModal';
-import { ContentCardItem, ContentStatus, ContentType } from '../components/ContentCard';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
+import { ContentCardItem, ContentStatus } from '../components/ContentCard';
 import { useAuth } from '../../../contexts/AuthContext';
 import { usePublicMetrics, triggerMetricsRefresh } from '../../../services/publicMetrics.service';
 import api from '../../../services/api';
@@ -363,17 +326,13 @@ export default function CmsDashboard() {
     const saved = homepageCmsService.getSettings();
     return saved ? { ...DEFAULT_HOMEPAGE_CONFIG, ...saved } : DEFAULT_HOMEPAGE_CONFIG;
   });
-  const [savingHomepage, setSavingHomepage] = useState(false);
-  const [homepageStudioSection, setHomepageStudioSection] = useState<'hero' | 'stats' | 'portals' | 'campusLife' | 'campuses' | 'gallery' | 'faq' | 'employers' | 'nav' | 'community' | 'stories' | 'partners' | 'banner'>('hero');
 
   // Registrations state
   const [registrations, setRegistrations] = useState<AlumniRegistration[]>([]);
 
-  // Events state
-  const [events, setEvents] = useState<ApiEvent[]>([]);
-
-  // Inquiries state - 100% loaded directly from Database (/support/tickets)
+  // Inquiries state - loaded from /support/tickets
   const [inquiries, setInquiries] = useState<any[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Memos state - loaded from localStorage or dynamically computed from live database metrics
   const [memos, setMemos] = useState<{ id: string; text: string; completed: boolean }[]>(() => {
@@ -389,28 +348,18 @@ export default function CmsDashboard() {
   const refreshAllData = useCallback(async (showToast = false) => {
     try {
       showToast ? setRefreshing(true) : setLoading(true);
+      setLoadError(null);
 
-      // 0. Live Public Metrics directly from Database
       try {
         await refreshMetrics();
       } catch { /* ignore */ }
 
-      // 1. Content items
       const list = await contentService.fetchItemsFromApi();
       const filtered = (list || []).filter((i) => i.title !== 'Homepage CMS Configuration');
       setItems(filtered);
 
-      // 2. Registrations
-      const allRegs = registrationService.getRegistrations();
-      setRegistrations(allRegs);
+      setRegistrations(registrationService.getRegistrations());
 
-      // 3. Events
-      try {
-        const evs = await eventsService.getAllEvents();
-        if (Array.isArray(evs)) setEvents(evs);
-      } catch { /* ignore */ }
-
-      // 4. Homepage CMS Config
       try {
         const cfg = await homepageCmsService.fetchFromApi();
         if (cfg) {
@@ -418,7 +367,6 @@ export default function CmsDashboard() {
         }
       } catch { /* ignore */ }
 
-      // 5. Live Inquiries & Support Tickets from Database
       try {
         const ticketRes = await api.get('/support/tickets');
         if (ticketRes.data?.success && Array.isArray(ticketRes.data.data)) {
@@ -440,33 +388,40 @@ export default function CmsDashboard() {
       if (showToast) toast.success('Alumni Office & Portal data updated');
     } catch (err) {
       console.warn('Dashboard data fetch error:', err);
+      setLoadError('Some dashboard data could not be loaded. Try syncing again.');
       if (showToast) toast.error('Failed to sync portal data');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [refreshMetrics]);
 
   useEffect(() => {
     refreshAllData();
   }, [refreshAllData]);
 
-  // Sync initial dynamic memos from real database metrics if memo list is empty
+  // Seed priority tasks from live metrics only when the officer has no saved memos
   useEffect(() => {
     if (memos.length === 0 && metrics.registeredAlumni > 0) {
       const initial: { id: string; text: string; completed: boolean }[] = [];
-      const unverified = metrics.registeredAlumni - metrics.verifiedAlumni;
+      const unverified = Math.max(0, (metrics.registeredAlumni || 0) - (metrics.verifiedAlumni || 0));
       if (unverified > 0) {
         initial.push({ id: 'task-1', text: `Review and verify ${unverified} pending alumni directory profiles`, completed: false });
       }
-      if (metrics.pendingTicketsCount > 0) {
+      if ((metrics.pendingTicketsCount || 0) > 0) {
         initial.push({ id: 'task-2', text: `Review and resolve ${metrics.pendingTicketsCount} open alumni desk support requests`, completed: false });
       }
-      if (metrics.digitalRequests > 0) {
-        initial.push({ id: 'task-3', text: `Audit ${metrics.digitalRequests} official digital document requests in SIS queue`, completed: false });
+      if ((metrics.pendingDigitalRequests || 0) > 0) {
+        initial.push({ id: 'task-3', text: `Process ${metrics.pendingDigitalRequests} pending digital document requests`, completed: false });
+      } else if ((metrics.digitalRequests || 0) > 0) {
+        initial.push({ id: 'task-3', text: `Audit ${metrics.digitalRequests} digital document requests in the SIS queue`, completed: false });
       }
-      if (metrics.etaComplianceRate > 0) {
-        initial.push({ id: 'task-4', text: `Track ETA tracer survey compliance rate (${metrics.etaComplianceRate}% tracked)`, completed: metrics.etaComplianceRate >= 90 });
+      if (metrics.hasSurveyData && typeof metrics.etaComplianceRate === 'number') {
+        initial.push({
+          id: 'task-4',
+          text: `Track ETA tracer survey compliance (${metrics.etaComplianceRate}% completed)`,
+          completed: metrics.etaComplianceRate >= 90,
+        });
       }
       if (initial.length === 0) {
         initial.push({ id: 'task-1', text: 'All alumni verification and support tasks up to date', completed: true });
@@ -476,42 +431,16 @@ export default function CmsDashboard() {
     }
   }, [metrics, memos.length]);
 
-  // ─── Handlers: Homepage Live Studio ─────────────────────────────────────────
-  const handleSaveHomepageConfig = async () => {
-    setSavingHomepage(true);
-    try {
-      await homepageCmsService.saveSettings(homepageConfig);
-      toast.success('Live Homepage published successfully! All visitors see updated content.');
-    } catch {
-      toast.error('Failed to publish homepage changes');
-    } finally {
-      setSavingHomepage(false);
-    }
-  };
-
-  const handleDeleteHeroSlide = (id: string) => {
-    setHomepageConfig((prev) => ({
-      ...prev,
-      heroSlides: prev.heroSlides.filter((s) => s.id !== id),
-    }));
-    toast.success('Slide removed');
-  };
-
-  const handleToggleSlideActive = (id: string) => {
-    setHomepageConfig((prev) => ({
-      ...prev,
-      heroSlides: prev.heroSlides.map((s) => (s.id === id ? { ...s, active: !s.active } : s)),
-    }));
-  };
-
   const handleTogglePublish = (item: ContentCardItem) => {
-    const updated = items.map((i) =>
-      i.id === item.id
-        ? { ...i, status: i.status === 'Published' ? ('Draft' as ContentStatus) : ('Published' as ContentStatus) }
-        : i
-    );
-    setItems(updated);
-    toast.success(item.status === 'Published' ? 'Item unpublished' : 'Item published');
+    const nextStatus: ContentStatus = item.status === 'Published' ? 'Draft' : 'Published';
+    const updated = contentService.updateItem(item.id, { status: nextStatus });
+    if (!updated) {
+      toast.error('Could not update bulletin status');
+      return;
+    }
+    setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: nextStatus } : i)));
+    window.dispatchEvent(new CustomEvent('astu-cms-content-changed'));
+    toast.success(nextStatus === 'Published' ? 'Bulletin published' : 'Bulletin unpublished');
   };
 
   const handleResolveInquiry = async (id: string) => {
@@ -811,11 +740,19 @@ export default function CmsDashboard() {
           </div>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {metrics.etaComplianceRate}% / {metrics.employmentRate}%
+              {metrics.hasSurveyData && typeof metrics.etaComplianceRate === 'number'
+                ? `${metrics.etaComplianceRate}%`
+                : (metrics.etaComplianceRateFormatted || '—')}
+              {' / '}
+              {metrics.registeredAlumni > 0
+                ? `${metrics.employmentRate}%`
+                : (metrics.employmentRateFormatted || '—')}
             </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-            ETA compliance & graduate employability (survey-derived)
+            {metrics.hasSurveyData
+              ? 'ETA survey compliance & graduate employability'
+              : 'Employability live · ETA awaits survey assignments'}
           </p>
         </div>
 
@@ -868,19 +805,25 @@ export default function CmsDashboard() {
         </div>
       </div>
 
-      {/* ═════════════════════════════════════════════════════════════════════ */}
-      {/* ── DASHBOARD OVERVIEW ─────────────────────────────────────────────── */}
-      {/* ═════════════════════════════════════════════════════════════════════ */}
-      {!loading && (
-        <div className="space-y-4">
+      {loadError && (
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+          <span className="flex-1">{loadError}</span>
+          <button type="button" onClick={() => refreshAllData(true)} className="font-bold underline cursor-pointer">
+            Retry
+          </button>
+        </div>
+      )}
 
-        {/* 2-Column Operational Grid */}
+      {loading ? (
         <div className="grid gap-4 lg:grid-cols-2">
-
-          {/* Left Column: Quick Actions */}
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-48 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-2">
           <div className="space-y-4">
-
-            {/* Quick Actions */}
             <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
               <div className="flex items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
                 <Sparkles className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
@@ -888,6 +831,7 @@ export default function CmsDashboard() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <button
+                  type="button"
                   onClick={() => navigate('/cms/content')}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
@@ -895,6 +839,7 @@ export default function CmsDashboard() {
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">New Announcement</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/cms/events')}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
@@ -902,6 +847,7 @@ export default function CmsDashboard() {
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Schedule Event</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/cms/homepage')}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
@@ -909,6 +855,7 @@ export default function CmsDashboard() {
                   <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Edit Homepage</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => navigate('/cms/registrations')}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
@@ -918,24 +865,31 @@ export default function CmsDashboard() {
               </div>
             </div>
 
-            {/* Recent Public Bulletins */}
             <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
-                  <div className="flex items-center gap-2">
-                    <Megaphone className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Active Portal Bulletins</h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/cms/content')}
-                    className="text-xs font-bold text-[#003366] dark:text-[#FFCC00] hover:underline cursor-pointer"
-                  >
-                    View All ({items.length})
-                  </button>
+                <div className="flex items-center gap-2">
+                  <Megaphone className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Active Portal Bulletins</h3>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/cms/content')}
+                  className="text-xs font-bold text-[#003366] dark:text-[#FFCC00] hover:underline cursor-pointer"
+                >
+                  View All ({items.length})
+                </button>
+              </div>
 
-                <div className="space-y-2.5">
-                  {items.slice(0, 3).map((item) => (
+              <div className="space-y-2.5">
+                {items.length === 0 ? (
+                  <div className="py-6 text-center text-xs text-slate-400">
+                    No portal bulletins yet.{' '}
+                    <button type="button" onClick={() => navigate('/cms/content')} className="font-bold text-[#003366] dark:text-[#FFCC00] underline cursor-pointer">
+                      Create one
+                    </button>
+                  </div>
+                ) : (
+                  items.slice(0, 3).map((item) => (
                     <div
                       key={item.id}
                       className="flex items-center justify-between p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 hover:bg-slate-50 transition-colors"
@@ -944,6 +898,9 @@ export default function CmsDashboard() {
                         <div className="flex items-center gap-1.5 mb-0.5">
                           <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-slate-200/80 text-slate-700">
                             {item.type}
+                          </span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${item.status === 'Published' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                            {item.status}
                           </span>
                           {item.requiresRegistration && (
                             <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-100 text-blue-800">
@@ -965,77 +922,76 @@ export default function CmsDashboard() {
                         {item.status === 'Published' ? 'Unpublish' : 'Publish'}
                       </button>
                     </div>
-                  ))}
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Office Desk Requests</h3>
                 </div>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                  {inquiries.filter((i) => i.urgency !== 'responded' && i.status !== 'RESOLVED').length} Pending
+                </span>
               </div>
 
+              <div className="space-y-3">
+                {inquiries.length === 0 ? (
+                  <div className="py-6 text-center text-xs text-slate-400">
+                    No desk requests in the Alumni Office queue.
+                  </div>
+                ) : (
+                  inquiries.slice(0, 3).map((inq) => (
+                    <div
+                      key={inq.id}
+                      className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">{inq.name}</span>
+                        <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded ${inq.urgency === 'urgent' ? 'bg-rose-100 text-rose-800' : inq.urgency === 'responded' || inq.status === 'RESOLVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>
+                          {inq.status === 'RESOLVED' ? 'responded' : inq.urgency}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{inq.subject}</p>
+                      <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{inq.message}</p>
+                      {inq.urgency !== 'responded' && inq.status !== 'RESOLVED' && (
+                        <div className="mt-2 pt-2 border-t border-slate-200/60 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleResolveInquiry(inq.id)}
+                            className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                          >
+                            Mark as Responded ✓
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
-            {/* Right Column: Inquiries & Officer Memos */}
-            <div className="space-y-6">
-
-              {/* Alumni Office Inquiries & Requests */}
-              <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Office Desk Requests</h3>
-                  </div>
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                    {inquiries.filter((i) => i.urgency !== 'responded' && i.status !== 'RESOLVED').length} Pending
-                  </span>
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
+                <div className="flex items-center gap-2">
+                  <CheckSquare className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Office Priority Tasks</h3>
                 </div>
-
-                <div className="space-y-3">
-                  {inquiries.length === 0 ? (
-                    <div className="py-6 text-center text-xs text-slate-400">
-                      No pending requests in the Alumni Office database queue.
-                    </div>
-                  ) : (
-                    inquiries.slice(0, 3).map((inq) => (
-                      <div
-                        key={inq.id}
-                        className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/30"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white">{inq.name}</span>
-                          <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded ${inq.urgency === 'urgent' ? 'bg-rose-100 text-rose-800' : inq.urgency === 'responded' || inq.status === 'RESOLVED' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>
-                            {inq.status === 'RESOLVED' ? 'responded' : inq.urgency}
-                          </span>
-                        </div>
-                        <p className="text-[11px] font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{inq.subject}</p>
-                        <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{inq.message}</p>
-                        {inq.urgency !== 'responded' && inq.status !== 'RESOLVED' && (
-                          <div className="mt-2 pt-2 border-t border-slate-200/60 flex justify-end">
-                            <button
-                              type="button"
-                              onClick={() => handleResolveInquiry(inq.id)}
-                              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
-                            >
-                              Mark as Responded ✓
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
+                <span className="text-xs text-slate-400">
+                  {memos.filter((m) => m.completed).length}/{memos.length} Done
+                </span>
               </div>
 
-              {/* Alumni Office Priority Tasks & Memos */}
-              <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
-                  <div className="flex items-center gap-2">
-                    <CheckSquare className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Office Priority Tasks</h3>
-                  </div>
-                  <span className="text-xs text-slate-400">
-                    {memos.filter((m) => m.completed).length}/{memos.length} Done
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {memos.map((memo) => (
+              <div className="space-y-2">
+                {memos.length === 0 ? (
+                  <div className="py-4 text-center text-xs text-slate-400">No priority tasks yet.</div>
+                ) : (
+                  memos.map((memo) => (
                     <div
                       key={memo.id}
                       className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
@@ -1062,30 +1018,27 @@ export default function CmsDashboard() {
                         <Trash2 className="h-3 w-3" />
                       </button>
                     </div>
-                  ))}
-                </div>
-
-                <form onSubmit={handleAddMemo} className="mt-3 pt-3 border-t border-slate-100 flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Log a new task for the alumni office…"
-                    value={newMemoText}
-                    onChange={(e) => setNewMemoText(e.target.value)}
-                    className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-700 text-white text-xs font-bold hover:bg-slate-800 cursor-pointer"
-                  >
-                    Add
-                  </button>
-                </form>
+                  ))
+                )}
               </div>
 
+              <form onSubmit={handleAddMemo} className="mt-3 pt-3 border-t border-slate-100 flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Log a new task for the alumni office…"
+                  value={newMemoText}
+                  onChange={(e) => setNewMemoText(e.target.value)}
+                  className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-slate-700 text-white text-xs font-bold hover:bg-slate-800 cursor-pointer"
+                >
+                  Add
+                </button>
+              </form>
             </div>
-
           </div>
-
         </div>
       )}
     </div>

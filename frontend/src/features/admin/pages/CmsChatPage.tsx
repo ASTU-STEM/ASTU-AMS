@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AdminPageHeader from '../components/AdminPageHeader';
 import { TelegramChat } from '../../../components/TelegramChat';
 
 export default function CmsChatPage() {
@@ -14,14 +15,11 @@ export default function CmsChatPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">ASTU_AMS Hub & Direct Messages</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Real-time direct messaging center for CMS Content Managers with Alumni Candidates, Corporate Recruiters, Registrar, Departments, and Admins.
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Messages"
+        subtitle="Real-time messaging for Alumni Office officers with alumni, recruiters, registrar, departments, and admins."
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Messages' }]}
+      />
       <TelegramChat darkMode={isDark} />
     </div>
   );

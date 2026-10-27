@@ -1,30 +1,34 @@
-const API_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-/** Origin that serves uploaded files (the API URL without its trailing /api). */
-export const apiOrigin = API_URL.replace(/\/api\/?$/, '');
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+/** Backend origin, i.e. apiUrl without the trailing /api segment. */
+const backendOrigin = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '')
+  || apiUrl.replace(/\/api\/?$/, '')
+  || 'http://localhost:5000';
 
 /**
- * Resolve a CMS-managed media path to something the browser can load.
+ * Turn a backend-stored media path into a loadable URL.
  *
- * CMS authors store a mix of absolute URLs, bundled public assets
- * (`/images/...`) and backend uploads (`/uploads/...`). Only the uploads live
- * on the API origin, so prefixing everything would break bundled art, while
- * prefixing nothing leaves uploaded images broken off-origin.
+ * Uploaded assets live on the backend (served from /uploads) while the app is
+ * served by Vite on another port, so a bare "/uploads/..." path would resolve
+ * against the dev server and 404. Absolute URLs are passed through untouched.
  */
-export const mediaUrl = (path?: string | null): string => {
-  if (!path) return '';
-  const value = String(path).trim();
+const mediaUrl = (raw?: string | null): string => {
+  const value = (raw || '').trim();
   if (!value) return '';
-  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:') || value.startsWith('blob:')) {
-    return value;
+  if (/^https?:\/\//i.test(value) || value.startsWith('data:')) return value;
+  let normalised = value.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!normalised) return '';
+  if (normalised.startsWith('src/assets/imgs/') || normalised.startsWith('src/assets/images/')) {
+    const filename = normalised.split('/').pop();
+    return `/images/${filename}`;
   }
-  if (value.startsWith('/uploads/')) return `${apiOrigin}${value}`;
-  return value;
+  if (normalised.startsWith('uploads/')) return `${backendOrigin}/${normalised}`;
+  // Anything else (e.g. /images/...) is a bundled frontend asset.
+  return `/${normalised}`;
 };
 
 const config = {
-  apiUrl: API_URL,
-  apiOrigin,
+  apiUrl,
+  backendOrigin,
   mediaUrl,
   appName: 'ASTU Alumni Management System',
   appShortName: 'ASTU-AMS',
@@ -52,4 +56,5 @@ const config = {
   toastDuration: 4000,
 };
 
+export { mediaUrl };
 export default config;

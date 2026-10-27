@@ -479,7 +479,7 @@ export default function PartnersManagement() {
       <AdminPageHeader
         title="Partner & Employer Portal Management"
         subtitle="Manage all corporate partnerships, recruitment frameworks, consortium tracks, and live landing page configuration."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Partners & Employers' }]}
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'Partners & Employers' }]}
       >
         <div className="flex flex-wrap items-center gap-2">
           {/* Device view switcher */}

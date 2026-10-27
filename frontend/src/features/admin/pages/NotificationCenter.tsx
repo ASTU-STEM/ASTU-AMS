@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   AlertCircle,
   AlertTriangle,
@@ -371,6 +372,8 @@ function SectionCard({
 }
 
 export default function NotificationCenter() {
+  const location = useLocation();
+  const isCms = location.pathname.startsWith('/cms');
   const [type, setType] = useState<NotificationType>('Both');
   const [target, setTarget] = useState<TargetType>('All Users');
   const [priority, setPriority] = useState<PriorityLevel>('Normal');
@@ -1830,7 +1833,7 @@ export default function NotificationCenter() {
       <AdminPageHeader
         title="Notification & Broadcast Center"
         subtitle="Broadcast rich multi-channel alerts, manage HTML templates, schedule sends, and target all 6 ASTU system portals."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Notification Center' }]}
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Notifications' }] : [{ label: 'Admin' }, { label: 'Notification Center' }]}
         actions={
           <div className="flex items-center gap-2">
             <button

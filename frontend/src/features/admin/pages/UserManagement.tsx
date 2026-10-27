@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
@@ -553,6 +554,8 @@ function createDefaultForm(): UserFormState {
 }
 
 export default function UserManagement() {
+  const location = useLocation();
+  const isCms = location.pathname.startsWith('/cms');
   const [searchParams] = useSearchParams();
   const initialRoleParam = searchParams.get('role');
   const initialStatusParam = searchParams.get('status');
@@ -1838,7 +1841,7 @@ export default function UserManagement() {
       <AdminPageHeader
         title="User Management"
         subtitle="Manage all system accounts, roles, and access permissions"
-        breadcrumbs={[{ label: 'Admin' }, { label: 'User Management' }]}
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Alumni Directory' }] : [{ label: 'Admin' }, { label: 'User Management' }]}
         actions={
           <>
             <button

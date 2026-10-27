@@ -52,8 +52,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Landing',
     icon: Sparkles,
     color: '#003580',
-    usage: 24,
-    lastUpdated: '2 days ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'landing',
     isDefault: true,
     isFeatured: true,
@@ -66,8 +66,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Post',
     icon: GraduationCap,
     color: '#7C3AED',
-    usage: 18,
-    lastUpdated: '1 week ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'story',
     isFeatured: true,
     fields: ['Alumni Name', 'Graduation Year', 'Major', 'Bio', 'Career Timeline', 'Photo Gallery', 'Video URL'],
@@ -79,8 +79,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Event',
     icon: Calendar,
     color: '#E24B4A',
-    usage: 32,
-    lastUpdated: '3 days ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'event',
     fields: ['Event Title', 'Date & Time', 'Venue', 'Description', 'Registration', 'Sponsors'],
   },
@@ -91,8 +91,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Post',
     icon: Newspaper,
     color: '#1D9E75',
-    usage: 56,
-    lastUpdated: '5 days ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'news',
     fields: ['Headline', 'Subtitle', 'Hero Image', 'Author', 'Body', 'Tags', 'Related Articles'],
   },
@@ -103,8 +103,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Announcement',
     icon: Megaphone,
     color: '#E8A020',
-    usage: 12,
-    lastUpdated: '2 weeks ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'alert',
     fields: ['Alert Title', 'Severity', 'Effective Period', 'Action Required', 'Contact Department'],
   },
@@ -115,8 +115,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Page',
     icon: Trophy,
     color: '#7C3AED',
-    usage: 8,
-    lastUpdated: '1 month ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'research',
     fields: ['Title', 'Authors', 'Abstract', 'Keywords', 'DOI', 'Citations', 'PDF Attachment'],
   },
@@ -127,8 +127,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Page',
     icon: ImageIcon,
     color: '#003580',
-    usage: 14,
-    lastUpdated: '1 week ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'gallery',
     fields: ['Album Title', 'Cover Image', 'Photos', 'Captions', 'Category'],
   },
@@ -139,8 +139,8 @@ const DEFAULT_TEMPLATES: Template[] = [
     category: 'Email',
     icon: FileText,
     color: '#1D9E75',
-    usage: 22,
-    lastUpdated: '4 days ago',
+    usage: 0,
+    lastUpdated: 'Starter',
     thumbnail: 'email',
     fields: ['Header', 'Featured Story', 'Secondary Highlights', 'Upcoming Events', 'Footer'],
   },
@@ -249,7 +249,7 @@ export default function ContentTemplates() {
 
     toast.success(`Draft created from "${template.name}"! Opening editor...`);
     setPreviewTemplate(null);
-    navigate('/cms/content');
+    navigate('/cms/content?from=template');
   };
 
   const handleDuplicate = (template: Template) => {
@@ -344,8 +344,8 @@ export default function ContentTemplates() {
     <div className="space-y-5">
       <AdminPageHeader
         title="Content Templates"
-        subtitle="Reusable, pre-designed content templates for pages, posts, events, and emails. Speed up content creation."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Templates' }]}
+        subtitle="Reusable starter layouts for pages, posts, events, and emails. Usage counts track drafts created from this workstation."
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'Templates' }]}
         actions={
           <button
             type="button"
@@ -421,6 +421,25 @@ export default function ContentTemplates() {
         </div>
       </div>
 
+      {filtered.length === 0 ? (
+        <div className="rounded-[12px] border border-dashed border-slate-300 bg-white px-6 py-16 text-center dark:border-slate-700 dark:bg-slate-900">
+          <FileText className="mx-auto h-10 w-10 text-slate-300 dark:text-slate-600" />
+          <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-white">No templates match your filters</h3>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Try another category or clear the search to see starter templates.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setCategory('all');
+            }}
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#003580] px-3 py-2 text-xs font-semibold text-white cursor-pointer"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : (
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {filtered.map((template) => {
           const Icon = template.icon;
@@ -508,6 +527,7 @@ export default function ContentTemplates() {
           );
         })}
       </div>
+      )}
 
       {/* Preview Modal */}
       {previewTemplate && (

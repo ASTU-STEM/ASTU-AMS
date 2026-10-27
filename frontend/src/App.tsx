@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import { store } from "./store";
 
 import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
 import PartnersPage from "./pages/PartnersPage";
 import EmployersPage from "./pages/EmployersPage";
 import PublicInfoPage from "./pages/PublicInfoPage";
@@ -12,10 +13,10 @@ import AnnouncementListPage from "./pages/AnnouncementListPage";
 import AnnouncementDetailPage from "./pages/AnnouncementDetailPage";
 import PublicGalleryPage from "./pages/PublicGalleryPage";
 import StoryDetailPage from "./pages/StoryDetailPage";
-import EventDetailPage from "./pages/EventDetailPage";
 import EventsPage from "./pages/EventsPage";
-import DonationsPage from "./pages/DonationsPage";
+import EventDetailPage from "./pages/EventDetailPage";
 import AlumniCommunityPage from "./pages/AlumniCommunityPage";
+import DonationsPage from "./pages/DonationsPage";
 import LoginPage from "./features/auth/pages/LoginPage";
 import AlumniRegistrationPage from "./features/auth/pages/AlumniRegistrationPage";
 import NationalIdVerificationPage from "./features/auth/pages/NationalIdVerificationPage";
@@ -42,46 +43,24 @@ import VerificationRouteGuard from "./features/auth/components/VerificationRoute
 
 import { SystemSettingsProvider } from "./context/SystemSettingsContext";
 
-// Tags <body> for the public marketing/detail routes so the shared dark-mode
-// stylesheet can theme every public page at once. It must live *inside* the
-// <Router> because it reads the current location. "/" and "/events" render
-// HomePage, which already owns its dark palette, so they are excluded to
-// avoid overriding it with the generic public rules.
-function PublicShellClass() {
-  const location = useLocation();
-
-  useEffect(() => {
-    // Shared dark remaps for public/auth pages. HomePage ("/", "/events") already
-    // has Tailwind `dark:` variants. Dashboards use admin/role/ict shells.
-    const isDashboard = /^\/(admin|ict|cms|alumni|employer|registrar|department)(\/|$)/.test(
-      location.pathname
-    );
-    const isHome = location.pathname === "/" || location.pathname === "/events";
-    document.body.classList.toggle("public-shell", !isDashboard && !isHome);
-  }, [location.pathname]);
-
-  return null;
-}
-
 function AppContent() {
   return (
     <Router>
-      <PublicShellClass />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/partners" element={<PartnersPage />} />
+        <Route path="/faq" element={<Navigate to="/info/faq" replace />} />
         <Route path="/info/:slug" element={<PublicInfoPage />} />
         <Route path="/announcements" element={<AnnouncementListPage />} />
         <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
         <Route path="/gallery" element={<PublicGalleryPage />} />
         <Route path="/stories/:id" element={<StoryDetailPage />} />
-        <Route path="/events" element={<HomePage />} />
+        <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:id" element={<EventDetailPage />} />
-        <Route path="/workshops/:id" element={<EventDetailPage />} />
-        <Route path="/donations" element={<DonationsPage />} />
-        <Route path="/info/donations" element={<DonationsPage />} />
         <Route path="/community" element={<AlumniCommunityPage />} />
+        <Route path="/donations" element={<DonationsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/employers" element={<EmployersPage />} />

@@ -168,7 +168,7 @@ const initialCampuses: Campus[] = [
 const initialGallery: GalleryImage[] = [
   { id: 'GI-1', title: 'ASTU Main Campus Architecture', src: '/images/astu-building.jpg', active: true },
   { id: 'GI-2', title: 'Innovation and Collaboration Hub', src: '/images/campus-2.jpeg', active: true },
-  { id: 'GI-3', title: 'ASTU Alumni Identity & Legacy', src: '/images/astu-logo.jpeg', active: true },
+  { id: 'GI-3', title: 'ASTU Alumni Identity & Legacy', src: '/images/astu-seal-logo.png', active: true },
 ];
 
 const initialVideos: VideoItem[] = [
@@ -650,7 +650,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     eventsHeaders, events, workshops, announcementsHeaders, announcements,
     newsHeaders, newsItems, storiesHeaders, stories, testimonials,
     partnersHeaders, partners, featuredEmployers, accreditation, faqHeaders,
-    faq, ctaSection, footer, sectionLinks, detailPages, partnersPage,
+    faq, ctaSection, givingSection, footer, sectionLinks, detailPages, partnersPage,
     liveCommunitySection, liveCommunityPosts,
   ]);
 
@@ -4116,7 +4116,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
       <AdminPageHeader
         title="Pages & Homepage CMS"
         subtitle="Manage homepage sections, Overview, Contact Us, and all 22+ institutional pages in one unified workspace."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Pages & Homepage CMS' }]}
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'Pages & Homepage CMS' }]}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {hasUnsavedChanges && (

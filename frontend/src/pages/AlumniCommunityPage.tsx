@@ -22,7 +22,9 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import communityMembersService, { CommunityMember } from '../features/admin/services/communityMembers.service';
+import PaginationBar from '../components/PaginationBar';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
 import { usePublicMetrics } from '../services/publicMetrics.service';
 
@@ -32,61 +34,6 @@ const CATEGORIES = [
   { id: 'policy', label: 'Public Policy & Finance', icon: Briefcase },
   { id: 'academia', label: 'Academia & Research', icon: GraduationCap },
   { id: 'engineering', label: 'Infrastructure & Contractors', icon: Award },
-];
-
-const DEFAULT_REGIONAL_CHAPTERS = [
-  {
-    name: 'Central Ethiopia & Addis Ababa',
-    hub: 'Addis Ababa',
-    members: 'Active Chapter',
-    focus: 'Aviation, Telecom, Financial Technology, and Federal Ministries',
-    contact: 'irccd@astu.edu.et',
-  },
-  {
-    name: 'Main Campus & Rift Valley Hub',
-    hub: 'Adama',
-    members: 'Active Chapter',
-    focus: 'Research Incubators, Precision Manufacturing & Water Works',
-    contact: 'alumni@astu.edu.et',
-  },
-  {
-    name: 'North America Chapter',
-    hub: 'United States & Canada',
-    members: 'Active Chapter',
-    focus: 'Aerospace, Cloud Computing, and Academic Leadership',
-    contact: 'alumni-na@astu.edu.et',
-  },
-  {
-    name: 'European Union Chapter',
-    hub: 'Germany, UK & Scandinavia',
-    members: 'Active Chapter',
-    focus: 'DAAD Research Exchange, Industrial Operations & Consulting',
-    contact: 'alumni-eu@astu.edu.et',
-  },
-];
-
-const DEFAULT_COMMUNITY_PILLARS = [
-  {
-    icon: 'Users',
-    title: 'Alumni Mentorship',
-    desc: 'Mentor graduating seniors in CV reviews, mock technical interviews, and navigating the labor market transition before Job Expo.',
-    action: 'Join Mentorship Roster',
-    link: '/info/mentorship',
-  },
-  {
-    icon: 'BookOpen',
-    title: 'Curriculum Advisory',
-    desc: 'Participate in employer tracer studies and feedback sessions that update biennial engineering curricula with modern industry tools.',
-    action: 'Learn More',
-    link: '/info/overview',
-  },
-  {
-    icon: 'Sparkles',
-    title: 'Endowment & Innovation',
-    desc: 'Sponsor student graduation capstone projects, laboratory prototyping spaces, and entrepreneurship seed grants at the ASTU Incubation Arc.',
-    action: 'Support Innovation',
-    link: '/info/innovation',
-  },
 ];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -102,10 +49,9 @@ export default function AlumniCommunityPage() {
   const [activeModalMember, setActiveModalMember] = useState<CommunityMember | null>(null);
   const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
   const [membersLoading, setMembersLoading] = useState(true);
+  const [communityPage, setCommunityPage] = useState(0);
 
   const { metrics } = usePublicMetrics();
-
-  // Dynamic live stats directly from backend database
   const dynamicHeroStats = useMemo(() => [
     { label: 'Registered Alumni', value: metrics.registeredAlumniFormatted, sub: 'Globally Verified' },
     { label: 'Fields of Study', value: metrics.fieldsOfStudyFormatted, sub: 'Engineering & Tech' },
@@ -124,7 +70,7 @@ export default function AlumniCommunityPage() {
       { label: 'Historic Batches', value: '—', sub: 'Since 1993 Establishment' },
     ],
   });
-  const [regionalChapters, setRegionalChapters] = useState(DEFAULT_REGIONAL_CHAPTERS);
+  const [regionalChapters, setRegionalChapters] = useState<any[]>([]);
   const [eventBanner, setEventBanner] = useState({
     badge: 'Flagship Homecoming Event',
     title: 'ASTU Alumni Carnival 2026',
@@ -139,7 +85,7 @@ export default function AlumniCommunityPage() {
     secondaryButtonText: 'View Carnival Schedule',
     secondaryButtonLink: '/events',
   });
-  const [communityPillars, setCommunityPillars] = useState(DEFAULT_COMMUNITY_PILLARS);
+  const [communityPillars, setCommunityPillars] = useState<any[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -224,6 +170,19 @@ export default function AlumniCommunityPage() {
     });
   }, [communityMembers, selectedCategory, searchQuery]);
 
+  const COMMUNITY_PAGE_SIZE = 6;
+  const communityTotalPages = filteredMembers.length ? Math.ceil(filteredMembers.length / COMMUNITY_PAGE_SIZE) : 1;
+  const safeCommunityPage = Math.min(communityPage, Math.max(0, communityTotalPages - 1));
+  const pagedMembers = filteredMembers.slice(safeCommunityPage * COMMUNITY_PAGE_SIZE, safeCommunityPage * COMMUNITY_PAGE_SIZE + COMMUNITY_PAGE_SIZE);
+
+  useEffect(() => {
+    setCommunityPage(0);
+  }, [selectedCategory, searchQuery, communityMembers.length]);
+
+  useEffect(() => {
+    setCommunityPage((prev) => Math.min(prev, Math.max(0, communityTotalPages - 1)));
+  }, [communityTotalPages]);
+
   const handleCopyShare = (member: CommunityMember) => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(`${member.name} — ${member.role} at ${member.org} (ASTU Alumni Community)`);
@@ -232,11 +191,11 @@ export default function AlumniCommunityPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
+    <div className="flex min-h-screen flex-col bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100">
       <Navbar />
 
       {/* ── Modern Hero Section ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] text-white py-16 md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-astu-navy text-white py-16 md:py-24">
         {/* Soft brand glows — navy + green only */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-astu-green/10 blur-3xl" />
@@ -259,10 +218,13 @@ export default function AlumniCommunityPage() {
 
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div className="max-w-3xl">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-astu-green backdrop-blur-md">
-                <Globe className="h-3.5 w-3.5" /> ASTU Global Alumni Network
+              <p className="text-sm font-bold uppercase tracking-[0.28em] text-white/85">
+                ASTU-AMS
+              </p>
+              <span className="mt-3 inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-astu-green backdrop-blur-md">
+                <Globe className="h-3.5 w-3.5" /> Global Alumni Network
               </span>
-              <h1 className="mt-4 text-3xl font-black md:text-5xl lg:text-6xl tracking-tight leading-tight">
+              <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
                 {communityPageHero.title}
               </h1>
               <p className="mt-4 text-sm md:text-base text-slate-200 leading-relaxed max-w-2xl">
@@ -330,7 +292,8 @@ export default function AlumniCommunityPage() {
 
             <div className="flex items-center gap-2 text-xs font-bold text-slate-500 shrink-0">
               <Filter className="h-4 w-4" />
-              <span>Showing {filteredMembers.length} of {communityMembers.length} Leaders</span>
+              <span>Showing {filteredMembers.length === 0 ? 0 : safeCommunityPage * COMMUNITY_PAGE_SIZE + 1}–
+              {Math.min((safeCommunityPage + 1) * COMMUNITY_PAGE_SIZE, filteredMembers.length)} of {filteredMembers.length} Leaders</span>
             </div>
           </div>
 
@@ -398,8 +361,9 @@ export default function AlumniCommunityPage() {
             )}
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredMembers.map((member) => (
+          <>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pagedMembers.map((member) => (
               <article
                 key={member.id}
                 className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-astu-navy/30"
@@ -495,11 +459,21 @@ export default function AlumniCommunityPage() {
               </article>
             ))}
           </div>
+
+          <PaginationBar
+            currentPage={safeCommunityPage}
+            totalPages={communityTotalPages}
+            total={filteredMembers.length}
+            pageSize={COMMUNITY_PAGE_SIZE}
+            onPageChange={setCommunityPage}
+            noun="leaders"
+          />
+          </>
         )}
       </section>
 
       {/* ── Regional Chapters & Global Reach ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] text-white py-16 md:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-astu-navy text-white py-16 md:py-24">
         {/* Background Decorative Mesh & Glow */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-astu-green/10 blur-3xl" />
@@ -520,7 +494,7 @@ export default function AlumniCommunityPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {regionalChapters.map((chap) => (
               <div
                 key={chap.name}
@@ -555,7 +529,7 @@ export default function AlumniCommunityPage() {
 
       {/* ── Alumni Homecoming & Carnival 2026 Highlight ── */}
       <section className="mx-auto max-w-[1440px] px-4 md:px-8 py-14">
-        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+        <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-astu-navy via-primary-container to-astu-navy p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-astu-green">
@@ -713,6 +687,8 @@ export default function AlumniCommunityPage() {
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   );
 }

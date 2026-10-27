@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ClipboardList,
   Eye, FilePlus2, GripVertical, MoreHorizontal, Plus,
@@ -47,6 +48,8 @@ interface Section {
 }
 
 export default function SurveyManagement() {
+  const location = useLocation();
+  const isCms = location.pathname.startsWith('/cms');
   const [activeTab, setActiveTab] = useState<'all' | 'create' | 'analytics' | 'waves' | 'details' | 'edit'>('all');
   const [surveys, setSurveys] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -403,7 +406,7 @@ export default function SurveyManagement() {
       <AdminPageHeader
         title="Survey Management"
         subtitle="Design, launch, and monitor graduate tracer surveys for ABET accreditation. Track 6/12/24-month response rates and export accreditation-ready data."
-        breadcrumb={[{ label: 'Admin' }, { label: 'Surveys' }]}
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Surveys' }] : [{ label: 'Admin' }, { label: 'Surveys' }]}
         actions={
           <button
             onClick={() => { resetBuilder(); setActiveTab('create'); }}

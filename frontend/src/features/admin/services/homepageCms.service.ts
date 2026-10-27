@@ -100,7 +100,7 @@ export interface WorkshopItem {
   title: string;
   date: string;
   seats: string;
-  focus: string;
+  focus?: string;
   active: boolean;
   location?: string;
   image?: string;
@@ -881,6 +881,17 @@ export const homepageCmsService = {
     }
 
     return this.getSettings();
+  },
+
+  async fetchPublishedPartners(): Promise<Partner[]> {
+    try {
+      const res = await axios.get(`${API_URL}/content/homepage/config`, { timeout: 5000 });
+      const partners = res.data?.success ? res.data?.data?.partners : [];
+      if (!Array.isArray(partners)) return [];
+      return deepSanitizeImages(partners).filter((partner: Partner) => partner?.active !== false);
+    } catch {
+      return [];
+    }
   },
 
   async uploadMedia(file: File, album = 'General', altText = ''): Promise<{ url: string; id?: string }> {

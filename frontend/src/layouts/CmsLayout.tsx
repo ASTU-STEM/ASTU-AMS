@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Plus, Search, Sun, User, UserCircle2, Sparkles, Command, Clock } from 'lucide-react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import CmsSidebar from './CmsSidebar';
 import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import { useTheme } from '../hooks/useTheme';
 import { sidebarContentMarginClass } from './sidebarShared';
+import { notificationService } from '../features/notifications/services/notification.service';
 
 class CmsRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -51,12 +52,18 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/cms/registrations': { title: 'Registrations', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Registrations' }] },
   '/cms/events': { title: 'Events & Workshops', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Events' }] },
   '/cms/jobs': { title: 'Jobs & Placement Hub', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] },
+  '/cms/careers': { title: 'Jobs & Placement Hub', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] },
   '/cms/donations': { title: 'Donations & Giving', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Donations & Giving' }] },
+  '/cms/messages': { title: 'Messages', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Messages' }] },
+  '/cms/notifications': { title: 'Notifications', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Notifications' }] },
   '/cms/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'Content Management' }, { label: 'Homepage' }] },
   '/cms/partners': { title: 'Partners & Employers', breadcrumb: [{ label: 'Content Management' }, { label: 'Partners & Employers' }] },
+  '/cms/employers': { title: 'Partners & Employers', breadcrumb: [{ label: 'Content Management' }, { label: 'Partners & Employers' }] },
   '/cms/institutional-pages': { title: 'Institutional Pages Manager', breadcrumb: [{ label: 'Content Management' }, { label: 'Institutional Pages' }] },
   '/cms/content': { title: 'Announcements', breadcrumb: [{ label: 'Content Management' }, { label: 'Announcements' }] },
+  '/cms/announcements': { title: 'Announcements', breadcrumb: [{ label: 'Content Management' }, { label: 'Announcements' }] },
   '/cms/community': { title: 'Community', breadcrumb: [{ label: 'Content Management' }, { label: 'Community' }] },
+  '/cms/community-members': { title: 'Community Members', breadcrumb: [{ label: 'Content Management' }, { label: 'Community Members' }] },
   '/cms/media-gallery': { title: 'Media & Gallery Hub', breadcrumb: [{ label: 'Content Management' }, { label: 'Media & Gallery' }] },
   '/cms/gallery': { title: 'Campus Gallery', breadcrumb: [{ label: 'Content Management' }, { label: 'Media & Gallery' }] },
   '/cms/media': { title: 'Media Library', breadcrumb: [{ label: 'Content Management' }, { label: 'Media & Gallery' }] },
@@ -64,6 +71,7 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/cms/approvals': { title: 'Approval Workflow', breadcrumb: [{ label: 'Content Management' }, { label: 'Approvals' }] },
   '/cms/templates': { title: 'Content Templates', breadcrumb: [{ label: 'Content Management' }, { label: 'Templates' }] },
   '/cms/settings': { title: 'Settings', breadcrumb: [{ label: 'Content Management' }, { label: 'Settings' }] },
+  '/cms/profile': { title: 'My Profile', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Profile' }] },
 };
 
 const searchSuggestions = [
@@ -82,6 +90,11 @@ const searchSuggestions = [
   { label: 'Upload & browse media library', path: '/cms/media' },
   { label: 'Manage SEO & metadata', path: '/cms/seo' },
   { label: 'Review pending approvals', path: '/cms/approvals' },
+  { label: 'Open messages hub', path: '/cms/messages' },
+  { label: 'Notification center', path: '/cms/notifications' },
+  { label: 'Community members roster', path: '/cms/community-members' },
+  { label: 'Partners & employers portal', path: '/cms/partners' },
+  { label: 'Content templates', path: '/cms/templates' },
   { label: 'CMS settings', path: '/cms/settings' },
 ];
 
@@ -104,11 +117,43 @@ export default function CmsLayout() {
   const searchRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const [headerTime, setHeaderTime] = useState(formatHeaderDate());
+  const [notifications, setNotifications] = useState<{ id: string; color: string; text: string; time: string }[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setHeaderTime(formatHeaderDate()), 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadNotifications = async () => {
+      setNotificationsLoading(true);
+      try {
+        const items = await notificationService.getMyNotifications();
+        if (cancelled) return;
+        const mapped = (Array.isArray(items) ? items : [])
+          .slice(0, 5)
+          .map((n: any, idx: number) => ({
+            id: String(n.id ?? n._id ?? idx),
+            color: n.read || n.isRead ? 'bg-slate-300' : 'bg-emerald-500',
+            text: n.title || n.message || n.body || 'Notification update',
+            time: n.createdAt
+              ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(n.createdAt))
+              : 'Recently',
+          }));
+        setNotifications(mapped);
+      } catch {
+        if (!cancelled) setNotifications([]);
+      } finally {
+        if (!cancelled) setNotificationsLoading(false);
+      }
+    };
+    loadNotifications();
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
 
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed((prev) => {
@@ -168,8 +213,6 @@ export default function CmsLayout() {
     toast.success('Logged out successfully');
     navigate('/login');
   };
-
-  const notifications: { color: string; text: string; time: string }[] = [];
 
   const filteredSuggestions = searchQuery.trim()
     ? searchSuggestions.filter(s => s.label.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -315,6 +358,9 @@ export default function CmsLayout() {
                 <button type="button" onClick={() => setNotificationOpen(v => !v)}
                   className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-page)] transition-all">
                   <Bell className="h-4.5 w-4.5" />
+                  {notifications.some((n) => n.color === 'bg-emerald-500') && (
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+                  )}
                 </button>
                 {notificationOpen && (
                   <div className="absolute right-0 top-12 z-50 w-[360px] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg shadow-slate-200/50 dark:shadow-black/30">
@@ -325,22 +371,39 @@ export default function CmsLayout() {
                       </div>
                     </div>
                     <div className="py-1">
-                      {notifications.length === 0 ? (
+                      {notificationsLoading ? (
+                        <p className="px-4 py-8 text-center text-sm text-[var(--text-secondary)]">Loading…</p>
+                      ) : notifications.length === 0 ? (
                         <p className="px-4 py-8 text-center text-sm text-[var(--text-secondary)]">No notifications yet</p>
                       ) : (
                         notifications.map((item) => (
-                          <div key={item.text} className="flex items-start gap-3 px-4 py-2.5 hover:bg-[var(--bg-page)] transition-all cursor-pointer">
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => {
+                              setNotificationOpen(false);
+                              navigate('/cms/notifications');
+                            }}
+                            className="flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-[var(--bg-page)] transition-all cursor-pointer"
+                          >
                             <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${item.color}`} />
                             <div className="min-w-0">
-                              <p className="text-sm text-[var(--text-primary)]">{item.text}</p>
+                              <p className="text-sm text-[var(--text-primary)] line-clamp-2">{item.text}</p>
                               <p className="text-xs text-[var(--text-muted)] mt-0.5">{item.time}</p>
                             </div>
-                          </div>
+                          </button>
                         ))
                       )}
                     </div>
                     <div className="border-t border-[var(--border-color)] px-4 py-3">
-                      <button type="button" className="text-sm font-semibold text-[#003366] dark:text-[#3b82f6] hover:text-[#002a55] dark:hover:text-[#60a5fa] transition-colors">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNotificationOpen(false);
+                          navigate('/cms/notifications');
+                        }}
+                        className="text-sm font-semibold text-[#003366] dark:text-[#3b82f6] hover:text-[#002a55] dark:hover:text-[#60a5fa] transition-colors cursor-pointer"
+                      >
                         View all notifications →
                       </button>
                     </div>

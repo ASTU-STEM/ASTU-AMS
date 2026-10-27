@@ -537,13 +537,25 @@ export default function EventWorkshopManagement() {
     setSelectedEventIds([]);
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedEventIds.length === 0) return;
-    if (confirm(`Are you sure you want to delete ${selectedEventIds.length} selected event(s)?`)) {
-      setEvents((prev) => prev.filter((e) => !selectedEventIds.includes(e.id)));
-      selectedEventIds.forEach((id) => eventsService.deleteEvent(id).catch(() => null));
-      toast.success(`Removed ${selectedEventIds.length} event(s)`);
-      setSelectedEventIds([]);
+    if (!confirm(`Are you sure you want to delete ${selectedEventIds.length} selected event(s)?`)) return;
+
+    const results = await Promise.all(selectedEventIds.map((id) => eventsService.deleteEvent(id)));
+    const deletedIds = selectedEventIds.filter((_, idx) => results[idx]);
+    const failed = selectedEventIds.length - deletedIds.length;
+
+    if (deletedIds.length > 0) {
+      setEvents((prev) => prev.filter((e) => !deletedIds.includes(e.id)));
+    }
+    setSelectedEventIds([]);
+
+    if (failed === 0) {
+      toast.success(`Removed ${deletedIds.length} event(s)`);
+    } else if (deletedIds.length === 0) {
+      toast.error('Could not delete selected events on the server.');
+    } else {
+      toast.error(`Removed ${deletedIds.length}, but ${failed} could not be deleted on the server.`);
     }
   };
 
@@ -595,89 +607,6 @@ export default function EventWorkshopManagement() {
         (r.contentTitle && event.title && r.contentTitle.toLowerCase().includes(event.title.toLowerCase())) ||
         (event.title && r.contentTitle && event.title.toLowerCase().includes(r.contentTitle.toLowerCase()))
     );
-
-    if (matches.length === 0) {
-      const seeded: AlumniRegistration[] = [
-        {
-          id: `REG-${event.id}-01`,
-          contentId: event.id,
-          contentTitle: event.title,
-          fullName: 'Tewodros Kassahun Bekele',
-          studentId: 'UGR/18920/14',
-          email: 'tewodros.kassahun@astu.edu.et',
-          phone: '+251 91 234 5678',
-          classYear: 'Class of 2024',
-          department: 'Software Engineering',
-          currentEmployer: 'Safaricom Ethiopia',
-          jobTitle: 'Junior DevOps Engineer',
-          employmentStatus: 'Employed Full-time',
-          registeredAt: new Date(Date.now() - 86400000 * 2).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: 'Confirmed',
-          accreditationVerified: true,
-          cgpa: '3.88',
-          gender: 'Male',
-        },
-        {
-          id: `REG-${event.id}-02`,
-          contentId: event.id,
-          contentTitle: event.title,
-          fullName: 'Bethlehem Demisse Tadesse',
-          studentId: 'UGR/17451/13',
-          email: 'bethlehem.demisse@gmail.com',
-          phone: '+251 92 111 2233',
-          classYear: 'Class of 2023',
-          department: 'Computer Science',
-          currentEmployer: 'Commercial Bank of Ethiopia',
-          jobTitle: 'Database Specialist',
-          employmentStatus: 'Employed Full-time',
-          registeredAt: new Date(Date.now() - 86400000 * 3).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: 'Confirmed',
-          accreditationVerified: true,
-          cgpa: '3.92',
-          gender: 'Female',
-        },
-        {
-          id: `REG-${event.id}-03`,
-          contentId: event.id,
-          contentTitle: event.title,
-          fullName: 'Amanuel Girma Kebede',
-          studentId: 'UGR/19002/14',
-          email: 'amanuel.girma@yahoo.com',
-          phone: '+251 93 456 7890',
-          classYear: 'Class of 2024',
-          department: 'Electrical Engineering',
-          currentEmployer: 'Ethio Telecom',
-          jobTitle: 'Network Operations Engineer',
-          employmentStatus: 'Employed Full-time',
-          registeredAt: new Date(Date.now() - 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: 'Pending Approval',
-          accreditationVerified: true,
-          cgpa: '3.75',
-          gender: 'Male',
-        },
-        {
-          id: `REG-${event.id}-04`,
-          contentId: event.id,
-          contentTitle: event.title,
-          fullName: 'Selamawit Hailemariam',
-          studentId: 'UGR/16200/12',
-          email: 'selamawit.haile@astu.edu.et',
-          phone: '+251 94 888 9900',
-          classYear: 'Class of 2022',
-          department: 'Mechanical Engineering',
-          currentEmployer: 'Ethiopian Airlines',
-          jobTitle: 'Aviation Maintenance Systems',
-          employmentStatus: 'Employed Full-time',
-          registeredAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: 'Confirmed',
-          accreditationVerified: true,
-          cgpa: '3.81',
-          gender: 'Female',
-        },
-      ];
-      seeded.forEach((s) => registrationService.addRegistration(s));
-      matches = seeded;
-    }
 
     setEventRegistrations(matches);
   }, []);
@@ -796,44 +725,61 @@ export default function EventWorkshopManagement() {
     };
 
     if (editingId) {
-      await eventsService
-        .updateEvent(editingId, {
+      try {
+        const updated = await eventsService.updateEvent(editingId, {
           title: payload.title,
           description: payload.description,
           date: new Date(payload.date).toISOString(),
           location: payload.location,
           type: payload.kind,
-        })
-        .catch(() => null);
-      setEvents((prev) => prev.map((e) => (e.id === editingId ? payload : e)));
-      toast.success(`Updated “${payload.title}” successfully!`);
+        });
+        if (!updated) {
+          toast.error('Could not update event on the server. Local draft was not saved as live.');
+          return;
+        }
+        setEvents((prev) => prev.map((e) => (e.id === editingId ? { ...payload, id: updated.id || editingId } : e)));
+        toast.success(`Updated “${payload.title}” successfully!`);
+      } catch {
+        toast.error('Failed to update event. Please try again.');
+        return;
+      }
     } else {
-      await eventsService
-        .createEvent({
+      try {
+        const created = await eventsService.createEvent({
           title: payload.title,
           description: payload.description,
           date: new Date(payload.date).toISOString(),
           location: payload.location,
           type: payload.kind,
-        })
-        .catch(() => null);
-      setEvents((prev) => [payload, ...prev]);
-      toast.success(`Published “${payload.title}” successfully!`);
+        });
+        if (!created) {
+          toast.error('Could not publish event to the server.');
+          return;
+        }
+        setEvents((prev) => [{ ...payload, id: created.id || payload.id }, ...prev]);
+        toast.success(`Published “${payload.title}” successfully!`);
+      } catch {
+        toast.error('Failed to create event. Please try again.');
+        return;
+      }
     }
     resetForm();
   };
 
   const togglePin = (id: string) => {
     setEvents((prev) => prev.map((e) => (e.id === id ? { ...e, pinned: !e.pinned } : e)));
-    toast.success('Pin status updated');
+    toast.success('Pin updated locally — reopen and save the event to persist server-side fields');
   };
 
-  const deleteEvent = (id: string) => {
-    if (confirm('Are you sure you want to delete this event post?')) {
-      setEvents((prev) => prev.filter((e) => e.id !== id));
-      eventsService.deleteEvent(id).catch(() => null);
-      toast.success('Post removed');
+  const deleteEvent = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this event post?')) return;
+    const ok = await eventsService.deleteEvent(id);
+    if (!ok) {
+      toast.error('Could not delete event on the server.');
+      return;
     }
+    setEvents((prev) => prev.filter((e) => e.id !== id));
+    toast.success('Post removed');
   };
 
   const editEvent = (event: EventItem) => {
@@ -866,7 +812,7 @@ export default function EventWorkshopManagement() {
       <AdminPageHeader
         title="Events & Workshops CMS"
         subtitle="Publish, pin, edit, and delete events/workshops. Homepage shows pinned + latest 3 posts; /events shows all posts."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Events & Workshops' }]}
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Events & Workshops' }]}
         actions={
           <div className="flex flex-wrap items-center justify-end gap-2">
             <button
@@ -2188,14 +2134,17 @@ export default function EventWorkshopManagement() {
               });
 
               if (filteredAttendees.length === 0) {
+                const hasAny = eventRegistrations.length > 0;
                 return (
                   <div className="py-12 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800/40">
                     <Users className="mx-auto h-8 w-8 text-slate-300 mb-2" />
                     <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      No attendees match your filters.
+                      {hasAny ? 'No attendees match your filters.' : 'No attendees registered yet'}
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      You can register attendees manually using the button above.
+                      {hasAny
+                        ? 'Clear search or status filters to see the full roster.'
+                        : 'Registrations will appear here once alumni RSVP, or add attendees manually.'}
                     </p>
                   </div>
                 );

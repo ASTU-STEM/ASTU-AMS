@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Bar,
   BarChart,
@@ -172,6 +172,8 @@ function SectionCard({
 
 export default function JobsManagement() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isCms = location.pathname.startsWith('/cms');
   const [activeTab, setActiveTab] = useState<'jobs' | 'applications' | 'analytics'>('jobs');
   const [selectedJobStatus, setSelectedJobStatus] = useState<'All' | JobStatus>('All');
   const [selectedEmployer, setSelectedEmployer] = useState('All');
@@ -607,7 +609,7 @@ export default function JobsManagement() {
       <AdminPageHeader
         title="Jobs Management"
         subtitle="Track employer posts, applications, and hiring outcomes."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Jobs Management' }]}
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] : [{ label: 'Admin' }, { label: 'Jobs Management' }]}
         actions={
           <button
             type="button"

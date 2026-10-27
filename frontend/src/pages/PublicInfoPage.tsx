@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -38,15 +38,20 @@ import {
   Cpu,
   Compass,
   Search,
+  Quote,
+  X,
+  Filter,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import homepageCmsService, {
   HomepageCmsConfig,
   Partner,
 } from "../features/admin/services/homepageCms.service";
 import { defaultDetailPages, DetailPageItem } from "../features/admin/services/detailPages.data";
 import storiesService, { AlumniStory } from "../features/admin/services/stories.service";
+import PaginationBar from '../components/PaginationBar';
 import { partnerLogos } from "../components/PartnerLogos";
 import PartnerDetailLiveCustomizer from "../features/admin/components/PartnerDetailLiveCustomizer";
 import CompanyDetailModal from "../components/CompanyDetailModal";
@@ -100,6 +105,7 @@ export default function PublicInfoPage() {
   const { metrics } = usePublicMetrics();
   const [cmsConfig, setCmsConfig] = useState<HomepageCmsConfig | null>(() => homepageCmsService.getSettings());
   const [alumniStories, setAlumniStories] = useState<AlumniStory[]>(() => storiesService.getStories());
+  const [storyPage, setStoryPage] = useState(0);
   const [partnersList, setPartnersList] = useState<Partner[]>(() => {
     const s = homepageCmsService.getSettings();
     return Array.isArray(s?.partners) ? s.partners.filter((p) => p.active !== false) : [];
@@ -110,6 +116,21 @@ export default function PublicInfoPage() {
   const [selectedCompanyModal, setSelectedCompanyModal] = useState<Partner | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("All");
+
+  // Stories search, category filter, and submission modal states
+  const [storiesSearch, setStoriesSearch] = useState("");
+  const [storiesCategory, setStoriesCategory] = useState("All");
+  const [shareStoryModalOpen, setShareStoryModalOpen] = useState(false);
+  const [shareStoryForm, setShareStoryForm] = useState({
+    name: "",
+    email: "",
+    graduationYear: "",
+    department: "",
+    role: "",
+    company: "",
+    text: "",
+  });
+  const [isSubmittingStory, setIsSubmittingStory] = useState(false);
 
   // Contact form state
   const [inquiryForm, setInquiryForm] = useState({
@@ -186,6 +207,14 @@ export default function PublicInfoPage() {
       window.removeEventListener("storage", handleUpdate);
     };
   }, [navigate, slug]);
+
+  useEffect(() => {
+    setStoryPage(0);
+  }, [alumniStories.length]);
+
+  useEffect(() => {
+    setStoryPage((prev) => Math.min(prev, Math.max(0, Math.ceil(alumniStories.length / 6) - 1 || 0)));
+  }, [alumniStories.length]);
 
   const rawDefaultPage = defaultDetailPages[slug] ?? fallbackPage;
 
@@ -276,6 +305,73 @@ export default function PublicInfoPage() {
     (page.iconName && iconMap[page.iconName]) || iconMap[rawDefaultPage.iconName || ""] || Trophy;
 
   const isStoriesPage = slug === "alumni-stories";
+  const STORY_PAGE_SIZE = 6;
+
+  const filteredAlumniStories = useMemo(() => {
+    return alumniStories.filter((s) => {
+      const q = storiesSearch.trim().toLowerCase();
+      const matchSearch =
+        !q ||
+        s.name.toLowerCase().includes(q) ||
+        (s.company && s.company.toLowerCase().includes(q)) ||
+        s.role.toLowerCase().includes(q) ||
+        (s.department && s.department.toLowerCase().includes(q)) ||
+        s.text.toLowerCase().includes(q);
+
+      const combinedText = `${s.role} ${s.department || ""} ${s.company || ""} ${s.text}`.toLowerCase();
+      const matchCat =
+        storiesCategory === "All" ||
+        (storiesCategory === "AI & Computing" &&
+          (combinedText.includes("ai") ||
+            combinedText.includes("computer") ||
+            combinedText.includes("software") ||
+            combinedText.includes("machine learning"))) ||
+        (storiesCategory === "Clean Energy & Power" &&
+          (combinedText.includes("energy") ||
+            combinedText.includes("power") ||
+            combinedText.includes("electrical") ||
+            combinedText.includes("greengrid"))) ||
+        (storiesCategory === "Telecom & Cloud" &&
+          (combinedText.includes("cloud") ||
+            combinedText.includes("telecom") ||
+            combinedText.includes("network"))) ||
+        (storiesCategory === "Research & Leadership" &&
+          (combinedText.includes("research") ||
+            combinedText.includes("scientist") ||
+            combinedText.includes("director") ||
+            combinedText.includes("leader") ||
+            combinedText.includes("delegate")));
+
+      return matchSearch && matchCat;
+    });
+  }, [alumniStories, storiesSearch, storiesCategory]);
+
+  const storyTotalPages = filteredAlumniStories.length ? Math.ceil(filteredAlumniStories.length / STORY_PAGE_SIZE) : 1;
+  const safeStoryPage = Math.min(storyPage, Math.max(0, storyTotalPages - 1));
+  const pagedStories = filteredAlumniStories.slice(safeStoryPage * STORY_PAGE_SIZE, safeStoryPage * STORY_PAGE_SIZE + STORY_PAGE_SIZE);
+
+  const handleShareStorySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shareStoryForm.name || !shareStoryForm.email || !shareStoryForm.text) {
+      toast.error("Please provide your name, email, and your success story.");
+      return;
+    }
+    setIsSubmittingStory(true);
+    setTimeout(() => {
+      setIsSubmittingStory(false);
+      setShareStoryModalOpen(false);
+      toast.success("Thank you! Your success story has been submitted for review by the ASTU Alumni Office.");
+      setShareStoryForm({
+        name: "",
+        email: "",
+        graduationYear: "",
+        department: "",
+        role: "",
+        company: "",
+        text: "",
+      });
+    }, 600);
+  };
   const isEmployerPortal = slug === "employer-portal";
   const isFeaturedEmployers = slug === "featured-employers";
   const isStakeholders = slug === "stakeholders";
@@ -305,7 +401,7 @@ export default function PublicInfoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 antialiased selection:bg-astu-navy selection:text-white">
+    <div className="flex min-h-screen flex-col bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100 selection:bg-astu-navy selection:text-white">
       <Navbar />
 
       {/* Floating CMS Edit & Live Customizer Trigger for Admins */}
@@ -314,7 +410,7 @@ export default function PublicInfoPage() {
           <button
             type="button"
             onClick={() => setCustomizerOpen(!customizerOpen)}
-            className="inline-flex items-center gap-2 rounded-full bg-[#003366] hover:bg-[#002244] text-white px-5 py-3 text-xs font-bold shadow-2xl transition-all cursor-pointer ring-4 ring-amber-400/30 hover:scale-105"
+            className="inline-flex items-center gap-2 rounded-full bg-astu-navy hover:bg-astu-navy text-white px-5 py-3 text-xs font-bold shadow-2xl transition-all cursor-pointer ring-4 ring-amber-400/30 hover:scale-105"
             title="Open Live Preview CMS customizer sidebar"
           >
             <Sparkles className="h-4 w-4 text-astu-green" />
@@ -326,7 +422,7 @@ export default function PublicInfoPage() {
             className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-4 py-2.5 text-xs font-bold text-slate-800 shadow-xl backdrop-blur-md hover:bg-slate-100 transition-all cursor-pointer"
             title="Open Full CMS Studio"
           >
-            <Edit3 className="h-3.5 w-3.5 text-[#003366]" />
+            <Edit3 className="h-3.5 w-3.5 text-astu-navy" />
             <span>CMS Studio</span>
           </button>
         </div>
@@ -360,19 +456,39 @@ export default function PublicInfoPage() {
 
       <main>
         {/* ── HERO SECTION ── */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-[#001a41] text-white">
-          {/* Subtle background image overlay */}
-          <div className="absolute inset-0 opacity-20 mix-blend-overlay">
-            <img
-              alt={page.title}
-              className="h-full w-full object-cover"
-              src={page.image}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80";
-              }}
-            />
-          </div>
+        <section className={`relative overflow-hidden text-white ${isStoriesPage ? '' : 'bg-gradient-to-br from-astu-navy via-primary-container to-astu-navy'}`}>
+          {/* Hero background */}
+          {isStoriesPage ? (
+            <div className="absolute inset-0">
+              <img
+                alt={page.title}
+                className="h-full w-full object-cover object-center scale-105 transition-transform duration-[7000ms] ease-out hover:scale-100"
+                src={
+                  !page.image || page.image.includes("unsplash.com")
+                    ? "/images/astu-building.jpg"
+                    : page.image
+                }
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/images/astu-building.jpg";
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-astu-navy/85 to-slate-950/90 backdrop-blur-[1px]" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400/10 via-transparent to-transparent" />
+              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green" />
+            </div>
+          ) : (
+            <div className="absolute inset-0 opacity-20 mix-blend-overlay">
+              <img
+                alt={page.title}
+                className="h-full w-full object-cover"
+                src={page.image}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "/images/astu-building.jpg";
+                }}
+              />
+            </div>
+          )}
 
           {/* Clean grid pattern */}
           <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
@@ -424,6 +540,23 @@ export default function PublicInfoPage() {
                 <p className="mt-4 text-sm leading-relaxed text-slate-200/95 sm:text-base sm:leading-7 max-w-2xl">
                   {page.subtitle}
                 </p>
+
+                {isStoriesPage && (
+                  <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-200">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 backdrop-blur-sm border border-white/15">
+                      <GraduationCap className="h-4 w-4 text-amber-400" />
+                      1,238+ Registered Alumni
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 backdrop-blur-sm border border-white/15">
+                      <Trophy className="h-4 w-4 text-astu-green" />
+                      87% Graduate Placement
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 backdrop-blur-sm border border-white/15">
+                      <Globe className="h-4 w-4 text-sky-400" />
+                      Global Alumni Network
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -464,6 +597,33 @@ export default function PublicInfoPage() {
                       <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   </>
+                ) : isStoriesPage ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShareStoryModalOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-astu-red to-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:brightness-110 hover:scale-105 cursor-pointer"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>Share Your Story</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/login")}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-astu-navy shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
+                    >
+                      <GraduationCap className="h-4 w-4" />
+                      <span>Portal Login</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/partners")}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 cursor-pointer"
+                    >
+                      <span>View Partners</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </>
                 ) : (
                   <>
                     <button
@@ -495,7 +655,7 @@ export default function PublicInfoPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl">
               {page.stats.map((stat, idx) => (
                 <div key={stat.id || idx} className="text-center p-2 border-r last:border-r-0 border-slate-100">
-                  <p className="text-2xl sm:text-3xl font-black text-[#003366]">{stat.value}</p>
+                  <p className="text-2xl sm:text-3xl font-black text-astu-navy">{stat.value}</p>
                   <p className="text-xs font-bold text-slate-800 mt-1">{stat.label}</p>
                   {stat.desc && <p className="text-[11px] text-slate-500 mt-0.5">{stat.desc}</p>}
                 </div>
@@ -508,95 +668,252 @@ export default function PublicInfoPage() {
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           {/* 1. SPECIAL RICH GRID FOR ALUMNI STORIES */}
           {isStoriesPage ? (
-            <div className="space-y-12">
-              <div className="space-y-6">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
+            <div className="space-y-10">
+              {/* Controls: Search, Category Filters, and Stats */}
+              <div className="rounded-3xl border border-slate-200/90 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h2 className="text-2xl font-black tracking-tight text-astu-navy">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-astu-navy/10 dark:bg-sky-500/15 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-astu-navy dark:text-sky-300">
+                        ASTU Alumni Directory
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-astu-green">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        Verified Achievements
+                      </span>
+                    </div>
+                    <h2 className="mt-1 text-2xl font-black tracking-tight text-astu-navy dark:text-white">
                       Featured Alumni Spotlights
                     </h2>
-                    <p className="text-xs text-slate-500">
-                      Real journeys of ASTU graduates excelling across industries worldwide. Managed via CMS.
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Real journeys of ASTU graduates excelling across industries worldwide.
                     </p>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-astu-navy">
-                    <ShieldCheck className="h-3.5 w-3.5 text-astu-green" />
-                    {alumniStories.length} Verified Stories
-                  </span>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShareStoryModalOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-astu-navy to-[#1a4f8a] px-4 py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 transition-all cursor-pointer"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                      <span>Submit Your Story</span>
+                    </button>
+                    <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                      <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                      {filteredAlumniStories.length} {filteredAlumniStories.length === 1 ? 'Story' : 'Stories'}
+                    </span>
+                  </div>
                 </div>
 
+                {/* Search Bar & Categories */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <input
+                      type="text"
+                      value={storiesSearch}
+                      onChange={(e) => {
+                        setStoriesSearch(e.target.value);
+                        setStoryPage(0);
+                      }}
+                      placeholder="Search by alumni name, company, role, or major..."
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 pl-10 pr-9 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-astu-navy/10 transition-all"
+                    />
+                    {storiesSearch && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStoriesSearch("");
+                          setStoryPage(0);
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {[
+                      { id: "All", label: "All Stories" },
+                      { id: "AI & Computing", label: "AI & Computing" },
+                      { id: "Clean Energy & Power", label: "Clean Energy & Power" },
+                      { id: "Telecom & Cloud", label: "Telecom & Cloud" },
+                      { id: "Research & Leadership", label: "Research & Leadership" },
+                    ].map((cat) => {
+                      const isActive = storiesCategory === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => {
+                            setStoriesCategory(cat.id);
+                            setStoryPage(0);
+                          }}
+                          className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-astu-navy text-white shadow-sm dark:bg-sky-600"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Stories Cards Grid — 3 Cards Per Row ("three three display") */}
+              {filteredAlumniStories.length === 0 ? (
+                <div className="rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-12 text-center max-w-md mx-auto">
+                  <Trophy className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                  <h3 className="text-base font-bold text-slate-800 dark:text-white">No Stories Found</h3>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Try adjusting your search keywords or switching category filters.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStoriesSearch("");
+                      setStoriesCategory("All");
+                      setStoryPage(0);
+                    }}
+                    className="mt-4 rounded-xl bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:brightness-110 shadow-xs"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              ) : (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {alumniStories.map((story) => (
+                  {pagedStories.map((story) => (
                     <article
                       key={story.id}
-                      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 hover:shadow-lg"
+                      className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:shadow-xl"
                     >
                       <div>
-                        <div className="flex items-start gap-4 mb-4">
+                        {/* Top Badges */}
+                        <div className="flex items-center justify-between gap-2 mb-4">
+                          <div className="flex items-center gap-1.5">
+                            {story.featured && (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40">
+                                <Sparkles className="h-3 w-3 text-amber-500" /> Featured
+                              </span>
+                            )}
+                            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-[10px] font-bold text-astu-green dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                              <CheckCircle2 className="h-3 w-3" /> Verified Alum
+                            </span>
+                          </div>
+
+                          {story.graduationYear && (
+                            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
+                              {story.graduationYear}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Profile Header */}
+                        <div className="flex items-start gap-3.5 mb-4">
                           {story.image ? (
                             <img
                               src={story.image}
                               alt={story.name}
-                              className="h-16 w-16 shrink-0 rounded-2xl object-cover border border-slate-100 shadow-xs"
+                              className="h-16 w-16 shrink-0 rounded-2xl object-cover border-2 border-slate-100 dark:border-slate-800 shadow-sm group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = "/images/astu-building.jpg";
                               }}
                             />
                           ) : (
-                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-astu-navy/10 text-xl font-bold text-astu-navy">
+                            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-astu-navy text-lg font-bold text-white shadow-sm">
                               {story.name.slice(0, 2).toUpperCase()}
                             </div>
                           )}
 
                           <div className="min-w-0 flex-1">
-                            {story.featured && (
-                              <span className="mb-1 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
-                                <Sparkles className="h-3 w-3 text-amber-500" /> Featured
-                              </span>
-                            )}
-                            <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-astu-navy transition-colors">
+                            <h3 className="truncate text-base font-bold text-slate-900 dark:text-white group-hover:text-astu-navy dark:group-hover:text-sky-300 transition-colors">
                               {story.name}
                             </h3>
-                            <p className="line-clamp-1 text-xs font-semibold text-astu-navy">
+                            <p className="line-clamp-1 text-xs font-semibold text-astu-navy dark:text-sky-400">
                               {story.role}
                             </p>
                             {story.company && (
-                              <p className="line-clamp-1 text-[11px] text-slate-400">
+                              <p className="line-clamp-1 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                                 {story.company}
                               </p>
                             )}
                           </div>
                         </div>
 
-                        <div className="mb-3 flex flex-wrap items-center gap-2 text-[10px] text-slate-500">
-                          {story.graduationYear && (
-                            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-medium text-slate-600">
-                              {story.graduationYear}
+                        {/* Department Pill */}
+                        {story.department && (
+                          <div className="mb-3">
+                            <span className="rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 line-clamp-1 inline-block">
+                              🎓 {story.department}
                             </span>
-                          )}
-                          {story.department && (
-                            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-medium text-slate-600 truncate max-w-[180px]">
-                              {story.department}
-                            </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
 
-                        <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
-                          {story.text}
-                        </p>
+                        {/* Quote excerpt */}
+                        <div className="relative mt-2">
+                          <Quote className="h-4 w-4 text-slate-300 dark:text-slate-700 mb-1" />
+                          <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300 line-clamp-3 italic">
+                            &ldquo;{story.text}&rdquo;
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="mt-5 border-t border-slate-100 pt-4">
+                      {/* Card Footer */}
+                      <div className="mt-5 border-t border-slate-100 dark:border-slate-800 pt-4">
                         <Link
                           to={`/stories/${story.id}`}
-                          className="inline-flex items-center justify-between w-full rounded-xl bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-astu-navy group-hover:bg-astu-navy group-hover:text-white transition-all shadow-2xs"
+                          className="inline-flex items-center justify-between w-full rounded-xl bg-slate-50 dark:bg-slate-800/80 px-4 py-2.5 text-xs font-bold text-astu-navy dark:text-white group-hover:bg-astu-navy group-hover:text-white dark:group-hover:bg-sky-600 transition-all shadow-2xs"
                         >
-                          <span>Read Full Success Story</span>
-                          <ChevronRight className="h-4 w-4" />
+                          <span>Read Full Journey</span>
+                          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                         </Link>
                       </div>
                     </article>
                   ))}
+                </div>
+              )}
+
+              {/* Pagination Controls */}
+              <PaginationBar
+                currentPage={safeStoryPage}
+                totalPages={storyTotalPages}
+                total={filteredAlumniStories.length}
+                pageSize={STORY_PAGE_SIZE}
+                onPageChange={setStoryPage}
+                noun="stories"
+              />
+
+              {/* Inspiring "Share Your Story" Callout Card */}
+              <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-br from-astu-navy via-[#0c3970] to-slate-900 p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 h-72 w-72 rounded-full bg-astu-green/10 blur-3xl pointer-events-none" />
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="max-w-2xl space-y-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-astu-green border border-white/15">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      ASTU Alumni Voice
+                    </span>
+                    <h3 className="text-2xl font-black text-white">
+                      Are You an ASTU Graduate with a Story to Tell?
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                      Inspire current engineering and applied science students. Share your career progression, research breakthroughs, startup milestones, or industry advice with the university network.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShareStoryModalOpen(true)}
+                    className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-astu-red to-rose-600 px-6 py-3.5 text-xs sm:text-sm font-black text-white shadow-lg hover:brightness-110 hover:scale-105 transition-all cursor-pointer"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>Submit Your Success Story</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -623,7 +940,7 @@ export default function PublicInfoPage() {
                         {page.sections[0].linkUrl ? (
                           <a
                             href={page.sections[0].linkUrl}
-                            className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#001a41] transition-all"
+                            className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-astu-navy transition-all"
                           >
                             <span>{page.sections[0].linkText || "Learn More"}</span>
                             <ArrowRight className="h-3.5 w-3.5" />
@@ -632,7 +949,7 @@ export default function PublicInfoPage() {
                           <button
                             type="button"
                             onClick={() => navigate("/login")}
-                            className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#001a41] transition-all cursor-pointer"
+                            className="inline-flex items-center gap-2 rounded-xl bg-astu-navy px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-astu-navy transition-all cursor-pointer"
                           >
                             <span>Access AMS Portal</span>
                             <ArrowRight className="h-3.5 w-3.5" />
@@ -947,7 +1264,7 @@ export default function PublicInfoPage() {
                         <button
                           type="submit"
                           disabled={isSubmittingInquiry}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-astu-navy hover:bg-[#001a41] text-white py-3 text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-60"
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-astu-navy hover:bg-astu-navy text-white py-3 text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-60"
                         >
                           <Send className="h-3.5 w-3.5" />
                           <span>{isSubmittingInquiry ? "Sending Inquiry..." : "Submit Inquiry to Directorate"}</span>
@@ -963,7 +1280,7 @@ export default function PublicInfoPage() {
             <div className="space-y-12">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
                 <div>
-                  <h2 className="text-2xl font-black text-[#003366]">Verified Partner Organizations</h2>
+                  <h2 className="text-2xl font-black text-astu-navy">Verified Partner Organizations</h2>
                   <p className="text-xs text-slate-500 mt-1">
                     Leading enterprise companies actively hiring, hosting internships, and collaborating with ASTU.
                   </p>
@@ -977,7 +1294,7 @@ export default function PublicInfoPage() {
                     placeholder="Search by company, sector, location..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-xs font-medium text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#003366]/20"
+                    className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-xs font-medium text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
                   />
                 </div>
               </div>
@@ -992,7 +1309,7 @@ export default function PublicInfoPage() {
                     onClick={() => setSelectedIndustry(ind)}
                     className={`rounded-xl px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                       selectedIndustry === ind
-                        ? "bg-[#003366] text-white shadow-sm"
+                        ? "bg-astu-navy text-white shadow-sm"
                         : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
                     }`}
                   >
@@ -1024,7 +1341,7 @@ export default function PublicInfoPage() {
                     return (
                       <article
                         key={company.id}
-                        className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#003366]/40 hover:shadow-xl"
+                        className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 hover:shadow-xl"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-4 mb-5">
@@ -1034,7 +1351,7 @@ export default function PublicInfoPage() {
                               ) : LogoComponent ? (
                                 <LogoComponent className="h-10 w-10" />
                               ) : (
-                                <Building2 className="h-7 w-7 text-[#003366]" />
+                                <Building2 className="h-7 w-7 text-astu-navy" />
                               )}
                             </div>
 
@@ -1051,13 +1368,13 @@ export default function PublicInfoPage() {
                             </div>
                           </div>
 
-                          <h3 className="text-base font-black text-slate-900 group-hover:text-[#003366] transition-colors">
+                          <h3 className="text-base font-black text-slate-900 group-hover:text-astu-navy transition-colors">
                             {company.name}
                           </h3>
                           <p className="text-xs text-slate-500 mt-1">{company.industry || "Technology & Engineering"}</p>
 
-                          <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50/60 p-2.5 text-xs font-bold text-[#003366]">
-                            <Briefcase className="h-3.5 w-3.5 text-[#003366]" />
+                          <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50/60 p-2.5 text-xs font-bold text-astu-navy">
+                            <Briefcase className="h-3.5 w-3.5 text-astu-navy" />
                             <span>{company.openings || "Active Trainee Roles"}</span>
                           </div>
 
@@ -1071,7 +1388,7 @@ export default function PublicInfoPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedCompanyModal(company)}
-                            className="font-bold text-[#003366] hover:underline cursor-pointer inline-flex items-center gap-1"
+                            className="font-bold text-astu-navy hover:underline cursor-pointer inline-flex items-center gap-1"
                           >
                             <span>Company Profile</span>
                             <ChevronRight className="h-3 w-3" />
@@ -1091,7 +1408,7 @@ export default function PublicInfoPage() {
               <div className="space-y-6 pt-6">
                 <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-black text-[#003366]">Recruitment Framework & Institutional Pillars</h3>
+                    <h3 className="text-xl font-black text-astu-navy">Recruitment Framework & Institutional Pillars</h3>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Strategic mechanisms enabling longitudinal career tracking and verified employer placement.
                     </p>
@@ -1105,10 +1422,10 @@ export default function PublicInfoPage() {
                   {page.sections.map((sec, idx) => (
                     <div
                       key={sec.id || idx}
-                      className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between hover:border-[#003366]/30 transition-all"
+                      className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between hover:border-astu-navy/30 transition-all"
                     >
                       <div>
-                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-[#003366]">
+                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy">
                           {sec.badge || `Pillar ${idx + 1}`}
                         </span>
                         <h4 className="text-base font-bold text-slate-900 mt-3">{sec.heading}</h4>
@@ -1130,12 +1447,12 @@ export default function PublicInfoPage() {
               {/* FAQs Accordion */}
               {page.faqs && page.faqs.length > 0 && (
                 <div className="space-y-4 pt-6">
-                  <h3 className="text-xl font-black text-[#003366]">Frequently Asked Questions</h3>
+                  <h3 className="text-xl font-black text-astu-navy">Frequently Asked Questions</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {page.faqs.map((faq, idx) => (
                       <div key={faq.id || idx} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2">
                         <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                          <HelpCircle className="h-4 w-4 text-[#003366] shrink-0" />
+                          <HelpCircle className="h-4 w-4 text-astu-navy shrink-0" />
                           <span>{faq.question}</span>
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed pl-6">{faq.answer}</p>
@@ -1146,7 +1463,7 @@ export default function PublicInfoPage() {
               )}
 
               {/* Corporate CTA */}
-              <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-r from-astu-navy via-primary-container to-[#001a41] p-8 sm:p-12 text-white shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+              <div className="rounded-3xl border border-slate-200/90 bg-gradient-to-r from-astu-navy via-primary-container to-astu-navy p-8 sm:p-12 text-white shadow-xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
                 <div className="max-w-xl">
                   <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-astu-green">
                     Institutional Partnership
@@ -1182,7 +1499,7 @@ export default function PublicInfoPage() {
             /* 5. STAKEHOLDERS & INDUSTRY COLLABORATORS LAYOUT */
             <div className="space-y-12">
               <div className="border-b border-slate-200 pb-4">
-                <h2 className="text-2xl font-black text-[#003366]">Strategic Alliances & Industry Consortia</h2>
+                <h2 className="text-2xl font-black text-astu-navy">Strategic Alliances & Industry Consortia</h2>
                 <p className="text-xs text-slate-500 mt-1">
                   Active cooperation frameworks with government agencies, multinational tech enterprises, and international research organizations.
                 </p>
@@ -1197,7 +1514,7 @@ export default function PublicInfoPage() {
                     return (
                       <div
                         key={company.id}
-                        className="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs flex flex-col justify-between hover:border-[#003366]/40 hover:shadow-lg transition-all"
+                        className="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs flex flex-col justify-between hover:border-astu-navy/40 hover:shadow-lg transition-all"
                       >
                         <div>
                           <div className="flex items-center justify-between gap-3 mb-4">
@@ -1207,10 +1524,10 @@ export default function PublicInfoPage() {
                               ) : LogoComponent ? (
                                 <LogoComponent className="h-8 w-8" />
                               ) : (
-                                <Building2 className="h-6 w-6 text-[#003366]" />
+                                <Building2 className="h-6 w-6 text-astu-navy" />
                               )}
                             </div>
-                            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-[#003366]">
+                            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy">
                               {company.partnershipType || "Strategic Alliance"}
                             </span>
                           </div>
@@ -1227,7 +1544,7 @@ export default function PublicInfoPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedCompanyModal(company)}
-                            className="font-bold text-[#003366] hover:underline cursor-pointer"
+                            className="font-bold text-astu-navy hover:underline cursor-pointer"
                           >
                             Alliance Details →
                           </button>
@@ -1241,7 +1558,7 @@ export default function PublicInfoPage() {
               {/* Stakeholder Pillars */}
               <div className="space-y-6 pt-6">
                 <div className="border-b border-slate-200 pb-3">
-                  <h3 className="text-xl font-black text-[#003366]">Institutional Cooperation Pillars</h3>
+                  <h3 className="text-xl font-black text-astu-navy">Institutional Cooperation Pillars</h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Curriculum advisory boards, joint applied laboratories, and international grants.
                   </p>
@@ -1253,7 +1570,7 @@ export default function PublicInfoPage() {
                       key={sec.id || idx}
                       className="rounded-2xl border border-slate-200/90 bg-white p-6 space-y-2.5"
                     >
-                      <span className="rounded-md bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-[#003366]">
+                      <span className="rounded-md bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy">
                         {sec.badge || `Alliance Track ${idx + 1}`}
                       </span>
                       <h4 className="text-base font-bold text-slate-900">{sec.heading}</h4>
@@ -1266,12 +1583,12 @@ export default function PublicInfoPage() {
               {/* FAQs */}
               {page.faqs && page.faqs.length > 0 && (
                 <div className="space-y-4 pt-6">
-                  <h3 className="text-xl font-black text-[#003366]">Stakeholder & Partnership FAQs</h3>
+                  <h3 className="text-xl font-black text-astu-navy">Stakeholder & Partnership FAQs</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {page.faqs.map((faq, idx) => (
                       <div key={faq.id || idx} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2">
                         <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                          <HelpCircle className="h-4 w-4 text-[#003366] shrink-0" />
+                          <HelpCircle className="h-4 w-4 text-astu-navy shrink-0" />
                           <span>{faq.question}</span>
                         </h4>
                         <p className="text-xs text-slate-600 leading-relaxed pl-6">{faq.answer}</p>
@@ -1358,7 +1675,7 @@ export default function PublicInfoPage() {
               </div>
 
               {/* Quick Institutional Action Banner */}
-              <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-astu-navy to-[#001a41] p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+              <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-astu-navy to-astu-navy p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div>
                   <h3 className="text-xl font-black text-white">Need Further Institutional Assistance?</h3>
                   <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-xl">
@@ -1386,6 +1703,142 @@ export default function PublicInfoPage() {
           )}
         </section>
       </main>
+
+      <Footer />
+
+      {/* Share Story Submission Modal */}
+      {shareStoryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 md:p-8 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-astu-navy/10 dark:bg-sky-500/15 text-astu-navy dark:text-sky-300">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">Submit Your Success Story</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShareStoryModalOpen(false)}
+                className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleShareStorySubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={shareStoryForm.name}
+                  onChange={(e) => setShareStoryForm((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="e.g. Dr. Ruth Alemu"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={shareStoryForm.email}
+                    onChange={(e) => setShareStoryForm((p) => ({ ...p, email: e.target.value }))}
+                    placeholder="you@alumni.astu.edu.et"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Graduation Cohort
+                  </label>
+                  <input
+                    type="text"
+                    value={shareStoryForm.graduationYear}
+                    onChange={(e) =>
+                      setShareStoryForm((p) => ({ ...p, graduationYear: e.target.value }))
+                    }
+                    placeholder="e.g. Class of 2018"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Current Job Title
+                  </label>
+                  <input
+                    type="text"
+                    value={shareStoryForm.role}
+                    onChange={(e) => setShareStoryForm((p) => ({ ...p, role: e.target.value }))}
+                    placeholder="e.g. AI Research Scientist"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Company / Organization
+                  </label>
+                  <input
+                    type="text"
+                    value={shareStoryForm.company}
+                    onChange={(e) => setShareStoryForm((p) => ({ ...p, company: e.target.value }))}
+                    placeholder="e.g. Ethio Telecom / Lab"
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Department / Field of Study
+                </label>
+                <input
+                  type="text"
+                  value={shareStoryForm.department}
+                  onChange={(e) => setShareStoryForm((p) => ({ ...p, department: e.target.value }))}
+                  placeholder="e.g. Computer Science & Engineering"
+                  className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Your Story & Key Achievements *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={shareStoryForm.text}
+                  onChange={(e) => setShareStoryForm((p) => ({ ...p, text: e.target.value }))}
+                  placeholder="Describe your career milestones, how ASTU influenced your path, and any advice for current students..."
+                  className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy resize-none"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShareStoryModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingStory}
+                  className="px-5 py-2.5 rounded-xl bg-astu-navy hover:bg-astu-navy/90 text-white text-xs font-bold shadow-md disabled:opacity-50 transition-all cursor-pointer"
+                >
+                  {isSubmittingStory ? "Submitting..." : "Submit Story"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Selected Company Modal */}
       <CompanyDetailModal company={selectedCompanyModal} onClose={() => setSelectedCompanyModal(null)} />

@@ -1,27 +1,59 @@
 import React from 'react';
-import { 
-  BarChart3, Layers, FileBarChart2, 
-  UserCog, Key, BarChart, FileText, Briefcase, 
-  GraduationCap, Bell, Activity, Shield, Settings 
+import {
+  BarChart3,
+  Layers,
+  FileBarChart2,
+  UserCog,
+  Key,
+  BarChart,
+  FileText,
+  Briefcase,
+  GraduationCap,
+  Bell,
+  Activity,
+  Shield,
+  Settings,
+  CalendarDays,
+  HeartHandshake,
+  MessageSquareText,
+  ClipboardCheck,
+  Image as ImageIcon,
+  Globe,
+  Users,
+  Newspaper,
+  Building2,
+  ClipboardList,
+  ShieldCheck,
 } from 'lucide-react';
 import type { AdminPageHeaderProps } from '../types/admin.types';
 
 const getHeaderIcon = (title: string) => {
-  const t = title.toLowerCase();
-  if (t.includes('dashboard')) return BarChart3;
-  if (t.includes('module')) return Layers;
-  if (t.includes('report')) return FileBarChart2;
-  if (t.includes('user')) return UserCog;
-  if (t.includes('role') || t.includes('permission')) return Key;
-  if (t.includes('analytics') || t.includes('statistic')) return BarChart;
-  if (t.includes('survey') || t.includes('questionnaire')) return FileText;
-  if (t.includes('job') || t.includes('placement') || t.includes('career')) return Briefcase;
-  if (t.includes('department')) return GraduationCap;
-  if (t.includes('notification') || t.includes('alert')) return Bell;
-  if (t.includes('log') || t.includes('audit')) return Activity;
-  if (t.includes('backup') || t.includes('security')) return Shield;
-  if (t.includes('settings') || t.includes('configuration')) return Settings;
-  return Settings; // Default fallback icon
+    const t = title.toLowerCase();
+    if (t.includes('dashboard')) return BarChart3;
+    if (t.includes('module')) return Layers;
+    if (t.includes('report')) return FileBarChart2;
+    if (t.includes('user') || t.includes('member')) return UserCog;
+    if (t.includes('role') || t.includes('permission')) return Key;
+    if (t.includes('analytics') || t.includes('statistic')) return BarChart;
+    if (t.includes('survey') || t.includes('questionnaire') || t.includes('tracer')) return ClipboardList;
+    if (t.includes('job') || t.includes('placement') || t.includes('career')) return Briefcase;
+    if (t.includes('event') || t.includes('workshop')) return CalendarDays;
+    if (t.includes('donation') || t.includes('giving') || t.includes('fundrais')) return HeartHandshake;
+    if (t.includes('message') || t.includes('chat') || t.includes('inbox')) return MessageSquareText;
+    if (t.includes('registration') || t.includes('roster')) return ClipboardCheck;
+    if (t.includes('media') || t.includes('gallery')) return ImageIcon;
+    if (t.includes('seo') || t.includes('search engine')) return Globe;
+    if (t.includes('partner') || t.includes('employer')) return Building2;
+    if (t.includes('community')) return Users;
+    if (t.includes('announcement') || t.includes('content') || t.includes('news')) return Newspaper;
+    if (t.includes('approval') || t.includes('governance') || t.includes('workflow')) return ShieldCheck;
+    if (t.includes('template')) return FileText;
+    if (t.includes('department')) return GraduationCap;
+    if (t.includes('notification') || t.includes('alert')) return Bell;
+    if (t.includes('log') || t.includes('audit')) return Activity;
+    if (t.includes('backup') || t.includes('security')) return Shield;
+    if (t.includes('settings') || t.includes('configuration')) return Settings;
+    return Settings;
 };
 
 export default function AdminPageHeader({

@@ -981,7 +981,7 @@ export default function ContentList() {
       <AdminPageHeader
         title="Announcements & Public Notices"
         subtitle="Full administrative control over all public notices, articles, cover images, descriptions, and the page header layout."
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Announcements' }]}
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'Announcements' }]}
         actions={
           <div className="flex flex-wrap items-center gap-2.5">
             <a
