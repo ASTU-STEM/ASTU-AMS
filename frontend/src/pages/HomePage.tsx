@@ -60,7 +60,10 @@ import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
 import storiesService from "../features/admin/services/stories.service";
-import homepageCmsService, { Partner } from "../features/admin/services/homepageCms.service";
+import homepageCmsService, {
+  Partner,
+  defaultSectionLinks as cmsDefaultSectionLinks,
+} from "../features/admin/services/homepageCms.service";
 import publicStatsService, { PublicStat } from "../features/public/services/publicStats.service";
 import config from "../config";
 
@@ -165,11 +168,32 @@ const STAT_PRESENTATION: Record<
     Icon: Trophy,
     accent: 'text-amber-600 bg-amber-500/10 dark:text-amber-400 dark:bg-amber-500/15',
   },
+  events: {
+    label: 'Events',
+    Icon: CalendarDays,
+    accent: 'text-sky-600 bg-sky-500/10 dark:text-sky-300 dark:bg-sky-500/15',
+  },
+  verified: {
+    label: 'Verified Profiles',
+    Icon: ShieldCheck,
+    accent: 'text-emerald-600 bg-emerald-500/10 dark:text-emerald-300 dark:bg-emerald-500/15',
+  },
+  employment: {
+    label: 'Employment Rate',
+    Icon: TrendingUp,
+    accent: 'text-astu-navy bg-astu-navy/10 dark:text-sky-400 dark:bg-sky-500/15',
+  },
+  requests: {
+    label: 'Service Requests',
+    Icon: MessageSquareText,
+    accent: 'text-rose-600 bg-rose-500/10 dark:text-rose-300 dark:bg-rose-500/15',
+  },
 };
 
 const navSections = [
   { label: "Home", id: "home" },
   { label: "Impact", id: "impact-numbers" },
+  { label: "How It Works", id: "how-it-works" },
   { label: "Campus Life", id: "campus-life" },
   { label: "Events", id: "events" },
   { label: "News", id: "news" },
@@ -187,12 +211,12 @@ const navSections = [
 export const DEFAULT_CAMPUS_LIFE = [
   {
     id: 'CL-1',
-    title: 'Events and Activities',
+    title: 'Student Clubs & Chapters',
     campus: 'Main Campus',
-    description: 'Career expos, alumni reunions, workshops, chapter meetings, and community programs.',
+    description: 'Professional societies, cultural clubs, and alumni chapters that keep graduates connected to campus.',
     image: '/images/astusteam.jpg',
-    action: 'View Events',
-    link: '/events',
+    action: 'Explore Campus Life',
+    link: '/info/campus-life',
     active: true,
   },
   {
@@ -207,12 +231,12 @@ export const DEFAULT_CAMPUS_LIFE = [
   },
   {
     id: 'CL-3',
-    title: 'ASTU Museums & Gallery',
-    campus: 'Campus Gallery',
-    description: 'Research showcases, graduation moments, campus photography, and public video archives.',
+    title: 'Sports & Cultural Life',
+    campus: 'Campus Grounds',
+    description: 'Athletics, arts, and community gatherings that shape everyday life across ASTU campuses.',
     image: '/images/arc.jpg',
-    action: 'View Gallery',
-    link: '/gallery',
+    action: 'Learn More',
+    link: '/info/campus-life',
     active: true,
   },
 ];
@@ -550,6 +574,10 @@ export default function HomePage() {
     }
     return emptyCampuses;
   });
+  const [industryBridge, setIndustryBridge] = useState<any>(() => {
+    const config = homepageCmsService.getSettings();
+    return config?.industryBridge?.enabled === false ? null : config?.industryBridge || null;
+  });
   const [liveGallery, setLiveGallery] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
     if (config?.gallery?.length) {
@@ -658,9 +686,15 @@ export default function HomePage() {
     const config = homepageCmsService.getSettings();
     return config?.employerFeedback?.enabled ? config.employerFeedback : null;
   });
-  const [careerCta, setCareerCta] = useState<any>(() => homepageCmsService.getSettings()?.careerCta || null);
+  const [careerCta, setCareerCta] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings()?.careerCta;
+    return cfg?.enabled === false ? null : cfg || null;
+  });
   const [bottomCta, setBottomCta] = useState<any>(() => homepageCmsService.getSettings()?.bottomCta || null);
-  const [researchHighlights, setResearchHighlights] = useState<any>(() => homepageCmsService.getSettings()?.researchHighlights || null);
+  const [researchHighlights, setResearchHighlights] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings()?.researchHighlights;
+    return cfg?.enabled === false ? null : cfg || null;
+  });
   const [footerConfig, setFooterConfig] = useState<FooterCmsConfig>(() => footerCmsService.getSettings());
   const [liveWelcomeMessage, setLiveWelcomeMessage] = useState<string>(() => {
     const cfg = homepageCmsService.getSettings();
@@ -703,20 +737,29 @@ export default function HomePage() {
   });
   const [liveCampusLifeHeaders, setLiveCampusLifeHeaders] = useState<any>(() => {
     const cfg = homepageCmsService.getSettings();
-    return cfg?.campusLifeHeaders || {
-      eyebrow: "Explore Life At ASTU",
-      title: "Campus Life, Facilities, Events, and Galleries",
-      description: "Discover events, facilities, campus activities, and galleries that define life at Adama Science and Technology University.",
+    const raw: any = cfg?.campusLifeHeaders || {};
+    const title = String(raw.title || '').trim();
+    return {
+      eyebrow: raw.eyebrow || 'Explore Life At ASTU',
+      title:
+        !title || /events|galler/i.test(title) ? 'Campus Life & Facilities' : title,
+      description:
+        raw.description && !/galler|events and/i.test(String(raw.description))
+          ? raw.description
+          : 'Discover clubs, facilities, and daily campus culture at Adama Science and Technology University.',
     };
   });
   const [liveEventsHeaders, setLiveEventsHeaders] = useState<any>(() => {
     const cfg = homepageCmsService.getSettings();
-    return cfg?.eventsHeaders || {
-      eyebrow: "Events & Workshops",
-      title: "Upcoming Alumni Events",
-      description: "Networking, learning, and professional growth opportunities.",
-      viewAllText: "See All Events →",
-      viewAllLink: "/events",
+    const raw: any = cfg?.eventsHeaders || {};
+    return {
+      eyebrow: raw.eyebrow || 'Events & Workshops',
+      title: raw.title || 'Gatherings & Training',
+      description:
+        raw.description ||
+        'Join campus career expos, technical workshops, and alumni reunions.',
+      viewAllText: raw.viewAllText || 'See All Events →',
+      viewAllLink: raw.viewAllLink || '/events',
     };
   });
   const [liveAnnouncementsHeaders, setLiveAnnouncementsHeaders] = useState<any>(() => {
@@ -788,20 +831,51 @@ export default function HomePage() {
       copyrightText: "Adama Science and Technology University. All rights reserved.",
     };
   });
-  const defaultSectionLinks = {
-    about: true,
-    impact: true,
-    portals: true,
-    campusLife: true,
-    events: true,
-    stories: true,
-    announcements: true,
-    partners: true,
-    giving: true,
-  };
-  const [liveSectionLinks, setLiveSectionLinks] = useState<typeof defaultSectionLinks>(() => {
+  const [liveSectionLinks, setLiveSectionLinks] = useState(() => {
     const cfg = homepageCmsService.getSettings();
-    return cfg?.sectionLinks ? { ...defaultSectionLinks, ...cfg.sectionLinks } : defaultSectionLinks;
+    return cfg?.sectionLinks
+      ? { ...cmsDefaultSectionLinks, ...cfg.sectionLinks }
+      : { ...cmsDefaultSectionLinks };
+  });
+  const [liveGalleryHeaders, setLiveGalleryHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    const raw = cfg?.galleryHeaders || cfg?.gallerySection || {};
+    const title = String(raw.title || '').trim();
+    // Older CMS copy reused “Campus Life & Moments” — keep gallery distinct from Campus Life.
+    const normalizedTitle =
+      !title || /campus life/i.test(title) ? 'Photo Gallery' : title;
+    return {
+      eyebrow: raw.eyebrow || 'Campus Moments',
+      title: normalizedTitle,
+      subtitle:
+        raw.subtitle ||
+        raw.description ||
+        'A curated look at graduation stages, research exhibitions, and campus life at ASTU.',
+      buttonText: raw.buttonText || 'Explore Full Gallery',
+      buttonLink: raw.buttonLink || '/gallery',
+    };
+  });
+  const [liveStoriesHeaders, setLiveStoriesHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return (
+      cfg?.storiesHeaders || {
+        eyebrow: 'Success Stories',
+        title: 'Alumni Success Stories',
+        description:
+          'Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.',
+      }
+    );
+  });
+  const [liveNewsHeaders, setLiveNewsHeaders] = useState<any>(() => {
+    const cfg = homepageCmsService.getSettings();
+    return (
+      cfg?.newsHeaders || {
+        eyebrow: 'Official Updates & Notices',
+        title: 'News & Announcements',
+        description:
+          'University notices, academic bulletins, and alumni community circulars.',
+      }
+    );
   });
   const [liveGivingSection, setLiveGivingSection] = useState(() => {
     const cfg = homepageCmsService.getSettings();
@@ -922,24 +996,11 @@ export default function HomePage() {
         source: 'community' as const,
       }));
 
-    const fromStories = (liveStories || [])
-      .filter((s: any) => s && isRealVoice(s.name) && (s.text || s.message || s.quote))
-      .map((s: any, idx: number) => ({
-        id: s.id || `story-voice-${idx}`,
-        name: s.name,
-        role: s.role || 'Alumni',
-        company: s.company || '',
-        message: s.text || s.message || s.quote,
-        image: s.image || '',
-        source: 'story' as const,
-      }));
-
-    // Prefer authored testimonials, then community posts, then success stories
+    // Keep alumni stories exclusive to the Success Stories section.
     const merged = [...fromTestimonials, ...fromPosts];
-    if (merged.length > 0) return merged.slice(0, 6);
-    if (fromStories.length > 0) return fromStories.slice(0, 6);
-    return DEFAULT_NETWORK_VOICES;
-  }, [liveTestimonials, liveCommunityPosts, liveStories]);
+    if (merged.length > 0) return merged.slice(0, 3);
+    return DEFAULT_NETWORK_VOICES.slice(0, 3);
+  }, [liveTestimonials, liveCommunityPosts]);
 
   // Alumni stories carousel state
   const [storySlideIndex, setStorySlideIndex] = useState(0);
@@ -1237,9 +1298,11 @@ export default function HomePage() {
         const active = cmsConfig.campusLife.filter((c: any) => c.active !== false);
         setLiveCampusLife(active.length > 0 ? active : DEFAULT_CAMPUS_LIFE);
       }
-      if (cmsConfig.campusLifeHeaders) setLiveCampusLifeHeaders(cmsConfig.campusLifeHeaders);
       if (Array.isArray(cmsConfig.campuses)) {
         setLiveCampuses(cmsConfig.campuses.filter((c: any) => c.active !== false));
+      }
+      if (cmsConfig.industryBridge) {
+        setIndustryBridge(cmsConfig.industryBridge.enabled === false ? null : cmsConfig.industryBridge);
       }
       if (Array.isArray(cmsConfig.gallery)) {
         const active = cmsConfig.gallery.filter((g: any) => g.active !== false);
@@ -1319,10 +1382,44 @@ export default function HomePage() {
       if (cmsConfig.portalsHeaders) setLivePortalsHeaders(cmsConfig.portalsHeaders);
       if (cmsConfig.eventsHeaders) setLiveEventsHeaders(cmsConfig.eventsHeaders);
       if (cmsConfig.announcementsHeaders) setLiveAnnouncementsHeaders(cmsConfig.announcementsHeaders);
+      if (cmsConfig.newsHeaders) setLiveNewsHeaders(cmsConfig.newsHeaders);
+      if (cmsConfig.galleryHeaders || cmsConfig.gallerySection) {
+        const raw = cmsConfig.galleryHeaders || cmsConfig.gallerySection || {};
+        const title = String(raw.title || '').trim();
+        setLiveGalleryHeaders({
+          ...raw,
+          eyebrow: raw.eyebrow || 'Campus Moments',
+          title: !title || /campus life/i.test(title) ? 'Photo Gallery' : title,
+          subtitle:
+            raw.subtitle ||
+            raw.description ||
+            'A curated look at graduation stages, research exhibitions, and campus life at ASTU.',
+          buttonText: raw.buttonText || 'Explore Full Gallery',
+          buttonLink: raw.buttonLink || '/gallery',
+        });
+      }
+      if (cmsConfig.campusLifeHeaders) {
+        const raw = cmsConfig.campusLifeHeaders;
+        const title = String(raw.title || '').trim();
+        setLiveCampusLifeHeaders({
+          ...raw,
+          title:
+            !title || /events|galler/i.test(title)
+              ? 'Campus Life & Facilities'
+              : title,
+          description:
+            raw.description && !/galler|events and/i.test(String(raw.description))
+              ? raw.description
+              : 'Discover clubs, facilities, and daily campus culture at Adama Science and Technology University.',
+        });
+      }
+      if (cmsConfig.storiesHeaders) setLiveStoriesHeaders(cmsConfig.storiesHeaders);
       if (cmsConfig.givingSection) setLiveGivingSection(cmsConfig.givingSection);
       if (cmsConfig.accreditation) setLiveAccreditation(cmsConfig.accreditation);
       if (cmsConfig.ctaSection) setLiveCtaSection(cmsConfig.ctaSection);
-      if (cmsConfig.sectionLinks) setLiveSectionLinks((prev: any) => ({ ...prev, ...cmsConfig.sectionLinks }));
+      if (cmsConfig.sectionLinks) {
+        setLiveSectionLinks((prev: any) => ({ ...cmsDefaultSectionLinks, ...prev, ...cmsConfig.sectionLinks }));
+      }
       if (cmsConfig.tracerSpotlight?.enabled) {
         setTracerSpotlight(cmsConfig.tracerSpotlight);
       } else if (cmsConfig.tracerSpotlight) {
@@ -1333,11 +1430,17 @@ export default function HomePage() {
       } else if (cmsConfig.employerFeedback) {
         setEmployerFeedback(null);
       }
-      if (cmsConfig.careerCta) setCareerCta(cmsConfig.careerCta);
+      if (cmsConfig.careerCta) {
+        setCareerCta(cmsConfig.careerCta.enabled === false ? null : cmsConfig.careerCta);
+      }
       if (cmsConfig.heroBadge) setLiveHeroBadge(cmsConfig.heroBadge);
       if (cmsConfig.heroButtons) setLiveHeroButtons(cmsConfig.heroButtons);
       if (cmsConfig.bottomCta) setBottomCta(cmsConfig.bottomCta);
-      if (cmsConfig.researchHighlights) setResearchHighlights(cmsConfig.researchHighlights);
+      if (cmsConfig.researchHighlights) {
+        setResearchHighlights(
+          cmsConfig.researchHighlights.enabled === false ? null : cmsConfig.researchHighlights
+        );
+      }
       if (cmsConfig.footer) {
         setFooterConfig({ ...defaultFooterConfig, ...cmsConfig.footer });
       }
@@ -1651,6 +1754,31 @@ location: e.location || 'Location to be confirmed',
       </div>
 
       <main id="home" className="flex flex-col w-full relative">
+        {liveWelcomeEnabled && liveWelcomeMessage && (
+          <div className="relative w-full border-b border-amber-400/20 bg-[#001730] text-amber-200">
+            <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-4 py-2 md:px-8">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
+                </span>
+                <p className="truncate text-[11px] font-semibold tracking-wide md:text-xs">
+                  {liveWelcomeMessage}
+                </p>
+              </div>
+              {liveSectionLinks?.tickerLinkText && (
+                <button
+                  type="button"
+                  onClick={() => navigate(liveSectionLinks.tickerLinkTarget || '/announcements')}
+                  className="shrink-0 rounded-full border border-amber-300/30 bg-amber-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-200 transition hover:bg-amber-400/20"
+                >
+                  {liveSectionLinks.tickerLinkText}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <section className="relative w-full overflow-hidden min-h-[520px] max-h-[620px] md:h-[520px] lg:h-[560px] bg-slate-950">
           {/* Background Slides — photo stays dominant; text uses a local scrim only */}
           <div className="absolute inset-0 w-full h-full">
@@ -1774,8 +1902,21 @@ location: e.location || 'Location to be confirmed',
         </section>
 
         {visibleStats.length > 0 && (
-          <section id="impact-numbers" className="relative w-full z-20 mx-auto -mt-8 mb-6 md:-mt-10 md:mb-8 max-w-[1440px] px-4 md:px-8">
-            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[var(--bg-card)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] backdrop-blur-xl">
+          <section id="impact-numbers" className="relative w-full mx-auto mt-8 mb-4 max-w-[1440px] px-4 md:mt-10 md:mb-6 md:px-8">
+            <div className="mb-5 max-w-2xl reveal">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                {liveImpactHeaders?.eyebrow || 'ASTU Impact At A Glance'}
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                {liveImpactHeaders?.title || 'Connecting Academia to Industry'}
+              </h2>
+              {liveImpactHeaders?.description && (
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                  {liveImpactHeaders.description}
+                </p>
+              )}
+            </div>
+            <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[var(--bg-card)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)]">
               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green" />
               <div
                 className={`grid divide-y sm:divide-y-0 sm:divide-x divide-slate-200/90 dark:divide-[var(--border-color)] ${
@@ -1814,7 +1955,98 @@ location: e.location || 'Location to be confirmed',
           </section>
         )}
 
-        <section id="campus-life" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
+        {(livePortals?.length > 0 || howItWorksSteps.length > 0) && (
+          <section id="how-it-works" className="relative w-full mx-auto max-w-[1440px] px-4 py-14 md:px-8 md:py-16">
+            <div className="mb-8 text-center reveal">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                {livePortalsHeaders?.eyebrow || 'Get Started'}
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                {livePortalsHeaders?.title || 'How ASTU-AMS Works'}
+              </h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                {livePortalsHeaders?.description ||
+                  "From registration to real impact — here's how our platform empowers alumni, employers, and the university community."}
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {(livePortals.length > 0 ? livePortals : howItWorksSteps).slice(0, 4).map((item: any, idx: number) => {
+                const IconComp =
+                  (item.icon && typeof item.icon !== 'string' && item.icon) ||
+                  (typeof item.icon === 'string' && iconMap[item.icon]) ||
+                  howItWorksSteps[idx]?.icon ||
+                  CircleUserRound;
+                const stepNum = String(item.step || idx + 1).padStart(2, '0');
+                const tags = Array.isArray(item.points) ? item.points.slice(0, 2) : [];
+                return (
+                  <article
+                    key={item.id || idx}
+                    className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[var(--shadow-soft)] transition-all hover:-translate-y-0.5 hover:border-astu-navy/30 dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
+                  >
+                    <div>
+                      <div className="mb-3 flex items-center justify-between">
+                        <span className="inline-flex h-7 items-center rounded-full bg-astu-navy px-2.5 text-[10px] font-extrabold text-white">
+                          {stepNum}
+                        </span>
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${item.iconBg || 'bg-astu-navy/10 text-astu-navy dark:bg-sky-500/15 dark:text-sky-300'}`}>
+                          <IconComp className="h-4 w-4" />
+                        </div>
+                      </div>
+                      <h3 className="text-sm font-bold uppercase tracking-tight text-astu-navy dark:text-white">
+                        {item.title}
+                      </h3>
+                      <p className="mt-1.5 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-3">
+                        {item.description || (Array.isArray(item.points) ? item.points[0] : '')}
+                      </p>
+                      {tags.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {tags.map((tag: string, tIdx: number) => (
+                            <span
+                              key={tIdx}
+                              className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => navigate(item.route || liveSectionLinks?.portalsGetStartedLink || '/login')}
+                      className="mt-4 inline-flex items-center gap-1.5 border-t border-slate-100 pt-3 text-xs font-bold text-astu-navy transition hover:text-astu-red dark:border-[var(--border-color)] dark:text-sky-300"
+                    >
+                      {item.cta || 'Learn more'}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    livePortalsHeaders?.ctaLink ||
+                      liveSectionLinks?.portalsGetStartedLink ||
+                      '/login'
+                  )
+                }
+                className="home-btn home-btn--navy"
+              >
+                {livePortalsHeaders?.ctaText ||
+                  liveSectionLinks?.portalsGetStartedText ||
+                  'Get Started Today'}
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
+            </div>
+          </section>
+        )}
+
+        <section id="campus-life" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
           <div className="pointer-events-none absolute -top-10 right-0 h-56 w-56 rounded-full bg-gradient-to-br from-astu-green/10 via-sky-400/5 to-transparent blur-3xl dark:from-emerald-500/15" />
 
           <div className="relative mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
@@ -1832,25 +2064,50 @@ location: e.location || 'Location to be confirmed',
             </div>
             <button
               type="button"
-              onClick={() => navigate('/info/campus-life')}
+              onClick={() =>
+                navigate(
+                  liveSectionLinks?.campusLifeViewAllLink ||
+                    liveCampusLifeHeaders?.ctaLink ||
+                    '/info/campus-life'
+                )
+              }
               className="home-btn home-btn--navy home-btn--sm"
             >
-              Explore Campus Life
+              {liveSectionLinks?.campusLifeViewAllText ||
+                liveCampusLifeHeaders?.ctaText ||
+                'Explore Campus Life'}
               <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
             </button>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {(liveCampusLife.length > 0 ? liveCampusLife : DEFAULT_CAMPUS_LIFE).slice(0, 3).map((card: any, idx: number) => {
+            {(() => {
+              const isDuplicateCampusLifeCard = (card: any) => {
+                const link = String(card.link || '').toLowerCase();
+                const title = String(card.title || '').toLowerCase();
+                const action = String(card.action || '').toLowerCase();
+                const blob = `${link} ${title} ${action}`;
+                return (
+                  blob.includes('/gallery') ||
+                  blob.includes('#gallery') ||
+                  blob.includes('/events') ||
+                  blob.includes('#events') ||
+                  blob.includes('success-stories') ||
+                  blob.includes('alumni-stories') ||
+                  title.includes('gallery') ||
+                  title.includes('museum') ||
+                  (title.includes('event') && !title.includes('student'))
+                );
+              };
+              const source = liveCampusLife.length > 0 ? liveCampusLife : DEFAULT_CAMPUS_LIFE;
+              const distinct = source.filter((card: any) => !isDuplicateCampusLifeCard(card));
+              return (distinct.length > 0 ? distinct : DEFAULT_CAMPUS_LIFE).slice(0, 3);
+            })().map((card: any, idx: number) => {
               const targetRoute =
                 card.link ||
-                (card.action?.toLowerCase().includes('event')
-                  ? '/events'
-                  : card.action?.toLowerCase().includes('facilit')
+                (card.action?.toLowerCase().includes('facilit')
                     ? '/info/facilities'
-                    : card.action?.toLowerCase().includes('gallery')
-                      ? '/gallery'
-                      : '/info/campus-life');
+                    : '/info/campus-life');
 
               const handleNavigate = () => {
                 if (typeof targetRoute === 'string' && targetRoute.startsWith('#')) {
@@ -1905,41 +2162,142 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="events" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
+        {liveCampuses.length > 0 && (
+          <section id="campuses" className="relative w-full mx-auto max-w-[1440px] px-4 pb-10 md:px-8 md:pb-12">
+            <div className="mb-6 max-w-2xl reveal">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">ASTU Campuses</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                Spaces That Shape Alumni Outcomes
+              </h2>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {liveCampuses.slice(0, 3).map((campus: any, idx: number) => (
+                <article
+                  key={campus.id || campus.name || idx}
+                  className="group overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
+                >
+                  <div className="h-36 overflow-hidden">
+                    <img
+                      src={mediaUrl(campus.image) || campus.image || DEFAULT_HERO_IMAGE}
+                      alt={campus.name}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      onError={handleImageError}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-sm font-bold text-astu-navy dark:text-white">{campus.name}</h3>
+                    <p className="mt-1.5 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-3">
+                      {campus.description}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {industryBridge && (
+          <section id="industry-bridge" className="relative w-full mx-auto max-w-[1440px] px-4 py-14 md:px-8 md:py-16">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]">
+              <div className="grid lg:grid-cols-2">
+                <div className="flex flex-col justify-center p-6 md:p-8 lg:p-10">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                    {industryBridge.eyebrow || 'Industry-Campus Bridge'}
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                    {industryBridge.title}
+                  </h2>
+                  <p className="mt-3 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                    {industryBridge.description}
+                  </p>
+                  <div className="mt-6 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-[var(--border-color)] dark:bg-[var(--bg-elevated)]">
+                      <p className="text-2xl font-black text-astu-navy dark:text-white">
+                        {industryBridge.stat1Value}
+                      </p>
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        {industryBridge.stat1Label}
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-[var(--border-color)] dark:bg-[var(--bg-elevated)]">
+                      <p className="text-2xl font-black text-astu-navy dark:text-white">
+                        {industryBridge.stat2Value}
+                      </p>
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        {industryBridge.stat2Label}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        industryBridge.buttonLink ||
+                          liveSectionLinks?.industryBridgeButtonLink ||
+                          '/info/campus-life'
+                      )
+                    }
+                    className="home-btn home-btn--navy home-btn--sm mt-6 self-start"
+                  >
+                    {industryBridge.buttonText ||
+                      liveSectionLinks?.industryBridgeButtonText ||
+                      'Explore Campus Life'}
+                    <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="relative min-h-[240px] bg-slate-100 dark:bg-slate-800">
+                  <img
+                    src={mediaUrl(industryBridge.image) || industryBridge.image || DEFAULT_HERO_IMAGE}
+                    alt=""
+                    className="absolute inset-0 h-full w-full object-cover"
+                    onError={handleImageError}
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section id="events" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
           <div id="workshops" className="sr-only" />
 
-          <div className="pointer-events-none absolute -top-8 -right-8 h-64 w-64 rounded-full bg-gradient-to-br from-astu-navy/10 via-rose-500/8 to-transparent blur-3xl dark:from-sky-500/12 dark:via-rose-500/8" />
-
-          <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-blue-50/30 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
-            <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-              <div>
-                {/* CALENDAR Badge Pill */}
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
-                  <CalendarDays className="h-3.5 w-3.5 text-astu-red dark:text-rose-400" />
-                  <span>CALENDAR · GATHERINGS & TRAINING</span>
-                </div>
-
-                {/* Main Heading */}
-                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
-                  Events & Workshops
+          <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+              <div className="max-w-2xl reveal">
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  <span>{liveEventsHeaders?.eyebrow || 'Events & Workshops'}</span>
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                  {liveEventsHeaders?.title || 'Gatherings & Training'}
                 </h2>
-
-                {/* Subtitle */}
-                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
-                  <span className="font-semibold text-astu-navy dark:text-sky-300">Gatherings & training</span> · Join campus career expos, technical workshops, and alumni reunions.
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                  {liveEventsHeaders?.description ||
+                    'Join campus career expos, technical workshops, and alumni reunions.'}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  className="home-btn home-btn--navy home-btn--sm"
-                  onClick={() => navigate(liveEventsHeaders?.viewAllLink || '/events')}
-                >
-                  <span>{liveEventsHeaders?.viewAllText?.replace(/→/g, '').trim() || 'See All Events'}</span>
-                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="home-btn home-btn--navy home-btn--sm"
+                onClick={() =>
+                  navigate(
+                    liveEventsHeaders?.viewAllLink ||
+                      liveSectionLinks?.eventsViewAllLink ||
+                      '/events'
+                  )
+                }
+              >
+                <span>
+                  {(
+                    liveEventsHeaders?.viewAllText ||
+                    liveSectionLinks?.eventsViewAllText ||
+                    'See All Events'
+                  )
+                    .replace(/→/g, '')
+                    .trim()}
+                </span>
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
             </div>
 
             {/* Filter Tabs & Carousel Navigation Controls Bar */}
@@ -2159,47 +2517,50 @@ location: e.location || 'Location to be confirmed',
                 ))}
               </div>
             )}
-
-          </div>
         </section>
 
-        <section id="news" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
-          <div className="pointer-events-none absolute -top-8 -left-8 h-56 w-56 rounded-full bg-gradient-to-br from-astu-navy/8 via-sky-500/5 to-transparent blur-3xl dark:from-sky-500/10" />
-
-          <div 
-            className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-slate-50/60 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden"
-            onMouseEnter={() => setIsNewsTimerPaused(true)}
-            onMouseLeave={() => setIsNewsTimerPaused(false)}
-          >
+        <section
+          id="news"
+          className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate"
+          onMouseEnter={() => setIsNewsTimerPaused(true)}
+          onMouseLeave={() => setIsNewsTimerPaused(false)}
+        >
             <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-              <div>
-                {/* Curved Badge Pill */}
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
+              <div className="max-w-2xl reveal">
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
                   <span className="h-2 w-2 rounded-full bg-astu-red animate-pulse" />
-                  <span>OFFICIAL UPDATES & NOTICES</span>
-                </div>
-
-                {/* Main Heading */}
-                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
-                  News & Announcements
+                  <span>
+                    {liveNewsHeaders?.eyebrow ||
+                      liveAnnouncementsHeaders?.eyebrow ||
+                      'Official Updates'}
+                  </span>
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                  {liveNewsHeaders?.title ||
+                    liveAnnouncementsHeaders?.title ||
+                    'News & Announcements'}
                 </h2>
-
-                {/* Subtitle */}
-                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
-                  <span className="font-semibold text-astu-navy dark:text-sky-300">Official updates</span> · University notices, academic bulletins, and alumni community circulars.
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                  {liveNewsHeaders?.description ||
+                    liveAnnouncementsHeaders?.subscribeDesc ||
+                    'University notices, academic bulletins, and alumni community circulars.'}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  className="home-btn home-btn--navy home-btn--sm"
-                  onClick={() => navigate('/announcements')}
-                >
-                  <span>See All News</span>
-                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="home-btn home-btn--navy home-btn--sm"
+                onClick={() =>
+                  navigate(
+                    liveSectionLinks?.announcementsViewAllLink || '/announcements'
+                  )
+                }
+              >
+                <span>
+                  {liveSectionLinks?.announcementsViewAllText || 'See All News'}
+                </span>
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
             </div>
 
             {/* Slider Controls Bar with Auto-play Progress Timer — only when content exists */}
@@ -2388,69 +2749,43 @@ location: e.location || 'Location to be confirmed',
                 ))}
               </div>
             )}
-
-          </div>
         </section>
 
         {/* =========================================================================
-            CAMPUS MOMENTS (GALLERY) SECTION
+            CAMPUS MOMENTS (GALLERY) SECTION — homepage shows 3; full archive on /gallery
             ========================================================================= */}
-        <section id="gallery" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
-          <div className="pointer-events-none absolute -top-8 -left-8 h-64 w-64 rounded-full bg-gradient-to-br from-blue-500/10 via-amber-500/5 to-transparent blur-3xl" />
-
-          <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-blue-50/20 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
+        <section id="gallery" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
             <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-              <div>
-                {/* CAMPUS MOMENTS Badge Pill */}
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-navy dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300 shadow-sm">
-                  <Image className="h-3.5 w-3.5 text-astu-navy dark:text-sky-300" />
-                  <span>CAMPUS MOMENTS · VISUAL ARCHIVE</span>
-                </div>
-
-                {/* Main Heading */}
-                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
-                  Gallery
+              <div className="max-w-2xl reveal">
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                  <Image className="h-3.5 w-3.5" />
+                  <span>{liveGalleryHeaders?.eyebrow || 'Campus Moments'}</span>
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                  {liveGalleryHeaders?.title || 'Photo Gallery'}
                 </h2>
-
-                {/* Subtitle */}
-                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
-                  <span className="font-semibold text-astu-navy dark:text-sky-300">Campus moments</span> · Explore vibrant memories, graduation stages, applied engineering exhibitions, and campus life at ASTU.
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                  {liveGalleryHeaders?.subtitle ||
+                    liveGalleryHeaders?.description ||
+                    'A curated look at graduation stages, research exhibitions, and campus life at ASTU.'}
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  className="home-btn home-btn--navy home-btn--sm"
-                  onClick={() => navigate('/gallery')}
-                >
-                  <span>Explore Full Gallery</span>
-                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="home-btn home-btn--navy home-btn--sm"
+                onClick={() =>
+                  navigate(liveGalleryHeaders?.buttonLink || '/gallery')
+                }
+              >
+                <span>{liveGalleryHeaders?.buttonText || 'Explore Full Gallery'}</span>
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
             </div>
 
-            {/* Filter Tabs by Album */}
-            <div className="mb-6 flex flex-wrap items-center gap-1.5 p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 w-fit">
-              {['ALL', 'Campus Gallery', 'Graduation Gallery', 'Research Gallery', 'Event Gallery'].map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setGalleryFilterTab(tab)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
-                    galleryFilterTab === tab
-                      ? 'bg-astu-navy text-white shadow-sm dark:bg-sky-600'
-                      : 'text-slate-600 hover:text-astu-navy dark:text-slate-300 dark:hover:text-white'
-                  }`}
-                >
-                  {tab === 'ALL' ? 'All Moments' : tab}
-                </button>
-              ))}
-            </div>
-
-            {/* Gallery Grid */}
+            {/* Gallery Grid — only 3 moments on the homepage */}
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredGalleryList.slice(0, 6).map((photo: any, idx: number) => {
+              {filteredGalleryList.slice(0, 3).map((photo: any, idx: number) => {
                 const photoSrc = mediaUrl(photo.src) || photo.src || '/images/astu-building.jpg';
                 return (
                   <article
@@ -2515,50 +2850,39 @@ location: e.location || 'Location to be confirmed',
                 );
               })}
             </div>
-          </div>
         </section>
 
         {/* =========================================================================
-            VIDEO GALLERY (VIDEO HIGHLIGHTS) SECTION
+            VIDEO GALLERY — homepage shows 3; full archive on /info/video-gallery
             ========================================================================= */}
-        <section id="video-gallery" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
-          <div className="pointer-events-none absolute -top-8 -right-8 h-64 w-64 rounded-full bg-gradient-to-br from-rose-500/10 via-astu-navy/5 to-transparent blur-3xl" />
-
-          <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-rose-50/20 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
+        <section id="video-gallery" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
             <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-              <div>
-                {/* VIDEO HIGHLIGHTS Badge Pill */}
-                <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
-                  <PlayCircle className="h-3.5 w-3.5 text-astu-red dark:text-rose-400" />
-                  <span>VIDEO HIGHLIGHTS · MEDIA REELS</span>
-                </div>
-
-                {/* Main Heading */}
-                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
+              <div className="max-w-2xl reveal">
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                  <PlayCircle className="h-3.5 w-3.5" />
+                  <span>Video Highlights</span>
+                </p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
                   Video Gallery
                 </h2>
-
-                {/* Subtitle */}
-                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
-                  <span className="font-semibold text-astu-navy dark:text-sky-300">Video highlights</span> · Watch applied engineering showcases, event recordings, campus virtual tours, and keynote archives.
+                <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                  Watch applied engineering showcases, event recordings, and campus virtual tours.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  className="home-btn home-btn--navy home-btn--sm"
-                  onClick={() => navigate('/info/video-gallery')}
-                >
-                  <span>View All Video Highlights</span>
-                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
-                </button>
-              </div>
+              <button
+                type="button"
+                className="home-btn home-btn--navy home-btn--sm"
+                onClick={() => navigate('/info/video-gallery')}
+              >
+                <span>View All Videos</span>
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
             </div>
 
-            {/* Video Cards Grid */}
+            {/* Video Cards Grid — only 3 videos on the homepage */}
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {liveVideos.map((video: any, idx: number) => {
+              {liveVideos.slice(0, 3).map((video: any, idx: number) => {
                 const videoImg = mediaUrl(video.image) || video.image || '/images/astu-building.jpg';
                 return (
                   <article
@@ -2648,16 +2972,20 @@ location: e.location || 'Location to be confirmed',
                 );
               })}
             </div>
-          </div>
         </section>
 
-        <section id="success-stories" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
+        <section id="success-stories" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
           <div className="mb-6 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
             <div className="max-w-2xl reveal">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Success Stories</p>
-              <h2 className="mt-2 text-2xl font-bold text-astu-navy dark:text-white md:text-3xl">Alumni Success Stories</h2>
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                {liveStoriesHeaders?.eyebrow || 'Success Stories'}
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                {liveStoriesHeaders?.title || 'Alumni Success Stories'}
+              </h2>
               <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant dark:text-slate-400 md:mx-0">
-                Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.
+                {liveStoriesHeaders?.description ||
+                  'Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.'}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2.5">
@@ -2671,10 +2999,14 @@ location: e.location || 'Location to be confirmed',
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/info/alumni-stories')}
+                onClick={() =>
+                  navigate(
+                    liveSectionLinks?.storiesViewAllLink || '/info/alumni-stories'
+                  )
+                }
                 className="home-btn home-btn--navy home-btn--sm"
               >
-                See All Stories
+                {liveSectionLinks?.storiesViewAllText || 'See All Stories'}
                 <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
               </button>
             </div>
@@ -3129,8 +3461,8 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="partners" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
-          <div className="mb-8 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
+        <section id="partners" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
+          <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
             <div className="max-w-2xl reveal">
               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
                 {livePartnersHeaders?.eyebrow || 'Our Partners'}
@@ -3138,7 +3470,7 @@ location: e.location || 'Location to be confirmed',
               <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
                 {livePartnersHeaders?.title || 'Partner Companies'}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400 md:mx-0">
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
                 {livePartnersHeaders?.description ||
                   'Institutional partners supporting employability, internships, and research collaboration.'}
               </p>
@@ -3146,80 +3478,72 @@ location: e.location || 'Location to be confirmed',
             <button
               type="button"
               onClick={() => navigate('/partners')}
-              className="inline-flex items-center gap-2 text-sm font-bold text-astu-navy transition-colors hover:text-astu-red dark:text-sky-300 dark:hover:text-amber-400"
+              className="home-btn home-btn--navy home-btn--sm"
             >
               View all partners
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
             </button>
           </div>
 
-          <div className="relative overflow-hidden">
-            {partnersLoading ? (
-              <div className="flex items-center justify-center gap-10 py-8" aria-label="Loading partners">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-14 w-28 shrink-0 animate-pulse rounded-lg bg-slate-200/80 dark:bg-slate-700/60"
-                  />
-                ))}
-              </div>
-            ) : livePartners.length === 0 ? (
-              <div className="flex min-h-[120px] flex-col items-center justify-center px-6 py-10 text-center">
-                <Building2 className="h-7 w-7 text-slate-400" />
-                <p className="mt-3 text-sm font-bold text-astu-navy dark:text-white">No published partners yet</p>
-                <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                  Partner logos will appear here once published from the ASTU CMS.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--bg-page,#ffffff)] to-transparent dark:from-[var(--bg-page)]" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--bg-page,#ffffff)] to-transparent dark:from-[var(--bg-page)]" />
+          {partnersLoading ? (
+            <div
+              className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
+              aria-label="Loading partners"
+            >
+              {Array.from({ length: 6 }).map((_, index) => (
                 <div
-                  role="list"
-                  className="flex w-max items-center gap-10 py-6 animate-scroll hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] motion-reduce:animate-none md:gap-14"
-                  style={{ animationDuration: `${Math.max(28, livePartners.length * 5)}s` }}
+                  key={index}
+                  className="flex h-24 items-center justify-center rounded-2xl border border-slate-200/90 bg-white dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
                 >
-                  {[...livePartners, ...livePartners].map((partner, index) => {
-                    const logoUrl = partner.logo ? mediaUrl(partner.logo) : '';
-                    const logoFailed = failedPartnerLogos.has(partner.id);
-                    const isDuplicate = index >= livePartners.length;
-
-                    const PartnerLogoComp = partnerLogos[partner.name];
-
-                    return (
-                      <article
-                        key={`${partner.id}-${index}`}
-                        role="listitem"
-                        aria-hidden={isDuplicate}
-                        title={partner.name}
-                        className="group flex h-20 w-36 shrink-0 items-center justify-center md:h-24 md:w-44"
-                      >
-                        {logoUrl && !logoFailed ? (
-                          <img
-                            src={logoUrl}
-                            alt={`${partner.name} logo`}
-                            loading="lazy"
-                            decoding="async"
-                            className="max-h-14 max-w-full object-contain opacity-80 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0 md:max-h-16"
-                            onError={() =>
-                              setFailedPartnerLogos((current) => new Set(current).add(partner.id))
-                            }
-                          />
-                        ) : PartnerLogoComp ? (
-                          <PartnerLogoComp className="max-h-12 w-auto opacity-85 transition duration-300 group-hover:opacity-100" />
-                        ) : (
-                          <span className="text-center text-xs font-bold uppercase tracking-wide text-astu-navy/70 transition group-hover:text-astu-navy dark:text-slate-300 dark:group-hover:text-white md:text-sm">
-                            {partner.name}
-                          </span>
-                        )}
-                      </article>
-                    );
-                  })}
+                  <div className="h-10 w-24 animate-pulse rounded-lg bg-slate-200/80 dark:bg-slate-700/60" />
                 </div>
-              </>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : livePartners.length === 0 ? (
+            <div className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 px-6 py-10 text-center dark:border-[var(--border-color)]">
+              <Building2 className="h-7 w-7 text-slate-400" />
+              <p className="mt-3 text-sm font-bold text-astu-navy dark:text-white">No published partners yet</p>
+              <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                Partner logos will appear here once published from the ASTU CMS.
+              </p>
+            </div>
+          ) : (
+            <div role="list" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              {livePartners.slice(0, 6).map((partner) => {
+                const logoUrl = partner.logo ? mediaUrl(partner.logo) : '';
+                const logoFailed = failedPartnerLogos.has(partner.id);
+                const PartnerLogoComp = partnerLogos[partner.name];
+
+                return (
+                  <article
+                    key={partner.id}
+                    role="listitem"
+                    title={partner.name}
+                    className="group flex h-24 items-center justify-center rounded-2xl border border-slate-200/90 bg-white px-4 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:shadow-md dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
+                  >
+                    {logoUrl && !logoFailed ? (
+                      <img
+                        src={logoUrl}
+                        alt={`${partner.name} logo`}
+                        loading="lazy"
+                        decoding="async"
+                        className="max-h-12 max-w-full object-contain opacity-85 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0"
+                        onError={() =>
+                          setFailedPartnerLogos((current) => new Set(current).add(partner.id))
+                        }
+                      />
+                    ) : PartnerLogoComp ? (
+                      <PartnerLogoComp className="max-h-10 w-auto opacity-85 transition duration-300 group-hover:opacity-100" />
+                    ) : (
+                      <span className="text-center text-xs font-bold uppercase tracking-wide text-astu-navy/70 transition group-hover:text-astu-navy dark:text-slate-300 dark:group-hover:text-white">
+                        {partner.name}
+                      </span>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
 
 
@@ -3283,14 +3607,251 @@ location: e.location || 'Location to be confirmed',
           <div className="mt-8 flex justify-center reveal">
             <button
               type="button"
-              onClick={() => navigate('/info/faq')}
+              onClick={() =>
+                navigate(liveSectionLinks?.faqViewAllLink || '/info/faq')
+              }
               className="inline-flex items-center gap-2 text-sm font-bold text-astu-navy hover:text-astu-red dark:text-sky-300 dark:hover:text-amber-400"
             >
-              View all FAQs
+              {liveSectionLinks?.faqViewAllText || 'View all FAQs'}
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </section>
+
+        {(tracerSpotlight || mentorshipStats || employerFeedback) && (
+          <section id="outcomes" className="relative w-full mx-auto max-w-[1440px] px-4 py-14 md:px-8 md:py-16">
+            <div className="mb-8 max-w-2xl reveal">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                Institutional Outcomes
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                Tracer Studies, Mentorship & Employer Insight
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                Live CMS blocks that keep accreditation, mentoring, and industry feedback connected to the public homepage.
+              </p>
+            </div>
+            <div className="grid gap-4 lg:grid-cols-3">
+              {tracerSpotlight && (
+                <article className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[var(--shadow-soft)] dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 text-astu-navy dark:bg-sky-500/15 dark:text-sky-300">
+                    <FileCheck2 className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-bold text-astu-navy dark:text-white">
+                    {tracerSpotlight.title || 'Tracer Study'}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-4">
+                    {tracerSpotlight.description}
+                  </p>
+                  <dl className="mt-4 grid grid-cols-2 gap-2 text-center">
+                    <div className="rounded-lg bg-slate-50 px-2 py-2 dark:bg-[var(--bg-elevated)]">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Response</dt>
+                      <dd className="text-sm font-black text-astu-navy dark:text-white">{tracerSpotlight.responseRate || '—'}</dd>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 px-2 py-2 dark:bg-[var(--bg-elevated)]">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Batch</dt>
+                      <dd className="text-sm font-black text-astu-navy dark:text-white">{tracerSpotlight.targetBatch || '—'}</dd>
+                    </div>
+                  </dl>
+                  {tracerSpotlight.deadline && (
+                    <p className="mt-3 text-[11px] font-semibold text-astu-red">
+                      Deadline: {tracerSpotlight.deadline}
+                    </p>
+                  )}
+                </article>
+              )}
+              {mentorshipStats && (
+                <article className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[var(--shadow-soft)] dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-bold text-astu-navy dark:text-white">Mentorship Network</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400">
+                    Mentors and mentees connected through ASTU-AMS career guidance programs.
+                  </p>
+                  <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-lg bg-slate-50 px-2 py-2 dark:bg-[var(--bg-elevated)]">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Mentors</dt>
+                      <dd className="text-sm font-black text-astu-navy dark:text-white">{mentorshipStats.mentors ?? '—'}</dd>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 px-2 py-2 dark:bg-[var(--bg-elevated)]">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Mentees</dt>
+                      <dd className="text-sm font-black text-astu-navy dark:text-white">{mentorshipStats.mentees ?? '—'}</dd>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 px-2 py-2 dark:bg-[var(--bg-elevated)]">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Sessions</dt>
+                      <dd className="text-sm font-black text-astu-navy dark:text-white">{mentorshipStats.sessions ?? '—'}</dd>
+                    </div>
+                  </dl>
+                  <button
+                    type="button"
+                    onClick={() => navigate(liveSectionLinks?.footerMentorshipLink || '/info/mentorship')}
+                    className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy hover:text-astu-red dark:text-sky-300"
+                  >
+                    Explore mentorship
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </article>
+              )}
+              {employerFeedback && (
+                <article className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[var(--shadow-soft)] dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]">
+                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
+                    <Briefcase className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-base font-bold text-astu-navy dark:text-white">
+                    {employerFeedback.title || 'Employer Feedback'}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-4">
+                    {employerFeedback.description}
+                  </p>
+                  <dl className="mt-4 grid grid-cols-2 gap-2 text-center">
+                    <div className="rounded-lg bg-slate-50 px-2 py-2 dark:bg-[var(--bg-elevated)]">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Submissions</dt>
+                      <dd className="text-sm font-black text-astu-navy dark:text-white">{employerFeedback.submissions ?? '—'}</dd>
+                    </div>
+                    <div className="rounded-lg bg-slate-50 px-2 py-2 dark:bg-[var(--bg-elevated)]">
+                      <dt className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Companies</dt>
+                      <dd className="text-sm font-black text-astu-navy dark:text-white">{employerFeedback.companies ?? '—'}</dd>
+                    </div>
+                  </dl>
+                </article>
+              )}
+            </div>
+          </section>
+        )}
+
+        {researchHighlights && (
+          <section id="research" className="relative w-full mx-auto max-w-[1440px] px-4 pb-10 md:px-8 md:pb-12">
+            <div className="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-50 via-white to-emerald-50/40 p-6 shadow-[var(--shadow-soft)] dark:border-[var(--border-color)] dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] md:p-8">
+              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">Research Highlights</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                {researchHighlights.title || 'Research That Powers Industry'}
+              </h2>
+              {researchHighlights.description && (
+                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                  {researchHighlights.description}
+                </p>
+              )}
+              {Array.isArray(researchHighlights.stats) && researchHighlights.stats.length > 0 && (
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {researchHighlights.stats.slice(0, 3).map((stat: any, idx: number) => (
+                    <div
+                      key={stat.label || idx}
+                      className="rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-center dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
+                    >
+                      <p className="text-xl font-black text-astu-navy dark:text-white">{stat.value}</p>
+                      <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {careerCta && (
+          <section id="career-cta" className="relative w-full mx-auto max-w-[1440px] px-4 pb-14 md:px-8 md:pb-16">
+            <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-astu-navy/15 bg-astu-navy px-6 py-6 text-white shadow-[var(--shadow-soft)] md:flex-row md:items-center md:px-8">
+              <div className="max-w-2xl">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-green">
+                  {careerCta.eyebrow || 'Career Services'}
+                </p>
+                <h2 className="mt-1 text-xl font-black md:text-2xl">{careerCta.title}</h2>
+                {careerCta.description && (
+                  <p className="mt-2 text-sm leading-relaxed text-slate-200">{careerCta.description}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate(careerCta.route || '/info/overview')}
+                className="home-btn home-btn--ghost-light home-btn--sm shrink-0"
+              >
+                {careerCta.buttonLabel || 'Open Career Portal'}
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
+            </div>
+          </section>
+        )}
+
+        {liveAccreditation?.title && (
+          <section id="accreditation" className="relative w-full mx-auto max-w-[1440px] px-4 pb-16 md:px-8 md:pb-20">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-50 via-white to-sky-50/40 p-6 shadow-[var(--shadow-soft)] dark:border-[var(--border-color)] dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] md:p-8">
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                    {liveAccreditation.eyebrow || 'Quality Assurance'}
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
+                    {liveAccreditation.title}
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                    {liveAccreditation.description}
+                  </p>
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    {[
+                      {
+                        title: liveAccreditation.point1Title,
+                        desc: liveAccreditation.point1Desc,
+                      },
+                      {
+                        title: liveAccreditation.point2Title,
+                        desc: liveAccreditation.point2Desc,
+                      },
+                    ]
+                      .filter((p) => p.title)
+                      .map((point) => (
+                        <div
+                          key={point.title}
+                          className="rounded-xl border border-slate-200/80 bg-white/80 p-4 dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
+                        >
+                          <p className="text-sm font-bold text-astu-navy dark:text-white">
+                            {point.title}
+                          </p>
+                          <p className="mt-1 text-xs leading-relaxed text-on-surface-variant dark:text-slate-400">
+                            {point.desc}
+                          </p>
+                        </div>
+                      ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        liveAccreditation.buttonLink ||
+                          liveSectionLinks?.accreditationButtonLink ||
+                          '/info/impact-numbers'
+                      )
+                    }
+                    className="home-btn home-btn--navy home-btn--sm mt-6"
+                  >
+                    {liveAccreditation.buttonText ||
+                      liveSectionLinks?.accreditationButtonText ||
+                      'View Impact Numbers'}
+                    <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[liveAccreditation.image1, liveAccreditation.image2]
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((src: string, idx: number) => (
+                      <img
+                        key={`${src}-${idx}`}
+                        src={mediaUrl(src) || src}
+                        alt=""
+                        className={`h-40 w-full rounded-2xl object-cover shadow-sm md:h-48 ${
+                          idx === 1 ? 'mt-6' : ''
+                        }`}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = FALLBACK_IMAGE;
+                        }}
+                      />
+                    ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         <section
           id="community"
@@ -3309,11 +3870,16 @@ location: e.location || 'Location to be confirmed',
                 {liveCommunitySection?.title || 'ASTU Alumni Community'}
               </span>
               <h2 className="mt-4 text-2xl font-black text-white md:text-4xl">
-                Your Network <span className="text-astu-green">Around the World</span>
+                {bottomCta?.title || liveCtaSection?.title || (
+                  <>
+                    Your Network <span className="text-astu-green">Around the World</span>
+                  </>
+                )}
               </h2>
               <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-200">
-                {liveCommunitySection?.subtitle ||
-                  bottomCta?.description ||
+                {bottomCta?.description ||
+                  liveCommunitySection?.subtitle ||
+                  liveCtaSection?.description ||
                   'Connect with fellow alumni, discover career opportunities, and contribute to university excellence.'}
               </p>
             </div>

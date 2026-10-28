@@ -23,6 +23,16 @@ export interface AdminStatCardData {
   tone?: 'blue' | 'gold' | 'green' | 'red' | 'amber' | 'purple';
   accentColor?: string;
   trendDirection?: 'up' | 'down' | 'flat';
+  /** Supporting line under the value / trend chip */
+  description?: string;
+  /** Optional 0–100 progress bar */
+  progress?: number;
+  /** Navigate on click */
+  to?: string;
+  onClick?: () => void;
+  loading?: boolean;
+  compact?: boolean;
+  className?: string;
 }
 
 export interface AdminTableColumn<T> {
@@ -62,6 +72,10 @@ export interface AdminPageHeaderProps {
   actions?: ReactNode;
   className?: string;
   children?: ReactNode;
+  /** Optional KPI strip rendered below the hero banner */
+  stats?: AdminStatCardData[];
+  statsCols?: 2 | 3 | 4 | 5;
+  lastSynced?: string;
 }
 
 export interface AdminDataTableProps<T extends Record<string, unknown>> {
