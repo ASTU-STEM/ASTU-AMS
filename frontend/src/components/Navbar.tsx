@@ -494,9 +494,9 @@ export default function Navbar() {
                 <button
                   key={item.sectionId || item.route}
                   onClick={() => handleNavClick(item)}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-base font-bold text-on-surface hover:bg-astu-navy/5 transition-all text-left"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-base font-bold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left"
                 >
-                  <Icon className="h-5 w-5 text-astu-navy/60" />
+                  <Icon className="h-5 w-5 text-astu-navy dark:text-sky-400" />
                   {item.label}
                 </button>
               );
@@ -509,14 +509,14 @@ export default function Navbar() {
                 <div key={menu.label}>
                   <button
                     onClick={() => setOpenMega(isOpen ? null : menu.label)}
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-base font-bold text-on-surface hover:bg-astu-navy/5 transition-all text-left"
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-base font-bold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left"
                   >
                     <span className="flex items-center gap-3">
-                      <Icon className="h-5 w-5 text-astu-navy/60" />
+                      <Icon className="h-5 w-5 text-astu-navy dark:text-sky-400" />
                       {menu.label}
                     </span>
                     <HiChevronDown
-                      className={`h-4 w-4 text-on-surface-variant transition-transform ${
+                      className={`h-4 w-4 text-slate-400 dark:text-slate-400 transition-transform ${
                         isOpen ? "rotate-180" : ""
                       }`}
                     />
@@ -527,7 +527,7 @@ export default function Navbar() {
                         <button
                           key={item.label}
                           onClick={() => handleMegaItemClick(item)}
-                          className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-astu-navy/5 transition-all text-left"
+                          className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-astu-navy dark:hover:text-white transition-all text-left"
                         >
                           {item.label}
                         </button>

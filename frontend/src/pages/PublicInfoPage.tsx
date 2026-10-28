@@ -58,6 +58,7 @@ import storiesService, { AlumniStory } from "../features/admin/services/stories.
 import PaginationBar from '../components/PaginationBar';
 import { partnerLogos } from "../components/PartnerLogos";
 import PartnerDetailLiveCustomizer from "../features/admin/components/PartnerDetailLiveCustomizer";
+import VideoDetailModal from "../components/VideoDetailModal";
 import CompanyDetailModal from "../components/CompanyDetailModal";
 import ShareModal, { ShareItem } from "../components/ShareModal";
 import { usePublicMetrics } from "../services/publicMetrics.service";
@@ -1569,108 +1570,13 @@ export default function PublicInfoPage() {
                 </div>
               )}
 
-              {/* Video Player Modal */}
-              {activePlayVideo && (
-                <div
-                  role="dialog"
-                  aria-modal="true"
-                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
-                  onClick={() => setActivePlayVideo(null)}
-                >
-                  <div
-                    className="relative max-w-4xl w-full bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {/* Top Bar */}
-                    <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-900">
-                      <div className="flex items-center gap-2">
-                        <PlayCircle className="h-5 w-5 text-astu-red" />
-                        <h3 className="text-base font-bold text-white line-clamp-1">{activePlayVideo.title}</h3>
-                      </div>
-                      <button
-                        type="button"
-                        aria-label="Close video player"
-                        onClick={() => setActivePlayVideo(null)}
-                        className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    {/* Video Player Container */}
-                    <div className="relative aspect-video w-full bg-black">
-                      {(() => {
-                        const embedUrl = getEmbedVideoUrl(activePlayVideo.link);
-                        if (embedUrl && (embedUrl.includes('youtube') || embedUrl.includes('vimeo'))) {
-                          return (
-                            <iframe
-                              src={embedUrl}
-                              title={activePlayVideo.title}
-                              className="w-full h-full border-0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          );
-                        }
-                        if (activePlayVideo.link && activePlayVideo.link.endsWith('.mp4')) {
-                          return (
-                            <video
-                              controls
-                              autoPlay
-                              src={activePlayVideo.link}
-                              className="w-full h-full object-contain"
-                            />
-                          );
-                        }
-                        return (
-                          <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-astu-navy/50 to-slate-950 p-6 text-center">
-                            <img
-                              src={activePlayVideo.image || '/images/astu-building.jpg'}
-                              alt={activePlayVideo.title}
-                              className="absolute inset-0 w-full h-full object-cover opacity-25"
-                            />
-                            <div className="relative z-10 flex flex-col items-center">
-                              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-astu-red text-white shadow-xl animate-pulse mb-4">
-                                <Play className="h-8 w-8 fill-current ml-1" />
-                              </div>
-                              <h4 className="text-lg font-bold text-white">{activePlayVideo.title}</h4>
-                              <p className="mt-2 text-xs text-slate-300 max-w-md">
-                                {activePlayVideo.subtitle || 'Official media highlight from Adama Science and Technology University.'}
-                              </p>
-                              <span className="mt-4 rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white">
-                                {activePlayVideo.category} · {activePlayVideo.duration}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-
-                    {/* Bottom Info */}
-                    <div className="px-5 py-3 border-t border-slate-800 bg-slate-900 flex items-center justify-between text-xs text-slate-400">
-                      <span className="font-semibold text-sky-400">ASTU Media Services · HD Stream</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShareItemModal({
-                            id: activePlayVideo.id,
-                            title: activePlayVideo.title,
-                            subtitle: `${activePlayVideo.category} · Video Highlights`,
-                            text: `Watch "${activePlayVideo.title}" from Adama Science and Technology University`,
-                            image: activePlayVideo.image,
-                            url: "/info/video-gallery",
-                            type: "video",
-                          });
-                        }}
-                        className="font-bold text-white hover:text-amber-400 flex items-center gap-1.5 transition-colors cursor-pointer"
-                      >
-                        <Share2 className="h-3.5 w-3.5" />
-                        <span>Share Video</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Video Player Modal with HD Streaming, Scrubber, Chapters, Transcript, & Details */}
+              <VideoDetailModal
+                video={activePlayVideo}
+                onClose={() => setActivePlayVideo(null)}
+                onSelectRelatedVideo={(v) => setActivePlayVideo(v)}
+                relatedVideos={videoItemsList}
+              />
             </div>
           ) : isContactPage ? (
             /* 3. DEDICATED INSTITUTIONAL CONTACT DIRECTORY LAYOUT */

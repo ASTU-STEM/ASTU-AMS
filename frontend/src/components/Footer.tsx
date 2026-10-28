@@ -154,7 +154,7 @@ export default function Footer() {
       : defaultSections;
 
   return (
-    <footer id="contact" className="scroll-mt-20 relative bg-slate-950 text-slate-300 font-sans border-t border-slate-800">
+    <footer id="contact" className="scroll-mt-20 relative w-full bg-slate-950 text-slate-300 font-sans border-t border-slate-800">
       {/* Top Tri-Color Accent Ribbon */}
       <div className="h-1 w-full bg-gradient-to-r from-astu-green via-astu-navy to-astu-red" />
 

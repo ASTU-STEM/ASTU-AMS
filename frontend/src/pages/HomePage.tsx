@@ -55,6 +55,7 @@ import ChatBot from "../components/ChatBot";
 import ShareCampaignModal from "../components/ShareCampaignModal";
 import ShareModal, { ShareItem } from "../components/ShareModal";
 import TelebirrDonationModal from "../components/TelebirrDonationModal";
+import VideoDetailModal from "../components/VideoDetailModal";
 import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
@@ -1639,7 +1640,7 @@ location: e.location || 'Location to be confirmed',
   // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
-    <div className="home-shell flex min-h-screen flex-col bg-background text-on-surface dark:bg-[var(--bg-page)] dark:text-slate-100 transition-colors duration-200">
+    <div className="home-shell flex min-h-screen flex-col w-full relative bg-background text-on-surface dark:bg-[var(--bg-page)] dark:text-slate-100 transition-colors duration-200">
       <Navbar />
 
       <div className="fixed top-0 left-0 z-[60] w-full h-0.5 bg-slate-800/20 dark:bg-white/10">
@@ -1649,8 +1650,8 @@ location: e.location || 'Location to be confirmed',
         />
       </div>
 
-      <main id="home">
-        <section className="relative overflow-hidden min-h-[520px] h-[70vh] max-h-[620px] md:h-[520px] lg:h-[560px] bg-slate-950">
+      <main id="home" className="flex flex-col w-full relative">
+        <section className="relative w-full overflow-hidden min-h-[520px] max-h-[620px] md:h-[520px] lg:h-[560px] bg-slate-950">
           {/* Background Slides — photo stays dominant; text uses a local scrim only */}
           <div className="absolute inset-0 w-full h-full">
             {displaySlides.map((slide, idx) => (
@@ -1773,7 +1774,7 @@ location: e.location || 'Location to be confirmed',
         </section>
 
         {visibleStats.length > 0 && (
-          <section id="impact-numbers" className="relative z-20 mx-auto -mt-8 mb-6 md:-mt-10 md:mb-8 max-w-[1440px] px-4 md:px-8">
+          <section id="impact-numbers" className="relative w-full z-20 mx-auto -mt-8 mb-6 md:-mt-10 md:mb-8 max-w-[1440px] px-4 md:px-8">
             <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-[var(--bg-card)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] backdrop-blur-xl">
               <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green" />
               <div
@@ -1813,7 +1814,7 @@ location: e.location || 'Location to be confirmed',
           </section>
         )}
 
-        <section id="campus-life" className="relative mx-auto max-w-[1440px] px-4 py-10 md:px-8 md:py-12">
+        <section id="campus-life" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div className="pointer-events-none absolute -top-10 right-0 h-56 w-56 rounded-full bg-gradient-to-br from-astu-green/10 via-sky-400/5 to-transparent blur-3xl dark:from-emerald-500/15" />
 
           <div className="relative mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
@@ -1904,7 +1905,7 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="events" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+        <section id="events" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div id="workshops" className="sr-only" />
 
           <div className="pointer-events-none absolute -top-8 -right-8 h-64 w-64 rounded-full bg-gradient-to-br from-astu-navy/10 via-rose-500/8 to-transparent blur-3xl dark:from-sky-500/12 dark:via-rose-500/8" />
@@ -2162,7 +2163,7 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="news" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+        <section id="news" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div className="pointer-events-none absolute -top-8 -left-8 h-56 w-56 rounded-full bg-gradient-to-br from-astu-navy/8 via-sky-500/5 to-transparent blur-3xl dark:from-sky-500/10" />
 
           <div 
@@ -2394,7 +2395,7 @@ location: e.location || 'Location to be confirmed',
         {/* =========================================================================
             CAMPUS MOMENTS (GALLERY) SECTION
             ========================================================================= */}
-        <section id="gallery" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+        <section id="gallery" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div className="pointer-events-none absolute -top-8 -left-8 h-64 w-64 rounded-full bg-gradient-to-br from-blue-500/10 via-amber-500/5 to-transparent blur-3xl" />
 
           <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-blue-50/20 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
@@ -2520,7 +2521,7 @@ location: e.location || 'Location to be confirmed',
         {/* =========================================================================
             VIDEO GALLERY (VIDEO HIGHLIGHTS) SECTION
             ========================================================================= */}
-        <section id="video-gallery" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+        <section id="video-gallery" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div className="pointer-events-none absolute -top-8 -right-8 h-64 w-64 rounded-full bg-gradient-to-br from-rose-500/10 via-astu-navy/5 to-transparent blur-3xl" />
 
           <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-rose-50/20 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
@@ -2650,7 +2651,7 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+        <section id="success-stories" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div className="mb-6 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
             <div className="max-w-2xl reveal">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Success Stories</p>
@@ -2771,7 +2772,7 @@ location: e.location || 'Location to be confirmed',
           )}
         </section>
 
-        <section id="giving" className="relative py-8 md:py-10 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-[var(--bg-page)] dark:via-[var(--bg-card)] dark:to-[var(--bg-page)] overflow-hidden border-t border-slate-100 dark:border-[var(--border-color)]">
+        <section id="giving" className="relative w-full py-16 md:py-20 bg-gradient-to-b from-slate-50 via-white to-slate-50 dark:from-[var(--bg-page)] dark:via-[var(--bg-card)] dark:to-[var(--bg-page)] overflow-hidden border-t border-slate-100 dark:border-[var(--border-color)]">
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute -top-24 right-8 w-64 h-64 rounded-full bg-astu-navy/5 dark:bg-sky-500/10 blur-3xl" />
             <div className="absolute -bottom-12 left-8 w-64 h-64 rounded-full bg-astu-green/5 dark:bg-emerald-500/10 blur-3xl" />
@@ -3128,7 +3129,7 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-10 md:px-8 md:py-12">
+        <section id="partners" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div className="mb-8 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
             <div className="max-w-2xl reveal">
               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
@@ -3222,7 +3223,7 @@ location: e.location || 'Location to be confirmed',
         </section>
 
 
-        <section id="faq" className="relative mx-auto max-w-[1440px] px-4 py-10 md:px-8 md:py-12">
+        <section id="faq" className="relative w-full mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
           <div className="mb-8 text-center reveal">
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
               {liveFaqHeaders?.eyebrow || 'FAQ'}
@@ -3293,7 +3294,7 @@ location: e.location || 'Location to be confirmed',
 
         <section
           id="community"
-          className="relative overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-slate-900 py-12 md:py-16"
+          className="relative w-full overflow-hidden bg-gradient-to-br from-astu-navy via-primary-container to-slate-900 py-16 md:py-20"
         >
           <div id="cta" className="sr-only" aria-hidden="true" />
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -4286,109 +4287,13 @@ location: e.location || 'Location to be confirmed',
         </div>
       )}
 
-      {/* Video Player Modal */}
-      {activeVideoModalItem && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
-          onClick={() => setActiveVideoModalItem(null)}
-        >
-          <div
-            className="relative max-w-4xl w-full bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Top Bar */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-900">
-              <div className="flex items-center gap-2">
-                <PlayCircle className="h-5 w-5 text-astu-red" />
-                <h3 className="text-base font-bold text-white line-clamp-1">{activeVideoModalItem.title}</h3>
-              </div>
-              <button
-                type="button"
-                aria-label="Close video player"
-                onClick={() => setActiveVideoModalItem(null)}
-                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Video Player Container */}
-            <div className="relative aspect-video w-full bg-black">
-              {(() => {
-                const embedUrl = getEmbedVideoUrl(activeVideoModalItem.link);
-                if (embedUrl && (embedUrl.includes('youtube') || embedUrl.includes('vimeo'))) {
-                  return (
-                    <iframe
-                      src={embedUrl}
-                      title={activeVideoModalItem.title}
-                      className="w-full h-full border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  );
-                }
-                if (activeVideoModalItem.link && activeVideoModalItem.link.endsWith('.mp4')) {
-                  return (
-                    <video
-                      controls
-                      autoPlay
-                      src={activeVideoModalItem.link}
-                      className="w-full h-full object-contain"
-                    />
-                  );
-                }
-                return (
-                  <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-astu-navy/50 to-slate-950 p-6 text-center">
-                    <img
-                      src={mediaUrl(activeVideoModalItem.image) || activeVideoModalItem.image || '/images/astu-building.jpg'}
-                      alt={activeVideoModalItem.title}
-                      className="absolute inset-0 w-full h-full object-cover opacity-25"
-                    />
-                    <div className="relative z-10 flex flex-col items-center">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-astu-red text-white shadow-xl animate-pulse mb-4">
-                        <Play className="h-8 w-8 fill-current ml-1" />
-                      </div>
-                      <h4 className="text-lg font-bold text-white">{activeVideoModalItem.title}</h4>
-                      <p className="mt-2 text-xs text-slate-300 max-w-md">
-                        {activeVideoModalItem.subtitle || 'Official media highlight from Adama Science and Technology University.'}
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveVideoModalItem(null);
-                          navigate('/info/video-gallery');
-                        }}
-                        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 text-xs font-bold text-white transition-all"
-                      >
-                        <span>Open in Video Gallery Directory</span>
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Bottom Info */}
-            <div className="px-5 py-3 border-t border-slate-800 bg-slate-900 flex items-center justify-between text-xs text-slate-400">
-              <span className="font-semibold text-sky-400">ASTU Media Services · HD Stream</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveVideoModalItem(null);
-                  navigate('/info/video-gallery');
-                }}
-                className="font-bold text-white hover:text-amber-400 flex items-center gap-1 transition-colors"
-              >
-                <span>All Video Highlights</span>
-                <ArrowRight className="h-3 w-3" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Video Player Modal with HD Streaming, Scrubber, Chapters, Transcript, & Details */}
+      <VideoDetailModal
+        video={activeVideoModalItem}
+        onClose={() => setActiveVideoModalItem(null)}
+        onSelectRelatedVideo={(v) => setActiveVideoModalItem(v)}
+        relatedVideos={liveVideos}
+      />
 
       {/* Direct Instant Giving Modal for Homepage */}
       <TelebirrDonationModal
