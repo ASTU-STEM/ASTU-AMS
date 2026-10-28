@@ -434,3 +434,144 @@ export const recordPublicDonationController = async (req: Request, res: Response
   }
 };
 
+// ─── Content Templates Controllers ───
+
+export const getContentTemplatesController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { category, search, featured } = req.query;
+    const where: any = {};
+    if (category && category !== 'all') {
+      where.category = String(category);
+    }
+    if (search) {
+      where.search = String(search);
+    }
+    if (featured !== undefined) {
+      where.isFeatured = featured === 'true';
+    }
+    const templates = await prisma.contentTemplate.findMany({ where });
+    return res.status(200).json({
+      success: true,
+      data: templates,
+      total: templates.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getContentTemplateByIdController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    const template = await prisma.contentTemplate.findUnique({ where: { id } });
+    if (!template) {
+      return res.status(404).json({ success: false, message: 'Template not found' });
+    }
+    return res.status(200).json({
+      success: true,
+      data: template,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { name, description, category, color, iconName, thumbnail, fields, starterBody, isFeatured, isDefault } = req.body;
+    if (!name || !description || !category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, category, and description are required for creating a template.',
+      });
+    }
+    const created = await prisma.contentTemplate.create({
+      data: {
+        name,
+        description,
+        category,
+        color: color || '#003580',
+        iconName: iconName || 'FileText',
+        thumbnail: thumbnail || String(category).toLowerCase(),
+        fields: Array.isArray(fields) ? fields : (typeof fields === 'string' ? fields.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
+        starterBody: starterBody || '',
+        isFeatured: Boolean(isFeatured),
+        isDefault: Boolean(isDefault),
+        usage: 0,
+        lastUpdated: 'Just now',
+      },
+    });
+    return res.status(201).json({
+      success: true,
+      message: `Template "${name}" created successfully.`,
+      data: created,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    const { name, description, category, color, iconName, thumbnail, fields, starterBody, isFeatured, isDefault } = req.body;
+    const data: any = {};
+    if (name !== undefined) data.name = name;
+    if (description !== undefined) data.description = description;
+    if (category !== undefined) data.category = category;
+    if (color !== undefined) data.color = color;
+    if (iconName !== undefined) data.iconName = iconName;
+    if (thumbnail !== undefined) data.thumbnail = thumbnail;
+    if (fields !== undefined) {
+      data.fields = Array.isArray(fields) ? fields : (typeof fields === 'string' ? fields.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+    }
+    if (starterBody !== undefined) data.starterBody = starterBody;
+    if (isFeatured !== undefined) data.isFeatured = Boolean(isFeatured);
+    if (isDefault !== undefined) data.isDefault = Boolean(isDefault);
+
+    const updated = await prisma.contentTemplate.update({
+      where: { id },
+      data,
+    });
+    return res.status(200).json({
+      success: true,
+      message: `Template "${updated.name}" updated successfully.`,
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    await prisma.contentTemplate.delete({ where: { id } });
+    return res.status(200).json({
+      success: true,
+      message: 'Template deleted successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const useContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    const updated = await prisma.contentTemplate.incrementUsage({ where: { id } });
+    return res.status(200).json({
+      success: true,
+      message: `Usage count updated for "${updated.name}".`,
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
