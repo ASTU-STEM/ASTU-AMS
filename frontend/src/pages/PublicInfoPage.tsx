@@ -618,42 +618,14 @@ export default function PublicInfoPage() {
 
       <main>
         {/* ── HERO SECTION ── */}
-        <section className={`relative overflow-hidden text-white ${isStoriesPage ? '' : 'bg-gradient-to-br from-astu-navy via-primary-container to-astu-navy'}`}>
-          {/* Hero background */}
-          {isStoriesPage ? (
-            <div className="absolute inset-0">
-              <img
-                alt={page.title}
-                className="h-full w-full object-cover object-center scale-105 transition-transform duration-[7000ms] ease-out hover:scale-100"
-                src={
-                  !page.image || page.image.includes("unsplash.com")
-                    ? "/images/astu-building.jpg"
-                    : page.image
-                }
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/images/astu-building.jpg";
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-astu-navy/85 to-slate-950/90 backdrop-blur-[1px]" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400/10 via-transparent to-transparent" />
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green" />
-            </div>
-          ) : (
-            <div className="absolute inset-0 opacity-20 mix-blend-overlay">
-              <img
-                alt={page.title}
-                className="h-full w-full object-cover"
-                src={page.image}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "/images/astu-building.jpg";
-                }}
-              />
-            </div>
-          )}
+        <section className="relative overflow-hidden text-white bg-gradient-to-br from-[#001f3f] via-[#002f6c] to-[#001730] dark:from-slate-950 dark:via-[#001933] dark:to-slate-950 border-b border-white/10 dark:border-slate-800">
+          {/* Top Tri-Color University Ribbon */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-astu-green via-sky-400 to-astu-red z-20" />
 
-          {/* Clean grid pattern */}
-          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
+          {/* Ambient Lighting & Depth Glows (clean, executive atmosphere without photographic clutter) */}
+          <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-sky-500/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400/10 via-transparent to-transparent" />
 
           <div className="relative mx-auto max-w-[1440px] px-4 pt-12 pb-16 sm:px-6 lg:px-8 lg:pt-16 lg:pb-24">
             {/* Top Navigation Row */}
@@ -661,7 +633,7 @@ export default function PublicInfoPage() {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white cursor-pointer shadow-sm"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Back to Home</span>
@@ -690,9 +662,9 @@ export default function PublicInfoPage() {
             {/* Hero Main Content */}
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <div className="mb-4 inline-flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/10 p-2.5 backdrop-blur-md">
-                  <IconComponent className="h-5 w-5 text-astu-green" />
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-astu-green">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3.5 py-1.5 backdrop-blur-md text-emerald-300 shadow-sm">
+                  <IconComponent className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
                     {page.badge || "ASTU Institutional Resource"}
                   </span>
                 </div>
