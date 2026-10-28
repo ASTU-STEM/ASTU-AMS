@@ -11,6 +11,7 @@ interface ImageUploaderProps {
   onChange: (url: string) => void;
   label?: string;
   className?: string;
+  album?: string;
 }
 
 export default function ImageUploader({

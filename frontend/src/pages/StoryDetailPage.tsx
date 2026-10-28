@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Quote,
   Share2,
+  Sparkles,
   UserCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -18,11 +19,13 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
 import storiesService, { AlumniStory } from '../features/admin/services/stories.service';
+import ShareModal from '../components/ShareModal';
 
 export default function StoryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [story, setStory] = useState<AlumniStory | null>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -36,10 +39,7 @@ export default function StoryDetailPage() {
   const relatedStories = allStories.filter((s) => s.id !== story?.id).slice(0, 3);
 
   const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Story link copied to clipboard!');
-    }
+    setIsShareModalOpen(true);
   };
 
   if (!story) {
@@ -69,31 +69,36 @@ export default function StoryDetailPage() {
     <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar />
 
-      {/* Header Breadcrumb */}
-      <div className="bg-[#003580] text-white py-8 px-4 sm:px-6">
-        <div className="mx-auto max-w-[1240px]">
+      {/* Header Breadcrumb & Hero */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-astu-navy to-slate-900 text-white pt-10 pb-14 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-500 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-amber-500 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-[1440px]">
           <button
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-200 hover:text-white mb-4 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-white mb-4 transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back
           </button>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300 mb-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300 mb-3">
             <Link to="/" className="hover:underline">Home</Link>
             <ChevronRight className="h-3 w-3" />
-            <span>Alumni Success Stories</span>
+            <Link to="/info/alumni-stories" className="hover:underline">Alumni Success Stories</Link>
             <ChevronRight className="h-3 w-3" />
-            <span className="text-[#FFD700] font-semibold">{story.name}</span>
+            <span className="text-amber-400 font-semibold">{story.name}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black">{story.name}</h1>
-          <p className="mt-1 text-sm text-slate-200 font-medium">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">{story.name}</h1>
+          <p className="mt-2 text-sm sm:text-base text-slate-200 font-medium">
             {story.role} {story.company && `at ${story.company}`}
           </p>
         </div>
-      </div>
+      </section>
 
       {/* Main Content */}
-      <div className="flex-1 mx-auto max-w-[1240px] w-full px-4 sm:px-6 py-10">
+      <div className="flex-1 mx-auto max-w-[1440px] w-full px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
           {/* Main Story Column */}
           <main className="space-y-8">
@@ -147,13 +152,23 @@ export default function StoryDetailPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleShare}
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                  title="Share Story"
-                >
-                  <Share2 className="h-4 w-4" /> Share
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => navigate('/info/alumni-stories?submit=true')}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-astu-navy to-[#1a4f8a] px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:brightness-110 transition-all cursor-pointer"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                    <span>Share Your Story</span>
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-2xs transition-all cursor-pointer"
+                    title="Share this alumni story"
+                  >
+                    <Share2 className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                    <span>Share</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -224,12 +239,52 @@ export default function StoryDetailPage() {
                 ))}
               </div>
             </div>
+            {/* Share Your Story Sidebar Callout */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-astu-navy via-[#0c3970] to-slate-900 p-5 text-white shadow-md space-y-2.5">
+              <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-400">
+                <Sparkles className="h-3 w-3" />
+                ASTU Alumni Network
+              </span>
+              <h4 className="text-sm font-bold text-white leading-snug">
+                Have a Story to Inspire Current Students?
+              </h4>
+              <p className="text-[11px] text-slate-200 leading-relaxed">
+                Submit your career progression, research breakthroughs, startup milestones, or industry advice.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/info/alumni-stories?submit=true')}
+                className="w-full rounded-xl bg-gradient-to-r from-astu-red to-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:brightness-110 transition-all cursor-pointer text-center"
+              >
+                Share Your Story
+              </button>
+            </div>
           </aside>
         </div>
       </div>
 
       <Footer />
       <ChatBot />
+
+      {/* Universal Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        item={
+          story
+            ? {
+                id: story.id,
+                title: story.name,
+                subtitle: [story.role, story.company].filter(Boolean).join(' · '),
+                text: story.text,
+                image: story.image,
+                badge: story.department || (story.graduationYear ? `Class of ${story.graduationYear}` : 'Alumni Spotlight'),
+                url: `/stories/${story.id}`,
+                type: 'story',
+              }
+            : null
+        }
+      />
     </div>
   );
 }

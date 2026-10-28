@@ -406,7 +406,12 @@ export interface Partner {
   partnershipType?: 'Strategic' | 'Recruitment' | 'Research' | 'Internship' | 'Technology' | string;
   description?: string;
   contactEmail?: string;
+  contactPhone?: string;
   featured?: boolean;
+  hiredCount?: string;
+  mouYear?: string;
+  status?: string;
+  tags?: string[];
 }
 
 /** Partners come from CMS / API only — no demo directory. */
@@ -881,6 +886,10 @@ export const homepageCmsService = {
     }
 
     return this.getSettings();
+  },
+
+  async fetchSettings(): Promise<HomepageCmsConfig | null> {
+    return this.fetchFromApi();
   },
 
   async fetchPublishedPartners(): Promise<Partner[]> {

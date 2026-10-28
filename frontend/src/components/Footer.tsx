@@ -22,7 +22,8 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useSystemSettings } from "../context/SystemSettingsContext";
-import astuLogo from "../assets/logos/astu-icon.jpeg";
+import { resolveLogoUrl, DEFAULT_LOGO_PATH } from "../config";
+import astuLogo from "../assets/logos/astu-seal-logo.png";
 import footerCmsService, {
   FooterCmsConfig,
   defaultFooterConfig,
@@ -219,9 +220,16 @@ export default function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="inline-flex items-center gap-3 group">
               <img
-                src={settings.appearance?.logoUrl || astuLogo}
+                src={resolveLogoUrl(settings.appearance?.logoUrl)}
                 alt={`${abbreviation} Logo`}
                 className="h-12 w-12 object-contain rounded-2xl bg-white/5 p-1 ring-1 ring-white/10 shadow-md group-hover:scale-105 transition-transform"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (!img.dataset.fallback) {
+                    img.dataset.fallback = "1";
+                    img.src = DEFAULT_LOGO_PATH;
+                  }
+                }}
               />
               <div>
                 <h4 className="text-lg font-black text-white leading-tight">

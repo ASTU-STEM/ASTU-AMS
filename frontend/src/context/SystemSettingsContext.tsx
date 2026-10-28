@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import config from '../config';
+import config, { resolveLogoUrl, DEFAULT_LOGO_PATH } from '../config';
 
 export interface SystemSettingsState {
   general: {
@@ -81,7 +81,7 @@ export const DEFAULT_FRONTEND_SETTINGS: SystemSettingsState = {
   appearance: {
     primaryColor: '#003580',
     accentColor: '#E8A020',
-    logoUrl: 'images/astu-seal-logo.png',
+    logoUrl: DEFAULT_LOGO_PATH,
   },
 };
 
@@ -111,17 +111,21 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
-          setSettings((prev) => ({
-            ...prev,
-            general: {
-              ...prev.general,
-              ...(result.data.general || {}),
-            },
-            appearance: {
+          setSettings((prev) => {
+            const nextAppearance = {
               ...prev.appearance,
               ...(result.data.appearance || {}),
-            },
-          }));
+            };
+            nextAppearance.logoUrl = resolveLogoUrl(nextAppearance.logoUrl);
+            return {
+              ...prev,
+              general: {
+                ...prev.general,
+                ...(result.data.general || {}),
+              },
+              appearance: nextAppearance,
+            };
+          });
         }
       }
     } catch (err) {
@@ -160,7 +164,13 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
       if (newSettings.general) merged.general = { ...prev.general, ...newSettings.general };
       if (newSettings.email) merged.email = { ...prev.email, ...newSettings.email };
       if (newSettings.integrations) merged.integrations = { ...prev.integrations, ...newSettings.integrations };
-      if (newSettings.appearance) merged.appearance = { ...prev.appearance, ...newSettings.appearance };
+      if (newSettings.appearance) {
+        merged.appearance = {
+          ...prev.appearance,
+          ...newSettings.appearance,
+          logoUrl: resolveLogoUrl(newSettings.appearance.logoUrl ?? prev.appearance.logoUrl),
+        };
+      }
       return merged;
     });
   };

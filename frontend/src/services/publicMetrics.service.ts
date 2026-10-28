@@ -1,11 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
 import api from './api';
 
+export interface DepartmentOutcome {
+  id: string;
+  code: string;
+  name: string;
+  totalAlumni: number;
+  employedAlumni: number;
+  employmentRate: number;
+}
+
 export interface PublicMetrics {
   registeredAlumni: number;
   registeredAlumniFormatted: string;
   verifiedAlumni?: number;
   verifiedAlumniFormatted?: string;
+  pendingAlumniVerification?: number;
+  employedAlumni?: number;
+  unemployedAlumni?: number;
   verificationRate?: number;
   verificationRateFormatted?: string;
   fieldsOfStudy: number;
@@ -16,18 +28,25 @@ export interface PublicMetrics {
   historicBatchesFormatted: string;
   employmentRate: number;
   employmentRateFormatted: string;
-  etaComplianceRate?: number;
+  etaComplianceRate?: number | null;
   etaComplianceRateFormatted?: string;
+  hasActiveSurveyWave?: boolean;
+  surveyAssignmentsTotal?: number;
+  surveyAssignmentsCompleted?: number;
   activeJobs: number;
   activeJobsFormatted: string;
   digitalRequests: number;
   digitalRequestsFormatted: string;
+  documentRequestsTotal?: number;
+  documentRequestsPending?: number;
+  supportTicketsOpen?: number;
   eventsCount: number;
   eventsCountFormatted: string;
   eventRsvpsCount?: number;
   storiesCount?: number;
   bulletinsCount?: number;
   pendingTicketsCount?: number;
+  departmentDistribution?: DepartmentOutcome[];
   lastUpdated?: string;
 }
 
@@ -37,6 +56,9 @@ export const EMPTY_METRICS: PublicMetrics = {
   registeredAlumniFormatted: '—',
   verifiedAlumni: 0,
   verifiedAlumniFormatted: '—',
+  pendingAlumniVerification: 0,
+  employedAlumni: 0,
+  unemployedAlumni: 0,
   verificationRate: 0,
   verificationRateFormatted: '—',
   fieldsOfStudy: 0,
@@ -47,18 +69,25 @@ export const EMPTY_METRICS: PublicMetrics = {
   historicBatchesFormatted: '—',
   employmentRate: 0,
   employmentRateFormatted: '—',
-  etaComplianceRate: 0,
+  etaComplianceRate: null,
   etaComplianceRateFormatted: '—',
+  hasActiveSurveyWave: false,
+  surveyAssignmentsTotal: 0,
+  surveyAssignmentsCompleted: 0,
   activeJobs: 0,
   activeJobsFormatted: '—',
   digitalRequests: 0,
   digitalRequestsFormatted: '—',
+  documentRequestsTotal: 0,
+  documentRequestsPending: 0,
+  supportTicketsOpen: 0,
   eventsCount: 0,
   eventsCountFormatted: '—',
   eventRsvpsCount: 0,
   storiesCount: 0,
   bulletinsCount: 0,
   pendingTicketsCount: 0,
+  departmentDistribution: [],
 };
 
 let cachedMetrics: PublicMetrics | null = null;

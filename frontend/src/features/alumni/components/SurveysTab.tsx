@@ -481,7 +481,7 @@ export const SurveysTab = () => {
                 <img
                   alt="ASTU"
                   className="h-9 w-9 object-contain rounded-lg bg-white/15 p-1 border border-white/20"
-                  src="/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg"
+                  src="/images/astu-seal-logo.png"
                 />
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#FFCC00]">

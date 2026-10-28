@@ -35,6 +35,7 @@ import AdminBadge from '../features/admin/components/AdminBadge';
 import { adminService } from '../features/admin/services/admin.service';
 import { useAuth } from '../contexts/AuthContext';
 import { useSystemSettings } from '../context/SystemSettingsContext';
+import { resolveLogoUrl } from '../config';
 
 interface UnifiedSidebarProps {
   onLogout: () => void;
@@ -240,11 +241,7 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
               <img
-                src={
-                  settings.appearance?.logoUrl && !settings.appearance.logoUrl.includes('googleusercontent')
-                    ? settings.appearance.logoUrl
-                    : '/images/astu-seal-logo.png'
-                }
+                src={resolveLogoUrl(settings.appearance?.logoUrl)}
                 alt={`${settings.general?.abbreviation || 'ASTU'} Logo`}
                 className="h-full w-full object-contain scale-105"
               />

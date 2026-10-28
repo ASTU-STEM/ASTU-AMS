@@ -77,9 +77,51 @@ function readDevDb(): any {
     'contentItems', 'mediaAssets', 'homepageConfigs', 'jobs', 'events', 'eventRSVPs',
     'surveys', 'surveyResponses', 'mentorships', 'communityMembers',
     'departmentHeadProfiles', 'verificationRequests', 'forumPosts', 'employerFeedbacks',
+    'donationCampaigns',
   ];
   for (const key of COLLECTIONS) {
     if (!Array.isArray(store[key])) store[key] = store[key] ?? [];
+  }
+
+  if (!store.donationCampaigns || store.donationCampaigns.length === 0) {
+    store.donationCampaigns = [
+      {
+        id: 'camp-001',
+        title: 'ASTU STEM Scholarship Fund 2026',
+        category: 'Scholarship',
+        description: 'Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.',
+        goal: 5000000,
+        raised: 1851000,
+        donorCount: 349,
+        status: 'ACTIVE',
+        createdAt: '2026-01-15T08:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'camp-002',
+        title: 'AI Research Lab & Robotics Equipment',
+        category: 'Research',
+        description: 'Fund high-performance GPU compute clusters, sensory rigs, and laboratory instrumentation for advanced postgraduate engineering researchers.',
+        goal: 8000000,
+        raised: 3201000,
+        donorCount: 158,
+        status: 'ACTIVE',
+        createdAt: '2026-02-10T09:30:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'camp-003',
+        title: 'Campus Innovation Makerspace & Incubator',
+        category: 'Infrastructure',
+        description: 'Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.',
+        goal: 12000000,
+        raised: 6800000,
+        donorCount: 220,
+        status: 'ACTIVE',
+        createdAt: '2026-03-01T10:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+    ];
   }
 
   return store;
@@ -365,17 +407,27 @@ class FakePrisma {
       if (where?.name) return depts.find((d: any) => (d.name || '').toLowerCase() === String(where.name).toLowerCase()) || null;
       return null;
     },
-    findMany: async ({ orderBy, include }: any = {}) => {
+    findMany: async ({ orderBy, include, select }: any = {}) => {
       const store = readDevDb();
       const depts = store.departments || [];
       const alumniProfiles = store.alumniProfiles || [];
       const users = store.users || [];
+      const matchDept = (a: any, d: any) =>
+        a.departmentId === d.id ||
+        (d.code && a.departmentId?.toLowerCase().includes(d.code.toLowerCase())) ||
+        (d.code && a.studentId?.toLowerCase().includes('/' + d.code.toLowerCase() + '/')) ||
+        a.department === d.name;
+
       return depts.map((d: any) => {
+        const matchedProfiles = alumniProfiles.filter((a: any) => matchDept(a, d));
         const rec: any = {
           ...d,
           departmentHeadProfiles: d.departmentHeadProfiles || [],
-          _count: { alumniProfiles: alumniProfiles.filter((a: any) => a.departmentId === d.id).length },
+          _count: { alumniProfiles: matchedProfiles.length },
         };
+        if (include?.alumniProfiles || select?.alumniProfiles) {
+          rec.alumniProfiles = matchedProfiles;
+        }
         if (include?.departmentHeadProfiles?.include?.user) {
           rec.departmentHeadProfiles = (rec.departmentHeadProfiles || []).map((h: any) => ({
             ...h,
@@ -583,7 +635,7 @@ class FakePrisma {
           companyName: 'INSA Corporation',
           industry: 'Cybersecurity & Defense Tech',
           location: 'Addis Ababa, Ethiopia',
-          logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+          logoUrl: '/images/partners/insa.png',
           website: 'https://insa.gov.et'
         };
         return {
@@ -607,7 +659,7 @@ class FakePrisma {
         companyName: 'INSA Corporation',
         industry: 'Cybersecurity & Defense Tech',
         location: 'Addis Ababa, Ethiopia',
-        logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+        logoUrl: '/images/partners/insa.png',
         website: 'https://insa.gov.et'
       };
       return {
@@ -930,6 +982,70 @@ class FakePrisma {
         store.mediaAssets = store.mediaAssets.filter((m: any) => m.id !== where.id);
         writeDevDb(store);
       }
+      return {};
+    },
+  };
+
+  donationCampaign = {
+    findMany: async ({ where, orderBy }: any = {}) => {
+      const store = readDevDb();
+      let list = [...(store.donationCampaigns || [])];
+      if (where?.status && where.status !== 'ALL') {
+        list = list.filter((c: any) => c.status === where.status);
+      }
+      if (where?.category && where.category !== 'ALL') {
+        list = list.filter((c: any) => c.category === where.category);
+      }
+      return list;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.donationCampaigns || []).find((c: any) => c.id === where?.id) || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let list = store.donationCampaigns || [];
+      if (where?.status && where.status !== 'ALL') {
+        list = list.filter((c: any) => c.status === where.status);
+      }
+      return list.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `camp-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.donationCampaigns = store.donationCampaigns || [];
+      store.donationCampaigns.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    createMany: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const items = Array.isArray(data) ? data : [data];
+      const created = items.map((c: any) => ({
+        ...c,
+        id: c.id || `camp-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
+      store.donationCampaigns = store.donationCampaigns || [];
+      store.donationCampaigns.push(...created);
+      writeDevDb(store);
+      return { count: created.length };
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const list = store.donationCampaigns || [];
+      const idx = list.findIndex((c: any) => c.id === where?.id);
+      if (idx === -1) throw new Error('Campaign not found');
+      list[idx] = { ...list[idx], ...data, updatedAt: new Date().toISOString() };
+      store.donationCampaigns = list;
+      writeDevDb(store);
+      return list[idx];
+    },
+    delete: async ({ where }: any) => {
+      const store = readDevDb();
+      store.donationCampaigns = (store.donationCampaigns || []).filter((c: any) => c.id !== where?.id);
+      writeDevDb(store);
       return {};
     },
   };

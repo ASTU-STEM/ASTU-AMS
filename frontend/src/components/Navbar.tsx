@@ -1,25 +1,21 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Bell,
-  Building2,
-  ChevronDown,
-  Heart,
-  Home,
-  Info,
-  Menu,
-  Megaphone,
-  Moon,
-  Search,
-  Sun,
-  Users,
-  X,
-} from "lucide-react";
+  HiBars3,
+  HiChevronDown,
+  HiHome,
+  HiMagnifyingGlass,
+  HiXMark,
+} from "react-icons/hi2";
+import { MdCampaign, MdDashboardCustomize } from "react-icons/md";
+import { FaInfoCircle, FaUsers } from "react-icons/fa";
+import { Bell, Moon, Sun } from "lucide-react";
 import toast from "react-hot-toast";
 import authService from "../features/auth/services/auth.service";
 import AnnouncementPanel from "./AnnouncementPanel";
 import { useSystemSettings } from "../context/SystemSettingsContext";
 import { useTheme } from "../hooks/useTheme";
+import { resolveLogoUrl, DEFAULT_LOGO_PATH } from "../config";
 
 interface MegaMenuItem {
   label: string;
@@ -34,39 +30,40 @@ interface MegaMenu {
   items: MegaMenuItem[];
 }
 
+/** Original top-level nav: Home + Partners only. Giving, Community, Gallery live in mega menus. */
 const megaMenus: MegaMenu[] = [
   {
     label: "About",
-    icon: Info,
+    icon: FaInfoCircle,
     items: [
-      { label: "About ASTU", route: "/about", description: "Mission, vision and institutional impact" },
-      { label: "Campuses", sectionId: "campuses", description: "Campuses and facilities" },
-      { label: "Campus Life", sectionId: "campus-life", description: "Student activities and culture" },
-      { label: "Research", sectionId: "research", description: "Research and innovation highlights" },
-      { label: "Success Stories", sectionId: "success-stories", description: "Alumni achievements" },
+      { label: "About ASTU", route: "/about", description: "Mission, vision & history" },
+      { label: "Campuses", route: "/info/campuses", description: "Our campuses & facilities" },
+      { label: "Campus Life", sectionId: "campus-life", route: "/info/campus-life", description: "Student activities & culture" },
+      { label: "Research", route: "/info/research", description: "Innovation & discoveries" },
+      { label: "Success Stories", sectionId: "success-stories", route: "/info/alumni-stories", description: "Alumni achievements" },
     ],
   },
   {
     label: "Services",
-    icon: Building2,
+    icon: MdDashboardCustomize,
     items: [
+      { label: "Giving & Donations", sectionId: "giving", route: "/donations", description: "Support student scholarships & research" },
       { label: "Alumni Community", route: "/community", description: "Directory of graduates, chapters and mentors" },
-      { label: "Giving & Donations", route: "/donations", description: "Support student scholarships and campus labs" },
-      { label: "Industry Partners", route: "/partners", description: "Strategic corporate and institutional partners" },
-      { label: "Career Opportunities", sectionId: "career-opportunities", description: "Jobs and internships" },
-      { label: "How It Works", sectionId: "how-it-works", description: "Portals for alumni, employers and departments" },
-      { label: "Community Voices", sectionId: "testimonials", description: "What alumni and partners say" },
+      { label: "Stakeholders", route: "/partners?tab=stakeholders", description: "Partners & collaborators" },
+      { label: "Career Opportunities", route: "/partners?tab=employers", description: "Jobs & internships" },
+      { label: "Testimonials", sectionId: "testimonials", route: "/community", description: "What alumni say" },
     ],
   },
   {
     label: "Media",
-    icon: Megaphone,
+    icon: MdCampaign,
     items: [
-      { label: "Events & Workshops", route: "/events", description: "Upcoming gatherings, workshops & summits" },
-      { label: "News & Bulletins", sectionId: "news", description: "Latest university updates" },
-      { label: "Announcements", route: "/announcements", description: "Official notices and memos" },
-      { label: "Photo Gallery", route: "/gallery", description: "Campus and event photo moments" },
-      { label: "Video Highlights", sectionId: "video-gallery", description: "Video highlights" },
+      { label: "Events", sectionId: "events", route: "/events", description: "Upcoming gatherings" },
+      { label: "Workshops", sectionId: "workshops", route: "/events", description: "Skill-building sessions" },
+      { label: "News", sectionId: "news", route: "/announcements", description: "Latest updates" },
+      { label: "Announcements", sectionId: "announcements", route: "/announcements", description: "Official notices" },
+      { label: "Gallery", route: "/gallery", description: "Photo moments" },
+      { label: "Video Gallery", route: "/info/video-gallery", description: "Video highlights" },
     ],
   },
 ];
@@ -79,11 +76,8 @@ interface SimpleNavItem {
 }
 
 const simpleItems: SimpleNavItem[] = [
-  { label: "Home", sectionId: "home", icon: Home },
-  { label: "About", route: "/about", icon: Info },
-  { label: "Community", route: "/community", icon: Users },
-  { label: "Giving", route: "/donations", icon: Heart },
-  { label: "Partners", route: "/partners", icon: Building2 },
+  { label: "Home", sectionId: "home", icon: HiHome },
+  { label: "Partners", route: "/partners", icon: FaUsers },
 ];
 
 const searchItems = [
@@ -144,11 +138,7 @@ export default function Navbar() {
   const handleSearchSelect = (item: (typeof searchItems)[number]) => {
     setSearchQuery("");
     setIsSearchOpen(false);
-    if (item.route) {
-      navigate(item.route);
-    } else if (item.sectionId) {
-      navigateToSection(item.sectionId);
-    }
+    navigateToSection(item.sectionId, item.route);
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -176,12 +166,19 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const navigateToSection = (sectionId: string) => {
+  const navigateToSection = (sectionId?: string, fallbackRoute?: string) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    if (location.pathname === "/") {
+    // Prefer in-page scroll only when the section actually exists on the homepage.
+    if (location.pathname === "/" && sectionId && document.getElementById(sectionId)) {
       scrollToSection(sectionId);
-    } else {
+      return;
+    }
+    if (fallbackRoute) {
+      navigate(fallbackRoute);
+      return;
+    }
+    if (sectionId) {
       navigate(`/?scrollTo=${sectionId}`);
     }
   };
@@ -189,21 +186,17 @@ export default function Navbar() {
   const handleNavClick = (item: SimpleNavItem) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    if (item.route) {
+    if (item.route && !item.sectionId) {
       navigate(item.route);
     } else if (item.sectionId) {
-      navigateToSection(item.sectionId);
+      navigateToSection(item.sectionId, item.route);
+    } else if (item.route) {
+      navigate(item.route);
     }
   };
 
   const handleMegaItemClick = (item: MegaMenuItem) => {
-    setIsMobileNavOpen(false);
-    setOpenMega(null);
-    if (item.route) {
-      navigate(item.route);
-    } else if (item.sectionId) {
-      navigateToSection(item.sectionId);
-    }
+    navigateToSection(item.sectionId, item.route);
   };
 
   const handleMegaEnter = (label: string) => {
@@ -251,9 +244,16 @@ export default function Navbar() {
         <Link to="/" className="flex items-center gap-3 py-3 group">
           <div className="flex items-center gap-2.5">
             <img
-              src={settings.appearance?.logoUrl || "/images/astu-seal-logo.png"}
+              src={resolveLogoUrl(settings.appearance?.logoUrl)}
               alt={`${settings.general?.abbreviation || "ASTU"} Logo`}
               className="h-10 w-10 object-contain scale-110 shrink-0"
+              onError={(e) => {
+                const img = e.currentTarget;
+                if (img.src !== window.location.origin + DEFAULT_LOGO_PATH && !img.dataset.fallback) {
+                  img.dataset.fallback = "1";
+                  img.src = DEFAULT_LOGO_PATH;
+                }
+              }}
             />
             <div className="hidden sm:block">
               <p className="text-sm font-bold text-astu-navy dark:text-white leading-tight">
@@ -275,7 +275,7 @@ export default function Navbar() {
                 onClick={() => handleNavClick(item)}
                 className="relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide text-slate-700 hover:text-astu-navy dark:text-slate-300 dark:hover:text-amber-400 transition-colors duration-200"
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5" />
                 {item.label}
               </button>
             );
@@ -298,10 +298,10 @@ export default function Navbar() {
                       : "text-slate-700 hover:text-astu-navy dark:text-slate-300 dark:hover:text-amber-400"
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-5 w-5" />
                   {menu.label}
-                  <ChevronDown
-                    className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                  <HiChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
@@ -340,7 +340,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           <div ref={searchWrapRef} className="relative hidden lg:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
               value={searchQuery}
               onChange={(e) => {
@@ -350,7 +350,7 @@ export default function Navbar() {
               onFocus={() => setIsSearchOpen(true)}
               onKeyDown={handleSearchKeyDown}
               onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
-              className="w-48 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white py-2.5 pl-8 pr-3 text-sm focus:w-60 focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-48 rounded-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white py-2.5 pl-10 pr-3 text-sm focus:w-60 focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
               placeholder="Search sections..."
               type="text"
             />
@@ -403,9 +403,9 @@ export default function Navbar() {
             onClick={() => setIsMobileNavOpen((prev) => !prev)}
           >
             {isMobileNavOpen ? (
-              <X className="h-6 w-6" />
+              <HiXMark className="h-6 w-6" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <HiBars3 className="h-6 w-6" />
             )}
           </button>
         </div>
@@ -460,7 +460,7 @@ export default function Navbar() {
 
           <div className="flex flex-col gap-2 mb-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant dark:text-slate-400" />
+              <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant dark:text-slate-400" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -515,7 +515,7 @@ export default function Navbar() {
                       <Icon className="h-5 w-5 text-astu-navy/60" />
                       {menu.label}
                     </span>
-                    <ChevronDown
+                    <HiChevronDown
                       className={`h-4 w-4 text-on-surface-variant transition-transform ${
                         isOpen ? "rotate-180" : ""
                       }`}

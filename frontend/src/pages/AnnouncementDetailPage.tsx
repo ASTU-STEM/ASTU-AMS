@@ -18,6 +18,7 @@ import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
+import ShareModal from '../components/ShareModal';
 import contentService from '../features/admin/services/content.service';
 import { ContentCardItem } from '../features/admin/components/ContentCard';
 
@@ -26,6 +27,7 @@ export default function AnnouncementDetailPage() {
   const navigate = useNavigate();
   const [item, setItem] = useState<ContentCardItem | null>(null);
   const [related, setRelated] = useState<ContentCardItem[]>([]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -68,12 +70,7 @@ export default function AnnouncementDetailPage() {
   }, [id]);
 
   const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Announcement link copied to clipboard!');
-    } else {
-      toast.success('Announcement link ready to share');
-    }
+    setIsShareModalOpen(true);
   };
 
   if (!item) {
@@ -93,7 +90,7 @@ export default function AnnouncementDetailPage() {
 
       {/* Header Breadcrumbs */}
       <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors">
-        <div className="mx-auto max-w-[1240px] px-4 py-3.5 sm:px-6">
+        <div className="mx-auto max-w-[1440px] px-4 py-3.5 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
             <nav className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
               <Link to="/" className="hover:text-[#003580] dark:hover:text-blue-300 transition-colors">
@@ -120,7 +117,7 @@ export default function AnnouncementDetailPage() {
       </div>
 
       {/* Main Container */}
-      <main className="mx-auto max-w-[1240px] flex-1 px-4 py-8 sm:px-6 md:py-12">
+      <main className="mx-auto max-w-[1440px] flex-1 px-4 py-8 sm:px-6 md:py-12">
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
           {/* Main Article Content */}
           <article className="space-y-6">
@@ -295,6 +292,26 @@ export default function AnnouncementDetailPage() {
 
       <Footer />
       <ChatBot />
+
+      {/* Universal Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        item={
+          item
+            ? {
+                id: item.id,
+                title: item.title,
+                subtitle: `${item.publishedAt || item.updatedAt || 'Recent'} · By ${item.author || 'ASTU Administration'}`,
+                text: item.excerpt,
+                image: (item as any).coverImage || (item as any).image,
+                badge: item.tags?.[0] || 'Announcement',
+                type: 'announcement',
+                url: window.location.pathname,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

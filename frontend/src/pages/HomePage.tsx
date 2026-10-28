@@ -53,7 +53,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ChatBot from "../components/ChatBot";
 import ShareCampaignModal from "../components/ShareCampaignModal";
+import ShareModal, { ShareItem } from "../components/ShareModal";
 import TelebirrDonationModal from "../components/TelebirrDonationModal";
+import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
 import storiesService from "../features/admin/services/stories.service";
@@ -170,6 +172,8 @@ const navSections = [
   { label: "Campus Life", id: "campus-life" },
   { label: "Events", id: "events" },
   { label: "News", id: "news" },
+  { label: "Gallery", id: "gallery" },
+  { label: "Video Gallery", id: "video-gallery" },
   { label: "Stories", id: "success-stories" },
   { label: "Giving", id: "giving" },
   { label: "Partners", id: "partners" },
@@ -208,6 +212,48 @@ export const DEFAULT_CAMPUS_LIFE = [
     image: '/images/arc.jpg',
     action: 'View Gallery',
     link: '/gallery',
+    active: true,
+  },
+];
+
+export const DEFAULT_GALLERY_IMAGES = [
+  { id: 'GI-1', title: 'ASTU Main Campus Architecture', src: '/images/astu-building.jpg', album: 'Campus Gallery', date: 'June 2026', active: true },
+  { id: 'GI-2', title: 'Campus Walkway & Innovation Hub', src: '/images/campus-2.jpeg', album: 'Campus Gallery', date: 'May 2026', active: true },
+  { id: 'GI-3', title: 'Advanced Electrical & Robotics Labs', src: '/images/electriclabs.jpeg', album: 'Research Gallery', date: 'May 2026', active: true },
+  { id: 'GI-4', title: 'Research & Innovation Arc', src: '/images/arc.jpg', album: 'Research Gallery', date: 'April 2026', active: true },
+  { id: 'GI-5', title: 'Graduation & Assembly Hall', src: '/images/gc7.jpg', album: 'Graduation Gallery', date: 'March 2026', active: true },
+  { id: 'GI-6', title: 'University Main Gate & Entrance', src: '/images/astuget.jpg', album: 'Campus Gallery', date: 'February 2026', active: true },
+];
+
+export const DEFAULT_VIDEO_HIGHLIGHTS = [
+  {
+    id: 'VI-1',
+    title: 'ASTU Campus Highlights & Academic Excellence',
+    subtitle: 'A guided aerial and ground visual tour of laboratories, student hubs, and campus facilities.',
+    image: '/images/astu-building.jpg',
+    duration: '04:28',
+    category: 'Campus Virtual Tours',
+    link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    active: true,
+  },
+  {
+    id: 'VI-2',
+    title: 'Annual Applied Research & Innovation Forum',
+    subtitle: 'Keynote presentations, robotics exhibitions, and industry-sponsored engineering projects.',
+    image: '/images/arc.jpg',
+    duration: '06:15',
+    category: 'Research Showcases',
+    link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    active: true,
+  },
+  {
+    id: 'VI-3',
+    title: 'ASTU Grand Graduation & Alumni Replay',
+    subtitle: 'Celebration of graduating classes, honorary guest addresses, and alumni leadership awards.',
+    image: '/images/gc7.jpg',
+    duration: '08:42',
+    category: 'Event Recordings',
+    link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     active: true,
   },
 ];
@@ -281,6 +327,19 @@ const getHomeCampaignImage = (campaign: any) => {
   if (title.includes('lab') || title.includes('equipment')) return '/images/electriclabs.jpeg';
   if (title.includes('welfare') || title.includes('emergency')) return '/images/campus-2.jpeg';
   return '/images/astu-building.jpg';
+};
+
+export const getEmbedVideoUrl = (link?: string) => {
+  if (!link) return null;
+  const ytMatch = link.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (ytMatch && ytMatch[1]) {
+    return `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+  }
+  const vimeoMatch = link.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+  }
+  return link;
 };
 
 /** Minimal empty fallbacks — real content/images come from Homepage CMS */
@@ -428,6 +487,7 @@ export default function HomePage() {
   const [donationPayMethod, setDonationPayMethod] = useState<'telebirr' | 'cbe' | 'card'>('telebirr');
   const [shareModalCampaign, setShareModalCampaign] = useState<any | null>(null);
   const [sharePageContent, setSharePageContent] = useState<any | null>(null);
+  const [shareStoryModalItem, setShareStoryModalItem] = useState<ShareItem | null>(null);
 
   const donationDashboardPath = (campaignId?: string) => {
     const params = new URLSearchParams({ tab: 'donations' });
@@ -492,12 +552,25 @@ export default function HomePage() {
   const [liveGallery, setLiveGallery] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
     if (config?.gallery?.length) {
-      const active = config.gallery.filter((g: any) => g.active);
+      const active = config.gallery.filter((g: any) => g.active !== false);
       if (active.length) return active;
     }
-    return emptyGallery;
+    return DEFAULT_GALLERY_IMAGES;
   });
-  // CMS items may carry a real publication timestamp.  When they do, show the
+  const [galleryFilterTab, setGalleryFilterTab] = useState<string>('ALL');
+  const [activeLightboxPhoto, setActiveLightboxPhoto] = useState<any | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+
+  const filteredGalleryList = useMemo(() => {
+    if (galleryFilterTab === 'ALL') return liveGallery;
+    return liveGallery.filter((item: any) =>
+      String(item.album || 'Campus Gallery')
+        .toLowerCase()
+        .includes(galleryFilterTab.toLowerCase())
+    );
+  }, [liveGallery, galleryFilterTab]);
+
+  // CMS items may carry a real publication timestamp. When they do, show the
   // newest three on the landing page; otherwise retain the curator's order.
   const featuredGallery = useMemo(() => {
     const datedItems = liveGallery
@@ -517,14 +590,17 @@ export default function HomePage() {
       : datedItems
     ).slice(0, 3).map(({ item }) => item);
   }, [liveGallery]);
+
   const [liveVideos, setLiveVideos] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
     if (config?.videos?.length) {
-      const active = config.videos.filter((v: any) => v.active);
+      const active = config.videos.filter((v: any) => v.active !== false);
       if (active.length) return active;
     }
-    return [];
+    return DEFAULT_VIDEO_HIGHLIGHTS;
   });
+  const [activeVideoModalItem, setActiveVideoModalItem] = useState<any | null>(null);
+  const [shareMediaModalItem, setShareMediaModalItem] = useState<ShareItem | null>(null);
   const [livePartners, setLivePartners] = useState<Partner[]>([]);
   const [partnersLoading, setPartnersLoading] = useState(true);
   const [failedPartnerLogos, setFailedPartnerLogos] = useState<Set<string>>(() => new Set());
@@ -819,8 +895,7 @@ export default function HomePage() {
 
   /** Network voices: CMS testimonials + approved community posts + published stories (API only). */
   const networkVoices = useMemo(() => {
-    const demoName = /^(dr\.?\s*)?(abebe yosef|bekele kebede|helina sileshi|helen mekonnen)$/i;
-    const isRealVoice = (name?: string) => Boolean(name && !demoName.test(String(name).trim()));
+    const isRealVoice = (name?: string) => Boolean(name && String(name).trim().length > 0);
 
     const fromTestimonials = (liveTestimonials || [])
       .filter((t: any) => t && (t.quote || t.message || t.text) && isRealVoice(t.by || t.name))
@@ -1166,10 +1241,12 @@ export default function HomePage() {
         setLiveCampuses(cmsConfig.campuses.filter((c: any) => c.active !== false));
       }
       if (Array.isArray(cmsConfig.gallery)) {
-        setLiveGallery(cmsConfig.gallery.filter((g: any) => g.active !== false));
+        const active = cmsConfig.gallery.filter((g: any) => g.active !== false);
+        setLiveGallery(active.length > 0 ? active : DEFAULT_GALLERY_IMAGES);
       }
       if (Array.isArray(cmsConfig.videos)) {
-        setLiveVideos(cmsConfig.videos.filter((v: any) => v.active !== false));
+        const active = cmsConfig.videos.filter((v: any) => v.active !== false);
+        setLiveVideos(active.length > 0 ? active : DEFAULT_VIDEO_HIGHLIGHTS);
       }
       if (Array.isArray(cmsConfig.newsItems)) {
         setLiveNews(cmsConfig.newsItems.filter((n: any) => n.active !== false));
@@ -1182,6 +1259,10 @@ export default function HomePage() {
         setLiveStories(active.length ? storiesService.fromConfig(active) : []);
       }
       if (cmsConfig.partnersHeaders) setLivePartnersHeaders(cmsConfig.partnersHeaders);
+      if (Array.isArray(cmsConfig.partners)) {
+        const active = cmsConfig.partners.filter((p: any) => p.active !== false);
+        if (active.length) setLivePartners(active);
+      }
       if (Array.isArray(cmsConfig.faq)) {
         const active = cmsConfig.faq.filter((f: any) => f.active !== false);
         setLiveFaq(active.length > 0 ? active : DEFAULT_FAQ);
@@ -1228,7 +1309,19 @@ export default function HomePage() {
       }
       if (typeof cmsConfig.welcomeMessage === 'string') {
         setWelcomeMessage(cmsConfig.welcomeMessage);
+        setLiveWelcomeMessage(cmsConfig.welcomeMessage);
       }
+      if (typeof cmsConfig.welcomeEnabled === 'boolean') {
+        setLiveWelcomeEnabled(cmsConfig.welcomeEnabled);
+      }
+      if (cmsConfig.impactHeaders) setLiveImpactHeaders(cmsConfig.impactHeaders);
+      if (cmsConfig.portalsHeaders) setLivePortalsHeaders(cmsConfig.portalsHeaders);
+      if (cmsConfig.eventsHeaders) setLiveEventsHeaders(cmsConfig.eventsHeaders);
+      if (cmsConfig.announcementsHeaders) setLiveAnnouncementsHeaders(cmsConfig.announcementsHeaders);
+      if (cmsConfig.givingSection) setLiveGivingSection(cmsConfig.givingSection);
+      if (cmsConfig.accreditation) setLiveAccreditation(cmsConfig.accreditation);
+      if (cmsConfig.ctaSection) setLiveCtaSection(cmsConfig.ctaSection);
+      if (cmsConfig.sectionLinks) setLiveSectionLinks((prev: any) => ({ ...prev, ...cmsConfig.sectionLinks }));
       if (cmsConfig.tracerSpotlight?.enabled) {
         setTracerSpotlight(cmsConfig.tracerSpotlight);
       } else if (cmsConfig.tracerSpotlight) {
@@ -1284,17 +1377,21 @@ export default function HomePage() {
         // Guarding on `apiItems.length` meant deleted content stayed visible.
         if (isMounted && Array.isArray(apiItems)) {
           const liveNews = apiItems
-            .filter((i: any) => i.status === 'Published' && (i.type === 'post' || i.type === 'announcement'))
+            .filter((i: any) => {
+              const status = String(i.status || '').toUpperCase();
+              const type = String(i.type || '').toLowerCase();
+              return status === 'PUBLISHED' && (type === 'post' || type === 'announcement' || type === 'news');
+            })
             .map((i: any) => ({ id: i.id, title: i.title, date: i.publishedAt || i.updatedAt, excerpt: i.excerpt }));
           setLiveNews(liveNews);
 
           const liveAnnounce = apiItems
-            .filter((i: any) => i.status === 'Published')
+            .filter((i: any) => String(i.status || '').toUpperCase() === 'PUBLISHED')
             .map((i: any) => ({
               id: i.id,
               title: i.title,
               date: i.publishedAt || i.updatedAt || 'Just now',
-              type: i.type === 'announcement' ? 'Official Announcement' : `${String(i.type).toUpperCase()} Announcement`,
+              type: String(i.type || '').toLowerCase() === 'announcement' ? 'Official Announcement' : `${String(i.type || '').toUpperCase()} Announcement`,
               excerpt: i.excerpt,
             }));
           setLiveAnnouncements(liveAnnounce);
@@ -1815,20 +1912,20 @@ location: e.location || 'Location to be confirmed',
           <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-blue-50/30 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
             <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
               <div>
-                {/* CALENDAR Badge Pill matching user screenshot */}
+                {/* CALENDAR Badge Pill */}
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
                   <CalendarDays className="h-3.5 w-3.5 text-astu-red dark:text-rose-400" />
-                  <span>CALENDAR</span>
+                  <span>CALENDAR · GATHERINGS & TRAINING</span>
                 </div>
 
                 {/* Main Heading */}
                 <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
-                  Upcoming Events and Workshops
+                  Events & Workshops
                 </h2>
 
-                {/* Subtitle matching user screenshot */}
+                {/* Subtitle */}
                 <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
-                  Join campus career expos, technical workshops, and alumni reunions.
+                  <span className="font-semibold text-astu-navy dark:text-sky-300">Gatherings & training</span> · Join campus career expos, technical workshops, and alumni reunions.
                 </p>
               </div>
 
@@ -2008,9 +2105,32 @@ location: e.location || 'Location to be confirmed',
                               { state: { event } }
                             )
                           }
-                          className="rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                          className="rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                         >
-                          View Details
+                          Details
+                        </button>
+
+                        <button
+                          type="button"
+                          aria-label={`Share ${event.title}`}
+                          title="Share this event"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const slug = (event.id || String(event.title || '')).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                            setShareMediaModalItem({
+                              id: event.id || slug,
+                              title: event.title,
+                              subtitle: `${formatHomepageDate(event.date)} · ${event.location || 'ASTU Campus'}`,
+                              text: event.description,
+                              image: event.image,
+                              url: `/events/${slug}`,
+                              badge: event.category || 'Event',
+                              type: 'event',
+                            });
+                          }}
+                          className="shrink-0 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-astu-navy dark:hover:text-white transition-all cursor-pointer"
+                        >
+                          <Share2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -2055,17 +2175,17 @@ location: e.location || 'Location to be confirmed',
                 {/* Curved Badge Pill */}
                 <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
                   <span className="h-2 w-2 rounded-full bg-astu-red animate-pulse" />
-                  <span>NEWS & ANNOUNCEMENTS</span>
+                  <span>OFFICIAL UPDATES & NOTICES</span>
                 </div>
 
                 {/* Main Heading */}
                 <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
-                  News and Announcements
+                  News & Announcements
                 </h2>
 
                 {/* Subtitle */}
                 <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
-                  University updates, academic notices, and alumni network news.
+                  <span className="font-semibold text-astu-navy dark:text-sky-300">Official updates</span> · University notices, academic bulletins, and alumni community circulars.
                 </p>
               </div>
 
@@ -2204,21 +2324,45 @@ location: e.location || 'Location to be confirmed',
                           <CalendarDays className="h-3.5 w-3.5 text-astu-red dark:text-rose-400 shrink-0" />
                           <span>{formatHomepageDate(news.date)}</span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(
-                              `/announcements/${news.id || String(news.title || '')
-                                .toLowerCase()
-                                .replace(/[^a-z0-9]+/g, '-')}`
-                            );
-                          }}
-                          className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-amber-400 group-hover:translate-x-1 transition-transform"
-                        >
-                          <span>Read More</span>
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            aria-label={`Share ${news.title}`}
+                            title="Share this announcement"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const slug = (news.id || String(news.title || '')).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                              setShareMediaModalItem({
+                                id: news.id || slug,
+                                title: news.title,
+                                subtitle: `${categoryMeta.label} · ASTU Official Notice`,
+                                text: news.excerpt,
+                                image: news.image,
+                                url: `/announcements/${slug}`,
+                                badge: categoryMeta.label,
+                                type: 'announcement',
+                              });
+                            }}
+                            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-astu-navy dark:hover:text-white transition-all cursor-pointer"
+                          >
+                            <Share2 className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(
+                                `/announcements/${news.id || String(news.title || '')
+                                  .toLowerCase()
+                                  .replace(/[^a-z0-9]+/g, '-')}`
+                              );
+                            }}
+                            className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-amber-400 group-hover:translate-x-1 transition-transform"
+                          >
+                            <span>Read More</span>
+                            <ArrowRight className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </article>
                   );
@@ -2247,6 +2391,265 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
+        {/* =========================================================================
+            CAMPUS MOMENTS (GALLERY) SECTION
+            ========================================================================= */}
+        <section id="gallery" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+          <div className="pointer-events-none absolute -top-8 -left-8 h-64 w-64 rounded-full bg-gradient-to-br from-blue-500/10 via-amber-500/5 to-transparent blur-3xl" />
+
+          <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-blue-50/20 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                {/* CAMPUS MOMENTS Badge Pill */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-navy dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300 shadow-sm">
+                  <Image className="h-3.5 w-3.5 text-astu-navy dark:text-sky-300" />
+                  <span>CAMPUS MOMENTS · VISUAL ARCHIVE</span>
+                </div>
+
+                {/* Main Heading */}
+                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
+                  Gallery
+                </h2>
+
+                {/* Subtitle */}
+                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
+                  <span className="font-semibold text-astu-navy dark:text-sky-300">Campus moments</span> · Explore vibrant memories, graduation stages, applied engineering exhibitions, and campus life at ASTU.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  className="home-btn home-btn--navy home-btn--sm"
+                  onClick={() => navigate('/gallery')}
+                >
+                  <span>Explore Full Gallery</span>
+                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Tabs by Album */}
+            <div className="mb-6 flex flex-wrap items-center gap-1.5 p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 w-fit">
+              {['ALL', 'Campus Gallery', 'Graduation Gallery', 'Research Gallery', 'Event Gallery'].map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setGalleryFilterTab(tab)}
+                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ${
+                    galleryFilterTab === tab
+                      ? 'bg-astu-navy text-white shadow-sm dark:bg-sky-600'
+                      : 'text-slate-600 hover:text-astu-navy dark:text-slate-300 dark:hover:text-white'
+                  }`}
+                >
+                  {tab === 'ALL' ? 'All Moments' : tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Gallery Grid */}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredGalleryList.slice(0, 6).map((photo: any, idx: number) => {
+                const photoSrc = mediaUrl(photo.src) || photo.src || '/images/astu-building.jpg';
+                return (
+                  <article
+                    key={photo.id || idx}
+                    className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+                    onClick={() => {
+                      setActiveLightboxPhoto(photo);
+                      setLightboxIndex(idx);
+                    }}
+                  >
+                    <div className="relative h-56 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                      <img
+                        src={photoSrc}
+                        alt={photo.title || 'ASTU Campus Moment'}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.onerror = null;
+                          target.src = '/images/astu-building.jpg';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+
+                      {/* Top Album Pill */}
+                      <span className="absolute top-3.5 left-3.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-navy dark:text-sky-300 shadow-sm">
+                        {photo.album || 'Campus Moment'}
+                      </span>
+
+                      {/* Quick Share Button */}
+                      <button
+                        type="button"
+                        aria-label="Share this moment"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShareMediaModalItem({
+                            id: photo.id || String(idx),
+                            title: photo.title || 'ASTU Campus Moment',
+                            subtitle: photo.album || 'Campus Gallery',
+                            text: `Explore this campus moment from Adama Science and Technology University: ${photo.title}`,
+                            image: photoSrc,
+                            url: '/gallery',
+                            type: 'gallery',
+                          });
+                        }}
+                        className="absolute top-3.5 right-3.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-astu-navy"
+                      >
+                        <Share2 className="h-3.5 w-3.5" />
+                      </button>
+
+                      {/* Bottom Info inside image */}
+                      <div className="absolute bottom-3 left-3 right-3 text-white">
+                        <h4 className="text-base font-bold leading-snug line-clamp-1 drop-shadow-sm group-hover:text-amber-300 transition-colors">
+                          {photo.title || 'Campus Moment'}
+                        </h4>
+                        <p className="mt-0.5 text-xs text-slate-300 flex items-center justify-between">
+                          <span>{photo.date || 'Campus Archive'}</span>
+                          <span className="text-[11px] font-semibold text-sky-300 group-hover:underline">Click to view</span>
+                        </p>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* =========================================================================
+            VIDEO GALLERY (VIDEO HIGHLIGHTS) SECTION
+            ========================================================================= */}
+        <section id="video-gallery" className="relative mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
+          <div className="pointer-events-none absolute -top-8 -right-8 h-64 w-64 rounded-full bg-gradient-to-br from-rose-500/10 via-astu-navy/5 to-transparent blur-3xl" />
+
+          <div className="relative rounded-2xl md:rounded-3xl bg-gradient-to-b from-slate-50/95 via-white to-rose-50/20 dark:from-[var(--bg-card)] dark:via-[var(--bg-elevated)] dark:to-[var(--bg-page)] border border-slate-200/90 dark:border-[var(--border-color)] shadow-[var(--shadow-soft)] p-5 md:p-8 overflow-hidden">
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                {/* VIDEO HIGHLIGHTS Badge Pill */}
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50/95 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400 shadow-sm">
+                  <PlayCircle className="h-3.5 w-3.5 text-astu-red dark:text-rose-400" />
+                  <span>VIDEO HIGHLIGHTS · MEDIA REELS</span>
+                </div>
+
+                {/* Main Heading */}
+                <h2 className="mt-2.5 text-2xl font-extrabold tracking-tight text-astu-navy dark:text-white sm:text-3xl md:text-4xl">
+                  Video Gallery
+                </h2>
+
+                {/* Subtitle */}
+                <p className="mt-2 text-sm sm:text-base text-on-surface-variant dark:text-slate-300 max-w-2xl leading-relaxed">
+                  <span className="font-semibold text-astu-navy dark:text-sky-300">Video highlights</span> · Watch applied engineering showcases, event recordings, campus virtual tours, and keynote archives.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  className="home-btn home-btn--navy home-btn--sm"
+                  onClick={() => navigate('/info/video-gallery')}
+                >
+                  <span>View All Video Highlights</span>
+                  <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+
+            {/* Video Cards Grid */}
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {liveVideos.map((video: any, idx: number) => {
+                const videoImg = mediaUrl(video.image) || video.image || '/images/astu-building.jpg';
+                return (
+                  <article
+                    key={video.id || idx}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  >
+                    {/* Thumbnail with interactive Play Button */}
+                    <div
+                      className="relative h-48 w-full overflow-hidden bg-slate-900 cursor-pointer"
+                      onClick={() => setActiveVideoModalItem(video)}
+                    >
+                      <img
+                        src={videoImg}
+                        alt={video.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.onerror = null;
+                          target.src = '/images/astu-building.jpg';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-black/30 to-black/10" />
+
+                      {/* Play Button Overlay with ripple */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-astu-red text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:bg-rose-600">
+                          <Play className="h-6 w-6 fill-current ml-0.5" />
+                        </div>
+                      </div>
+
+                      {/* Top Badges */}
+                      <span className="absolute top-3 left-3 rounded-full bg-black/60 backdrop-blur-md border border-white/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                        {video.category || 'Highlights'}
+                      </span>
+                      <span className="absolute bottom-3 right-3 rounded-full bg-black/75 px-2.5 py-0.5 text-[11px] font-bold text-white flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        <span>{video.duration || 'Video'}</span>
+                      </span>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="flex flex-1 flex-col justify-between p-5">
+                      <div>
+                        <h4
+                          onClick={() => setActiveVideoModalItem(video)}
+                          className="cursor-pointer text-base sm:text-lg font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors line-clamp-1"
+                        >
+                          {video.title}
+                        </h4>
+                        <p className="mt-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                          {video.subtitle || video.description || 'Watch the official recording and highlights from Adama Science and Technology University.'}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => setActiveVideoModalItem(video)}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy dark:text-sky-300 hover:text-astu-red dark:hover:text-sky-200 transition-colors"
+                        >
+                          <PlayCircle className="h-4 w-4" />
+                          <span>Watch Highlights</span>
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Share video"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShareMediaModalItem({
+                              id: video.id || String(idx),
+                              title: video.title,
+                              subtitle: video.category || 'Video Highlights',
+                              text: `Watch: ${video.title} - Adama Science and Technology University`,
+                              image: videoImg,
+                              url: '/info/video-gallery',
+                              type: 'video',
+                            });
+                          }}
+                          className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-astu-navy dark:hover:text-white transition-all cursor-pointer"
+                          title="Share this video"
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         <section id="success-stories" className="mx-auto max-w-[1440px] px-4 py-8 md:px-8 md:py-10">
           <div className="mb-6 flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
             <div className="max-w-2xl reveal">
@@ -2256,14 +2659,24 @@ location: e.location || 'Location to be confirmed',
                 Journeys of ASTU graduates building careers across industry, research, and entrepreneurship.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => navigate('/info/alumni-stories')}
-              className="home-btn home-btn--navy home-btn--sm"
-            >
-              See All Stories
-              <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
-            </button>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => navigate('/info/alumni-stories?submit=true')}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-astu-red to-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 transition-all cursor-pointer"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                <span>Share Your Story</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/info/alumni-stories')}
+                className="home-btn home-btn--navy home-btn--sm"
+              >
+                See All Stories
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {liveStories.length === 0 ? (
@@ -2295,19 +2708,39 @@ location: e.location || 'Location to be confirmed',
                     </p>
                     <p className="mt-2 text-sm text-on-surface-variant dark:text-slate-400 line-clamp-3">{story.text}</p>
                   </div>
-                  <button
-                    type="button"
-                    className="mt-4 text-xs font-semibold text-astu-navy dark:text-amber-400 hover:underline self-start cursor-pointer inline-flex items-center gap-1"
-                    onClick={() =>
-                      navigate(
-                        `/stories/${story.id || String(story.name || '')
-                          .toLowerCase()
-                          .replace(/[^a-z0-9]+/g, '-')}`
-                      )
-                    }
-                  >
-                    Read Story <ArrowRight className="h-3 w-3" />
-                  </button>
+                  <div className="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      type="button"
+                      className="text-xs font-bold text-astu-navy dark:text-amber-400 hover:underline self-start cursor-pointer inline-flex items-center gap-1"
+                      onClick={() =>
+                        navigate(
+                          `/stories/${story.id || String(story.name || '')
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')}`
+                        )
+                      }
+                    >
+                      Read Story <ArrowRight className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShareStoryModalItem({
+                          id: story.id,
+                          title: story.name,
+                          subtitle: [story.role, story.company].filter(Boolean).join(' · '),
+                          text: story.text,
+                          image: story.image,
+                          url: `/stories/${story.id || String(story.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+                          type: 'story',
+                        })
+                      }
+                      className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-astu-navy dark:hover:text-white transition-all cursor-pointer"
+                      title="Share this alumni story"
+                    >
+                      <Share2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </article>
               ))
             )}
@@ -2751,6 +3184,8 @@ location: e.location || 'Location to be confirmed',
                     const logoFailed = failedPartnerLogos.has(partner.id);
                     const isDuplicate = index >= livePartners.length;
 
+                    const PartnerLogoComp = partnerLogos[partner.name];
+
                     return (
                       <article
                         key={`${partner.id}-${index}`}
@@ -2770,6 +3205,8 @@ location: e.location || 'Location to be confirmed',
                               setFailedPartnerLogos((current) => new Set(current).add(partner.id))
                             }
                           />
+                        ) : PartnerLogoComp ? (
+                          <PartnerLogoComp className="max-h-12 w-auto opacity-85 transition duration-300 group-hover:opacity-100" />
                         ) : (
                           <span className="text-center text-xs font-bold uppercase tracking-wide text-astu-navy/70 transition group-hover:text-astu-navy dark:text-slate-300 dark:group-hover:text-white md:text-sm">
                             {partner.name}
@@ -3666,17 +4103,18 @@ location: e.location || 'Location to be confirmed',
                   type="button"
                   onClick={() => {
                     const slug = selectedNewsModal.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                    setSharePageContent({
+                    setShareMediaModalItem({
                       id: selectedNewsModal.id || slug,
                       title: selectedNewsModal.title,
-                      category: selectedNewsModal.category || 'Announcement',
-                      description: selectedNewsModal.excerpt,
+                      subtitle: `${selectedNewsModal.category || 'Official Notice'} · ASTU Announcement`,
+                      text: selectedNewsModal.excerpt,
                       image: selectedNewsModal.image,
-                      url: `${window.location.origin}/announcements/${slug}`,
-                      contentType: 'announcement',
+                      url: `/announcements/${slug}`,
+                      badge: selectedNewsModal.category || 'Announcement',
+                      type: 'announcement',
                     });
                   }}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer"
                 >
                   <Share2 className="h-4 w-4" />
                   <span>Share Notice</span>
@@ -3727,6 +4165,230 @@ location: e.location || 'Location to be confirmed',
         onClose={() => setSharePageContent(null)}
         campaign={sharePageContent}
       />
+
+      {/* Universal Share Modal for Alumni Stories */}
+      <ShareModal
+        isOpen={!!shareStoryModalItem}
+        onClose={() => setShareStoryModalItem(null)}
+        item={shareStoryModalItem}
+      />
+
+      {/* Universal Share Modal for Media / Gallery / Videos */}
+      <ShareModal
+        isOpen={!!shareMediaModalItem}
+        onClose={() => setShareMediaModalItem(null)}
+        item={shareMediaModalItem}
+      />
+
+      {/* Photo Lightbox Modal */}
+      {activeLightboxPhoto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
+          onClick={() => setActiveLightboxPhoto(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Bar */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/80">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">
+                  {activeLightboxPhoto.album || 'Campus Moments'}
+                </span>
+                <h3 className="text-base font-bold text-white line-clamp-1">{activeLightboxPhoto.title}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Share photo"
+                  onClick={() =>
+                    setShareMediaModalItem({
+                      id: activeLightboxPhoto.id || 'lightbox',
+                      title: activeLightboxPhoto.title,
+                      subtitle: activeLightboxPhoto.album || 'Campus Gallery',
+                      text: `Campus moment from ASTU: ${activeLightboxPhoto.title}`,
+                      image: mediaUrl(activeLightboxPhoto.src) || activeLightboxPhoto.src,
+                      url: '/gallery',
+                      type: 'gallery',
+                    })
+                  }
+                  className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                  <Share2 className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Close photo preview"
+                  onClick={() => setActiveLightboxPhoto(null)}
+                  className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Photo View with Next / Prev */}
+            <div className="relative flex items-center justify-center bg-black min-h-[300px] max-h-[70vh]">
+              <img
+                src={mediaUrl(activeLightboxPhoto.src) || activeLightboxPhoto.src || '/images/astu-building.jpg'}
+                alt={activeLightboxPhoto.title}
+                className="max-h-[70vh] w-auto max-w-full object-contain"
+              />
+              {filteredGalleryList.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous photo"
+                    onClick={() => {
+                      const prevIdx = (lightboxIndex - 1 + filteredGalleryList.length) % filteredGalleryList.length;
+                      setLightboxIndex(prevIdx);
+                      setActiveLightboxPhoto(filteredGalleryList[prevIdx]);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 border border-white/20 text-white hover:bg-astu-navy transition-all hover:scale-105"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next photo"
+                    onClick={() => {
+                      const nextIdx = (lightboxIndex + 1) % filteredGalleryList.length;
+                      setLightboxIndex(nextIdx);
+                      setActiveLightboxPhoto(filteredGalleryList[nextIdx]);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 border border-white/20 text-white hover:bg-astu-navy transition-all hover:scale-105"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Bottom Caption & Link */}
+            <div className="px-5 py-3 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between text-xs text-slate-400">
+              <span>{activeLightboxPhoto.date || 'ASTU Visual Archive'}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveLightboxPhoto(null);
+                  navigate('/gallery');
+                }}
+                className="font-bold text-sky-400 hover:underline flex items-center gap-1"
+              >
+                <span>View in Gallery</span>
+                <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Player Modal */}
+      {activeVideoModalItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
+          onClick={() => setActiveVideoModalItem(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Bar */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-900">
+              <div className="flex items-center gap-2">
+                <PlayCircle className="h-5 w-5 text-astu-red" />
+                <h3 className="text-base font-bold text-white line-clamp-1">{activeVideoModalItem.title}</h3>
+              </div>
+              <button
+                type="button"
+                aria-label="Close video player"
+                onClick={() => setActiveVideoModalItem(null)}
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Video Player Container */}
+            <div className="relative aspect-video w-full bg-black">
+              {(() => {
+                const embedUrl = getEmbedVideoUrl(activeVideoModalItem.link);
+                if (embedUrl && (embedUrl.includes('youtube') || embedUrl.includes('vimeo'))) {
+                  return (
+                    <iframe
+                      src={embedUrl}
+                      title={activeVideoModalItem.title}
+                      className="w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  );
+                }
+                if (activeVideoModalItem.link && activeVideoModalItem.link.endsWith('.mp4')) {
+                  return (
+                    <video
+                      controls
+                      autoPlay
+                      src={activeVideoModalItem.link}
+                      className="w-full h-full object-contain"
+                    />
+                  );
+                }
+                return (
+                  <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-astu-navy/50 to-slate-950 p-6 text-center">
+                    <img
+                      src={mediaUrl(activeVideoModalItem.image) || activeVideoModalItem.image || '/images/astu-building.jpg'}
+                      alt={activeVideoModalItem.title}
+                      className="absolute inset-0 w-full h-full object-cover opacity-25"
+                    />
+                    <div className="relative z-10 flex flex-col items-center">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-astu-red text-white shadow-xl animate-pulse mb-4">
+                        <Play className="h-8 w-8 fill-current ml-1" />
+                      </div>
+                      <h4 className="text-lg font-bold text-white">{activeVideoModalItem.title}</h4>
+                      <p className="mt-2 text-xs text-slate-300 max-w-md">
+                        {activeVideoModalItem.subtitle || 'Official media highlight from Adama Science and Technology University.'}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveVideoModalItem(null);
+                          navigate('/info/video-gallery');
+                        }}
+                        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 text-xs font-bold text-white transition-all"
+                      >
+                        <span>Open in Video Gallery Directory</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Bottom Info */}
+            <div className="px-5 py-3 border-t border-slate-800 bg-slate-900 flex items-center justify-between text-xs text-slate-400">
+              <span className="font-semibold text-sky-400">ASTU Media Services · HD Stream</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveVideoModalItem(null);
+                  navigate('/info/video-gallery');
+                }}
+                className="font-bold text-white hover:text-amber-400 flex items-center gap-1 transition-colors"
+              >
+                <span>All Video Highlights</span>
+                <ArrowRight className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Direct Instant Giving Modal for Homepage */}
       <TelebirrDonationModal

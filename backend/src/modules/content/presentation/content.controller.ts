@@ -201,12 +201,16 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
     const [
       alumniCount,
       verifiedAlumniCount,
+      pendingAlumniCount,
       employedAlumniCount,
+      unemployedAlumniCount,
       departmentCount,
+      departmentsList,
       employerCount,
       activeJobsCount,
       eventsCount,
       docRequestsCount,
+      pendingDocRequestsCount,
       verifRequestsCount,
       eventRsvpsCount,
       surveyAssignmentsTotal,
@@ -217,14 +221,29 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
     ] = await Promise.all([
       prisma.alumniProfile.count().catch(() => 0),
       prisma.alumniProfile.count({ where: { isVerified: true } }).catch(() => 0),
+      prisma.alumniProfile.count({ where: { isVerified: false } }).catch(() => 0),
       prisma.alumniProfile.count({
         where: { employmentStatus: { in: ['EMPLOYED', 'SELF_EMPLOYED'] } },
       }).catch(() => 0),
+      prisma.alumniProfile.count({
+        where: { employmentStatus: 'UNEMPLOYED' },
+      }).catch(() => 0),
       prisma.department.count().catch(() => 0),
+      prisma.department.findMany({
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          alumniProfiles: {
+            select: { id: true, employmentStatus: true }
+          }
+        }
+      }).catch(() => []),
       prisma.employerProfile.count().catch(() => 0),
       (prisma.job?.count ? prisma.job.count({ where: { isActive: true } }) : Promise.resolve(0)).catch(() => 0),
       (prisma.event?.count ? prisma.event.count() : Promise.resolve(0)).catch(() => 0),
       (prisma.documentRequest?.count ? prisma.documentRequest.count() : Promise.resolve(0)).catch(() => 0),
+      (prisma.documentRequest?.count ? prisma.documentRequest.count({ where: { status: 'PENDING' } }) : Promise.resolve(0)).catch(() => 0),
       (prisma.verificationRequest?.count ? prisma.verificationRequest.count() : Promise.resolve(0)).catch(() => 0),
       (prisma.eventRSVP?.count ? prisma.eventRSVP.count() : Promise.resolve(0)).catch(() => 0),
       (prisma.surveyAssignment?.count ? prisma.surveyAssignment.count() : Promise.resolve(0)).catch(() => 0),
@@ -235,12 +254,26 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
     ]);
 
     const historicBatchesYears = Math.max(0, new Date().getFullYear() - 1993);
-    const employmentRate = alumniCount > 0 ? Math.round((employedAlumniCount / alumniCount) * 100) : 0;
-    const verificationRate = alumniCount > 0 ? Math.round((verifiedAlumniCount / alumniCount) * 100) : 0;
+    const employmentRate = alumniCount > 0 ? Number(((employedAlumniCount / alumniCount) * 100).toFixed(1)) : 0;
+    const verificationRate = alumniCount > 0 ? Number(((verifiedAlumniCount / alumniCount) * 100).toFixed(1)) : 0;
     const etaComplianceRate = surveyAssignmentsTotal > 0
       ? Math.round((surveyAssignmentsCompleted / surveyAssignmentsTotal) * 100)
-      : verificationRate;
+      : null;
     const digitalRequests = (docRequestsCount || 0) + (verifRequestsCount || 0);
+
+    const departmentDistribution = (departmentsList || []).map((d: any) => {
+      const profiles = d.alumniProfiles || [];
+      const total = profiles.length;
+      const emp = profiles.filter((p: any) => p.employmentStatus === 'EMPLOYED' || p.employmentStatus === 'SELF_EMPLOYED').length;
+      return {
+        id: d.id,
+        code: d.code || d.name?.substring(0, 3).toUpperCase() || 'DEPT',
+        name: d.name,
+        totalAlumni: total,
+        employedAlumni: emp,
+        employmentRate: total > 0 ? Math.round((emp / total) * 100) : 0,
+      };
+    });
 
     return res.status(200).json({
       success: true,
@@ -249,7 +282,11 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
         registeredAlumniFormatted: `${alumniCount.toLocaleString()}`,
         verifiedAlumni: verifiedAlumniCount,
         verifiedAlumniFormatted: `${verifiedAlumniCount.toLocaleString()}`,
+        pendingAlumniVerification: pendingAlumniCount,
+        employedAlumni: employedAlumniCount,
+        unemployedAlumni: unemployedAlumniCount,
         verificationRate,
+        verificationRateFormatted: `${verificationRate}%`,
         fieldsOfStudy: departmentCount,
         fieldsOfStudyFormatted: `${departmentCount} Departments`,
         corporatePartners: employerCount,
@@ -259,17 +296,24 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
         employmentRate,
         employmentRateFormatted: `${employmentRate}%`,
         etaComplianceRate,
-        etaComplianceRateFormatted: `${etaComplianceRate}%`,
+        etaComplianceRateFormatted: etaComplianceRate !== null ? `${etaComplianceRate}%` : '—',
+        hasActiveSurveyWave: surveyAssignmentsTotal > 0,
+        surveyAssignmentsTotal,
+        surveyAssignmentsCompleted,
         activeJobs: activeJobsCount,
         activeJobsFormatted: `${activeJobsCount.toLocaleString()}`,
         digitalRequests,
         digitalRequestsFormatted: `${digitalRequests.toLocaleString()}`,
+        documentRequestsTotal: docRequestsCount,
+        documentRequestsPending: pendingDocRequestsCount,
+        supportTicketsOpen: pendingTicketsCount,
         eventsCount,
         eventsCountFormatted: `${eventsCount.toLocaleString()}`,
         eventRsvpsCount,
         storiesCount,
         bulletinsCount,
         pendingTicketsCount,
+        departmentDistribution,
         lastUpdated: new Date().toISOString(),
       },
     });

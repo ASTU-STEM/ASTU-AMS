@@ -254,7 +254,7 @@ export default function CmsLayout() {
 
   return (
     <>
-    <div className="admin-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 antialiased">
+    <div className="admin-shell app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-slate-900 dark:text-slate-100 antialiased">
       {mobileSidebarOpen && (
         <button type="button" aria-label="Close navigation"
           onClick={() => setMobileSidebarOpen(false)}
