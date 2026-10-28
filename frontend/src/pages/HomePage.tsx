@@ -752,23 +752,32 @@ export default function HomePage() {
   const [liveEventsHeaders, setLiveEventsHeaders] = useState<any>(() => {
     const cfg = homepageCmsService.getSettings();
     const raw: any = cfg?.eventsHeaders || {};
+    const desc = String(raw.description || '').replace(/^Gatherings\s*(&|and)\s*training\s*·\s*/i, '').trim();
+    const eyebrow = /calendar.*gatherings/i.test(String(raw.eyebrow || ''))
+      ? 'Events & Workshops'
+      : raw.eyebrow || 'Events & Workshops';
     return {
-      eyebrow: raw.eyebrow || 'Events & Workshops',
-      title: raw.title || 'Gatherings & Training',
+      eyebrow,
+      title: raw.title || 'Gatherings & Technical Training',
       description:
-        raw.description ||
-        'Join campus career expos, technical workshops, and alumni reunions.',
-      viewAllText: raw.viewAllText || 'See All Events →',
+        desc ||
+        'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+      viewAllText: raw.viewAllText || 'See All Events',
       viewAllLink: raw.viewAllLink || '/events',
     };
   });
   const [liveAnnouncementsHeaders, setLiveAnnouncementsHeaders] = useState<any>(() => {
     const cfg = homepageCmsService.getSettings();
-    return cfg?.announcementsHeaders || {
-      eyebrow: "Announcements",
-      title: "Official Notices",
-      subscribeTitle: "Subscribe to official updates",
-      subscribeDesc: "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.",
+    const raw: any = cfg?.announcementsHeaders || {};
+    const desc = String(raw.description || '').replace(/^Official\s*updates\s*·\s*/i, '').trim();
+    return {
+      eyebrow: raw.eyebrow || "Official Updates",
+      title: raw.title || "News & Announcements",
+      subscribeTitle: raw.subscribeTitle || "Subscribe to official updates",
+      subscribeDesc:
+        desc ||
+        raw.subscribeDesc ||
+        "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.",
     };
   });
   const [livePartnersHeaders, setLivePartnersHeaders] = useState<any>(() => {
@@ -868,14 +877,14 @@ export default function HomePage() {
   });
   const [liveNewsHeaders, setLiveNewsHeaders] = useState<any>(() => {
     const cfg = homepageCmsService.getSettings();
-    return (
-      cfg?.newsHeaders || {
-        eyebrow: 'Official Updates & Notices',
-        title: 'News & Announcements',
-        description:
-          'University notices, academic bulletins, and alumni community circulars.',
-      }
-    );
+    const raw: any = cfg?.newsHeaders || {};
+    return {
+      eyebrow: raw.eyebrow || 'Campus News',
+      title: raw.title || 'Latest ASTU Highlights',
+      description:
+        raw.description ||
+        'University notices, academic bulletins, and alumni community circulars.',
+    };
   });
   const [liveGivingSection, setLiveGivingSection] = useState(() => {
     const cfg = homepageCmsService.getSettings();
@@ -918,10 +927,8 @@ export default function HomePage() {
   const [allEventsSearch, setAllEventsSearch] = useState('');
   const [isAutoPlayEvents, setIsAutoPlayEvents] = useState(false);
 
-  // News Carousel State, Timer & Modals
+  // News Carousel State & Modals (Manual pagination only, no aggressive 50ms re-render timer)
   const [newsSlideIndex, setNewsSlideIndex] = useState(0);
-  const [isNewsTimerPaused, setIsNewsTimerPaused] = useState(false);
-  const [newsTimerProgress, setNewsTimerProgress] = useState(0);
   const [selectedNewsModal, setSelectedNewsModal] = useState<any | null>(null);
   const [showAllNewsModal, setShowAllNewsModal] = useState(false);
   const [newsSearchQuery, setNewsSearchQuery] = useState('');
@@ -938,34 +945,9 @@ export default function HomePage() {
     setNewsSlideIndex((prev) => Math.min(prev, Math.max(0, totalNewsSlides - 1)));
   }, [totalNewsSlides]);
 
-  // Auto-Slide Timer with animated progress bar (5s duration per slide)
-  useEffect(() => {
-    if (totalNewsSlides <= 1 || isNewsTimerPaused) return;
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setIsNewsTimerPaused(true);
-      return;
-    }
-
-    const intervalMs = 50;
-    const durationMs = 5000;
-    const step = (intervalMs / durationMs) * 100;
-
-    const timer = setInterval(() => {
-      setNewsTimerProgress((prev) => {
-        if (prev >= 100) {
-          setNewsSlideIndex((curr) => (curr + 1) % totalNewsSlides);
-          return 0;
-        }
-        return prev + step;
-      });
-    }, intervalMs);
-
-    return () => clearInterval(timer);
-  }, [totalNewsSlides, isNewsTimerPaused]);
-
   const handleNewsSlideChange = (newIdx: number) => {
+    if (totalNewsSlides <= 1) return;
     setNewsSlideIndex((newIdx + totalNewsSlides) % totalNewsSlides);
-    setNewsTimerProgress(0);
   };
 
   /** Network voices: CMS testimonials + approved community posts + published stories (API only). */
@@ -1039,6 +1021,16 @@ export default function HomePage() {
 
     if (liveWorkshops && liveWorkshops.length > 0) {
       liveWorkshops.forEach((w: any, idx: number) => {
+        const titleLower = String(w.title || '').toLowerCase();
+        let fallbackWorkshopImage = '/images/electriclabs.jpeg';
+        if (titleLower.includes('cloud') || titleLower.includes('devops') || titleLower.includes('architecture')) {
+          fallbackWorkshopImage = '/images/arc.jpg';
+        } else if (titleLower.includes('startup') || titleLower.includes('finance') || titleLower.includes('career')) {
+          fallbackWorkshopImage = '/images/gc7.jpg';
+        } else if (idx % 2 === 1) {
+          fallbackWorkshopImage = '/images/arc.jpg';
+        }
+
         liveList.push({
           id: w.id || `live-workshop-${idx}`,
           title: w.title,
@@ -1050,7 +1042,7 @@ export default function HomePage() {
           location: w.location || w.focus || 'Location to be confirmed',
           campus: w.campus || 'ASTU Campus',
           description: w.description || 'Hands-on workshop hosted by Adama Science and Technology University.',
-          image: w.image || FALLBACK_IMAGE,
+          image: w.image || fallbackWorkshopImage,
           speaker: w.speaker || undefined,
           seats: w.seats || undefined,
           statusBadge: w.statusBadge || 'Workshop',
@@ -1380,9 +1372,38 @@ export default function HomePage() {
       }
       if (cmsConfig.impactHeaders) setLiveImpactHeaders(cmsConfig.impactHeaders);
       if (cmsConfig.portalsHeaders) setLivePortalsHeaders(cmsConfig.portalsHeaders);
-      if (cmsConfig.eventsHeaders) setLiveEventsHeaders(cmsConfig.eventsHeaders);
-      if (cmsConfig.announcementsHeaders) setLiveAnnouncementsHeaders(cmsConfig.announcementsHeaders);
-      if (cmsConfig.newsHeaders) setLiveNewsHeaders(cmsConfig.newsHeaders);
+      if (cmsConfig.eventsHeaders) {
+        const raw = cmsConfig.eventsHeaders;
+        const desc = String(raw.description || '').replace(/^Gatherings\s*(&|and)\s*training\s*·\s*/i, '').trim();
+        const eyebrow = /calendar.*gatherings/i.test(String(raw.eyebrow || ''))
+          ? 'Events & Workshops'
+          : raw.eyebrow || 'Events & Workshops';
+        setLiveEventsHeaders({
+          ...raw,
+          eyebrow,
+          title: raw.title || 'Gatherings & Technical Training',
+          description: desc || 'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+        });
+      }
+      if (cmsConfig.announcementsHeaders) {
+        const raw = cmsConfig.announcementsHeaders;
+        const desc = String(raw.description || '').replace(/^Official\s*updates\s*·\s*/i, '').trim();
+        setLiveAnnouncementsHeaders({
+          ...raw,
+          eyebrow: raw.eyebrow || 'Official Updates',
+          title: raw.title || 'News & Announcements',
+          description: desc || 'University notices, academic bulletins, and alumni community circulars.',
+        });
+      }
+      if (cmsConfig.newsHeaders) {
+        const raw = cmsConfig.newsHeaders;
+        setLiveNewsHeaders({
+          ...raw,
+          eyebrow: raw.eyebrow || 'Campus News',
+          title: raw.title || 'Latest ASTU Highlights',
+          description: raw.description || 'University notices, academic bulletins, and alumni community circulars.',
+        });
+      }
       if (cmsConfig.galleryHeaders || cmsConfig.gallerySection) {
         const raw = cmsConfig.galleryHeaders || cmsConfig.gallerySection || {};
         const title = String(raw.title || '').trim();
@@ -2262,17 +2283,17 @@ location: e.location || 'Location to be confirmed',
           <div id="workshops" className="sr-only" />
 
           <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-              <div className="max-w-2xl reveal">
+              <div className="max-w-2xl">
                 <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
                   <CalendarDays className="h-3.5 w-3.5" />
                   <span>{liveEventsHeaders?.eyebrow || 'Events & Workshops'}</span>
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
-                  {liveEventsHeaders?.title || 'Gatherings & Training'}
+                  {liveEventsHeaders?.title || 'Gatherings & Technical Training'}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
                   {liveEventsHeaders?.description ||
-                    'Join campus career expos, technical workshops, and alumni reunions.'}
+                    'Join campus career expos, technical workshops, and alumni reunions across ASTU.'}
                 </p>
               </div>
 
@@ -2363,18 +2384,19 @@ location: e.location || 'Location to be confirmed',
             {filteredEventsList.length === 0 ? (
               <EmptySection message="No upcoming events or workshops are published yet. Check back soon or visit the full events calendar." />
             ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" key={`home-events-${safeEventSlideIndex}-${eventFilterTab}`}>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredEventsList
                 .slice(safeEventSlideIndex * 3, safeEventSlideIndex * 3 + 3)
                 .map((event, idx) => (
                   <article
                     key={event.id + '-' + idx}
-                    className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300"
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300"
                   >
                     {/* Top Image Frame with Smooth Curved Top */}
                     <div className="relative h-40 w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
                       <img
-                        alt={event.title}
+                        alt=""
+                        aria-hidden="true"
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         src={event.image}
                         onError={handleImageError}
@@ -2522,27 +2544,21 @@ location: e.location || 'Location to be confirmed',
         <section
           id="news"
           className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate"
-          onMouseEnter={() => setIsNewsTimerPaused(true)}
-          onMouseLeave={() => setIsNewsTimerPaused(false)}
         >
             <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-              <div className="max-w-2xl reveal">
+              <div className="max-w-2xl">
                 <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
-                  <span className="h-2 w-2 rounded-full bg-astu-red animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-astu-red" />
                   <span>
-                    {liveNewsHeaders?.eyebrow ||
-                      liveAnnouncementsHeaders?.eyebrow ||
-                      'Official Updates'}
+                    {liveNewsHeaders?.eyebrow || 'Campus News'}
                   </span>
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
-                  {liveNewsHeaders?.title ||
-                    liveAnnouncementsHeaders?.title ||
-                    'News & Announcements'}
+                  {liveNewsHeaders?.title || 'Latest ASTU Highlights'}
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
                   {liveNewsHeaders?.description ||
-                    liveAnnouncementsHeaders?.subscribeDesc ||
+                    liveAnnouncementsHeaders?.description ||
                     'University notices, academic bulletins, and alumni community circulars.'}
                 </p>
               </div>
@@ -2563,54 +2579,12 @@ location: e.location || 'Location to be confirmed',
               </button>
             </div>
 
-            {/* Slider Controls Bar with Auto-play Progress Timer — only when content exists */}
-            {totalNewsSlides > 0 && (
+            {/* Slider Controls Bar — manual navigation only */}
+            {totalNewsSlides > 1 && (
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/70 dark:border-slate-700/60 pb-4">
-              {/* Timer Progress Indicator & Status */}
-              <div className="flex items-center gap-3">
-                {totalNewsSlides > 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setIsNewsTimerPaused(!isNewsTimerPaused)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold border transition-all ${
-                        isNewsTimerPaused
-                          ? 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300'
-                          : 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700/50 dark:bg-emerald-950/40 dark:text-emerald-300'
-                      }`}
-                      title={isNewsTimerPaused ? "Resume auto-rotation" : "Pause auto-rotation"}
-                      aria-label={isNewsTimerPaused ? "Resume news auto-rotation" : "Pause news auto-rotation"}
-                      aria-pressed={isNewsTimerPaused}
-                    >
-                      {isNewsTimerPaused ? (
-                        <>
-                          <Play className="h-3.5 w-3.5 fill-current" />
-                          <span>Paused</span>
-                        </>
-                      ) : (
-                        <>
-                          <Pause className="h-3.5 w-3.5 fill-current" />
-                          <span>Auto-sliding (5s)</span>
-                        </>
-                      )}
-                    </button>
-
-                    <div className="relative h-1.5 w-32 sm:w-44 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden" aria-hidden="true">
-                      <div
-                        className={`h-full bg-gradient-to-r from-astu-navy to-sky-500 dark:from-sky-400 dark:to-emerald-400 transition-all duration-75 rounded-full ${
-                          isNewsTimerPaused ? 'opacity-50' : 'opacity-100'
-                        }`}
-                        style={{ width: `${newsTimerProgress}%` }}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Latest notices</span>
-                )}
-              </div>
-
-              {/* Slider Pagination Controls */}
-              {totalNewsSlides > 1 && (
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                Official bulletins & campus notices
+              </span>
               <div className="flex items-center justify-end gap-3 self-end sm:self-auto">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   Slide {newsSlideIndex + 1} of {totalNewsSlides}
@@ -2634,7 +2608,6 @@ location: e.location || 'Location to be confirmed',
                   </button>
                 </div>
               </div>
-              )}
             </div>
             )}
 
@@ -2657,7 +2630,7 @@ location: e.location || 'Location to be confirmed',
                             .replace(/[^a-z0-9]+/g, '-')}`
                         )
                       }
-                      className="animate-card-slide group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 p-6 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300 cursor-pointer"
+                      className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-700/80 bg-white dark:bg-slate-800 p-6 shadow-[0_4px_20px_rgba(0,51,102,0.05)] dark:shadow-slate-900/40 hover:shadow-2xl hover:shadow-astu-navy/15 dark:hover:shadow-sky-950/40 hover:-translate-y-2 transition-all duration-300 cursor-pointer"
                     >
                       {/* Top Category Badge & Pill */}
                       <div className="flex items-center justify-between gap-2 mb-4">

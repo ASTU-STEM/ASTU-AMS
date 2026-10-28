@@ -318,16 +318,16 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   /* ── 5. Events & Notices ── */
   const [eventsHeaders, setEventsHeaders] = useState({
     eyebrow: 'Events & Workshops',
-    title: 'Gatherings & Training',
-    description: 'Join campus career expos, technical workshops, and alumni reunions.',
-    viewAllText: 'See All Events →',
+    title: 'Gatherings & Technical Training',
+    description: 'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+    viewAllText: 'See All Events',
     viewAllLink: '/events',
   });
   const [events, setEvents] = useState<EventItem[]>(initialEvents);
   const [workshops, setWorkshops] = useState<WorkshopItem[]>(initialWorkshops);
   const [announcementsHeaders, setAnnouncementsHeaders] = useState({
-    eyebrow: 'Announcements',
-    title: 'Official Notices',
+    eyebrow: 'Official Updates',
+    title: 'News & Announcements',
     subscribeTitle: 'Subscribe to official updates',
     subscribeDesc: 'Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.',
   });
@@ -335,6 +335,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   const [newsHeaders, setNewsHeaders] = useState({
     eyebrow: 'Campus News',
     title: 'Latest ASTU Highlights',
+    description: 'University notices, academic bulletins, and alumni community circulars.',
   });
   const [newsItems, setNewsItems] = useState<NewsItem[]>(initialNews);
 
@@ -531,12 +532,42 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         else if ((cfg as any).gallerySection) setGalleryHeaders((cfg as any).gallerySection);
         if (Array.isArray(cfg.videos)) setVideos(cfg.videos);
         if (cfg.industryBridge) setIndustryBridge(cfg.industryBridge);
-        if (cfg.eventsHeaders) setEventsHeaders(cfg.eventsHeaders);
+        if (cfg.eventsHeaders) {
+          const raw = cfg.eventsHeaders;
+          const desc = String(raw.description || '').replace(/^Gatherings\s*(&|and)\s*training\s*·\s*/i, '').trim();
+          const eyebrow = /calendar.*gatherings/i.test(String(raw.eyebrow || ''))
+            ? 'Events & Workshops'
+            : raw.eyebrow || 'Events & Workshops';
+          setEventsHeaders({
+            ...raw,
+            eyebrow,
+            title: raw.title || 'Gatherings & Technical Training',
+            description: desc || 'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+          });
+        }
         if (Array.isArray(cfg.events)) setEvents(cfg.events);
         if (Array.isArray(cfg.workshops)) setWorkshops(cfg.workshops);
-        if (cfg.announcementsHeaders) setAnnouncementsHeaders(cfg.announcementsHeaders);
+        if (cfg.announcementsHeaders) {
+          const raw: any = cfg.announcementsHeaders;
+          const desc = String(raw.description || raw.subscribeDesc || '').replace(/^Official\s*updates\s*·\s*/i, '').trim();
+          setAnnouncementsHeaders({
+            ...raw,
+            eyebrow: raw.eyebrow || 'Official Updates',
+            title: raw.title || 'News & Announcements',
+            subscribeTitle: raw.subscribeTitle || 'Subscribe to official updates',
+            subscribeDesc: desc || raw.subscribeDesc || 'Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.',
+          });
+        }
         if (Array.isArray(cfg.announcements)) setAnnouncements(cfg.announcements);
-        if (cfg.newsHeaders) setNewsHeaders(cfg.newsHeaders);
+        if (cfg.newsHeaders) {
+          const raw: any = cfg.newsHeaders;
+          setNewsHeaders({
+            ...raw,
+            eyebrow: raw.eyebrow || 'Campus News',
+            title: raw.title || 'Latest ASTU Highlights',
+            description: raw.description || 'University notices, academic bulletins, and alumni community circulars.',
+          });
+        }
         if (Array.isArray(cfg.newsItems)) setNewsItems(cfg.newsItems);
         if (cfg.storiesHeaders) setStoriesHeaders(cfg.storiesHeaders);
         if (Array.isArray(cfg.stories)) setStories(cfg.stories);

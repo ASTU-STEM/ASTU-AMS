@@ -1118,10 +1118,10 @@ export default function HomepageLivePreviewCanvas({
               {eventsHeaders?.eyebrow || 'EVENTS & WORKSHOPS'}
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-[#003366] dark:text-sky-300">
-              {eventsHeaders?.title || 'Upcoming Alumni Events'}
+              {eventsHeaders?.title || 'Gatherings & Technical Training'}
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              {eventsHeaders?.description || 'Networking, learning, and professional growth opportunities.'}
+              {eventsHeaders?.description || 'Join campus career expos, technical workshops, and alumni reunions across ASTU.'}
             </p>
           </div>
 
