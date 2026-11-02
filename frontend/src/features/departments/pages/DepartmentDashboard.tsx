@@ -17,6 +17,8 @@ import { AccreditationReports } from '../components/AccreditationReports';
 import { DepartmentSurveyCenter } from '../components/DepartmentSurveyCenter';
 import { TelegramChat } from '../../../components/TelegramChat';
 import { useTheme } from '../../../hooks/useTheme';
+import { usePortalMenuControl } from '../../../context/PortalMenuControlContext';
+import PageClosedView from '../../../components/PageClosedView';
 
 // Data
 
@@ -69,6 +71,7 @@ const initialNotifications: NotificationItem[] = [];
 const DepartmentDashboard = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { isPageClosed, getClosedNotice } = usePortalMenuControl();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('department_sidebar_collapsed') === 'true');
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<string>('dashboard');
@@ -161,6 +164,16 @@ const DepartmentDashboard = () => {
     ];
 
     const renderSection = () => {
+        if (isPageClosed('DEPARTMENT_HEAD', activeTab)) {
+            return (
+                <PageClosedView
+                    actor="DEPARTMENT_HEAD"
+                    pageId={activeTab}
+                    onBackToDashboard={() => setActiveTab('dashboard')}
+                />
+            );
+        }
+
         switch (activeTab) {
             case 'management':
                 return (
@@ -296,15 +309,22 @@ const DepartmentDashboard = () => {
                                     </div>
                                 )}
                                 <div className="space-y-1">
-                                    {group.items.map((item) => (
+                                    {group.items.map((item) => {
+                                        const isClosed = isPageClosed('DEPARTMENT_HEAD', item.id);
+                                        const closedNotice = getClosedNotice('DEPARTMENT_HEAD', item.id);
+                                        return (
                                         <button
                                             key={item.id}
                                             onClick={() => setActiveTab(item.id)}
-                                            title={sidebarCollapsed ? item.label : item.tooltip}
+                                            title={sidebarCollapsed ? (isClosed ? `${item.label} (Closed)` : item.label) : (isClosed ? `Closed: ${closedNotice || 'Click to view notice'}` : item.tooltip)}
                                             className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
                                                     ? darkMode
                                                         ? 'bg-blue-600/20 text-blue-400 font-bold shadow-2xs ring-1 ring-blue-500/30'
                                                         : 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
+                                                    : isClosed
+                                                    ? darkMode
+                                                        ? 'text-slate-500 hover:text-slate-300 hover:bg-rose-950/20'
+                                                        : 'text-slate-500 hover:text-slate-800 hover:bg-rose-50/50'
                                                     : darkMode
                                                         ? 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                                                         : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
@@ -319,11 +339,21 @@ const DepartmentDashboard = () => {
                                                         : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
                                                 }`}>
                                                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                                                {isClosed && sidebarCollapsed && (
+                                                    <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-0.5 flex items-center justify-center rounded-full bg-rose-600 text-[7px] font-extrabold text-white shadow-xs">
+                                                        ✕
+                                                    </span>
+                                                )}
                                             </span>
                                             {!sidebarCollapsed && (
                                                 <>
                                                     <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
-                                                    {item.badge && (
+                                                    {isClosed ? (
+                                                        <span className="ml-auto flex items-center gap-1 min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shrink-0">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                                            Closed
+                                                        </span>
+                                                    ) : item.badge ? (
                                                         <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${item.badge === 'NEW'
                                                                 ? 'bg-blue-600 text-white'
                                                                 : darkMode
@@ -332,14 +362,15 @@ const DepartmentDashboard = () => {
                                                             }`}>
                                                             {item.badge}
                                                         </span>
-                                                    )}
+                                                    ) : null}
                                                 </>
                                             )}
-                                            {activeTab === item.id && !sidebarCollapsed && !item.badge && (
+                                            {activeTab === item.id && !sidebarCollapsed && !item.badge && !isClosed && (
                                                 <div className={`ml-1 w-1.5 h-1.5 rounded-full shrink-0 ${darkMode ? 'bg-blue-400' : 'bg-[#003580]'}`} />
                                             )}
                                         </button>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}

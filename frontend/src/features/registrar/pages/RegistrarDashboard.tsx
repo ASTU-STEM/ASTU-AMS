@@ -26,10 +26,13 @@ import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { useTheme } from '../../../hooks/useTheme';
+import { usePortalMenuControl } from '../../../context/PortalMenuControlContext';
+import PageClosedView from '../../../components/PageClosedView';
 
 const RegistrarDashboard = () => {
    const navigate = useNavigate();
    const { user, logout } = useAuth();
+   const { isPageClosed, getClosedNotice } = usePortalMenuControl();
 
    // Dynamic authenticated Registrar profile state from database
    const registrarName = useMemo(() => {
@@ -819,39 +822,54 @@ useEffect(() => {
                   </div>
                 )}
                 <div className="space-y-1">
-                  {group.items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      title={sidebarCollapsed ? item.label : item.tooltip}
-                      className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
-                        ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
-                        : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
-                        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                        {item.badge && sidebarCollapsed && (
-                          <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
-                            {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
-                          </span>
-                        )}
-                      </span>
-                      {!sidebarCollapsed && (
-                        <>
-                          <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
-                          {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                  {group.items.map((item) => {
+                    const isClosed = isPageClosed('REGISTRAR', item.id);
+                    const closedNotice = getClosedNotice('REGISTRAR', item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        title={sidebarCollapsed ? (isClosed ? `${item.label} (Closed)` : item.label) : (isClosed ? `Closed: ${closedNotice || 'Click to view notice'}` : item.tooltip)}
+                        className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
+                          ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
+                          : isClosed
+                          ? 'text-slate-500 hover:text-slate-800 hover:bg-rose-50/50 dark:hover:bg-rose-950/20'
+                          : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
+                        }`}
+                      >
+                        <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
+                          <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                          {isClosed && sidebarCollapsed ? (
+                            <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-0.5 flex items-center justify-center rounded-full bg-rose-600 text-[7px] font-extrabold text-white shadow-xs">
+                              ✕
+                            </span>
+                          ) : item.badge && sidebarCollapsed ? (
+                            <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
-                          )}
-                        </>
-                      )}
-                      {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                        <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
-                      )}
-                    </button>
-                  ))}
+                          ) : null}
+                        </span>
+                        {!sidebarCollapsed && (
+                          <>
+                            <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
+                            {isClosed ? (
+                              <span className="ml-auto flex items-center gap-1 min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shrink-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                Closed
+                              </span>
+                            ) : item.badge ? (
+                              <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                                {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                        {activeTab === item.id && !sidebarCollapsed && !item.badge && !isClosed && (
+                          <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -1067,6 +1085,14 @@ useEffect(() => {
 
           {/* Dynamic tabs routing */}
           <div className="dashboard-content flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+            {isPageClosed('REGISTRAR', activeTab) ? (
+              <PageClosedView
+                actor="REGISTRAR"
+                pageId={activeTab}
+                onBackToDashboard={() => setActiveTab('dashboard')}
+              />
+            ) : (
+              <>
             {activeTab === 'management' && (
               <section className="space-y-6 p-4 md:p-6">
                 {/* Management Hub Hero */}
@@ -1444,6 +1470,8 @@ useEffect(() => {
 
             {activeTab === 'bulletins' && (
               <RegistrarPublishingTab registrarName={registrarName} darkMode={darkMode} />
+            )}
+              </>
             )}
           </div>
         </div>
