@@ -70,6 +70,7 @@ function readDevDb(): any {
     'contentItems', 'mediaAssets', 'homepageConfigs', 'jobs', 'events', 'eventRSVPs',
     'surveys', 'surveyResponses', 'mentorships', 'communityMembers',
     'departmentHeadProfiles', 'verificationRequests', 'forumPosts', 'employerFeedbacks',
+    'knowledgeDocuments', 'knowledgeChunks',
   ];
   for (const key of COLLECTIONS) {
     if (!Array.isArray(store[key])) store[key] = store[key] ?? [];
@@ -1277,88 +1278,134 @@ function sanitizeItemForRead(item: any): any {
 }
 
 const createSafeModel = (name: string) => {
-  const store: any[] = [];
+  const getCollectionKey = (): string => {
+    if (name === 'knowledgeDocument') return 'knowledgeDocuments';
+    if (name === 'knowledgeChunk') return 'knowledgeChunks';
+    return name.endsWith('s') ? name : `${name}s`;
+  };
+
+  const getStore = () => {
+    const db = readDevDb();
+    const key = getCollectionKey();
+    if (!Array.isArray(db[key])) db[key] = [];
+    return { db, store: db[key], key };
+  };
+
+  const matchesWhere = (item: any, where: any): boolean => {
+    if (!where || Object.keys(where).length === 0) return true;
+    return Object.entries(where).every(([k, v]: [string, any]) => {
+      if (v === undefined) return true;
+      if (v !== null && typeof v === 'object' && 'in' in v && Array.isArray(v.in)) {
+        return v.in.includes(item[k]);
+      }
+      return item[k] === v;
+    });
+  };
+
   return {
     findMany: async ({ where }: any = {}) => {
-      let results = store;
-      if (where && Object.keys(where).length > 0) {
-        results = store.filter((item: any) => {
-          return Object.entries(where).every(([k, v]) => item[k] === v);
-        });
-      }
+      const { store } = getStore();
+      const results = where && Object.keys(where).length > 0
+        ? store.filter((item: any) => matchesWhere(item, where))
+        : [...store];
       return results.map((item: any) => sanitizeItemForRead(item));
     },
     findUnique: async ({ where }: any = {}) => {
       if (!where) return null;
-      const found = store.find((item: any) => {
-        return Object.entries(where).every(([k, v]) => item[k] === v);
-      });
+      const { store } = getStore();
+      const found = store.find((item: any) => matchesWhere(item, where));
       return found ? sanitizeItemForRead(found) : null;
     },
     findFirst: async ({ where }: any = {}) => {
+      const { store } = getStore();
       if (!where || Object.keys(where).length === 0) return store[0] ? sanitizeItemForRead(store[0]) : null;
-      const found = store.find((item: any) => {
-        return Object.entries(where).every(([k, v]) => item[k] === v);
-      });
+      const found = store.find((item: any) => matchesWhere(item, where));
       return found ? sanitizeItemForRead(found) : null;
     },
     count: async ({ where }: any = {}) => {
+      const { store } = getStore();
       if (!where || Object.keys(where).length === 0) return store.length;
-      return store.filter((item: any) => Object.entries(where).every(([k, v]) => item[k] === v)).length;
+      return store.filter((item: any) => matchesWhere(item, where)).length;
     },
     create: async ({ data }: any) => {
+      const { db, store } = getStore();
       const sanitized = sanitizePrismaCreate(data);
       const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      const rec = { id, ...sanitized };
+      const rec = { id, ...sanitized, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
       store.push(rec);
+      writeDevDb(db);
       return sanitizeItemForRead(rec);
     },
     createMany: async ({ data }: any = {}) => {
+      const { db, store } = getStore();
       const items = Array.isArray(data) ? data : [data];
       const created = items.map((item: any) => {
         const sanitized = sanitizePrismaCreate(item);
         const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-        const rec = { id, ...sanitized };
+        const rec = { id, ...sanitized, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
         store.push(rec);
         return rec;
       });
+      writeDevDb(db);
       return { count: created.length };
     },
     update: async ({ where, data }: any) => {
-      let item = store.find((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
+      const { db, store } = getStore();
+      let item = store.find((i: any) => matchesWhere(i, where));
       if (!item) {
         const id = where?.id || `dev-${name}-${Date.now()}`;
         item = { id, ...where };
         store.push(item);
       }
       applyPrismaUpdate(item, data);
+      writeDevDb(db);
       return sanitizeItemForRead(item);
     },
     delete: async ({ where }: any = {}) => {
-      const idx = store.findIndex((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
+      const { db, store } = getStore();
+      const idx = store.findIndex((i: any) => matchesWhere(i, where));
       if (idx !== -1) {
-        return store.splice(idx, 1)[0];
+        const removed = store.splice(idx, 1)[0];
+        writeDevDb(db);
+        return removed;
       }
       return {};
     },
+    deleteMany: async ({ where }: any = {}) => {
+      const { db, store, key } = getStore();
+      if (!where || Object.keys(where).length === 0) {
+        const count = store.length;
+        db[key] = [];
+        writeDevDb(db);
+        return { count };
+      }
+      const beforeCount = store.length;
+      db[key] = store.filter((item: any) => !matchesWhere(item, where));
+      writeDevDb(db);
+      return { count: beforeCount - db[key].length };
+    },
     upsert: async ({ where, create, update }: any) => {
-      let item = store.find((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
+      const { db, store } = getStore();
+      let item = store.find((i: any) => matchesWhere(i, where));
       if (item) {
         applyPrismaUpdate(item, update);
+        writeDevDb(db);
         return sanitizeItemForRead(item);
       }
       const sanitized = sanitizePrismaCreate(create);
-      const rec = { id: `dev-${name}-${Date.now()}`, ...sanitized };
+      const rec = { id: `dev-${name}-${Date.now()}`, ...sanitized, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
       store.push(rec);
+      writeDevDb(db);
       return sanitizeItemForRead(rec);
     },
     updateMany: async ({ where, data }: any = {}) => {
-      const items = store.filter((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
-      items.forEach(i => applyPrismaUpdate(i, data));
+      const { db, store } = getStore();
+      const items = store.filter((i: any) => matchesWhere(i, where));
+      items.forEach((i: any) => applyPrismaUpdate(i, data));
+      writeDevDb(db);
       return { count: items.length };
     },
-    deleteMany: async () => ({ count: 0 }),
-    aggregate: async () => ({ _avg: { salary: 0, technicalSkill: 0, communicationSkill: 0, leadershipSkill: 0, teamworkSkill: 0, problemSolvingSkill: 0, innovationSkill: 0 }, _count: { id: store.length } }),
+    aggregate: async () => ({ _avg: { salary: 0, technicalSkill: 0, communicationSkill: 0, leadershipSkill: 0, teamworkSkill: 0, problemSolvingSkill: 0, innovationSkill: 0 }, _count: { id: 0 } }),
     groupBy: async () => [],
   };
 };
