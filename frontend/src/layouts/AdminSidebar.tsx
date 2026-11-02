@@ -15,12 +15,15 @@ import {
   Settings,
   Shield,
   ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
 import { adminService } from '../features/admin/services/admin.service';
 import { useAuth } from '../contexts/AuthContext';
 import { useSystemSettings } from '../context/SystemSettingsContext';
+import { usePortalMenuControl } from '../context/PortalMenuControlContext';
 import {
   SidebarAiButton,
   SidebarBrand,
@@ -53,6 +56,7 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Messages', path: '/admin/messages', icon: MessageSquareText, section: 'main', tooltip: 'ASTU_AMS direct messaging hub' },
   { label: 'Support Desk', path: '/admin/support-tickets', icon: LifeBuoy, section: 'system', tooltip: 'User support tickets & help desk' },
   { label: 'Super Admin Modules', path: '/admin/modules', icon: Shield, section: 'system', tooltip: 'Advanced system modules' },
+  { label: 'RAG Knowledge Hub', path: '/admin/knowledge-hub', icon: Sparkles, section: 'system', tooltip: 'Institutional RAG documents & FAQs for AI Chatbot' },
   { label: 'Reports Center', path: '/admin/reports', icon: FileBarChart, section: 'system', tooltip: 'Generate & export reports' },
   { label: 'User Management', path: '/admin/users', icon: Users, section: 'system', tooltip: 'Pending verifications' },
   { label: 'Role Management', path: '/admin/roles', icon: ShieldCheck, section: 'system', tooltip: 'Manage roles & permissions' },
@@ -61,6 +65,7 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Jobs Management', path: '/admin/jobs', icon: Briefcase, section: 'system', tooltip: 'Active job posts' },
   { label: 'Departments', path: '/admin/departments', icon: GraduationCap, section: 'system', tooltip: 'Manage departments' },
   { label: 'Donations & Giving', path: '/admin/donations', icon: Heart, section: 'system', tooltip: 'Fundraising causes & Chapa donors' },
+  { label: 'Portal Page Controls', path: '/admin/menu-controls', icon: SlidersHorizontal, section: 'system', tooltip: 'Control & toggle sidebar menu pages for all actor portals' },
   { label: 'Notifications', path: '/admin/notifications', icon: Bell, section: 'settings', tooltip: 'Unread notifications' },
   { label: 'System Logs', path: '/admin/logs', icon: ScrollText, section: 'settings', tooltip: 'Audit trail & system logs' },
   { label: 'Backup & Security', path: '/admin/backup', icon: Shield, section: 'settings', tooltip: 'Backup & security settings' },
@@ -84,6 +89,7 @@ export default function AdminSidebar({
   const location = useLocation();
   const { user } = useAuth();
   const { settings } = useSystemSettings();
+  const { isPageClosed, getClosedNotice } = usePortalMenuControl();
 
   const [stats, setStats] = React.useState({
     users: 0,
@@ -201,6 +207,7 @@ export default function AdminSidebar({
         logoAlt={`${settings.general?.abbreviation || 'ASTU'} Logo`}
         title={`${settings.general?.abbreviation || 'ASTU'} Admin`}
         subtitle={(settings.general?.portalTitle || 'Alumni Management').replace(/^ASTU\s+/i, '')}
+        onCloseMobile={onNavigate}
       />
 
       <SidebarNav>
@@ -212,6 +219,9 @@ export default function AdminSidebar({
               {!collapsed && <SidebarSectionLabel>{section.label}</SidebarSectionLabel>}
               <div className="space-y-0.5">
                 {items.map((item) => {
+                  const pageId = item.path.replace('/admin/', '');
+                  const isClosed = !['menu-controls', 'portal-controls'].includes(pageId) && isPageClosed('ADMIN', pageId);
+                  const closedNotice = getClosedNotice('ADMIN', pageId);
                   const isActive = item.exact
                     ? location.pathname === item.path
                     : location.pathname.startsWith(item.path);
@@ -224,8 +234,8 @@ export default function AdminSidebar({
                       isActive={isActive}
                       icon={item.icon}
                       label={item.label}
-                      tooltip={item.tooltip}
-                      badge={item.badge}
+                      tooltip={isClosed ? `Closed: ${closedNotice || 'Click to view notice'}` : item.tooltip}
+                      badge={isClosed ? 'Closed' : item.badge}
                       onClick={() => {
                         markAsSeen(item.path);
                         onNavigate?.();

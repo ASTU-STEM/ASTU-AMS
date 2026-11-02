@@ -29,12 +29,14 @@ import {
   Users,
   ClipboardCheck,
   FileText,
+  SlidersHorizontal,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import { adminService } from '../features/admin/services/admin.service';
 import { useAuth } from '../contexts/AuthContext';
 import { useSystemSettings } from '../context/SystemSettingsContext';
+import { usePortalMenuControl } from '../context/PortalMenuControlContext';
 
 interface UnifiedSidebarProps {
   onLogout: () => void;
@@ -59,9 +61,11 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Events & Workshops', path: '/cms/events', icon: CalendarDays, section: 'alumni-office', tooltip: 'Manage alumni reunions & workshops', roleAccess: 'both' },
   { label: 'Messages', path: '/cms/messages', icon: MessageSquareText, section: 'alumni-office', tooltip: 'Internal messaging & communication', roleAccess: 'both' },
   { label: 'Notifications', path: '/cms/notifications', icon: Bell, section: 'alumni-office', tooltip: 'System notifications & alerts', roleAccess: 'both' },
+  { label: 'Portal Page Controls', path: '/cms/menu-controls', icon: SlidersHorizontal, section: 'alumni-office', tooltip: 'Control & toggle sidebar menu pages for all actor portals', roleAccess: 'both' },
 
   // Content Management Section
   { label: 'Pages & Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content-management', tooltip: 'Manage homepage sections, Overview, Contact Us & institutional pages', roleAccess: 'both' },
+  { label: 'RAG Knowledge Hub', path: '/cms/knowledge-hub', icon: Sparkles, section: 'content-management', tooltip: 'Institutional documents & FAQs for Homepage AI Chatbot', roleAccess: 'both' },
   { label: 'Partners & Employers', path: '/cms/partners', icon: Briefcase, section: 'content-management', tooltip: 'Manage /partners portal, employer benefits & logos', roleAccess: 'both' },
   { label: 'Announcements', path: '/cms/content', icon: Newspaper, section: 'content-management', tooltip: 'Alumni announcements & public notices', roleAccess: 'both' },
   { label: 'Community', path: '/cms/community', icon: Users, section: 'content-management', tooltip: 'Alumni community & member profiles', roleAccess: 'both' },
@@ -83,6 +87,7 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Jobs Management', path: '/admin/jobs', icon: Briefcase, section: 'system-admin', tooltip: 'Active job posts', roleAccess: 'admin' },
   { label: 'Departments', path: '/admin/departments', icon: GraduationCap, section: 'system-admin', tooltip: 'Manage departments', roleAccess: 'admin' },
   { label: 'Donations & Giving', path: '/admin/donations', icon: Heart, section: 'system-admin', tooltip: 'Fundraising causes & Chapa donors', roleAccess: 'admin' },
+  { label: 'Portal Page Controls', path: '/admin/menu-controls', icon: SlidersHorizontal, section: 'system-admin', tooltip: 'Control & toggle sidebar menu pages for all actor portals', roleAccess: 'admin' },
 
   // Configuration Section
   { label: 'Notifications', path: '/admin/notifications', icon: Bell, section: 'configuration', tooltip: 'Unread notifications', roleAccess: 'admin' },
@@ -102,6 +107,7 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
   const location = useLocation();
   const { user } = useAuth();
   const { settings } = useSystemSettings();
+  const { isPageClosed, getClosedNotice } = usePortalMenuControl();
 
   const [stats, setStats] = React.useState({
     users: 0,
@@ -287,6 +293,9 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
                 <div className="space-y-1">
                   {items.map((item) => {
                     const Icon = item.icon;
+                    const pageId = item.path.startsWith('/admin/') ? item.path.replace('/admin/', '') : '';
+                    const isClosed = Boolean(pageId && !['menu-controls', 'portal-controls'].includes(pageId) && isPageClosed('ADMIN', pageId));
+                    const closedNotice = isClosed ? getClosedNotice('ADMIN', pageId) : undefined;
                     const isActive = item.exact
                       ? location.pathname === item.path
                       : location.pathname.startsWith(item.path);
@@ -299,12 +308,14 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
                           markAsSeen(item.path);
                           if (onNavigate) onNavigate();
                         }}
-                        title={collapsed ? item.tooltip || item.label : undefined}
+                        title={collapsed ? (isClosed ? `${item.label} (Closed)` : item.tooltip || item.label) : (isClosed ? `Closed: ${closedNotice || 'Click to view notice'}` : undefined)}
                         className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
                           collapsed ? 'justify-center' : 'gap-2.5'
                         } ${
                           isActive
                             ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
+                            : isClosed
+                            ? 'text-slate-500 hover:text-slate-800 hover:bg-rose-50/50'
                             : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
                         }`}
                       >
@@ -312,9 +323,19 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
                           isActive ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
                         }`}>
                           <Icon className="h-4.5 w-4.5" />
+                          {isClosed && collapsed && (
+                            <span className="absolute -top-0.5 -right-0.5 min-w-[12px] h-3 px-0.5 flex items-center justify-center rounded-full bg-rose-600 text-[7px] font-extrabold text-white shadow-xs">
+                              ✕
+                            </span>
+                          )}
                         </span>
                         {!collapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                        {item.badge && !collapsed && (
+                        {isClosed && !collapsed ? (
+                          <span className="ml-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200 shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                            Closed
+                          </span>
+                        ) : item.badge && !collapsed ? (
                           <span className={`flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold shadow-xs ${
                             isActive
                               ? 'bg-rose-500 text-white'
@@ -322,18 +343,18 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
                           }`}>
                             {item.badge}
                           </span>
-                        )}
-                        {item.badge && collapsed && (
+                        ) : null}
+                        {item.badge && collapsed && !isClosed && (
                           <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
                             {item.badge}
                           </span>
                         )}
-                        {isActive && !item.badge && !collapsed && (
+                        {isActive && !item.badge && !collapsed && !isClosed && (
                           <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
                         )}
                         {collapsed && (
                           <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                            {item.label}
+                            {item.label} {isClosed ? '(Closed)' : ''}
                             {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
                           </div>
                         )}
