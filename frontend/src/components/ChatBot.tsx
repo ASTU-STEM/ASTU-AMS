@@ -1,8 +1,21 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, ChevronDown, ChevronUp, MessageCircle, Send, Trash2, X, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Bot, ChevronDown, ChevronUp, MessageCircle, Send, Trash2, X, Sparkles, Square } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 
 type MessageSender = "user" | "bot";
+
+export type CitationItem = {
+  title: string;
+  category?: string;
+  section?: string;
+  pageNumber?: number;
+};
+
+export type ActionItem = {
+  label: string;
+  route: string;
+};
 
 type ChatMessage = {
   id: number;
@@ -10,6 +23,9 @@ type ChatMessage = {
   sender: MessageSender;
   timestamp: string;
   isAI: boolean;
+  isStreaming?: boolean;
+  citations?: CitationItem[];
+  actions?: ActionItem[];
 };
 
 const COLORS = {
@@ -81,7 +97,80 @@ function getFallback(input: string) {
   return "ASTU-AMS Assistant:\nI can help with portal navigation, transcript requests, job applications, tracer surveys, and university information.\n\nTry asking:\n• \"What can you do?\"\n• \"How do I request my transcript?\"\n• \"How do I register?\"\n• \"How do employers post jobs?\"";
 }
 
-async function askAssistant(userMessage: string) {
+async function askAssistantStream(
+  userMessage: string,
+  onDelta: (delta: string) => void,
+  onDone: (metadata: { citations?: CitationItem[]; actions?: ActionItem[] }) => void,
+  signal?: AbortSignal
+): Promise<boolean> {
+  const envUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  const urlsToTry = Array.from(new Set([
+    `${envUrl}/ai/public-chat-stream`,
+    "http://localhost:5000/api/ai/public-chat-stream",
+    "http://localhost:5000/api/v1/ai/public-chat-stream",
+  ]));
+
+  for (const url of urlsToTry) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage }),
+        signal,
+      });
+
+      if (!response.ok || !response.body) {
+        continue;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let receivedAny = false;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data:")) continue;
+          const jsonStr = trimmed.replace(/^data:\s*/, "");
+          if (!jsonStr) continue;
+          try {
+            const data = JSON.parse(jsonStr);
+            if (data.delta) {
+              receivedAny = true;
+              onDelta(data.delta);
+            }
+            if (data.done) {
+              onDone({ citations: data.citations || [], actions: data.actions || [] });
+              return true;
+            }
+          } catch {
+            // ignore partial JSON chunk
+          }
+        }
+      }
+
+      if (receivedAny) {
+        return true;
+      }
+    } catch (err: any) {
+      if (err.name === "AbortError" || signal?.aborted) {
+        return true;
+      }
+      console.warn(`Streaming attempt to ${url} notice:`, err?.message || err);
+    }
+  }
+
+  return false;
+}
+
+async function askAssistant(userMessage: string): Promise<{ text: string; citations?: CitationItem[]; actions?: ActionItem[] }> {
   const envUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
   const urlsToTry = Array.from(new Set([
     `${envUrl}/ai/public-chat`,
@@ -92,7 +181,7 @@ async function askAssistant(userMessage: string) {
   for (const url of urlsToTry) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       const response = await fetch(url, {
         method: "POST",
@@ -106,13 +195,23 @@ async function askAssistant(userMessage: string) {
         const data = await response.json();
         const reply = data.data?.response;
         if (typeof reply === "string" && reply.trim()) {
-          return reply.replace(/\*\*/g, "").replace(/\*/g, "").trim();
+          return {
+            text: reply
+              .replace(/\*\*/g, "")
+              .replace(/\*/g, "")
+              .replace(/\n*(?:Source|Sources):\s*(?:(?:SOURCE|\d+|INSTITUTIONAL DOCUMENT)\s*\d*.*)+/gi, "")
+              .trim(),
+            citations: data.data?.citations || [],
+            actions: data.data?.actions || [],
+          };
         }
       }
-    } catch (_) {}
+    } catch (err: any) {
+      console.warn(`Public AI chat attempt to ${url} notice:`, err?.message || err);
+    }
   }
 
-  return getFallback(userMessage);
+  return { text: getFallback(userMessage), citations: [], actions: [] };
 }
 
 function nowTime() {
@@ -140,19 +239,65 @@ function TypingDots({ isDark = false }: { isDark?: boolean }) {
   );
 }
 
-function renderStructuredContent(rawText: string, isUser: boolean, isDark = false) {
+function renderStructuredContent(rawText: string, isUser: boolean, isDark = false, isStreaming = false) {
   const cleanedText = rawText
     .replace(/\*\*/g, "")
     .replace(/\*/g, "")
-    .replace(/"\s*"/g, '"');
+    .replace(/"\s*"/g, '"')
+    .replace(/\n*(?:Source|Sources):\s*(?:(?:SOURCE|\d+|INSTITUTIONAL DOCUMENT)\s*\d*.*)+/gi, "")
+    .replace(/\n*Source:\s*$/gim, "");
 
-  const lines = cleanedText.split("\n");
+  const rawLines = cleanedText.split("\n");
+
+  // Merge split/orphan bullet characters and numbers with their following text line
+  const lines: string[] = [];
+  for (let i = 0; i < rawLines.length; i++) {
+    const cur = rawLines[i].trim();
+    if (!cur) continue;
+
+    const isOrphanNum = /^(\d+)\.?$/.test(cur);
+    const isOrphanBullet = /^[•\-✓\*]$/.test(cur);
+
+    if ((isOrphanNum || isOrphanBullet) && i + 1 < rawLines.length && rawLines[i + 1].trim()) {
+      const next = rawLines[i + 1].trim();
+      const prefix = isOrphanNum ? `${cur.replace(/\.$/, "")}. ` : "• ";
+      lines.push(`${prefix}${next}`);
+      i++;
+    } else {
+      lines.push(cur);
+    }
+  }
+
+  const cursorElement = isStreaming ? (
+    <span
+      key="streaming-cursor"
+      style={{
+        display: "inline-block",
+        width: 7,
+        height: 14,
+        marginLeft: 3,
+        borderRadius: 2,
+        background: isUser ? "#fff" : (isDark ? "#60a5fa" : COLORS.navy),
+        verticalAlign: "middle",
+        animation: "blink 0.8s infinite",
+      }}
+    />
+  ) : null;
+
+  if (lines.length === 0 && isStreaming) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", minHeight: 20 }}>
+        {cursorElement}
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) return null;
+        const isLastLine = idx === lines.length - 1;
 
         const isHeader =
           (trimmed.endsWith(":") && trimmed.length < 65) ||
@@ -176,6 +321,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
               }}
             >
               {trimmed}
+              {isLastLine && cursorElement}
             </div>
           );
         }
@@ -213,6 +359,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
               </span>
               <span style={{ fontSize: 13, lineHeight: 1.55, color: isUser ? "#fff" : (isDark ? "#f1f5f9" : "#1a1a2e") }}>
                 {numMatch[2]}
+                {isLastLine && cursorElement}
               </span>
             </div>
           );
@@ -241,6 +388,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
               </span>
               <span style={{ fontSize: 13, lineHeight: 1.55, color: isUser ? "#fff" : (isDark ? "#f1f5f9" : "#1a1a2e") }}>
                 {bulletMatch[2]}
+                {isLastLine && cursorElement}
               </span>
             </div>
           );
@@ -249,6 +397,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
         return (
           <div key={idx} style={{ fontSize: 13, lineHeight: 1.55, color: isUser ? "#fff" : (isDark ? "#f1f5f9" : "#1a1a2e") }}>
             {trimmed}
+            {isLastLine && cursorElement}
           </div>
         );
       })}
@@ -256,7 +405,15 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
   );
 }
 
-function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boolean }) {
+function MessageBubble({
+  msg,
+  isDark = false,
+  onNavigate,
+}: {
+  msg: ChatMessage;
+  isDark?: boolean;
+  onNavigate?: (route: string) => void;
+}) {
   const isUser = msg.sender === "user";
   return (
     <div style={{
@@ -277,7 +434,7 @@ function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boo
       </div>
 
       <div style={{
-        maxWidth: "78%",
+        maxWidth: "80%",
         background: isUser
           ? `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`
           : (isDark ? "#1e293b" : "#fff"),
@@ -291,7 +448,79 @@ function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boo
           ? `0 4px 12px ${COLORS.navy}30`
           : (isDark ? "0 4px 14px rgba(0,0,0,0.3)" : "0 2px 8px rgba(0,0,0,0.06)"),
       }}>
-        {renderStructuredContent(msg.text, isUser, isDark)}
+        {renderStructuredContent(msg.text, isUser, isDark, msg.isStreaming)}
+
+        {/* Verified RAG Citations */}
+        {!msg.isStreaming && msg.citations && msg.citations.length > 0 && (
+          <div style={{
+            marginTop: 8,
+            paddingTop: 6,
+            borderTop: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid #e2e8f0",
+            animation: "fadeSlideIn 0.3s ease",
+          }}>
+            <div style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: isDark ? "#93c5fd" : COLORS.navy,
+              marginBottom: 4,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}>
+              <span>Verified Institutional Sources:</span>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {msg.citations.map((c, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: 9.5,
+                    padding: "2px 7px",
+                    borderRadius: 10,
+                    background: isDark ? "rgba(59, 130, 246, 0.15)" : "#eff6ff",
+                    color: isDark ? "#93c5fd" : "#1d4ed8",
+                    border: isDark ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid #bfdbfe",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 3,
+                  }}
+                >
+                  📚 {c.title} {c.section ? `• ${c.section}` : ""}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Action Link Chips */}
+        {!msg.isStreaming && msg.actions && msg.actions.length > 0 && (
+          <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6, animation: "fadeSlideIn 0.3s ease" }}>
+            {msg.actions.map((act, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onNavigate && onNavigate(act.route)}
+                style={{
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  padding: "4px 10px",
+                  borderRadius: 8,
+                  background: isDark ? "#3b82f6" : COLORS.navy,
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                }}
+              >
+                {act.label} →
+              </button>
+            ))}
+          </div>
+        )}
+
         <p style={{
           fontSize: 10.5, marginTop: 6, marginBottom: 0,
           color: isUser ? "rgba(255,255,255,0.55)" : (isDark ? "#94a3b8" : "#9aa3b8"),
@@ -313,6 +542,7 @@ function MessageBubble({ msg, isDark = false }: { msg: ChatMessage; isDark?: boo
 }
 
 export default function ASTUCareerCopilot() {
+  const navigate = useNavigate();
   const { darkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -327,10 +557,12 @@ export default function ASTUCareerCopilot() {
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isStreamingActive, setIsStreamingActive] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isOpenRef = useRef(isOpen);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -346,8 +578,16 @@ export default function ASTUCareerCopilot() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: isStreamingActive ? "auto" : "smooth" });
+  }, [messages, isTyping, isStreamingActive]);
 
   useEffect(() => {
     if (isOpen && !isMinimized) {
@@ -363,9 +603,72 @@ export default function ASTUCareerCopilot() {
     if (!isOpenRef.current) setUnreadCount((count) => count + 1);
   };
 
+  const stopGenerating = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsTyping(false);
+    setIsStreamingActive(false);
+    setMessages((prev) =>
+      prev.map((m) => (m.isStreaming ? { ...m, isStreaming: false } : m))
+    );
+  };
+
+  const streamTokensProgressively = async (
+    fullText: string,
+    metadata: { citations?: CitationItem[]; actions?: ActionItem[] },
+    botMsgId: number,
+    signal?: AbortSignal
+  ) => {
+    setIsTyping(false);
+    setIsStreamingActive(true);
+
+    const initialBotMsg: ChatMessage = {
+      id: botMsgId,
+      text: "",
+      sender: "bot",
+      timestamp: nowTime(),
+      isAI: true,
+      isStreaming: true,
+    };
+    setMessages((prev) => [...prev, initialBotMsg]);
+
+    const words = fullText.split(/(\s+)/);
+    let accumulated = "";
+
+    for (const chunk of words) {
+      if (signal?.aborted || !abortControllerRef.current) break;
+      if (!chunk) continue;
+      accumulated += chunk;
+      setMessages((prev) =>
+        prev.map((m) => (m.id === botMsgId ? { ...m, text: accumulated } : m))
+      );
+      await new Promise((resolve) => setTimeout(resolve, 22));
+    }
+
+    if (!signal?.aborted && abortControllerRef.current) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === botMsgId
+            ? {
+              ...m,
+              text: fullText,
+              isStreaming: false,
+              citations: metadata.citations || [],
+              actions: metadata.actions || [],
+            }
+            : m
+        )
+      );
+      setIsStreamingActive(false);
+      addUnreadIfClosed();
+    }
+  };
+
   const sendMessage = async (text: string) => {
     const trimmed = text?.trim();
-    if (!trimmed || isTyping) return;
+    if (!trimmed || isTyping || isStreamingActive) return;
 
     const userMsg: ChatMessage = {
       id: Date.now(),
@@ -378,33 +681,90 @@ export default function ASTUCareerCopilot() {
     setInput("");
     setIsTyping(true);
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const botMsgId = Date.now() + 1;
+    let botMsgCreated = false;
+
     try {
-      const responseText = await askAssistant(trimmed);
-      const botMsg: ChatMessage = {
-        id: Date.now() + 1,
-        text: responseText,
-        sender: "bot",
-        timestamp: nowTime(),
-        isAI: true,
-      };
-      setMessages((prev) => [...prev, botMsg]);
-      addUnreadIfClosed();
+      const streamedSuccessfully = await askAssistantStream(
+        trimmed,
+        (delta) => {
+          if (!botMsgCreated) {
+            botMsgCreated = true;
+            setIsTyping(false);
+            setIsStreamingActive(true);
+            const initialBotMsg: ChatMessage = {
+              id: botMsgId,
+              text: delta,
+              sender: "bot",
+              timestamp: nowTime(),
+              isAI: true,
+              isStreaming: true,
+            };
+            setMessages((prev) => [...prev, initialBotMsg]);
+          } else {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === botMsgId ? { ...m, text: m.text + delta } : m
+              )
+            );
+          }
+        },
+        (metadata) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === botMsgId
+                ? {
+                  ...m,
+                  isStreaming: false,
+                  citations: metadata.citations || [],
+                  actions: metadata.actions || [],
+                }
+                : m
+            )
+          );
+          setIsStreamingActive(false);
+          addUnreadIfClosed();
+        },
+        controller.signal
+      );
+
+      if (!streamedSuccessfully && !controller.signal.aborted) {
+        // Fallback to standard askAssistant, streamed progressively
+        const result = await askAssistant(trimmed);
+        await streamTokensProgressively(
+          result.text,
+          { citations: result.citations, actions: result.actions },
+          botMsgId,
+          controller.signal
+        );
+      }
     } catch {
-      const botMsg: ChatMessage = {
-        id: Date.now() + 1,
-        text: getFallback(trimmed),
-        sender: "bot",
-        timestamp: nowTime(),
-        isAI: false,
-      };
-      setMessages((prev) => [...prev, botMsg]);
-      addUnreadIfClosed();
+      if (!botMsgCreated && !controller.signal.aborted) {
+        const fallbackText = getFallback(trimmed);
+        await streamTokensProgressively(
+          fallbackText,
+          { citations: [], actions: [] },
+          botMsgId,
+          controller.signal
+        );
+      }
     } finally {
       setIsTyping(false);
+      setIsStreamingActive(false);
+      abortControllerRef.current = null;
     }
   };
 
   const clearChat = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsTyping(false);
+    setIsStreamingActive(false);
     setMessages([{
       id: 1,
       text: "Hello! I am the ASTU-AMS assistant.\n\nI can answer questions about Adama Science and Technology University and guide you through alumni, employer, and portal services. How can I help you today?",
@@ -418,6 +778,10 @@ export default function ASTUCareerCopilot() {
   return (
     <>
       <style>{`
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
         @keyframes bounce {
           0%, 80%, 100% { transform: translateY(0); }
           40% { transform: translateY(-8px); }
@@ -444,6 +808,7 @@ export default function ASTUCareerCopilot() {
           50% { transform: translateY(-6px) rotate(2deg); }
         }
         .action-btn:hover { opacity: 0.85; transform: scale(1.05); }
+        .stop-btn:hover { opacity: 0.9; transform: scale(1.05); }
         .send-btn:not(:disabled):hover {
           background: linear-gradient(135deg, ${COLORS.green}, ${COLORS.gold}) !important;
           transform: scale(1.05);
@@ -584,9 +949,9 @@ export default function ASTUCareerCopilot() {
             display: "flex", alignItems: "center", gap: 12,
             flexShrink: 0, position: "relative", overflow: "hidden",
           }}>
-            <div style={{ position:"absolute", top:-24, right:-24, width:110, height:110, borderRadius:"50%", background:"rgba(255,255,255,0.04)" }} />
-            <div style={{ position:"absolute", bottom:-32, right:40, width:80, height:80, borderRadius:"50%", background:"rgba(200,150,42,0.08)" }} />
-            <div style={{ position:"absolute", top:10, left:"40%", width:40, height:40, borderRadius:"50%", background:"rgba(0,107,60,0.06)" }} />
+            <div style={{ position: "absolute", top: -24, right: -24, width: 110, height: 110, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
+            <div style={{ position: "absolute", bottom: -32, right: 40, width: 80, height: 80, borderRadius: "50%", background: "rgba(200,150,42,0.08)" }} />
+            <div style={{ position: "absolute", top: 10, left: "40%", width: 40, height: 40, borderRadius: "50%", background: "rgba(0,107,60,0.06)" }} />
 
             {/* Bot avatar */}
             <div style={{
@@ -600,8 +965,8 @@ export default function ASTUCareerCopilot() {
             }}><Bot size={22} strokeWidth={2} /></div>
 
             <div style={{ flex: 1, position: "relative", zIndex: 1 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                <span style={{ color:"#fff", fontSize:15, fontWeight:700, letterSpacing:"0.3px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "#fff", fontSize: 15, fontWeight: 700, letterSpacing: "0.3px" }}>
                   ASTU Assistant
                 </span>
                 <span style={{
@@ -611,24 +976,24 @@ export default function ASTUCareerCopilot() {
                   animation: "pulse 2s infinite",
                 }} />
               </div>
-              <div style={{ color:"rgba(255,255,255,0.6)", fontSize:12, marginTop:3 }}>
+              <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, marginTop: 3 }}>
                 Adama Science &amp; Technology University
               </div>
             </div>
 
-            <div style={{ display:"flex", gap:6, zIndex:1 }}>
+            <div style={{ display: "flex", gap: 6, zIndex: 1 }}>
               {[
-                { icon: <Trash2 size={14} />, title:"Clear chat", action: clearChat },
+                { icon: <Trash2 size={14} />, title: "Clear chat", action: clearChat },
                 { icon: isMinimized ? <ChevronUp size={14} /> : <ChevronDown size={14} />, title: isMinimized ? "Expand" : "Minimize", action: () => setIsMinimized(!isMinimized) },
               ].map(({ icon, title, action }) => (
                 <button key={title} onClick={action} title={title} className="action-btn"
                   style={{
                     width: 32, height: 32, borderRadius: 10,
-                    background:"rgba(255,255,255,0.10)",
-                    border:"0.5px solid rgba(255,255,255,0.18)",
-                    color:"#fff", cursor:"pointer",
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                    transition:"all 0.15s",
+                    background: "rgba(255,255,255,0.10)",
+                    border: "0.5px solid rgba(255,255,255,0.18)",
+                    color: "#fff", cursor: "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "all 0.15s",
                     backdropFilter: "blur(4px)",
                   }}
                 >{icon}</button>
@@ -647,30 +1012,40 @@ export default function ASTUCareerCopilot() {
             <>
               {/* Messages area */}
               <div style={{
-                flex: 1, overflowY:"auto", padding:"16px",
-                display:"flex", flexDirection:"column", gap:12,
+                flex: 1, overflowY: "auto", padding: "16px",
+                display: "flex", flexDirection: "column", gap: 12,
                 background: darkMode
                   ? "linear-gradient(180deg, #0b0f19 0%, #0f172a 100%)"
                   : "linear-gradient(180deg, #f0f4fe 0%, #f4f7fc 50%, #f8faff 100%)",
               }} className="chatbot-messages">
-                {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} isDark={darkMode} />)}
+                {messages.map((msg) => (
+                  <MessageBubble
+                    key={msg.id}
+                    msg={msg}
+                    isDark={darkMode}
+                    onNavigate={(route) => {
+                      setIsOpen(false);
+                      navigate(route);
+                    }}
+                  />
+                ))}
 
                 {isTyping && (
                   <div style={{
-                    display:"flex", gap:10, alignItems:"flex-end",
-                    animation:"fadeSlideIn 0.3s ease",
+                    display: "flex", gap: 10, alignItems: "flex-end",
+                    animation: "fadeSlideIn 0.3s ease",
                   }}>
                     <div style={{
-                      width:34, height:34, borderRadius:"50%", flexShrink:0,
+                      width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
                       background: `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
-                      color:"#fff",
-                      display:"flex", alignItems:"center", justifyContent:"center",
+                      color: "#fff",
+                      display: "flex", alignItems: "center", justifyContent: "center",
                       boxShadow: `0 2px 8px ${COLORS.navy}40`,
                     }}><Bot size={16} strokeWidth={2.25} /></div>
                     <div style={{
                       background: darkMode ? "#1e293b" : "#fff",
-                      borderRadius:16, borderBottomLeftRadius:4,
-                      padding:"10px 16px",
+                      borderRadius: 16, borderBottomLeftRadius: 4,
+                      padding: "10px 16px",
                       border: darkMode ? "1px solid #334155" : "1px solid #e2e8f4",
                       boxShadow: darkMode ? "0 4px 16px rgba(0,0,0,0.4)" : "0 2px 8px rgba(0,0,0,0.04)",
                     }}>
@@ -681,12 +1056,53 @@ export default function ASTUCareerCopilot() {
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Floating Stop Generating button */}
+              {(isTyping || isStreamingActive) && (
+                <div style={{
+                  position: "absolute",
+                  bottom: 60,
+                  left: 0,
+                  right: 0,
+                  display: "flex",
+                  justifyContent: "center",
+                  zIndex: 10,
+                  pointerEvents: "none",
+                  animation: "fadeSlideIn 0.2s ease",
+                }}>
+                  <button
+                    type="button"
+                    onClick={stopGenerating}
+                    style={{
+                      pointerEvents: "auto",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "5px 14px",
+                      borderRadius: 20,
+                      background: darkMode ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)",
+                      border: darkMode ? "1px solid rgba(239, 68, 68, 0.45)" : "1px solid rgba(220, 38, 38, 0.35)",
+                      color: darkMode ? "#f87171" : "#dc2626",
+                      fontSize: 11.5,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
+                      backdropFilter: "blur(6px)",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <Square size={11} fill="currentColor" />
+                    <span>Stop generating</span>
+                  </button>
+                </div>
+              )}
+
               {/* Input bar */}
               <div style={{
-                padding:"12px 14px",
+                padding: "12px 14px",
                 background: darkMode ? "#0f172a" : "#fff",
                 borderTop: darkMode ? "1px solid #1e293b" : "1px solid #edf0f8",
-                display:"flex", gap:8, alignItems:"center", flexShrink:0,
+                display: "flex", gap: 8, alignItems: "center", flexShrink: 0,
+                position: "relative",
               }}>
                 <input
                   ref={inputRef}
@@ -694,46 +1110,68 @@ export default function ASTUCareerCopilot() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
                   placeholder="Ask about ASTU, how to register, or request transcripts…"
-                  disabled={isTyping}
+                  disabled={isTyping || isStreamingActive}
                   className="chat-input"
                   style={{
-                    flex:1, fontSize:13.5, padding:"10px 14px",
-                    borderRadius:12,
+                    flex: 1, fontSize: 13.5, padding: "10px 14px",
+                    borderRadius: 12,
                     border: darkMode ? "1.5px solid #334155" : "1.5px solid #dde3f0",
                     background: darkMode ? "#1e293b" : "#f4f7fc",
                     color: darkMode ? "#f8fafc" : "#1a1a2e",
-                    transition:"border-color 0.2s, box-shadow 0.2s",
+                    transition: "border-color 0.2s, box-shadow 0.2s",
                   }}
                 />
 
-                <button
-                  onClick={() => sendMessage(input)}
-                  disabled={!input.trim() || isTyping}
-                  className="send-btn"
-                  style={{
-                    width:38, height:38, borderRadius:12,
-                    background: `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
-                    border:"none",
-                    color:"#fff", cursor:"pointer",
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                    fontSize:18, flexShrink:0, transition:"all 0.2s",
-                    opacity: (!input.trim() || isTyping) ? 0.4 : 1,
-                    boxShadow: `0 2px 8px ${COLORS.navy}30`,
-                  }}
-                ><Send size={16} /></button>
+                {isTyping || isStreamingActive ? (
+                  <button
+                    type="button"
+                    onClick={stopGenerating}
+                    title="Stop generating"
+                    className="stop-btn"
+                    style={{
+                      width: 38, height: 38, borderRadius: 12,
+                      background: darkMode ? "#ef4444" : "#dc2626",
+                      border: "none",
+                      color: "#fff", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0, transition: "all 0.2s",
+                      boxShadow: "0 2px 8px rgba(220, 38, 38, 0.4)",
+                    }}
+                  >
+                    <Square size={14} fill="#fff" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => sendMessage(input)}
+                    disabled={!input.trim()}
+                    className="send-btn"
+                    style={{
+                      width: 38, height: 38, borderRadius: 12,
+                      background: `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
+                      border: "none",
+                      color: "#fff", cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 18, flexShrink: 0, transition: "all 0.2s",
+                      opacity: !input.trim() ? 0.4 : 1,
+                      boxShadow: `0 2px 8px ${COLORS.navy}30`,
+                    }}
+                  >
+                    <Send size={16} />
+                  </button>
+                )}
               </div>
 
               {/* Powered by footer */}
               <div style={{
-                textAlign:"center", padding:"6px 14px 10px",
+                textAlign: "center", padding: "6px 14px 10px",
                 background: darkMode
                   ? "linear-gradient(180deg, #0f172a, #0b0f19)"
                   : "linear-gradient(180deg, #fff, #f8faff)",
                 borderTop: darkMode ? "1px solid #1e293b" : "1px solid #f0f3fa",
-                flexShrink:0,
+                flexShrink: 0,
               }}>
                 <span style={{
-                  fontSize:11, fontWeight:500,
+                  fontSize: 11, fontWeight: 500,
                   background: darkMode
                     ? `linear-gradient(90deg, #60a5fa, #4ade80)`
                     : `linear-gradient(90deg, ${COLORS.navy}, ${COLORS.green})`,
