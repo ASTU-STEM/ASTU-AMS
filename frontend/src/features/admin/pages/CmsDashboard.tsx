@@ -728,7 +728,7 @@ export default function CmsDashboard() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => refreshAllData(true)}
@@ -773,7 +773,7 @@ export default function CmsDashboard() {
       <DashboardBroadcastHero actorRole="ADMIN" className="mb-4" />
 
       {/* ── 4 STREAMLINED EXECUTIVE KPI CARDS (100% Database-Driven) ─────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Card 1: Verified Alumni */}
         <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-[#003366]/40 transition-all">
           <div className="flex items-center justify-between">

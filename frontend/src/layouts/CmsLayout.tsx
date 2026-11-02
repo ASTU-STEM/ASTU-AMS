@@ -53,6 +53,8 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/cms/jobs': { title: 'Jobs & Placement Hub', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] },
   '/cms/donations': { title: 'Donations & Giving', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Donations & Giving' }] },
   '/cms/homepage': { title: 'Homepage CMS', breadcrumb: [{ label: 'Content Management' }, { label: 'Homepage' }] },
+  '/cms/knowledge-hub': { title: 'RAG Knowledge Hub', breadcrumb: [{ label: 'Content Management' }, { label: 'RAG Knowledge Hub' }] },
+  '/cms/rag-knowledge': { title: 'RAG Knowledge Hub', breadcrumb: [{ label: 'Content Management' }, { label: 'RAG Knowledge Hub' }] },
   '/cms/partners': { title: 'Partners & Employers', breadcrumb: [{ label: 'Content Management' }, { label: 'Partners & Employers' }] },
   '/cms/institutional-pages': { title: 'Institutional Pages Manager', breadcrumb: [{ label: 'Content Management' }, { label: 'Institutional Pages' }] },
   '/cms/content': { title: 'Announcements', breadcrumb: [{ label: 'Content Management' }, { label: 'Announcements' }] },
@@ -63,6 +65,8 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/cms/seo': { title: 'SEO Management', breadcrumb: [{ label: 'Content Management' }, { label: 'SEO' }] },
   '/cms/approvals': { title: 'Approval Workflow', breadcrumb: [{ label: 'Content Management' }, { label: 'Approvals' }] },
   '/cms/templates': { title: 'Content Templates', breadcrumb: [{ label: 'Content Management' }, { label: 'Templates' }] },
+  '/cms/menu-controls': { title: 'Portal Page Controls', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Portal Page Controls' }] },
+  '/cms/portal-controls': { title: 'Portal Page Controls', breadcrumb: [{ label: 'Alumni Office' }, { label: 'Portal Page Controls' }] },
   '/cms/settings': { title: 'Settings', breadcrumb: [{ label: 'Content Management' }, { label: 'Settings' }] },
 };
 
@@ -77,20 +81,14 @@ const searchSuggestions = [
   { label: 'Manage homepage content', path: '/cms/homepage' },
   { label: 'Create announcement', path: '/cms/content' },
   { label: 'Manage events & workshops', path: '/cms/events' },
-  { label: 'Manage community content', path: '/cms/community' },
+  { label: 'Manage community & leaders roster', path: '/cms/community' },
   { label: 'Manage gallery images', path: '/cms/gallery' },
   { label: 'Upload & browse media library', path: '/cms/media' },
   { label: 'Manage SEO & metadata', path: '/cms/seo' },
   { label: 'Review pending approvals', path: '/cms/approvals' },
+  { label: 'Control & toggle actor dashboard menu pages', path: '/cms/menu-controls' },
   { label: 'CMS settings', path: '/cms/settings' },
 ];
-
-function formatHeaderDate() {
-  const now = new Date();
-  const date = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).format(now);
-  const time = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).format(now);
-  return { date, time };
-}
 
 export default function CmsLayout() {
   const { theme, toggleTheme } = useTheme();
@@ -103,12 +101,6 @@ export default function CmsLayout() {
   const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
-  const [headerTime, setHeaderTime] = useState(formatHeaderDate());
-
-  useEffect(() => {
-    const interval = setInterval(() => setHeaderTime(formatHeaderDate()), 30000);
-    return () => clearInterval(interval);
-  }, []);
 
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed((prev) => {
@@ -227,45 +219,54 @@ export default function CmsLayout() {
       />
 
       <div className={sidebarContentMarginClass(sidebarCollapsed)}>
-        {/* Clean White Top Header */}
-        <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
-          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-            {/* Left: mobile hamburger + page title */}
-            <div className="flex min-w-0 items-center gap-3">
+        {/* Clean Minimalist Top Header */}
+        <header className="sticky top-0 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors">
+          <div className="flex h-14 items-center justify-between px-3 sm:px-6">
+            {/* Left: mobile hamburger + clean page title */}
+            <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setMobileSidebarOpen(true)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden cursor-pointer"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden cursor-pointer transition-colors"
                 aria-label="Open navigation"
               >
                 <Menu className="h-5 w-5" />
               </button>
 
-              <div className="flex items-center gap-3">
-                <h1 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">{meta.title}</h1>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800 rounded-full px-2.5 py-0.5">
-                  <Clock className="h-3 w-3" />
-                  {headerTime.date} · {headerTime.time}
-                </span>
-              </div>
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white truncate">
+                {meta.title}
+              </h1>
             </div>
 
             {/* Center: Search input */}
-            <div className="relative hidden md:block" ref={searchRef}>
+            <div className="relative" ref={searchRef}>
+              {/* Desktop search bar */}
               <button
+                type="button"
                 onClick={() => setSearchOpen(true)}
-                className="flex h-9 w-[340px] items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-800/80 px-3.5 text-xs text-slate-400 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800 transition-all focus:outline-none cursor-pointer"
+                className="hidden md:flex h-9 w-[220px] lg:w-[280px] items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/60 px-3 text-xs text-slate-400 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-white dark:hover:bg-slate-800 transition-all focus:outline-none cursor-pointer"
               >
-                <Search className="h-3.5 w-3.5 text-slate-400" />
-                <span>Search pages, media, announcements...</span>
-                <span className="ml-auto flex items-center gap-0.5 rounded-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-300 shadow-xs">
-                  <Command className="h-3 w-3" />K
+                <Search className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                <span className="truncate">Search pages, media...</span>
+                <span className="ml-auto flex items-center gap-0.5 rounded border border-slate-200/80 bg-white dark:border-slate-700 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-300 shadow-2xs">
+                  <Command className="h-2.5 w-2.5" />K
                 </span>
               </button>
+
+              {/* Mobile search icon trigger */}
+              <button
+                type="button"
+                onClick={() => setSearchOpen((prev) => !prev)}
+                className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                aria-label="Search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+
               {searchOpen && (
-                <div className="absolute right-0 top-11 z-50 w-[420px] overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-xl dark:shadow-black/50">
+                <div className="fixed inset-x-3 top-16 md:absolute md:inset-auto md:right-0 md:top-11 z-50 md:w-[420px] overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-2xl dark:shadow-black/60">
                   <div className="flex items-center gap-2.5 border-b border-slate-100 dark:border-slate-800 px-4 py-3">
-                    <Search className="h-4 w-4 text-slate-400" />
+                    <Search className="h-4 w-4 text-slate-400 shrink-0" />
                     <input
                       type="text"
                       value={searchQuery}
@@ -274,8 +275,15 @@ export default function CmsLayout() {
                       className="w-full bg-transparent text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
                       autoFocus
                     />
+                    <button
+                      type="button"
+                      onClick={() => setSearchOpen(false)}
+                      className="text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 px-1.5 py-0.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      ESC
+                    </button>
                   </div>
-                  <div className="p-2">
+                  <div className="max-h-80 overflow-y-auto p-2">
                     {filteredSuggestions.map((s, idx) => (
                       <button
                         key={idx}
@@ -284,10 +292,10 @@ export default function CmsLayout() {
                           setSearchOpen(false);
                           setSearchQuery('');
                         }}
-                        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-slate-800/80 transition-all cursor-pointer text-left"
                       >
-                        <Sparkles className="h-3.5 w-3.5 text-slate-400" />
-                        {s.label}
+                        <Sparkles className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{s.label}</span>
                       </button>
                     ))}
                   </div>
@@ -295,52 +303,60 @@ export default function CmsLayout() {
               )}
             </div>
 
-            {/* Right: actions */}
-            <div className="flex items-center gap-2 shrink-0">
-
-              {/* Quick Create */}
-              <button type="button" onClick={() => navigate('/cms/content')}
-                className="hidden sm:inline-flex h-10 items-center gap-1.5 rounded-xl bg-[#003366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#002a55] transition-all shadow-sm">
-                <Plus className="h-4 w-4" /> Create
-              </button>
-
+            {/* Right: clean utilities */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               {/* Theme toggle */}
-              <button type="button" onClick={toggleTheme}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-page)] transition-all" aria-label="Toggle dark mode">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                aria-label="Toggle dark mode"
+              >
                 {theme === 'dark' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
               </button>
 
               {/* Notifications */}
               <div className="relative" data-cms-notifications>
-                <button type="button" onClick={() => setNotificationOpen(v => !v)}
-                  className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-page)] transition-all">
+                <button
+                  type="button"
+                  onClick={() => setNotificationOpen((v) => !v)}
+                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  aria-label="Notifications"
+                >
                   <Bell className="h-4.5 w-4.5" />
                 </button>
                 {notificationOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-[360px] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg shadow-slate-200/50 dark:shadow-black/30">
-                    <div className="flex items-center justify-between border-b border-[var(--border-color)] px-4 py-3">
+                  <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200/90 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-xl dark:shadow-black/40">
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-3">
                       <div>
-                        <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
-                        <div className="text-xs text-[var(--text-secondary)]">Your latest content updates</div>
+                        <div className="text-sm font-bold text-slate-900 dark:text-white">Notifications</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">Your latest content updates</div>
                       </div>
                     </div>
-                    <div className="py-1">
+                    <div className="py-1 max-h-72 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <p className="px-4 py-8 text-center text-sm text-[var(--text-secondary)]">No notifications yet</p>
+                        <p className="px-4 py-8 text-center text-xs text-slate-400">No new notifications</p>
                       ) : (
                         notifications.map((item) => (
-                          <div key={item.text} className="flex items-start gap-3 px-4 py-2.5 hover:bg-[var(--bg-page)] transition-all cursor-pointer">
-                            <span className={`mt-1 h-2 w-2 rounded-full shrink-0 ${item.color}`} />
+                          <div
+                            key={item.text}
+                            className="flex items-start gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all cursor-pointer"
+                          >
+                            <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${item.color}`} />
                             <div className="min-w-0">
-                              <p className="text-sm text-[var(--text-primary)]">{item.text}</p>
-                              <p className="text-xs text-[var(--text-muted)] mt-0.5">{item.time}</p>
+                              <p className="text-xs font-medium text-slate-800 dark:text-slate-200">{item.text}</p>
+                              <p className="text-[10px] text-slate-400 mt-0.5">{item.time}</p>
                             </div>
                           </div>
                         ))
                       )}
                     </div>
-                    <div className="border-t border-[var(--border-color)] px-4 py-3">
-                      <button type="button" className="text-sm font-semibold text-[#003366] dark:text-[#3b82f6] hover:text-[#002a55] dark:hover:text-[#60a5fa] transition-colors">
+                    <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-2.5 bg-slate-50/50 dark:bg-slate-900/50">
+                      <button
+                        type="button"
+                        onClick={() => navigate('/cms/notifications')}
+                        className="text-xs font-bold text-[#003366] dark:text-sky-400 hover:underline"
+                      >
                         View all notifications →
                       </button>
                     </div>
@@ -348,24 +364,20 @@ export default function CmsLayout() {
                 )}
               </div>
 
-              {/* User menu */}
+              {/* User menu button - simple and clean */}
               <div className="relative" data-cms-menu>
-                <button type="button" onClick={() => setMenuOpen(v => !v)}
-                  className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-sm hover:border-slate-300 dark:hover:border-slate-600 hover:shadow transition-all">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#003366] to-[#002244] dark:from-[#004080] dark:to-[#002855] text-xs font-bold text-[#FFCC00] shadow-sm border border-white/10">
-                    {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'AO'}
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 px-2.5 py-1.5 shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all cursor-pointer"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#003366] dark:bg-sky-600 text-xs font-bold text-white shadow-2xs">
+                    {user ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}` : 'CM'}
                   </div>
-                  <div className="hidden text-left sm:block">
-                    <div className="text-sm font-semibold text-[var(--text-primary)]">{user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : 'Alumni Office Officer'}</div>
-                    <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                      </span>
-                      Online
-                    </div>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-[var(--text-muted)]" />
+                  <span className="hidden sm:inline text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    {user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : 'CMS Manager'}
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
                 </button>
                 {menuOpen && menu}
               </div>
@@ -374,7 +386,10 @@ export default function CmsLayout() {
         </header>
 
         {/* Main Content */}
-        <main className="h-[calc(100dvh-4rem)] overflow-y-auto p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 transition-colors text-slate-900 dark:text-slate-100" style={{ animation: 'cms-fade-in 150ms ease-out' }}>
+        <main
+          className="min-h-[calc(100dvh-3.5rem)] overflow-y-auto overflow-x-hidden p-3.5 sm:p-5 md:p-6 lg:p-8 bg-slate-50 dark:bg-slate-950 transition-colors text-slate-900 dark:text-slate-100"
+          style={{ animation: 'cms-fade-in 150ms ease-out' }}
+        >
           <style>{`@keyframes cms-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           <CmsRouteBoundary key={location.pathname}>
             <Outlet />

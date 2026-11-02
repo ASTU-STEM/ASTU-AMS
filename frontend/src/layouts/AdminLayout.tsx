@@ -11,6 +11,8 @@ import AdminAiAssistant from '../components/AdminAiAssistant';
 import { notificationService } from '../features/notifications/services/notification.service';
 import { useTheme } from '../hooks/useTheme';
 import { sidebarContentMarginClass } from './sidebarShared';
+import { usePortalMenuControl } from '../context/PortalMenuControlContext';
+import PageClosedView from '../components/PageClosedView';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -51,6 +53,8 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/admin/messages': { title: 'ASTU_AMS Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Messages' }] },
   '/admin/support-tickets': { title: 'Support Desk', breadcrumb: [{ label: 'Admin' }, { label: 'Support Desk' }] },
   '/admin/modules': { title: 'Super Admin Modules', breadcrumb: [{ label: 'Admin' }, { label: 'Modules' }] },
+  '/admin/knowledge-hub': { title: 'RAG Knowledge Hub', breadcrumb: [{ label: 'Admin' }, { label: 'RAG Knowledge Hub' }] },
+  '/admin/rag-knowledge': { title: 'RAG Knowledge Hub', breadcrumb: [{ label: 'Admin' }, { label: 'RAG Knowledge Hub' }] },
   '/admin/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Admin' }, { label: 'Reports' }] },
   '/admin/users': { title: 'User Management', breadcrumb: [{ label: 'Admin' }, { label: 'Users' }] },
   '/admin/roles': { title: 'Role Management', breadcrumb: [{ label: 'Admin' }, { label: 'Roles' }] },
@@ -62,11 +66,14 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/admin/logs': { title: 'System Logs', breadcrumb: [{ label: 'Admin' }, { label: 'Logs' }] },
   '/admin/backup': { title: 'Backup & Security', breadcrumb: [{ label: 'Admin' }, { label: 'Backup' }] },
   '/admin/settings': { title: 'Settings', breadcrumb: [{ label: 'Admin' }, { label: 'Settings' }] },
+  '/admin/menu-controls': { title: 'Portal Page Controls', breadcrumb: [{ label: 'Admin' }, { label: 'Portal Controls' }] },
+  '/admin/portal-controls': { title: 'Portal Page Controls', breadcrumb: [{ label: 'Admin' }, { label: 'Portal Controls' }] },
   '/admin/profile': { title: 'My Profile', breadcrumb: [{ label: 'Admin' }, { label: 'Profile' }] },
 };
 
 export default function AdminLayout() {
   const { theme, toggleTheme } = useTheme();
+  const { isPageClosed } = usePortalMenuControl();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -74,6 +81,11 @@ export default function AdminLayout() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const location = useLocation();
+
+  const { user, logout } = useAuth();
+  const isSuperOrIctAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
+  const adminPageId = location.pathname.replace(/^\/admin\/?/, '').split('/')[0];
+  const isCurrentClosed = !isSuperOrIctAdmin && adminPageId && !['menu-controls', 'portal-controls'].includes(adminPageId) && isPageClosed('ADMIN', adminPageId);
 
   // Sync real admin profile name into AuthContext once on layout mount
   useEffect(() => {
@@ -107,7 +119,6 @@ export default function AdminLayout() {
     });
   };
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -279,7 +290,7 @@ export default function AdminLayout() {
 
        <div className={sidebarContentMarginClass(sidebarCollapsed)}>
         <header
-          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
+          className="sticky top-0 z-20 flex h-14 items-center justify-between border-b px-4 shadow-xs sm:px-6 transition-colors"
           style={{
             background: 'var(--bg-navbar)',
             borderColor: 'var(--border-color)',
@@ -436,9 +447,13 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main className="min-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden bg-slate-50/60 dark:bg-slate-950 p-3.5 sm:p-5 md:p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
-            <Outlet />
+            {isCurrentClosed ? (
+              <PageClosedView actor="ADMIN" pageId={adminPageId} />
+            ) : (
+              <Outlet />
+            )}
           </AdminRouteBoundary>
         </main>
       </div>
