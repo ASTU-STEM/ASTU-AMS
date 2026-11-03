@@ -21,6 +21,8 @@ const DonationsManagement = lazy(() => import('../features/admin/pages/Donations
 const AdminChatPage = lazy(() => import('../features/admin/pages/AdminChatPage'));
 const SupportDeskManagement = lazy(() => import('../features/admin/pages/SupportDeskManagement'));
 const IctAdminDashboard = lazy(() => import('../features/admin/pages/IctAdminDashboard'));
+const KnowledgeBaseManagement = lazy(() => import('../features/admin/pages/KnowledgeBaseManagement'));
+const PortalMenuControls = lazy(() => import('../features/admin/pages/PortalMenuControls'));
 
 export default function AdminRoutes() {
   const { user } = useAuth();
@@ -34,6 +36,8 @@ export default function AdminRoutes() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="ict-portal" element={<IctAdminDashboard />} />
           <Route path="modules" element={<SuperAdminModules />} />
+          <Route path="knowledge-hub" element={<KnowledgeBaseManagement />} />
+          <Route path="rag-knowledge" element={<KnowledgeBaseManagement />} />
           <Route path="reports" element={<ReportsCenter />} />
           <Route path="messages" element={<AdminChatPage />} />
           <Route path="support-tickets" element={<SupportDeskManagement />} />
@@ -48,6 +52,8 @@ export default function AdminRoutes() {
           <Route path="notifications" element={<NotificationCenter />} />
           <Route path="logs" element={<SystemLogs />} />
           <Route path="backup" element={<BackupSecurity />} />
+          <Route path="menu-controls" element={<PortalMenuControls />} />
+          <Route path="portal-controls" element={<PortalMenuControls />} />
           <Route path="settings" element={<SystemSettings />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>

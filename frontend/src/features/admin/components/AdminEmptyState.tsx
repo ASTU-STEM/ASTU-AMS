@@ -4,7 +4,8 @@ import { LucideIcon, Inbox, AlertTriangle } from 'lucide-react';
 export interface AdminEmptyStateProps {
   title: string;
   description?: string;
-  icon?: LucideIcon;
+  icon?: LucideIcon | React.ComponentType<{ className?: string }>;
+  action?: React.ReactNode;
   actionLabel?: string;
   onAction?: () => void;
   secondaryActionLabel?: string;
@@ -17,6 +18,7 @@ export default function AdminEmptyState({
   title,
   description,
   icon,
+  action,
   actionLabel,
   onAction,
   secondaryActionLabel,
@@ -45,13 +47,14 @@ export default function AdminEmptyState({
           {description}
         </p>
       )}
+      {action && <div className="mt-4">{action}</div>}
       {(actionLabel || secondaryActionLabel) && (
         <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           {actionLabel && onAction && (
             <button
               type="button"
               onClick={onAction}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#003580] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#002660] focus:outline-hidden dark:bg-blue-600 dark:hover:bg-blue-500"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#003580] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#002660] focus:outline-hidden dark:bg-blue-600 dark:hover:bg-blue-500 cursor-pointer"
             >
               {actionLabel}
             </button>
@@ -60,7 +63,7 @@ export default function AdminEmptyState({
             <button
               type="button"
               onClick={onSecondaryAction}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs transition hover:bg-slate-50 dark:hover:bg-slate-700/60 focus:outline-hidden"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs transition hover:bg-slate-50 dark:hover:bg-slate-700/60 focus:outline-hidden cursor-pointer"
             >
               {secondaryActionLabel}
             </button>

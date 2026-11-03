@@ -186,7 +186,7 @@ export default function CommunityMembersManagement() {
       <AdminPageHeader
         title="Community Members"
         subtitle="Manage distinguished alumni profiles featured on the public community page"
-        breadcrumbs={[{ label: 'CMS' }, { label: 'Community Members' }]}
+        breadcrumbs={[{ label: 'Content Management' }, { label: 'Community Members' }]}
         actions={
           <button
             onClick={handleAdd}

@@ -1,18 +1,18 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LogOut, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
+import { LogOut, PanelLeftClose, PanelLeftOpen, Sparkles, X } from 'lucide-react';
 
 /** Shared shell rules for Admin / CMS / ICT sidebars */
 export const SIDEBAR_WIDTH = {
-  expanded: 'w-64',
-  collapsed: 'w-[72px]',
-  marginExpanded: 'lg:ml-64',
-  marginCollapsed: 'lg:ml-[72px]',
+  expanded: 'w-[272px]',
+  collapsed: 'w-[74px]',
+  marginExpanded: 'lg:ml-[272px]',
+  marginCollapsed: 'lg:ml-[74px]',
 } as const;
 
 export function sidebarShellClass(collapsed: boolean, isOpen: boolean) {
   return [
-    'fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white text-slate-800',
+    'fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200/90 bg-white text-slate-800 shadow-sm',
     'transition-all duration-300 ease-in-out lg:translate-x-0',
     'dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100',
     collapsed ? SIDEBAR_WIDTH.collapsed : SIDEBAR_WIDTH.expanded,
@@ -35,6 +35,7 @@ export function SidebarBrand({
   subtitle,
   badge,
   children,
+  onCloseMobile,
 }: {
   collapsed: boolean;
   logoSrc: string;
@@ -43,29 +44,42 @@ export function SidebarBrand({
   subtitle: string;
   badge?: string;
   children?: React.ReactNode;
+  onCloseMobile?: () => void;
 }) {
   return (
-    <div className="shrink-0 border-b border-slate-200 px-3 py-4 dark:border-slate-800">
-      <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center">
-          <img src={logoSrc} alt={logoAlt} className="h-full w-full object-contain" />
-        </div>
-        {!collapsed && (
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <span className="truncate text-[15px] font-bold tracking-tight text-slate-900 dark:text-white">
-                {title}
-              </span>
-              {badge && (
-                <span className="shrink-0 border border-[#003580]/20 bg-[#003580]/10 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-[#003580] dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-300">
-                  {badge}
-                </span>
-              )}
-            </div>
-            <p className="truncate text-[10px] font-bold uppercase tracking-[0.14em] text-[#003580] dark:text-sky-400">
-              {subtitle}
-            </p>
+    <div className="shrink-0 border-b border-slate-200/80 px-4 py-3.5 dark:border-slate-800">
+      <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between gap-3'}`}>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 dark:bg-slate-900 p-0.5">
+            <img src={logoSrc} alt={logoAlt} className="h-full w-full object-contain" />
           </div>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="truncate text-sm font-bold tracking-tight text-slate-900 dark:text-white">
+                  {title}
+                </span>
+                {badge && (
+                  <span className="shrink-0 rounded-full border border-[#003580]/20 bg-[#003580]/10 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-[#003580] dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-300">
+                    {badge}
+                  </span>
+                )}
+              </div>
+              <p className="truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                {subtitle}
+              </p>
+            </div>
+          )}
+        </div>
+        {!collapsed && onCloseMobile && (
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            className="lg:hidden inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+            aria-label="Close menu"
+          >
+            <X className="h-4 w-4" />
+          </button>
         )}
       </div>
       {children}
@@ -75,7 +89,7 @@ export function SidebarBrand({
 
 export function SidebarSectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mb-1.5 px-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
+    <p className="mb-2 px-3 text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400 dark:text-slate-500">
       {children}
     </p>
   );
@@ -83,11 +97,11 @@ export function SidebarSectionLabel({ children }: { children: React.ReactNode })
 
 export function sidebarNavItemClass(collapsed: boolean, isActive: boolean) {
   return [
-    'group relative flex items-center transition-colors duration-150',
-    collapsed ? 'mx-auto h-10 w-10 justify-center' : 'gap-2.5 px-2.5 py-2',
+    'group relative flex items-center rounded-xl transition-all duration-150',
+    collapsed ? 'mx-auto h-10 w-10 justify-center' : 'gap-3 px-3 py-2 text-[13px]',
     isActive
-      ? 'bg-[#003580]/10 text-[#003580] dark:bg-sky-950/50 dark:text-sky-300'
-      : 'text-slate-600 hover:bg-slate-50 hover:text-[#003580] dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-sky-300',
+      ? 'bg-[#003366]/10 text-[#003366] font-semibold dark:bg-sky-500/15 dark:text-sky-300 shadow-xs'
+      : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-slate-100',
   ].join(' ');
 }
 
@@ -99,20 +113,15 @@ export function SidebarNavIcon({
   isActive: boolean;
 }) {
   return (
-    <>
-      {isActive && (
-        <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 bg-[#003580] dark:bg-sky-400" />
-      )}
-      <span
-        className={`flex h-8 w-8 shrink-0 items-center justify-center transition-colors ${
-          isActive
-            ? 'bg-[#003580] text-white dark:bg-sky-600'
-            : 'bg-slate-100 text-slate-500 group-hover:text-[#003580] dark:bg-slate-800 dark:text-slate-400'
-        }`}
-      >
-        <Icon className="h-4 w-4" />
-      </span>
-    </>
+    <span
+      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors ${
+        isActive
+          ? 'bg-[#003366] text-white shadow-xs dark:bg-sky-500'
+          : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/80 group-hover:text-slate-800 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 dark:group-hover:text-slate-200'
+      }`}
+    >
+      <Icon className="h-3.5 w-3.5" />
+    </span>
   );
 }
 
@@ -127,14 +136,14 @@ export function SidebarBadge({
 }) {
   if (collapsed) {
     return (
-      <span className="absolute -right-0.5 -top-0.5 flex h-3.5 min-w-[14px] items-center justify-center bg-rose-500 px-1 text-[7px] font-extrabold text-white">
+      <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[8px] font-extrabold text-white shadow-xs">
         {value}
       </span>
     );
   }
   return (
     <span
-      className={`flex h-5 min-w-[20px] items-center justify-center px-1.5 text-[10px] font-bold ${
+      className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-bold ${
         isActive
           ? 'bg-rose-500 text-white'
           : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'
@@ -153,7 +162,7 @@ export function SidebarCollapsedTooltip({
   badge?: string | number;
 }) {
   return (
-    <div className="pointer-events-none absolute left-full z-50 ml-2 whitespace-nowrap border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-[11px] font-medium text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
+    <div className="pointer-events-none absolute left-full z-50 ml-2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-[11px] font-medium text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
       {label}
       {badge != null && badge !== '' && (
         <span className="ml-1.5 font-bold text-rose-400">({badge})</span>
@@ -288,7 +297,7 @@ export function SidebarUserCard({
     return (
       <div className="flex flex-col items-center gap-2">
         <div
-          className={`group relative flex h-8 w-8 items-center justify-center bg-[#003580] text-[11px] font-bold ${
+          className={`group relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#003366] to-[#004080] text-xs font-bold shadow-xs ${
             accentInitials ? 'text-[#FFCC00]' : 'text-white'
           }`}
           title={`${name} · ${role}`}
@@ -299,7 +308,7 @@ export function SidebarUserCard({
         <button
           type="button"
           onClick={onLogout}
-          className="group relative flex h-8 w-8 items-center justify-center border border-rose-100 bg-rose-50 text-rose-600 transition-colors hover:bg-rose-100 cursor-pointer dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400"
+          className="group relative flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200/80 bg-rose-50/70 text-rose-600 transition-all hover:bg-rose-100/90 cursor-pointer dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400"
           title="Logout"
         >
           <LogOut className="h-4 w-4" />
@@ -311,9 +320,9 @@ export function SidebarUserCard({
 
   return (
     <>
-      <div className="flex items-center gap-2.5 border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-900">
+      <div className="flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/90 p-2.5 dark:border-slate-800 dark:bg-slate-900/80 transition-all">
         <div
-          className={`flex h-8 w-8 shrink-0 items-center justify-center bg-[#003580] text-[11px] font-bold ${
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#003366] to-[#004080] text-xs font-bold shadow-xs ${
             accentInitials ? 'text-[#FFCC00]' : 'text-white'
           }`}
         >
@@ -321,20 +330,17 @@ export function SidebarUserCard({
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-slate-900 dark:text-slate-100">{name}</p>
-          <div className="mt-0.5 flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
-            <span className="truncate text-[10px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              {secondary}
-            </span>
-          </div>
+          <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
+            {secondary}
+          </p>
         </div>
       </div>
       <button
         type="button"
         onClick={onLogout}
-        className="flex w-full items-center gap-2 border border-rose-100 bg-rose-50/60 px-3 py-2 text-xs font-bold text-rose-600 transition-colors hover:bg-rose-100 cursor-pointer dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200/80 bg-rose-50/60 px-3 py-2 text-xs font-bold text-rose-600 transition-all hover:bg-rose-100/90 hover:border-rose-300 cursor-pointer dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-400"
       >
-        <LogOut className="h-4 w-4" />
+        <LogOut className="h-3.5 w-3.5" />
         <span>Logout</span>
       </button>
     </>
@@ -352,8 +358,8 @@ export function SidebarCollapseButton({
     <button
       type="button"
       onClick={onToggle}
-      className={`group flex items-center justify-center border border-transparent text-slate-400 transition-colors hover:border-slate-200 hover:bg-slate-50 hover:text-slate-700 cursor-pointer dark:hover:border-slate-700 dark:hover:bg-slate-900 dark:hover:text-slate-200 ${
-        collapsed ? 'mx-auto h-9 w-9' : 'w-full gap-2 px-2.5 py-2'
+      className={`group flex items-center justify-center rounded-xl border border-transparent text-slate-400 transition-all hover:border-slate-200 hover:bg-slate-100/70 hover:text-slate-700 cursor-pointer dark:hover:border-slate-800 dark:hover:bg-slate-900 dark:hover:text-slate-200 ${
+        collapsed ? 'mx-auto h-9 w-9' : 'w-full gap-2 px-3 py-2'
       }`}
       title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -363,7 +369,7 @@ export function SidebarCollapseButton({
       ) : (
         <>
           <PanelLeftClose className="h-4 w-4 shrink-0" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Collapse</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">Collapse Sidebar</span>
         </>
       )}
     </button>
@@ -372,7 +378,7 @@ export function SidebarCollapseButton({
 
 export function SidebarFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="shrink-0 space-y-2 border-t border-slate-200 p-2.5 dark:border-slate-800">
+    <div className="shrink-0 space-y-2 border-t border-slate-200/90 p-3 dark:border-slate-800">
       {children}
     </div>
   );
@@ -380,7 +386,7 @@ export function SidebarFooter({ children }: { children: React.ReactNode }) {
 
 export function SidebarNav({ children }: { children: React.ReactNode }) {
   return (
-    <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-4 scrollbar-thin">
+    <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-3 scrollbar-thin">
       {children}
     </nav>
   );
