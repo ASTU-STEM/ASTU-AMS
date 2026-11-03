@@ -2,6 +2,23 @@ import React from 'react';
 
 const logoPath = (filename: string) => `/images/partners/${filename}`;
 
+const partnerLogoFiles: Record<string, string> = {
+  'ethio telecom': 'ethio-telecom.png',
+  'insa': 'insa.png',
+  'ethiopian airlines': 'ethiopian-airlines.svg',
+  'safaricom': 'safaricom.png',
+  'safaricom ethiopia': 'safaricom.png',
+  'huawei': 'huawei.svg',
+  'huawei ethiopia': 'huawei.svg',
+  'commercial bank of ethiopia': 'cbe.png',
+  'cbe': 'cbe.png',
+};
+
+export const getPartnerLogoSrc = (name: string): string | undefined => {
+  const filename = partnerLogoFiles[(name || '').trim().toLowerCase()];
+  return filename ? logoPath(filename) : undefined;
+};
+
 const wrapperClass = 'flex h-full w-full items-center justify-center overflow-hidden select-none';
 const imgClass = 'max-h-12 w-auto max-w-[140px] object-contain transition-transform duration-300 group-hover:scale-105';
 

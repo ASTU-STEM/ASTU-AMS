@@ -6,6 +6,7 @@ import {
   FileSpreadsheet,
   FileText,
   RefreshCw,
+  Share2,
   X,
 } from 'lucide-react';
 import type { IncludedSuitesState } from './types';

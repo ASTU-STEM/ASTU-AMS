@@ -14,6 +14,7 @@ export type PublicStatKey = 'alumni' | 'employers' | 'jobs' | 'departments';
 export interface PublicStat {
   key: PublicStatKey;
   value: number;
+  suffix?: string;
 }
 
 /**
