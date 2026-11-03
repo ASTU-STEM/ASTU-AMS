@@ -1,13 +1,11 @@
-import axios from 'axios';
+import apiClient from '../../../services/api';
 import { ApiResult } from '../../auth/services/auth.service';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 export const supportService = {
   async createTicket(formData: FormData): Promise<ApiResult<{ ticketId: string }>> {
     try {
-      const response = await axios.post<{ success: boolean; data?: { ticketId: string }; message?: string }>(
-        `${API_BASE_URL}/support/tickets`,
+      const response = await apiClient.post<{ success: boolean; data?: { ticketId: string }; message?: string }>(
+        '/support/tickets',
         formData,
         {
           headers: {

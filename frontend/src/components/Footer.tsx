@@ -22,7 +22,8 @@ import {
 } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useSystemSettings } from "../context/SystemSettingsContext";
-import astuLogo from "../assets/logos/astu-icon.jpeg";
+import { resolveLogoUrl, DEFAULT_LOGO_PATH } from "../config";
+import astuLogo from "../assets/logos/astu-seal-logo.png";
 import footerCmsService, {
   FooterCmsConfig,
   defaultFooterConfig,
@@ -63,7 +64,7 @@ const defaultSections: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: "Contact Office", id: "contact", scroll: true },
       { label: "Photo Gallery", href: "/gallery" },
-      { label: "Community Voices", id: "community", scroll: true },
+      { label: "Community Voices", href: "/community" },
       { label: "Join Network / Register", href: "/register" },
     ],
   },
@@ -153,7 +154,7 @@ export default function Footer() {
       : defaultSections;
 
   return (
-    <footer id="contact" className="scroll-mt-20 relative bg-slate-950 text-slate-300 font-sans border-t border-slate-800">
+    <footer id="contact" className="scroll-mt-20 relative w-full bg-slate-950 text-slate-300 font-sans border-t border-slate-800">
       {/* Top Tri-Color Accent Ribbon */}
       <div className="h-1 w-full bg-gradient-to-r from-astu-green via-astu-navy to-astu-red" />
 
@@ -219,9 +220,16 @@ export default function Footer() {
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="inline-flex items-center gap-3 group">
               <img
-                src={settings.appearance?.logoUrl || astuLogo}
+                src={resolveLogoUrl(settings.appearance?.logoUrl)}
                 alt={`${abbreviation} Logo`}
                 className="h-12 w-12 object-contain rounded-2xl bg-white/5 p-1 ring-1 ring-white/10 shadow-md group-hover:scale-105 transition-transform"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  if (!img.dataset.fallback) {
+                    img.dataset.fallback = "1";
+                    img.src = DEFAULT_LOGO_PATH;
+                  }
+                }}
               />
               <div>
                 <h4 className="text-lg font-black text-white leading-tight">
@@ -425,7 +433,7 @@ export default function Footer() {
           <button
             type="button"
             onClick={scrollToTop}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-850 text-slate-400 hover:text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-900 px-3.5 py-2 text-xs font-bold text-slate-300 shadow-sm transition-all hover:-translate-y-0.5 hover:border-slate-500 hover:bg-slate-800 hover:text-white"
             title="Scroll to top of page"
           >
             <span>Back to top</span>

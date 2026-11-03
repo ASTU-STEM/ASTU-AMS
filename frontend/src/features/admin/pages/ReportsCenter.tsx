@@ -54,14 +54,17 @@ import {
   Lock,
   Database,
   FileCheck2,
+  Search,
+  Filter,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import AdminStatGrid from '../components/AdminStatGrid';
 import { adminService } from '../services/admin.service';
 import { generateAndDownloadReport } from '../utils/reportPdfGenerator';
 
-type ReportArea = 'Employment' | 'Tracer Studies' | 'Industry' | 'Engagement' | 'Events' | 'Accreditation & Quality' | 'Governance & Security';
+type ReportArea = 'All Domains' | 'Employment' | 'Tracer Studies' | 'Industry' | 'Engagement' | 'Events' | 'Accreditation & Quality' | 'Governance & Security';
 
 interface ReportItem {
   title: string;
@@ -137,12 +140,14 @@ const reports: ReportItem[] = [
   { title: 'Registrar Data Sync & Integrity Reports', area: 'Governance & Security', cadence: 'Monthly', owner: 'Registrar ICT', icon: RefreshCw },
 ];
 
-const areas: ReportArea[] = ['Employment', 'Tracer Studies', 'Industry', 'Engagement', 'Events', 'Accreditation & Quality', 'Governance & Security'];
+const areas: ReportArea[] = ['All Domains', 'Employment', 'Tracer Studies', 'Industry', 'Engagement', 'Events', 'Accreditation & Quality', 'Governance & Security'];
 
 const UNAVAILABLE = 'Unavailable';
 
 export default function ReportsCenter() {
   const [area, setArea] = useState<ReportArea>('Employment');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cadenceFilter, setCadenceFilter] = useState('ALL');
   const [metricsLoading, setMetricsLoading] = useState(true);
   const [metricsError, setMetricsError] = useState(false);
   const [metrics, setMetrics] = useState<{
@@ -168,7 +173,24 @@ export default function ReportsCenter() {
   const [isBuildingReport, setIsBuildingReport] = useState(false);
   const [departmentsList, setDepartmentsList] = useState<Array<{ id: string; name: string }>>([]);
 
-  const filteredReports = useMemo(() => reports.filter((report) => report.area === area), [area]);
+  const filteredReports = useMemo(() => {
+    return reports.filter((report) => {
+      const matchesArea = area === 'All Domains' || report.area === area;
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        report.title.toLowerCase().includes(q) ||
+        report.owner.toLowerCase().includes(q) ||
+        report.cadence.toLowerCase().includes(q) ||
+        report.area.toLowerCase().includes(q);
+      const matchesCadence =
+        cadenceFilter === 'ALL' ||
+        report.cadence.toLowerCase() === cadenceFilter.toLowerCase() ||
+        (cadenceFilter === 'Wave Based' && report.cadence.toLowerCase().includes('wave')) ||
+        (cadenceFilter === 'Per Event' && report.cadence.toLowerCase().includes('event'));
+      return matchesArea && matchesSearch && matchesCadence;
+    });
+  }, [area, searchQuery, cadenceFilter]);
 
   const fetchMetrics = async () => {
     setMetricsLoading(true);
@@ -329,7 +351,7 @@ export default function ReportsCenter() {
       <AdminPageHeader
         title="Institutional Reports"
         subtitle="Generate and download accreditation-ready PDF exports across employment, tracer studies, industry, engagement, events, and quality domains."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Reports' }]}
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Reports Center' }]}
         actions={
           <div className="flex items-center gap-2">
             <button
@@ -347,73 +369,90 @@ export default function ReportsCenter() {
       />
 
       {metricsError && !metricsLoading && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
-          <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+        <div className="rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 flex items-start gap-3">
+          <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
           <div className="min-w-0">
-            <p className="text-xs font-bold text-amber-900">Report metrics unavailable</p>
-            <p className="text-[11px] text-amber-700 mt-0.5">
+            <p className="text-xs font-bold text-amber-900 dark:text-amber-200">Report metrics unavailable</p>
+            <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">
               Could not load live summary metrics. Catalog exports still work — retry refresh or check the API connection.
             </p>
           </div>
           <button
             type="button"
             onClick={fetchMetrics}
-            className="ml-auto shrink-0 text-[11px] font-bold text-amber-800 hover:underline"
+            className="ml-auto shrink-0 text-[11px] font-bold text-amber-800 dark:text-amber-300 hover:underline cursor-pointer"
           >
             Retry
           </button>
         </div>
       )}
 
-      {/* Metric Cards */}
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'Employment Rate', value: metrics.employmentRate, icon: GraduationCap, color: 'text-emerald-600' },
-          { label: 'Employer Satisfaction', value: metrics.employerSatisfaction, icon: Building2, color: 'text-amber-600' },
-          { label: 'Mapped Countries', value: metrics.mappedCountries, icon: Globe2, color: 'text-blue-600' },
-          { label: 'Exported This Month', value: metrics.exportedThisMonth, icon: Download, color: 'text-[#003580]' },
-        ].map((metric) => {
-          const Icon = metric.icon;
-          const isUnavailable = !metricsLoading && (metric.value === UNAVAILABLE || metricsError);
-          return (
-            <div key={metric.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:shadow-md">
-              <div className="flex items-center justify-between">
-                <Icon className={`h-6 w-6 ${metric.color}`} />
-              </div>
-              <p className="mt-3 text-xs font-black uppercase tracking-wide text-slate-500">{metric.label}</p>
-              <p className={`mt-1 text-2xl font-black font-mono ${isUnavailable ? 'text-slate-400 text-lg' : 'text-slate-900'}`}>
-                {metricsLoading ? <RefreshCw className="h-5 w-5 animate-spin text-slate-400" /> : metric.value}
-              </p>
-            </div>
-          );
-        })}
-      </section>
+      <AdminStatGrid
+        cols={4}
+        compact
+        stats={[
+          {
+            title: 'Employment Rate',
+            value: String(metrics.employmentRate),
+            icon: GraduationCap,
+            tone: 'green',
+            loading: metricsLoading,
+            trend: metricsError || metrics.employmentRate === UNAVAILABLE ? 'Unavailable' : 'Accreditation metric',
+            trendDirection: metricsError || metrics.employmentRate === UNAVAILABLE ? 'flat' : 'up',
+          },
+          {
+            title: 'Employer Satisfaction',
+            value: String(metrics.employerSatisfaction),
+            icon: Building2,
+            tone: 'amber',
+            loading: metricsLoading,
+            description: 'Industry feedback index',
+          },
+          {
+            title: 'Mapped Countries',
+            value: String(metrics.mappedCountries),
+            icon: Globe2,
+            tone: 'blue',
+            loading: metricsLoading,
+            description: 'Alumni geographic coverage',
+          },
+          {
+            title: 'Exported This Month',
+            value: String(metrics.exportedThisMonth),
+            icon: Download,
+            tone: 'purple',
+            loading: metricsLoading,
+            trend: 'PDF export center',
+            trendDirection: 'up',
+          },
+        ]}
+      />
 
       {/* Main Report Library Grid */}
       <section className="grid gap-6 xl:grid-cols-[300px_1fr]">
         {/* Category Switcher Sidebar */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-xs h-fit space-y-1">
-          <p className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 mb-2">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-[var(--bg-card)] p-3 shadow-sm h-fit space-y-1 lg:sticky lg:top-4">
+          <p className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-2">
             Report Domains ({reports.length})
           </p>
           {areas.map((item) => {
-            const count = reports.filter((report) => report.area === item).length;
+            const count = item === 'All Domains' ? reports.length : reports.filter((report) => report.area === item).length;
 
             return (
               <button
                 key={item}
                 type="button"
                 onClick={() => setArea(item)}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-left text-xs font-extrabold transition-all ${
+                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-left text-xs font-extrabold transition-all cursor-pointer ${
                   area === item
-                    ? 'bg-[#003580] text-white shadow-md'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-astu-navy dark:bg-sky-600 text-white shadow-md dark:shadow-sky-950/50'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <span>{item}</span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    area === item ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                    area === item ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                   }`}
                 >
                   {count}
@@ -424,74 +463,129 @@ export default function ReportsCenter() {
         </div>
 
         {/* Selected Domain Report Library */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-[var(--bg-card)] p-6 shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
-              <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <span>{area} Report Library</span>
-                <span className="text-xs font-normal text-slate-400">({filteredReports.length} Packages)</span>
+                <span className="text-xs font-normal text-slate-400 dark:text-slate-400">({filteredReports.length} Packages)</span>
               </h2>
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                 Filter, generate, download, and audit official accreditation report packages in PDF format.
               </p>
             </div>
 
             <button
               onClick={() => setShowBuildModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#003580] hover:bg-[#002866] px-4 py-2.5 text-xs font-extrabold text-white shadow-md transition-all shrink-0 hover:scale-[1.01]"
+              className="inline-flex items-center gap-2 rounded-xl bg-astu-navy hover:bg-blue-900 dark:bg-sky-600 dark:hover:bg-sky-500 px-4 py-2.5 text-xs font-extrabold text-white shadow-md dark:shadow-sky-950/50 transition-all shrink-0 hover:scale-[1.01] cursor-pointer"
             >
               <LineChart className="h-4 w-4" />
               <span>Build Report</span>
             </button>
           </div>
 
-          {/* Cards */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            {filteredReports.map((report) => {
-              const Icon = report.icon;
-              const isDownloading = downloadingReportTitle === report.title;
-
-              return (
-                <article
-                  key={report.title}
-                  className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 hover:bg-white hover:border-[#003580]/40 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+          {/* Quick Filter & Search Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search reports by title, owner, or cadence..."
+                className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20 focus:border-astu-navy dark:focus:border-sky-500 transition-all"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 >
-                  <div>
-                    <div className="flex items-start justify-between gap-3">
-                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#003580] shadow-xs border border-slate-200">
-                        <Icon className="h-5 w-5" />
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Filter className="h-4 w-4 text-slate-400 dark:text-slate-500 hidden sm:block" />
+              <select
+                value={cadenceFilter}
+                onChange={(e) => setCadenceFilter(e.target.value)}
+                className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20 cursor-pointer"
+              >
+                <option value="ALL">All Cadences</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Biannual">Biannual</option>
+                <option value="Annual">Annual</option>
+                <option value="Wave Based">Wave Based</option>
+                <option value="Per Event">Per Event</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Cards */}
+          {filteredReports.length === 0 ? (
+            <div className="py-12 text-center border border-dashed border-[var(--border-color)] rounded-2xl p-8">
+              <FileSpreadsheet className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No reports matching your filter</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try adjusting your search terms or clearing the cadence filter.</p>
+              <button
+                type="button"
+                onClick={() => { setSearchQuery(''); setCadenceFilter('ALL'); setArea('All Domains'); }}
+                className="mt-4 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-extrabold text-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+              >
+                Reset Filters
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {filteredReports.map((report) => {
+                const Icon = report.icon;
+                const isDownloading = downloadingReportTitle === report.title;
+
+                return (
+                  <article
+                    key={report.title}
+                    className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/70 p-5 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:shadow-lg dark:hover:shadow-sky-950/40 transition-all flex flex-col justify-between space-y-4 group"
+                  >
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
+                        <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-astu-navy dark:text-sky-300 ring-1 ring-blue-500/10 dark:ring-blue-500/20 group-hover:bg-astu-navy dark:group-hover:bg-sky-600 group-hover:text-white dark:group-hover:text-white transition-all">
+                          <Icon className="h-5 w-5" />
+                        </span>
+                        <button
+                          onClick={() => handleDownloadSinglePdf(report)}
+                          disabled={isDownloading}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-astu-navy dark:hover:text-sky-300 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:bg-white dark:hover:bg-slate-700 hover:shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                          title={`Download Official PDF for ${report.title}`}
+                        >
+                          {isDownloading ? <RefreshCw className="h-4 w-4 animate-spin text-astu-navy dark:text-sky-300" /> : <Download className="h-4 w-4" />}
+                        </button>
+                      </div>
+
+                      <h3 className="mt-3 text-sm font-black text-slate-900 dark:text-white group-hover:text-astu-navy dark:group-hover:text-sky-300 transition-colors">{report.title}</h3>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        {report.owner} · <span className="inline-block px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-bold text-[11px]">{report.cadence}</span>
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] font-extrabold text-slate-500 dark:text-slate-400">
+                      <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" /> ABET / HERQA Audit Ready
                       </span>
                       <button
                         onClick={() => handleDownloadSinglePdf(report)}
-                        disabled={isDownloading}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-[#003580] hover:border-[#003580]/40 hover:shadow-xs transition-all disabled:opacity-50"
-                        title={`Download Official PDF for ${report.title}`}
+                        className="text-astu-navy dark:text-sky-400 hover:text-blue-800 dark:hover:text-sky-300 hover:underline font-black flex items-center gap-0.5 cursor-pointer"
                       >
-                        {isDownloading ? <RefreshCw className="h-4 w-4 animate-spin text-[#003580]" /> : <Download className="h-4 w-4" />}
+                        Export PDF →
                       </button>
                     </div>
-
-                    <h3 className="mt-3 text-sm font-black text-slate-900">{report.title}</h3>
-                    <p className="mt-1 text-xs text-slate-500 font-semibold">
-                      {report.owner} · <span className="text-slate-700 font-bold">{report.cadence}</span>
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-200/70 text-[10px] font-extrabold text-slate-500">
-                    <span className="flex items-center gap-1 text-emerald-700">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> ABET / HERQA Audit Ready
-                    </span>
-                    <button
-                      onClick={() => handleDownloadSinglePdf(report)}
-                      className="text-[#003580] hover:underline font-black flex items-center gap-0.5"
-                    >
-                      Export PDF →
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -499,28 +593,28 @@ export default function ReportsCenter() {
       {showBuildModal &&
         createPortal(
           <div
-            className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[999999] flex items-center justify-center bg-slate-950/75 backdrop-blur-md p-4 animate-in fade-in duration-200"
+            className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen z-[999999] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200"
             onClick={(e) => {
               if (e.target === e.currentTarget) setShowBuildModal(false);
             }}
           >
-            <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-6 animate-in zoom-in-95 duration-200">
               {/* Header */}
-              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 rounded-2xl bg-[#003580]/10 text-[#003580] flex items-center justify-center border border-[#003580]/20 font-bold shadow-sm">
-                    <SlidersHorizontal className="h-6 w-6" />
+                  <div className="h-11 w-11 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-astu-navy dark:text-sky-300 flex items-center justify-center border border-blue-200/60 dark:border-blue-800/60 font-bold shadow-xs">
+                    <SlidersHorizontal className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-[#003580] block">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-astu-navy dark:text-sky-400 block">
                       Custom Report Builder
                     </span>
-                    <h3 className="text-lg font-black text-slate-900">Compile Institutional Report</h3>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Compile Institutional Report</h3>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowBuildModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -529,16 +623,16 @@ export default function ReportsCenter() {
               {/* Form */}
               <form onSubmit={handleGenerateCustomReport} className="space-y-4 text-xs">
                 <div>
-                  <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                  <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                     Select Report Package ({reports.length} Total Options)
                   </label>
                   <select
                     value={selectedReportType}
                     onChange={(e) => setSelectedReportType(e.target.value)}
-                    className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-white font-extrabold text-slate-800 focus:border-[#003580] focus:outline-none"
+                    className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-extrabold text-slate-800 dark:text-slate-100 focus:border-astu-navy dark:focus:border-sky-500 focus:outline-none"
                   >
                     {reports.map((r) => (
-                      <option key={r.title} value={r.title}>
+                      <option key={r.title} value={r.title} className="dark:bg-slate-800 dark:text-slate-100">
                         {r.title} ({r.area} Domain)
                       </option>
                     ))}
@@ -547,17 +641,17 @@ export default function ReportsCenter() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                       Department / Scope Filter
                     </label>
                     <select
                       value={selectedDepartment}
                       onChange={(e) => setSelectedDepartment(e.target.value)}
-                      className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:border-[#003580] focus:outline-none"
+                      className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-100 focus:border-astu-navy dark:focus:border-sky-500 focus:outline-none"
                     >
-                      <option value="ALL">All Departments (Institutional Wide)</option>
+                      <option value="ALL" className="dark:bg-slate-800 dark:text-slate-100">All Departments (Institutional Wide)</option>
                       {departmentsList.map((d) => (
-                        <option key={d.id} value={d.id}>
+                        <option key={d.id} value={d.id} className="dark:bg-slate-800 dark:text-slate-100">
                           {d.name}
                         </option>
                       ))}
@@ -565,24 +659,24 @@ export default function ReportsCenter() {
                   </div>
 
                   <div>
-                    <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                       Reporting Timeframe
                     </label>
                     <select
                       value={selectedTimeframe}
                       onChange={(e) => setSelectedTimeframe(e.target.value)}
-                      className="w-full text-xs p-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:border-[#003580] focus:outline-none"
+                      className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-100 focus:border-astu-navy dark:focus:border-sky-500 focus:outline-none"
                     >
-                      <option value="Monthly">Monthly Cycle</option>
-                      <option value="Quarterly">Quarterly Audit</option>
-                      <option value="Biannual">Biannual Review</option>
-                      <option value="Annual">Annual Quality Accreditation</option>
+                      <option value="Monthly" className="dark:bg-slate-800 dark:text-slate-100">Monthly Cycle</option>
+                      <option value="Quarterly" className="dark:bg-slate-800 dark:text-slate-100">Quarterly Audit</option>
+                      <option value="Biannual" className="dark:bg-slate-800 dark:text-slate-100">Biannual Review</option>
+                      <option value="Annual" className="dark:bg-slate-800 dark:text-slate-100">Annual Quality Accreditation</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                  <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                     Output File Format
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -595,40 +689,40 @@ export default function ReportsCenter() {
                         key={fmt.id}
                         type="button"
                         onClick={() => setSelectedFormat(fmt.id as any)}
-                        className={`p-3 rounded-xl border text-left transition-all ${
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                           selectedFormat === fmt.id
-                            ? 'border-[#003580] bg-[#003580]/10 text-[#003580] font-black ring-1 ring-[#003580]/30'
-                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                            ? 'border-astu-navy dark:border-sky-500 bg-blue-50/60 dark:bg-sky-950/50 text-astu-navy dark:text-sky-300 font-black ring-1 ring-astu-navy/30 dark:ring-sky-500/30'
+                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
                         }`}
                       >
                         <p className="text-xs font-black">{fmt.label}</p>
-                        <p className="text-[10px] text-slate-500">{fmt.desc}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">{fmt.desc}</p>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Audit Disclaimer */}
-                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed font-semibold flex items-start gap-2">
-                  <FileText className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed font-semibold flex items-start gap-2">
+                  <FileText className="h-4 w-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
                   <span>
                     Generating this report will record a permanent entry in the Official System Audit Log and increment your monthly institutional export quota.
                   </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+                <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                   <button
                     type="button"
                     onClick={() => setShowBuildModal(false)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                    className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isBuildingReport}
-                    className="flex-1 py-3 rounded-xl bg-[#003580] hover:bg-[#002866] text-white text-xs font-extrabold shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 py-3 rounded-xl bg-astu-navy hover:bg-blue-900 dark:bg-sky-600 dark:hover:bg-sky-500 text-white text-xs font-extrabold shadow-md dark:shadow-sky-950/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                   >
                     {isBuildingReport ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />

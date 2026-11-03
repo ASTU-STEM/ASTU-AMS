@@ -325,6 +325,25 @@ export const authService = {
     }
   },
 
+  async activateAlumni(token: string, password: string): Promise<ApiResult<{ success: boolean; message: string }>> {
+    try {
+      const response = await apiClient.post<AuthResponse>('/auth/activate-alumni', {
+        token,
+        password,
+      });
+      if (response.data.success) {
+        return { ok: true, data: { success: true, message: response.data.message || 'Account activated successfully.' } };
+      }
+      return { ok: false, errorCode: 'ACTIVATE_ALUMNI_FAILED', message: response.data.message || 'Failed to activate account.' };
+    } catch (error) {
+      let message = 'An unexpected error occurred.';
+      if (axios.isAxiosError(error) && error.response?.data) {
+        message = (error.response.data as any).message || message;
+      }
+      return { ok: false, errorCode: 'ACTIVATE_ALUMNI_ERROR', message };
+    }
+  },
+
   // ==================== OTP VERIFICATION ====================
   async verifyOtp(studentId: string, otp: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {

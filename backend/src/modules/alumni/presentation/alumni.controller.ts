@@ -402,17 +402,44 @@ export class AlumniController {
         where: { OR: [{ menteeId: alumniId }, { mentor: { alumniId } }] }
       });
 
+      const appliedJobIds = await prisma.jobApplication.findMany({
+        where: { alumniId },
+        select: { jobId: true },
+      });
+
+      const now = new Date();
+
+      const [openJobMatches, upcomingEvents, networkConnections] = await Promise.all([
+        prisma.job.count({
+          where: {
+            isActive: true,
+            status: 'PUBLISHED',
+            deadline: { gte: now },
+            id: { notIn: appliedJobIds.map((a) => a.jobId) },
+          },
+        }).catch(() => 0),
+        prisma.eventRegistration.count({
+          where: { alumniId, event: { date: { gte: now } } },
+        }).catch(() => 0),
+        prisma.mentorshipRequest.count({
+          where: {
+            status: { in: ['ACCEPTED', 'COMPLETED'] },
+            OR: [{ mentorId: alumniId }, { menteeId: alumniId }],
+          },
+        }).catch(() => 0),
+      ]);
+
       const stats = {
         profileCompletion: completion,
-        openJobMatches: 12, // Dummy for now
+        openJobMatches,
         savedJobs: await prisma.savedJob.count({ where: { alumniId } }),
         appliedJobs: await prisma.jobApplication.count({ where: { alumniId } }),
         pendingSurveys: await prisma.surveyAssignment.count({ where: { alumniId, status: 'PENDING' } }),
         documentRequests: await prisma.documentRequest.count({ where: { alumniId } }),
         activeMentorships,
         unreadMessages: await prisma.notification.count({ where: { userId, isRead: false } }),
-        upcomingEvents: await prisma.eventRegistration.count({ where: { alumniId } }),
-        networkConnections: 347
+        upcomingEvents,
+        networkConnections
       };
 
       return sendSuccess(res, 'Stats fetched successfully', stats);
@@ -1021,41 +1048,8 @@ export class AlumniController {
   // ─── Donations ──────────────────────────────────────────────────────
   static async getDonations(req: Request, res: Response, next: NextFunction) {
     try {
-      let campaigns = await prisma.donationCampaign.findMany({ orderBy: { createdAt: 'asc' } });
-      if (campaigns.length === 0) {
-        await prisma.donationCampaign.createMany({
-          data: [
-            {
-              title: 'ASTU Scholarship Fund 2026',
-              category: 'SCHOLARSHIP',
-              description: 'Support underprivileged engineering students with full tuition scholarships.',
-              goal: 5000000,
-              raised: 1851000,
-              donorCount: 349,
-              status: 'ACTIVE',
-            },
-            {
-              title: 'AI Research Lab Equipment',
-              category: 'RESEARCH',
-              description: 'Fund cutting-edge GPU servers for the new AI research laboratory.',
-              goal: 8000000,
-              raised: 3201000,
-              donorCount: 158,
-              status: 'ACTIVE',
-            },
-            {
-              title: 'Campus Innovation Hub',
-              category: 'INFRASTRUCTURE',
-              description: 'Build a modern co-working makerspace and innovation center for students.',
-              goal: 12000000,
-              raised: 5401000,
-              donorCount: 291,
-              status: 'ACTIVE',
-            },
-          ],
-        });
-        campaigns = await prisma.donationCampaign.findMany({ orderBy: { createdAt: 'asc' } });
-      }
+      // Return real campaigns only — do not auto-seed fabricated catalogue entries.
+      const campaigns = await prisma.donationCampaign.findMany({ orderBy: { createdAt: 'asc' } });
       const parseNum = (val: any) => {
         if (typeof val === 'number') return isNaN(val) ? 0 : val;
         if (val && typeof val === 'object') {
@@ -1160,7 +1154,7 @@ export class AlumniController {
         checkout_url: checkoutUrl,
         amount: amount || 500,
         campaignId,
-        campaignTitle: campaign?.title || 'ASTU Scholarship Fund 2026',
+        campaignTitle: campaign?.title || 'ASTU Alumni Giving',
         publicKey: process.env.CHAPA_PUBLIC_KEY || 'CHAPUBK_TEST-CHAPA_TEST_PUB_osvjFpEwm_HgJWO-HKsW6YKx6U0bz5fXIvyUcCzK'
       });
     } catch (err) { next(err); }

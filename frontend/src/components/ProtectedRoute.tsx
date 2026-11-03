@@ -38,7 +38,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!isAuthenticated || !user) {
-    return <Navigate to={redirectTo} replace state={{ from: location.pathname }} />;
+    const loginTarget =
+      redirectTo === '/login'
+        ? `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`
+        : redirectTo;
+    return <Navigate to={loginTarget} replace state={{ from: location.pathname }} />;
   }
 
   if (!allowedRoles.includes(user.role)) {

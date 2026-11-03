@@ -59,61 +59,11 @@ export class SupportController {
         ];
       }
 
-      let tickets = await prisma.supportTicket.findMany({
+      // Return stored tickets only — never auto-seed fabricated desk requests.
+      const tickets = await prisma.supportTicket.findMany({
         where,
         orderBy: { createdAt: 'desc' },
       });
-
-      // If database has 0 tickets, seed initial real tickets in PostgreSQL
-      if (tickets.length === 0 && !status && !category && !search) {
-        await prisma.supportTicket.createMany({
-          data: [
-            {
-              category: 'auth_verification',
-              studentId: 'UGR/37898/17',
-              fullName: 'Mr Dereje Benti',
-              graduationYear: '2021',
-              contactEmail: 'kenoderejeb@gmail.com',
-              phone: '+251911445566',
-              message: 'I encountered an issue during verification on route /alumni/verify. OTP email was delayed by 15 minutes.',
-              status: 'OPEN',
-              route: '/alumni/verify',
-              lastErrorCode: 'OTP_DELAYED',
-              sessionId: 'sess-889912',
-            },
-            {
-              category: 'didit_verification',
-              studentId: 'UGR/37898/14',
-              fullName: 'Mr Dereje Benti',
-              graduationYear: '2018',
-              contactEmail: 'kenoderejeb@gmail.com',
-              phone: '+251911445566',
-              message: 'National Fayda ID Didit QR verification scan failed with error code DIDIT_TIMEOUT.',
-              status: 'OPEN',
-              route: '/alumni/didit',
-              lastErrorCode: 'DIDIT_TIMEOUT',
-              sessionId: 'sess-889914',
-            },
-            {
-              category: 'missing_record',
-              studentId: 'ASTU/1024/18',
-              fullName: 'Abebe Kebede',
-              graduationYear: '2018',
-              contactEmail: 'abebe.kebede@astu.edu.et',
-              phone: '+251911200101',
-              message: 'My degree transcript distinction says Great Distinction instead of First Class Distinction in SIS record.',
-              status: 'IN_PROGRESS',
-              route: '/alumni/profile',
-              lastErrorCode: 'NONE',
-              sessionId: 'sess-772210',
-            },
-          ],
-        });
-        tickets = await prisma.supportTicket.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-        });
-      }
 
       res.status(200).json({ success: true, data: tickets });
     } catch (err) {

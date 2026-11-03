@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import apiClient from '../../../services/api';
 import {
   Activity,
   AlertCircle,
@@ -61,12 +62,10 @@ export default function IctApiGatewayPage() {
   const [activeTab, setActiveTab] = useState<'KEYS' | 'HEALTH' | 'STREAM'>('KEYS');
 
   React.useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch('/api/admin/technical-ops/api-gateway', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(d => {
+    apiClient
+      .get('/admin/technical-ops/api-gateway')
+      .then((res) => {
+        const d = res.data;
         if (d.success && Array.isArray(d.data?.apiKeys)) {
           setApiKeys(d.data.apiKeys);
         }

@@ -49,8 +49,12 @@ import { format, formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
 import AdminBadge from '../components/AdminBadge';
+import AdminStatGrid from '../components/AdminStatGrid';
+import AdminEmptyState from '../components/AdminEmptyState';
 import { toast } from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
+import ImportBanner from './users/ImportBanner';
+import type { ImportLog } from './users/ImportBanner';
 
 type Role = 'Alumni' | 'Employer' | 'Department Head' | 'DepartmentHead' | 'Faculty' | 'Registrar' | 'RegistrarStaff' | 'CMS Manager' | 'Admin' | 'Super Admin' | 'SuperAdmin';
 type Status = 'Active' | 'Inactive' | 'Suspended' | 'Pending Verification';
@@ -564,7 +568,7 @@ export default function UserManagement() {
     try {
       localStorage.removeItem('admin_users_cache');
     } catch {}
-    return makeUsers();
+    return [];
   });
   const [totalCount, setTotalCount] = useState<number>(() => {
     try {
@@ -897,14 +901,6 @@ export default function UserManagement() {
     securityAlert: 'All',
   });
 
-  type ImportLog = {
-    id: string;
-    syncedAt: string;
-    recordsCount: number;
-    status: 'SUCCESS' | 'PARTIAL' | 'FAILED';
-    errors?: string | null;
-  };
-
   const [importLogs, setImportLogs] = useState<ImportLog[]>([]);
   const [isImportHistoryOpen, setIsImportHistoryOpen] = useState(false);
   const [loadingImportLogs, setLoadingImportLogs] = useState(false);
@@ -926,30 +922,22 @@ export default function UserManagement() {
     setIsSavingNotes(true);
     setNotesSuccessMsg(false);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`/api/admin/users/${activeUser.id}/notes`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ notes: adminNotesInput }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        const updatedNotes = data.data?.adminNotes ?? adminNotesInput;
+      const res = await adminService.updateUserNotes(activeUser.id, adminNotesInput);
+      if (res.ok) {
+        const updatedNotes = res.data?.adminNotes ?? adminNotesInput;
         setActiveUser((prev) => (prev ? { ...prev, adminNotes: updatedNotes } : null));
         setUsers((prevList) =>
           prevList.map((u) => (u.id === activeUser.id ? { ...u, adminNotes: updatedNotes } : u))
         );
         setNotesSuccessMsg(true);
         setTimeout(() => setNotesSuccessMsg(false), 3000);
+        toast.success('Administrative notes saved');
       } else {
-        alert(data.message || 'Failed to save administrative notes');
+        toast.error(res.message || 'Failed to save administrative notes');
       }
     } catch (error: any) {
       console.error('Error saving admin notes:', error);
-      alert('Network error while saving administrative notes');
+      toast.error(error?.message || 'Network error while saving administrative notes');
     } finally {
       setIsSavingNotes(false);
     }
@@ -1915,7 +1903,7 @@ export default function UserManagement() {
           return (
             <div
               key={card.label}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all duration-200 hover:border-slate-300 hover:shadow-xs"
+              className="group relative overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-2xs transition-all duration-200 hover:border-slate-300 hover:shadow-xs"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -4862,7 +4850,7 @@ export default function UserManagement() {
             </div>
 
             {/* Admin Notes Section */}
-            <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-2xs">
+            <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] space-y-3 shadow-2xs">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse" />

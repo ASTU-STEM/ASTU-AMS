@@ -67,16 +67,9 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
       setChapaPayPayload(initResult);
       setShowChapaModal(true);
     } catch (err: any) {
-      console.warn('Chapa init notice:', err);
-      const tx_ref = `ASTU-DOC-${Date.now()}`;
-      setChapaPayPayload({
-        tx_ref,
-        checkout_url: `https://checkout.chapa.co/checkout/payment/${tx_ref}`,
-        amount: selectedDocObj.price,
-        documentType: docType,
-        additionalInstructions: reason,
-      });
-      setShowChapaModal(true);
+      console.error('Chapa init failed:', err);
+      const msg = err?.response?.data?.message || err?.message || 'Could not start Chapa payment. Please try again.';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -127,27 +120,9 @@ export const DocumentServicesTab: React.FC<DocumentServicesTabProps> = ({
       }, 1500);
     } catch (err: any) {
       console.error('Failed Chapa verification:', err);
-      let uploadedFileUrls: string[] = [];
-      if (requestFile) {
-        uploadedFileUrls.push(`/uploads/documents/${requestFile.name}`);
-      }
-
-      // Seamless demo fallback execution
-      onRequestDocument(
-        docType,
-        `[Paid ${selectedDocObj.price} ETB via Chapa | Ref: ${chapaPayPayload?.tx_ref || 'ASTU-DOC-DEMO'}] ${reason}`,
-        uploadedFileUrls
-      );
-      setPaymentStep('success');
-      setTimeout(() => {
-        setReason('');
-        setRequestFile(null);
-        setShowChapaModal(false);
-        setShowFullChapaPage(false);
-        setChapaPayPayload(null);
-        setPaymentStep('checkout');
-        toast.success(`Payment of ${selectedDocObj.price} ETB verified via Chapa! Document request sent to ASTU Registrar.`);
-      }, 1500);
+      setPaymentStep('checkout');
+      const msg = err?.response?.data?.message || err?.message || 'Payment verification failed. Document request was not submitted.';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

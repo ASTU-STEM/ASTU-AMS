@@ -88,6 +88,15 @@ const users = [
     isActive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'alice-alumni-user',
+    email: 'alice@alumni.com',
+    password: defaultPasswordHash,
+    role: 'ALUMNI',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 

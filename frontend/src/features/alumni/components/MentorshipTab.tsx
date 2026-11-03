@@ -126,7 +126,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
       m.name.toLowerCase().includes(query) ||
       m.company.toLowerCase().includes(query) ||
       m.role.toLowerCase().includes(query) ||
-      m.skills.some(s => s.toLowerCase().includes(query))
+      (Array.isArray(m.skills) ? m.skills : []).some(s => s.toLowerCase().includes(query))
     );
   });
 
@@ -339,7 +339,7 @@ export const MentorshipTab: React.FC<MentorshipTabProps> = ({
                     )}
 
                     <div className="flex flex-wrap gap-1.5">
-                      {mentor.skills.map(skill => (
+                      {(Array.isArray(mentor.skills) ? mentor.skills : []).map(skill => (
                         <span key={skill} className="px-2 py-0.5 bg-[#003366]/5 text-[10px] font-bold text-[#003366] rounded-md">
                           {skill}
                         </span>

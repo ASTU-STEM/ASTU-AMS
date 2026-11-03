@@ -231,12 +231,12 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-white border-r border-slate-200/80 text-slate-800 shadow-xs transition-all duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] text-[var(--text-primary)] shadow-xs transition-all duration-300 lg:translate-x-0 ${
           collapsed ? 'w-20' : 'w-72'
         } ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Sidebar Logo Header */}
-        <div className="relative px-4 py-4 border-b border-slate-100">
+        <div className="relative px-4 py-4 border-b border-[var(--border-color)] bg-[var(--bg-sidebar)]">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="group/logo relative shrink-0 flex items-center justify-center h-10 w-10">
               <img
@@ -251,10 +251,10 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
             </div>
             {!collapsed && (
               <div>
-                <div className="font-bold tracking-tight text-slate-900 text-[18px] leading-tight">
+                <div className="font-bold tracking-tight text-[var(--text-primary)] text-[18px] leading-tight">
                   {settings.general?.abbreviation || 'ASTU'} {isAdmin ? 'Admin' : 'CMS'}
                 </div>
-                <p className="text-[9.5px] text-[#003580] uppercase tracking-wider font-extrabold leading-snug">
+                <p className="text-[9.5px] text-[#003580] dark:text-[#22D3EE] uppercase tracking-wider font-extrabold leading-snug">
                   {isAdmin ? 'System Administration' : 'Alumni Relations Office'}
                 </p>
               </div>
@@ -347,7 +347,7 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
         </nav>
 
         {/* Footer */}
-        <div className="relative border-t border-slate-100 p-3 space-y-2">
+        <div className="relative border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] p-3 space-y-2">
           {!collapsed ? (
             <>
               {/* AI Copilot Launch Button - Admin only */}
@@ -374,7 +374,12 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
                   <div className="mt-0.5 flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[10px] font-bold text-slate-500 uppercase">
-                      {isAdmin ? (user?.role === 'SUPER_ADMIN' ? 'Root Admin' : 'ICT Administrator') : 'Alumni Affairs Officer'}
+                      {user?.role === 'SUPER_ADMIN' ? 'Super Admin'
+                        : user?.role === 'ADMIN' ? 'Administrator'
+                        : user?.role === 'CMS_MANAGER' ? 'CMS Manager'
+                        : user?.role === 'ALUMNI_OFFICE' ? 'Alumni Office'
+                        : user?.role === 'REGISTRAR' ? 'Registrar Officer'
+                        : 'Alumni Affairs Officer'}
                     </span>
                   </div>
                 </div>

@@ -75,9 +75,11 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
-import AdminStatCard from '../components/AdminStatCard';
+import AdminSectionCard, { adminHeroGhostBtnClass } from '../components/AdminSectionCard';
+import AdminStatGrid from '../components/AdminStatGrid';
 import { adminService } from '../services/admin.service';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../../../contexts/AuthContext';
 
 type NotificationType = 'Email' | 'In-App' | 'Both';
 type TargetType =
@@ -134,7 +136,7 @@ const templatesList: Template[] = [
     category: 'Survey & Feedback',
     title: 'Reminder: Please Complete Your ASTU Tracer Survey',
     message: 'Hello {first_name}, please take 5 minutes to complete the official ASTU Alumni Tracer Survey. Your feedback shapes our academic programs and alumni services.',
-    ctaLink: 'http://localhost:5173/alumni/tracer-survey',
+    ctaLink: '/alumni/dashboard',
     ctaText: 'Complete Tracer Survey Now',
   },
   {
@@ -143,7 +145,7 @@ const templatesList: Template[] = [
     title: 'New Career Opportunities Matching Your Profile',
     message: 'Dear Alumni, top partner employers have posted new job openings matching your engineering specialization. Log into ASTU AMS to view and apply.',
     imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/jobs',
+    ctaLink: '/jobs',
     ctaText: 'Explore Job Opportunities',
   },
   {
@@ -152,7 +154,7 @@ const templatesList: Template[] = [
     title: 'Upcoming ASTU Annual Alumni Grand Homecoming',
     message: 'Join us for the ASTU Annual Alumni Homecoming & Tech Expo. Connect with fellow graduates, faculty, and industry leaders. Reserve your spot today!',
     imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/events',
+    ctaLink: '/events',
     ctaText: 'RSVP for Homecoming',
   },
   {
@@ -160,7 +162,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Welcome to the Official ASTU Alumni Management System',
     message: 'Welcome {first_name}! Your ASTU Alumni portal account has been activated. Discover networking opportunities, career resources, and university updates.',
-    ctaLink: 'http://localhost:5173/profile',
+    ctaLink: '/profile',
     ctaText: 'Access Your Profile',
   },
   {
@@ -168,7 +170,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Urgent: Complete Your Graduation Clearance Requirements',
     message: 'Notice to graduating batch: Please submit all outstanding clearance documents before the deadline to receive official transcript issuance.',
-    ctaLink: 'http://localhost:5173/clearance',
+    ctaLink: '/clearance',
     ctaText: 'Submit Clearance Docs',
   },
   {
@@ -176,7 +178,7 @@ const templatesList: Template[] = [
     category: 'Mentorship & Network',
     title: 'Join the ASTU Alumni Mentorship Network',
     message: 'Share your professional experience! Become an ASTU Alumni Mentor and guide current engineering students in their career journeys.',
-    ctaLink: 'http://localhost:5173/mentorship',
+    ctaLink: '/mentorship',
     ctaText: 'Become a Mentor',
   },
   {
@@ -185,7 +187,7 @@ const templatesList: Template[] = [
     title: 'Support the ASTU Innovation & Student Scholarship Fund',
     message: 'Your contribution empowers the next generation of engineers and researchers at ASTU. Donate today to support student scholarships.',
     imageUrl: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb0?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/donations',
+    ctaLink: '/donations',
     ctaText: 'Donate to Scholarship Fund',
   },
   {
@@ -193,7 +195,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Document Verification Request Processed',
     message: 'Your document verification request has been reviewed and approved by the ASTU Registrar Office. Download your official document from your profile.',
-    ctaLink: 'http://localhost:5173/documents',
+    ctaLink: '/documents',
     ctaText: 'Download Verified Document',
   },
   {
@@ -202,7 +204,7 @@ const templatesList: Template[] = [
     title: 'ASTU National Tech & Engineering Career Fair',
     message: 'Register for the ASTU Virtual Career Fair featuring over 30 leading technology and industrial partner companies. Upload your resume to participate.',
     imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/career-fair',
+    ctaLink: '/career-fair',
     ctaText: 'Register for Career Fair',
   },
   {
@@ -210,7 +212,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Security Update: Please Verify Your Security Preferences',
     message: 'We noticed a new login attempt on your ASTU AMS account. If this was not you, please update your password and enable Two-Factor Authentication immediately.',
-    ctaLink: 'http://localhost:5173/settings/security',
+    ctaLink: '/settings/security',
     ctaText: 'Manage Account Security',
   },
   {
@@ -312,11 +314,11 @@ function statusClass(status: NotificationStatus) {
     case 'Scheduled':
       return 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20';
     case 'Draft':
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-slate-200';
     case 'Failed':
       return 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15';
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-slate-200';
   }
 }
 
@@ -329,7 +331,7 @@ function typeClass(type: NotificationType) {
     case 'Both':
       return 'bg-violet-100 text-violet-700 border-violet-200';
     default:
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-slate-200';
   }
 }
 
@@ -340,39 +342,17 @@ function priorityClass(priority?: PriorityLevel) {
     case 'High':
       return 'bg-amber-100 text-amber-700 border-amber-200';
     case 'Low':
-      return 'bg-slate-100 text-slate-600 border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-slate-200';
     default:
       return 'bg-blue-50 text-blue-700 border-blue-200';
   }
 }
 
-function SectionCard({
-  title,
-  subtitle,
-  children,
-  headerAction,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-  headerAction?: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
-        </div>
-        {headerAction && <div>{headerAction}</div>}
-      </div>
-      {children}
-    </section>
-  );
-}
+const SectionCard = AdminSectionCard;
 
 export default function NotificationCenter() {
   const location = useLocation();
+  const { user } = useAuth();
   const isCms = location.pathname.startsWith('/cms');
   const [type, setType] = useState<NotificationType>('Both');
   const [target, setTarget] = useState<TargetType>('All Users');
@@ -1227,9 +1207,11 @@ export default function NotificationCenter() {
   const totalHistoryPages = Math.ceil(historyTotal / historyLimit) || 1;
 
   // -------------------------------------------------------------
-  // 150 ADVANCED BROADCASTING TOOLS IMPLEMENTATION HANDLERS
+  // Broadcast composer helpers + local-only enrichment tools
+  // (test_email hits /admin/settings/test-integration; other tools
+  // mutate composer state or report local estimates only.)
   // -------------------------------------------------------------
-  const runTool = (toolId: string) => {
+  const runTool = async (toolId: string) => {
     switch (toolId) {
       // --- AI & COMPOSITION (1-15) ---
       case 'ai_summarize':
@@ -1312,7 +1294,7 @@ export default function NotificationCenter() {
         toast.success('Inserted Success Callout Component.');
         break;
       case 'cta_button':
-        setCtaLink('http://localhost:5173/alumni');
+        setCtaLink('/alumni');
         setCtaText('Access ASTU Portal Now');
         toast.success('Inserted Primary CTA Action Button Component.');
         break;
@@ -1353,11 +1335,11 @@ export default function NotificationCenter() {
         toast.success('Inserted Countdown Urgency Badge Component.');
         break;
       case 'component_rsvp_grid':
-        insertFormatting('\n\n[ RSVP YES ](http://localhost:5173/events/rsvp?status=yes) | [ RSVP MAYBE ](http://localhost:5173/events/rsvp?status=maybe) | [ RSVP NO ](http://localhost:5173/events/rsvp?status=no)\n');
+        insertFormatting('\n\n[ RSVP YES ](/events/rsvp?status=yes) | [ RSVP MAYBE ](/events/rsvp?status=maybe) | [ RSVP NO ](/events/rsvp?status=no)\n');
         toast.success('Inserted Interactive RSVP Button Grid Component.');
         break;
       case 'component_document_card':
-        insertFormatting('\n **Attachment Document:** [Download ASTU Clearance Form (PDF)](http://localhost:5173/documents/clearance-form.pdf)\n');
+        insertFormatting('\n **Attachment Document:** [Download ASTU Clearance Form (PDF)](/documents/clearance-form.pdf)\n');
         toast.success('Inserted PDF Attachment Document Card.');
         break;
 
@@ -1479,9 +1461,25 @@ export default function NotificationCenter() {
         break;
 
       // --- TRACKING & TESTS (61-75) ---
-      case 'test_email':
-        toast.success('Sent test broadcast copy to super admin email inbox.');
+      case 'test_email': {
+        const recipient = user?.email;
+        if (!recipient) {
+          toast.error('No authenticated admin email available for the SMTP test.');
+          return;
+        }
+        const toastId = toast.loading(`Sending SMTP test to ${recipient}…`);
+        try {
+          const result = await adminService.testIntegration('email', { recipient });
+          if (result.ok) {
+            toast.success(result.data?.message || `Test email sent to ${recipient}.`, { id: toastId });
+          } else {
+            toast.error(result.message || 'SMTP test failed.', { id: toastId });
+          }
+        } catch (err: any) {
+          toast.error(err?.message || 'SMTP test failed.', { id: toastId });
+        }
         break;
+      }
       case 'viewport_preview':
         setViewMode('live-preview');
         toast.success('Switched to Live Viewport Preview Mode.');
@@ -1605,27 +1603,27 @@ export default function NotificationCenter() {
         toast.success('Auto-BCC Active: alumni-office@astu.edu.et added to hidden copy list.');
         break;
       case 'auto_token_survey_url':
-        setCtaLink('http://localhost:5173/alumni/tracer-survey');
+        setCtaLink('/alumni/tracer-survey');
         setCtaText('Complete Survey Now');
         toast.success('Attached Tracer Survey link token.');
         break;
       case 'auto_token_employer_url':
-        setCtaLink('http://localhost:5173/employer/dashboard');
+        setCtaLink('/employer/dashboard');
         setCtaText('Open Employer Dashboard');
         toast.success('Attached Employer Portal link token.');
         break;
       case 'auto_token_event_url':
-        setCtaLink('http://localhost:5173/events');
+        setCtaLink('/events');
         setCtaText('Register for Event');
         toast.success('Attached Event Registration link token.');
         break;
       case 'auto_token_password_url':
-        setCtaLink('http://localhost:5173/reset-password');
+        setCtaLink('/reset-password');
         setCtaText('Reset Password');
         toast.success('Attached Password Reset link token.');
         break;
       case 'auto_token_transcript_url':
-        setCtaLink('http://localhost:5173/registrar/transcripts');
+        setCtaLink('/registrar/transcripts');
         setCtaText('Request Official Transcript');
         toast.success('Attached Transcript Request link token.');
         break;
@@ -1655,7 +1653,7 @@ export default function NotificationCenter() {
 
       // --- SECURITY & COMPLIANCE (106-120) ---
       case 'sec_unsubscribe':
-        insertFormatting('\n\n---\n<small>To update your email notification preferences, click [Unsubscribe Preferences](http://localhost:5173/settings/notifications)</small>');
+        insertFormatting('\n\n---\n<small>To update your email notification preferences, click [Unsubscribe Preferences](/settings/notifications)</small>');
         toast.success('Inserted GDPR / Privacy Unsubscribe Footer.');
         break;
       case 'sec_pii_masking':
@@ -1831,37 +1829,31 @@ export default function NotificationCenter() {
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Notification & Broadcast Center"
-        subtitle="Broadcast rich multi-channel alerts, manage HTML templates, schedule sends, and target all 6 ASTU system portals."
-        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Notifications' }] : [{ label: 'Admin' }, { label: 'Notification Center' }]}
+        title="Notifications"
+        subtitle="Compose multi-channel alerts, schedule broadcasts, and track delivery across ASTU portals."
+        breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Notifications' }] : [{ label: 'Admin' }, { label: 'Notifications' }]}
         actions={
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={exportHistoryCSV}
-              className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm"
-            >
-              <Download className="h-3.5 w-3.5 text-slate-500" />
-              Export CSV Report
+            <button type="button" onClick={exportHistoryCSV} className={adminHeroGhostBtnClass}>
+              <Download className="h-4 w-4 text-[#FFCC00]" />
+              Export CSV
             </button>
-            <AdminBadge variant="success">Broadcasting System Live</AdminBadge>
+            <AdminBadge variant="success">Live</AdminBadge>
           </div>
         }
       />
 
-      {/* Top 4 Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {notificationSummaryCards.map((card) => (
-          <AdminStatCard
-            key={card.title}
-            title={card.title}
-            value={card.value}
-            icon={card.icon}
-            tone={card.tone}
-            trend={card.trend}
-          />
-        ))}
-      </div>
+      <AdminStatGrid
+        stats={notificationSummaryCards.map((card) => ({
+          title: card.title,
+          value: card.value,
+          icon: card.icon,
+          tone: card.tone,
+          trend: card.trend,
+        }))}
+        cols={4}
+        compact
+      />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,520px)_minmax(0,1fr)]">
         {/* Left Side: New Notification Form & Rich Editor */}
@@ -1879,12 +1871,12 @@ export default function NotificationCenter() {
                   <Wand2 className="h-3.5 w-3.5 text-[#003580]" />
                    More Tools & Suite (100+)
                 </button>
-                <div className="flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs">
+                <div className="flex rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-0.5 text-xs">
                   <button
                     type="button"
                     onClick={() => setViewMode('editor')}
-                    className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
-                      viewMode === 'editor' ? 'bg-white text-[#003580] shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    className={`rounded-lg px-2.5 py-1 font-semibold transition-all ${
+                      viewMode === 'editor' ? 'bg-[var(--bg-card)] text-[#003580] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     Editor
@@ -1892,8 +1884,8 @@ export default function NotificationCenter() {
                   <button
                     type="button"
                     onClick={() => setViewMode('live-preview')}
-                    className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
-                      viewMode === 'live-preview' ? 'bg-white text-[#003580] shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    className={`rounded-lg px-2.5 py-1 font-semibold transition-all ${
+                      viewMode === 'live-preview' ? 'bg-[var(--bg-card)] text-[#003580] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     Live Preview
@@ -1903,30 +1895,30 @@ export default function NotificationCenter() {
             }
           >
             {viewMode === 'live-preview' ? (
-              <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <div className="space-y-4 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
+                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
                   <div className="flex items-center gap-2">
                     <AdminBadge variant="default">{type}</AdminBadge>
                     <AdminBadge variant="neutral">{priority} Priority</AdminBadge>
                     <AdminBadge variant="success">{category}</AdminBadge>
                   </div>
-                  <span className="text-xs text-slate-500 font-medium">Target: ~{estimatedRecipientsCount} recipients</span>
+                  <span className="text-xs text-[var(--text-muted)] font-medium">Target: ~{estimatedRecipientsCount} recipients</span>
                 </div>
 
                 {imageUrl && (
-                  <div className="overflow-hidden rounded-lg border border-slate-200 bg-black">
+                  <div className="overflow-hidden rounded-lg border border-[var(--border-color)] bg-black">
                     <img src={imageUrl} alt="Banner Preview" className="max-h-48 w-full object-cover" />
                   </div>
                 )}
 
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Subject</p>
-                  <h4 className="mt-1 text-base font-bold text-slate-900">{subject || 'Untitled Broadcast'}</h4>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Subject</p>
+                  <h4 className="mt-1 text-base font-bold text-[var(--text-primary)]">{subject || 'Untitled Broadcast'}</h4>
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Content</p>
-                  <div className="mt-1 rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-800 whitespace-pre-wrap shadow-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Content</p>
+                  <div className="mt-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] p-4 text-sm leading-6 text-[var(--text-primary)] whitespace-pre-wrap shadow-sm">
                     {message || 'No message content composed.'}
                   </div>
                 </div>
@@ -1948,11 +1940,11 @@ export default function NotificationCenter() {
               <div className="space-y-4">
                 <div className="grid gap-3 md:grid-cols-3">
                   <label className="space-y-1.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Channel</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Channel</span>
                     <select
                       value={type}
                       onChange={(event) => setType(event.target.value as NotificationType)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                     >
                       {['Both', 'In-App', 'Email'].map((item) => (
                         <option key={item} value={item}>
@@ -1963,11 +1955,11 @@ export default function NotificationCenter() {
                   </label>
 
                   <label className="space-y-1.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Priority</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Priority</span>
                     <select
                       value={priority}
                       onChange={(event) => setPriority(event.target.value as PriorityLevel)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580]"
                     >
                       {['Low', 'Normal', 'High', 'Urgent'].map((item) => (
                         <option key={item} value={item}>
@@ -1978,11 +1970,11 @@ export default function NotificationCenter() {
                   </label>
 
                   <label className="space-y-1.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Category</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Category</span>
                     <select
                       value={category}
                       onChange={(event) => setCategory(event.target.value as CategoryType)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580]"
                     >
                       {['General', 'Academic', 'Career', 'Survey', 'Event', 'Emergency', 'Donation'].map((item) => (
                         <option key={item} value={item}>
@@ -1995,7 +1987,7 @@ export default function NotificationCenter() {
 
                 <label className="space-y-1.5 block">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">
                       Target Audience (All 6 Portals)
                     </span>
                     <span className="text-[11px] font-semibold text-[#003580]">
@@ -2008,7 +2000,7 @@ export default function NotificationCenter() {
                       setTarget(event.target.value as TargetType);
                       setTargetValue('All');
                     }}
-                    className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#003580]"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2.5 text-xs text-[var(--text-primary)] font-medium outline-none focus:border-[#003580]"
                   >
                     <option value="All Users"> All Users (System-wide Broadcast)</option>
                     <option value="Alumni Portal (ALUMNI)"> 1. Alumni Portal (ALUMNI)</option>
@@ -2027,11 +2019,11 @@ export default function NotificationCenter() {
                 {/* Sub-Target Controls */}
                 {target === 'By Department' && (
                   <label className="space-y-1.5 block">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Select Department</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Select Department</span>
                     <select
                       value={targetValue}
                       onChange={(e) => setTargetValue(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580]"
                     >
                       <option value="All">All Departments</option>
                       {targetOptions.map((opt) => (
@@ -2045,11 +2037,11 @@ export default function NotificationCenter() {
 
                 {target === 'By Batch' && (
                   <label className="space-y-1.5 block">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Select Graduation Batch</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Select Graduation Batch</span>
                     <select
                       value={targetValue}
                       onChange={(e) => setTargetValue(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580]"
                     >
                       <option value="All">All Batches</option>
                       {dbBatches.map((batch) => (
@@ -2063,11 +2055,11 @@ export default function NotificationCenter() {
 
                 {target === 'By Employment Status' && (
                   <label className="space-y-1.5 block">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Select Employment Status</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Select Employment Status</span>
                     <select
                       value={employmentValue}
                       onChange={(e) => setEmploymentValue(e.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580]"
                     >
                       <option value="EMPLOYED">Employed Alumni</option>
                       <option value="UNEMPLOYED">Unemployed Alumni</option>
@@ -2077,14 +2069,14 @@ export default function NotificationCenter() {
                 )}
 
                 {target === 'Specific Users' && (
-                  <div className="space-y-2 rounded-[8px] border border-slate-200 p-3 bg-slate-50/50">
-                    <div className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-2.5 py-1.5">
-                      <Search className="h-3.5 w-3.5 text-slate-400" />
+                  <div className="space-y-2 rounded-[8px] border border-[var(--border-color)] p-3 bg-[var(--bg-page)]">
+                    <div className="flex items-center gap-2 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5">
+                      <Search className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                       <input
                         value={searchUsers}
                         onChange={(e) => setSearchUsers(e.target.value)}
                         placeholder="Search user name or email..."
-                        className="w-full bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
+                        className="w-full bg-transparent text-xs text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
                       />
                     </div>
                     <div className="max-h-36 overflow-y-auto space-y-1">
@@ -2101,7 +2093,7 @@ export default function NotificationCenter() {
                               }
                             }}
                             className={`flex cursor-pointer items-center justify-between rounded px-2.5 py-1 text-xs transition-colors ${
-                              isSelected ? 'bg-[#003580] text-white font-semibold' : 'hover:bg-slate-200 text-slate-700'
+                              isSelected ? 'bg-[#003580] text-white font-semibold' : 'hover:bg-[var(--bg-page)] text-[var(--text-secondary)]'
                             }`}
                           >
                             <span>{u.name} ({u.email})</span>
@@ -2119,45 +2111,45 @@ export default function NotificationCenter() {
                 )}
 
                 <label className="space-y-1.5 block">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Subject</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Subject</span>
                   <input
                     value={subject}
                     onChange={(event) => setSubject(event.target.value)}
                     placeholder="Enter notification title..."
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-900 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                   />
                 </label>
 
                 {/* Formatting Toolbar */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Message Body</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Message Body</span>
                     <div className="flex flex-wrap gap-1">
-                      <button type="button" onClick={() => insertFormatting('**', '**')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Bold">
+                      <button type="button" onClick={() => insertFormatting('**', '**')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Bold">
                         <Bold className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('*', '*')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Italic">
+                      <button type="button" onClick={() => insertFormatting('*', '*')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Italic">
                         <Italic className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('<u>', '</u>')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Underline">
+                      <button type="button" onClick={() => insertFormatting('<u>', '</u>')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Underline">
                         <Underline className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('~~', '~~')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Strikethrough">
+                      <button type="button" onClick={() => insertFormatting('~~', '~~')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Strikethrough">
                         <Strikethrough className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('# ')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Heading 1">
+                      <button type="button" onClick={() => insertFormatting('# ')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Heading 1">
                         <Heading1 className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('## ')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Heading 2">
+                      <button type="button" onClick={() => insertFormatting('## ')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Heading 2">
                         <Heading2 className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('- ')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Bullet List">
+                      <button type="button" onClick={() => insertFormatting('- ')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Bullet List">
                         <List className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('[', '](https://)')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Add Link">
+                      <button type="button" onClick={() => insertFormatting('[', '](https://)')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Add Link">
                         <Link2 className="h-3.5 w-3.5" />
                       </button>
-                      <button type="button" onClick={() => insertFormatting('`', '`')} className="p-1 rounded hover:bg-slate-200 text-slate-700" title="Code">
+                      <button type="button" onClick={() => insertFormatting('`', '`')} className="p-1 rounded hover:bg-[var(--bg-page)] text-[var(--text-secondary)]" title="Code">
                         <Code className="h-3.5 w-3.5" />
                       </button>
                     </div>
@@ -2168,46 +2160,46 @@ export default function NotificationCenter() {
                     onChange={(event) => setMessage(event.target.value)}
                     rows={5}
                     placeholder="Compose rich message text or HTML content..."
-                    className="w-full rounded-[8px] border border-slate-200 px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
+                    className="w-full rounded-[8px] border border-[var(--border-color)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-400">
+                  <div className="flex justify-between text-[10px] text-[var(--text-muted)]">
                     <span>{message.length} characters | {message.trim() ? message.trim().split(/\s+/).length : 0} words</span>
                     <span>Tokens: {'{first_name}'}, {'{department}'}, {'{graduation_year}'}</span>
                   </div>
                 </div>
 
                 {/* Rich Media & CTA Controls */}
-                <div className="grid gap-3 md:grid-cols-2 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+                <div className="grid gap-3 md:grid-cols-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/70 p-3">
                   <label className="space-y-1 block md:col-span-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Banner Image URL (Optional)</span>
-                    <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5">
-                      <ImageIcon className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Banner Image URL (Optional)</span>
+                    <div className="flex items-center gap-1.5 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5">
+                      <ImageIcon className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                       <input
                         value={imageUrl}
                         onChange={(e) => setImageUrl(e.target.value)}
                         placeholder="https://example.com/banner-image.jpg"
-                        className="w-full bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
+                        className="w-full bg-transparent text-xs text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)]"
                       />
                     </div>
                   </label>
 
                   <label className="space-y-1 block">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">CTA Button Link (Optional)</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">CTA Button Link (Optional)</span>
                     <input
                       value={ctaLink}
                       onChange={(e) => setCtaLink(e.target.value)}
                       placeholder="https://astu.edu.et/portal"
-                      className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 outline-none"
+                      className="w-full rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none"
                     />
                   </label>
 
                   <label className="space-y-1 block">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">CTA Button Text</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">CTA Button Text</span>
                     <input
                       value={ctaText}
                       onChange={(e) => setCtaText(e.target.value)}
                       placeholder="e.g. Complete Survey Now"
-                      className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 outline-none"
+                      className="w-full rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none"
                     />
                   </label>
                 </div>
@@ -2215,11 +2207,11 @@ export default function NotificationCenter() {
                 {/* Schedule Controls */}
                 <div className="grid gap-3 md:grid-cols-3">
                   <label className="space-y-1.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Send Mode</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Send Mode</span>
                     <select
                       value={sendMode}
                       onChange={(event) => setSendMode(event.target.value as SendMode)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580]"
                     >
                       {['Send Now', 'Schedule for Date'].map((item) => (
                         <option key={item} value={item}>
@@ -2230,33 +2222,33 @@ export default function NotificationCenter() {
                   </label>
 
                   <label className="space-y-1.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Schedule Date</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Schedule Date</span>
                     <input
                       type="date"
                       value={scheduleDate}
                       onChange={(event) => setScheduleDate(event.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580] disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580] disabled:bg-[var(--bg-page)] disabled:text-[var(--text-muted)]"
                       disabled={sendMode === 'Send Now'}
                     />
                   </label>
 
                   <label className="space-y-1.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Schedule Time</span>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">Schedule Time</span>
                     <input
                       type="time"
                       value={scheduleTime}
                       onChange={(event) => setScheduleTime(event.target.value)}
-                      className="w-full rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580] disabled:bg-slate-50 disabled:text-slate-400"
+                      className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580] disabled:bg-[var(--bg-page)] disabled:text-[var(--text-muted)]"
                       disabled={sendMode === 'Send Now'}
                     />
                   </label>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-color)] pt-4">
                   <button
                     type="button"
                     onClick={() => setPreviewOpen(true)}
-                    className="rounded-[8px] border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    className="rounded-[8px] border border-[var(--border-color)] px-4 py-2.5 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
                   >
                     Preview Broadcast
                   </button>
@@ -2283,9 +2275,9 @@ export default function NotificationCenter() {
           >
             <div className="space-y-3">
               {/* Advanced Filter Toolbar */}
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2.5">
                 <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[var(--text-muted)]" />
                   <input
                     type="text"
                     value={historySearch}
@@ -2294,7 +2286,7 @@ export default function NotificationCenter() {
                       setHistoryPage(1);
                     }}
                     placeholder="Search logs..."
-                    className="w-full rounded-md border border-slate-200 bg-white pl-8 pr-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                    className="w-full rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] pl-8 pr-2.5 py-1.5 text-xs text-[var(--text-primary)] outline-none focus:border-[#003580]"
                   />
                 </div>
 
@@ -2304,7 +2296,7 @@ export default function NotificationCenter() {
                     setHistoryTypeFilter(e.target.value);
                     setHistoryPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none"
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1.5 text-xs text-[var(--text-primary)] outline-none"
                 >
                   <option value="All">All Channels</option>
                   <option value="In-App">In-App Only</option>
@@ -2318,7 +2310,7 @@ export default function NotificationCenter() {
                     setHistoryStatusFilter(e.target.value);
                     setHistoryPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none"
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1.5 text-xs text-[var(--text-primary)] outline-none"
                 >
                   <option value="All">All Statuses</option>
                   <option value="Sent">Sent</option>
@@ -2333,7 +2325,7 @@ export default function NotificationCenter() {
                     setHistoryPriorityFilter(e.target.value);
                     setHistoryPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-800 outline-none"
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1.5 text-xs text-[var(--text-primary)] outline-none"
                 >
                   <option value="All">All Priorities</option>
                   <option value="Low">Low</option>
@@ -2344,13 +2336,13 @@ export default function NotificationCenter() {
               </div>
 
               {/* Table View */}
-              <div className="overflow-hidden rounded-[10px] border border-slate-200 bg-white">
+              <div className="overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)]">
                 <div className="overflow-x-auto max-h-[480px]">
                   <table className="min-w-full text-xs">
-                    <thead className="bg-slate-50 sticky top-0 z-10 border-b border-slate-200">
+                    <thead className="bg-[var(--bg-page)] sticky top-0 z-10 border-b border-[var(--border-color)]">
                       <tr>
                         {['Date Sent', 'Channel', 'Priority', 'Subject', 'Target Group', 'Recipients', 'Status'].map((head) => (
-                          <th key={head} className="px-3.5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500 whitespace-nowrap">
+                          <th key={head} className="px-3.5 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] whitespace-nowrap">
                             {head}
                           </th>
                         ))}
@@ -2359,13 +2351,13 @@ export default function NotificationCenter() {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td colSpan={7} className="px-4 py-12 text-center text-xs text-slate-500">
+                          <td colSpan={7} className="px-4 py-12 text-center text-xs text-[var(--text-muted)]">
                             Loading notifications from database...
                           </td>
                         </tr>
                       ) : historyRows.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-4 py-12 text-center text-xs text-slate-500">
+                          <td colSpan={7} className="px-4 py-12 text-center text-xs text-[var(--text-muted)]">
                             No notifications match your active filters.
                           </td>
                         </tr>
@@ -2373,10 +2365,10 @@ export default function NotificationCenter() {
                         historyRows.map((notification) => (
                           <tr
                             key={notification.id}
-                            className="cursor-pointer border-t border-slate-100 hover:bg-slate-50/80 transition-colors"
+                            className="cursor-pointer border-t border-[var(--border-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04] transition-colors"
                             onClick={() => setDetail(notification)}
                           >
-                            <td className="px-3.5 py-3 text-slate-600 whitespace-nowrap">
+                            <td className="px-3.5 py-3 text-[var(--text-secondary)] whitespace-nowrap">
                               {new Date(notification.dateSent).toLocaleDateString()}
                             </td>
                             <td className="px-3.5 py-3 whitespace-nowrap">
@@ -2389,13 +2381,13 @@ export default function NotificationCenter() {
                                 {notification.priority || 'Normal'}
                               </AdminBadge>
                             </td>
-                            <td className="px-3.5 py-3 text-slate-900 font-semibold max-w-[200px] truncate" title={notification.subject}>
+                            <td className="px-3.5 py-3 text-[var(--text-primary)] font-semibold max-w-[200px] truncate" title={notification.subject}>
                               {notification.subject}
                             </td>
-                            <td className="px-3.5 py-3 text-slate-600 whitespace-nowrap">
+                            <td className="px-3.5 py-3 text-[var(--text-secondary)] whitespace-nowrap">
                               {notification.targetGroup}
                             </td>
-                            <td className="px-3.5 py-3 text-slate-700 font-bold whitespace-nowrap">
+                            <td className="px-3.5 py-3 text-[var(--text-secondary)] font-bold whitespace-nowrap">
                               {notification.recipients.toLocaleString()}
                             </td>
                             <td className="px-3.5 py-3 whitespace-nowrap">
@@ -2412,7 +2404,7 @@ export default function NotificationCenter() {
               </div>
 
               {/* Clean Pagination Controls */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-color)] pt-3 text-xs text-[var(--text-secondary)]">
                 <div className="flex items-center gap-2">
                   <span>Show</span>
                   <select
@@ -2421,7 +2413,7 @@ export default function NotificationCenter() {
                       setHistoryLimit(Number(e.target.value));
                       setHistoryPage(1);
                     }}
-                    className="rounded border border-slate-200 px-2 py-1 text-xs outline-none focus:border-[#003580]"
+                    className="rounded border border-[var(--border-color)] px-2 py-1 text-xs outline-none focus:border-[#003580]"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
@@ -2440,19 +2432,19 @@ export default function NotificationCenter() {
                     type="button"
                     disabled={historyPage <= 1}
                     onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
-                    className="inline-flex items-center gap-1 rounded border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    className="inline-flex items-center gap-1 rounded border border-[var(--border-color)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40"
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                     Prev
                   </button>
-                  <span className="px-2 font-semibold text-slate-700">
+                  <span className="px-2 font-semibold text-[var(--text-secondary)]">
                     {historyPage} / {totalHistoryPages}
                   </span>
                   <button
                     type="button"
                     disabled={historyPage >= totalHistoryPages}
                     onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))}
-                    className="inline-flex items-center gap-1 rounded border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    className="inline-flex items-center gap-1 rounded border border-[var(--border-color)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40"
                   >
                     Next
                     <ChevronRight className="h-3.5 w-3.5" />
@@ -2478,7 +2470,7 @@ export default function NotificationCenter() {
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
                   selectedCategory === cat
                     ? 'bg-[#003580] text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)]'
                 }`}
               >
                 {cat}
@@ -2491,17 +2483,17 @@ export default function NotificationCenter() {
           {filteredTemplates.map((template) => (
             <article
               key={template.name}
-              className="flex flex-col justify-between rounded-[10px] border border-slate-200 bg-slate-50/70 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300 transition-all"
+              className="flex flex-col justify-between rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)]/70 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300 transition-all"
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
-                  <h4 className="text-sm font-semibold text-slate-900">{template.name}</h4>
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">{template.name}</h4>
                   <AdminBadge variant="neutral" className="text-[10px]">
                     {template.category}
                   </AdminBadge>
                 </div>
                 <p className="mt-1 text-xs font-medium text-[#003580]">{template.title}</p>
-                <p className="mt-2 text-xs leading-5 text-slate-600 line-clamp-3">{template.message}</p>
+                <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)] line-clamp-3">{template.message}</p>
               </div>
 
               <button
@@ -2526,7 +2518,7 @@ export default function NotificationCenter() {
         onClose={() => setMoreToolsOpen(false)}
         footer={
           <div className="flex items-center justify-between w-full">
-            <span className="text-xs text-slate-500 font-medium">ASTU AMS Enterprise Broadcasting Suite &bull; 150 Tools Fully Functional</span>
+            <span className="text-xs text-[var(--text-muted)] font-medium">ASTU AMS Enterprise Broadcasting Suite &bull; 150 Tools Fully Functional</span>
             <button
               type="button"
               onClick={() => setMoreToolsOpen(false)}
@@ -2539,7 +2531,7 @@ export default function NotificationCenter() {
       >
         <div className="space-y-4">
           {/* Tool Suite Navigation Tabs (10 Categories) */}
-          <div className="flex flex-wrap gap-1 border-b border-slate-200 pb-2 text-xs font-semibold">
+          <div className="flex flex-wrap gap-1 border-b border-[var(--border-color)] pb-2 text-xs font-semibold">
             {[
               { id: 'ai', label: '1. AI & Composition (15)', icon: Bot },
               { id: 'components', label: '2. HTML Layouts (15)', icon: Layout },
@@ -2559,7 +2551,7 @@ export default function NotificationCenter() {
                   type="button"
                   onClick={() => setActiveToolTab(tab.id as any)}
                   className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 transition-all ${
-                    activeToolTab === tab.id ? 'bg-[#003580] text-white shadow-sm font-bold' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    activeToolTab === tab.id ? 'bg-[#003580] text-white shadow-sm font-bold' : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)]'
                   }`}
                 >
                   <TabIcon className="h-3.5 w-3.5" />
@@ -2788,7 +2780,7 @@ export default function NotificationCenter() {
         onClose={() => setPreviewOpen(false)}
         footer={
           <div className="flex justify-between items-center w-full">
-            <span className="text-xs text-slate-500">Targeting ~{estimatedRecipientsCount} recipients</span>
+            <span className="text-xs text-[var(--text-muted)]">Targeting ~{estimatedRecipientsCount} recipients</span>
             <button
               type="button"
               onClick={() => setPreviewOpen(false)}
@@ -2808,19 +2800,19 @@ export default function NotificationCenter() {
           </div>
 
           {imageUrl && (
-            <div className="overflow-hidden rounded-lg border border-slate-200">
+            <div className="overflow-hidden rounded-lg border border-[var(--border-color)]">
               <img src={imageUrl} alt="Banner" className="max-h-48 w-full object-cover" />
             </div>
           )}
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Subject</p>
-            <p className="mt-1 text-base font-bold text-slate-900">{subject || 'No Subject'}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Subject</p>
+            <p className="mt-1 text-base font-bold text-[var(--text-primary)]">{subject || 'No Subject'}</p>
           </div>
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Message Content</p>
-            <div className="mt-1 rounded-[10px] border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-800 whitespace-pre-wrap">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Message Content</p>
+            <div className="mt-1 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-xs leading-6 text-[var(--text-primary)] whitespace-pre-wrap">
               {message || 'No message content provided.'}
             </div>
           </div>
@@ -2847,7 +2839,7 @@ export default function NotificationCenter() {
         onClose={() => setDetail(null)}
         footer={
           <div className="flex justify-between items-center w-full">
-            <span className="text-xs text-slate-500">ID: {detail?.id}</span>
+            <span className="text-xs text-[var(--text-muted)]">ID: {detail?.id}</span>
             <button
               type="button"
               onClick={() => setDetail(null)}
@@ -2873,21 +2865,21 @@ export default function NotificationCenter() {
 
             {detail.imageUrl && (
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Banner Image</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Banner Image</p>
                 <img src={detail.imageUrl} alt="Banner" className="mt-1 max-h-40 rounded-lg object-cover" />
               </div>
             )}
 
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Broadcast Content</p>
-              <div className="mt-2 rounded-[10px] border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-800 whitespace-pre-wrap">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Broadcast Content</p>
+              <div className="mt-2 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-xs leading-6 text-[var(--text-primary)] whitespace-pre-wrap">
                 {detail.body}
               </div>
             </div>
 
             {detail.ctaLink && (
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Action Button</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Action Button</p>
                 <a
                   href={detail.ctaLink}
                   target="_blank"
@@ -2914,9 +2906,9 @@ export default function NotificationCenter() {
               <button
                 type="button"
                 onClick={handleCopyExportData}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-all shadow-xs"
               >
-                <Copy className="h-3.5 w-3.5 text-slate-500" />
+                <Copy className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                 <span>Copy Data to Clipboard</span>
               </button>
               {exportFormat === 'html' && (
@@ -2935,7 +2927,7 @@ export default function NotificationCenter() {
               <button
                 type="button"
                 onClick={() => setIsExportModalOpen(false)}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] transition-colors"
               >
                 Cancel
               </button>
@@ -2967,7 +2959,7 @@ export default function NotificationCenter() {
 
           {/* Section 1: Choose File Format */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 block">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2 block">
               1. Select Export Format
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
@@ -2989,18 +2981,18 @@ export default function NotificationCenter() {
                     className={`flex flex-col items-start justify-between rounded-xl border p-3 text-left transition-all ${
                       active
                         ? 'border-[#003580] bg-blue-50/80 ring-2 ring-[#003580]/20 shadow-sm'
-                        : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300'
+                        : 'border-slate-200 bg-white hover:bg-[var(--bg-page)] hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <div className={`p-1.5 rounded-lg ${active ? 'bg-[#003580] text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      <div className={`p-1.5 rounded-lg ${active ? 'bg-[#003580] text-white' : 'bg-[var(--bg-page)] text-[var(--text-secondary)]'}`}>
                         <IconComp className="h-4 w-4" />
                       </div>
                       {active && <CheckCircle2 className="h-4 w-4 text-[#003580]" />}
                     </div>
                     <div className="mt-2.5">
-                      <p className={`text-xs font-bold ${active ? 'text-[#003580]' : 'text-slate-800'}`}>{fmt.name}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-2">{fmt.desc}</p>
+                      <p className={`text-xs font-bold ${active ? 'text-[#003580]' : 'text-[var(--text-primary)]'}`}>{fmt.name}</p>
+                      <p className="text-[10px] text-[var(--text-muted)] mt-0.5 line-clamp-2">{fmt.desc}</p>
                     </div>
                   </button>
                 );
@@ -3010,7 +3002,7 @@ export default function NotificationCenter() {
 
           {/* Section 2: Data Filtering Criteria Grid */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-2 block">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-2 block">
               2. Data Filtering & Scope Criteria
             </label>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -3040,15 +3032,15 @@ export default function NotificationCenter() {
               </div>
 
               {/* Date Range Selector */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <CalendarDays className="h-3.5 w-3.5 text-[#003580]" />
                   <span>Date Range</span>
                 </div>
                 <select
                   value={exportDateRange}
                   onChange={(e) => setExportDateRange(e.target.value as any)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-800 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                 >
                   <option value="all">All Time (Full History)</option>
                   <option value="24h">Last 24 Hours</option>
@@ -3061,21 +3053,21 @@ export default function NotificationCenter() {
                 {exportDateRange === 'custom' && (
                   <div className="space-y-1.5 pt-1">
                     <div>
-                      <span className="text-[10px] text-slate-500 font-semibold">From Date:</span>
+                      <span className="text-[10px] text-[var(--text-muted)] font-semibold">From Date:</span>
                       <input
                         type="date"
                         value={customStartDate}
                         onChange={(e) => setCustomStartDate(e.target.value)}
-                        className="w-full rounded-md border border-slate-200 bg-slate-50 p-1.5 text-xs text-slate-700"
+                        className="w-full rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] p-1.5 text-xs text-[var(--text-secondary)]"
                       />
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 font-semibold">To Date:</span>
+                      <span className="text-[10px] text-[var(--text-muted)] font-semibold">To Date:</span>
                       <input
                         type="date"
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="w-full rounded-md border border-slate-200 bg-slate-50 p-1.5 text-xs text-slate-700"
+                        className="w-full rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] p-1.5 text-xs text-[var(--text-secondary)]"
                       />
                     </div>
                   </div>
@@ -3083,15 +3075,15 @@ export default function NotificationCenter() {
               </div>
 
               {/* Target Audience / Portal Selector */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <Users className="h-3.5 w-3.5 text-emerald-600" />
                   <span>Target Audience</span>
                 </div>
                 <select
                   value={exportTargetAudience}
                   onChange={(e) => setExportTargetAudience(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-800 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                 >
                   <option value="all">All 6 System Portals</option>
                   <option value="ALUMNI">Alumni & Graduates</option>
@@ -3104,15 +3096,15 @@ export default function NotificationCenter() {
               </div>
 
               {/* Channel Filter */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <Radio className="h-3.5 w-3.5 text-purple-600" />
                   <span>Delivery Channel</span>
                 </div>
                 <select
                   value={exportChannel}
                   onChange={(e) => setExportChannel(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-800 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                 >
                   <option value="all">All Channels</option>
                   <option value="Both">Both (In-App & Email)</option>
@@ -3123,8 +3115,8 @@ export default function NotificationCenter() {
               </div>
 
               {/* Priority & Status Filter */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <Sliders className="h-3.5 w-3.5 text-amber-600" />
                   <span>Priority & Status</span>
                 </div>
@@ -3132,7 +3124,7 @@ export default function NotificationCenter() {
                   <select
                     value={exportPriority}
                     onChange={(e) => setExportPriority(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-1.5 text-[11px] font-medium text-slate-800 outline-none focus:border-[#003580]"
+                    className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-1.5 text-[11px] font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                   >
                     <option value="all">All Priority</option>
                     <option value="Urgent">Urgent</option>
@@ -3142,7 +3134,7 @@ export default function NotificationCenter() {
                   <select
                     value={exportStatus}
                     onChange={(e) => setExportStatus(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-1.5 text-[11px] font-medium text-slate-800 outline-none focus:border-[#003580]"
+                    className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-1.5 text-[11px] font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                   >
                     <option value="all">All Status</option>
                     <option value="Sent">Sent</option>
@@ -3156,8 +3148,8 @@ export default function NotificationCenter() {
             {/* Custom Criteria Secondary Row */}
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mt-3">
               {/* Search Keyword Filter */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <Search className="h-3.5 w-3.5 text-blue-600" />
                   <span>Keyword Search</span>
                 </div>
@@ -3166,20 +3158,20 @@ export default function NotificationCenter() {
                   placeholder="Subject or content..."
                   value={exportKeyword}
                   onChange={(e) => setExportKeyword(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-800 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                 />
               </div>
 
               {/* Category Filter */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <Layers className="h-3.5 w-3.5 text-teal-600" />
                   <span>Category Scope</span>
                 </div>
                 <select
                   value={exportCategory}
                   onChange={(e) => setExportCategory(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-800 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                 >
                   <option value="all">All Categories</option>
                   <option value="General">General</option>
@@ -3191,15 +3183,15 @@ export default function NotificationCenter() {
               </div>
 
               {/* Open Rate / Engagement Filter */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <Eye className="h-3.5 w-3.5 text-indigo-600" />
                   <span>Engagement Level</span>
                 </div>
                 <select
                   value={exportEngagement}
                   onChange={(e) => setExportEngagement(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-800 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                 >
                   <option value="all">All Engagement Levels</option>
                   <option value="high">High Engagement (≥50% Open)</option>
@@ -3210,15 +3202,15 @@ export default function NotificationCenter() {
               </div>
 
               {/* Media Content Filter */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-1.5">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-[var(--text-secondary)]">
                   <ImageIcon className="h-3.5 w-3.5 text-rose-600" />
                   <span>Media Banners</span>
                 </div>
                 <select
                   value={exportMediaFilter}
                   onChange={(e) => setExportMediaFilter(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs font-medium text-slate-800 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-2 text-xs font-medium text-[var(--text-primary)] outline-none focus:border-[#003580]"
                 >
                   <option value="all">All Notifications</option>
                   <option value="with_banner">With Hero Image Banners</option>
@@ -3231,7 +3223,7 @@ export default function NotificationCenter() {
           {/* Section 3: Field Selection Checkboxes */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">
+              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                 3. Select Included Columns & Data Fields
               </label>
               <div className="flex items-center gap-2 text-xs">
@@ -3285,7 +3277,7 @@ export default function NotificationCenter() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 rounded-xl border border-slate-200 bg-white p-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5">
               {[
                 { key: 'id', label: 'Notification ID' },
                 { key: 'dateSent', label: 'Date & Time Sent' },
@@ -3308,7 +3300,7 @@ export default function NotificationCenter() {
                     className={`flex items-center gap-2 rounded-lg border p-2 text-xs font-medium cursor-pointer transition-all ${
                       checked
                         ? 'border-blue-200 bg-blue-50/50 text-[#003580] font-bold'
-                        : 'border-slate-200 bg-slate-50/50 text-slate-600 hover:bg-slate-100'
+                        : 'border-slate-200 bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)]'
                     }`}
                   >
                     <input
@@ -3328,8 +3320,8 @@ export default function NotificationCenter() {
 
           {/* Section 4: Formatting & Header Preferences */}
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
-              <label className="flex items-center gap-2 text-xs font-bold text-slate-800 cursor-pointer">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
+              <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={includeAnalyticsHeader}
@@ -3338,17 +3330,17 @@ export default function NotificationCenter() {
                 />
                 <span>Include Summary Metrics Header</span>
               </label>
-              <p className="text-[10px] text-slate-500 mt-1 pl-5">
+              <p className="text-[10px] text-[var(--text-muted)] mt-1 pl-5">
                 Adds total recipient stats & open rate metadata at top of report file.
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
-              <span className="text-xs font-bold text-slate-800 block mb-1">Sort Order</span>
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
+              <span className="text-xs font-bold text-[var(--text-primary)] block mb-1">Sort Order</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-1.5 text-xs text-slate-800"
+                className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-1.5 text-xs text-[var(--text-primary)]"
               >
                 <option value="dateSent_desc">Date Sent (Newest First)</option>
                 <option value="dateSent_asc">Date Sent (Oldest First)</option>
@@ -3357,12 +3349,12 @@ export default function NotificationCenter() {
               </select>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
-              <span className="text-xs font-bold text-slate-800 block mb-1">CSV Delimiter</span>
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
+              <span className="text-xs font-bold text-[var(--text-primary)] block mb-1">CSV Delimiter</span>
               <select
                 value={delimiter}
                 onChange={(e) => setDelimiter(e.target.value as any)}
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-1.5 text-xs text-slate-800"
+                className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-1.5 text-xs text-[var(--text-primary)]"
                 disabled={exportFormat === 'json' || exportFormat === 'html' || exportFormat === 'pdf'}
               >
                 <option value=",">Comma ( , ) - Standard</option>
@@ -3381,7 +3373,7 @@ export default function NotificationCenter() {
             );
 
             return (
-              <div className="rounded-xl border border-slate-200 bg-slate-900 text-white p-4 space-y-3">
+              <div className="rounded-xl border border-[var(--border-color)] bg-slate-900 text-white p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
                   <div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Live Export Filter Match</span>
@@ -3391,15 +3383,15 @@ export default function NotificationCenter() {
                   </div>
                   <div className="flex items-center gap-4 text-xs">
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Total Audience</span>
+                      <span className="text-[var(--text-muted)] block text-[10px]">Total Audience</span>
                       <span className="font-bold text-white">{totalRecipients.toLocaleString()}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Avg Open Rate</span>
+                      <span className="text-[var(--text-muted)] block text-[10px]">Avg Open Rate</span>
                       <span className="font-bold text-emerald-300">{avgOpenRate}%</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px]">Output Format</span>
+                      <span className="text-[var(--text-muted)] block text-[10px]">Output Format</span>
                       <span className="font-bold text-blue-300 uppercase">{exportFormat}</span>
                     </div>
                   </div>
@@ -3407,13 +3399,13 @@ export default function NotificationCenter() {
 
                 {/* Sample Rows Preview */}
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">
                     Sample Data Preview (First 3 Rows)
                   </p>
                   {filtered.length > 0 ? (
                     <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950/60">
                       <table className="w-full text-left text-[11px] text-slate-300">
-                        <thead className="bg-slate-800/80 text-slate-400 font-semibold text-[10px] uppercase">
+                        <thead className="bg-slate-800/80 text-[var(--text-muted)] font-semibold text-[10px] uppercase">
                           <tr>
                             <th className="p-2">Date Sent</th>
                             <th className="p-2">Channel</th>
@@ -3426,7 +3418,7 @@ export default function NotificationCenter() {
                         <tbody className="divide-y divide-slate-800/50">
                           {filtered.slice(0, 3).map((r) => (
                             <tr key={r.id} className="hover:bg-slate-800/40">
-                              <td className="p-2 whitespace-nowrap text-slate-400">{new Date(r.dateSent).toLocaleDateString()}</td>
+                              <td className="p-2 whitespace-nowrap text-[var(--text-muted)]">{new Date(r.dateSent).toLocaleDateString()}</td>
                               <td className="p-2 font-semibold text-blue-300">{r.type}</td>
                               <td className="p-2">
                                 <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
@@ -3436,7 +3428,7 @@ export default function NotificationCenter() {
                                 </span>
                               </td>
                               <td className="p-2 font-medium text-white max-w-[200px] truncate">{r.subject}</td>
-                              <td className="p-2 text-slate-400">{r.targetGroup}</td>
+                              <td className="p-2 text-[var(--text-muted)]">{r.targetGroup}</td>
                               <td className="p-2 font-bold text-emerald-400">{r.openRate}</td>
                             </tr>
                           ))}
@@ -3473,12 +3465,12 @@ function ToolCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-start gap-2.5 rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-left hover:bg-slate-100 hover:border-slate-300 transition-all shadow-sm"
+      className="flex items-start gap-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/80 p-3 text-left hover:bg-[var(--bg-page)] hover:border-slate-300 transition-all shadow-sm"
     >
       <Icon className="h-4 w-4 text-[#003580] mt-0.5 shrink-0" />
       <div>
-        <h5 className="text-xs font-bold text-slate-900">{title}</h5>
-        <p className="text-[11px] text-slate-500 leading-4 mt-0.5">{desc}</p>
+        <h5 className="text-xs font-bold text-[var(--text-primary)]">{title}</h5>
+        <p className="text-[11px] text-[var(--text-muted)] leading-4 mt-0.5">{desc}</p>
       </div>
     </button>
   );
@@ -3486,9 +3478,9 @@ function ToolCard({
 
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-      <p className="mt-1 text-xs font-medium text-slate-800">{value}</p>
+    <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">{label}</p>
+      <p className="mt-1 text-xs font-medium text-[var(--text-primary)]">{value}</p>
     </div>
   );
 }

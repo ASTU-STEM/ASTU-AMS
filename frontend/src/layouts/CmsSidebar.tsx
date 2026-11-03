@@ -20,6 +20,7 @@ import {
   Plus,
   Settings,
   ShieldCheck,
+  Sparkles,
   Users,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
@@ -61,11 +62,11 @@ const navItems: EnhancedNavItem[] = [
   { label: 'Donations & Giving', path: '/cms/donations', icon: HeartHandshake, section: 'alumni-office', tooltip: 'Fundraising causes, Telebirr/Chapa campaigns & donor tracking' },
   { label: 'Messages', path: '/cms/messages', icon: MessageSquareText, section: 'alumni-office', tooltip: 'Internal messaging & communication' },
   { label: 'Notifications', path: '/cms/notifications', icon: Bell, section: 'alumni-office', tooltip: 'System notifications & alerts' },
-  { label: 'Pages & Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content-management', tooltip: 'Manage homepage sections, Overview, Contact Us & institutional pages' },
+  { label: 'Pages & Homepage CMS', path: '/cms/homepage', icon: Layers3, section: 'content-management', tooltip: 'Homepage sections including FAQ, hero, partners, gallery & institutional pages' },
   { label: 'Partners & Employers', path: '/cms/partners', icon: Building2, section: 'content-management', tooltip: 'Manage /partners portal, employer benefits & logos' },
   { label: 'Announcements', path: '/cms/content', icon: Newspaper, section: 'content-management', tooltip: 'Alumni announcements & public notices' },
-  { label: 'Community', path: '/cms/community', icon: Users, section: 'content-management', tooltip: 'Alumni community, detail pages & homepage sections' },
-  { label: 'Community Members', path: '/cms/community-members', icon: Users, section: 'content-management', tooltip: 'Executive committee & community member records' },
+  { label: 'RAG Knowledge Hub', path: '/cms/knowledge-hub', icon: Sparkles, section: 'content-management', tooltip: 'Institutional RAG documents & FAQs for Homepage AI Chatbot' },
+  { label: 'Community', path: '/cms/community', icon: Users, section: 'content-management', tooltip: 'Community page, members roster, chapters & pillars (merged)' },
   { label: 'Media & Gallery', path: '/cms/media-gallery', icon: ImageIcon, section: 'content-management', tooltip: 'Unified media library, asset uploads & campus photo gallery' },
   { label: 'SEO', path: '/cms/seo', icon: Globe, section: 'content-management', tooltip: 'Search engine optimization & indexing' },
   { label: 'Templates', path: '/cms/templates', icon: FileText, section: 'content-management', tooltip: 'Reusable content templates' },
@@ -135,7 +136,7 @@ export default function CmsSidebar({
           <NavLink
             to="/cms/content"
             onClick={onNavigate}
-            className="mt-3 flex w-full items-center justify-center gap-2 bg-[#003580] px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#002866] cursor-pointer"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#003580] px-3 py-2.5 text-xs font-semibold text-white shadow-sm shadow-[#003580]/20 transition-colors hover:bg-[#002866] cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Broadcast Notice</span>
@@ -145,7 +146,7 @@ export default function CmsSidebar({
             to="/cms/content"
             onClick={onNavigate}
             title="Broadcast Notice"
-            className="mt-3 mx-auto flex h-9 w-9 items-center justify-center bg-[#003580] text-white transition-colors hover:bg-[#002866] cursor-pointer"
+            className="mt-3 mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-[#003580] text-white shadow-sm shadow-[#003580]/20 transition-colors hover:bg-[#002866] cursor-pointer"
           >
             <Plus className="h-4 w-4" />
           </NavLink>
@@ -161,9 +162,18 @@ export default function CmsSidebar({
               {!collapsed && <SidebarSectionLabel>{section.label}</SidebarSectionLabel>}
               <div className="space-y-0.5">
                 {items.map((item) => {
+                  const aliases: Record<string, string[]> = {
+                    '/cms/content': ['/cms/content', '/cms/announcements'],
+                    '/cms/jobs': ['/cms/jobs', '/cms/careers'],
+                    '/cms/surveys': ['/cms/surveys', '/cms/tracer-studies'],
+                    '/cms/partners': ['/cms/partners', '/cms/employers'],
+                    '/cms/media-gallery': ['/cms/media-gallery', '/cms/media', '/cms/gallery'],
+                    '/cms/community': ['/cms/community', '/cms/community-members'],
+                  };
+                  const matchPaths = aliases[item.path] || [item.path];
                   const isActive = item.exact
                     ? location.pathname === item.path
-                    : location.pathname.startsWith(item.path);
+                    : matchPaths.some((p) => location.pathname.startsWith(p));
                   return (
                     <SidebarNavLink
                       key={item.path}

@@ -2,6 +2,10 @@ import cron from 'node-cron';
 import prisma from '../config/db';
 import { NotificationDispatcher } from '../../modules/notifications/application/services/NotificationDispatcher';
 import { EmailService } from '../services/EmailService';
+import {
+  createDatabaseBackup,
+  reconcileBackupHistory,
+} from '../../modules/admin/infrastructure/services/DatabaseBackupService';
 
 const dispatcher = new NotificationDispatcher();
 
@@ -125,33 +129,25 @@ export function initCronJobs() {
 }
 
 /**
- * Executes an automated PostgreSQL database backup snapshot and archives metadata to DB.
+ * Executes an automated PostgreSQL pg_dump and archives metadata + on-disk file.
  */
 export async function executeScheduledDatabaseBackup(): Promise<any> {
   try {
-    const [users, alumni, logs, registrar] = await Promise.all([
-      prisma.user.count().catch(() => 0),
-      prisma.alumniProfile.count().catch(() => 0),
-      prisma.auditLog.count().catch(() => 0),
-      prisma.registrarStudent.count().catch(() => 0),
-    ]);
-    const estimatedMB = ((users * 2.5 + alumni * 8.2 + logs * 1.5 + registrar * 4.1 + 1500) / 1024).toFixed(1);
-    const dbSize = `${estimatedMB} MB`;
-
-    const now = new Date();
-    const dateStr = now.toLocaleDateString() + ', ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const isoDate = now.toISOString().split('T')[0];
-    const newBackup = {
-      date: dateStr,
-      size: dbSize,
-      status: 'Success',
-      file: `backup-${isoDate}-${Date.now().toString().slice(-4)}.sql.gz`,
-    };
+    const newBackup = await createDatabaseBackup();
 
     let backupsSetting = await prisma.systemSetting.findUnique({ where: { key: 'BACKUP_HISTORY' } }).catch(() => null);
     const currentBackups: any[] = backupsSetting && Array.isArray(backupsSetting.value) ? (backupsSetting.value as any[]) : [];
-
-    const updatedBackups = [newBackup, ...currentBackups.filter((b) => !b.date || !b.date.includes('2026-05-29'))];
+    const cleanPast = reconcileBackupHistory(currentBackups);
+    const updatedBackups = [
+      {
+        date: newBackup.date,
+        size: newBackup.size,
+        status: newBackup.status,
+        file: newBackup.file,
+        format: newBackup.format,
+      },
+      ...cleanPast.filter((b) => b.file !== newBackup.file),
+    ];
 
     await prisma.systemSetting.upsert({
       where: { key: 'BACKUP_HISTORY' },
@@ -162,7 +158,7 @@ export async function executeScheduledDatabaseBackup(): Promise<any> {
     await prisma.auditLog.create({
       data: {
         action: 'AUTOMATED_DATABASE_BACKUP',
-        details: `Automated database backup executed: ${newBackup.file} (${dbSize})`,
+        details: `Automated PostgreSQL pg_dump completed: ${newBackup.file} (${newBackup.size})`,
       },
     });
 

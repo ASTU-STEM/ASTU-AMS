@@ -6,22 +6,11 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (role: UserRole, name?: string) => void;
   logout: () => void;
   hasPermission: (allowedRoles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-const MOCK_USERS: Record<string, User> = {
-  ALUMNI: { id: 'alum-001', email: 'abebe@astu.edu.et', firstName: 'Abebe', lastName: 'Bikila', role: 'ALUMNI', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  EMPLOYER: { id: 'emp-001', email: 'tigist@safir.com', firstName: 'Tigist', lastName: 'Haile', role: 'EMPLOYER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  REGISTRAR: { id: 'reg-001', email: 'registrar@astu.edu.et', firstName: 'Abebe', lastName: 'Assefa', role: 'REGISTRAR', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  DEPARTMENT_HEAD: { id: 'dept-001', email: 'cs.head@astu.edu.et', firstName: 'Meseret', lastName: 'Alemu', department: 'Computer Science', role: 'DEPARTMENT_HEAD', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  ADMIN: { id: 'adm-001', email: 'admin@astu.edu.et', firstName: 'System', lastName: 'Administrator', role: 'ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  SUPER_ADMIN: { id: 'super-adm-001', email: 'admin@astust.edu.et', firstName: 'Tolosa Abebe', lastName: 'Badho', role: 'SUPER_ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  CMS_MANAGER: { id: 'cms-mgr-001', email: 'cms@astu.edu.et', firstName: 'Content', lastName: 'Manager', role: 'CMS_MANAGER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-};
 
 const normalizeRole = (role?: string | null): UserRole | null => {
   switch (role?.toUpperCase()) {
@@ -39,40 +28,39 @@ const normalizeRole = (role?: string | null): UserRole | null => {
 };
 
 const readStoredUser = (): User | null => {
+  // Authentication may only be restored from a successful backend login.  In
+  // particular, never infer a user or role from a browser-only preference.
+  if (!localStorage.getItem('authToken')) return null;
+
   const storedUser = localStorage.getItem('user');
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      const role = normalizeRole(parsed.role);
-      if (role) {
-        const mock = MOCK_USERS[role];
-        const rawName = parsed.name || parsed.fullName || '';
-        const firstName = parsed.firstName !== undefined && parsed.firstName !== '' 
-          ? parsed.firstName 
-          : (rawName ? rawName.split(' ')[0] : (mock?.firstName ?? ''));
-        const lastName = parsed.lastName !== undefined && parsed.lastName !== ''
-          ? parsed.lastName 
-          : (rawName ? rawName.split(' ').slice(1).join(' ') : (mock?.lastName ?? ''));
-        
-        return {
-          id: String(parsed.id ?? mock?.id ?? ''),
-          email: String(parsed.email ?? mock?.email ?? ''),
-          firstName: String(firstName),
-          lastName: String(lastName),
-          name: String(rawName || `${firstName} ${lastName}`.trim()),
-          department: parsed.department || mock?.department,
-          role,
-          isActive: true,
-          createdAt: parsed.createdAt ?? '2024-01-01',
-          updatedAt: parsed.updatedAt ?? '2026-01-01',
-        };
-      }
-    } catch {
-      console.warn('Failed to restore stored auth user');
-    }
+  if (!storedUser) return null;
+
+  try {
+    const parsed = JSON.parse(storedUser);
+    const role = normalizeRole(parsed.role);
+    const rawName = typeof parsed.name === 'string' ? parsed.name : (typeof parsed.fullName === 'string' ? parsed.fullName : '');
+    const nameParts = rawName.trim().split(/\s+/).filter(Boolean);
+    const firstName = typeof parsed.firstName === 'string' && parsed.firstName.trim() ? parsed.firstName.trim() : nameParts[0];
+    const lastName = typeof parsed.lastName === 'string' && parsed.lastName.trim() ? parsed.lastName.trim() : nameParts.slice(1).join(' ');
+
+    if (!role || !parsed.id || !parsed.email || !firstName || !lastName) return null;
+
+    return {
+      id: String(parsed.id),
+      email: String(parsed.email),
+      firstName,
+      lastName,
+      name: rawName || `${firstName} ${lastName}`,
+      department: typeof parsed.department === 'string' ? parsed.department : undefined,
+      role,
+      isActive: parsed.isActive !== false,
+      createdAt: typeof parsed.createdAt === 'string' ? parsed.createdAt : '',
+      updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : '',
+    };
+  } catch {
+    console.warn('Failed to restore stored auth user');
+    return null;
   }
-  const savedRole = normalizeRole(localStorage.getItem('astu_ams_user_role'));
-  return savedRole ? MOCK_USERS[savedRole] ?? null : null;
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -96,17 +84,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
-  const login = useCallback((role: UserRole, name?: string) => {
-    const mockUser = MOCK_USERS[role];
-    if (!mockUser) return;
-    const userData = name ? { ...mockUser, firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') } : mockUser;
-    localStorage.setItem('astu_ams_user_role', role);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('authToken', 'mock-jwt-token-' + Date.now());
-    window.dispatchEvent(new Event('astu-auth-changed'));
-    setUser(userData);
-  }, []);
-
   const logout = useCallback(async () => {
     try {
       await authService.logout();
@@ -123,7 +100,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, hasPermission }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, logout, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

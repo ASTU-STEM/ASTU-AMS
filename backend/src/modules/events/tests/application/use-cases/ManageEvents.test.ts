@@ -91,6 +91,19 @@ describe('ManageEvents Use Cases', () => {
       await useCase.execute('evt1', 'admin1');
       expect(mockRepo.delete).toHaveBeenCalledWith('evt1');
     });
+
+    it('should delete event if user is an office manager even when not creator', async () => {
+      mockRepo.findById.mockResolvedValue(mockEvent);
+      const useCase = new DeleteEvent(mockRepo);
+      await useCase.execute('evt1', 'cms-user', 'ALUMNI_OFFICE');
+      expect(mockRepo.delete).toHaveBeenCalledWith('evt1');
+    });
+
+    it('should throw UnauthorizedEventActionError for non-managers who are not creator', async () => {
+      mockRepo.findById.mockResolvedValue(mockEvent);
+      const useCase = new DeleteEvent(mockRepo);
+      await expect(useCase.execute('evt1', 'hacker', 'ALUMNI')).rejects.toThrow(UnauthorizedEventActionError);
+    });
   });
 
   describe('GetEvents', () => {

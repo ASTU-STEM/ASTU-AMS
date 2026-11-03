@@ -187,17 +187,17 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       fullName: '',
       email: '',
       phone: '',
-      nationality: 'Ethiopian',
+      nationality: '',
       dateOfBirth: '',
-      department: 'Computer Science and Engineering',
-      graduationYear: '2024',
+      department: '',
+      graduationYear: '',
       cgpa: '',
       password: generateRandomPassword(),
       autoGeneratePassword: true,
       status: 'Active',
-      isVerified: true
+      isVerified: false
     });
-    toast.success('Graduate profile added to SIS database!');
+    // Parent handler owns the success/error toast after API commit
   };
 
   const handleEditSubmit = (e: React.FormEvent) => {
@@ -205,7 +205,7 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
     if (editingGrad) {
       onEditGraduate(editingGrad);
       setEditingGrad(null);
-      toast.success('Graduate profile saved successfully.');
+      // Parent surfaces honest workspace-only messaging
     }
   };
 
@@ -215,7 +215,6 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       return;
     }
     selectedRecords.forEach((id: number) => onArchiveGraduate(id));
-    toast.success(`Archived ${selectedRecords.length} records.`);
     setSelectedRecords([]);
   };
 
@@ -225,7 +224,6 @@ export const RecordsTab: React.FC<RecordsTabProps> = ({
       return;
     }
     selectedRecords.forEach((id: number) => onVerifyIdentity(id));
-    toast.success(`Verified ${selectedRecords.length} identities.`);
     setSelectedRecords([]);
   };
 

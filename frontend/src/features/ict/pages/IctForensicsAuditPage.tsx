@@ -8,6 +8,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import apiClient from '../../../services/api';
 
 interface ForensicLog {
   id: string;
@@ -31,11 +32,8 @@ export default function IctForensicsAuditPage() {
   useEffect(() => {
     const fetchAuditLogs = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch('/api/admin/system-logs?limit=50', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
+        const res = await apiClient.get('/admin/logs', { params: { limit: 50 } });
+        const data = res.data;
         const rawLogs = data?.data?.logs || data?.data || data?.logs || [];
         if (Array.isArray(rawLogs) && rawLogs.length > 0) {
           setLogs(

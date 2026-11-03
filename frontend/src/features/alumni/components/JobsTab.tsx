@@ -1,17 +1,41 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { PaginationControls } from '../../../components/dashboard/PaginationControls';
 import { JobMatch } from '../types/alumni.types';
+import {
+  alumniFilterBarClass,
+  alumniGhostBtnClass,
+  alumniInputClass,
+  alumniMutedClass,
+  alumniPageClass,
+  alumniPanelClass,
+  alumniPrimaryBtnClass,
+  alumniSecondaryBtnClass,
+  alumniSelectClass,
+  alumniStatusBadge,
+  alumniTabBtn,
+  alumniTabRailClass,
+} from './alumniUi';
 
 interface JobsTabProps {
   jobs: JobMatch[];
   onViewJob: (job: JobMatch) => void;
-  onToggleSaveJob: (jobId: number) => void;
+  onToggleSaveJob: (jobId: string | number) => void;
 }
+
+const hasRealSalary = (salary?: string) => {
+  if (!salary) return false;
+  const trimmed = salary.trim();
+  if (!trimmed) return false;
+  const lower = trimmed.toLowerCase();
+  if (['n/a', 'na', 'tbd', 'negotiable', '-', '—'].includes(lower)) return false;
+  return /\d/.test(trimmed);
+};
 
 export const JobsTab: React.FC<JobsTabProps> = ({
   jobs,
   onViewJob,
-  onToggleSaveJob
+  onToggleSaveJob,
 }) => {
   const [innerTab, setInnerTab] = useState<'all' | 'saved' | 'applied'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,16 +66,15 @@ export const JobsTab: React.FC<JobsTabProps> = ({
     'Remote (Ethiopia)',
     'Remote (Global)',
     'Hybrid',
-    'International / Overseas'
+    'International / Overseas',
   ];
 
-  // Dynamically include any additional location found in the loaded jobs
   const dynamicJobLocations = Array.from(
     new Set(
       jobs
-        .map(j => j.location)
+        .map((j) => j.location)
         .filter((loc): loc is string => Boolean(loc && loc.trim()))
-        .map(loc => loc.trim())
+        .map((loc) => loc.trim())
     )
   );
 
@@ -61,7 +84,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
 
   const formats = ['All', 'Full-Time', 'Internship', 'Contract', 'Part-Time'];
 
-  const handleToggleSave = (e: React.MouseEvent, id: number, saved: boolean) => {
+  const handleToggleSave = (e: React.MouseEvent, id: string | number, saved: boolean) => {
     e.stopPropagation();
     onToggleSaveJob(id);
     toast.success(
@@ -70,15 +93,18 @@ export const JobsTab: React.FC<JobsTabProps> = ({
   };
 
   let tabJobs = jobs;
-  if (innerTab === 'saved') tabJobs = jobs.filter(j => j.saved);
-  else if (innerTab === 'applied') tabJobs = jobs.filter(j => j.applied);
+  if (innerTab === 'saved') tabJobs = jobs.filter((j) => j.saved);
+  else if (innerTab === 'applied') tabJobs = jobs.filter((j) => j.applied);
 
-  const filteredJobs = tabJobs.filter(job => {
+  const filteredJobs = tabJobs.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.skills?.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())) || false;
+      job.skills?.some((skill) =>
+        skill.toLowerCase().includes(searchQuery.toLowerCase())
+      ) ||
+      false;
 
     const matchesLocation = (() => {
       if (selectedLocation === 'All') return true;
@@ -88,8 +114,13 @@ export const JobsTab: React.FC<JobsTabProps> = ({
       const selLoc = selectedLocation.toLowerCase();
 
       if (jobLoc.includes(selLoc) || selLoc.includes(jobLoc)) return true;
-      if (selLoc.includes('adama') && (jobLoc.includes('adama') || jobLoc.includes('nazret'))) return true;
-      if (selLoc.includes('bishoftu') && (jobLoc.includes('bishoftu') || jobLoc.includes('debre zeit'))) return true;
+      if (selLoc.includes('adama') && (jobLoc.includes('adama') || jobLoc.includes('nazret')))
+        return true;
+      if (
+        selLoc.includes('bishoftu') &&
+        (jobLoc.includes('bishoftu') || jobLoc.includes('debre zeit'))
+      )
+        return true;
       if (selLoc.includes('remote') && jobLoc.includes('remote')) return true;
       if (selLoc.includes('hybrid') && jobLoc.includes('hybrid')) return true;
 
@@ -101,80 +132,87 @@ export const JobsTab: React.FC<JobsTabProps> = ({
 
     const matchesFormat =
       selectedFormat === 'All' ||
-      job.type.toLowerCase().replace(/[^a-z]/g, '').includes(selectedFormat.toLowerCase().replace(/[^a-z]/g, '')) ||
-      selectedFormat.toLowerCase().replace(/[^a-z]/g, '').includes(job.type.toLowerCase().replace(/[^a-z]/g, ''));
+      job.type
+        .toLowerCase()
+        .replace(/[^a-z]/g, '')
+        .includes(selectedFormat.toLowerCase().replace(/[^a-z]/g, '')) ||
+      selectedFormat
+        .toLowerCase()
+        .replace(/[^a-z]/g, '')
+        .includes(job.type.toLowerCase().replace(/[^a-z]/g, ''));
 
     return matchesSearch && matchesLocation && matchesFormat;
   });
 
   const sortedJobs = [...filteredJobs].sort((a, b) => {
-    const parseSalary = (s: string) => parseInt(s.replace(/[^0-9]/g, '')) || 0;
+    const parseSalary = (s: string) => parseInt(s.replace(/[^0-9]/g, ''), 10) || 0;
     switch (sortBy) {
-      case 'match': return parseInt(b.match) - parseInt(a.match);
-      case 'recent': return (b.views || 0) - (a.views || 0);
-      case 'salary': return parseSalary(b.salary) - parseSalary(a.salary);
-      case 'views': return (b.applications || 0) - (a.applications || 0);
-      default: return 0;
+      case 'match':
+        return parseInt(b.match, 10) - parseInt(a.match, 10);
+      case 'recent':
+        return (b.views || 0) - (a.views || 0);
+      case 'salary':
+        return parseSalary(b.salary) - parseSalary(a.salary);
+      case 'views':
+        return (b.applications || 0) - (a.applications || 0);
+      default:
+        return 0;
     }
   });
 
-  const totalPages = Math.ceil(sortedJobs.length / pageSize);
-  const paginatedJobs = sortedJobs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = Math.max(1, Math.ceil(sortedJobs.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedJobs = sortedJobs.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const tabConfig = [
-    { key: 'all' as const, label: 'Available Placements', icon: 'work' },
-    { key: 'saved' as const, label: 'Saved Opportunities', icon: 'star' },
-    { key: 'applied' as const, label: 'My Applications', icon: 'task_alt' }
+    { key: 'all' as const, label: 'Available', icon: 'work' },
+    { key: 'saved' as const, label: 'Saved', icon: 'bookmark' },
+    { key: 'applied' as const, label: 'Applied', icon: 'task_alt' },
   ];
 
-return (
-       <div className="space-y-8 bg-gray-50/50 min-h-screen">
-      
-      {/* HERO SECTION */}
+  const appliedCount = jobs.filter((j) => j.applied).length;
+
+  return (
+    <div className={alumniPageClass}>
+      {/* Career hero */}
       <section
-        className="rounded-2xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden"
+        className={`${alumniPanelClass} relative overflow-hidden`}
         style={{
-          background: 'linear-gradient(135deg, #003366 0%, #001a33 50%, #0d2b4d 100%)'
+          background:
+            'linear-gradient(135deg, color-mix(in srgb, var(--brand-navy) 92%, #000) 0%, var(--bg-card) 100%)',
         }}
       >
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row md:justify-between md:items-center gap-8">
-          <div className="flex flex-col sm:flex-row items-start gap-5">
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-4">
             <img
-              alt="ASTU Logo"
-              className="h-14 w-14 object-contain scale-110 shrink-0"
+              alt="ASTU seal"
+              className="h-12 w-12 shrink-0 object-contain sm:h-14 sm:w-14"
               src="/images/astu-seal-logo.png"
             />
-            <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFCC00]/20 text-[#FFD700] text-xs font-bold uppercase tracking-widest rounded-full border border-[#FFCC00]/30">
-                <span className="w-2 h-2 rounded-full bg-[#FFCC00] animate-pulse"></span>
-                ASTU Corporate Careers
-              </span>
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight">
-                Career Placement Board
+            <div className="space-y-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
+                ASTU Career Placement
+              </p>
+              <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                Jobs Board
               </h2>
-              <p className="text-base md:text-lg text-white/70 leading-relaxed max-w-2xl">
-                Discover career openings and internships mapped to your graduating major.
-                Apply with your ASTU verified credentials.
+              <p className="max-w-xl text-sm leading-relaxed text-white/75 sm:text-base">
+                Openings and internships matched to your verified ASTU profile. Save roles,
+                track applications, and apply with your credentials.
               </p>
             </div>
           </div>
 
-          <div className="flex gap-4 self-start md:self-center">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 text-center border border-white/10 min-w-[100px]">
-              <div className="text-3xl font-extrabold text-[#FFCC00]">
-                {filteredJobs.length}
-              </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-white/60">
-                Positions
+          <div className="flex gap-3 self-start md:self-center">
+            <div className="min-w-[6.5rem] rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-center backdrop-blur-sm">
+              <div className="text-2xl font-extrabold text-white">{filteredJobs.length}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-white/65">
+                Available
               </div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 text-center border border-white/10 min-w-[100px]">
-              <div className="text-3xl font-extrabold text-white">
-                {jobs.filter(j => j.applied).length}
-              </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-white/60">
+            <div className="min-w-[6.5rem] rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-center backdrop-blur-sm">
+              <div className="text-2xl font-extrabold text-white">{appliedCount}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-white/65">
                 Applied
               </div>
             </div>
@@ -182,67 +220,82 @@ return (
         </div>
       </section>
 
-      {/* FILTER TABS */}
-      <div className="flex p-1.5 bg-white rounded-xl border border-gray-200 shadow-sm gap-1">
-        {tabConfig.map(tab => {
+      {/* Tabs */}
+      <div className={alumniTabRailClass} role="tablist" aria-label="Jobs board filters">
+        {tabConfig.map((tab) => {
           const isActive = innerTab === tab.key;
           return (
             <button
               key={tab.key}
-              onClick={() => setInnerTab(tab.key)}
-              className={`flex-1 py-3 px-4 rounded-lg font-bold text-base md:text-lg flex items-center justify-center gap-2 transition-all duration-200 ${
-                isActive
-                  ? 'bg-[#003366] text-white shadow-md'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              }`}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => {
+                setInnerTab(tab.key);
+                setCurrentPage(1);
+              }}
+              className={alumniTabBtn(isActive)}
             >
-              <span className={`material-symbols-outlined text-xl ${isActive ? 'text-[#FFCC00]' : ''}`}>
-                {tab.icon}
-              </span>
-              <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+              <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
+              <span>{tab.label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* SEARCH & SELECT FILTERS */}
-      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="relative flex-1">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+      {/* Filters */}
+      <div className={alumniFilterBarClass}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="relative min-w-0 flex-1">
+            <span className="material-symbols-outlined pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-[20px]">
               search
             </span>
             <input
               value={searchQuery}
-              onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-              placeholder="Search jobs, companies, or skills..."
-              className="w-full pl-11 pr-4 py-3 text-base border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-[#003366]/20 focus:border-[#003366] transition-all outline-none"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              placeholder="Search jobs, companies, or skills…"
+              className={`${alumniInputClass} pl-11`}
             />
           </div>
 
-          <div className="grid grid-cols-2 lg:flex gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:w-auto lg:min-w-0">
             <select
               value={selectedLocation}
-              onChange={e => { setSelectedLocation(e.target.value); setCurrentPage(1); }}
-              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[170px]"
+              onChange={(e) => {
+                setSelectedLocation(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={alumniSelectClass}
+              aria-label="Filter by location"
             >
-              <option value="All">📍 All Locations</option>
-              <optgroup label="📍 Ethiopian Cities & Regional Hubs">
+              <option value="All">All locations</option>
+              <optgroup label="Ethiopian cities & hubs">
                 {allLocationOptions
-                  .filter(loc => !loc.toLowerCase().includes('remote') && !loc.toLowerCase().includes('hybrid') && !loc.toLowerCase().includes('international'))
-                  .map(loc => (
+                  .filter(
+                    (loc) =>
+                      !loc.toLowerCase().includes('remote') &&
+                      !loc.toLowerCase().includes('hybrid') &&
+                      !loc.toLowerCase().includes('international')
+                  )
+                  .map((loc) => (
                     <option key={loc} value={loc}>
-                      📍 {loc}
+                      {loc}
                     </option>
                   ))}
               </optgroup>
-              <optgroup label="🌐 Work Modes & International">
+              <optgroup label="Work modes & international">
                 {allLocationOptions
-                  .filter(loc => loc.toLowerCase().includes('remote') || loc.toLowerCase().includes('hybrid') || loc.toLowerCase().includes('international'))
-                  .map(loc => (
+                  .filter(
+                    (loc) =>
+                      loc.toLowerCase().includes('remote') ||
+                      loc.toLowerCase().includes('hybrid') ||
+                      loc.toLowerCase().includes('international')
+                  )
+                  .map((loc) => (
                     <option key={loc} value={loc}>
-                      {loc.toLowerCase().includes('remote') ? '🌐 ' : loc.toLowerCase().includes('hybrid') ? '🏢 ' : '✈️ '}
                       {loc}
                     </option>
                   ))}
@@ -251,180 +304,200 @@ return (
 
             <select
               value={selectedFormat}
-              onChange={e => { setSelectedFormat(e.target.value); setCurrentPage(1); }}
-              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
+              onChange={(e) => {
+                setSelectedFormat(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={alumniSelectClass}
+              aria-label="Filter by employment format"
             >
-              <option value="All">All Formats</option>
-              {formats.filter(f => f !== 'All').map(fmt => (
-                <option key={fmt} value={fmt}>{fmt}</option>
-              ))}
+              <option value="All">All formats</option>
+              {formats
+                .filter((f) => f !== 'All')
+                .map((fmt) => (
+                  <option key={fmt} value={fmt}>
+                    {fmt}
+                  </option>
+                ))}
             </select>
 
             <select
               value={sortBy}
-              onChange={e => setSortBy(e.target.value as typeof sortBy)}
-              className="px-4 py-3 text-base rounded-xl border border-gray-200 bg-white shadow-sm focus:border-[#003366] focus:ring-1 focus:ring-[#003366] outline-none cursor-pointer min-w-[160px]"
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className={alumniSelectClass}
+              aria-label="Sort jobs"
             >
-              <option value="match">🎯 Best Match</option>
-              <option value="recent">🕐 Most Recent</option>
-              <option value="salary">💰 Highest Salary</option>
-              <option value="views">👁️ Most Viewed</option>
+              <option value="match">Best match</option>
+              <option value="recent">Most recent</option>
+              <option value="salary">Highest salary</option>
+              <option value="views">Most viewed</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* JOB LISTINGS */}
+      {/* Listings */}
       <div className="space-y-4">
-        <div className="flex justify-between items-center px-1">
-          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider">
-            {sortedJobs.length} Positions Found
-            {currentPage > 1 && <span className="text-gray-400 font-normal lowercase ml-1">(page {currentPage}/{totalPages})</span>}
+        <div className="flex flex-wrap items-center justify-between gap-2 px-0.5">
+          <p className={`${alumniMutedClass} font-semibold`}>
+            {sortedJobs.length} position{sortedJobs.length === 1 ? '' : 's'} found
           </p>
-          <div className="flex items-center gap-2">
-            {totalPages > 1 && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded-lg border ${currentPage === 1 ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === page ? 'bg-[#003366] text-white' : 'text-gray-500 hover:bg-gray-100'}`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded-lg border ${currentPage === totalPages ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
         {sortedJobs.length === 0 ? (
-          <div className="text-center py-16 bg-white border rounded-2xl shadow-sm">
-            <span className="material-symbols-outlined text-5xl text-gray-300 mb-2">
+          <div className={`${alumniPanelClass} text-center`}>
+            <span className="material-symbols-outlined mb-2 text-4xl text-[var(--text-muted)]">
               find_in_page
             </span>
-            <p className="text-gray-500 font-medium text-lg">No matching career listings found.</p>
-            <p className="text-gray-400 text-sm">Try tweaking your search keywords or filters.</p>
+            <p className="text-base font-semibold text-[var(--text-primary)]">
+              No matching career listings found.
+            </p>
+            <p className={alumniMutedClass}>Try adjusting search keywords or filters.</p>
           </div>
         ) : (
-          paginatedJobs.map(job => (
-            <div
-              key={job.id}
-              onClick={() => onViewJob(job)}
-              className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-md hover:border-gray-300 transition-all duration-200 cursor-pointer relative group"
-            >
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                
-                <div className="space-y-3 flex-1 w-full">
-                  
-                  {/* Top line metadata */}
-                  <div className="flex items-center justify-between md:justify-start gap-3">
-                    <span className="px-2.5 py-1 bg-blue-50 text-[#003366] text-xs font-bold uppercase rounded-md tracking-wide">
-                      {job.type}
-                    </span>
-                    <span className="text-xs text-gray-400 font-medium">
-                      ⏱️ {job.postedDate}
-                    </span>
-                    
-                    {/* Floating Save Button on Mobile */}
-                    <button
-                      onClick={(e) => handleToggleSave(e, job.id, job.saved)}
-                      className="md:hidden p-2 rounded-full hover:bg-gray-100 transition text-gray-400 hover:text-yellow-500"
-                    >
-                      <span className={`material-symbols-outlined ${job.saved ? 'text-yellow-500' : ''}`}>
-                        star
-                      </span>
-                    </button>
+          <>
+            <div className="space-y-3">
+              {paginatedJobs.map((job) => (
+                <article
+                  key={job.id}
+                  onClick={() => onViewJob(job)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onViewJob(job);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  className="group cursor-pointer rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-xs transition hover:border-[var(--brand-primary)]/35 hover:bg-[var(--bg-hover)] sm:p-6"
+                >
+                  <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={alumniStatusBadge.brand}>{job.type}</span>
+                        {job.postedDate && (
+                          <span className="text-xs font-medium text-[var(--text-muted)]">
+                            {job.postedDate}
+                          </span>
+                        )}
+                        {job.deadline && (
+                          <span className={alumniStatusBadge.warning}>
+                            Deadline {job.deadline}
+                          </span>
+                        )}
+                        {job.applied && (
+                          <span className={alumniStatusBadge.success}>Applied</span>
+                        )}
+                      </div>
+
+                      <div>
+                        <h3 className="text-xl font-bold tracking-tight text-[var(--text-primary)] transition group-hover:text-[var(--brand-primary)] sm:text-2xl">
+                          {job.title}
+                        </h3>
+                        <p className="mt-1 text-sm font-semibold text-[var(--text-secondary)] sm:text-base">
+                          {job.company}
+                          {job.location ? (
+                            <span className="font-normal text-[var(--text-muted)]">
+                              {' '}
+                              · {job.location}
+                            </span>
+                          ) : null}
+                        </p>
+                      </div>
+
+                      {job.description && (
+                        <p className="line-clamp-2 text-sm leading-relaxed text-[var(--text-secondary)] sm:text-[15px]">
+                          {job.description}
+                        </p>
+                      )}
+
+                      {job.skills && job.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {job.skills.slice(0, 8).map((skill) => (
+                            <span
+                              key={skill}
+                              className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card-secondary)] px-2.5 py-1 text-xs font-medium text-[var(--text-secondary)]"
+                            >
+                              {skill}
+                            </span>
+                          ))}
+                          {job.skills.length > 8 && (
+                            <span className="px-2 py-1 text-xs font-medium text-[var(--text-muted)]">
+                              +{job.skills.length - 8} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex w-full shrink-0 flex-row items-center justify-between gap-3 border-t border-[var(--border-color)] pt-4 md:w-auto md:flex-col md:items-end md:border-t-0 md:pt-0">
+                      <div className="text-left md:text-right">
+                        {hasRealSalary(job.salary) && (
+                          <>
+                            <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">
+                              Salary
+                            </p>
+                            <p className="text-lg font-bold text-[var(--text-primary)]">
+                              {job.salary}
+                            </p>
+                          </>
+                        )}
+                        {job.experience && (
+                          <p className="mt-0.5 text-xs font-medium text-[var(--text-muted)]">
+                            {job.experience}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          title={job.saved ? 'Remove from saved' : 'Save opportunity'}
+                          onClick={(e) => handleToggleSave(e, job.id, job.saved)}
+                          className={`${alumniGhostBtnClass} !px-2.5 !py-2.5 border border-[var(--border-color)]`}
+                        >
+                          <span
+                            className={`material-symbols-outlined text-[20px] ${
+                              job.saved ? 'text-[var(--warning)]' : ''
+                            }`}
+                            style={job.saved ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                          >
+                            bookmark
+                          </span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onViewJob(job);
+                          }}
+                          className={
+                            job.applied
+                              ? `${alumniSecondaryBtnClass} !border-emerald-500/30 !text-emerald-600 dark:!text-emerald-400`
+                              : alumniPrimaryBtnClass
+                          }
+                        >
+                          {job.applied ? 'View application' : 'View & apply'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-
-                  {/* Title & Company */}
-                  <div>
-                    <h4 className="text-2xl md:text-3xl font-bold text-gray-900 group-hover:text-[#003366] transition-colors">
-                      {job.title}
-                    </h4>
-                    <p className="text-lg font-semibold text-gray-600 mt-0.5">
-                      {job.company} — <span className="text-base font-normal text-gray-500">{job.location}</span>
-                    </p>
-                  </div>
-
-                  {/* Job description */}
-                  <p className="text-base md:text-lg text-gray-600 line-clamp-2 leading-relaxed">
-                    {job.description}
-                  </p>
-
-                  {/* Tech Stack Tags */}
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {job.skills?.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Metrics & Hiring Analytics Panel */}
-                  <div className="grid grid-cols-3 gap-2 max-w-sm pt-2 border-t border-gray-100 text-sm font-medium text-gray-500">
-                    <div>👀 <span className="text-gray-800 font-bold">{job.views}</span> Views</div>
-                    <div>📝 <span className="text-gray-800 font-bold">{job.applications}</span> Applied</div>
-                    <div>🎯 <span className="text-green-600 font-bold">{job.shortlisted}</span> Shortlisted</div>
-                  </div>
-                </div>
-
-                {/* Desktop Action Column */}
-                <div className="flex md:flex-col items-center md:items-end justify-between w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0 gap-4">
-                  <div className="text-left md:text-right">
-                    <div className="text-base text-gray-400 font-medium">Est. Monthly Salary</div>
-                    <div className="text-xl font-black text-gray-900">{job.salary}</div>
-                    <div className="text-sm text-gray-500 font-semibold">{job.experience}</div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {/* Desktop Save Star Button */}
-                    <button
-                      onClick={(e) => handleToggleSave(e, job.id, job.saved)}
-                      className="hidden md:flex p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition text-gray-400 hover:text-yellow-500"
-                      title={job.saved ? "Remove from saved" : "Save Opportunity"}
-                    >
-                      <span className={`material-symbols-outlined text-xl ${job.saved ? 'text-yellow-400' : ''}`}>
-                        star
-                      </span>
-                    </button>
-
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        onViewJob(job);
-                      }}
-                      className={`px-6 py-3 text-base font-bold rounded-xl shadow-sm whitespace-nowrap transition-all ${
-                        job.applied
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-[#003366] text-white hover:bg-[#002244]'
-                      }`}
-                    >
-                      {job.applied ? 'Applied ✓' : 'View & Apply'}
-                    </button>
-                  </div>
-                </div>
-
-              </div>
+                </article>
+              ))}
             </div>
-          ))
+
+            {sortedJobs.length > pageSize && (
+              <PaginationControls
+                currentPage={safePage}
+                totalPages={totalPages}
+                totalItems={sortedJobs.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                className="pt-2"
+              />
+            )}
+          </>
         )}
       </div>
     </div>

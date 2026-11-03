@@ -11,6 +11,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import apiClient from '../../../services/api';
 
 type Telemetry = {
   cpuUsagePct?: number | null;
@@ -37,11 +38,8 @@ export default function IctCommandCenterPage() {
   const fetchTelemetry = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/admin/technical-ops/telemetry', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const data = await res.json();
+      const res = await apiClient.get('/admin/technical-ops/telemetry');
+      const data = res.data;
       if (data.success && data.data) {
         setTelemetry(data.data);
       } else {

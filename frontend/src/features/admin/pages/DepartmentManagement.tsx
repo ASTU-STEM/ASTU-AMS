@@ -120,7 +120,7 @@ function getSchoolForCode(code: string): string {
 
 function StatCard({ label, value, icon: Icon, hint }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; hint: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-all">
+    <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm hover:shadow-md transition-all">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
@@ -865,9 +865,9 @@ export default function DepartmentManagement() {
       {activeTab === 'directory' && (
         <>
           {/* Filter & Search Toolbar */}
-          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
             <div className="grid gap-3 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-6 focus-within:border-[#003580] focus-within:bg-white transition-all">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-6 focus-within:border-[#003580] focus-within:bg-white transition-all">
                 <Search className="h-4 w-4 text-slate-400" />
                 <input
                   value={query}
@@ -887,7 +887,7 @@ export default function DepartmentManagement() {
                 <select
                   value={selectedSchoolFilter}
                   onChange={(e) => setSelectedSchoolFilter(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#003580]"
+                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#003580]"
                 >
                   <option value="All">All ASTU Schools & Colleges</option>
                   {allAvailableSchools.map((school) => (
@@ -947,12 +947,12 @@ export default function DepartmentManagement() {
           {/* Department Cards Grid */}
           <section className="space-y-4">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-12 text-center">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-12 text-center">
                 <RefreshCw className="h-8 w-8 animate-spin text-[#003580]" />
                 <p className="mt-3 text-sm font-semibold text-slate-600">Loading ASTU Department Directory...</p>
               </div>
             ) : filteredDepartments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-12 text-center">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-12 text-center">
                 <Building2 className="h-12 w-12 text-slate-300" />
                 <h3 className="mt-3 text-base font-semibold text-slate-800">No departments match your filter</h3>
                 <p className="mt-1 text-xs text-slate-500">Try adjusting your search query or selecting "All Schools".</p>
@@ -1061,7 +1061,7 @@ export default function DepartmentManagement() {
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Analytics Toolbar / Department Filter */}
-          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-[#003580]/10 text-[#003580]">
                 <BarChart3 className="h-5 w-5" />
@@ -1079,7 +1079,7 @@ export default function DepartmentManagement() {
                 <select
                   value={analyticsBatchFilter}
                   onChange={(e) => handleBatchFilterChange(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-[#003580] outline-none focus:border-[#003580]"
+                  className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs font-bold text-[#003580] outline-none focus:border-[#003580]"
                 >
                   <option value="All">All Batches (Cumulative)</option>
                   {availableBatches.map((year: number) => (
@@ -1096,7 +1096,7 @@ export default function DepartmentManagement() {
                 <select
                   value={analyticsDeptFilter}
                   onChange={(e) => setAnalyticsDeptFilter(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
+                  className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs text-slate-800 outline-none focus:border-[#003580]"
                 >
                   <option value="All">All ASTU Departments (Comparative Overview)</option>
                   {departments.map((d) => (
@@ -1110,7 +1110,7 @@ export default function DepartmentManagement() {
               <button
                 type="button"
                 onClick={() => loadAnalyticsData(analyticsBatchFilter)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
                 <RefreshCw className={`h-3.5 w-3.5 text-slate-500 ${analyticsLoading ? 'animate-spin' : ''}`} />
                 Refresh Analytics
@@ -1120,7 +1120,7 @@ export default function DepartmentManagement() {
 
           {/* Top Key Metric Cards */}
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Avg Employability Index</span>
                 <Award className="h-5 w-5 text-amber-500" />
@@ -1131,7 +1131,7 @@ export default function DepartmentManagement() {
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Top Performing Unit</span>
                 <Sparkles className="h-5 w-5 text-[#003580]" />
@@ -1140,7 +1140,7 @@ export default function DepartmentManagement() {
               <p className="mt-2 text-xs text-slate-500 font-medium">{executiveMetrics.topPerformingUnitRate}% employment rate calculated from DB</p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Primary Skill Gap</span>
                 <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -1149,7 +1149,7 @@ export default function DepartmentManagement() {
               <p className="mt-2 text-xs text-red-600 font-semibold">Flagged by corporate employer feedbacks</p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Top Corporate Recruiter</span>
                 <Briefcase className="h-5 w-5 text-emerald-600" />
@@ -1162,7 +1162,7 @@ export default function DepartmentManagement() {
           {/* Section 1: Department Performance Benchmarks */}
           <div className="grid gap-6 xl:grid-cols-12">
             {/* Chart: Employment & Employability Score */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-7">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm xl:col-span-7">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900">Department Employment Rate & Employability Benchmarks</h3>
@@ -1192,7 +1192,7 @@ export default function DepartmentManagement() {
             </div>
 
             {/* Leaderboard Table */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-5 flex flex-col justify-between">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm xl:col-span-5 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-base font-bold text-slate-900">Department Performance Leaderboard</h3>
@@ -1228,7 +1228,7 @@ export default function DepartmentManagement() {
           {/* Section 2: Skill Gap Analysis per Department */}
           <div className="grid gap-6 xl:grid-cols-12">
             {/* Skill Proficiency vs Benchmark Bar */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-6">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm xl:col-span-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900">Skill Gap Breakdown: {activeSkillGap.deptName} ({activeSkillGap.deptCode})</h3>
@@ -1276,7 +1276,7 @@ export default function DepartmentManagement() {
             </div>
 
             {/* Curriculum Gaps & Recommended Actions */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-6 flex flex-col justify-between">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm xl:col-span-6 flex flex-col justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-900">Employer-Flagged Missing Skills & Action Plan</h3>
                 <p className="text-xs text-slate-500 mb-4">Skills demanded in ASTU labor market missing from baseline student profiles.</p>
@@ -1316,7 +1316,7 @@ export default function DepartmentManagement() {
           {/* Section 3: Alumni Hired Across Each Department */}
           <div className="grid gap-6 xl:grid-cols-12">
             {/* Top Hiring Employers Table */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-8 flex flex-col justify-between">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm xl:col-span-8 flex flex-col justify-between">
               <div>
                 {/* Header & Controls */}
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -1339,7 +1339,7 @@ export default function DepartmentManagement() {
                         placeholder="Search employers, sectors..."
                         value={rosterSearch}
                         onChange={(e) => setRosterSearch(e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-7 py-1.5 text-xs text-slate-800 focus:bg-white focus:border-[#003580] focus:outline-none transition-colors"
+                        className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] pl-8 pr-7 py-1.5 text-xs text-slate-800 focus:bg-white focus:border-[#003580] focus:outline-none transition-colors"
                       />
                       {rosterSearch && (
                         <button
@@ -1355,7 +1355,7 @@ export default function DepartmentManagement() {
                     <select
                       value={rosterPageSize}
                       onChange={(e) => setRosterPageSize(Number(e.target.value))}
-                      className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-slate-700 focus:border-[#003580] focus:outline-none"
+                      className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] px-2 py-1.5 text-xs font-semibold text-slate-700 focus:border-[#003580] focus:outline-none"
                     >
                       <option value={6}>6 / page</option>
                       <option value={10}>10 / page</option>
@@ -1421,7 +1421,7 @@ export default function DepartmentManagement() {
                     <button
                       onClick={() => setRosterPage((p) => Math.max(1, p - 1))}
                       disabled={rosterPage === 1}
-                      className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-slate-200 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" /> Prev
                     </button>
@@ -1445,7 +1445,7 @@ export default function DepartmentManagement() {
                     <button
                       onClick={() => setRosterPage((p) => Math.min(rosterTotalPages, p + 1))}
                       disabled={rosterPage === rosterTotalPages}
-                      className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-slate-200 bg-white font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="inline-flex items-center justify-center h-8 px-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       Next <ChevronRight className="h-4 w-4 ml-1" />
                     </button>
@@ -1455,7 +1455,7 @@ export default function DepartmentManagement() {
             </div>
 
             {/* Sector Distribution Pie Chart */}
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-4 flex flex-col justify-between">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm xl:col-span-4 flex flex-col justify-between">
               <div>
                 <h3 className="text-base font-bold text-slate-900 mb-1">Employment Industry Sectors</h3>
                 <p className="text-xs text-slate-500 mb-4">Distribution of ASTU graduates by economy sector.</p>
@@ -1584,11 +1584,11 @@ export default function DepartmentManagement() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+                  <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 shadow-2xs">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Registered Alumni</p>
                     <p className="mt-1 text-2xl font-extrabold text-slate-900">{selectedDetailDept.alumniCount}</p>
                   </div>
-                  <div className="rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+                  <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 shadow-2xs">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Calculated Employment Rate</p>
                     <p className="mt-1 text-2xl font-extrabold text-[#003580]">
                       {deptDetailData?.analytics?.employmentRatePct ?? (selectedDetailDept.alumniCount > 0 ? 94 : 0)}%
@@ -1597,7 +1597,7 @@ export default function DepartmentManagement() {
                 </div>
 
                 {deptDetailData?.analytics && (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+                  <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 space-y-2">
                     <div className="flex items-center justify-between font-bold text-slate-800">
                       <span>Alumni Placement Summary</span>
                       <span className="text-[11px] text-[#003580] font-semibold">PostgreSQL Live Data</span>
@@ -1663,7 +1663,7 @@ export default function DepartmentManagement() {
             {/* TAB 2: SKILL GAP MATRIX */}
             {modalTab === 'skills' && (
               <div className="space-y-4">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+                <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 space-y-3">
                   <h4 className="font-bold text-slate-900 text-sm">Employer Skill Evaluation for {selectedDetailDept.code}</h4>
                   <div className="space-y-2">
                     {activeSkillGap.skills.map((s) => (
@@ -1703,7 +1703,7 @@ export default function DepartmentManagement() {
                   {alumniHiredData
                     .filter(a => a.topDept.includes(selectedDetailDept.code) || selectedDetailDept.code === 'SWE')
                     .map((item) => (
-                      <div key={item.company} className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white shadow-2xs">
+                      <div key={item.company} className="flex items-center justify-between p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs">
                         <div>
                           <p className="font-bold text-slate-900">{item.company}</p>
                           <p className="text-[10px] text-slate-500">{item.sector} • Primary hires from {item.topDept}</p>
@@ -2036,7 +2036,7 @@ export default function DepartmentManagement() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
             <span className="block font-bold text-slate-800 mb-2">Included Report Fields:</span>
             <div className="grid grid-cols-2 gap-2 text-slate-600">
               <div className="flex items-center gap-1.5">

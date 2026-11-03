@@ -99,6 +99,22 @@ export const adminService = {
     }
   },
 
+  async updateUserNotes(id: string, notes: string): Promise<ApiResult<{ success: boolean; adminNotes: string }>> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: { success: boolean; adminNotes: string } }>(
+        `/admin/users/${id}/notes`,
+        { notes }
+      );
+      return { ok: true, data: response.data.data };
+    } catch (error: any) {
+      return {
+        ok: false,
+        errorCode: 'UPDATE_USER_NOTES_ERROR',
+        message: error.response?.data?.message || 'Failed to save administrative notes',
+      };
+    }
+  },
+
   async getJobs(params: { page?: number; limit?: number; query?: string; status?: string }): Promise<ApiResult<any>> {
     try {
       const response = await apiClient.get<{ success: boolean; data: any }>('/admin/jobs', { params });

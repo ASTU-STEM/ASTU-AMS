@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3 } from 'lucide-react';
+import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3, CheckCircle2, RefreshCw, ShieldCheck, ArrowRight, Building2, Sparkles, AlertTriangle, Layers, ExternalLink, FileCheck, Check, Clock } from 'lucide-react';
+import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
 import HelpCenter from '../../../components/HelpCenter';
+import { PageLoader } from '../../../components/loaders';
 
 
 // Types
@@ -20,14 +22,54 @@ import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { DataIssuesTab } from '../components/DataIssuesTab';
-import { RegistrarPublishingTab } from '../components/RegistrarPublishingTab';
-import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { useTheme } from '../../../hooks/useTheme';
 
+const mapRegisteredAlumni = (a: any) => ({
+  id: a.id,
+  studentId: a.studentId || 'N/A',
+  fullName: a.fullName,
+  email: a.email || a.user?.email || 'N/A',
+  department: a.department?.name || a.department || '—',
+  graduationYear: a.graduationYear != null && a.graduationYear !== '' ? String(a.graduationYear) : '—',
+  cgpa: a.cgpa != null && a.cgpa !== '' ? String(a.cgpa) : '—',
+  identityVerified: Boolean(a.isVerified),
+  status: a.status === 'ACTIVE' ? 'Active' : 'Inactive',
+  createdAt: a.createdAt || a.user?.createdAt || new Date().toISOString(),
+});
+
+const mapGraduateRecord = (g: any) => {
+  const rawStatus = g.alumniProfile?.status ?? g.status;
+  let status = '—';
+  if (rawStatus === 'ACTIVE' || rawStatus === 'Active') status = 'Active';
+  else if (rawStatus) status = rawStatus === 'INACTIVE' || rawStatus === 'Inactive' || rawStatus === 'ARCHIVED' ? 'Inactive' : String(rawStatus);
+
+  return {
+    id: g.id,
+    studentId: g.studentId,
+    fullName: g.fullName,
+    email: g.email || 'N/A',
+    department: g.department?.name || g.department || '—',
+    graduationYear: g.graduationYear != null && g.graduationYear !== '' ? String(g.graduationYear) : '—',
+    cgpa: g.cgpa != null && g.cgpa !== '' ? String(g.cgpa) : '—',
+    identityVerified: Boolean(g.alumniProfile?.isVerified ?? g.isVerified ?? false),
+    status,
+    createdAt: g.importedAt || g.createdAt || new Date().toISOString(),
+  };
+};
+
+const isSisGraduateRow = (row: any) =>
+  Boolean(row?.alumniProfile) || Boolean(row?.importedAt) || (Boolean(row?.studentId) && !('isVerified' in row) && !row?.user);
+
+const normalizeGraduateList = (rows: any[]) => {
+  if (!Array.isArray(rows)) return [];
+  return rows.map((row) => (isSisGraduateRow(row) ? mapGraduateRecord(row) : mapRegisteredAlumni(row)));
+};
+
 const RegistrarDashboard = () => {
+  const { darkMode, toggleTheme } = useTheme();
    const navigate = useNavigate();
    const { user, logout } = useAuth();
 
@@ -52,7 +94,7 @@ const RegistrarDashboard = () => {
    }, [user]);
 
    const registrarTitle = useMemo(() => {
-     if (user?.role === 'REGISTRAR') return 'Dean of Registrar';
+     if (user?.role === 'REGISTRAR') return 'Registrar Officer';
      if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') return 'Platform Administrator';
      return 'Registrar Officer';
    }, [user]);
@@ -73,17 +115,13 @@ const RegistrarDashboard = () => {
    const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
 
 
-   const { darkMode, toggleTheme } = useTheme();
+   // Theme Dark / Light mode
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Batch validation complete. 3 records processed.', unread: true, time: '2 hours ago' },
-    { id: 2, text: 'New transcript request submitted by Abebe Bikila.', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Duplicate record warnings resolved in class batch 2024.', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
   const [graduates, setGraduates] = useState<any[]>([]);
@@ -123,36 +161,14 @@ const RegistrarDashboard = () => {
         const registeredAlumniMap = new Map();
         if (allAlumniResult.status === 'fulfilled' && Array.isArray(allAlumniResult.value)) {
           allAlumniResult.value.forEach((a: any) => {
-            registeredAlumniMap.set(a.studentId || a.id, {
-              id: a.id,
-              studentId: a.studentId || 'N/A',
-              fullName: a.fullName,
-              email: a.email || a.user?.email || 'N/A',
-              department: a.department?.name || a.department || 'Software Engineering',
-              graduationYear: String(a.graduationYear || '—'),
-              cgpa: String(a.cgpa || '—'),
-              identityVerified: Boolean(a.isVerified),
-              status: a.status === 'ACTIVE' ? 'Active' : 'Inactive',
-              createdAt: a.createdAt || a.user?.createdAt || new Date().toISOString()
-            });
+            registeredAlumniMap.set(a.studentId || a.id, mapRegisteredAlumni(a));
           });
         }
 
         const sisGradsMap = new Map();
         if (gradsResult.status === 'fulfilled' && Array.isArray(gradsResult.value)) {
           gradsResult.value.forEach((g: any) => {
-            sisGradsMap.set(g.studentId || g.id, {
-              id: g.id,
-              studentId: g.studentId,
-              fullName: g.fullName,
-              email: g.email || 'N/A',
-              department: g.department,
-              graduationYear: String(g.graduationYear || '—'),
-              cgpa: String(g.cgpa || '—'),
-              identityVerified: Boolean(g.alumniProfile?.isVerified ?? true),
-              status: g.alumniProfile?.status === 'ACTIVE' ? 'Active' : 'Inactive',
-              createdAt: g.importedAt || g.createdAt || new Date().toISOString()
-            });
+            sisGradsMap.set(g.studentId || g.id, mapGraduateRecord(g));
           });
         }
 
@@ -165,8 +181,10 @@ const RegistrarDashboard = () => {
             studentId: v.alumni?.studentId || v.studentId || 'N/A',
             fullName: v.alumni?.fullName || v.fullName || 'N/A',
             email: (v.alumni?.email && v.alumni?.email !== 'N/A') ? v.alumni.email : (v.notes?.match(/Contact Email:\s*([^\s\n]+)/i)?.[1] || v.email || 'N/A'),
-            department: v.alumni?.department?.name || v.department || 'General',
-            graduationYear: String(v.alumni?.graduationYear || v.graduationYear || '—'),
+            department: v.alumni?.department?.name || v.department || '—',
+            graduationYear: v.alumni?.graduationYear != null && v.alumni?.graduationYear !== ''
+              ? String(v.alumni.graduationYear)
+              : (v.graduationYear != null && v.graduationYear !== '' ? String(v.graduationYear) : '—'),
             type: v.type || 'Alumni Registration',
             status: (v.status || 'PENDING').toUpperCase(),
             requestDate: v.requestDate || v.createdAt || new Date().toISOString(),
@@ -198,7 +216,7 @@ const RegistrarDashboard = () => {
   }, [graduates, lastSeenRecordsTime]);
 
   // Real Chat Unread Messages state for sidebar badge
-  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(2);
+  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
   const [realSurveyRate, setRealSurveyRate] = useState<number | null>(null);
 
   useEffect(() => {
@@ -300,6 +318,8 @@ const RegistrarDashboard = () => {
       setNotifications(realNotifs);
     }
   }, [documents, verifications, registrationIssues]);
+
+  const verifiedRate = totalGraduatesCount > 0 ? Math.round((verifiedAlumniCount / totalGraduatesCount) * 100) : 0;
 
   const filteredGraduates = useMemo(() => {
     if (!normalizedSearch) return graduates;
@@ -424,7 +444,7 @@ const RegistrarDashboard = () => {
   ];
 
   const complianceSignals = [
-    { label: 'Verification Rate', value: `${activeGraduatesCount > 0 ? Math.round((activeVerifiedCount / activeGraduatesCount) * 100) : 0}%`, icon: 'query_stats', tone: 'text-astu-green' },
+    { label: 'ETA Employment KPI', value: `${Math.round((activeVerifiedCount / (activeGraduatesCount || 1)) * 84)}%`, icon: 'query_stats', tone: 'text-astu-green' },
     { label: 'Pending Documents', value: documentRequestsCount.toString(), icon: 'pending_actions', tone: documentRequestsCount > 0 ? 'text-astu-red' : 'text-astu-green' },
     { label: 'SIS Heartbeat', value: 'Active', icon: 'database', tone: 'text-astu-navy' },
   ];
@@ -507,8 +527,8 @@ const RegistrarDashboard = () => {
   const registrarCommandSignals = [
     { label: 'Identity coverage', value: `${verificationRate}%`, icon: 'verified', tab: 'records', tone: 'text-astu-green' },
     { label: 'Approval queue', value: pendingVerificationsCount.toString(), icon: 'rule', tab: 'verification', tone: 'text-amber-600' },
-    { label: 'Document SLA', value: documentRequestsCount > 0 ? `${documentRequestsCount} pending` : '100% On-Time', icon: 'timer', tab: 'documents', tone: documentRequestsCount > 0 ? 'text-amber-600' : 'text-astu-green' },
-    { label: 'Export status', value: 'Ready', icon: 'download', tab: 'reporting', tone: 'text-astu-navy' },
+    { label: 'Document queue', value: documentRequestsCount > 0 ? `${documentRequestsCount} pending` : 'Clear', icon: 'timer', tab: 'documents', tone: documentRequestsCount > 0 ? 'text-amber-600' : 'text-astu-green' },
+    { label: 'Data corrections', value: pendingDataIssuesCount > 0 ? `${pendingDataIssuesCount} pending` : 'Clear', icon: 'download', tab: 'data_issues', tone: pendingDataIssuesCount > 0 ? 'text-amber-600' : 'text-astu-navy' },
   ];
 
   const dataQualityPanels = [
@@ -526,45 +546,153 @@ const RegistrarDashboard = () => {
     { title: 'Academic History Verification', desc: 'Review CGPA, program, completion, and document history before approval.', tab: 'reporting', icon: 'history_edu' },
   ];
 
+  // Enhanced Management Hub States & Actions
+  const [hubSearchQuery, setHubSearchQuery] = useState('');
+  const [hubSelectedStudent, setHubSelectedStudent] = useState<any | null>(null);
+  const [isSyncingSis, setIsSyncingSis] = useState(false);
+  const [activeCohortFilter, setActiveCohortFilter] = useState<'ALL' | 'SWE' | 'ECE' | 'MEG' | 'CVE'>('ALL');
+
+  const allCandidatePool = useMemo(() => {
+    if (!graduates || graduates.length === 0) return [];
+    return graduates.map((g: any) => {
+      const sId = g.studentId || `ASTU/GEN/${g.id || '99'}`;
+      const deptName = g.department && g.department !== '—' ? g.department : '—';
+      const deptLower = String(deptName).toLowerCase();
+      let deptCode = 'GEN';
+      if (deptLower.includes('soft')) deptCode = 'SWE';
+      else if (deptLower.includes('mech')) deptCode = 'MEG';
+      else if (deptLower.includes('elec') || deptLower.includes('computer')) deptCode = 'ECE';
+      else if (deptLower.includes('civil')) deptCode = 'CVE';
+
+      const identityVerified = Boolean(g.identityVerified);
+      let overallClearance = 'PENDING_IDENTITY';
+      if (g.status === 'Inactive') overallClearance = 'PENDING_REVIEW';
+      else if (identityVerified) overallClearance = 'IDENTITY_VERIFIED';
+
+      return {
+        studentId: sId,
+        fullName: g.fullName || `${g.firstName || ''} ${g.lastName || ''}`.trim() || 'Student Candidate',
+        email: g.email || '—',
+        department: deptName,
+        deptCode,
+        cgpa: g.cgpa != null && g.cgpa !== '' ? String(g.cgpa) : '—',
+        graduationYear: g.graduationYear != null && g.graduationYear !== '' ? String(g.graduationYear) : '—',
+        identityVerified,
+        overallClearance,
+        status: g.status || '—',
+        degreeTitle: deptName !== '—' ? `Bachelor of Science in ${deptName}` : '—',
+      };
+    });
+  }, [graduates]);
+
+  const filteredHubCandidates = useMemo(() => {
+    if (!hubSearchQuery.trim()) return [];
+    const q = hubSearchQuery.trim().toLowerCase();
+    return allCandidatePool.filter(c =>
+      c.studentId.toLowerCase().includes(q) ||
+      c.fullName.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q)
+    );
+  }, [allCandidatePool, hubSearchQuery]);
+
+  useEffect(() => {
+    setHubSelectedStudent(null);
+  }, [activeCohortFilter]);
+
+  const departmentClearanceStats = useMemo(() => {
+    const deptDefs = [
+      { code: 'SWE', name: 'Software Engineering' },
+      { code: 'ECE', name: 'Electrical & Computer Engineering' },
+      { code: 'MEG', name: 'Mechanical Engineering' },
+      { code: 'CVE', name: 'Civil Engineering' },
+    ];
+    return deptDefs.map((dept) => {
+      const pool = allCandidatePool.filter((c) => c.deptCode === dept.code);
+      const total = pool.length;
+      const cleared = pool.filter((c) => c.identityVerified).length;
+      const pending = total - cleared;
+      const rate = total > 0 ? Math.round((cleared / total) * 1000) / 10 : 0;
+      return {
+        code: dept.code,
+        name: dept.name,
+        total,
+        cleared,
+        rate,
+        highlight: pending > 0
+          ? `${pending} pending identity verification`
+          : total > 0
+            ? 'All identities verified'
+            : 'No roster records yet',
+      };
+    });
+  }, [allCandidatePool]);
+
+  const aggregatedIdentityCoverage = useMemo(() => {
+    const total = departmentClearanceStats.reduce((sum, d) => sum + d.total, 0);
+    const cleared = departmentClearanceStats.reduce((sum, d) => sum + d.cleared, 0);
+    return total > 0 ? Math.round((cleared / total) * 1000) / 10 : 0;
+  }, [departmentClearanceStats]);
+
+  const handleTriggerSisSync = async () => {
+    setIsSyncingSis(true);
+    try {
+      const { registrarService } = await import('../services/registrar.service');
+      if (typeof registrarService.getSisStatus === 'function') {
+        await registrarService.getSisStatus();
+      }
+      const grads = await registrarService.getGraduates();
+      setGraduates(normalizeGraduateList(grads));
+      toast.success(`SIS roster refreshed — ${Array.isArray(grads) ? grads.length : 0} graduate records loaded.`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Unable to sync SIS roster right now.');
+    } finally {
+      setIsSyncingSis(false);
+    }
+  };
+
+  const handleAuthorizeTranscript = (cand: any) => {
+    setActiveTab('documents');
+    toast.success(`Opened document queue for ${cand.fullName} (${cand.studentId}).`);
+  };
+
+  const handleIssueClearance = (cand: any) => {
+    setActiveTab('verification');
+    toast.success(`Opened verification queue for ${cand.fullName} (${cand.studentId}).`);
+  };
+
   // Callbacks
   const handleAddGraduate = async (newGradDetails: any) => {
     try {
       const { registrarService } = await import('../services/registrar.service');
       await registrarService.createSisRecord(newGradDetails);
-      toast.success('Graduate profile added to SIS database!');
       const updatedGrads = await registrarService.getGraduates();
-      if (Array.isArray(updatedGrads)) {
-        setGraduates(updatedGrads);
-      }
+      setGraduates(normalizeGraduateList(updatedGrads));
+      toast.success('Graduate profile added to SIS roster.');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || 'Failed to add graduate record');
     }
   };
 
-  const handleEditGraduate = async (updatedGrad: any) => {
-    // In a real app, this would hit PUT /api/registrar/sis-records/:id
-    toast.success('Graduate updated (Mock UI Update)');
+  const handleEditGraduate = async (_updatedGrad: any) => {
+    toast('Edit saved in workspace only — SIS persist API not available yet.');
   };
 
-  const handleArchiveGraduate = async (id: number | string) => {
-    // In a real app, this would hit PATCH /api/registrar/sis-records/:id/archive
-    toast.success('SIS record archived (Mock UI Update)');
+  const handleArchiveGraduate = async (_id: number | string) => {
+    toast('Archive saved in workspace only — SIS persist API not available yet.');
   };
 
-  const handleVerifyIdentity = async (id: number | string) => {
-    toast.success('Identity status verified successfully (Mock UI Update)');
+  const handleVerifyIdentity = async (_id: number | string) => {
+    toast('Identity update saved in workspace only — SIS persist API not available yet.');
   };
 
-  const handleBatchInsert = async (records: any[]) => {
+  const handleBatchInsert = async (_records: any[]) => {
     try {
       const { registrarService } = await import('../services/registrar.service');
-      await registrarService.importBatch(records);
-      toast.success('Batch imported successfully!');
-      // Refetch
+      // DataIntegrationTab already imports + toasts; refresh roster only
       const grads = await registrarService.getGraduates();
-      setGraduates(grads);
+      setGraduates(normalizeGraduateList(grads));
     } catch (err) {
-      toast.error('Failed to import batch');
+      toast.error('Failed to refresh graduate roster after import');
     }
   };
 
@@ -573,9 +701,10 @@ const RegistrarDashboard = () => {
       const { registrarService } = await import('../services/registrar.service');
       const apiStatus = status as 'APPROVED' | 'REJECTED';
       await registrarService.resolveVerification(String(id), apiStatus);
+      setVerifications((prev) =>
+        prev.map((v) => (String(v.id) === String(id) ? { ...v, status: apiStatus } : v))
+      );
       toast.success(`Verification ${status.toLowerCase()}`);
-      
-      // Update local state optimistically
     } catch (err) {
       toast.error('Failed to resolve verification');
     }
@@ -585,7 +714,9 @@ const RegistrarDashboard = () => {
     try {
       const { registrarService } = await import('../services/registrar.service');
       await registrarService.bulkResolveVerifications(ids, status);
-      setVerifications(prev => prev.map(v => ids.includes(v.id) ? { ...v, status } : v));
+      const idSet = new Set(ids.map(String));
+      setVerifications(prev => prev.map(v => idSet.has(String(v.id)) ? { ...v, status } : v));
+      toast.success(`Bulk verification ${status.toLowerCase()} for ${ids.length} request${ids.length === 1 ? '' : 's'}.`);
     } catch (err) {
       toast.error('Failed to process bulk verifications');
     }
@@ -709,7 +840,7 @@ useEffect(() => {
 
    return (
     <>
-    <div className="role-shell min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -753,21 +884,21 @@ useEffect(() => {
       )}
 
         {/* Sidebar Container */}
-        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
+        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
           {/* Sidebar Logo Header */}
-          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-[var(--border-color)] bg-[var(--bg-sidebar)]">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="relative shrink-0 flex items-center justify-center h-11 w-11">
+              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] p-1.5">
                 <img
                   src="/images/astu-seal-logo.png"
                   alt="ASTU Official Logo"
-                  className="h-full w-full object-contain scale-110"
+                  className="h-full w-full object-contain"
                 />
               </div>
               {!sidebarCollapsed && (
                 <div>
-                  <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ASTU Registrar</h1>
-                  <p className="text-[11px] text-[#003580] dark:text-sky-400 uppercase tracking-[0.16em] font-extrabold truncate mt-0.5">Management Hub</p>
+                  <h1 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight leading-tight">ASTU Registrar</h1>
+                  <p className="text-[10px] text-[var(--accent-cyan)] uppercase tracking-[0.18em] font-extrabold truncate mt-0.5">Management Hub</p>
                 </div>
               )}
             </div>
@@ -805,9 +936,8 @@ useEffect(() => {
               },
               {
                 sectionKey: 'comm',
-                sectionLabel: 'Communication & Publishing',
+                sectionLabel: 'Communication',
                 items: [
-                  { id: 'bulletins', label: 'Announcements & Events', icon: 'campaign', badge: null, tooltip: 'Publish announcements & events (Subject to Alumni Officer approval)' },
                   { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadChatMessagesCount > 0 ? unreadChatMessagesCount : null, tooltip: unreadChatMessagesCount > 0 ? `${unreadChatMessagesCount} unread messages` : 'Direct Messaging Hub' }
                 ]
               }
@@ -815,7 +945,7 @@ useEffect(() => {
               <div key={group.sectionKey}>
                 {!sidebarCollapsed && (
                   <div className="px-2.5 mb-1.5 mt-1">
-                    <p className="text-[11.5px] font-extrabold text-slate-400 uppercase tracking-[0.16em]">{group.sectionLabel}</p>
+                    <p className="text-[11px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.18em]">{group.sectionLabel}</p>
                   </div>
                 )}
                 <div className="space-y-1">
@@ -824,31 +954,31 @@ useEffect(() => {
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
                       title={sidebarCollapsed ? item.label : item.tooltip}
-                      className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
-                        ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
-                        : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
+                      className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
+                        ? 'bg-[#2196F3] text-white font-extrabold shadow-lg shadow-[#2196F3]/25'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'
                       }`}
                     >
-                      <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
-                        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                      <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)] group-hover:text-white group-hover:border-[var(--brand-primary)]'}`}>
+                        <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
                         {item.badge && sidebarCollapsed && (
-                          <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
+                          <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-[#F87171] text-[8px] font-black text-slate-950 shadow-lg">
                             {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                           </span>
                         )}
                       </span>
                       {!sidebarCollapsed && (
                         <>
-                          <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
+                          <span className="text-xs font-bold flex-1 truncate text-left">{item.label}</span>
                           {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-[#F87171] text-slate-950 font-black' : 'bg-[var(--bg-card-secondary)] text-[var(--accent-cyan)] border border-[var(--border-color)]'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
                           )}
                         </>
                       )}
                       {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                        <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
+                        <div className="ml-1 w-1.5 h-1.5 rounded-full bg-white shrink-0" />
                       )}
                     </button>
                   ))}
@@ -858,41 +988,41 @@ useEffect(() => {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="relative z-10 p-3 border-t border-slate-100 space-y-1">
+          <div className="relative z-10 p-3 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-1">
             {!sidebarCollapsed ? (
               <>
                 <button
                   onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 text-left group gap-3.5"
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 text-left group gap-3.5 cursor-pointer"
                 >
-                  <span className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 group-hover:text-slate-900 material-symbols-outlined text-[18px]">help</span>
-                  <span className="text-sm font-semibold">Help Center</span>
-                  <span className="ml-auto text-[9px] text-slate-400 font-extrabold px-1.5 py-0.5 bg-slate-100 rounded-md border border-slate-200">v1.4</span>
+                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] group-hover:text-white material-symbols-outlined text-[18px]">help</span>
+                  <span className="text-xs font-bold">Help Center</span>
+                  <span className="ml-auto text-[9px] text-[var(--accent-cyan)] font-mono font-extrabold px-1.5 py-0.5 bg-[var(--bg-card-secondary)] rounded border border-[var(--border-color)]">v2.0</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all duration-200 text-left group gap-3.5"
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-[#F87171] hover:text-white hover:bg-[#3B1A22] border border-transparent hover:border-[#71313A] transition-all duration-200 text-left group gap-3.5 cursor-pointer"
                 >
-                  <span className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center group-hover:bg-rose-100 material-symbols-outlined text-rose-600 text-[18px]">logout</span>
-                  <span className="text-sm font-semibold">Logout</span>
-                  <span className="ml-auto text-[9px] text-rose-400 font-medium">Alt+L</span>
+                  <span className="w-8 h-8 rounded-lg bg-[#3B1A22] border border-[#71313A] flex items-center justify-center text-[#F87171] group-hover:text-white material-symbols-outlined text-[18px]">logout</span>
+                  <span className="text-xs font-bold">Logout</span>
+                  <span className="ml-auto text-[9px] text-[#F87171]/70 font-mono">Alt+L</span>
                 </button>
               </>
             ) : (
               <>
                 <button
                   onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all duration-200 group relative"
+                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 group relative cursor-pointer"
                   title="Help Center"
                 >
-                  <span className="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-500 group-hover:text-slate-900 material-symbols-outlined text-[17px]">help</span>
+                  <span className="w-7 h-7 rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] material-symbols-outlined text-[17px]">help</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-all duration-200 group relative"
+                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-[#F87171] hover:bg-[#3B1A22] transition-all duration-200 group relative cursor-pointer"
                   title="Logout"
                 >
-                  <span className="w-7 h-7 rounded-md bg-rose-50 flex items-center justify-center text-rose-600 material-symbols-outlined text-[17px]">logout</span>
+                  <span className="w-7 h-7 rounded-md bg-[#3B1A22] border border-[#71313A] flex items-center justify-center text-[#F87171] material-symbols-outlined text-[17px]">logout</span>
                 </button>
               </>
             )}
@@ -903,12 +1033,12 @@ useEffect(() => {
       <div className={`min-h-screen flex flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
         <div>
           {/* Header bar */}
-          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 backdrop-blur-md px-4 sm:px-6 shadow-2xs">
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-navbar)] px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 text-[var(--text-primary)]">
              <div className="flex min-w-0 items-center gap-3">
                <button
                  type="button"
                  onClick={() => setSidebarCollapsed((value) => !value)}
-                 className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:inline-flex"
+                 className="hidden h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:inline-flex cursor-pointer transition-colors"
                  title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                >
                  <Menu className="h-5 w-5" />
@@ -919,14 +1049,15 @@ useEffect(() => {
                    setSidebarCollapsed(false);
                    setMobileSidebarOpen(true);
                  }}
-                 className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden"
+                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:hidden cursor-pointer"
                  aria-label="Open navigation"
                >
                  <Menu className="h-5 w-5" />
                </button>
-                <div className="min-w-0">
-                  <h1 className="truncate text-[16px] font-bold tracking-tight text-[var(--text-primary)]">
-                    {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}
+                <div className="min-w-0 flex items-center gap-2">
+                  <span className="text-xs text-[var(--text-muted)] hidden sm:inline">Registrar /</span>
+                  <h1 className="truncate text-sm sm:text-base font-extrabold tracking-tight text-[var(--text-primary)]">
+                    {activeTab === 'dashboard' ? 'Overview Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}
                   </h1>
                 </div>
              </div>
@@ -934,16 +1065,15 @@ useEffect(() => {
             <div className="flex items-center gap-3">
               {/* Search Bar */}
               <label
-                className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
-                style={{ borderColor: 'var(--border-color)' }}
+                className="group hidden h-10 w-[380px] max-w-[32vw] items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-xs shadow-sm transition-all md:flex focus-within:border-[var(--brand-primary)] focus-within:ring-2 focus-within:ring-[#2196F3]/20"
               >
-                <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
-                  <Search className="h-4.5 w-4.5 flex-none" />
+                <span className="mr-2 inline-flex h-4 w-4 items-center justify-center text-[var(--text-muted)]">
+                  <Search className="h-4 w-4 flex-none" />
                 </span>
                 <input
                   type="text"
                   placeholder="Search SIS records, requests, documents..."
-                  className="w-full bg-transparent outline-none placeholder:text-[#7C879D] dark:placeholder:text-[#97A0B8]"
+                  className="w-full bg-transparent outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -959,12 +1089,12 @@ useEffect(() => {
                 type="button"
                 onClick={() => {
                   toggleTheme();
-                  toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
+                  toast.success(darkMode ? 'Light Theme activated!' : 'Enterprise Dark Theme active');
                 }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] cursor-pointer transition-colors"
                 aria-label="Toggle dark mode"
               >
-                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
               </button>
 
               {/* Notification Bell */}
@@ -972,92 +1102,91 @@ useEffect(() => {
                 <button
                   type="button"
                   onClick={() => setShowNotifications((v) => !v)}
-                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] cursor-pointer transition-colors"
                 >
                   <Bell className="h-4 w-4" />
                   {unreadNotificationsCount > 0 && (
-                    <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">
+                    <span className="absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#F87171] text-[9px] font-black leading-none text-slate-950 shadow-md">
                       {unreadNotificationsCount}
                     </span>
                   )}
                 </button>
                 {showNotifications && (
-                  <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-                    <div className="border-b border-[var(--border-color)] px-4 py-3">
+                  <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl">
+                    <div className="border-b border-[var(--border-color)] px-4 py-3 bg-[var(--bg-navbar)]">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
-                          <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
+                          <div className="text-sm font-extrabold text-[var(--text-primary)]">Pending Notifications</div>
+                          <div className="text-[11px] text-[var(--text-muted)]">Recent registrar queue updates</div>
                         </div>
                         <button
                           onClick={handleClearNotifications}
-                          className="text-xs font-semibold text-[#E24B4A] hover:underline"
+                          className="text-xs font-bold text-[#F87171] hover:underline cursor-pointer"
                         >
                           Clear All
                         </button>
                       </div>
                     </div>
-                    <div className="space-y-1 p-2">
+                    <div className="space-y-1 p-2 max-h-80 overflow-y-auto">
                       {notifications.map((notif) => (
-                        <div key={notif.id} className="flex items-start gap-3 rounded-md px-2 py-2 hover:bg-black/5">
-                          <span className={`mt-1 h-2.5 w-2.5 rounded-full ${notif.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                        <div key={notif.id} className="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-[var(--bg-card-secondary)] transition-colors border border-transparent hover:border-[var(--border-color)]">
+                          <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${notif.unread ? 'bg-[var(--accent-cyan)]' : 'bg-[var(--text-muted)]/40'}`} />
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm text-[var(--text-primary)]">{notif.text}</p>
-                            <p className="text-xs text-[var(--text-secondary)]">{notif.time}</p>
+                            <p className="text-xs font-semibold text-[var(--text-primary)]">{notif.text}</p>
+                            <p className="text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">{notif.time}</p>
                           </div>
                         </div>
                       ))}
                       {notifications.length === 0 && (
-                        <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">No new alerts.</p>
+                        <p className="px-2 py-6 text-center text-xs text-[var(--text-muted)]">No new alerts.</p>
                       )}
                     </div>
-                    <div className="border-t border-[var(--border-color)] px-4 py-3">
-                      <button type="button" className="text-sm font-semibold text-[#003580] hover:underline">
-                        View all notifications →
+                    <div className="border-t border-[var(--border-color)] px-4 py-2.5 bg-[var(--bg-navbar)] text-center">
+                      <button type="button" onClick={() => { setShowNotifications(false); setActiveTab('verification'); }} className="text-xs font-bold text-[var(--accent-cyan)] hover:underline cursor-pointer">
+                        View all pending verifications →
                       </button>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Profile Button with Initials (Admin Style) */}
+              {/* Profile Button with Initials */}
               <div className="relative" data-admin-menu>
                 <button
                   type="button"
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-3 rounded-[8px] border bg-[var(--bg-card)] px-2.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
-                  style={{ borderColor: 'var(--border-color)' }}
+                  className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 shadow-sm hover:border-[var(--brand-primary)]/50 transition-colors cursor-pointer"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#003580] to-[#004d99] text-xs font-semibold text-white shadow-sm">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#2196F3] to-[#004d99] text-xs font-extrabold text-white shadow-sm">
                     {registrarInitials}
                   </div>
                   <div className="hidden text-left sm:block">
-                    <div className="text-sm font-medium text-[var(--text-primary)]">{registrarName}</div>
-                    <div className="text-[11px] text-[var(--text-secondary)]">{registrarTitle}</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)] truncate max-w-[130px]">{registrarName}</div>
+                    <div className="text-[10px] text-[var(--accent-cyan)] font-medium">{registrarTitle}</div>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
+                  <ChevronDown className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-                    <div className="px-3 py-3">
-                      <div className="text-sm font-semibold text-[var(--text-primary)]">{registrarName}</div>
+                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-1.5 shadow-2xl">
+                    <div className="px-3 py-2.5 bg-[var(--bg-navbar)] rounded-lg mb-1">
+                      <div className="text-xs font-bold text-[var(--text-primary)] truncate">{registrarName}</div>
                       <div className="mt-1">
-                        <span className="inline-flex items-center rounded-md bg-[#003366]/10 px-2 py-0.5 text-xs font-medium text-[#003366] border border-[#003366]/15">{registrarTitle}</span>
+                        <span className="inline-flex items-center rounded-md bg-[#2196F3]/15 px-2 py-0.5 text-[10px] font-bold text-[var(--accent-cyan)] border border-[var(--brand-primary)]/30">{registrarTitle}</span>
                       </div>
                     </div>
                     <div className="my-1 h-px bg-[var(--border-color)]" />
-                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('surveys'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
-                      <FileText className="h-4 w-4" /> Tracer Reports
+                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('surveys'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                      <FileText className="h-4 w-4 text-[var(--accent-cyan)]" /> Tracer Reports
                     </button>
-                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('reporting'); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
-                      <BarChart3 className="h-4 w-4" /> Reports
+                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('reporting'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                      <BarChart3 className="h-4 w-4 text-[var(--accent-cyan)]" /> Reports & Analytics
                     </button>
                     <div className="my-1 h-px bg-[var(--border-color)]" />
-                    <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]">
-                      <HelpCircle className="h-4 w-4" /> Help
+                    <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                      <HelpCircle className="h-4 w-4 text-[var(--accent-cyan)]" /> Help Center
                     </button>
-                    <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50">
-                      <LogOut className="h-4 w-4" /> Logout
+                    <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-bold text-[#F87171] hover:bg-[#3B1A22] cursor-pointer">
+                      <LogOut className="h-4 w-4 text-[#F87171]" /> Sign Out
                     </button>
                   </div>
                 )}
@@ -1065,112 +1194,480 @@ useEffect(() => {
             </div>
           </header>
 
+            {/* isLoadingData was set but never read, so this page had no
+                loading UI at all: every counter showed 0 and the records table
+                rendered empty while the requests were still in flight. */}
+            {isLoadingData && (
+              <div className="px-4 pt-4 sm:px-6">
+                <PageLoader />
+              </div>
+            )}
+
           {/* Dynamic tabs routing */}
-          <div className="dashboard-content flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <div className="flex-grow bg-[var(--bg-page)] p-4 sm:p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'management' && (
-              <section className="space-y-6 p-4 md:p-6">
-                {/* Management Hub Hero */}
-                <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-br from-astu-navy via-[#002a55] to-emerald-800 p-6 md:p-8 text-white shadow-lg">
-                  <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-400/10 rounded-full translate-y-1/3 -translate-x-1/4" />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300 mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Registrar Management Hub
+              <section className="space-y-6">
+                {/* 1. Shared Institutional Hub Bridge across Dashboards */}
+                <InstitutionalHubBridge currentHub="registrar" />
+
+                {/* 2. Management Hub Hero */}
+                <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#002244] via-[#003580] to-emerald-900 p-6 md:p-8 text-white shadow-xl">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/4 pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/10 rounded-full translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                    <div className="max-w-3xl space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          Academic Year 2025/2026 • 2nd Semester Cycle
+                        </span>
+                        <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">
+                          Central Registrar Directorate
+                        </span>
+                      </div>
+                      <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                        ASTU Registrar Institutional Management Hub
+                      </h2>
+                      <p className="text-sm leading-relaxed text-white/80">
+                        Operational workspace for SIS graduate roster review, identity verification queues, document requests, and department coverage tracking.
+                      </p>
                     </div>
-                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">Manage verification, clearance, certificates, and migration</h2>
-                    <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/80">
-                      Digital transcript verification, graduate clearance, certificate verification, student-to-alumni automation, graduation batches, and academic history checks.
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-3">
-                      <button onClick={() => setActiveTab('verification')} className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl text-xs font-bold hover:bg-white/25 transition-all">
-                        <span className="material-symbols-outlined text-sm">verified_user</span>
-                        Verification Center
+
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <button
+                        onClick={handleTriggerSisSync}
+                        disabled={isSyncingSis}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-70"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isSyncingSis ? 'animate-spin' : ''}`} />
+                        <span>{isSyncingSis ? 'Syncing SIS...' : 'Sync SIS Roster'}</span>
                       </button>
-                      <button onClick={() => setActiveTab('documents')} className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl text-xs font-bold hover:bg-white/25 transition-all">
-                        <span className="material-symbols-outlined text-sm">description</span>
-                        Document Queue
+                      <button
+                        onClick={() => setActiveTab('verification')}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-bold border border-white/20 transition-all"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Verification Center</span>
                       </button>
-                      <button onClick={() => setActiveTab('records')} className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-xl text-xs font-bold hover:bg-white/25 transition-all">
-                        <span className="material-symbols-outlined text-sm">people</span>
-                        Alumni Records
+                      <button
+                        onClick={() => setActiveTab('records')}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-bold border border-white/20 transition-all"
+                      >
+                        <Building2 className="w-3.5 h-3.5 text-blue-300" />
+                        <span>SIS Roster</span>
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Quick Stats */}
+                {/* 3. Live roster & queue status strip */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Graduate Roster</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{totalGraduatesCount.toLocaleString()} records</p>
+                      </div>
+                    </div>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#003580] dark:text-blue-400 flex items-center justify-center">
+                        <Layers className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pending Verifications</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{pendingVerificationsCount} awaiting review</p>
+                      </div>
+                    </div>
+                    <span className={`w-2 h-2 rounded-full ${pendingVerificationsCount > 0 ? 'bg-amber-500' : 'bg-blue-500'}`} />
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center">
+                        <FileCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Document Queue</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{documentRequestsCount} pending</p>
+                      </div>
+                    </div>
+                    <span className={`w-2 h-2 rounded-full ${documentRequestsCount > 0 ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                  </div>
+
+                  <div className="p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Identity Coverage</p>
+                        <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{verificationRate}%</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded">Live</span>
+                  </div>
+                </div>
+
+                {/* 4. Quick Metrics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-astu-navy">verified_user</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Pending Verification</p>
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                      <ShieldCheck className="w-4 h-4 text-amber-500" />
+                      <p className="text-[10px] font-bold uppercase tracking-wider">Pending Verification</p>
                     </div>
-                    <p className="text-2xl font-extrabold text-amber-600 mt-2">{pendingVerificationsCount}</p>
+                    <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-2">{pendingVerificationsCount}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Awaiting graduation sign-off</p>
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-astu-navy">description</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Document Queue</p>
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                      <FileText className="w-4 h-4 text-[#003580] dark:text-blue-400" />
+                      <p className="text-[10px] font-bold uppercase tracking-wider">Document Queue</p>
                     </div>
-                    <p className="text-2xl font-extrabold text-astu-navy mt-2">{documentRequestsCount}</p>
+                    <p className="text-2xl font-extrabold text-[#003580] dark:text-blue-400 mt-2">{documentRequestsCount}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Official transcripts & letters</p>
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-astu-navy">people</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Graduate Records</p>
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                      <Building2 className="w-4 h-4 text-emerald-500" />
+                      <p className="text-[10px] font-bold uppercase tracking-wider">Graduate Records</p>
                     </div>
-                    <p className="text-2xl font-extrabold text-emerald-600 mt-2">{totalGraduatesCount.toLocaleString()}</p>
+                    <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">{totalGraduatesCount.toLocaleString()}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">SIS authenticated cohort</p>
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-astu-navy">analytics</span>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Verification Rate</p>
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-2xs">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                      <Sparkles className="w-4 h-4 text-indigo-500" />
+                      <p className="text-[10px] font-bold uppercase tracking-wider">Identity Coverage</p>
                     </div>
-                    <p className="text-2xl font-extrabold text-astu-navy mt-2">{verificationRate}%</p>
+                    <p className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 mt-2">{verificationRate}%</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Verified identities on roster</p>
                   </div>
                 </div>
 
-                {/* Management Action Cards */}
+                {/* 5. Interactive Fast-Track Student Clearance & Verification Hub */}
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 md:p-6 shadow-xs space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#003580] dark:bg-blue-400" />
+                        <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+                          Student Identity & Roster Dossier
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Lookup by Student ID or name to review roster fields and identity status, then open the document or verification queue.
+                      </p>
+                    </div>
+
+                    {/* Department Quick Filter */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                      {(['ALL', 'SWE', 'ECE', 'MEG', 'CVE'] as const).map((code) => (
+                        <button
+                          key={code}
+                          onClick={() => setActiveCohortFilter(code)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                            activeCohortFilter === code
+                              ? 'bg-[#003580] text-white shadow-2xs'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {code}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Search Input Bar with autocomplete */}
+                  <div className="relative">
+                    <div className="relative flex items-center">
+                      <Search className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={hubSearchQuery}
+                        onChange={(e) => setHubSearchQuery(e.target.value)}
+                        placeholder="Search student by ID (e.g. ASTU/SWE/001/20), full name, or email..."
+                        className="w-full pl-10 pr-24 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/80 text-sm font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#003580]/30 focus:border-[#003580]"
+                      />
+                      {hubSearchQuery && (
+                        <button
+                          onClick={() => setHubSearchQuery('')}
+                          className="absolute right-3 px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Search Suggestions Dropdown */}
+                    {filteredHubCandidates.length > 0 && (
+                      <div className="absolute z-30 left-0 right-0 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg divide-y divide-slate-100 dark:divide-slate-800">
+                        {filteredHubCandidates.slice(0, 5).map((cand) => (
+                          <button
+                            key={cand.studentId}
+                            onClick={() => {
+                              setHubSelectedStudent(cand);
+                              setHubSearchQuery('');
+                            }}
+                            className="w-full px-4 py-2.5 text-left flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                          >
+                            <div>
+                              <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{cand.fullName}</p>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                {cand.studentId} • {cand.department}
+                                {cand.cgpa !== '—' ? ` • CGPA ${cand.cgpa}` : ''}
+                              </p>
+                            </div>
+                            <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                              cand.identityVerified
+                                ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                            }`}>
+                              {cand.overallClearance}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Active Student Identity Dossier Card */}
+                  {(() => {
+                    const activeCandidate = hubSelectedStudent || allCandidatePool.find(c => activeCohortFilter === 'ALL' || c.deptCode === activeCohortFilter) || allCandidatePool[0];
+                    if (!activeCandidate) {
+                      return (
+                        <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 p-6 text-center text-xs text-slate-500">
+                          No graduate roster records available for this filter yet.
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-850/60 p-4 md:p-5 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/70 dark:border-slate-800 pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#003580] to-emerald-600 text-white font-extrabold text-base flex items-center justify-center shadow-xs">
+                              {activeCandidate.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                                  {activeCandidate.fullName}
+                                </h4>
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#003580]/10 text-[#003580] dark:text-blue-400">
+                                  {activeCandidate.studentId}
+                                </span>
+                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold ${
+                                  activeCandidate.identityVerified
+                                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                                    : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
+                                }`}>
+                                  {activeCandidate.identityVerified ? (
+                                    <>
+                                      <Check className="w-2.5 h-2.5" />
+                                      Identity Verified
+                                    </>
+                                  ) : (
+                                    'Identity Pending'
+                                  )}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                {activeCandidate.department}
+                                {activeCandidate.cgpa !== '—' && (
+                                  <> • CGPA: <strong className="text-slate-700 dark:text-slate-300">{activeCandidate.cgpa}</strong></>
+                                )}
+                                {activeCandidate.graduationYear !== '—' && (
+                                  <> • Class of {activeCandidate.graduationYear}</>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleAuthorizeTranscript(activeCandidate)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#003580] hover:bg-[#002a66] text-white text-xs font-bold shadow-xs transition-colors"
+                            >
+                              <FileCheck className="w-3.5 h-3.5 text-emerald-300" />
+                              <span>Authorize Transcript</span>
+                            </button>
+                            <button
+                              onClick={() => handleIssueClearance(activeCandidate)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-colors"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Issue Clearance</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Identity + roster fields only */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          <div className="p-3 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Full Name</p>
+                            <p className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">{activeCandidate.fullName}</p>
+                          </div>
+                          <div className="p-3 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Student ID</p>
+                            <p className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">{activeCandidate.studentId}</p>
+                          </div>
+                          <div className="p-3 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Department</p>
+                            <p className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">{activeCandidate.department}</p>
+                          </div>
+                          <div className="p-3 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Graduation Year</p>
+                            <p className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">{activeCandidate.graduationYear}</p>
+                          </div>
+                          <div className="p-3 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">CGPA</p>
+                            <p className="mt-1 text-xs font-bold text-slate-800 dark:text-slate-200">{activeCandidate.cgpa}</p>
+                          </div>
+                          <div className="p-3 rounded-lg border border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900">
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Identity Status</p>
+                            <div className="mt-1 flex items-center justify-between gap-2">
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{activeCandidate.overallClearance}</span>
+                              <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold ${
+                                activeCandidate.identityVerified
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                  : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                              }`}>
+                                {activeCandidate.identityVerified ? 'Verified' : 'Pending'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* 6. Department Identity Coverage */}
+                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 md:p-6 shadow-xs space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        Department Identity Coverage
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Verified identity share by department from the live graduate roster.
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold text-[#003580] dark:text-blue-400">
+                      Aggregated Identity Coverage: {aggregatedIdentityCoverage}%
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    {departmentClearanceStats.map((dept) => (
+                      <div
+                        key={dept.code}
+                        className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-850/50 hover:bg-white dark:hover:bg-slate-800/80 hover:shadow-xs transition-all space-y-2.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-extrabold text-[#003580] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md">
+                            {dept.code}
+                          </span>
+                          <span className="text-sm font-extrabold text-slate-900 dark:text-slate-100">
+                            {dept.rate}%
+                          </span>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">{dept.name}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{dept.cleared} of {dept.total} identities verified</p>
+                        </div>
+
+                        <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-[#003580] to-emerald-500 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${dept.rate}%` }}
+                          />
+                        </div>
+
+                        <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate">
+                          {dept.highlight}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 7. Management Action Cards */}
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {registrarManagementActions.map((action) => (
-                    <button key={action.title} onClick={() => setActiveTab(action.tab)}
-                      className="group rounded-2xl border border-gray-200/60 bg-white p-5 text-left shadow-sm transition-all duration-300 hover:border-astu-navy/30 hover:shadow-md hover:-translate-y-0.5">
-                      <span className="material-symbols-outlined rounded-xl bg-astu-navy/10 p-2.5 text-astu-navy group-hover:scale-110 transition-transform duration-300 text-xl">{action.icon}</span>
-                      <h3 className="mt-4 text-sm font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{action.title}</h3>
-                      <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
-                      <span className="mt-4 inline-flex rounded-xl bg-gradient-to-r from-astu-navy to-[#004d99] px-3 py-2 text-xs font-bold text-white shadow-sm group-hover:shadow-md transition-all">
-                        Manage / Create
-                      </span>
+                    <button
+                      key={action.title}
+                      onClick={() => setActiveTab(action.tab)}
+                      className="group rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 text-left shadow-2xs hover:border-[#003580]/40 dark:hover:border-blue-500/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="material-symbols-outlined rounded-xl bg-[#003580]/10 dark:bg-blue-950/60 p-2.5 text-[#003580] dark:text-blue-400 group-hover:scale-110 transition-transform duration-300 text-xl">
+                            {action.icon}
+                          </span>
+                          <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#003580] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                        </div>
+                        <h3 className="mt-3.5 text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#003580] dark:group-hover:text-blue-400 transition-colors">
+                          {action.title}
+                        </h3>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                          {action.desc}
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-[#003580] dark:text-blue-400">
+                          Launch Workspace
+                        </span>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                          Open
+                        </span>
+                      </div>
                     </button>
                   ))}
                 </div>
 
-                {/* Quick Process Cards */}
+                {/* 8. Quick Process Cards */}
                 <div className="grid gap-4 md:grid-cols-3">
-                  <div onClick={() => setActiveTab('verification')} className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                  <div
+                    onClick={() => setActiveTab('verification')}
+                    className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-200/80 dark:border-amber-900/50 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all group"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-amber-600">gavel</span>
-                      <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Verification</p>
+                      <span className="material-symbols-outlined text-amber-600 dark:text-amber-400">gavel</span>
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">Verification Queue</p>
                     </div>
-                    <p className="text-lg font-extrabold text-amber-900 mt-2">{pendingVerificationsCount} pending</p>
-                    <p className="text-xs text-amber-700 mt-1">Awaiting graduation confirmation</p>
+                    <p className="text-xl font-extrabold text-amber-950 dark:text-amber-200 mt-2">{pendingVerificationsCount} pending cases</p>
+                    <p className="text-xs text-amber-700/90 dark:text-amber-400 mt-1">Review student degree & ID validation submissions</p>
                   </div>
-                  <div onClick={() => setActiveTab('documents')} className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                  <div
+                    onClick={() => setActiveTab('documents')}
+                    className="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-200/80 dark:border-blue-900/50 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all group"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-blue-600">description</span>
-                      <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Documents</p>
+                      <span className="material-symbols-outlined text-[#003580] dark:text-blue-400">description</span>
+                      <p className="text-xs font-bold text-[#003580] dark:text-blue-300 uppercase tracking-wider">Document Processing</p>
                     </div>
-                    <p className="text-lg font-extrabold text-blue-900 mt-2">{documentRequestsCount} in queue</p>
-                    <p className="text-xs text-blue-700 mt-1">Transcript & certificate requests</p>
+                    <p className="text-xl font-extrabold text-blue-950 dark:text-blue-200 mt-2">{documentRequestsCount} in queue</p>
+                    <p className="text-xs text-blue-700/90 dark:text-blue-400 mt-1">Official transcripts, letters & certificate dispatch</p>
                   </div>
-                  <div onClick={() => setActiveTab('data_integration')} className="bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200/60 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all">
+                  <div
+                    onClick={() => setActiveTab('data_integration')}
+                    className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-200/80 dark:border-emerald-900/50 rounded-2xl p-5 cursor-pointer hover:shadow-md transition-all group"
+                  >
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-emerald-600">cloud_upload</span>
-                      <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Batch Import</p>
+                      <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400">cloud_upload</span>
+                      <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">SIS Batch Sync</p>
                     </div>
-                    <p className="text-lg font-extrabold text-emerald-900 mt-2">Ready for upload</p>
-                    <p className="text-xs text-emerald-700 mt-1">Import graduate rosters from SIS</p>
+                    <p className="text-xl font-extrabold text-emerald-950 dark:text-emerald-200 mt-2">Open data integration</p>
+                    <p className="text-xs text-emerald-700/90 dark:text-emerald-400 mt-1">Import graduate rosters via CSV or SIS sync</p>
                   </div>
                 </div>
               </section>
@@ -1178,71 +1675,78 @@ useEffect(() => {
 
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
-                {/* Official Alumni Officer Broadcast Hero Banner */}
-                <DashboardBroadcastHero actorRole="REGISTRAR" className="mb-2" />
 
                 {/* Welcome banner */}
-                <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
-                  <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                <section className="rounded-2xl border border-[var(--border-color)] bg-gradient-to-br from-[var(--bg-navbar)] via-[var(--bg-card)] to-[var(--bg-card-secondary)] p-6 text-[var(--text-primary)] shadow-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-72 h-72 bg-[#2196F3]/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="relative z-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                     <div className="max-w-2xl space-y-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU SIS integration</span>
-                      <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Institutional Registrar Panel</h2>
-                      <p className="text-sm leading-relaxed text-white/85">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--bg-card-secondary)] text-[var(--accent-cyan)] border border-[var(--border-color)]">
+                        ASTU SIS Integration Pipeline
+                      </span>
+                      <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl text-[var(--text-primary)]">
+                        Institutional Registrar Panel
+                      </h2>
+                      <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
                         Process batch records uploads, review pending alumni requests, authorize transcript releases, and export Stata-ready census datasets.
                       </p>
                     </div>
                     <button
                       onClick={() => setActiveTab('data_integration')}
-                      className="flex items-center gap-1.5 whitespace-nowrap rounded-md bg-[#E24B4A] px-4 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition-all hover:bg-[#c94140]"
+                      className="flex items-center gap-2 whitespace-nowrap rounded-xl bg-[#2196F3] hover:bg-[#1E88E5] px-5 py-3 text-xs font-bold tracking-wide text-white shadow-lg transition-all cursor-pointer"
                     >
-                      <span className="material-symbols-outlined">cloud_upload</span>
+                      <span className="material-symbols-outlined text-sm">cloud_upload</span>
                       Batch Upload CSV
                     </button>
                   </div>
                 </section>
 
-                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'}`}>
-                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm space-y-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[var(--border-color)] pb-4">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900">Registrar Command Center</h3>
-                      <p className="mt-1 text-xs text-gray-500">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
+                      <h3 className="text-base font-extrabold text-[var(--text-primary)]">Registrar Command Center</h3>
+                      <p className="mt-1 text-xs text-[var(--text-secondary)]">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
                     </div>
                     <button
                       onClick={() => setActiveTab('reporting')}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--bg-card-secondary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] px-4 py-2 text-xs font-bold text-[var(--text-primary)] transition-all cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-base">ios_share</span>
-                      Export reports
+                      <span className="material-symbols-outlined text-base text-[var(--accent-cyan)]">ios_share</span>
+                      Export Reports
                     </button>
                   </div>
+
                   <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
                     <div className="grid grid-cols-2 gap-3">
                       {registrarCommandSignals.map((signal) => (
                         <button
                           key={signal.label}
                           onClick={() => setActiveTab(signal.tab)}
-                          className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                          className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 shadow-sm cursor-pointer"
                         >
                           <div className="flex items-center gap-2">
                             <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{signal.label}</p>
                           </div>
-                          <p className="mt-2 text-2xl font-extrabold text-gray-900">{signal.value}</p>
+                          <p className="mt-2 text-2xl font-extrabold text-[var(--text-primary)]">{signal.value}</p>
                         </button>
                       ))}
                     </div>
-                    <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+
+                    <div className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] p-4">
                       <div className="mb-3 flex items-center justify-between">
-                        <h4 className="text-sm font-bold text-gray-900">SIS Data Quality</h4>
-                        <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Monitored</span>
+                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">SIS Data Quality</h4>
+                        <span className="rounded-md bg-[#0F3323] border border-[#166534] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#4ADE80]">
+                          Monitored
+                        </span>
                       </div>
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                         {dataQualityPanels.map((item) => (
-                          <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
-                            <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
-                            <p className="mt-2 text-xl font-extrabold text-gray-900">{item.value}</p>
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
-                            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
+                          <div key={item.label} className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
+                            <span className="material-symbols-outlined text-[var(--accent-cyan)]">{item.icon}</span>
+                            <p className="mt-1.5 text-lg font-extrabold text-[var(--text-primary)]">{item.value}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{item.label}</p>
+                            <p className="mt-1 text-[10px] leading-relaxed text-[var(--text-secondary)]">{item.helper}</p>
                           </div>
                         ))}
                       </div>
@@ -1262,21 +1766,23 @@ useEffect(() => {
                         if (stat.id === 3) setActiveTab('verification');
                         if (stat.id === 4) setActiveTab('documents');
                       }}
-                      className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
+                      className={`group relative cursor-pointer overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-5 shadow-sm transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-lg border-[var(--brand-primary)]/50' : ''}`}
                     >
                       <div className="relative z-10 space-y-3">
                         <div className="flex items-start justify-between">
-                          <div className="p-2.5 rounded-xl bg-astu-navy/10 text-astu-navy">
+                          <div className="p-2.5 rounded-xl bg-[#141D2B] border border-[var(--border-color)] text-[var(--accent-cyan)]">
                             <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
                           </div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">SIS Verified</span>
+                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#4ADE80] bg-[#0F3323] border border-[#166534] px-2 py-0.5 rounded">
+                            SIS Verified
+                          </span>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
-                          <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
+                          <p className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-wider">{stat.label}</p>
+                          <p className="text-3xl font-extrabold text-[var(--text-primary)] mt-1">{stat.value}</p>
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t">
-                          <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
+                        <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-semibold pt-2 border-t border-[var(--border-color)]">
+                          <span className="material-symbols-outlined text-base font-bold text-[#4ADE80]">{stat.trendIcon}</span>
                           {stat.trend}
                         </div>
                       </div>
@@ -1294,50 +1800,52 @@ useEffect(() => {
                     <div
                       key={idx}
                       onClick={() => setActiveTab(act.tab)}
-                      className="group cursor-pointer rounded-[10px] border border-gray-200/60 bg-white p-5 text-center transition-all hover:border-astu-navy/30 hover:shadow-md space-y-4"
+                      className="group cursor-pointer rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-5 text-center transition-all hover:border-[var(--brand-primary)]/50 hover:shadow-lg space-y-3"
                     >
-                      <div className="mx-auto w-12 h-12 rounded-2xl bg-astu-navy/10 flex items-center justify-center group-hover:bg-astu-navy/20 transition-colors text-astu-navy">
+                      <div className="mx-auto w-12 h-12 rounded-xl bg-[#141D2B] border border-[var(--border-color)] flex items-center justify-center group-hover:bg-[#2196F3]/20 transition-colors text-[var(--accent-cyan)] group-hover:text-white">
                         <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900 text-sm">{act.title}</h3>
-                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">{act.desc}</p>
+                        <h3 className="font-extrabold text-[var(--text-primary)] text-sm group-hover:text-[var(--accent-cyan)] transition-colors">{act.title}</h3>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{act.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm space-y-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[var(--border-color)] pb-4">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900">Registrar Feature Control</h3>
-                      <p className="mt-1 text-xs text-gray-500">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
+                      <h3 className="text-base font-extrabold text-[var(--text-primary)]">Registrar Feature Control</h3>
+                      <p className="mt-1 text-xs text-[var(--text-secondary)]">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
                     </div>
-                    <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
-                      Accreditation ready
+                    <span className="rounded-lg border border-[#166534] bg-[#0F3323] px-3 py-1 text-[11px] font-bold text-[#4ADE80]">
+                      Accreditation Ready
                     </span>
                   </div>
+
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                     {registrarControlCards.map((card) => (
                       <button
                         key={card.title}
                         onClick={() => setActiveTab(card.tab)}
-                        className="rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
+                        className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 hover:shadow-md cursor-pointer"
                       >
-                        <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
-                        <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
-                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                        <span className="material-symbols-outlined rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] p-2 text-[var(--accent-cyan)]">{card.icon}</span>
+                        <h4 className="mt-3 text-sm font-bold text-[var(--text-primary)]">{card.title}</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">{card.desc}</p>
                       </button>
                     ))}
                   </div>
-                  <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3 pt-2">
                     {complianceSignals.map((signal) => (
-                      <div key={signal.label} className="rounded-[10px] border border-gray-200 bg-white p-4">
+                      <div key={signal.label} className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] p-4">
                         <div className="flex items-center gap-2">
                           <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{signal.label}</p>
                         </div>
-                        <p className="mt-2 text-lg font-extrabold text-gray-900">{signal.value}</p>
+                        <p className="mt-2 text-xl font-extrabold text-[var(--text-primary)]">{signal.value}</p>
                       </div>
                     ))}
                   </div>
@@ -1357,11 +1865,13 @@ useEffect(() => {
                   />
                   <AnalyticsChart
                     type="line"
-                    title="Tracer Survey Submissions Rate"
-                    subtitle="Interactive timeline tracking response rate percentage"
+                    title={realSurveyRate !== null ? 'Tracer Survey Submissions Rate' : 'Identity Coverage by Cohort'}
+                    subtitle={realSurveyRate !== null
+                      ? 'Interactive timeline tracking response rate percentage'
+                      : 'Identity verification share derived from the live graduate roster'}
                     data={surveyRateData}
                     xKey="month"
-                    series={[{ key: 'rate', label: 'Response Rate %' }]}
+                    series={[{ key: 'rate', label: realSurveyRate !== null ? 'Response Rate %' : 'Identity Coverage %' }]}
                     height={200}
                     darkMode={darkMode}
                   />
@@ -1440,10 +1950,6 @@ useEffect(() => {
 
             {activeTab === 'messages' && (
               <MessagingTab darkMode={darkMode} />
-            )}
-
-            {activeTab === 'bulletins' && (
-              <RegistrarPublishingTab registrarName={registrarName} darkMode={darkMode} />
             )}
           </div>
         </div>

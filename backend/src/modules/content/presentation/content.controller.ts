@@ -201,12 +201,16 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
     const [
       alumniCount,
       verifiedAlumniCount,
+      pendingAlumniCount,
       employedAlumniCount,
+      unemployedAlumniCount,
       departmentCount,
+      departmentsList,
       employerCount,
       activeJobsCount,
       eventsCount,
       docRequestsCount,
+      pendingDocRequestsCount,
       verifRequestsCount,
       eventRsvpsCount,
       surveyAssignmentsTotal,
@@ -217,14 +221,29 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
     ] = await Promise.all([
       prisma.alumniProfile.count().catch(() => 0),
       prisma.alumniProfile.count({ where: { isVerified: true } }).catch(() => 0),
+      prisma.alumniProfile.count({ where: { isVerified: false } }).catch(() => 0),
       prisma.alumniProfile.count({
         where: { employmentStatus: { in: ['EMPLOYED', 'SELF_EMPLOYED'] } },
       }).catch(() => 0),
+      prisma.alumniProfile.count({
+        where: { employmentStatus: 'UNEMPLOYED' },
+      }).catch(() => 0),
       prisma.department.count().catch(() => 0),
+      prisma.department.findMany({
+        select: {
+          id: true,
+          code: true,
+          name: true,
+          alumniProfiles: {
+            select: { id: true, employmentStatus: true }
+          }
+        }
+      }).catch(() => []),
       prisma.employerProfile.count().catch(() => 0),
       (prisma.job?.count ? prisma.job.count({ where: { isActive: true } }) : Promise.resolve(0)).catch(() => 0),
       (prisma.event?.count ? prisma.event.count() : Promise.resolve(0)).catch(() => 0),
       (prisma.documentRequest?.count ? prisma.documentRequest.count() : Promise.resolve(0)).catch(() => 0),
+      (prisma.documentRequest?.count ? prisma.documentRequest.count({ where: { status: 'PENDING' } }) : Promise.resolve(0)).catch(() => 0),
       (prisma.verificationRequest?.count ? prisma.verificationRequest.count() : Promise.resolve(0)).catch(() => 0),
       (prisma.eventRSVP?.count ? prisma.eventRSVP.count() : Promise.resolve(0)).catch(() => 0),
       (prisma.surveyAssignment?.count ? prisma.surveyAssignment.count() : Promise.resolve(0)).catch(() => 0),
@@ -235,12 +254,26 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
     ]);
 
     const historicBatchesYears = Math.max(0, new Date().getFullYear() - 1993);
-    const employmentRate = alumniCount > 0 ? Math.round((employedAlumniCount / alumniCount) * 100) : 0;
-    const verificationRate = alumniCount > 0 ? Math.round((verifiedAlumniCount / alumniCount) * 100) : 0;
+    const employmentRate = alumniCount > 0 ? Number(((employedAlumniCount / alumniCount) * 100).toFixed(1)) : 0;
+    const verificationRate = alumniCount > 0 ? Number(((verifiedAlumniCount / alumniCount) * 100).toFixed(1)) : 0;
     const etaComplianceRate = surveyAssignmentsTotal > 0
       ? Math.round((surveyAssignmentsCompleted / surveyAssignmentsTotal) * 100)
-      : verificationRate;
+      : null;
     const digitalRequests = (docRequestsCount || 0) + (verifRequestsCount || 0);
+
+    const departmentDistribution = (departmentsList || []).map((d: any) => {
+      const profiles = d.alumniProfiles || [];
+      const total = profiles.length;
+      const emp = profiles.filter((p: any) => p.employmentStatus === 'EMPLOYED' || p.employmentStatus === 'SELF_EMPLOYED').length;
+      return {
+        id: d.id,
+        code: d.code || d.name?.substring(0, 3).toUpperCase() || 'DEPT',
+        name: d.name,
+        totalAlumni: total,
+        employedAlumni: emp,
+        employmentRate: total > 0 ? Math.round((emp / total) * 100) : 0,
+      };
+    });
 
     return res.status(200).json({
       success: true,
@@ -249,7 +282,11 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
         registeredAlumniFormatted: `${alumniCount.toLocaleString()}`,
         verifiedAlumni: verifiedAlumniCount,
         verifiedAlumniFormatted: `${verifiedAlumniCount.toLocaleString()}`,
+        pendingAlumniVerification: pendingAlumniCount,
+        employedAlumni: employedAlumniCount,
+        unemployedAlumni: unemployedAlumniCount,
         verificationRate,
+        verificationRateFormatted: `${verificationRate}%`,
         fieldsOfStudy: departmentCount,
         fieldsOfStudyFormatted: `${departmentCount} Departments`,
         corporatePartners: employerCount,
@@ -259,17 +296,24 @@ export const getPublicMetricsController = async (_req: Request, res: Response, n
         employmentRate,
         employmentRateFormatted: `${employmentRate}%`,
         etaComplianceRate,
-        etaComplianceRateFormatted: `${etaComplianceRate}%`,
+        etaComplianceRateFormatted: etaComplianceRate !== null ? `${etaComplianceRate}%` : '—',
+        hasActiveSurveyWave: surveyAssignmentsTotal > 0,
+        surveyAssignmentsTotal,
+        surveyAssignmentsCompleted,
         activeJobs: activeJobsCount,
         activeJobsFormatted: `${activeJobsCount.toLocaleString()}`,
         digitalRequests,
         digitalRequestsFormatted: `${digitalRequests.toLocaleString()}`,
+        documentRequestsTotal: docRequestsCount,
+        documentRequestsPending: pendingDocRequestsCount,
+        supportTicketsOpen: pendingTicketsCount,
         eventsCount,
         eventsCountFormatted: `${eventsCount.toLocaleString()}`,
         eventRsvpsCount,
         storiesCount,
         bulletinsCount,
         pendingTicketsCount,
+        departmentDistribution,
         lastUpdated: new Date().toISOString(),
       },
     });
@@ -293,50 +337,12 @@ export const getPublicDonationCampaignsController = async (req: Request, res: Re
       whereClause.category = category;
     }
 
-    let campaigns = await prisma.donationCampaign.findMany({
+    // Return real campaigns only — never auto-seed fabricated fundraising data.
+    const campaigns = await prisma.donationCampaign.findMany({
       where: whereClause,
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
-
-    if (campaigns.length === 0) {
-      await prisma.donationCampaign.createMany({
-        data: [
-          {
-            title: 'ASTU Scholarship Fund 2026',
-            category: 'Scholarship',
-            description: 'Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.',
-            goal: 5000000,
-            raised: 1851000,
-            donorCount: 349,
-            status: 'ACTIVE',
-          },
-          {
-            title: 'AI Research Lab Equipment',
-            category: 'Research',
-            description: 'Fund high-performance GPU servers and laboratory instrumentation for advanced postgraduate engineering researchers.',
-            goal: 8000000,
-            raised: 3201000,
-            donorCount: 158,
-            status: 'ACTIVE',
-          },
-          {
-            title: 'Campus Innovation Makerspace',
-            category: 'Infrastructure',
-            description: 'Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.',
-            goal: 12000000,
-            raised: 6800000,
-            donorCount: 220,
-            status: 'ACTIVE',
-          },
-        ],
-      }).catch(() => null);
-
-      campaigns = await prisma.donationCampaign.findMany({
-        where: { status: 'ACTIVE' },
-        orderBy: { createdAt: 'desc' },
-      });
-    }
 
     const parseNum = (val: any) => {
       if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -390,3 +396,144 @@ export const recordPublicDonationController = async (req: Request, res: Response
   }
 };
 
+// ─── Content Templates Controllers ───
+
+export const getContentTemplatesController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { category, search, featured } = req.query;
+    const where: any = {};
+    if (category && category !== 'all') {
+      where.category = String(category);
+    }
+    if (search) {
+      where.search = String(search);
+    }
+    if (featured !== undefined) {
+      where.isFeatured = featured === 'true';
+    }
+    const templates = await prisma.contentTemplate.findMany({ where });
+    return res.status(200).json({
+      success: true,
+      data: templates,
+      total: templates.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getContentTemplateByIdController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    const template = await prisma.contentTemplate.findUnique({ where: { id } });
+    if (!template) {
+      return res.status(404).json({ success: false, message: 'Template not found' });
+    }
+    return res.status(200).json({
+      success: true,
+      data: template,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { name, description, category, color, iconName, thumbnail, fields, starterBody, isFeatured, isDefault } = req.body;
+    if (!name || !description || !category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name, category, and description are required for creating a template.',
+      });
+    }
+    const created = await prisma.contentTemplate.create({
+      data: {
+        name,
+        description,
+        category,
+        color: color || '#003580',
+        iconName: iconName || 'FileText',
+        thumbnail: thumbnail || String(category).toLowerCase(),
+        fields: Array.isArray(fields) ? fields : (typeof fields === 'string' ? fields.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
+        starterBody: starterBody || '',
+        isFeatured: Boolean(isFeatured),
+        isDefault: Boolean(isDefault),
+        usage: 0,
+        lastUpdated: 'Just now',
+      },
+    });
+    return res.status(201).json({
+      success: true,
+      message: `Template "${name}" created successfully.`,
+      data: created,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    const { name, description, category, color, iconName, thumbnail, fields, starterBody, isFeatured, isDefault } = req.body;
+    const data: any = {};
+    if (name !== undefined) data.name = name;
+    if (description !== undefined) data.description = description;
+    if (category !== undefined) data.category = category;
+    if (color !== undefined) data.color = color;
+    if (iconName !== undefined) data.iconName = iconName;
+    if (thumbnail !== undefined) data.thumbnail = thumbnail;
+    if (fields !== undefined) {
+      data.fields = Array.isArray(fields) ? fields : (typeof fields === 'string' ? fields.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+    }
+    if (starterBody !== undefined) data.starterBody = starterBody;
+    if (isFeatured !== undefined) data.isFeatured = Boolean(isFeatured);
+    if (isDefault !== undefined) data.isDefault = Boolean(isDefault);
+
+    const updated = await prisma.contentTemplate.update({
+      where: { id },
+      data,
+    });
+    return res.status(200).json({
+      success: true,
+      message: `Template "${updated.name}" updated successfully.`,
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    await prisma.contentTemplate.delete({ where: { id } });
+    return res.status(200).json({
+      success: true,
+      message: 'Template deleted successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const useContentTemplateController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const prisma = await initPrisma();
+    const { id } = req.params;
+    const updated = await prisma.contentTemplate.incrementUsage({ where: { id } });
+    return res.status(200).json({
+      success: true,
+      message: `Usage count updated for "${updated.name}".`,
+      data: updated,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

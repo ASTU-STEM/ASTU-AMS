@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
+import AdminStatGrid from '../components/AdminStatGrid';
 import ContentCard, { ContentCardItem, ContentStatus, ContentType } from '../components/ContentCard';
 import ScheduleDialog, { ScheduleValue } from '../components/ScheduleDialog';
 import AdminModal from '../components/AdminModal';
@@ -1052,40 +1053,42 @@ export default function ContentList() {
       {/* TAB 1: CONTENT ITEMS MANAGEMENT */}
       {activeTab === 'content' && (
         <div className="space-y-4">
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 cms-fade">
-            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">Total Notices</span>
-                <Bell className="h-4 w-4 text-[#003580]" />
-              </div>
-              <div className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{items.length}</div>
-              <p className="mt-1 text-[11px] text-slate-400">All announcements in system</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
-              <div className="flex items-center justify-between text-emerald-600">
-                <span className="text-xs font-semibold">Live on Homepage</span>
-                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              </div>
-              <div className="mt-2 text-2xl font-black text-emerald-600">{items.filter(i => i.status === 'Published').length}</div>
-              <p className="mt-1 text-[11px] text-slate-400">Active on homepage notice board</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
-              <div className="flex items-center justify-between text-amber-600">
-                <span className="text-xs font-semibold">Pinned to Top</span>
-                <Pin className="h-4 w-4 text-amber-500" />
-              </div>
-              <div className="mt-2 text-2xl font-black text-amber-600">{items.filter(i => i.pinned).length}</div>
-              <p className="mt-1 text-[11px] text-slate-400">Prioritized at top of lists</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">Drafts & Scheduled</span>
-                <Clock className="h-4 w-4 text-slate-400" />
-              </div>
-              <div className="mt-2 text-2xl font-black text-slate-700 dark:text-slate-300">{items.filter(i => i.status !== 'Published').length}</div>
-              <p className="mt-1 text-[11px] text-slate-400">Unpublished or pending</p>
-            </div>
+          <div className="cms-fade">
+            <AdminStatGrid
+              cols={4}
+              compact
+              stats={[
+                {
+                  title: 'Total Notices',
+                  value: String(items.length),
+                  icon: Bell,
+                  tone: 'blue',
+                  description: 'All announcements in system',
+                },
+                {
+                  title: 'Live on Homepage',
+                  value: String(items.filter((i) => i.status === 'Published').length),
+                  icon: CheckCircle2,
+                  tone: 'green',
+                  trend: 'Notice board',
+                  trendDirection: 'up',
+                },
+                {
+                  title: 'Pinned to Top',
+                  value: String(items.filter((i) => i.pinned).length),
+                  icon: Pin,
+                  tone: 'amber',
+                  description: 'Prioritized at top of lists',
+                },
+                {
+                  title: 'Drafts & Scheduled',
+                  value: String(items.filter((i) => i.status !== 'Published').length),
+                  icon: Clock,
+                  tone: 'purple',
+                  description: 'Unpublished or pending',
+                },
+              ]}
+            />
           </div>
 
           {/* Toolbar */}

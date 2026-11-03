@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -40,6 +41,8 @@ import { usePublicMetrics } from '../../../services/publicMetrics.service';
 
 type Tab = 'members' | 'community-page' | 'regional-chapters' | 'event-banner' | 'pillars' | 'detail-page';
 
+const VALID_TABS: Tab[] = ['members', 'community-page', 'regional-chapters', 'event-banner', 'pillars', 'detail-page'];
+
 interface RegionalChapterItem {
   name: string;
   hub: string;
@@ -58,9 +61,26 @@ interface CommunityPillarItem {
 
 export default function CommunityManagement() {
   const { metrics } = usePublicMetrics();
-  const [activeTab, setActiveTab] = useState<Tab>('members');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab') as Tab | null;
+  const [activeTab, setActiveTab] = useState<Tab>(
+    tabFromUrl && VALID_TABS.includes(tabFromUrl) ? tabFromUrl : 'members'
+  );
   const [showLivePreview, setShowLivePreview] = useState(true);
   const [deviceView, setDeviceView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+
+  useEffect(() => {
+    if (tabFromUrl && VALID_TABS.includes(tabFromUrl) && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const selectTab = (tab: Tab) => {
+    setActiveTab(tab);
+    const next = new URLSearchParams(searchParams);
+    next.set('tab', tab);
+    setSearchParams(next, { replace: true });
+  };
 
   // ============ MEMBERS STATE ============
   const [members, setMembers] = useState<CommunityMember[]>(() => communityMembersService.getMembers());
@@ -554,7 +574,7 @@ export default function CommunityManagement() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as Tab)}
+                  onClick={() => selectTab(tab.id as Tab)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
                     isActive
                       ? 'bg-[#003366] text-white shadow-sm'

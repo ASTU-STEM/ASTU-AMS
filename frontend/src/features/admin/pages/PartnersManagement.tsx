@@ -42,6 +42,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import AdminStatGrid from '../components/AdminStatGrid';
 import homepageCmsService, {
   defaultPartnersPageConfig,
   PartnersPageConfig,
@@ -548,6 +549,41 @@ export default function PartnersManagement() {
           </button>
         </div>
       </AdminPageHeader>
+
+      <AdminStatGrid
+        cols={4}
+        compact
+        stats={[
+          {
+            title: 'Partner Directory',
+            value: String(partners.length),
+            icon: Building2,
+            tone: 'blue',
+            description: 'Employers & consortium orgs',
+          },
+          {
+            title: 'Portal Stats',
+            value: String(partnersConfig.stats?.length || 0),
+            icon: TrendingUp,
+            tone: 'gold',
+            description: 'Public impact counters',
+          },
+          {
+            title: 'Recruitment Tracks',
+            value: String(partnersConfig.recruitmentTracks?.length || 0),
+            icon: Briefcase,
+            tone: 'green',
+            description: 'Hiring pathways published',
+          },
+          {
+            title: 'Alliance Tracks',
+            value: String(partnersConfig.stakeholderTracks?.length || 0),
+            icon: Handshake,
+            tone: 'purple',
+            description: 'Stakeholder partnerships',
+          },
+        ]}
+      />
 
       {/* ── SPLIT STUDIO CONTAINER: SIDEBAR ON LEFT, LIVE PREVIEW ON RIGHT ── */}
       <div className="flex flex-col lg:flex-row gap-5 items-stretch min-h-[750px]">

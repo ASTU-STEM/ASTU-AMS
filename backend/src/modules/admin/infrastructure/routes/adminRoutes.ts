@@ -60,8 +60,9 @@ router.put('/jobs/:id', requirePermission('approve_jobs'), adminController.updat
 router.put('/jobs/:id/status', requirePermission('approve_jobs'), adminController.updateJobStatus);
 router.delete('/jobs/:id', requirePermission('approve_jobs'), adminController.deleteJob);
 
-// System Logs
+// System Logs (alias /system-logs for ICT Universal Logs & Forensics Audit pages)
 router.get('/logs', requirePermission('view_universal_logs'), adminController.getLogs);
+router.get('/system-logs', requirePermission('view_universal_logs'), adminController.getLogs);
 router.get('/logs/stats', adminController.getLogStats);
 
 // Notifications

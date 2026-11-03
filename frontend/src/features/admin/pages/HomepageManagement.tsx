@@ -113,130 +113,41 @@ type CmsCategory =
   | 'footer-cta';
 
 const CATEGORIES: { id: CmsCategory; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
-  { id: 'hero', label: '1. Hero & Alert Banner', icon: ImagePlus, desc: 'Top alert ticker, rotating carousel slides & quick action buttons' },
-  { id: 'impact', label: '2. Impact at a Glance', icon: BarChart3, desc: 'Eyebrow, title, 4 key statistics & measurable outcome figures' },
-  { id: 'portals', label: '3. How It Works (Journey)', icon: Users, desc: 'Ecosystem transition flow, 4 connected steps & Get Started CTA' },
-  { id: 'campus-life', label: '4. Campus Life & Labs', icon: Star, desc: 'Campus highlights, innovation laboratories & campus cards' },
-  { id: 'gallery', label: '5. Campus Moments (Gallery)', icon: ImageIcon, desc: 'Campus moments photo grid, album tags & gallery spotlight' },
-  { id: 'events-news', label: '6. Events & Notices', icon: CalendarDays, desc: 'Alumni events, workshops, announcements & official bulletins' },
-  { id: 'partners-portal', label: '7. Partner Companies', icon: Briefcase, desc: 'Corporate partners, recruitment tracks & enterprise logos' },
-  { id: 'giving-campaigns', label: '8. Giving & Research Funds', icon: Heart, desc: 'Homepage giving header, research funds directory & donation portal' },
-  { id: 'accreditation-faq', label: '9. Accreditation & FAQ', icon: ShieldCheck, desc: 'Quality assurance banner, tracer studies & frequently asked questions' },
-  { id: 'footer-cta', label: '10. CTA Banner & Footer', icon: MapPin, desc: 'Bottom CTA banner, official addresses, support contacts & directory' },
-  { id: 'detail-pages', label: 'Linked Sub-Pages', icon: FileText, desc: 'Manage 22+ institutional sub-pages linked from homepage (Overview, Contact, etc.)' },
+  { id: 'hero', label: '1. Hero & Alert', icon: ImagePlus, desc: 'Welcome ticker, hero slides, badge & portal action buttons' },
+  { id: 'impact', label: '2. Impact Headers', icon: BarChart3, desc: 'Section copy for Impact — live counters stay synced from AMS metrics' },
+  { id: 'portals', label: '3. How It Works', icon: Users, desc: 'Journey steps shown in studio preview & stakeholder portal cards' },
+  { id: 'campus-life', label: '4. Campus Life', icon: Star, desc: 'Campus highlights, labs bridge copy & facility cards' },
+  { id: 'gallery', label: '5. Gallery & Video', icon: ImageIcon, desc: 'Campus Moments headers, photo grid & video gallery cards' },
+  { id: 'events-news', label: '6. Events & Notices', icon: CalendarDays, desc: 'Alumni events, workshops, announcements & news headers' },
+  { id: 'partners-portal', label: '7. Partners', icon: Briefcase, desc: 'Partner logos, featured employers & recruitment tracks' },
+  { id: 'community', label: '8. Community & Stories', icon: MessageSquareText, desc: 'Community strip, alumni voices, success stories & testimonials' },
+  { id: 'giving-campaigns', label: '9. Giving', icon: Heart, desc: 'Homepage giving header & research fund callouts' },
+  { id: 'accreditation-faq', label: '10. FAQ', icon: ShieldCheck, desc: 'Homepage FAQ preview (3 items) + full /info/faq page — keep in sync' },
+  { id: 'footer-cta', label: '11. CTA & Footer', icon: MapPin, desc: 'Community CTA buttons, office contacts & copyright' },
+  { id: 'detail-pages', label: 'Sub-Pages', icon: FileText, desc: 'Overview, Contact Us and 22+ institutional pages linked from the homepage' },
 ];
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users, Building2, LineChart, FileCheck2, MessageSquareText, Briefcase, LockKeyhole, Globe, BookOpen, Star, Handshake, ShieldCheck, Trophy, GraduationCap, Zap, Phone, Mail, MapPin, CalendarDays, Award: Trophy,
 };
 
-/* ─── Initial Fallback Data ─── */
-const initialHeroSlides: HeroSlide[] = [
-  { id: 'HS-1', image: '/images/astu-building.jpg', tagline: 'Quality Assurance & Accreditation', title: "Connecting ASTU's Excellence to the Global Industry", description: 'A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.', active: true },
-  { id: 'HS-2', image: '/images/campus-2.jpeg', tagline: 'Enterprise Networking & Placement', title: 'Empowering ASTU Graduates in Modern Workspaces', description: 'Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.', active: true },
-  { id: 'HS-3', image: 'https://images.unsplash.com/photo-1562774053-701939374585', tagline: 'Academic Innovation & Tracer Feedback', title: 'Coordinating Strategic Tracer Studies & Skill Gaps', description: 'Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.', active: true },
-];
-
-const initialImpactStats: ImpactStat[] = [
-  { id: 'IS-1', label: 'Registered Alumni Members', value: '1,238', suffix: '+', detail: 'Registered in the alumni network', icon: 'Users', action: 'View Network', target: '/register', active: true },
-  { id: 'IS-2', label: 'Partner Organizations', value: '500', suffix: '+', detail: 'Hiring, internships, and feedback', icon: 'Building2', action: 'Meet Partners', target: '/info/featured-employers', active: true },
-  { id: 'IS-3', label: 'Employment Rate', value: '87', suffix: '%', detail: 'Graduate employment rate tracked', icon: 'LineChart', action: 'View Outcomes', target: '/info/impact-numbers', active: true },
-  { id: 'IS-4', label: 'Digital Requests', value: '6K', suffix: '+', detail: 'Transcript and certificate requests', icon: 'FileCheck2', action: 'Registrar Hub', target: '/info/registrar-portal', active: true },
-  { id: 'IS-5', label: 'Fields of Study', value: '5', suffix: '', detail: 'Engineering, Applied Tech & Science', icon: 'BookOpen', action: 'Explore Programs', target: '/info/overview', active: true },
-];
-
-const initialPortals: StakeholderPortal[] = [
-  { id: 'SP-1', title: 'Alumni', icon: 'Users', points: ['Create and maintain your professional profile.', 'Access verified job listings and internship opportunities.', 'Complete tracer surveys to guide curriculum development.', 'Mentor current students and connect with peers.'], cta: 'Access Alumni Portal', route: '/info/alumni-portal', active: true, step: 1, color: 'from-astu-navy to-[#1a4f8a]', iconBg: 'bg-astu-navy/10 text-astu-navy' },
-  { id: 'SP-2', title: 'Employers', icon: 'Briefcase', points: ['Post employment opportunities for ASTU graduates.', 'Search alumni by expertise, skills, and department.', 'Provide feedback to enhance curriculum relevance.'], cta: 'Partner With ASTU', route: '/info/employer-portal', active: true, step: 2, color: 'from-astu-red to-[#c0392b]', iconBg: 'bg-astu-red/10 text-astu-red' },
-  { id: 'SP-3', title: 'Departments', icon: 'LineChart', points: ['Monitor graduate employment outcomes and metrics.', 'Identify skill gaps through employer analytics.', 'Generate accreditation-ready reports.'], cta: 'View Department Analytics', route: '/info/department-portal', active: true, step: 3, color: 'from-astu-green to-[#1e8449]', iconBg: 'bg-astu-green/10 text-astu-green' },
-  { id: 'SP-4', title: 'Registrar', icon: 'FileCheck2', points: ['Validate alumni credentials against SIS records.', 'Process transcript and certificate requests.', 'Send tracer study reminders and audit notifications.'], cta: 'Open Registrar Portal', route: '/info/registrar-portal', active: true, step: 4, color: 'from-violet-600 to-violet-800', iconBg: 'bg-violet-100 text-violet-700' },
-];
-
-const initialCampusLife: CampusLifeCard[] = [
-  { id: 'CL-1', title: 'Events and Activities', campus: 'Main Campus', description: 'Career expos, alumni reunions, workshops, chapter meetings, and community programs.', image: '/images/campus-2.jpeg', action: 'View Events', link: '/events', active: true },
-  { id: 'CL-2', title: 'Facilities & Labs', campus: 'Innovation Spaces', description: 'Laboratories, research centers, libraries, student services, and employer interview rooms.', image: '/images/electriclabs.jpeg', action: 'Explore Facilities', link: '/info/facilities', active: true },
-  { id: 'CL-3', title: 'ASTU Museums & Gallery', campus: 'Campus Gallery', description: 'Research showcases, graduation moments, campus photography, and public video archives.', image: '/images/arc.jpg', action: 'View Gallery', link: '/info/gallery', active: true },
-];
-
-const initialCampuses: Campus[] = [
-  { id: 'CM-1', name: 'Main Campus', description: 'Central hub for alumni services, registrar workflows, and institutional engagement.', image: '/images/astu-building.jpg', active: true },
-  { id: 'CM-2', name: 'Engineering Labs', description: 'Applied research, workshops, innovation programs, and industry-linked training.', image: '/images/electriclabs.jpeg', active: true },
-  { id: 'CM-3', name: 'Graduation & Events Hall', description: 'Ceremonies, career fairs, alumni awards, and university achievement programs.', image: '/images/gc7.jpg', active: true },
-  { id: 'CM-4', name: 'Research Collaboration Center', description: 'Research publications, industry projects, and department KPI evidence.', image: '/images/arc.jpg', active: true },
-];
-
-const initialGallery: GalleryImage[] = [
-  { id: 'GI-1', title: 'ASTU Main Campus Architecture', src: '/images/astu-building.jpg', active: true },
-  { id: 'GI-2', title: 'Innovation and Collaboration Hub', src: '/images/campus-2.jpeg', active: true },
-  { id: 'GI-3', title: 'ASTU Alumni Identity & Legacy', src: '/images/astu-seal-logo.png', active: true },
-];
-
-const initialVideos: VideoItem[] = [
-  { id: 'VI-1', title: 'Career Expo Highlights', image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80', active: true },
-  { id: 'VI-2', title: 'Research & Innovation Forum', image: '/images/arc.jpg', active: true },
-  { id: 'VI-3', title: 'Graduation Ceremony Replay', image: '/images/gc7.jpg', active: true },
-];
-
-const initialEvents: EventItem[] = [
-  { id: 'EV-1', title: 'ASTU Alumni Carnival 2026', date: 'April 25-26, 2026', location: 'Main Campus', image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80', active: true },
-  { id: 'EV-2', title: 'DAAD Alumni Workshop', date: 'March 2026', location: 'ASTU Research Center', image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80', active: true },
-];
-
-const initialWorkshops: WorkshopItem[] = [
-  { id: 'WS-1', title: 'AI for Engineering Research', date: 'June 14, 2026', seats: '120 seats', focus: 'Research & Innovation', active: true },
-  { id: 'WS-2', title: 'CV Builder and Interview Lab', date: 'June 20, 2026', seats: '80 seats', focus: 'Career Readiness', active: true },
-  { id: 'WS-3', title: 'Startup Finance for Alumni', date: 'July 4, 2026', seats: '60 seats', focus: 'Entrepreneurship', active: true },
-];
-
-const initialNews: NewsItem[] = [
-  { id: 'NW-1', title: 'New Engineering Lab Inaugurated', date: 'May 28, 2026', excerpt: 'Cutting-edge robotics and IoT facilities opened for graduate research.', active: true },
-  { id: 'NW-2', title: 'ASTU Research Grant Winners', date: 'May 25, 2026', excerpt: 'Three applied research initiatives secure funding from regional partners.', active: true },
-  { id: 'NW-3', title: 'Annual Career Expo Announced', date: 'May 20, 2026', excerpt: 'Over 50 tech and engineering employers confirmed for on-campus hiring.', active: true },
-];
-
-const initialAnnouncements: Announcement[] = [
-  { id: 'AN-1', title: 'ASTU Alumni Association Inspires Graduating Class with Career Tips!', date: 'March 7, 2025', type: 'Alumni Announcement', active: true },
-  { id: 'AN-2', title: 'ASTU hosts a five-day DAAD Alumni workshop', date: 'March 7, 2025', type: 'Employer Announcement', active: true },
-  { id: 'AN-3', title: 'ASTU alumni serve as model United Nations secretariats!', date: 'January 7, 2025', type: 'Alumni Achievement', active: true },
-  { id: 'AN-4', title: 'Tracer Study 2026 response window is open', date: 'May 31, 2026', type: 'Alumni Announcement', active: true },
-  { id: 'AN-5', title: 'Call for employer partners: campus recruitment week', date: 'May 28, 2026', type: 'Employer Announcement', active: true },
-];
-
-const initialStories: SuccessStory[] = [
-  { id: 'SS-1', name: 'Abebe Yosef', role: 'Software Engineer', text: 'I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.', image: '/images/State-M.jpg', active: true },
-  { id: 'SS-2', name: 'Bekele Kebede', role: 'Employer Partner', text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.', image: '/images/gc7.jpg', active: true },
-  { id: 'SS-3', name: 'Helina Sileshi', role: 'Mentor & Alumni', text: 'Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!', image: '/images/arc.jpg', active: true },
-];
-
-const initialPartners: Partner[] = [
-  { id: 'PT-1', name: 'Ethio Telecom', active: true },
-  { id: 'PT-2', name: 'INSA', active: true },
-  { id: 'PT-3', name: 'Ethiopian Airlines', active: true },
-  { id: 'PT-4', name: 'Safaricom', active: true },
-  { id: 'PT-5', name: 'Huawei', active: true },
-  { id: 'PT-6', name: 'Commercial Bank of Ethiopia', active: true },
-];
-
-const initialFeaturedEmployers: FeaturedEmployerItem[] = [
-  { id: 'FE-1', name: 'Ethio Telecom', area: 'Telecom & Cloud', openings: '14 graduate roles', active: true },
-  { id: 'FE-2', name: 'Ethiopian Airlines', area: 'Aviation Technology', openings: '8 internship tracks', active: true },
-  { id: 'FE-3', name: 'INSA', area: 'Cybersecurity', openings: '6 research placements', active: true },
-  { id: 'FE-4', name: 'Huawei Ethiopia', area: 'Network Engineering', openings: '11 certification paths', active: true },
-];
-
-const initialTestimonials: Testimonial[] = [
-  { id: 'TT-1', quote: 'ASTU-AMS gave our department the evidence we needed for skill-gap review.', by: 'Department Head', active: true },
-  { id: 'TT-2', quote: 'The candidate search and feedback tools improved our campus recruitment cycle.', by: 'Employer Partner', active: true },
-  { id: 'TT-3', quote: 'I found mentorship, events, and job matches without leaving the alumni portal.', by: 'ASTU Alumna', active: true },
-];
-
-const initialFaq: FaqItem[] = [
-  { id: 'FQ-1', question: 'Who can use ASTU-AMS?', answer: 'Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.', category: 'General', active: true },
-  { id: 'FQ-2', question: 'How are tracer studies used?', answer: 'Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.', category: 'Tracer', active: true },
-  { id: 'FQ-3', question: 'Can employers register events?', answer: 'Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports.', category: 'Employers', active: true },
-  { id: 'FQ-4', question: 'How do I request a transcript?', answer: 'Log into your alumni profile, navigate to Document Requests, and submit a digital request through the Registrar portal.', category: 'Registrar', active: true },
-  { id: 'FQ-5', question: 'What is the Tracer Study cycle?', answer: 'A longitudinal survey that tracks graduate employment outcomes at 6, 12, and 24-month intervals for accreditation.', category: 'Tracer', active: true },
-];
+/* ─── Empty starters — post real CMS content, then test; never auto-fill demo rows ─── */
+const initialHeroSlides: HeroSlide[] = [];
+const initialImpactStats: ImpactStat[] = [];
+const initialPortals: StakeholderPortal[] = [];
+const initialCampusLife: CampusLifeCard[] = [];
+const initialCampuses: Campus[] = [];
+const initialGallery: GalleryImage[] = [];
+const initialVideos: VideoItem[] = [];
+const initialEvents: EventItem[] = [];
+const initialWorkshops: WorkshopItem[] = [];
+const initialNews: NewsItem[] = [];
+const initialAnnouncements: Announcement[] = [];
+const initialStories: SuccessStory[] = [];
+const initialPartners: Partner[] = [];
+const initialFeaturedEmployers: FeaturedEmployerItem[] = [];
+const initialTestimonials: Testimonial[] = [];
+const initialFaq: FaqItem[] = [];
 
 export default function HomepageManagement({ initialCategory }: { initialCategory?: CmsCategory } = {}) {
   const [searchParams] = useSearchParams();
@@ -288,17 +199,17 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   /* ── 4. Campus Life & Labs ── */
   const [campusLifeHeaders, setCampusLifeHeaders] = useState({
     eyebrow: 'Explore Life At ASTU',
-    title: 'Campus Life, Facilities, Events, and Galleries',
-    description: 'A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.',
+    title: 'Campus Life & Facilities',
+    description: 'Discover clubs, facilities, and daily campus culture at Adama Science and Technology University.',
   });
   const [campusLife, setCampusLife] = useState<CampusLifeCard[]>(initialCampusLife);
   const [campuses, setCampuses] = useState<Campus[]>(initialCampuses);
   const [gallery, setGallery] = useState<GalleryImage[]>(initialGallery);
   const [galleryHeaders, setGalleryHeaders] = useState({
-    eyebrow: 'CAMPUS GALLERY',
-    title: 'Campus Life & Moments',
-    subtitle: 'A glimpse of life at ASTU — research, innovation, graduation ceremonies, and alumni milestones.',
-    buttonText: 'View All Gallery',
+    eyebrow: 'Campus Moments',
+    title: 'Photo Gallery',
+    subtitle: 'A curated look at graduation stages, research exhibitions, and campus life at ASTU.',
+    buttonText: 'Explore Full Gallery',
     buttonLink: '/gallery',
   });
   const [videos, setVideos] = useState<VideoItem[]>(initialVideos);
@@ -319,16 +230,16 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   /* ── 5. Events & Notices ── */
   const [eventsHeaders, setEventsHeaders] = useState({
     eyebrow: 'Events & Workshops',
-    title: 'Upcoming Alumni Events',
-    description: 'Networking, learning, and professional growth opportunities across all ASTU campuses.',
-    viewAllText: 'See All Events →',
+    title: 'Gatherings & Technical Training',
+    description: 'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+    viewAllText: 'See All Events',
     viewAllLink: '/events',
   });
   const [events, setEvents] = useState<EventItem[]>(initialEvents);
   const [workshops, setWorkshops] = useState<WorkshopItem[]>(initialWorkshops);
   const [announcementsHeaders, setAnnouncementsHeaders] = useState({
-    eyebrow: 'Announcements',
-    title: 'Official Notices',
+    eyebrow: 'Official Updates',
+    title: 'News & Announcements',
     subscribeTitle: 'Subscribe to official updates',
     subscribeDesc: 'Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.',
   });
@@ -336,6 +247,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   const [newsHeaders, setNewsHeaders] = useState({
     eyebrow: 'Campus News',
     title: 'Latest ASTU Highlights',
+    description: 'University notices, academic bulletins, and alumni community circulars.',
   });
   const [newsItems, setNewsItems] = useState<NewsItem[]>(initialNews);
 
@@ -364,6 +276,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
 
   /* ── 6.5. Homepage Community Section ── */
   const [liveCommunitySection, setLiveCommunitySection] = useState({
+    eyebrow: 'ASTU Alumni Community',
     title: 'ASTU Alumni Community',
     subtitle: 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.',
     stats: [
@@ -515,34 +428,68 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         if (cfg.welcomeEnabled !== undefined) setWelcomeEnabled(cfg.welcomeEnabled);
         if (cfg.heroBadge) setHeroBadge(cfg.heroBadge);
         if (cfg.heroButtons) setHeroButtons(cfg.heroButtons);
-        if (Array.isArray(cfg.heroSlides) && cfg.heroSlides.length) setHeroSlides(cfg.heroSlides);
+        // An empty array is meaningful: it means every hero slide was
+        // intentionally deleted. Do not replace it with the initial demo
+        // slides during the next backend reload.
+        if (Array.isArray(cfg.heroSlides)) setHeroSlides(cfg.heroSlides);
         if (cfg.impactHeaders) setImpactHeaders(cfg.impactHeaders);
-        if (Array.isArray(cfg.impactStats) && cfg.impactStats.length) setImpactStats(cfg.impactStats);
+        if (Array.isArray(cfg.impactStats)) setImpactStats(cfg.impactStats);
         if (cfg.portalsHeaders) setPortalsHeaders(cfg.portalsHeaders);
-        if (Array.isArray(cfg.portals) && cfg.portals.length) setPortals(cfg.portals);
+        if (Array.isArray(cfg.portals)) setPortals(cfg.portals);
         if (cfg.campusLifeHeaders) setCampusLifeHeaders(cfg.campusLifeHeaders);
-        if (Array.isArray(cfg.campusLife) && cfg.campusLife.length) setCampusLife(cfg.campusLife);
-        if (Array.isArray(cfg.campuses) && cfg.campuses.length) setCampuses(cfg.campuses);
-        if (Array.isArray(cfg.gallery) && cfg.gallery.length) setGallery(cfg.gallery);
-        if ((cfg as any).gallerySection) setGalleryHeaders((cfg as any).gallerySection);
-        if (Array.isArray(cfg.videos) && cfg.videos.length) setVideos(cfg.videos);
+        if (Array.isArray(cfg.campusLife)) setCampusLife(cfg.campusLife);
+        if (Array.isArray(cfg.campuses)) setCampuses(cfg.campuses);
+        if (Array.isArray(cfg.gallery)) setGallery(cfg.gallery);
+        if (cfg.galleryHeaders) setGalleryHeaders(cfg.galleryHeaders);
+        else if ((cfg as any).gallerySection) setGalleryHeaders((cfg as any).gallerySection);
+        if (Array.isArray(cfg.videos)) setVideos(cfg.videos);
         if (cfg.industryBridge) setIndustryBridge(cfg.industryBridge);
-        if (cfg.eventsHeaders) setEventsHeaders(cfg.eventsHeaders);
-        if (Array.isArray(cfg.events) && cfg.events.length) setEvents(cfg.events);
-        if (Array.isArray(cfg.workshops) && cfg.workshops.length) setWorkshops(cfg.workshops);
-        if (cfg.announcementsHeaders) setAnnouncementsHeaders(cfg.announcementsHeaders);
-        if (Array.isArray(cfg.announcements) && cfg.announcements.length) setAnnouncements(cfg.announcements);
-        if (cfg.newsHeaders) setNewsHeaders(cfg.newsHeaders);
-        if (Array.isArray(cfg.newsItems) && cfg.newsItems.length) setNewsItems(cfg.newsItems);
+        if (cfg.eventsHeaders) {
+          const raw = cfg.eventsHeaders;
+          const desc = String(raw.description || '').replace(/^Gatherings\s*(&|and)\s*training\s*·\s*/i, '').trim();
+          const eyebrow = /calendar.*gatherings/i.test(String(raw.eyebrow || ''))
+            ? 'Events & Workshops'
+            : raw.eyebrow || 'Events & Workshops';
+          setEventsHeaders({
+            ...raw,
+            eyebrow,
+            title: raw.title || 'Gatherings & Technical Training',
+            description: desc || 'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+          });
+        }
+        if (Array.isArray(cfg.events)) setEvents(cfg.events);
+        if (Array.isArray(cfg.workshops)) setWorkshops(cfg.workshops);
+        if (cfg.announcementsHeaders) {
+          const raw: any = cfg.announcementsHeaders;
+          const desc = String(raw.description || raw.subscribeDesc || '').replace(/^Official\s*updates\s*·\s*/i, '').trim();
+          setAnnouncementsHeaders({
+            ...raw,
+            eyebrow: raw.eyebrow || 'Official Updates',
+            title: raw.title || 'News & Announcements',
+            subscribeTitle: raw.subscribeTitle || 'Subscribe to official updates',
+            subscribeDesc: desc || raw.subscribeDesc || 'Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox.',
+          });
+        }
+        if (Array.isArray(cfg.announcements)) setAnnouncements(cfg.announcements);
+        if (cfg.newsHeaders) {
+          const raw: any = cfg.newsHeaders;
+          setNewsHeaders({
+            ...raw,
+            eyebrow: raw.eyebrow || 'Campus News',
+            title: raw.title || 'Latest ASTU Highlights',
+            description: raw.description || 'University notices, academic bulletins, and alumni community circulars.',
+          });
+        }
+        if (Array.isArray(cfg.newsItems)) setNewsItems(cfg.newsItems);
         if (cfg.storiesHeaders) setStoriesHeaders(cfg.storiesHeaders);
-        if (Array.isArray(cfg.stories) && cfg.stories.length) setStories(cfg.stories);
-        if (Array.isArray(cfg.testimonials) && cfg.testimonials.length) setTestimonials(cfg.testimonials);
+        if (Array.isArray(cfg.stories)) setStories(cfg.stories);
+        if (Array.isArray(cfg.testimonials)) setTestimonials(cfg.testimonials);
         if (cfg.partnersHeaders) setPartnersHeaders(cfg.partnersHeaders);
-        if (Array.isArray(cfg.partners) && cfg.partners.length) setPartners(cfg.partners);
-        if (Array.isArray(cfg.featuredEmployers) && cfg.featuredEmployers.length) setFeaturedEmployers(cfg.featuredEmployers);
+        if (Array.isArray(cfg.partners)) setPartners(cfg.partners);
+        if (Array.isArray(cfg.featuredEmployers)) setFeaturedEmployers(cfg.featuredEmployers);
         if (cfg.accreditation) setAccreditation(cfg.accreditation);
         if (cfg.faqHeaders) setFaqHeaders(cfg.faqHeaders);
-        if (Array.isArray(cfg.faq) && cfg.faq.length) setFaq(cfg.faq);
+        if (Array.isArray(cfg.faq)) setFaq(cfg.faq);
         if (cfg.ctaSection) setCtaSection(cfg.ctaSection);
         if (cfg.footer) setFooter(cfg.footer);
         if (cfg.sectionLinks) setSectionLinks(prev => ({ ...prev, ...cfg.sectionLinks }));
@@ -553,14 +500,14 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
           setPartnersPage({ ...defaultPartnersPageConfig, ...cfg.partnersPage });
         }
         if (cfg.liveCommunitySection) setLiveCommunitySection(cfg.liveCommunitySection);
-        if (Array.isArray(cfg.liveCommunityPosts) && cfg.liveCommunityPosts.length) setLiveCommunityPosts(cfg.liveCommunityPosts);
+        if (Array.isArray(cfg.liveCommunityPosts)) setLiveCommunityPosts(cfg.liveCommunityPosts);
         if (cfg.givingSection) setGivingSection(cfg.givingSection);
       }
       setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       setHasUnsavedChanges(false);
-      if (isRefresh) toast.success('Reloaded latest data from backend database');
+      if (isRefresh) toast.success('Homepage content reloaded from the server');
     } catch {
-      if (isRefresh) toast.error('Failed to reload from backend');
+      if (isRefresh) toast.error('Could not reload homepage content');
     } finally {
       if (isRefresh) setIsReloading(false);
       setTimeout(() => {
@@ -580,6 +527,27 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     }
   };
 
+  // Hero-slide actions are destructive or highly visible on the public site.
+  // Persist each action as one small backend update instead of waiting for a
+  // later page-wide save, which previously allowed a reload to restore a
+  // deleted slide from the server's older configuration.
+  const persistHeroSlides = useCallback(async (nextSlides: HeroSlide[], successMessage: string) => {
+    setHeroSlides(nextSlides);
+    notifyChange();
+    setIsSaving(true);
+    try {
+      const saved = await homepageCmsService.saveSettings({ heroSlides: nextSlides });
+      if (!saved) throw new Error('The server did not confirm the update.');
+      setHasUnsavedChanges(false);
+      setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      toast.success(successMessage);
+    } catch {
+      toast.error('The change is saved only in this browser. Please retry when the backend is available.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, []);
+
   // ── Save to Backend ──
   const handleSaveAll = useCallback(async (showToast = true) => {
     setIsSaving(true);
@@ -597,6 +565,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
       campusLife,
       campuses,
       gallery,
+      galleryHeaders,
       gallerySection: galleryHeaders,
       videos,
       industryBridge,
@@ -617,6 +586,16 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
       faqHeaders,
       faq,
       ctaSection,
+      // Keep community CTA in sync with the public homepage bottomCta shape
+      bottomCta: {
+        enabled: ctaSection.enabled,
+        title: ctaSection.title,
+        description: ctaSection.description,
+        primaryLabel: ctaSection.primaryCtaText,
+        primaryRoute: ctaSection.primaryCtaLink,
+        secondaryLabel: ctaSection.secondaryCtaText,
+        secondaryRoute: ctaSection.secondaryCtaLink,
+      },
       givingSection,
       footer,
       sectionLinks,
@@ -632,14 +611,15 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     };
 
     try {
-      await homepageCmsService.saveSettings(payload);
+      const saved = await homepageCmsService.saveSettings(payload);
+      if (!saved) throw new Error('The backend did not confirm the save.');
       setHasUnsavedChanges(false);
       setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       if (showToast) {
-        toast.success('Homepage & detail pages saved live to backend database!');
+        toast.success('Homepage published — public site will show these updates');
       }
     } catch {
-      toast.error('Could not save to backend database. Saved to local cache.');
+      toast.error('Publish failed. Changes stay in this browser until the server is available.');
     } finally {
       setIsSaving(false);
     }
@@ -665,6 +645,15 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSaveAll]);
+
+  // Every CMS mutation is backend-first. This small debounce batches text
+  // edits, while delete/toggle/add actions are also covered, so a page refresh
+  // can no longer bring back a locally removed item from stale server data.
+  useEffect(() => {
+    if (!hasUnsavedChanges || isSaving || isInitialLoad.current) return;
+    const timer = window.setTimeout(() => void handleSaveAll(false), 700);
+    return () => window.clearTimeout(timer);
+  }, [hasUnsavedChanges, isSaving, handleSaveAll]);
 
   // Total active count across all sections
   const totalActiveItems = useMemo(() => {
@@ -747,7 +736,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                     </span>
                     <h3 className="text-base font-bold text-slate-900 dark:text-white">Top Announcement Ticker Banner</h3>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1">Appears as an alert bar at the very top of the public homepage.</p>
+                  <p className="text-xs text-slate-500 mt-1">Appears as the notice bar at the very top of the public homepage.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
@@ -761,6 +750,19 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                   </label>
                 </div>
               </div>
+              {welcomeEnabled && (
+                <div className="mb-3 overflow-hidden rounded-lg border border-astu-navy/20 bg-gradient-to-r from-astu-navy via-[#003f7d] to-astu-navy text-white">
+                  <div className="flex items-center gap-2.5 px-3 py-2">
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-astu-red px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">
+                      <Bell className="h-2.5 w-2.5" />
+                      Notice
+                    </span>
+                    <p className="truncate text-[11px] font-medium text-white/95">
+                      {welcomeMessage || 'Enter alert text below…'}
+                    </p>
+                  </div>
+                </div>
+              )}
               <textarea
                 value={welcomeMessage}
                 onChange={e => { setWelcomeMessage(e.target.value); notifyChange(); }}
@@ -774,7 +776,19 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
               <div className="border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Hero Badge & Call-To-Action Buttons</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Customize the eyebrow badge and the two primary buttons displayed directly under the main slide headline.</p>
+                <p className="text-xs text-slate-500 mt-0.5">Fallback badge when a slide has no tagline, plus the two portal buttons under every slide headline on /.</p>
+              </div>
+              <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-950/95 p-3 dark:border-slate-700">
+                <span className="inline-block rounded-full bg-astu-red px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                  {heroBadge || 'ASTU-AMS'}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-lg bg-astu-red px-2.5 py-1 text-[10px] font-bold text-white">
+                  <Users className="h-3 w-3" />
+                  {heroButtons.primaryText || 'Alumni Portal'}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-lg border border-white/30 bg-white/10 px-2.5 py-1 text-[10px] font-bold text-white">
+                  {heroButtons.secondaryText || 'Employer Partnership'}
+                </span>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -833,7 +847,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">Hero Carousel Slides ({heroSlides.length})</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Full-screen hero slider with high-resolution photography, headlines, and descriptions.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Same full-bleed hero visitors see on the public homepage — photo, badge, headline, and CTAs.</p>
                 </div>
                 <button
                   type="button"
@@ -851,9 +865,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                         active: true,
                       },
                       onSave: newItem => {
-                        setHeroSlides(prev => [...prev, newItem]);
-                        notifyChange();
-                        toast.success('Added new hero slide');
+                        void persistHeroSlides([...heroSlides, newItem], 'Hero slide added and saved to backend');
                       },
                     });
                   }}
@@ -864,62 +876,85 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               </div>
 
               <div className="space-y-4">
+                {heroSlides.length === 0 && (
+                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center dark:border-slate-700 dark:bg-slate-800/40">
+                    <ImagePlus className="mx-auto h-6 w-6 text-slate-400" />
+                    <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-200">No hero slides</p>
+                    <p className="mt-1 text-xs text-slate-500">Use “Add Slide” to create the next published hero slide.</p>
+                  </div>
+                )}
                 {heroSlides.map((slide, idx) => (
                   <div
                     key={slide.id || idx}
-                    className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+                    className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-slate-300 dark:hover:border-slate-700 transition-all"
                   >
-                    <div className="relative w-full sm:w-44 h-28 rounded-lg overflow-hidden shrink-0 bg-slate-200 border border-slate-200 dark:border-slate-700">
+                    <div className="relative h-36 w-full overflow-hidden bg-slate-900">
                       <img
                         src={mediaUrl(slide.image)}
                         alt={slide.title}
-                        className="w-full h-full object-cover"
-                        onError={e => { (e.target as HTMLImageElement).src = '/images/astu-seal-logo.png'; }}
+                        className="h-full w-full object-cover"
+                        onError={e => { (e.target as HTMLImageElement).src = '/images/astu-building.jpg'; }}
                       />
-                      <span className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-slate-950/20" />
+                      <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                         Slide #{idx + 1}
                       </span>
+                      <div className="absolute bottom-0 left-0 right-0 p-3 space-y-1.5">
+                        <span className="inline-block rounded-full bg-astu-red px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+                          {slide.tagline || heroBadge || 'ASTU-AMS'}
+                        </span>
+                        <h4 className="text-sm font-black text-white line-clamp-1 drop-shadow-sm">{slide.title || 'Untitled slide'}</h4>
+                        <p className="text-[11px] text-white/85 line-clamp-1">{slide.description}</p>
+                      </div>
                     </div>
 
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-astu-red">
-                          {slide.tagline || 'No Tagline'}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setHeroSlides(heroSlides.map((s, i) => i === idx ? { ...s, active: !s.active } : s));
-                              notifyChange();
-                            }}
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors ${
-                              slide.active ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
-                            }`}
-                          >
-                            {slide.active ? 'Active' : 'Hidden'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (confirm('Delete this hero slide?')) {
-                                setHeroSlides(heroSlides.filter((_, i) => i !== idx));
-                                notifyChange();
-                                toast.success('Slide removed');
-                              }
-                            }}
-                            className="p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
-                            title="Delete Slide"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
+                    <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => {
+                            if (idx === 0) return;
+                            const next = [...heroSlides];
+                            [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+                            void persistHeroSlides(next, 'Hero slide order updated');
+                          }}
+                          className="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-700 cursor-pointer"
+                          title="Move up"
+                        >
+                          <ArrowUp className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === heroSlides.length - 1}
+                          onClick={() => {
+                            if (idx >= heroSlides.length - 1) return;
+                            const next = [...heroSlides];
+                            [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+                            void persistHeroSlides(next, 'Hero slide order updated');
+                          }}
+                          className="rounded-md border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-700 cursor-pointer"
+                          title="Move down"
+                        >
+                          <ArrowDown className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void persistHeroSlides(
+                              heroSlides.map((s, i) => i === idx ? { ...s, active: !s.active } : s),
+                              slide.active ? 'Hero slide hidden on the public site' : 'Hero slide published on the public site'
+                            );
+                          }}
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold cursor-pointer transition-colors ${
+                            slide.active ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                          }`}
+                        >
+                          {slide.active ? 'Active on /' : 'Hidden'}
+                        </button>
                       </div>
-
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white line-clamp-1">{slide.title}</h4>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">{slide.description}</p>
-
-                      <div className="pt-2 flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => {
@@ -929,15 +964,31 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                               itemType: 'hero-slide',
                               itemData: { ...slide },
                               onSave: updated => {
-                                setHeroSlides(heroSlides.map((s, i) => i === idx ? { ...s, ...updated } : s));
-                                notifyChange();
-                                toast.success('Slide updated');
+                                void persistHeroSlides(
+                                  heroSlides.map((s, i) => i === idx ? { ...s, ...updated } : s),
+                                  'Hero slide updated and saved to backend'
+                                );
                               },
                             });
                           }}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-astu-navy dark:text-sky-400 hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-lg bg-astu-navy px-2.5 py-1.5 text-[11px] font-bold text-white hover:brightness-110 cursor-pointer"
                         >
                           <Edit3 className="h-3 w-3" /> Edit Slide Details
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm('Delete this hero slide?')) {
+                              void persistHeroSlides(
+                                heroSlides.filter((_, i) => i !== idx),
+                                'Hero slide deleted and saved to backend'
+                              );
+                            }
+                          }}
+                          className="inline-flex items-center gap-1 rounded-md border border-rose-200 px-2 py-1 text-[10px] font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-900/70 dark:text-rose-400 dark:hover:bg-rose-950/30 cursor-pointer"
+                          title="Delete Slide"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
@@ -1676,6 +1727,26 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                     <button
                       type="button"
                       onClick={() => {
+                        setModalState({
+                          open: true,
+                          title: 'Edit Campus Photo',
+                          itemType: 'gallery',
+                          itemData: { ...img },
+                          onSave: updated => {
+                            setGallery(prev => prev.map((g, i) => (i === idx ? { ...g, ...updated } : g)));
+                            notifyChange();
+                            toast.success('Photo updated');
+                          },
+                        });
+                      }}
+                      className="p-1 text-slate-400 hover:text-astu-navy"
+                      title="Edit photo"
+                    >
+                      <Edit3 className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         if (confirm(`Delete "${img.title}"?`)) {
                           setGallery(gallery.filter((_, i) => i !== idx));
                           notifyChange();
@@ -1690,6 +1761,112 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                 ))}
               </div>
             </div>
+
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Video Gallery ({videos.length})</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Cards shown in the public homepage Video Highlights section.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalState({
+                      open: true,
+                      title: 'Add Video Highlight',
+                      itemType: 'video',
+                      itemData: {
+                        id: `VI-${Date.now()}`,
+                        title: 'New Campus Highlight',
+                        image: '/images/arc.jpg',
+                        subtitle: 'Official recording from Adama Science and Technology University.',
+                        link: '/info/video-gallery',
+                        active: true,
+                      },
+                      onSave: newItem => {
+                        setVideos(prev => [...prev, newItem]);
+                        notifyChange();
+                        toast.success('Video card added');
+                      },
+                    });
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-astu-navy text-white px-3 py-1.5 text-xs font-bold hover:brightness-110 cursor-pointer shadow-sm"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add Video
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                {videos.map((video, idx) => (
+                  <div
+                    key={video.id || idx}
+                    className="flex gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40"
+                  >
+                    <img
+                      src={video.image}
+                      alt={video.title}
+                      className="w-24 h-20 rounded-lg object-cover bg-slate-200 shrink-0"
+                      onError={e => { (e.target as HTMLImageElement).src = '/images/arc.jpg'; }}
+                    />
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{video.title}</p>
+                        <p className="mt-0.5 text-[11px] text-slate-500 line-clamp-2">
+                          {(video as any).subtitle || (video as any).description || video.link || 'Homepage video card'}
+                        </p>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setVideos(videos.map((v, i) => (i === idx ? { ...v, active: !v.active } : v)));
+                            notifyChange();
+                          }}
+                          className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${video.active !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-500'}`}
+                        >
+                          {video.active !== false ? 'Visible' : 'Hidden'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setModalState({
+                              open: true,
+                              title: 'Edit Video Highlight',
+                              itemType: 'video',
+                              itemData: { ...video },
+                              onSave: updated => {
+                                setVideos(prev => prev.map((v, i) => (i === idx ? { ...v, ...updated } : v)));
+                                notifyChange();
+                                toast.success('Video updated');
+                              },
+                            });
+                          }}
+                          className="text-[11px] font-bold text-astu-navy hover:underline cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Delete video "${video.title}"?`)) {
+                              setVideos(videos.filter((_, i) => i !== idx));
+                              notifyChange();
+                              toast.success('Video removed');
+                            }
+                          }}
+                          className="p-1 text-slate-400 hover:text-rose-500 cursor-pointer"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {videos.length === 0 && (
+                  <p className="text-xs text-slate-500 text-center py-6">No video cards yet. Add one to populate the homepage Video Gallery.</p>
+                )}
+              </div>
+            </div>
           </div>
         );
 
@@ -1699,12 +1876,105 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
       case 'events-news':
         return (
           <div className="space-y-6">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
+              <div className="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">News & Announcements Headers</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Controls eyebrow, title, and description on the public homepage News section.</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Eyebrow</label>
+                  <input
+                    type="text"
+                    value={newsHeaders.eyebrow}
+                    onChange={e => { setNewsHeaders({ ...newsHeaders, eyebrow: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold text-rose-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Section Title</label>
+                  <input
+                    type="text"
+                    value={newsHeaders.title}
+                    onChange={e => { setNewsHeaders({ ...newsHeaders, title: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description</label>
+                  <textarea
+                    value={newsHeaders.description || ''}
+                    onChange={e => { setNewsHeaders({ ...newsHeaders, description: e.target.value }); notifyChange(); }}
+                    rows={2}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Events section headers */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
+              <div className="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Events & Workshops Headers</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Controls the public homepage Events section copy and View All link.</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Eyebrow</label>
+                  <input
+                    type="text"
+                    value={eventsHeaders.eyebrow}
+                    onChange={e => { setEventsHeaders({ ...eventsHeaders, eyebrow: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold text-rose-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Section Title</label>
+                  <input
+                    type="text"
+                    value={eventsHeaders.title}
+                    onChange={e => { setEventsHeaders({ ...eventsHeaders, title: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description</label>
+                  <textarea
+                    value={eventsHeaders.description || ''}
+                    onChange={e => { setEventsHeaders({ ...eventsHeaders, description: e.target.value }); notifyChange(); }}
+                    rows={2}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs"
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">View All Label</label>
+                    <input
+                      type="text"
+                      value={eventsHeaders.viewAllText}
+                      onChange={e => { setEventsHeaders({ ...eventsHeaders, viewAllText: e.target.value }); notifyChange(); }}
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">View All Link</label>
+                    <input
+                      type="text"
+                      value={eventsHeaders.viewAllLink}
+                      onChange={e => { setEventsHeaders({ ...eventsHeaders, viewAllLink: e.target.value }); notifyChange(); }}
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Upcoming Events */}
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">Upcoming Alumni Events ({events.length})</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Calendar events with RSVP registration and venue details.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Toggle Active / Hidden — only Active items publish to the live homepage.</p>
                 </div>
                 <button
                   type="button"
@@ -1916,12 +2186,21 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
               <div className="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Homepage Community Section</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Manage the main community section on the homepage (title, stats, testimonials).</p>
+                <p className="text-xs text-slate-500 mt-0.5">Matches the dark community strip on the public homepage (headline, subtitle, voices & CTAs).</p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Section Title</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Badge Label</label>
+                  <input
+                    type="text"
+                    value={liveCommunitySection?.eyebrow || 'ASTU Alumni Community'}
+                    onChange={e => updateCommunitySection({ eyebrow: e.target.value })}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 text-xs font-bold text-emerald-700"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Main Headline</label>
                   <input
                     type="text"
                     value={liveCommunitySection?.title || 'ASTU Alumni Community'}
@@ -1930,7 +2209,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Section Subtitle</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Supporting Sentence</label>
                   <textarea
                     value={liveCommunitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'}
                     onChange={e => updateCommunitySection({ subtitle: e.target.value })}
@@ -2084,7 +2363,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">Alumni & Partner Success Stories ({stories.length})</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Quotes and experiences highlighting graduate employability and mentorship.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Toggle Active / Hidden — only Active stories publish to the live homepage.</p>
                 </div>
                 <button
                   type="button"
@@ -2194,8 +2473,8 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Partner Companies Carousel ({partners.length})</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Corporate partners rotating in the logo carousel at the bottom of the page.</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Partner logos ({partners.length})</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Published partner logos appear as a still logo grid on the homepage.</p>
                 </div>
                 <button
                   type="button"
@@ -3670,40 +3949,107 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     const { itemType, itemData } = modalState;
 
     if (itemType === 'hero-slide') {
+      const previewImage = mediaUrl(itemData.image || '/images/astu-building.jpg') || '/images/astu-building.jpg';
+      const previewTagline = itemData.tagline || heroBadge || 'ASTU-AMS';
+      const previewTitle = itemData.title || 'Alumni Management System';
+      const previewDesc =
+        itemData.description ||
+        welcomeMessage ||
+        'Connecting ASTU graduates, employers, and academic departments through verified career and alumni services.';
       return (
-        <div className="space-y-4">
-          <ImageUploader
-            label="Slide Image"
-            value={itemData.image || ''}
-            onChange={url => setModalState(p => ({ ...p, itemData: { ...p.itemData, image: url } }))}
-            album="Hero Banners"
-          />
-          <div>
-            <label className="text-xs font-bold text-slate-700">Tagline Eyebrow</label>
-            <input
-              type="text"
-              value={itemData.tagline || ''}
-              onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, tagline: e.target.value } }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 p-2.5 text-xs font-bold"
+        <div className="grid gap-5 lg:grid-cols-2">
+          <div className="space-y-4">
+            <div className="rounded-xl border border-sky-200/80 bg-sky-50/70 px-3 py-2 dark:border-sky-900/50 dark:bg-sky-950/30">
+              <p className="text-[11px] font-semibold text-sky-900 dark:text-sky-200">
+                Edits mirror the public homepage hero on <span className="font-mono">/</span> — badge, headline, description, and photo.
+              </p>
+            </div>
+            <ImageUploader
+              label="Slide Background Image"
+              value={itemData.image || ''}
+              onChange={url => setModalState(p => ({ ...p, itemData: { ...p.itemData, image: url } }))}
+              album="Hero Banners"
             />
+            <div>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tagline Eyebrow (red badge)</label>
+              <input
+                type="text"
+                value={itemData.tagline || ''}
+                onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, tagline: e.target.value } }))}
+                placeholder={heroBadge || 'e.g. ASTU Innovation & Excellence'}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs font-bold text-astu-red"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Slide Main Headline</label>
+              <input
+                type="text"
+                value={itemData.title || ''}
+                onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, title: e.target.value } }))}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-sm font-bold text-slate-900 dark:text-white"
+              />
+              <p className="mt-1 text-[10px] text-slate-400">Tip: include “ to the ” to highlight the second half in green on the homepage.</p>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Slide Paragraph Description</label>
+              <textarea
+                value={itemData.description || ''}
+                onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, description: e.target.value } }))}
+                rows={4}
+                className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs text-slate-700 dark:text-slate-200 resize-none"
+              />
+            </div>
           </div>
-          <div>
-            <label className="text-xs font-bold text-slate-700">Slide Main Headline</label>
-            <input
-              type="text"
-              value={itemData.title || ''}
-              onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, title: e.target.value } }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 p-2.5 text-xs font-bold"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold text-slate-700">Slide Paragraph Description</label>
-            <textarea
-              value={itemData.description || ''}
-              onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, description: e.target.value } }))}
-              rows={3}
-              className="mt-1 w-full rounded-lg border border-slate-200 p-2.5 text-xs resize-none"
-            />
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Live homepage preview</p>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                Matches /
+              </span>
+            </div>
+            <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-lg min-h-[280px] sm:min-h-[320px]">
+              <img
+                src={previewImage}
+                alt={previewTitle}
+                className="absolute inset-0 h-full w-full object-cover object-center"
+                onError={e => { (e.target as HTMLImageElement).src = '/images/astu-building.jpg'; }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-slate-950/25" />
+              <div className="relative z-10 flex h-full min-h-[280px] sm:min-h-[320px] items-center px-5 py-8 sm:px-6">
+                <div className="max-w-md space-y-3">
+                  <span className="inline-block rounded-full bg-astu-red px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white shadow-md">
+                    {previewTagline}
+                  </span>
+                  <h3 className="text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
+                    {previewTitle.includes(' to the ') ? (
+                      <>
+                        {previewTitle.split(' to the ')[0]}
+                        <br />
+                        to the <span className="text-astu-green">{previewTitle.split(' to the ')[1]}</span>
+                      </>
+                    ) : (
+                      previewTitle
+                    )}
+                  </h3>
+                  <p className="text-xs leading-relaxed text-white/90 line-clamp-3">{previewDesc}</p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-astu-red px-3 py-1.5 text-[11px] font-bold text-white">
+                      <Users className="h-3 w-3" />
+                      {heroButtons.primaryText || 'Alumni Portal'}
+                      <ArrowRight className="h-3 w-3" />
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/40 bg-white/10 px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-sm">
+                      {heroButtons.secondaryText || 'Employer Partnership'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-500">
+              Portal buttons come from Hero Badge &amp; CTA settings and appear on every slide.
+            </p>
           </div>
         </div>
       );
@@ -4039,6 +4385,91 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
       );
     }
 
+    if (itemType === 'gallery') {
+      return (
+        <div className="space-y-4">
+          <ImageUploader
+            label="Campus Photo"
+            value={itemData.src || ''}
+            onChange={url => setModalState(p => ({ ...p, itemData: { ...p.itemData, src: url } }))}
+            album="Campus Gallery"
+          />
+          <div>
+            <label className="text-xs font-bold text-slate-700">Photo Title</label>
+            <input
+              type="text"
+              value={itemData.title || ''}
+              onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, title: e.target.value } }))}
+              className="mt-1 w-full rounded-lg border border-slate-200 p-2.5 text-xs font-bold"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-700">Album / Tag</label>
+            <input
+              type="text"
+              value={itemData.album || itemData.tag || ''}
+              onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, album: e.target.value, tag: e.target.value } }))}
+              placeholder="e.g. Graduation Gallery"
+              className="mt-1 w-full rounded-lg border border-slate-200 p-2.5 text-xs"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (itemType === 'video') {
+      return (
+        <div className="space-y-4">
+          <ImageUploader
+            label="Video Thumbnail"
+            value={itemData.image || ''}
+            onChange={url => setModalState(p => ({ ...p, itemData: { ...p.itemData, image: url } }))}
+            album="Video Gallery"
+          />
+          <div>
+            <label className="text-xs font-bold text-slate-700">Video Title</label>
+            <input
+              type="text"
+              value={itemData.title || ''}
+              onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, title: e.target.value } }))}
+              className="mt-1 w-full rounded-lg border border-slate-200 p-2.5 text-xs font-bold"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-700">Subtitle</label>
+            <textarea
+              value={itemData.subtitle || itemData.description || ''}
+              onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, subtitle: e.target.value, description: e.target.value } }))}
+              rows={2}
+              className="mt-1 w-full rounded-lg border border-slate-200 p-2.5 text-xs resize-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-slate-700">Watch Link / URL</label>
+              <input
+                type="text"
+                value={itemData.link || ''}
+                onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, link: e.target.value } }))}
+                placeholder="/info/video-gallery or https://..."
+                className="mt-1 w-full rounded-lg border border-slate-200 p-2 text-xs font-mono"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700">Duration Label</label>
+              <input
+                type="text"
+                value={itemData.duration || ''}
+                onChange={e => setModalState(p => ({ ...p, itemData: { ...p.itemData, duration: e.target.value } }))}
+                placeholder="e.g. 3:42"
+                className="mt-1 w-full rounded-lg border border-slate-200 p-2 text-xs"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (itemType === 'partner') {
       return (
         <div className="space-y-4">
@@ -4110,19 +4541,54 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   /* ──────────────────────────────────────────────────────────────────────────
      MAIN COMPONENT RETURN
   ────────────────────────────────────────────────────────────────────────── */
+  const studioStats = useMemo(() => [
+    {
+      title: 'Live Sections',
+      value: String(CATEGORIES.filter((c) => c.id !== 'detail-pages').length),
+      icon: Layers3,
+      tone: 'blue' as const,
+      description: 'Homepage sections in this workspace',
+    },
+    {
+      title: 'Published Items',
+      value: String(totalActiveItems),
+      icon: CheckCircle2,
+      tone: 'green' as const,
+      trend: 'Visible on /',
+      trendDirection: 'up' as const,
+    },
+    {
+      title: 'Gallery Media',
+      value: String(gallery.filter((g) => g.active !== false).length + videos.filter((v) => v.active !== false).length),
+      icon: ImageIcon,
+      tone: 'amber' as const,
+      description: 'Active photos & video cards',
+    },
+    {
+      title: 'Sync Status',
+      value: hasUnsavedChanges ? 'Pending' : 'Synced',
+      icon: hasUnsavedChanges ? AlertCircle : Globe,
+      tone: hasUnsavedChanges ? ('amber' as const) : ('purple' as const),
+      description: `Last publish ${lastSyncTime}`,
+    },
+  ], [totalActiveItems, gallery, videos, hasUnsavedChanges, lastSyncTime]);
+
   return (
     <div className="space-y-6">
       {/* ── Top Header & Actions ── */}
       <AdminPageHeader
         title="Pages & Homepage CMS"
-        subtitle="Manage homepage sections, Overview, Contact Us, and all 22+ institutional pages in one unified workspace."
+        subtitle="Edit the public homepage and linked institutional pages. Changes publish to the live site and match what visitors see on /."
         breadcrumbs={[{ label: 'Content Management' }, { label: 'Pages & Homepage CMS' }]}
+        lastSynced={lastSyncTime}
+        stats={studioStats}
+        statsCols={4}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {hasUnsavedChanges && (
               <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 text-amber-200 border border-amber-300/40 px-2.5 py-1 text-xs font-bold animate-pulse">
                 <AlertCircle className="h-3.5 w-3.5" />
-                Unsaved Edits
+                Publishing…
               </span>
             )}
 
@@ -4131,10 +4597,10 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               onClick={() => loadData(true)}
               disabled={isReloading}
               className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white px-3 py-2 text-xs font-semibold backdrop-blur-sm border border-white/20 transition-all cursor-pointer disabled:opacity-50"
-              title="Discard unsaved changes and reload from backend"
+              title="Discard local edits and reload published homepage content"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isReloading ? 'animate-spin' : ''}`} />
-              <span>Reload DB</span>
+              <span>Reload from Server</span>
             </button>
 
             <a
@@ -4144,7 +4610,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white px-3 py-2 text-xs font-semibold backdrop-blur-sm border border-white/20 transition-all cursor-pointer"
             >
               <Globe className="h-3.5 w-3.5 text-[#FFCC00]" />
-              <span>Public Site</span>
+              <span>View Homepage</span>
               <ExternalLink className="h-3 w-3 opacity-75" />
             </a>
 
@@ -4155,7 +4621,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               className="inline-flex items-center gap-2 rounded-lg bg-[#FFCC00] hover:bg-[#FFD633] text-[#003366] px-4 py-2 text-xs font-bold transition-all shadow-md hover:scale-102 cursor-pointer disabled:opacity-50"
             >
               <Save className={`h-4 w-4 ${isSaving ? 'animate-spin' : ''}`} />
-              <span>{isSaving ? 'Saving to Database...' : 'Save to Backend'}</span>
+              <span>{isSaving ? 'Publishing…' : 'Publish Homepage'}</span>
             </button>
           </div>
         }
@@ -4166,13 +4632,13 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         {/* Left: sync badge */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
-            <span className={`h-2 w-2 rounded-full ${hasUnsavedChanges ? 'bg-amber-500 animate-ping' : 'bg-emerald-500'}`} />
+            <span className={`h-2 w-2 rounded-full ${hasUnsavedChanges || isSaving ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
             <span className="text-xs font-bold text-slate-700 dark:text-slate-200">
-              {hasUnsavedChanges ? 'Unsaved edits' : 'Live & Synced'}
+              {isSaving ? 'Publishing…' : hasUnsavedChanges ? 'Autosaving…' : 'Matched to homepage'}
             </span>
           </div>
-          <span className="text-[11px] text-slate-400 hidden sm:inline">Last saved: {lastSyncTime}</span>
-          <span className="text-[11px] text-slate-400 hidden md:inline">· {totalActiveItems} live items</span>
+          <span className="text-[11px] text-slate-400 hidden sm:inline">Last publish: {lastSyncTime}</span>
+          <span className="text-[11px] text-slate-400 hidden md:inline">· {totalActiveItems} live items · editing {CATEGORIES.find((c) => c.id === activeCategory)?.label}</span>
         </div>
 
         {/* Center: viewport switcher */}
@@ -4201,7 +4667,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
           >
             <Eye className="h-3.5 w-3.5 text-emerald-600" />
-            <span className="hidden sm:inline">Open Live</span>
+            <span className="hidden sm:inline">Open Homepage</span>
             <ExternalLink className="h-3 w-3 opacity-60" />
           </a>
           <button
@@ -4209,7 +4675,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             onClick={() => loadData(true)}
             disabled={isReloading}
             className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer disabled:opacity-50"
-            title="Reload from database"
+            title="Reload published content from the server"
           >
             <RefreshCw className={`h-4 w-4 ${isReloading ? 'animate-spin' : ''}`} />
           </button>
@@ -4222,36 +4688,42 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             }`}
           >
             <Save className="h-3.5 w-3.5" />
-            <span>{isSaving ? 'Saving…' : hasUnsavedChanges ? 'Save Changes *' : 'Published Live'}</span>
+            <span>{isSaving ? 'Publishing…' : hasUnsavedChanges ? 'Publish Now' : 'Published'}</span>
           </button>
         </div>
       </div>
 
       {/* ── SPLIT STUDIO CONTAINER: SIDEBAR ON LEFT, LIVE PREVIEW ON RIGHT ── */}
       <div className="flex flex-col lg:flex-row gap-5 items-start">
-        {/* ── LEFT PANE: DOCKED SIDEBAR EDITOR CONTROLS ── */}
-        <div className="w-full lg:w-[480px] shrink-0 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm flex flex-col overflow-hidden sticky top-4">
-          {/* Sidebar Top Nav Tabs */}
-          <div className="flex border-b border-slate-200 bg-slate-50/80 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/60 overflow-x-auto scrollbar-none gap-1">
-            {CATEGORIES.map((cat) => {
-              const Icon = cat.icon;
-              const isActive = activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    isActive
-                      ? 'bg-white text-[#003366] shadow-xs ring-1 ring-slate-200 dark:bg-slate-900 dark:text-sky-300 dark:ring-slate-700'
-                      : 'text-slate-500 hover:bg-slate-200/60 dark:text-slate-400'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{cat.label}</span>
-                </button>
-              );
-            })}
+        {/* ── LEFT PANE: HOMEPAGE SECTION MAP + EDITOR ── */}
+        <div className="w-full lg:w-[520px] shrink-0 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm flex flex-col overflow-hidden sticky top-4">
+          <div className="border-b border-slate-200 bg-slate-50/90 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-800/70">
+            <div className="flex items-center justify-between gap-2 mb-2 px-0.5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">Homepage sections</p>
+              <span className="text-[10px] font-semibold text-slate-400">{CATEGORIES.length} areas · synced to /</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1 max-h-[168px] overflow-y-auto pr-0.5 scrollbar-thin">
+              {CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                const isActive = activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setActiveCategory(cat.id)}
+                    title={cat.desc}
+                    className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-left text-[11px] font-bold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-[#003366] text-white shadow-sm dark:bg-sky-600'
+                        : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <Icon className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-amber-300' : 'text-slate-400'}`} />
+                    <span className="truncate">{cat.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Active Section Info Banner */}
@@ -4264,7 +4736,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
           </div>
 
           {/* Sidebar Body Content with Scroll */}
-          <div className="overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-260px)]">
+          <div className="overflow-y-auto p-4 space-y-4 max-h-[calc(100vh-340px)]">
             {renderCategoryContent()}
           </div>
 
@@ -4281,26 +4753,72 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               className="inline-flex items-center gap-1.5 rounded-lg bg-[#003366] hover:bg-[#002244] text-white px-3 py-1.5 text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" />
-              <span>{isSaving ? 'Saving…' : 'Save Section'}</span>
+              <span>{isSaving ? 'Publishing…' : 'Publish Section'}</span>
             </button>
           </div>
         </div>
 
         {/* ── RIGHT PANE: LIVE PREVIEW CANVAS ── */}
         <div className="flex-1 min-w-0 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-hidden shadow-sm flex flex-col">
-          {/* Live Preview Header Bar */}
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/80 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-800/60">
-            <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Interactive Live Preview — Homepage</span>
+          {/* Live Preview Header Bar — mirrors public homepage chrome */}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-2.5 dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/80">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                  Live homepage canvas
+                </p>
+                <p className="text-[10px] font-medium text-slate-500 truncate">
+                  Same layout visitors see on{' '}
+                  <span className="font-mono text-astu-navy dark:text-sky-400">
+                    {activeCategory === 'detail-pages' ? `/info/${selectedDetailSlug}` : '/'}
+                  </span>
+                  {activeCategory !== 'detail-pages' && (
+                    <> · editing {CATEGORIES.find((c) => c.id === activeCategory)?.label}</>
+                  )}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-slate-400 capitalize">{deviceView} View</span>
+              <div className="hidden sm:flex items-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-800 p-0.5">
+                {([['desktop', Monitor, 'Desktop'], ['tablet', Tablet, 'Tablet'], ['mobile', Smartphone, 'Mobile']] as const).map(([view, Icon, label]) => (
+                  <button
+                    key={view}
+                    type="button"
+                    onClick={() => setDeviceView(view)}
+                    title={label}
+                    className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-bold transition-all cursor-pointer ${
+                      deviceView === view
+                        ? 'bg-[#003366] text-white shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="hidden md:inline capitalize">{view}</span>
+                  </button>
+                ))}
+              </div>
+              <span className="hidden lg:inline-flex items-center gap-1 rounded-full border border-emerald-200/80 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                <Globe className="h-3 w-3" />
+                Synced to /
+              </span>
+              <a
+                href={activeCategory === 'detail-pages' ? `/info/${selectedDetailSlug}` : '/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Open live
+              </a>
             </div>
           </div>
 
           {/* Canvas Wrapper */}
-          <div className="flex-1 overflow-y-auto p-4 bg-slate-100 dark:bg-slate-950">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 bg-[radial-gradient(ellipse_at_top,_#e8eef5_0%,_#f1f5f9_45%,_#e2e8f0_100%)] dark:bg-[radial-gradient(ellipse_at_top,_#0f172a_0%,_#020617_60%,_#020617_100%)]">
             <HomepageLivePreviewCanvas
               deviceView={deviceView}
               activeSection={activeCategory}
@@ -4316,8 +4834,10 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               campusLifeHeaders={campusLifeHeaders}
               campusLife={campusLife}
               campuses={campuses}
+              industryBridge={industryBridge}
               gallery={gallery}
               galleryHeaders={galleryHeaders}
+              videos={videos}
               eventsHeaders={eventsHeaders}
               events={events}
               workshops={workshops}
@@ -4326,6 +4846,10 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               newsItems={newsItems}
               partnersHeaders={partnersHeaders}
               partners={partners}
+              featuredEmployers={featuredEmployers}
+              communitySection={liveCommunitySection}
+              communityPosts={liveCommunityPosts}
+              givingSection={givingSection}
               accreditation={accreditation}
               faqHeaders={{
                 eyebrow: faqHeaders.eyebrow,
@@ -4365,7 +4889,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         open={modalState.open}
         title={modalState.title}
         onClose={closeModal}
-        size="lg"
+        size={modalState.itemType === 'hero-slide' ? 'xl' : 'lg'}
       >
         <div className="p-1 space-y-4">
           {renderModalForm()}

@@ -85,8 +85,45 @@ export interface CareerMilestone {
   type: 'academic' | 'professional' | 'achievement';
 }
 
+/**
+ * ApplicationStatus in the Prisma schema has 9 members. Previously only 3 were
+ * mapped, so REVIEWED / SHORTLISTED / INTERVIEW_SCHEDULED / OFFERED / ACCEPTED /
+ * WITHDRAWN leaked into the UI as raw enum names, and HIRED was mislabelled
+ * "Offered".
+ */
+export type AlumniApplicationStatus =
+  | 'Applied'
+  | 'Under Review'
+  | 'Shortlisted'
+  | 'Interview Scheduled'
+  | 'Offered'
+  | 'Hired'
+  | 'Accepted'
+  | 'Rejected'
+  | 'Withdrawn';
+
+export const APPLICATION_STATUS_LABEL: Record<string, AlumniApplicationStatus> = {
+  PENDING: 'Applied',
+  REVIEWED: 'Under Review',
+  SHORTLISTED: 'Shortlisted',
+  INTERVIEW_SCHEDULED: 'Interview Scheduled',
+  OFFERED: 'Offered',
+  HIRED: 'Hired',
+  ACCEPTED: 'Accepted',
+  REJECTED: 'Rejected',
+  WITHDRAWN: 'Withdrawn',
+};
+
+/** Terminal states: the employer has closed the loop, withdrawing is pointless. */
+export const APPLICATION_STATUS_TERMINAL: ReadonlySet<string> = new Set([
+  'HIRED',
+  'ACCEPTED',
+  'REJECTED',
+  'WITHDRAWN',
+]);
+
 export interface JobMatch {
-  id: number;
+  id: string | number;
   title: string;
   company: string;
   location: string;
@@ -98,7 +135,11 @@ export interface JobMatch {
   benefits: string[];
   applied: boolean;
   saved: boolean;
-  applicationStatus?: 'Applied' | 'Under Review' | 'Interview Scheduled' | 'Offered' | 'Rejected';
+  applicationStatus?: AlumniApplicationStatus;
+  /** Raw ApplicationStatus enum value, kept so terminal states stay distinguishable. */
+  applicationStatusRaw?: string;
+  /** True when an application exists and has not reached a terminal state. */
+  canWithdraw?: boolean;
   type: 'Full-Time' | 'Internship' | 'Contract' | 'Part-Time';
   experience?: string;
   views?: number;
@@ -112,6 +153,10 @@ export interface JobMatch {
   interviewDate?: string;
   offerDetails?: string;
   remoteOption?: 'remote' | 'hybrid' | 'on-site';
+  department?: string;
+  isVerified?: boolean;
+  deadline?: string;
+  responsibilities?: string;
 }
 
 export interface TracerSurvey {
@@ -138,6 +183,7 @@ export interface SurveyQuestion {
 
 export interface Mentor {
   id: number;
+  userId?: string | number;
   name: string;
   role: string;
   company: string;

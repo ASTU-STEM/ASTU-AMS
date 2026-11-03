@@ -71,16 +71,16 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
     return (sum / validGpas.length).toFixed(2);
   }, [graduates]);
 
-  const employmentRate = useMemo(() => {
+  const registeredCoverageRate = useMemo(() => {
     if (!graduates.length) return '0.0%';
-    const activeOrEmployed = graduates.filter(g => g.status === 'Active' || g.identityVerified).length;
-    return `${Math.round((activeOrEmployed / graduates.length) * 100)}%`;
+    const activeOrVerified = graduates.filter(g => g.status === 'Active' || g.identityVerified).length;
+    return `${Math.round((activeOrVerified / graduates.length) * 100)}%`;
   }, [graduates]);
 
   const departmentPerformance = useMemo(() => {
     const map = new Map<string, { count: number; sumCgpa: number }>();
     graduates.forEach(g => {
-      const dept = g.department || 'Software Engineering';
+      const dept = g.department && g.department !== '—' ? g.department : 'Unspecified';
       const cgpaVal = parseFloat(g.cgpa) || 0;
       if (!map.has(dept)) map.set(dept, { count: 0, sumCgpa: 0 });
       const entry = map.get(dept)!;
@@ -153,11 +153,12 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
       if (format === 'CSV' || format === 'Excel') {
         const headers = ['Student ID,Full Name,Email,Department,Graduation Year,CGPA,Verified,Status'];
         const rows = recordsToExport.map(g =>
-          `"${g.studentId || ''}","${(g.fullName || '').replace(/"/g, '""')}","${g.email || ''}","${(g.department || '').replace(/"/g, '""')}",${g.graduationYear || '2025'},${g.cgpa || '0.00'},${g.identityVerified ? 'TRUE' : 'FALSE'},"${g.status || 'Active'}"`
+          `"${g.studentId || ''}","${(g.fullName || '').replace(/"/g, '""')}","${g.email || ''}","${(g.department || '').replace(/"/g, '""')}","${g.graduationYear ?? ''}","${g.cgpa ?? ''}",${g.identityVerified ? 'TRUE' : 'FALSE'},"${g.status || ''}"`
         );
         fileContent = [...headers, ...rows].join('\n');
-        fileType = format === 'CSV' ? 'text/csv' : 'application/vnd.ms-excel';
-        extension = format === 'CSV' ? 'csv' : 'csv';
+        // Excel downloads as CSV that Excel opens cleanly — not a binary .xlsx workbook
+        fileType = 'text/csv';
+        extension = 'csv';
       } else if (format === 'Stata') {
         const header = '* ASTU Institutional Alumni Dataset (.dta export format)\n* Variable metadata: student_id (str), full_name (str), dept (str), cgpa (float)\n';
         const rows = recordsToExport.map((g, idx) =>
@@ -360,7 +361,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             {[
               { label: 'Total Graduates Tracked', value: totalGrads.toLocaleString(), change: `Live Database`, trend: '✓' },
               { label: 'Average CGPA', value: avgCgpa, change: `Live Calculation`, trend: '↑' },
-              { label: 'Employment Rate', value: employmentRate, change: `Real-time`, trend: '↑' },
+              { label: 'Active / Verified Rate', value: registeredCoverageRate, change: `Roster-based`, trend: '↑' },
               { label: 'Data Exports Generated', value: exportLogs.length.toLocaleString(), change: 'Live Counter', trend: '↑' },
             ].map((kpi, i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-all">
@@ -452,14 +453,14 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { format: 'PDF' as const, icon: 'picture_as_pdf', desc: 'Executive Summary', color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', scope: 'Graduate Executive Summary' },
-                { format: 'Excel' as const, icon: 'table_chart', desc: 'Detailed Data Tables', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', scope: 'Full Graduate Dataset' },
-                { format: 'Stata' as const, icon: 'analytics', desc: 'Research (.dta)', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', scope: 'Research Dataset Batch' },
+                { format: 'Excel' as const, icon: 'table_chart', desc: 'CSV for Excel', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', scope: 'Full Graduate Dataset' },
+                { format: 'Stata' as const, icon: 'analytics', desc: 'Tab-delimited research export', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', scope: 'Research Dataset Batch' },
                 { format: 'CSV' as const, icon: 'data_array', desc: 'Universal Format', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200', scope: 'Raw Alumni Roster' },
               ].map((item, i) => (
                 <button key={i} onClick={() => handleExport(item.format, item.scope)}
                   className={`${item.bg} ${item.border} border rounded-2xl p-5 text-center hover:shadow-md transition-all group hover:scale-[1.02]`}>
                   <span className={`material-symbols-outlined text-3xl ${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</span>
-                  <p className={`text-lg font-extrabold ${item.color} mt-2`}>{item.format}</p>
+                  <p className={`text-lg font-extrabold ${item.color} mt-2`}>{item.format === 'Excel' ? 'Excel CSV' : item.format}</p>
                   <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
                 </button>
               ))}
@@ -651,14 +652,14 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { format: 'PDF' as const, icon: 'picture_as_pdf', desc: 'Executive Summary', color: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', scope: 'Graduate Executive Summary' },
-                { format: 'Excel' as const, icon: 'table_chart', desc: 'Detailed Data Tables', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', scope: 'Full Graduate Dataset' },
-                { format: 'Stata' as const, icon: 'analytics', desc: 'Research (.dta)', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', scope: 'Research Dataset Batch' },
+                { format: 'Excel' as const, icon: 'table_chart', desc: 'CSV for Excel', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', scope: 'Full Graduate Dataset' },
+                { format: 'Stata' as const, icon: 'analytics', desc: 'Tab-delimited research export', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', scope: 'Research Dataset Batch' },
                 { format: 'CSV' as const, icon: 'data_array', desc: 'Universal Format', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200', scope: 'Raw Alumni Roster' },
               ].map((item, i) => (
                 <button key={i} onClick={() => handleExport(item.format, item.scope)}
                   className={`${item.bg} ${item.border} border rounded-2xl p-5 text-center hover:shadow-md transition-all group hover:scale-[1.02]`}>
                   <span className={`material-symbols-outlined text-3xl ${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</span>
-                  <p className={`text-lg font-extrabold ${item.color} mt-2`}>{item.format}</p>
+                  <p className={`text-lg font-extrabold ${item.color} mt-2`}>{item.format === 'Excel' ? 'Excel CSV' : item.format}</p>
                   <p className="text-xs text-gray-500 mt-1">{item.desc}</p>
                 </button>
               ))}
@@ -896,10 +897,10 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
           {/* Dynamic Accreditation Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-              { label: 'Curriculum Alignment', value: `${departmentPerformance.length > 0 ? '94%' : '90%'}`, status: 'On Track', icon: 'school', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-              { label: 'Graduate Outcome Assessment', value: employmentRate, status: 'Live Database', icon: 'analytics', color: 'text-blue-600', bg: 'bg-blue-50' },
-              { label: 'Verification Audit Trail', value: `${totalGrads} Grads`, status: '100% Verified', icon: 'verified_user', color: 'text-purple-600', bg: 'bg-purple-50' },
-              { label: 'Continuous Improvement Docs', value: `${exportLogs.length + 8}`, status: 'Up to Date', icon: 'description', color: 'text-amber-600', bg: 'bg-amber-50' },
+              { label: 'Departments Represented', value: `${departmentPerformance.length}`, status: 'From roster', icon: 'school', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+              { label: 'Active / Verified Coverage', value: registeredCoverageRate, status: 'Roster-based', icon: 'analytics', color: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: 'Graduate Records', value: `${totalGrads}`, status: 'SIS + alumni', icon: 'verified_user', color: 'text-purple-600', bg: 'bg-purple-50' },
+              { label: 'Exports Generated', value: `${exportLogs.length}`, status: 'This session', icon: 'description', color: 'text-amber-600', bg: 'bg-amber-50' },
             ].map((item, i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all">
                 <div className="flex items-center justify-between mb-2">
@@ -1006,7 +1007,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
                   className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-astu-navy bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 >
                   <option value="PDF">PDF</option>
-                  <option value="Excel">Excel</option>
+                  <option value="Excel">Excel CSV</option>
                   <option value="CSV">CSV</option>
                   <option value="Stata">Stata (.dta)</option>
                 </select>

@@ -776,7 +776,7 @@ export default function RoleManagement() {
 
       <div className="grid gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
         {/* Roles Navigation Sidebar List */}
-        <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-slate-900">Roles Roster</h2>
@@ -851,7 +851,7 @@ export default function RoleManagement() {
         </section>
 
         {/* Permission Matrix Configuration Section */}
-        <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -892,7 +892,7 @@ export default function RoleManagement() {
               const sectionEnabled = section.permissions.filter(p => rolePerms[p.key] !== false).length;
 
               return (
-                <div key={section.title} className="rounded-[10px] border border-slate-200 bg-slate-50/60 p-4">
+                <div key={section.title} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)]/60 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">{section.title}</h3>
@@ -910,7 +910,7 @@ export default function RoleManagement() {
                       return (
                         <div
                           key={permission.key}
-                          className="flex items-center justify-between gap-4 rounded-[10px] border border-slate-200/80 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                          className="flex items-center justify-between gap-4 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">

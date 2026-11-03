@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { defaultDetailPages, DetailPageItem } from './detailPages.data';
 
-const STORAGE_KEY = 'astu_ams_homepage_cms_config';
+/** Bumped so browsers drop legacy seeded/demo CMS snapshots. */
+const STORAGE_KEY = 'astu_ams_homepage_cms_config_v2';
+const LEGACY_STORAGE_KEYS = ['astu_ams_homepage_cms_config'];
 const API_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const getAuthToken = () =>
@@ -296,99 +298,29 @@ export const defaultPartnersPageConfig: PartnersPageConfig = {
   benefitsEyebrow: 'MUTUAL VALUE & TALENT ACCESS',
   benefitsTitle: 'Why Partner with ASTU?',
   benefitsSubtitle: 'Join leading industry enterprises, public institutions, and research consortia actively recruiting and collaborating with ASTU.',
-  benefits: [
-    {
-      id: 'B-1',
-      icon: 'Users',
-      title: 'Hire Talented Graduates',
-      description: 'Access a vetted pool of ASTU graduates equipped with rigorous practical training in applied engineering, software, technology, and sciences.',
-      active: true,
-    },
-    {
-      id: 'B-2',
-      icon: 'Briefcase',
-      title: 'Post Job Opportunities',
-      description: 'Publish employment openings, graduate trainee tracks, and internship positions directly to thousands of verified alumni.',
-      active: true,
-    },
-    {
-      id: 'B-3',
-      icon: 'MessageSquare',
-      title: 'Give Industry Feedback',
-      description: 'Directly influence biennial curriculum revisions and ensure graduate competency alignment through structured employer surveys.',
-      active: true,
-    },
-    {
-      id: 'B-4',
-      icon: 'Search',
-      title: 'Verified Student Information',
-      description: 'Search alumni profiles by department, GPA, verified degree credentials, technical skills, and graduation cohort.',
-      active: true,
-    },
-    {
-      id: 'B-5',
-      icon: 'TrendingUp',
-      title: 'Track Recruitment Analytics',
-      description: 'Monitor application pipelines, tracer study response trends, and longitudinal employment metrics in real time.',
-      active: true,
-    },
-    {
-      id: 'B-6',
-      icon: 'Handshake',
-      title: 'Build Strategic Partnerships',
-      description: 'Form long-term ties for joint research initiatives, faculty-industry exchange, campus hackathons, and corporate sponsorships.',
-      active: true,
-    },
-  ],
+  benefits: [],
   partnersCarouselTitle: 'Corporate & Institutional Partners',
   partnersCarouselSubtitle: 'Leading employers collaborating with ASTU across telecom, aviation, cybersecurity, banking, and technology sectors.',
   featuresEyebrow: 'ENTERPRISE ECOSYSTEM',
   featuresTitle: 'Comprehensive Partner Benefits',
   featuresSubtitle: 'Our dedicated employer platform provides institutions with robust tools to streamline talent sourcing and collaborate on institutional excellence.',
-  features: [
-    'TIN-verified enterprise employer accounts with high trust scores',
-    'Direct access to verified ASTU alumni and graduating seniors',
-    'Curriculum-aligned technical skill matching and automated recommendations',
-    'Accreditation-ready reporting and longitudinal tracer feedback loops',
-    'Priority coordination for campus recruitment days and tech expos',
-    'Direct engagement with academic departments and senior faculty',
-  ],
+  features: [],
   ctaCardTitle: 'Accelerate Your Hiring Pipeline',
   ctaCardDescription: 'Register your organization today to gain immediate access to verified graduate profiles and dedicated recruitment assistance.',
   ctaCardButtonText: 'Register as Partner',
   ctaCardButtonLink: '/employers/register',
-  stats: [
-    { id: 'S-1', value: '', label: 'Verified Alumni' },
-    { id: 'S-2', value: '', label: 'Partner Organizations' },
-    { id: 'S-3', value: '', label: 'Employment Rate' },
-    { id: 'S-4', value: '', label: 'Engineering & Science Schools' },
-  ],
+  stats: [],
   bottomCtaTitle: 'Start Building Your High-Impact Talent Pipeline Today',
   bottomCtaDescription: 'Join ASTU\'s corporate partner network and connect directly with Ethiopia\'s premier engineering, applied science, and technology graduates.',
   bottomCtaButtonText: 'Register Your Organization',
   bottomCtaButtonLink: '/employers/register',
   stakeholdersTitle: 'Strategic Alliances & Industry Consortia',
   stakeholdersSubtitle: 'Active cooperation frameworks with government agencies, multinational tech enterprises, and international research organizations.',
-  stakeholderTracks: [
-    { id: 'ST-1', title: 'Enterprise & Corporate Alliances', desc: 'Enterprise partners collaborating with ASTU on talent pipelines, industrial internships, and technology initiatives.', badge: 'Corporate Tier', active: true },
-    { id: 'ST-2', title: 'Academic & Research Consortia', desc: 'Partnering with German Academic Exchange Service (DAAD), regional universities, and national research institutes on applied engineering grants.', badge: 'International Consortia', active: true },
-    { id: 'ST-3', title: 'Curriculum & ETA Competency Alignment', desc: 'Stakeholder advisory boards meet regularly to evaluate industry skill trends, feeding data from graduate tracer surveys directly into university curriculum reforms.', badge: 'Accreditation Readiness', active: true },
-    { id: 'ST-4', title: 'Applied Laboratories & Joint Innovation', desc: 'Specialized engineering laboratories and research centers equipped to prototype and test regional solutions alongside enterprise sponsors.', badge: 'Innovation Hub', active: true },
-  ],
+  stakeholderTracks: [],
   recruitmentTitle: 'Recruitment Framework & Talent Engine',
   recruitmentSubtitle: 'Accelerate graduate hiring and evaluate verified competency metrics through the AMS platform.',
-  recruitmentTracks: [
-    { id: 'RT-1', title: 'Direct Opportunity Publishing', desc: 'Publish vacancies, internships, and graduate trainee programs directly to verified graduates across ASTU fields of study.', badge: 'Job Board', active: true },
-    { id: 'RT-2', title: 'Smart Candidate Search & Filters', desc: 'Filter verified candidates by GPA, graduation year, engineering department, and technical skills.', badge: 'Candidate Match', active: true },
-    { id: 'RT-3', title: 'Employer Competency Feedback', desc: 'Submit structured employer feedback regarding graduate competencies to directly influence ASTU curriculum development.', badge: 'Quality Loop', active: true },
-    { id: 'RT-4', title: 'On-Campus Career Expos & Interviews', desc: 'Coordinate interview suites, campus recruitment expos, and graduate tech talk days directly with ASTU leadership.', badge: 'Campus Days', active: true },
-  ],
-  faqs: [
-    { id: 'PF-1', question: 'How can our enterprise register as an official partner on ASTU-AMS?', answer: 'Click "Register as Employer", submit your corporate details and TIN verification. The ASTU Corporate Relations office approves verified accounts within 24–48 hours.' },
-    { id: 'PF-2', question: 'Are candidate degrees and graduation records verified?', answer: 'Yes, all alumni profiles on ASTU-AMS are directly cross-referenced against official university registrar records.' },
-    { id: 'PF-3', question: 'Can our organization conduct on-campus recruitment and interview suites?', answer: 'Yes! Partner organizations receive priority scheduling for campus career fairs, departmental interview rooms, and guest lecture symposiums.' },
-    { id: 'PF-4', question: 'How do employer surveys influence ASTU engineering curricula?', answer: 'Every 2 years, feedback from corporate employers is compiled into tracer study reports submitted to the Academic Vice President and ETA accreditation auditors.' },
-  ],
+  recruitmentTracks: [],
+  faqs: [],
   contactEmail: 'irccd@astu.edu.et',
   contactPhone: '+251-221-110000',
   contactAddress: 'Adama Science and Technology University, Adama, Oromia, Ethiopia',
@@ -406,7 +338,12 @@ export interface Partner {
   partnershipType?: 'Strategic' | 'Recruitment' | 'Research' | 'Internship' | 'Technology' | string;
   description?: string;
   contactEmail?: string;
+  contactPhone?: string;
   featured?: boolean;
+  hiredCount?: string;
+  mouYear?: string;
+  status?: string;
+  tags?: string[];
 }
 
 /** Partners come from CMS / API only — no demo directory. */
@@ -495,13 +432,13 @@ export const defaultSectionLinks: SectionLinks = {
   tickerLinkText: 'Details',
   tickerLinkTarget: '/announcements',
   impactDefaultLinkText: 'View Details',
-  impactDefaultLinkTarget: '/info/impact-numbers',
+  impactDefaultLinkTarget: '/about',
   portalsGetStartedText: 'Get Started Today',
-  portalsGetStartedLink: '/login',
+  portalsGetStartedLink: '/register',
   campusLifeViewAllText: 'Explore All',
-  campusLifeViewAllLink: '/info/campus-life',
+  campusLifeViewAllLink: '/gallery',
   industryBridgeButtonText: 'Explore Campus Life',
-  industryBridgeButtonLink: '/info/campus-life',
+  industryBridgeButtonLink: '/gallery',
   eventsViewAllText: 'See All Events →',
   eventsViewAllLink: '/events',
   eventsCardDetailsText: 'View Details',
@@ -511,28 +448,28 @@ export const defaultSectionLinks: SectionLinks = {
   announcementsViewAllLink: '/announcements',
   announcementItemLinkBase: '/announcements',
   partnersViewAllText: 'View All Partners',
-  partnersViewAllLink: '/info/featured-employers',
+  partnersViewAllLink: '/partners',
   faqViewAllText: 'View All FAQs',
   faqViewAllLink: '/info/faq',
   storiesReadMoreText: 'Read More',
   storiesViewAllText: 'View All Stories',
-  storiesViewAllLink: '/info/community-feed',
+  storiesViewAllLink: '/community',
   accreditationButtonText: 'View Impact Numbers',
-  accreditationButtonLink: '/info/impact-numbers',
+  accreditationButtonLink: '/about',
   footerCareerPortalText: 'Career Placement Portal',
-  footerCareerPortalLink: '/info/overview',
+  footerCareerPortalLink: '/alumni/jobs',
   footerTracerHubText: 'Tracer Survey Hub',
-  footerTracerHubLink: '/info/overview',
+  footerTracerHubLink: '/login',
   footerMentorshipText: 'Mentorship Scheduling',
-  footerMentorshipLink: '/info/mentorship',
+  footerMentorshipLink: '/community',
   footerStudentPortalText: 'Student Portal',
   footerStudentPortalLink: 'https://estudent.astu.edu.et/',
   footerQualityAssuranceText: 'Quality Assurance Deans',
-  footerQualityAssuranceLink: '/info/accreditation',
+  footerQualityAssuranceLink: '/about',
   footerAccreditationOutcomesText: 'Accreditation Outcomes',
-  footerAccreditationOutcomesLink: '/info/impact-numbers',
+  footerAccreditationOutcomesLink: '/about',
   footerInstitutionalResearchText: 'Institutional Research',
-  footerInstitutionalResearchLink: '/info/overview',
+  footerInstitutionalResearchLink: '/about',
 };
 
 export interface NavSection {
@@ -599,13 +536,15 @@ export interface HomepageCmsConfig {
   newsHeaders?: {
     eyebrow: string;
     title: string;
+    description?: string;
   };
   newsItems: NewsItem[];
   announcementsHeaders?: {
     eyebrow: string;
     title: string;
-    subscribeTitle: string;
-    subscribeDesc: string;
+    subscribeTitle?: string;
+    subscribeDesc?: string;
+    description?: string;
   };
   announcements: Announcement[];
   storiesHeaders?: {
@@ -757,6 +696,9 @@ function deepSanitizeImages<T>(obj: T): T {
 export const homepageCmsService = {
   getSettings(): HomepageCmsConfig | null {
     try {
+      for (const key of LEGACY_STORAGE_KEYS) {
+        try { localStorage.removeItem(key); } catch { /* ignore */ }
+      }
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         let parsed = JSON.parse(stored);
@@ -769,6 +711,38 @@ export const homepageCmsService = {
         }
         if (!Array.isArray(parsed.partners) || parsed.partners.length === 0) {
           parsed.partners = defaultPartnersList;
+        }
+        if (parsed.eventsHeaders) {
+          const raw = parsed.eventsHeaders;
+          const desc = String(raw.description || '').replace(/^Gatherings\s*(&|and)\s*training\s*·\s*/i, '').trim();
+          const eyebrow = /calendar.*gatherings/i.test(String(raw.eyebrow || ''))
+            ? 'Events & Workshops'
+            : raw.eyebrow || 'Events & Workshops';
+          parsed.eventsHeaders = {
+            ...raw,
+            eyebrow,
+            title: raw.title || 'Gatherings & Technical Training',
+            description: desc || 'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+          };
+        }
+        if (parsed.newsHeaders) {
+          const raw = parsed.newsHeaders;
+          parsed.newsHeaders = {
+            ...raw,
+            eyebrow: raw.eyebrow || 'Campus News',
+            title: raw.title || 'Latest ASTU Highlights',
+            description: raw.description || 'University notices, academic bulletins, and alumni community circulars.',
+          };
+        }
+        if (parsed.announcementsHeaders) {
+          const raw = parsed.announcementsHeaders;
+          const desc = String(raw.description || '').replace(/^Official\s*updates\s*·\s*/i, '').trim();
+          parsed.announcementsHeaders = {
+            ...raw,
+            eyebrow: raw.eyebrow || 'Official Updates',
+            title: raw.title || 'News & Announcements',
+            description: desc || 'University notices, academic bulletins, and alumni community circulars.',
+          };
         }
         return parsed;
       }
@@ -883,15 +857,43 @@ export const homepageCmsService = {
     return this.getSettings();
   },
 
+  async fetchSettings(): Promise<HomepageCmsConfig | null> {
+    return this.fetchFromApi();
+  },
+
   async fetchPublishedPartners(): Promise<Partner[]> {
+    const fromConfig = (data: any): Partner[] => {
+      const partners = Array.isArray(data?.partners) ? data.partners : [];
+      const active = deepSanitizeImages(partners).filter(
+        (partner: Partner) => partner?.active !== false && partner?.name
+      );
+      if (active.length) return active;
+
+      const featured = Array.isArray(data?.featuredEmployers) ? data.featuredEmployers : [];
+      return featured
+        .filter((e: any) => e && e.active !== false && e.name)
+        .map(
+          (e: any): Partner => ({
+            id: String(e.id || e.name),
+            name: String(e.name),
+            logo: e.logo || "",
+            industry: e.area || e.industry || "",
+            description: e.openings || e.description || "",
+            active: true,
+          })
+        );
+    };
+
     try {
       const res = await axios.get(`${API_URL}/content/homepage/config`, { timeout: 5000 });
-      const partners = res.data?.success ? res.data?.data?.partners : [];
-      if (!Array.isArray(partners)) return [];
-      return deepSanitizeImages(partners).filter((partner: Partner) => partner?.active !== false);
+      if (res.data?.success && res.data?.data) {
+        return fromConfig(res.data.data);
+      }
     } catch {
-      return [];
+      /* fall through to local CMS snapshot */
     }
+
+    return fromConfig(this.getSettings());
   },
 
   async uploadMedia(file: File, album = 'General', altText = ''): Promise<{ url: string; id?: string }> {

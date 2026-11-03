@@ -869,11 +869,8 @@ export const DocumentProcessingTab: React.FC<DocumentProcessingTabProps> = ({
                             ))}
                           </div>
                         ) : (
-                          <div className="space-y-2 text-xs">
-                            <div className="bg-white p-3 rounded-xl border border-slate-200">
-                              <span className="font-bold text-slate-900 block">Verified Software Engineering Certification</span>
-                              <span className="text-slate-500">Adama Science and Technology University</span>
-                            </div>
+                          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-500 text-center">
+                            No certifications on file for this alumni profile.
                           </div>
                         )}
                       </div>

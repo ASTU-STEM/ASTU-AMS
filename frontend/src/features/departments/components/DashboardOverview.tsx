@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
+import { DashboardWelcomeBanner, DashboardStatGrid, DashboardQuickNav } from '../../../components/dashboard';
 import { departmentService } from '../services/department.service';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
@@ -405,83 +406,104 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ darkMode =
 
   return (
     <div className="space-y-6">
-      {/* Official Alumni Officer Broadcast Hero Banner */}
-      <DashboardBroadcastHero actorRole="DEPARTMENT_HEAD" className="mb-2" />
+      <DashboardBroadcastHero actorRole="DEPARTMENT_HEAD" />
 
-      {/* Department Command Center Banner */}
-      <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-[#003580] via-[#004b99] to-[#0066cc] p-6 text-white shadow-md relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <div>
-            <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-white">
-              DEPARTMENT ACCREDITATION &amp; OUTCOMES HUB
-            </span>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight">{activeDeptName} Department Command Center</h2>
-            <p className="mt-1 max-w-3xl text-xs leading-relaxed text-white/90">
-              Executive monitoring of graduate employment rates, curriculum skill alignment, ABET accreditation evidence, and department survey completions.
-            </p>
-          </div>
+      <DashboardWelcomeBanner
+        eyebrow="Department Accreditation & Outcomes Hub"
+        title={`${activeDeptName} Department Command Center`}
+        description="Executive monitoring of graduate employment rates, curriculum skill alignment, ABET accreditation evidence, and department survey completions."
+        actions={[
+          {
+            label: refreshing ? 'Refreshing...' : 'Refresh metrics',
+            onClick: handleRefresh,
+            variant: 'secondary',
+          },
+          {
+            label: 'Export report',
+            onClick: handleExport,
+            variant: 'primary',
+          },
+        ]}
+      />
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl transition-all duration-300 font-bold text-xs disabled:opacity-50 cursor-pointer"
-            >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-              {refreshing ? 'Refreshing...' : 'Refresh'}
-            </button>
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#1D9E75] hover:brightness-110 text-white rounded-xl transition-all duration-300 font-bold text-xs shadow-sm cursor-pointer"
-            >
-              <Download className="h-4 w-4" />
-              Export Report
-            </button>
-          </div>
-        </div>
+      <DashboardStatGrid
+        stats={[
+          {
+            label: 'Department graduates',
+            value: metrics?.departmentGraduates !== undefined ? metrics.departmentGraduates.toLocaleString() : '0',
+            icon: GraduationCap,
+            tone: 'blue',
+            trend: `${metrics?.verifiedPercentage ?? 0}% verified SIS census`,
+            onClick: () => openRosterModal('ALL'),
+          },
+          {
+            label: 'Employment rate',
+            value: `${metrics?.employmentRate ?? 0}%`,
+            icon: TrendingUp,
+            tone: 'green',
+            trend: 'Live DB telemetry',
+            progress: Number(metrics?.employmentRate ?? 0),
+          },
+          {
+            label: 'Employer satisfaction',
+            value: String(metrics?.employerSatisfaction ?? 'N/A'),
+            icon: Star,
+            tone: 'gold',
+            trend: 'ABET quality target',
+            trendDirection: 'flat',
+          },
+          {
+            label: 'Active partnerships',
+            value: `${metrics?.activePartnerships ?? 0}`,
+            icon: Building2,
+            tone: 'purple',
+            trend: `${metrics?.activeJobRequisitions ?? 0} job requisitions`,
+          },
+        ]}
+      />
 
-        {/* Command Center 4-Card Quick Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-white/15">
-          <div
-            onClick={() => openRosterModal('ALL')}
-            className="bg-white/10 hover:bg-white/20 backdrop-blur-sm p-4 rounded-xl border border-white/15 cursor-pointer transition-all group"
-          >
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">DEPARTMENT GRADUATES</span>
-            <p className="text-2xl font-extrabold mt-1 text-white group-hover:scale-105 transition-transform">
-              {metrics?.departmentGraduates !== undefined ? metrics.departmentGraduates.toLocaleString() : '0'}
-            </p>
-            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">
-              ✓ {metrics?.verifiedPercentage ?? 0}% Verified SIS Census
-            </p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">EMPLOYMENT RATE</span>
-            <p className="text-2xl font-extrabold mt-1 text-white">
-              {metrics?.employmentRate ?? 0}%
-            </p>
-            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">↑ Live DB Telemetry</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">EMPLOYER SATISFACTION</span>
-            <p className="text-2xl font-extrabold mt-1 text-white">
-              {metrics?.employerSatisfaction ?? 'N/A'}
-            </p>
-            <p className="text-[10px] text-amber-300 font-semibold mt-0.5">★ ABET Quality Target Met</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/15">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">ACTIVE PARTNERSHIPS</span>
-            <p className="text-2xl font-extrabold mt-1 text-white">
-              {metrics?.activePartnerships ?? 0} Companies
-            </p>
-            <p className="text-[10px] text-emerald-300 font-semibold mt-0.5">
-              {metrics?.activeJobRequisitions ?? 0} Job Requisitions
-            </p>
-          </div>
-        </div>
-      </div>
+      <DashboardQuickNav
+        title="Department workflows"
+        subtitle="Open roster segments and accreditation evidence quickly."
+        columns={4}
+        items={[
+          {
+            id: 'active',
+            title: 'Active alumni',
+            description: 'Verified graduates currently marked active in the department roster.',
+            icon: UserCheck,
+            onClick: () => openRosterModal('ACTIVE'),
+            tone: 'green',
+          },
+          {
+            id: 'inactive',
+            title: 'Inactive alumni',
+            description: 'Review inactive records and follow-up opportunities.',
+            icon: UserX,
+            onClick: () => openRosterModal('INACTIVE'),
+            tone: 'amber',
+          },
+          {
+            id: 'pending',
+            title: 'Pending verification',
+            description: 'Clear identity and SIS verification blockers for your cohort.',
+            icon: AlertCircle,
+            onClick: () => openRosterModal('PENDING VERIFICATION'),
+            tone: 'rose',
+          },
+          {
+            id: 'all',
+            title: 'Full roster',
+            description: 'Browse the complete department alumni census and export views.',
+            icon: Users,
+            onClick: () => openRosterModal('ALL'),
+            tone: 'navy',
+          },
+        ]}
+      />
 
       {/* Dynamic Filters Bar */}
-      <div className={`rounded-2xl p-4 shadow-xs border ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+      <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
           {/* Department Scope Selection */}
           <div>
@@ -576,7 +598,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ darkMode =
       </div>
 
       {/* Account Status Breakdown Bar */}
-      <div className={`rounded-2xl p-4 border shadow-xs ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'}`}>
+      <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
             <Users className="h-4 w-4 text-[#003580] dark:text-blue-400" />

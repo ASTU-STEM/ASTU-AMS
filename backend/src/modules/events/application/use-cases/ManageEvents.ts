@@ -22,13 +22,29 @@ export class CreateEvent {
   }
 }
 
+const EVENT_MANAGER_ROLES = new Set([
+  'ADMIN',
+  'SUPER_ADMIN',
+  'ALUMNI_OFFICE',
+  'CMS_MANAGER',
+  'DEPARTMENT_HEAD',
+]);
+
+function canManageEvent(event: Event, userId: string, role?: string) {
+  if (role && EVENT_MANAGER_ROLES.has(String(role).toUpperCase())) return true;
+  // Legacy / seeded rows often have no createdBy — allow authenticated managers only above,
+  // and the original author when present.
+  if (event.createdBy && event.createdBy === userId) return true;
+  return false;
+}
+
 export class UpdateEvent {
   constructor(private readonly repo: IEventRepository) {}
 
-  async execute(eventId: string, userId: string, data: Partial<Event>) {
+  async execute(eventId: string, userId: string, data: Partial<Event>, role?: string) {
     const event = await this.repo.findById(eventId);
     if (!event) throw new EventNotFoundError();
-    if (event.createdBy !== userId) throw new UnauthorizedEventActionError();
+    if (!canManageEvent(event, userId, role)) throw new UnauthorizedEventActionError();
     
     return await this.repo.update(eventId, data);
   }
@@ -37,10 +53,10 @@ export class UpdateEvent {
 export class DeleteEvent {
   constructor(private readonly repo: IEventRepository) {}
 
-  async execute(eventId: string, userId: string) {
+  async execute(eventId: string, userId: string, role?: string) {
     const event = await this.repo.findById(eventId);
     if (!event) throw new EventNotFoundError();
-    if (event.createdBy !== userId) throw new UnauthorizedEventActionError();
+    if (!canManageEvent(event, userId, role)) throw new UnauthorizedEventActionError();
     
     return await this.repo.delete(eventId);
   }

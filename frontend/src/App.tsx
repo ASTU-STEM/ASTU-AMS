@@ -26,6 +26,7 @@ import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 import VerifyManualPage from "./features/auth/pages/VerifyManualPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
+import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
 import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
 import SupportPage from "./features/support/pages/SupportPage";
@@ -67,6 +68,9 @@ function AppContent() {
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/activate-alumni" element={<AlumniActivationPage />} />
+        <Route path="/activate" element={<Navigate to="/activate-alumni" replace />} />
+        <Route path="/activate-account" element={<Navigate to="/activate-alumni" replace />} />
         <Route path="/verify-2fa" element={<Verify2FAPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
@@ -78,6 +82,16 @@ function AppContent() {
           <Route path="/verify-manual" element={<VerifyManualPage />} />
           <Route path="/verify-national-id/callback" element={<VerifyNationalIdCallbackPage />} />
         </Route>
+
+        {/* Role base redirects — short paths used in emails/nav must land on dashboards */}
+        <Route path="/alumni" element={<Navigate to="/alumni/dashboard" replace />} />
+        <Route path="/employer" element={<Navigate to="/employer/dashboard" replace />} />
+        <Route path="/employers/portal" element={<Navigate to="/employer/dashboard" replace />} />
+        <Route path="/registrar" element={<Navigate to="/registrar/dashboard" replace />} />
+        <Route path="/department" element={<Navigate to="/department/dashboard" replace />} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/cms" element={<Navigate to="/cms/dashboard" replace />} />
+        <Route path="/ict" element={<Navigate to="/ict/dashboard" replace />} />
 
         {/* Role-protected routes */}
         <Route
@@ -124,10 +138,6 @@ function AppContent() {
               allowedRoles={["REGISTRAR"]}
             />
           }
-        />
-        <Route
-          path="/department"
-          element={<Navigate to="/department/dashboard" replace />}
         />
         <Route
           path="/department/dashboard"

@@ -219,13 +219,9 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
         return next;
       });
       toast.success(`Connection request sent to ${alumni.name}!`);
-    } catch (err) {
-      setConnectedIds(prev => {
-        const next = { ...prev, [alumni.id]: true };
-        localStorage.setItem('alumni_directory_connected_ids', JSON.stringify(next));
-        return next;
-      });
-      toast.success(`Connection request sent to ${alumni.name}!`);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || `Could not connect with ${alumni.name}.`;
+      toast.error(msg);
     } finally {
       setConnectingId(null);
     }

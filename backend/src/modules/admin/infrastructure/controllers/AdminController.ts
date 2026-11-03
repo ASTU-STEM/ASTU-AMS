@@ -12,6 +12,13 @@ import { ManageAdminProfile } from '../../application/use-cases/ManageAdminProfi
 import { ManageReports } from '../../application/use-cases/ManageReports';
 import { EmailService } from '../../../../core/services/EmailService';
 import prisma from '../../../../core/config/db';
+import {
+  createDatabaseBackup,
+  readBackupFile,
+  reconcileBackupHistory,
+  restoreDatabaseBackup as restoreBackupFromFile,
+} from '../services/DatabaseBackupService';
+import fs from 'fs';
 
 const manageUsersUseCase = new ManageUsers();
 const getDashboardMetricsUseCase = new GetDashboardMetrics();
@@ -774,12 +781,18 @@ export class AdminController {
       } else if (type === 'email') {
         const { EmailService } = require('../../../../core/services/EmailService');
         const emailService = new EmailService();
-        const testRecipient = config?.recipient || config?.fromEmail || process.env.SMTP_USER || 'admin@astu.edu.et';
+        const authEmail = (req as any).user?.email;
+        const testRecipient =
+          config?.recipient ||
+          authEmail ||
+          config?.fromEmail ||
+          process.env.SMTP_USER ||
+          'admin@astu.edu.et';
         await emailService.sendMail({
           to: testRecipient,
           subject: 'ASTU AMS - Integration Test Email',
           text: 'This is an automated test email to verify your SMTP Email Configuration in ASTU AMS.',
-          html: `<div style="font-family: Arial; padding: 20px; border: 1px solid #003580; border-radius: 8px;"><h3 style="color: #003580;">✅ SMTP Connection Successful</h3><p>Your ASTU AMS outbound mail server configuration has been verified.</p></div>`,
+          html: `<div style="font-family: Arial; padding: 20px; border: 1px solid #003580; border-radius: 8px;"><h3 style="color: #003580;">✅ SMTP Connection Successful</h3><p>Your ASTU AMS outbound mail server configuration has been verified.</p><p>Recipient: ${testRecipient}</p></div>`,
         });
         const latency = Date.now() - startTime;
         return res.json({
@@ -805,47 +818,10 @@ export class AdminController {
 
   async getDonationCampaigns(req: Request, res: Response) {
     try {
-      let campaigns = await prisma.donationCampaign.findMany({
+      // Return real campaigns only — do not auto-seed fabricated catalogue entries.
+      const campaigns = await prisma.donationCampaign.findMany({
         orderBy: { createdAt: 'desc' },
       });
-
-      if (!campaigns || campaigns.length === 0) {
-        await prisma.donationCampaign.createMany({
-          data: [
-            {
-              title: 'ASTU Scholarship Fund 2026',
-              category: 'Scholarship',
-              description: 'Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.',
-              goal: 5000000,
-              raised: 1851000,
-              donorCount: 349,
-              status: 'ACTIVE',
-            },
-            {
-              title: 'AI Research Lab Equipment',
-              category: 'Research',
-              description: 'Fund high-performance GPU servers and laboratory instrumentation for advanced postgraduate engineering researchers.',
-              goal: 8000000,
-              raised: 3201000,
-              donorCount: 158,
-              status: 'ACTIVE',
-            },
-            {
-              title: 'Campus Innovation Makerspace',
-              category: 'Infrastructure',
-              description: 'Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.',
-              goal: 12000000,
-              raised: 6800000,
-              donorCount: 220,
-              status: 'ACTIVE',
-            },
-          ],
-        }).catch(() => null);
-
-        campaigns = await prisma.donationCampaign.findMany({
-          orderBy: { createdAt: 'desc' },
-        });
-      }
 
       const parseNum = (val: any) => {
         if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -1123,44 +1099,12 @@ export class AdminController {
   // --- Backup & Security Settings ---
   async getBackupSecurity(req: Request, res: Response) {
     try {
-      const now = new Date();
-      const formatBackupDate = (d: Date) => d.toLocaleDateString() + ', 03:00 AM';
-
-      // 1. Calculate Real Database Size from PostgreSQL Engine
-      let realDbSize = '14.8 MB';
-      try {
-        const [users, alumni, logs, registrar] = await Promise.all([
-          prisma.user.count().catch(() => 0),
-          prisma.alumniProfile.count().catch(() => 0),
-          prisma.auditLog.count().catch(() => 0),
-          prisma.registrarStudent.count().catch(() => 0),
-        ]);
-        const estimatedMB = ((users * 2.5 + alumni * 8.2 + logs * 1.5 + registrar * 4.1 + 1500) / 1024).toFixed(1);
-        realDbSize = `${estimatedMB} MB`;
-      } catch (_) {}
-
-      // 2. Database Backups
+      // 1. Database Backups — only entries with files still on disk
       let backupsSetting = await prisma.systemSetting.findUnique({ where: { key: 'BACKUP_HISTORY' } });
-      let backups: any[] = backupsSetting && Array.isArray(backupsSetting.value) ? (backupsSetting.value as any[]) : [];
+      const rawBackups: any[] = backupsSetting && Array.isArray(backupsSetting.value) ? (backupsSetting.value as any[]) : [];
+      const backups = reconcileBackupHistory(rawBackups);
 
-      // Filter out synthetic/fake mock history entries (like 9/18, 9/17, 9/16 or 03:00 AM fake seeds)
-      backups = backups.filter((b) => {
-        if (!b || !b.date) return false;
-        if (b.date.includes('2026-05-29') || b.size === '2.4 GB' || b.date.endsWith('03:00 AM')) return false;
-        return true;
-      });
-
-      // If no real backups exist yet in database, create 1 real live baseline snapshot for today
-      if (backups.length === 0) {
-        const realBackupDate = now.toLocaleDateString() + ', ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        backups = [
-          {
-            date: realBackupDate,
-            size: realDbSize,
-            status: 'Success',
-            file: `backup-${now.toISOString().split('T')[0]}-${now.getTime().toString().slice(-4)}.sql.gz`,
-          },
-        ];
+      if (JSON.stringify(rawBackups) !== JSON.stringify(backups)) {
         await prisma.systemSetting.upsert({
           where: { key: 'BACKUP_HISTORY' },
           update: { value: backups, updatedAt: new Date() },
@@ -1168,7 +1112,7 @@ export class AdminController {
         });
       }
 
-      // 3. Active Sessions from PostgreSQL Users table
+      // 2. Active Sessions from PostgreSQL Users table
       const users = await prisma.user.findMany({
         select: { id: true, email: true, role: true, updatedAt: true, createdAt: true },
         orderBy: { updatedAt: 'desc' },
@@ -1180,28 +1124,29 @@ export class AdminController {
 
       const activeUsers = users.filter((u) => !revokedUsers.includes(u.email));
 
-      const activeSessions = activeUsers.map((u, idx) => ({
+      // Only expose fields we actually have — no synthetic IP / device / location.
+      const activeSessions = activeUsers.map((u) => ({
         user: u.email,
-        ip: `197.156.${92 + (idx % 10)}.${14 + (idx % 50)}`,
-        device: idx % 2 === 0 ? 'Chrome / Windows (Active)' : 'Safari / macOS (Active)',
-        location: idx % 3 === 0 ? 'Adama Main Campus' : 'Addis Ababa',
+        ip: 'Not captured',
+        device: String(u.role || 'USER').replace(/_/g, ' '),
+        location: 'Not captured',
         loginTime: new Date(u.updatedAt || u.createdAt).toLocaleString(),
       }));
 
-      // 4. API Keys
+      // 3. API Keys
       let apiKeysSetting = await prisma.systemSetting.findUnique({ where: { key: 'API_KEYS' } });
       let apiKeys: any[] = apiKeysSetting && Array.isArray(apiKeysSetting.value) ? (apiKeysSetting.value as any[]) : [];
       // Sanitize out any old mock seed keys
       apiKeys = apiKeys.filter((k) => k && k.name && !(k.name === 'Production API Key' && k.created === '2026-01-12'));
 
-      // 5. IP Whitelist
+      // 4. IP Whitelist
       let whitelistSetting = await prisma.systemSetting.findUnique({ where: { key: 'IP_WHITELIST' } });
       let whitelist: string[] = whitelistSetting && Array.isArray(whitelistSetting.value) ? (whitelistSetting.value as string[]) : [];
       // Sanitize out any old mock seed IPs
       const mockIps = ['154.78.22.14', '154.78.22.18', '10.0.2.15'];
       whitelist = whitelist.filter((ip) => !mockIps.includes(ip));
 
-      // 6. Config (Schedule, Time, Rate Limit)
+      // 5. Config (Schedule, Time, Rate Limit)
       let configSetting = await prisma.systemSetting.findUnique({ where: { key: 'BACKUP_SECURITY_CONFIG' } });
       const config = (configSetting?.value as any) || { schedule: 'Daily', time: '03:00', rateLimit: 120 };
 
@@ -1224,30 +1169,21 @@ export class AdminController {
 
   async runDatabaseBackup(req: Request, res: Response) {
     try {
+      const newBackup = await createDatabaseBackup();
+
       let backupsSetting = await prisma.systemSetting.findUnique({ where: { key: 'BACKUP_HISTORY' } });
       const currentBackups: any[] = backupsSetting && Array.isArray(backupsSetting.value) ? (backupsSetting.value as any[]) : [];
-
-      const [users, alumni, logs, registrar] = await Promise.all([
-        prisma.user.count().catch(() => 0),
-        prisma.alumniProfile.count().catch(() => 0),
-        prisma.auditLog.count().catch(() => 0),
-        prisma.registrarStudent.count().catch(() => 0),
-      ]);
-      const estimatedMB = ((users * 2.5 + alumni * 8.2 + logs * 1.5 + registrar * 4.1 + 1500) / 1024).toFixed(1);
-      const realDbSize = `${estimatedMB} MB`;
-
-      const now = new Date();
-      const dateStr = now.toLocaleDateString() + ', ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const isoDate = now.toISOString().split('T')[0];
-      const newBackup = {
-        date: dateStr,
-        size: realDbSize,
-        status: 'Success',
-        file: `backup-${isoDate}-${Date.now().toString().slice(-4)}.sql.gz`,
-      };
-
-      const cleanPast = currentBackups.filter((b) => b && b.date && !b.date.includes('2026-05-29') && b.size !== '2.4 GB' && !b.date.endsWith('03:00 AM'));
-      const updatedBackups = [newBackup, ...cleanPast];
+      const cleanPast = reconcileBackupHistory(currentBackups);
+      const updatedBackups = [
+        {
+          date: newBackup.date,
+          size: newBackup.size,
+          status: newBackup.status,
+          file: newBackup.file,
+          format: newBackup.format,
+        },
+        ...cleanPast.filter((b) => b.file !== newBackup.file),
+      ];
 
       await prisma.systemSetting.upsert({
         where: { key: 'BACKUP_HISTORY' },
@@ -1258,11 +1194,15 @@ export class AdminController {
       await prisma.auditLog.create({
         data: {
           action: 'MANUAL_DATABASE_BACKUP',
-          details: `Manual PostgreSQL database backup initiated: ${newBackup.file} (${realDbSize})`,
+          details: `Manual PostgreSQL pg_dump completed: ${newBackup.file} (${newBackup.size})`,
         },
       });
 
-      res.json({ success: true, data: updatedBackups, message: 'Database backup generated successfully and saved to PostgreSQL.' });
+      res.json({
+        success: true,
+        data: updatedBackups,
+        message: `Database backup written to disk: ${newBackup.file} (${newBackup.size}).`,
+      });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -1271,16 +1211,22 @@ export class AdminController {
   async restoreDatabaseBackup(req: Request, res: Response) {
     try {
       const { file } = req.body;
+      if (!file) {
+        return res.status(400).json({ success: false, message: 'Backup file name is required.' });
+      }
+
+      await restoreBackupFromFile(String(file));
+
       await prisma.auditLog.create({
         data: {
           action: 'RESTORE_DATABASE_BACKUP',
-          details: `Restored PostgreSQL database state from backup snapshot: ${file || 'latest'}`,
+          details: `Restored PostgreSQL database from on-disk dump: ${file}`,
         },
       });
 
       res.json({
         success: true,
-        message: `Database successfully restored from snapshot "${file || 'backup-latest.sql.gz'}". Schema integrity verified.`,
+        message: `Database restored from "${file}" via psql. Verify application health before continuing.`,
       });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
@@ -1289,48 +1235,16 @@ export class AdminController {
 
   async downloadDatabaseBackupFile(req: Request, res: Response) {
     try {
-      const filename = String(req.query.file || 'astu_database_backup.sql');
-      const userCount = await prisma.user.count().catch(() => 0);
-      const studentCount = await prisma.alumniProfile.count().catch(() => 0);
-
-      const sqlContent = `-- ASTU Alumni Management System (ASTU AMS) PostgreSQL Database Backup Dump
--- Created: ${new Date().toISOString()}
--- Database Engine: PostgreSQL 16 Enterprise
--- Total Users: ${userCount}
--- Total Alumni Records: ${studentCount}
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-
--- --------------------------------------------------------
--- Table Structure for "User"
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS "User" (
-    "id" TEXT NOT NULL,
-    "email" TEXT NOT NULL UNIQUE,
-    "role" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY ("id")
-);
-
--- --------------------------------------------------------
--- Database Backup Metadata
--- --------------------------------------------------------
-INSERT INTO "SystemSetting" ("key", "value", "updatedAt") 
-VALUES ('LAST_BACKUP_TIMESTAMP', '{"timestamp": "${new Date().toISOString()}", "status": "VERIFIED_SUCCESS"}', CURRENT_TIMESTAMP)
-ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCLUDED."updatedAt";
-
--- Dump completed successfully on ${new Date().toLocaleString()}
-`;
-
+      const filename = String(req.query.file || '');
+      if (!filename) {
+        return res.status(400).json({ success: false, message: 'Backup file query parameter is required.' });
+      }
+      const { path: filePath } = readBackupFile(filename);
       res.setHeader('Content-Type', 'application/sql');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.send(sqlContent);
+      fs.createReadStream(filePath).pipe(res);
     } catch (error: any) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: error.message });
     }
   }
 
@@ -1367,11 +1281,11 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
       });
 
       const activeUsers = users.filter((u) => !updatedRevoked.includes(u.email));
-      const activeSessions = activeUsers.map((u, idx) => ({
+      const activeSessions = activeUsers.map((u) => ({
         user: u.email,
-        ip: `197.156.${92 + (idx % 10)}.${14 + (idx % 50)}`,
-        device: idx % 2 === 0 ? 'Chrome / Windows (Active)' : 'Safari / macOS (Active)',
-        location: idx % 3 === 0 ? 'Adama Main Campus' : 'Addis Ababa',
+        ip: 'Not captured',
+        device: String(u.role || 'USER').replace(/_/g, ' '),
+        location: 'Not captured',
         loginTime: new Date(u.updatedAt || u.createdAt).toLocaleString(),
       }));
 
@@ -1404,9 +1318,9 @@ ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = EXCL
       const activeSessions = [
         {
           user: currentAdminEmail,
-          ip: '154.78.22.14',
-          device: 'Chrome / Windows (Active)',
-          location: 'Addis Ababa',
+          ip: 'Not captured',
+          device: 'Current administrator',
+          location: 'Not captured',
           loginTime: new Date().toLocaleString(),
         },
       ];

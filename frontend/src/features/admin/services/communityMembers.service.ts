@@ -49,7 +49,7 @@ export const communityMembersService = {
     this.saveMembers(updated);
 
     // Sync with backend DB API
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token') || localStorage.getItem('accessToken');
     axios
       .post(`${API_URL}/community-members`, newMember, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -67,7 +67,7 @@ export const communityMembersService = {
     members[index] = { ...members[index], ...updates };
     this.saveMembers(members);
 
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token') || localStorage.getItem('accessToken');
     axios
       .put(`${API_URL}/community-members/${id}`, updates, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -84,7 +84,7 @@ export const communityMembersService = {
 
     this.saveMembers(filtered);
 
-    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token') || localStorage.getItem('accessToken');
     axios
       .delete(`${API_URL}/community-members/${id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},

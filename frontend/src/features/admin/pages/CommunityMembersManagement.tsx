@@ -22,6 +22,7 @@ import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminStatGrid from '../components/AdminStatGrid';
 import ImageUploader from '../components/ImageUploader';
 import CommunityMemberModal from '../components/CommunityMemberModal';
 import communityMembersService, { CommunityMember } from '../services/communityMembers.service';
@@ -198,26 +199,40 @@ export default function CommunityMembersManagement() {
         }
       />
 
-      {/* Stats */}
-      <section className="grid gap-4 md:grid-cols-4">
-        {[
-          { label: 'Total Members', value: members.length, icon: Users, color: 'text-[#003366] bg-[#003366]/10 dark:text-sky-400 dark:bg-sky-950/40' },
-          { label: 'Executive', value: members.filter(m => m.category === 'executive').length, icon: Briefcase, color: 'text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-950/40' },
-          { label: 'Academia', value: members.filter(m => m.category === 'academia').length, icon: GraduationCap, color: 'text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-950/40' },
-          { label: 'Engineering', value: members.filter(m => m.category === 'engineering').length, icon: Building2, color: 'text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/40' },
-        ].map((metric) => {
-          const Icon = metric.icon;
-          return (
-            <div key={metric.label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <span className={`inline-flex h-10 w-10 items-center justify-center rounded-lg ${metric.color}`}>
-                <Icon className="h-5 w-5" />
-              </span>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{metric.label}</p>
-              <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{metric.value}</p>
-            </div>
-          );
-        })}
-      </section>
+      <AdminStatGrid
+        cols={4}
+        compact
+        stats={[
+          {
+            title: 'Total Members',
+            value: String(members.length),
+            icon: Users,
+            tone: 'blue',
+            description: 'Featured community profiles',
+          },
+          {
+            title: 'Executive',
+            value: String(members.filter((m) => m.category === 'executive').length),
+            icon: Briefcase,
+            tone: 'gold',
+            description: 'Leadership & industry',
+          },
+          {
+            title: 'Academia',
+            value: String(members.filter((m) => m.category === 'academia').length),
+            icon: GraduationCap,
+            tone: 'blue',
+            description: 'Research & teaching',
+          },
+          {
+            title: 'Engineering',
+            value: String(members.filter((m) => m.category === 'engineering').length),
+            icon: Building2,
+            tone: 'green',
+            description: 'Technical practice',
+          },
+        ]}
+      />
 
       {/* Filters & View Mode Bar */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

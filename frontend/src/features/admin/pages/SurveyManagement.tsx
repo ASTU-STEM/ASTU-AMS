@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ClipboardList,
-  Eye, FilePlus2, GripVertical, MoreHorizontal, Plus,
+  Copy, Eye, FilePlus2, GripVertical, MoreHorizontal, PauseCircle, Plus,
   Send, Sparkles, Trash2, X, BarChart as BarChartIcon,
   Calendar, Edit2, Play, Search, Filter, RefreshCw, Mail,
   Users, CheckCircle, Clock, AlertTriangle, AlertCircle, TrendingUp, GraduationCap, Download
 } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
-import AdminStatCard from '../components/AdminStatCard';
+import AdminStatGrid from '../components/AdminStatGrid';
 import { surveyService } from '../../surveys/services/survey.service';
 import toast from 'react-hot-toast';
 import {
@@ -120,6 +120,66 @@ export default function SurveyManagement() {
     }
   };
 
+  const handleCloneSurvey = async (e: React.MouseEvent, survey: any) => {
+    e.stopPropagation();
+    try {
+      const cloned = await surveyService.cloneSurvey(survey.id);
+      toast.success(`Cloned "${survey.title}" successfully.`);
+      await fetchSurveys();
+      if (cloned?.id) {
+        setSelectedSurvey(cloned);
+        setActiveTab('details');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to clone survey');
+    }
+  };
+
+  const handleSendInstantly = async (e: React.MouseEvent, survey: any) => {
+    e.stopPropagation();
+    if (!window.confirm(`Send "${survey.title}" to eligible alumni now?`)) return;
+    try {
+      const result = await surveyService.sendSurveyInstantly(survey.id);
+      toast.success(result?.message || `Survey sent instantly.`);
+      fetchSurveys();
+      if (selectedSurvey?.id === survey.id) {
+        const refreshed = await surveyService.getSurvey(survey.id).catch(() => null);
+        if (refreshed) setSelectedSurvey(refreshed);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send survey');
+    }
+  };
+
+  const handleDeactivateSurvey = async (e: React.MouseEvent, survey: any) => {
+    e.stopPropagation();
+    if (!window.confirm(`Deactivate "${survey.title}"? Alumni will no longer see new assignments.`)) return;
+    try {
+      await surveyService.deactivateSurvey(survey.id);
+      toast.success('Survey deactivated.');
+      fetchSurveys();
+      if (selectedSurvey?.id === survey.id) {
+        setSelectedSurvey({ ...survey, isActive: false });
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to deactivate survey');
+    }
+  };
+
+  const handleActivateSurveyNow = async (e: React.MouseEvent, survey: any) => {
+    e.stopPropagation();
+    try {
+      await surveyService.activateSurvey(survey.id);
+      toast.success('Survey activated for alumni.');
+      fetchSurveys();
+      if (selectedSurvey?.id === survey.id) {
+        setSelectedSurvey({ ...survey, isActive: true });
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to activate survey');
+    }
+  };
+
   // Builder State
   const [editId, setEditId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
@@ -170,7 +230,9 @@ export default function SurveyManagement() {
   // Survey Details Responses State
   const [selectedSurveyResponses, setSelectedSurveyResponses] = useState<any[]>([]);
   const [surveyResponsesLoading, setSurveyResponsesLoading] = useState(false);
-  const [detailsSubTab, setDetailsSubTab] = useState<'questions' | 'responses'>('questions');
+  const [surveyAnalysis, setSurveyAnalysis] = useState<any | null>(null);
+  const [surveyAnalysisLoading, setSurveyAnalysisLoading] = useState(false);
+  const [detailsSubTab, setDetailsSubTab] = useState<'questions' | 'responses' | 'analysis'>('questions');
   const [viewingResponseModal, setViewingResponseModal] = useState<any | null>(null);
 
   useEffect(() => {
@@ -378,14 +440,24 @@ export default function SurveyManagement() {
     setDetailsSubTab('questions');
     setActiveTab('details');
     setSurveyResponsesLoading(true);
+    setSurveyAnalysisLoading(true);
+    setSurveyAnalysis(null);
     try {
-      const responses = await surveyService.getResponsesBySurvey(survey.id);
+      const [responses, analysis] = await Promise.all([
+        surveyService.getResponsesBySurvey(survey.id).catch((err) => {
+          console.error(err);
+          return [];
+        }),
+        surveyService.getSurveyAnalysis(survey.id).catch((err) => {
+          console.error(err);
+          return null;
+        }),
+      ]);
       setSelectedSurveyResponses(responses || []);
-    } catch (err) {
-      console.error(err);
-      setSelectedSurveyResponses([]);
+      setSurveyAnalysis(analysis || null);
     } finally {
       setSurveyResponsesLoading(false);
+      setSurveyAnalysisLoading(false);
     }
   };
 
@@ -417,36 +489,53 @@ export default function SurveyManagement() {
         }
       />
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-5 gap-4">
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{totalSurveys}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Total Surveys</div>
-        </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{pendingSurveys}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Pending</div>
-          <div className="mt-1 text-xs font-semibold text-[#dc2626]">Awaiting launch</div>
-        </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{completedSurveys}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Completed</div>
-          <div className="mt-1 text-xs font-semibold text-[#3b82f6]">All responses in</div>
-        </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{totalResponses}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Responses</div>
-          <div className="mt-1 text-xs font-semibold text-[#10b981]">{totalSent} sent total</div>
-        </div>
-        <div className="rounded-[12px] border border-slate-100 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="text-3xl font-bold text-slate-900">{totalQuestions}</div>
-          <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">Questions</div>
-          <div className="mt-1 text-xs font-semibold text-[#8b5cf6]">Across all surveys</div>
-        </div>
-      </div>
+      <AdminStatGrid
+        cols={5}
+        compact
+        stats={[
+          {
+            title: 'Total Surveys',
+            value: String(totalSurveys),
+            icon: ClipboardList,
+            tone: 'blue',
+            description: 'All tracer instruments',
+          },
+          {
+            title: 'Active / Pending',
+            value: String(pendingSurveys),
+            icon: Clock,
+            tone: 'amber',
+            trend: pendingSurveys > 0 ? 'Awaiting launch' : 'None pending',
+            trendDirection: pendingSurveys > 0 ? 'flat' : 'up',
+          },
+          {
+            title: 'Archived',
+            value: String(completedSurveys),
+            icon: CheckCircle,
+            tone: 'green',
+            trend: 'Responses closed',
+            trendDirection: 'up',
+          },
+          {
+            title: 'Responses',
+            value: totalResponses.toLocaleString(),
+            icon: Users,
+            tone: 'green',
+            progress: totalSent > 0 ? Math.min(100, Math.round((totalResponses / totalSent) * 100)) : undefined,
+            description: `${totalSent.toLocaleString()} assignments sent`,
+          },
+          {
+            title: 'Questions',
+            value: String(totalQuestions),
+            icon: Sparkles,
+            tone: 'purple',
+            description: 'Across all surveys',
+          },
+        ]}
+      />
 
       {/* Tab Bar */}
-      <div className="flex flex-wrap gap-2 rounded-[10px] border border-slate-200 bg-white p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         {['all', 'create', 'analytics', 'waves'].map(tab => (
           <button
             key={tab}
@@ -459,7 +548,7 @@ export default function SurveyManagement() {
       </div>
 
       {activeTab === 'all' && (
-        <section className="rounded-[10px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           {loading ? (
             <div className="p-8 text-center text-slate-500">Loading surveys...</div>
           ) : (
@@ -489,19 +578,45 @@ export default function SurveyManagement() {
                         </td>
                         <td className="px-4 py-4 text-slate-600">{qCount}</td>
                         <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                          {!isFixed ? (
+                          <div className="inline-flex flex-wrap items-center justify-center gap-1.5">
                             <button
-                              onClick={(e) => handleDeleteSurvey(e, s)}
-                              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 shadow-sm transition-all"
-                              title="Delete custom survey"
+                              onClick={(e) => handleCloneSurvey(e, s)}
+                              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm transition-all"
+                              title="Clone survey"
                             >
-                              <Trash2 className="h-3.5 w-3.5" /> Delete
+                              <Copy className="h-3.5 w-3.5" /> Clone
                             </button>
-                          ) : (
-                            <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                              Fixed Milestone
-                            </span>
-                          )}
+                            {s.isActive ? (
+                              <button
+                                onClick={(e) => handleDeactivateSurvey(e, s)}
+                                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-50 border border-amber-200 shadow-sm transition-all"
+                                title="Deactivate survey"
+                              >
+                                <PauseCircle className="h-3.5 w-3.5" /> Pause
+                              </button>
+                            ) : (
+                              <button
+                                onClick={(e) => handleActivateSurveyNow(e, s)}
+                                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200 shadow-sm transition-all"
+                                title="Activate survey"
+                              >
+                                <Play className="h-3.5 w-3.5" /> Activate
+                              </button>
+                            )}
+                            {!isFixed ? (
+                              <button
+                                onClick={(e) => handleDeleteSurvey(e, s)}
+                                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 shadow-sm transition-all"
+                                title="Delete custom survey"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" /> Delete
+                              </button>
+                            ) : (
+                              <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                Fixed
+                              </span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -519,7 +634,7 @@ export default function SurveyManagement() {
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Analytics Header & Batch Filter */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-[10px] border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <GraduationCap className="h-5 w-5 text-[#003580]" /> Graduation Batch Analytics & ABET Reports
@@ -543,7 +658,7 @@ export default function SurveyManagement() {
           </div>
 
           {analyticsLoading ? (
-            <div className="rounded-[10px] border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-8 text-center text-slate-500">
               <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin text-[#003580]" />
               Loading analytics and reports...
             </div>
@@ -610,7 +725,7 @@ export default function SurveyManagement() {
               {/* Recharts section */}
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Donut chart - status breakdown */}
-                <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Response Status Breakdown</h3>
                   <div className="h-64 flex items-center justify-center">
                     {(() => {
@@ -656,7 +771,7 @@ export default function SurveyManagement() {
                 </div>
 
                 {/* Bar chart - milestone completion */}
-                <div className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Milestone Response Rates (%)</h3>
                   <div className="h-64">
                     {(() => {
@@ -686,7 +801,7 @@ export default function SurveyManagement() {
               </div>
 
               {/* Template report table */}
-              <section className="rounded-[10px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+              <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
                 <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Survey Template Performance</h3>
                 </div>
@@ -746,14 +861,14 @@ export default function SurveyManagement() {
       {activeTab === 'waves' && (
         <div className="space-y-6">
           {assignmentsLoading ? (
-            <div className="rounded-[10px] border border-slate-200 bg-white p-8 text-center text-slate-500">
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-8 text-center text-slate-500">
               <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin text-[#003580]" />
               Loading waves and assignments...
             </div>
           ) : (
             <>
               {/* Dynamic Waves Summary */}
-              <section className="rounded-[10px] border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm overflow-hidden">
                 <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Active Deployment Waves</h3>
                   <p className="text-xs text-slate-400 mt-0.5">Surveys currently active or scheduled in waves by graduation milestones</p>
@@ -833,7 +948,7 @@ export default function SurveyManagement() {
               </section>
 
               {/* Filterable assignments table */}
-              <section className="rounded-[10px] border border-slate-200 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
+              <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-4 md:flex-row md:items-center md:justify-between">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Individual Survey Assignments</h3>
                   
@@ -904,7 +1019,7 @@ export default function SurveyManagement() {
                         });
                         exportAssignmentsToCsv(filtered);
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-[8px] border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 shadow-sm cursor-pointer"
                       title="Export filtered assignments to CSV"
                     >
                       <Download className="h-3.5 w-3.5 text-[#003580]" /> Export CSV
@@ -1060,7 +1175,7 @@ export default function SurveyManagement() {
                               setWavePageSize(Number(e.target.value));
                               setWavePage(1);
                             }}
-                            className="rounded border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold text-slate-700 outline-none"
+                            className="rounded border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-0.5 text-xs font-semibold text-slate-700 outline-none"
                           >
                             <option value={15}>15</option>
                             <option value={25}>25</option>
@@ -1075,7 +1190,7 @@ export default function SurveyManagement() {
                           type="button"
                           onClick={() => setWavePage((p) => Math.max(1, p - 1))}
                           disabled={wavePage === 1}
-                          className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
+                          className="p-1.5 rounded border border-[var(--border-color)] bg-[var(--bg-card)] text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
                         >
                           <ChevronLeft className="h-3.5 w-3.5" />
                         </button>
@@ -1086,7 +1201,7 @@ export default function SurveyManagement() {
                           type="button"
                           onClick={() => setWavePage((p) => Math.min(totalPages, p + 1))}
                           disabled={wavePage === totalPages}
-                          className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
+                          className="p-1.5 rounded border border-[var(--border-color)] bg-[var(--bg-card)] text-slate-600 disabled:opacity-40 hover:bg-slate-50 cursor-pointer"
                         >
                           <ChevronRight className="h-3.5 w-3.5" />
                         </button>
@@ -1101,7 +1216,7 @@ export default function SurveyManagement() {
       )}
 
       {activeTab === 'details' && selectedSurvey && (
-        <div className="rounded-[10px] border border-slate-200 bg-white shadow-lg overflow-hidden">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
             <h2 className="text-xl font-bold text-slate-900">Survey Details</h2>
@@ -1160,6 +1275,33 @@ export default function SurveyManagement() {
                       </button>
                     );
                   })()}
+                  <button
+                    onClick={(e) => handleCloneSurvey(e, selectedSurvey)}
+                    className="flex items-center gap-2 rounded-[8px] border border-slate-200 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    <Copy className="h-4 w-4" /> Clone
+                  </button>
+                  <button
+                    onClick={(e) => handleSendInstantly(e, selectedSurvey)}
+                    className="flex items-center gap-2 rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-2 font-semibold text-emerald-800 hover:bg-emerald-100"
+                  >
+                    <Send className="h-4 w-4" /> Send Now
+                  </button>
+                  {selectedSurvey.isActive ? (
+                    <button
+                      onClick={(e) => handleDeactivateSurvey(e, selectedSurvey)}
+                      className="flex items-center gap-2 rounded-[8px] border border-amber-200 bg-amber-50 px-4 py-2 font-semibold text-amber-800 hover:bg-amber-100"
+                    >
+                      <PauseCircle className="h-4 w-4" /> Deactivate
+                    </button>
+                  ) : (
+                    <button
+                      onClick={(e) => handleActivateSurveyNow(e, selectedSurvey)}
+                      className="flex items-center gap-2 rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-2 font-semibold text-emerald-800 hover:bg-emerald-100"
+                    >
+                      <Play className="h-4 w-4" /> Activate
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       const defaultVal = selectedSurvey?.scheduledAt
@@ -1242,7 +1384,7 @@ export default function SurveyManagement() {
                           : 'border-transparent text-slate-500 hover:text-slate-700'
                       }`}
                     >
-                      📋 Questions ({allQs.length})
+                      Questions ({allQs.length})
                     </button>
                     <button
                       onClick={() => setDetailsSubTab('responses')}
@@ -1252,10 +1394,20 @@ export default function SurveyManagement() {
                           : 'border-transparent text-slate-500 hover:text-slate-700'
                       }`}
                     >
-                      💬 Submitted Alumni Responses
+                      Submitted Responses
                       <span className="rounded-full bg-[#003580] px-2.5 py-0.5 text-xs text-white">
                         {selectedSurveyResponses.length}
                       </span>
+                    </button>
+                    <button
+                      onClick={() => setDetailsSubTab('analysis')}
+                      className={`flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition-all ${
+                        detailsSubTab === 'analysis'
+                          ? 'border-[#003580] text-[#003580] bg-slate-50/50'
+                          : 'border-transparent text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      <BarChartIcon className="h-4 w-4" /> Per-question Analysis
                     </button>
                   </div>
 
@@ -1352,6 +1504,110 @@ export default function SurveyManagement() {
                       )}
                     </div>
                   )}
+
+                  {detailsSubTab === 'analysis' && (
+                    <div className="space-y-6">
+                      {surveyAnalysisLoading ? (
+                        <div className="p-8 text-center text-slate-500">Loading per-question analysis…</div>
+                      ) : !surveyAnalysis ? (
+                        <div className="p-8 text-center text-slate-400 rounded-lg border border-slate-100 bg-slate-50">
+                          Analysis data is unavailable for this survey.
+                        </div>
+                      ) : (
+                        <>
+                          <div className="grid gap-4 sm:grid-cols-3">
+                            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-sm">
+                              <div className="text-2xl font-bold text-slate-900">{surveyAnalysis.totalResponses ?? 0}</div>
+                              <div className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">Responses</div>
+                            </div>
+                            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-sm">
+                              <div className="text-2xl font-bold text-slate-900">{surveyAnalysis.totalAssignments ?? 0}</div>
+                              <div className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">Assigned</div>
+                            </div>
+                            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-sm">
+                              <div className="text-2xl font-bold text-slate-900">{surveyAnalysis.responseRate ?? 0}%</div>
+                              <div className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">Response Rate</div>
+                            </div>
+                          </div>
+
+                          {(surveyAnalysis.questionAnalytics || []).length === 0 ? (
+                            <div className="p-8 text-center text-slate-400 rounded-lg border border-slate-100 bg-slate-50">
+                              No questions or answers to analyze yet.
+                            </div>
+                          ) : (
+                            <div className="space-y-5">
+                              {(surveyAnalysis.questionAnalytics || []).map((qa: any, idx: number) => {
+                                const distEntries = Object.entries(qa.distribution || {}) as [string, number][];
+                                const maxCount = Math.max(1, ...distEntries.map(([, n]) => Number(n)));
+                                const chartData = distEntries
+                                  .sort((a, b) => Number(b[1]) - Number(a[1]))
+                                  .slice(0, 12)
+                                  .map(([label, count]) => ({
+                                    name: label.length > 28 ? `${label.slice(0, 25)}…` : label,
+                                    fullLabel: label,
+                                    count: Number(count),
+                                  }));
+
+                                return (
+                                  <div key={qa.questionId || idx} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                                    <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+                                      <div>
+                                        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                          Q{idx + 1} · {qa.questionType || 'TEXT'}
+                                        </div>
+                                        <h4 className="mt-1 text-sm font-semibold text-slate-900">{qa.questionText}</h4>
+                                      </div>
+                                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                                        {qa.totalAnswers ?? 0} answers
+                                      </span>
+                                    </div>
+
+                                    {chartData.length === 0 ? (
+                                      <p className="text-sm text-slate-400">No answers recorded for this question.</p>
+                                    ) : chartData.length <= 6 && maxCount < 50 ? (
+                                      <div className="space-y-2">
+                                        {chartData.map((row) => (
+                                          <div key={row.fullLabel} className="grid grid-cols-[minmax(0,1fr)_72px] items-center gap-3">
+                                            <div>
+                                              <div className="mb-1 truncate text-xs font-medium text-slate-600" title={row.fullLabel}>
+                                                {row.fullLabel}
+                                              </div>
+                                              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                                <div
+                                                  className="h-full rounded-full bg-[#003580]"
+                                                  style={{ width: `${Math.max(4, (row.count / maxCount) * 100)}%` }}
+                                                />
+                                              </div>
+                                            </div>
+                                            <div className="text-right text-sm font-semibold text-slate-800">{row.count}</div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <div className="h-56">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                          <RechartsBarChart data={chartData} layout="vertical" margin={{ left: 8, right: 16 }}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                                            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#64748B' }} />
+                                            <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 10, fill: '#64748B' }} />
+                                            <RechartsTooltip
+                                              formatter={(value: any) => [value, 'Answers']}
+                                              labelFormatter={(_, payload: any) => payload?.[0]?.payload?.fullLabel || ''}
+                                            />
+                                            <Bar dataKey="count" fill="#003580" radius={[0, 4, 4, 0]} />
+                                          </RechartsBarChart>
+                                        </ResponsiveContainer>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })()}
@@ -1361,7 +1617,7 @@ export default function SurveyManagement() {
 
       {(activeTab === 'create' || activeTab === 'edit') && (
         <div className="grid gap-6 xl:grid-cols-[360px_minmax(0,1fr)]">
-          <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-max">
+          <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] h-max">
             <h3 className="text-lg font-semibold text-slate-900 mb-4">Survey Details</h3>
             <div className="space-y-4">
               <label className="block space-y-2">
@@ -1417,7 +1673,7 @@ export default function SurveyManagement() {
             </div>
           </section>
 
-          <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-900">Survey Builder</h3>
               <button onClick={handleAddSection} className="inline-flex items-center gap-2 rounded-[8px] bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200">
@@ -1441,7 +1697,7 @@ export default function SurveyManagement() {
 
                   <div className="space-y-4">
                     {section.questions.map((q, qIdx) => (
-                      <div key={qIdx} className="rounded-[8px] border border-slate-200 bg-white p-4 shadow-sm">
+                      <div key={qIdx} className="rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="grid gap-4 md:grid-cols-[1fr_200px]">
                           <input value={q.questionText} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].questionText = e.target.value; setSections(up); }} className="w-full font-medium outline-none placeholder:text-slate-400" placeholder={`Question ${qIdx + 1} Text`} />
                           <select value={q.questionType} onChange={e => { const up = [...sections]; up[sIdx].questions[qIdx].questionType = e.target.value as QuestionType; setSections(up); }} className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm outline-none">
@@ -1604,7 +1860,7 @@ export default function SurveyManagement() {
                 const questionText = ans.question?.questionText || `Question ${aIdx + 1}`;
                 const questionType = ans.question?.questionType || 'TEXT';
                 return (
-                  <div key={ans.id || aIdx} className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+                  <div key={ans.id || aIdx} className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 p-4">
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-sm font-semibold text-slate-800">
                         {aIdx + 1}. {questionText}

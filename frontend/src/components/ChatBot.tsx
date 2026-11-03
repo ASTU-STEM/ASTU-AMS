@@ -596,7 +596,7 @@ export default function ASTUCareerCopilot() {
       {/* Floating Action Button with AI Badge */}
       <div
         style={{
-          position: "fixed", bottom: 24, right: 24, zIndex: 9999,
+          position: "fixed", bottom: 24, right: 24, zIndex: 45,
           display: "flex", alignItems: "center", gap: 8,
         }}
         className="group"
@@ -690,7 +690,7 @@ export default function ASTUCareerCopilot() {
         <div
           style={{
             position: "fixed",
-            bottom: 100, right: 24, zIndex: 9998,
+            bottom: 100, right: 24, zIndex: 45,
             width: 400, maxWidth: "calc(100vw - 48px)",
             height: isMinimized ? 68 : 560,
             maxHeight: "calc(100vh - 130px)",

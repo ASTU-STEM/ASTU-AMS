@@ -8,17 +8,32 @@ import React, {
 } from 'react';
 
 export type Theme = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
-const STORAGE_KEY = 'theme';
+const THEME_KEY = 'theme';
+const MODE_KEY = 'themeMode';
+
+function systemPrefersDark(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function resolveTheme(mode: ThemeMode): Theme {
+  if (mode === 'system') return systemPrefersDark() ? 'dark' : 'light';
+  return mode;
+}
+
+function readStoredMode(): ThemeMode {
+  if (typeof window === 'undefined') return 'light';
+  const mode = window.localStorage.getItem(MODE_KEY);
+  if (mode === 'light' || mode === 'dark' || mode === 'system') return mode;
+  const legacy = window.localStorage.getItem(THEME_KEY);
+  if (legacy === 'dark' || legacy === 'light') return legacy;
+  return 'system';
+}
 
 export function readStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === 'dark' || stored === 'light') return stored;
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark';
-  }
-  return 'light';
+  return resolveTheme(readStoredMode());
 }
 
 export function applyTheme(theme: Theme): void {
@@ -31,8 +46,10 @@ export function applyTheme(theme: Theme): void {
 
 interface ThemeContextValue {
   theme: Theme;
+  themeMode: ThemeMode;
   darkMode: boolean;
   setTheme: (theme: Theme) => void;
+  setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
 }
 
@@ -40,42 +57,78 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /**
  * Single source of truth for light/dark across public pages and every dashboard.
- * Mount once near the app root so toggles stay in sync (same tab + localStorage).
+ * Supports explicit light/dark plus system preference (used by System Settings).
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => readStoredTheme());
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(() => readStoredMode());
+  const [theme, setThemeState] = useState<Theme>(() => resolveTheme(readStoredMode()));
 
   useEffect(() => {
-    applyTheme(theme);
-    window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+    const resolved = resolveTheme(themeMode);
+    setThemeState(resolved);
+    applyTheme(resolved);
+    window.localStorage.setItem(MODE_KEY, themeMode);
+    window.localStorage.setItem(THEME_KEY, resolved);
+  }, [themeMode]);
+
+  useEffect(() => {
+    if (themeMode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      const resolved = resolveTheme('system');
+      setThemeState(resolved);
+      applyTheme(resolved);
+      window.localStorage.setItem(THEME_KEY, resolved);
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [themeMode]);
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === STORAGE_KEY) {
-        setThemeState(e.newValue === 'dark' ? 'dark' : 'light');
+      if (e.key === MODE_KEY) {
+        const next =
+          e.newValue === 'dark' || e.newValue === 'light' || e.newValue === 'system'
+            ? e.newValue
+            : 'light';
+        setThemeModeState(next);
+        return;
+      }
+      if (e.key === THEME_KEY && e.newValue === 'dark') {
+        setThemeModeState('dark');
+      } else if (e.key === THEME_KEY && e.newValue === 'light') {
+        setThemeModeState('light');
       }
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
+  const setThemeMode = useCallback((mode: ThemeMode) => {
+    setThemeModeState(mode);
+  }, []);
+
   const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
+    setThemeModeState(next);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setThemeModeState((prev) => {
+      const current = resolveTheme(prev);
+      return current === 'dark' ? 'light' : 'dark';
+    });
   }, []);
 
   const value = useMemo(
     () => ({
       theme,
+      themeMode,
       darkMode: theme === 'dark',
       setTheme,
+      setThemeMode,
       toggleTheme,
     }),
-    [theme, setTheme, toggleTheme]
+    [theme, themeMode, setTheme, setThemeMode, toggleTheme]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

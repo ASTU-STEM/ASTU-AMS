@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import apiClient from '../../../services/api';
 
 interface LogItem {
   id: string;
@@ -100,12 +101,10 @@ export default function IctUniversalLogsPage() {
   const [selectedDiffLog, setSelectedDiffLog] = useState<LogItem | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch('/api/admin/system-logs', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(d => {
+    apiClient
+      .get('/admin/logs')
+      .then((res) => {
+        const d = res.data;
         if (d.success && Array.isArray(d.data?.logs)) {
           const mapped: LogItem[] = d.data.logs.map((item: any, idx: number) => ({
             id: item.id || `LOG-${idx + 1}`,

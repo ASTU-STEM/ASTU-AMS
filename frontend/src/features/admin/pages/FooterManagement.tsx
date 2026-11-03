@@ -58,7 +58,7 @@ const initialSections: FooterSection[] = [
   { id: 'FS-04', title: 'Connect', links: [
     { id: 'FL-12', label: 'Contact Us', href: '#contact' },
     { id: 'FL-13', label: 'Photo Gallery', href: '#gallery' },
-    { id: 'FL-14', label: 'Community Feed', href: '#community' },
+    { id: 'FL-14', label: 'Community Feed', href: '/community' },
     { id: 'FL-15', label: 'Join Alumni', href: '/register' },
   ]},
 ];

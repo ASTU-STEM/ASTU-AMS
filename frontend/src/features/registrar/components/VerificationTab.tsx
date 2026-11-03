@@ -40,9 +40,9 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
     rejected: verifications.filter(v => getStatus(v.status) === 'REJECTED').length,
   }), [verifications]);
 
-  const handleAction = (id: string, status: 'APPROVED' | 'REJECTED', name: string) => {
+  const handleAction = (id: string, status: 'APPROVED' | 'REJECTED', _name: string) => {
     onVerify(id, status);
-    toast.success(`Registration request for ${name} marked as ${status.toLowerCase()}.`);
+    // Parent owns success/error toast after API resolve
     if (selectedVerification?.id === id) {
       setSelectedVerification(null);
     }
@@ -67,8 +67,7 @@ export const VerificationTab: React.FC<VerificationTabProps> = ({ verifications,
     } else {
       pendingList.forEach(v => onVerify(v.id, action));
     }
-    
-    toast.success(`Successfully ${action.toLowerCase()} ${ids.length} verification requests.`);
+    // Parent owns success/error toast after API resolve
     setConfirmModal(null);
   };
 

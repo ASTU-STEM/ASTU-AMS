@@ -8,7 +8,7 @@ export default function NotFoundPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="app-shell min-h-screen bg-surface dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200 flex flex-col">
+    <div className="app-shell min-h-screen bg-surface dark:bg-[var(--bg-page)] text-slate-800 dark:text-slate-100 transition-colors duration-200 flex flex-col">
       <Navbar />
       <div className="flex-1 flex items-center justify-center p-6 py-24">
         <div className="max-w-md rounded-2xl border border-outline-variant dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center shadow-sm dark:shadow-2xl transition-colors">

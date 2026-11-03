@@ -2,9 +2,20 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { Role } from '@prisma/client';
 import { SupportController } from './support.controller';
+import { authenticateJWT } from '../../../core/middleware/auth.middleware';
+import { requireRoles } from '../../../core/middleware/role.middleware';
 
 const router = Router();
+const adminSupportRoles = [
+  Role.SUPER_ADMIN,
+  Role.ADMIN,
+  Role.ALUMNI_OFFICE,
+  'SUPER_ADMIN',
+  'ADMIN',
+  'ALUMNI_OFFICE',
+];
 
 // Configure multer storage for support attachments
 const storage = multer.diskStorage({
@@ -32,10 +43,10 @@ const upload = multer({
 // Public / User ticket creation
 router.post('/tickets', upload.any(), SupportController.submitTicket);
 
-// Admin Ticket Management endpoints
-router.get('/tickets', SupportController.getTickets);
-router.get('/tickets/:id', SupportController.getTicketById);
-router.put('/tickets/:id/status', SupportController.updateTicketStatus);
-router.post('/tickets/:id/escalate', SupportController.escalateToIct);
+// Admin Ticket Management endpoints (JWT + admin roles required)
+router.get('/tickets', authenticateJWT, requireRoles(adminSupportRoles), SupportController.getTickets);
+router.get('/tickets/:id', authenticateJWT, requireRoles(adminSupportRoles), SupportController.getTicketById);
+router.put('/tickets/:id/status', authenticateJWT, requireRoles(adminSupportRoles), SupportController.updateTicketStatus);
+router.post('/tickets/:id/escalate', authenticateJWT, requireRoles(adminSupportRoles), SupportController.escalateToIct);
 
 export default router;

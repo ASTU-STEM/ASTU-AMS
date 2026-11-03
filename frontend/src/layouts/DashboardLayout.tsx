@@ -113,17 +113,17 @@ export function DashboardLayout({
   const sidebarDisplayCollapsed = sidebarCollapsed && !sidebarOpen;
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans">
+    <div className="flex h-dvh w-full overflow-hidden bg-[var(--bg-page)] text-[var(--text-primary)] antialiased font-sans">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" />
       )}
 
 {/* Sidebar Container */}
-       <aside className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-shrink-0 flex-col bg-white border-r border-slate-200 transition-all duration-300 lg:relative lg:z-20 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
+       <aside className={`fixed inset-y-0 left-0 z-50 flex h-dvh w-64 flex-shrink-0 flex-col bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] text-[var(--text-primary)] transition-all duration-300 lg:relative lg:z-20 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
          
          {/* Sidebar Header */}
-         <div className="p-4 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+         <div className="p-4 border-b border-[var(--border-color)] bg-[var(--bg-sidebar)] flex items-center justify-between flex-shrink-0">
            <Link to="/" className={`flex items-center ${sidebarDisplayCollapsed ? 'justify-center' : 'gap-3'}`}>
              <div className="bg-[#003366] p-2 rounded-xl text-white shadow-md flex-shrink-0">
                <GraduationCap className="h-5 w-5 text-[#FFCC00]" />
@@ -160,7 +160,7 @@ export function DashboardLayout({
          </nav>
 
          {/* Sidebar Footer */}
-         <div className="border-t border-slate-100 flex-shrink-0 p-4">
+         <div className="border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] flex-shrink-0 p-4">
            <button
              type="button"
              onClick={() => {
@@ -180,7 +180,7 @@ export function DashboardLayout({
        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
          
          {/* Clean Top Header Bar */}
-         <header className="bg-white h-16 border-b border-gray-200 flex items-center px-4 sm:px-6 justify-between flex-shrink-0 z-10">
+         <header className="bg-[var(--bg-navbar)] h-16 border-b border-[var(--border-color)] text-[var(--text-primary)] flex items-center px-4 sm:px-6 justify-between flex-shrink-0 z-10">
            <div className="flex items-center gap-4">
              {/* Mobile menu button */}
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl">
@@ -650,7 +650,7 @@ function AdminPageHero({
         <div className="max-w-md mx-auto space-y-2">
           <h3 className="text-lg font-bold text-slate-800">{title} Workspace</h3>
           <p className="text-xs text-slate-500 leading-relaxed">
-            This module is protected under the Root Admin security policies. Use this section to manage administrative data, monitor configurations, and update systems.
+            This module is protected under administrator security policies. Use this section to manage administrative data, monitor configurations, and update systems.
           </p>
         </div>
         <div className="pt-2">
@@ -705,7 +705,7 @@ function AdminPortal() {
   ];
 
   return (
-    <DashboardLayout title="Overarching Ecosystem Management Control Panel" role="Root Admin" navItems={navItems}>
+    <DashboardLayout title="Admin Control Panel" role="Administrator" navItems={navItems}>
       <Routes>
         <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
         <Route index element={<AdminDashboard />} />

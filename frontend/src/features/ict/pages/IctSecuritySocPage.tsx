@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BreakGlassModal, DangerousActionModal } from '../../../components/IctProtectionModals';
+import apiClient from '../../../services/api';
 
 interface OwaspItem {
   code: string;
@@ -130,12 +131,10 @@ export default function IctSecuritySocPage() {
   const [blacklistedIps, setBlacklistedIps] = useState<Array<{ ip: string; reason: string; added: string; count: number }>>([]);
 
   React.useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch('/api/admin/technical-ops/security', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(d => {
+    apiClient
+      .get('/admin/technical-ops/security')
+      .then((res) => {
+        const d = res.data;
         if (d.success && d.data) {
           if (d.data.currentThreatLevel) setThreatLevel(d.data.currentThreatLevel);
           if (Array.isArray(d.data.blacklistedIps)) setBlacklistedIps(d.data.blacklistedIps);

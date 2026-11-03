@@ -22,11 +22,19 @@ export class GetSidebarStats {
       unreadNotifications = await prisma.notification.count({ where: { isRead: false } });
     }
 
+    // 5. Support Desk (Open / in-progress tickets)
+    const openSupportTickets = await prisma.supportTicket.count({
+      where: {
+        status: { in: ['OPEN', 'IN_PROGRESS', 'PENDING_ICT_ADMIN'] },
+      },
+    });
+
     return {
       pendingVerifications,
       activeSurveys,
       activeJobs,
-      unreadNotifications
+      unreadNotifications,
+      openSupportTickets,
     };
   }
 }

@@ -25,7 +25,55 @@ export interface ExportReportOptions {
   reportType?: 'accreditation' | 'employment-analytics' | 'tracer-reports' | 'employer-feedback' | 'skill-gap' | 'curriculum';
 }
 
+export interface DepartmentStatsSummary {
+  totalAlumni: number;
+  employedAlumni: number;
+  employmentRate: number;
+}
+
+export interface DepartmentAlumniRecord {
+  id: string;
+  userId: string | null;
+  fullName: string;
+  graduationYear: number;
+  employmentStatus: string;
+}
+
+export interface DepartmentProfile {
+  id: string;
+  code: string;
+  name: string;
+}
+
 export const departmentService = {
+  // Department info for authenticated department head (my-department)
+  async getDepartmentProfile(departmentId?: string): Promise<DepartmentProfile> {
+    const url = departmentId ? `/departments/${departmentId}/profile` : '/departments/my-department';
+    const response = await api.get(url);
+    return response.data?.data || response.data;
+  },
+
+  // Department-scoped stats for the authenticated department head (my-stats)
+  async getDepartmentStats(departmentId?: string): Promise<DepartmentStatsSummary> {
+    const url = departmentId ? `/departments/${departmentId}/stats` : '/departments/my-stats';
+    const response = await api.get(url);
+    return response.data?.data || response.data;
+  },
+
+  // Department-scoped alumni records with employment status (my-alumni)
+  async getDepartmentAlumni(departmentId?: string): Promise<DepartmentAlumniRecord[]> {
+    const url = departmentId ? `/departments/${departmentId}/alumni` : '/departments/my-alumni';
+    const response = await api.get(url);
+    return response.data?.data || response.data || [];
+  },
+
+  // Department analytics
+  async getDepartmentAnalytics(departmentId?: string): Promise<any> {
+    const url = departmentId ? `/departments/${departmentId}/analytics` : '/departments/my-analytics';
+    const response = await api.get(url);
+    return response.data?.data || response.data;
+  },
+
   // Overview metrics from real backend endpoint
   async getOverview(filters?: Record<string, string>): Promise<any> {
     const response = await api.get('/department/overview', { params: filters });

@@ -4,14 +4,19 @@ import fs from 'fs';
 import path from 'path';
 
 // ─── In-memory dev DB helpers ───
-const DEV_DB_PATH = path.join(process.cwd(), 'data', 'dev-db.json');
-const CMS_CONTENT_PATH = path.join(process.cwd(), 'data', 'cms-content.json');
-
+const DEV_DB_PATH = process.env.NODE_ENV === 'test'
+  ? path.join(process.cwd(), 'data', 'test-db.json')
+  : path.join(process.cwd(), 'data', 'dev-db.json');
 function readDevDb(): any {
   let store: any = null;
   try {
     if (fs.existsSync(DEV_DB_PATH)) {
       store = JSON.parse(fs.readFileSync(DEV_DB_PATH, 'utf-8'));
+    } else if (process.env.NODE_ENV === 'test') {
+      const templatePath = path.join(process.cwd(), 'data', 'dev-db.json');
+      if (fs.existsSync(templatePath)) {
+        store = JSON.parse(fs.readFileSync(templatePath, 'utf-8'));
+      }
     }
   } catch { /* ignore */ }
   if (!store) {
@@ -31,35 +36,8 @@ function readDevDb(): any {
     };
   }
 
-  // Auto-bootstrap CMS items from cms-content.json if empty
-  if (!store.contentItems || store.contentItems.length === 0) {
-    try {
-      if (fs.existsSync(CMS_CONTENT_PATH)) {
-        const raw = JSON.parse(fs.readFileSync(CMS_CONTENT_PATH, 'utf-8'));
-        if (Array.isArray(raw)) {
-          const configItem = raw.find((i: any) => i.title === 'Homepage CMS Configuration');
-          // Seed the homepage only once. Re-seeding on every read silently
-          // overwrites CMS edits (including uploaded hero image URLs) whenever
-          // the legacy content collection is empty.
-          if (configItem && configItem.excerpt && (!store.homepageConfigs || store.homepageConfigs.length === 0)) {
-            try {
-              const parsed = typeof configItem.excerpt === 'string' ? JSON.parse(configItem.excerpt) : configItem.excerpt;
-              store.homepageConfigs = [{ id: 'hc-main', key: 'main', data: parsed, updatedAt: new Date().toISOString() }];
-            } catch { /* ignore */ }
-          }
-          store.contentItems = raw
-            .filter((i: any) => i.title !== 'Homepage CMS Configuration')
-            .map((i: any) => ({
-              ...i,
-              type: i.type?.toUpperCase() || 'POST',
-              status: i.status === 'Published' ? 'PUBLISHED' : i.status === 'Draft' ? 'DRAFT' : i.status === 'Needs Review' ? 'NEEDS_REVIEW' : i.status?.toUpperCase() || 'PUBLISHED',
-              createdAt: i.createdAt || new Date().toISOString(),
-              updatedAt: i.updatedAt || new Date().toISOString(),
-            }));
-        }
-      }
-    } catch { /* ignore fallback error */ }
-  }
+  // Do not auto-bootstrap CMS demo content from cms-content.json.
+  // Content is posted via the CMS only (post → test → clear).
 
   // Older dev-db.json snapshots may predate newer collections; make sure every
   // collection the fallback client touches exists so a read can never throw
@@ -70,10 +48,17 @@ function readDevDb(): any {
     'contentItems', 'mediaAssets', 'homepageConfigs', 'jobs', 'events', 'eventRSVPs',
     'surveys', 'surveyResponses', 'mentorships', 'communityMembers',
     'departmentHeadProfiles', 'verificationRequests', 'forumPosts', 'employerFeedbacks',
+    'donationCampaigns',
+    'contentTemplates',
+    'knowledgeDocuments', 'knowledgeChunks',
   ];
   for (const key of COLLECTIONS) {
     if (!Array.isArray(store[key])) store[key] = store[key] ?? [];
   }
+
+  // contentTemplates stay empty until created in CMS — no demo seed.
+
+  // donationCampaigns stay empty until created in CMS — no demo seed.
 
   return store;
 }
@@ -358,17 +343,27 @@ class FakePrisma {
       if (where?.name) return depts.find((d: any) => (d.name || '').toLowerCase() === String(where.name).toLowerCase()) || null;
       return null;
     },
-    findMany: async ({ orderBy, include }: any = {}) => {
+    findMany: async ({ orderBy, include, select }: any = {}) => {
       const store = readDevDb();
       const depts = store.departments || [];
       const alumniProfiles = store.alumniProfiles || [];
       const users = store.users || [];
+      const matchDept = (a: any, d: any) =>
+        a.departmentId === d.id ||
+        (d.code && a.departmentId?.toLowerCase().includes(d.code.toLowerCase())) ||
+        (d.code && a.studentId?.toLowerCase().includes('/' + d.code.toLowerCase() + '/')) ||
+        a.department === d.name;
+
       return depts.map((d: any) => {
+        const matchedProfiles = alumniProfiles.filter((a: any) => matchDept(a, d));
         const rec: any = {
           ...d,
           departmentHeadProfiles: d.departmentHeadProfiles || [],
-          _count: { alumniProfiles: alumniProfiles.filter((a: any) => a.departmentId === d.id).length },
+          _count: { alumniProfiles: matchedProfiles.length },
         };
+        if (include?.alumniProfiles || select?.alumniProfiles) {
+          rec.alumniProfiles = matchedProfiles;
+        }
         if (include?.departmentHeadProfiles?.include?.user) {
           rec.departmentHeadProfiles = (rec.departmentHeadProfiles || []).map((h: any) => ({
             ...h,
@@ -576,7 +571,7 @@ class FakePrisma {
           companyName: 'INSA Corporation',
           industry: 'Cybersecurity & Defense Tech',
           location: 'Addis Ababa, Ethiopia',
-          logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+          logoUrl: '/images/partners/insa.png',
           website: 'https://insa.gov.et'
         };
         return {
@@ -600,7 +595,7 @@ class FakePrisma {
         companyName: 'INSA Corporation',
         industry: 'Cybersecurity & Defense Tech',
         location: 'Addis Ababa, Ethiopia',
-        logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+        logoUrl: '/images/partners/insa.png',
         website: 'https://insa.gov.et'
       };
       return {
@@ -923,6 +918,163 @@ class FakePrisma {
         store.mediaAssets = store.mediaAssets.filter((m: any) => m.id !== where.id);
         writeDevDb(store);
       }
+      return {};
+    },
+  };
+
+
+  contentTemplate = {
+    findMany: async ({ where, orderBy }: any = {}) => {
+      const store = readDevDb();
+      let list = [...(store.contentTemplates || [])];
+      if (where?.category && where.category !== 'all' && where.category !== 'ALL') {
+        list = list.filter((t: any) => String(t.category).toLowerCase() === String(where.category).toLowerCase());
+      }
+      if (where?.isFeatured !== undefined) {
+        list = list.filter((t: any) => Boolean(t.isFeatured) === Boolean(where.isFeatured));
+      }
+      if (where?.search) {
+        const q = String(where.search).toLowerCase();
+        list = list.filter((t: any) =>
+          (t.name && t.name.toLowerCase().includes(q)) ||
+          (t.description && t.description.toLowerCase().includes(q)) ||
+          (t.category && t.category.toLowerCase().includes(q)) ||
+          (Array.isArray(t.fields) && t.fields.some((f: string) => f.toLowerCase().includes(q)))
+        );
+      }
+      // Sort: Featured first, then by usage descending
+      list.sort((a: any, b: any) => {
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        return (b.usage || 0) - (a.usage || 0);
+      });
+      return list;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.contentTemplates || []).find((t: any) => t.id === where?.id) || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let list = [...(store.contentTemplates || [])];
+      if (where?.category && where.category !== 'all' && where.category !== 'ALL') {
+        list = list.filter((t: any) => String(t.category).toLowerCase() === String(where.category).toLowerCase());
+      }
+      return list.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      store.contentTemplates = store.contentTemplates || [];
+      const rec = {
+        ...data,
+        id: data.id || `tpl-${Date.now()}`,
+        usage: Number(data.usage) || 0,
+        lastUpdated: data.lastUpdated || 'Just now',
+        isDefault: Boolean(data.isDefault),
+        isFeatured: Boolean(data.isFeatured),
+        fields: Array.isArray(data.fields) ? data.fields : [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      store.contentTemplates.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const list = store.contentTemplates || [];
+      const idx = list.findIndex((t: any) => t.id === where?.id);
+      if (idx === -1) throw new Error('Template not found');
+      list[idx] = {
+        ...list[idx],
+        ...data,
+        updatedAt: new Date().toISOString(),
+        lastUpdated: 'Just now',
+      };
+      store.contentTemplates = list;
+      writeDevDb(store);
+      return list[idx];
+    },
+    delete: async ({ where }: any) => {
+      const store = readDevDb();
+      store.contentTemplates = (store.contentTemplates || []).filter((t: any) => t.id !== where?.id);
+      writeDevDb(store);
+      return { success: true };
+    },
+    incrementUsage: async ({ where }: any) => {
+      const store = readDevDb();
+      const list = store.contentTemplates || [];
+      const idx = list.findIndex((t: any) => t.id === where?.id);
+      if (idx === -1) throw new Error('Template not found');
+      list[idx].usage = (Number(list[idx].usage) || 0) + 1;
+      list[idx].lastUpdated = 'Just now';
+      list[idx].updatedAt = new Date().toISOString();
+      store.contentTemplates = list;
+      writeDevDb(store);
+      return list[idx];
+    },
+  };
+
+  donationCampaign = {
+    findMany: async ({ where, orderBy }: any = {}) => {
+      const store = readDevDb();
+      let list = [...(store.donationCampaigns || [])];
+      if (where?.status && where.status !== 'ALL') {
+        list = list.filter((c: any) => c.status === where.status);
+      }
+      if (where?.category && where.category !== 'ALL') {
+        list = list.filter((c: any) => c.category === where.category);
+      }
+      return list;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.donationCampaigns || []).find((c: any) => c.id === where?.id) || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let list = store.donationCampaigns || [];
+      if (where?.status && where.status !== 'ALL') {
+        list = list.filter((c: any) => c.status === where.status);
+      }
+      return list.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `camp-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.donationCampaigns = store.donationCampaigns || [];
+      store.donationCampaigns.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    createMany: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const items = Array.isArray(data) ? data : [data];
+      const created = items.map((c: any) => ({
+        ...c,
+        id: c.id || `camp-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
+      store.donationCampaigns = store.donationCampaigns || [];
+      store.donationCampaigns.push(...created);
+      writeDevDb(store);
+      return { count: created.length };
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const list = store.donationCampaigns || [];
+      const idx = list.findIndex((c: any) => c.id === where?.id);
+      if (idx === -1) throw new Error('Campaign not found');
+      list[idx] = { ...list[idx], ...data, updatedAt: new Date().toISOString() };
+      store.donationCampaigns = list;
+      writeDevDb(store);
+      return list[idx];
+    },
+    delete: async ({ where }: any) => {
+      const store = readDevDb();
+      store.donationCampaigns = (store.donationCampaigns || []).filter((c: any) => c.id !== where?.id);
+      writeDevDb(store);
       return {};
     },
   };
@@ -1357,7 +1509,21 @@ const createSafeModel = (name: string) => {
       items.forEach(i => applyPrismaUpdate(i, data));
       return { count: items.length };
     },
-    deleteMany: async () => ({ count: 0 }),
+    deleteMany: async ({ where }: any = {}) => {
+      if (!where || Object.keys(where).length === 0) {
+        const count = store.length;
+        store.length = 0;
+        return { count };
+      }
+      let count = 0;
+      for (let i = store.length - 1; i >= 0; i -= 1) {
+        if (Object.entries(where).every(([k, v]) => store[i][k] === v)) {
+          store.splice(i, 1);
+          count += 1;
+        }
+      }
+      return { count };
+    },
     aggregate: async () => ({ _avg: { salary: 0, technicalSkill: 0, communicationSkill: 0, leadershipSkill: 0, teamworkSkill: 0, problemSolvingSkill: 0, innovationSkill: 0 }, _count: { id: store.length } }),
     groupBy: async () => [],
   };
