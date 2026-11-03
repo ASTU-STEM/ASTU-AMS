@@ -32,9 +32,11 @@ export default function IctForensicsAuditPage() {
     const fetchAuditLogs = async () => {
       try {
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        const res = await fetch('/api/admin/system-logs?limit=50', {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        let res = await fetch('/api/admin/logs?limit=50', { headers });
+        if (!res.ok && res.status === 404) {
+          res = await fetch('/api/admin/system-logs?limit=50', { headers });
+        }
         const data = await res.json();
         const rawLogs = data?.data?.logs || data?.data || data?.logs || [];
         if (Array.isArray(rawLogs) && rawLogs.length > 0) {

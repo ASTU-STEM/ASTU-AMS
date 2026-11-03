@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Heart,
@@ -149,7 +149,7 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
   return fallback;
 };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
       const [campaignsRes, donorsRes] = await Promise.all([
@@ -198,11 +198,11 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   useEffect(() => {
     if (showCreateModal || selectedDonor || showEditBannerModal) {

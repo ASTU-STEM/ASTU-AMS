@@ -83,1423 +83,32 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminStatCard from '../components/AdminStatCard';
 import AdminBadge from '../components/AdminBadge';
+import AdminSectionCard from '../components/AdminSectionCard';
+import AdminEmptyState from '../components/AdminEmptyState';
 import { adminService } from '../services/admin.service';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import ChartCard from './analytics/ChartCard';
+import LocationMap from './analytics/LocationMap';
+import AdvancedFiltersModal from './analytics/AdvancedFiltersModal';
+import ExportReportModal from './analytics/ExportReportModal';
+import PrintDashboardModal from './analytics/PrintDashboardModal';
+import EmploymentPlacementMatrix from './analytics/EmploymentPlacementMatrix';
+import {
+  AnalyticsPageTab,
+  ANALYTICS_PAGE_TABS,
+  AdvancedFilterState,
+  DEFAULT_FILTERS,
+  IncludedSuitesState,
+  DEFAULT_SUITES_SELECTION,
+  DepartmentFilter,
+  academicYears,
+  heatColor,
+} from './analytics/types';
+
+export * from './analytics/types';
+export { LocationMap, AdvancedFiltersModal, ExportReportModal, PrintDashboardModal, EmploymentPlacementMatrix };
+
+const SectionCard = AdminSectionCard;
 
-const CITY_COORDINATES: Record<string, [number, number]> = {
-  'addis ababa': [8.9806, 38.7578],
-  'adama': [8.5400, 39.2700],
-  'nazret': [8.5400, 39.2700],
-  'oromya/nekemte': [9.0833, 36.5500],
-  'nekemte': [9.0833, 36.5500],
-  'oromiya': [8.5400, 39.2700],
-  'hawassa': [7.0500, 38.4667],
-  'dire dawa': [9.6000, 41.8667],
-  'bahir dar': [11.5833, 37.3833],
-  'gondar': [12.6000, 37.4667],
-  'mekelle': [13.4967, 39.4769],
-  'jimma': [7.6667, 36.8333],
-  'bishoftu': [8.7500, 38.9833],
-  'ethiopian': [9.0000, 38.7500],
-  'ethiopia': [9.0000, 38.7500],
-  'remote': [8.9806, 38.7578],
-};
-
-function LocationMap({
-  locations,
-  className = 'h-full w-full min-h-[310px]',
-}: {
-  locations: Array<{ name: string; value: number; count: number; fill: string }>;
-  className?: string;
-}) {
-  const mapRef = React.useRef<HTMLDivElement>(null);
-  const mapInstanceRef = React.useRef<L.Map | null>(null);
-
-  React.useEffect(() => {
-    if (!mapRef.current) return;
-
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
-    }
-
-    const map = L.map(mapRef.current, {
-      center: [8.6, 38.9],
-      zoom: 6,
-      zoomControl: true,
-    });
-
-    const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19,
-    });
-
-    const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-      maxZoom: 18,
-    });
-
-    streetMap.addTo(map);
-
-    const baseMaps = {
-      'Map View': streetMap,
-      'Satellite View': satelliteMap,
-    };
-
-    L.control.layers(baseMaps, undefined, { position: 'topright' }).addTo(map);
-
-    mapInstanceRef.current = map;
-
-    const timer1 = setTimeout(() => map.invalidateSize(), 100);
-    const timer2 = setTimeout(() => map.invalidateSize(), 300);
-    const timer3 = setTimeout(() => map.invalidateSize(), 600);
-
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && mapRef.current) {
-      resizeObserver = new ResizeObserver(() => {
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.invalidateSize();
-        }
-      });
-      resizeObserver.observe(mapRef.current);
-    }
-
-    // Clear existing markers
-    map.eachLayer((layer) => {
-      if (layer instanceof L.CircleMarker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    // Add markers for database locations
-    locations.forEach((loc) => {
-      const key = loc.name.toLowerCase().trim();
-      const coords = CITY_COORDINATES[key] || [8.9806 + (Math.random() - 0.5) * 1.5, 38.7578 + (Math.random() - 0.5) * 1.5];
-
-      const marker = L.circleMarker(coords, {
-        radius: Math.max(9, Math.min(24, 9 + loc.value * 0.35)),
-        fillColor: loc.fill || '#003580',
-        color: '#ffffff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.85,
-      }).addTo(map);
-
-      marker.bindPopup(`
-        <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 130px;">
-          <strong style="font-size: 13px; color: #0f172a; display: block; margin-bottom: 2px;">${loc.name}</strong>
-          <div style="font-size: 11px; color: #475569;">Alumni Share: <strong style="color: #003580;">${loc.value}%</strong></div>
-          <div style="font-size: 10px; color: #64748b;">${loc.count || 1} alumni recorded</div>
-        </div>
-      `);
-    });
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-      }
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [locations]);
-
-  return <div ref={mapRef} className={`rounded-[10px] overflow-hidden border border-slate-200 ${className}`} />;
-}
-
-
-export type AnalyticsPageTab =
-  | 'overview'
-  | 'employment'
-  | 'skills'
-  | 'operations'
-  | 'innovation'
-  | 'geography'
-  | 'engagement'
-  | 'all';
-
-export interface TabConfig {
-  id: AnalyticsPageTab;
-  label: string;
-  shortLabel: string;
-  icon: any;
-  badge: string;
-  category: string;
-  description: string;
-}
-
-export const ANALYTICS_PAGE_TABS: TabConfig[] = [
-  {
-    id: 'overview',
-    label: 'Executive Overview',
-    shortLabel: 'Overview',
-    icon: BarChart3,
-    badge: 'Core KPIs',
-    category: 'High-Level Metrics',
-    description: 'High-level institutional outcomes, employment trajectories, 2027 AI predictive forecasts, and top hiring partners.',
-  },
-  {
-    id: 'employment',
-    label: 'Employment & Careers',
-    shortLabel: 'Employment',
-    icon: Briefcase,
-    badge: 'Trajectories',
-    category: 'Department & Compensation',
-    description: 'Department-level employment rates, multi-year performance matrix, salary tier distributions, and time-to-hire velocity.',
-  },
-  {
-    id: 'skills',
-    label: 'Skills & Employer Feedback',
-    shortLabel: 'Skills & Feedback',
-    icon: Award,
-    badge: 'Competencies',
-    category: 'Curriculum & Industry',
-    description: 'Spider radar competency scores, missing skill gap analysis, in-demand technical skills, and corporate partner ratings.',
-  },
-  {
-    id: 'operations',
-    label: 'Institutional SLA & Operations',
-    shortLabel: 'Operations & SLA',
-    icon: ShieldCheck,
-    badge: 'Registrar & Desk',
-    category: 'Administrative Telemetry',
-    description: 'Registrar student batch import telemetry, official document request SLA turnaround, support desk performance, and accreditation.',
-  },
-  {
-    id: 'innovation',
-    label: 'National Impact & Innovation',
-    shortLabel: 'Innovation',
-    icon: Sparkles,
-    badge: '50 Domains',
-    category: 'National STEM Strategy',
-    description: '50 modern out-of-the-box institutional innovation analyses, policy alignment radar, workforce velocity, and research migration.',
-  },
-  {
-    id: 'geography',
-    label: 'Geographic Mobility & Map',
-    shortLabel: 'Geography',
-    icon: MapPinned,
-    badge: 'Interactive Map',
-    category: 'Regional & Global',
-    description: 'Interactive geographic placement map across Ethiopian industrial hubs and global diaspora destinations.',
-  },
-  {
-    id: 'engagement',
-    label: 'Engagement, Mentorship & Giving',
-    shortLabel: 'Engagement',
-    icon: HeartHandshake,
-    badge: 'Community',
-    category: 'Alumni Network',
-    description: 'Alumni community financial giving campaigns, ROI multiplier, mentorship program velocity, forum sentiment, and network completeness.',
-  },
-  {
-    id: 'all',
-    label: 'All Modules (Audit View)',
-    shortLabel: 'All Modules',
-    icon: Layers,
-    badge: 'Comprehensive',
-    category: 'Full Institutional Audit',
-    description: 'Comprehensive single-scroll view of all 150+ metrics and suites, optimized for executive briefings, exports, and printing.',
-  },
-];
-
-export const getTabForIndicator = (category: string, id: string): AnalyticsPageTab => {
-  const cat = (category || '').toLowerCase();
-  const lowerId = (id || '').toLowerCase();
-  if (cat.includes('geographic') || cat.includes('mobility') || cat.includes('regional')) return 'geography';
-  if (cat.includes('skill') || cat.includes('competenc') || cat.includes('mou') || cat.includes('partner') || cat.includes('employer')) return 'skills';
-  if (cat.includes('sla') || cat.includes('registrar') || cat.includes('document') || cat.includes('support') || cat.includes('accreditation') || cat.includes('operations')) return 'operations';
-  if (cat.includes('mentorship') || cat.includes('giving') || cat.includes('donation') || cat.includes('forum') || cat.includes('community') || cat.includes('profile')) return 'engagement';
-  if (cat.includes('innovation') || cat.includes('policy') || cat.includes('patent') || cat.includes('research') || lowerId.startsWith('ind-')) return 'innovation';
-  if (cat.includes('employment') || cat.includes('salary') || cat.includes('cgpa') || cat.includes('matrix')) return 'employment';
-  return 'overview';
-};
-type DepartmentFilter = string;
-
-const generateAcademicYears = (): string[] => {
-  const years: string[] = ['All Time'];
-  const currentYear = new Date().getFullYear();
-  for (let y = currentYear + 1; y >= 2000; y--) {
-    const nextYY = String(y + 1).slice(-2);
-    years.push(`${y}-${nextYY}`);
-  }
-  return years;
-};
-
-const academicYears = generateAcademicYears();
-const exportOptions = ['PDF', 'Excel', 'CSV'];
-
-function heatColor(value: number) {
-  if (value >= 80) return 'bg-[#E24B4A] text-white';
-  if (value >= 65) return 'bg-[#EF9F27] text-white';
-  if (value >= 50) return 'bg-[#E8A020] text-white';
-  if (value >= 35) return 'bg-[#9ACD6B] text-white';
-  return 'bg-[#1D9E75] text-white';
-}
-
-function SectionCard({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="admin-card rounded-[10px] border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function ChartCard({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="admin-card rounded-[10px] border border-slate-200 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="mb-3">
-        <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-export interface AdvancedFilterState {
-  academicYear: string;
-  department: DepartmentFilter;
-  degreeLevel: string;
-  cgpaTier: string;
-  employmentStatus: string;
-  industrySector: string;
-  salaryTier: string;
-  workLocation: string;
-  verificationStatus: string;
-  hasResume: boolean;
-  hasLinkedIn: boolean;
-}
-
-const DEFAULT_FILTERS: AdvancedFilterState = {
-  academicYear: 'All Time',
-  department: 'All',
-  degreeLevel: 'All',
-  cgpaTier: 'All',
-  employmentStatus: 'All',
-  industrySector: 'All',
-  salaryTier: 'All',
-  workLocation: 'All',
-  verificationStatus: 'All',
-  hasResume: false,
-  hasLinkedIn: false,
-};
-
-function AdvancedFiltersModal({
-  isOpen,
-  onClose,
-  filters,
-  onApply,
-  onReset,
-  departments,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  filters: AdvancedFilterState;
-  onApply: (newFilters: AdvancedFilterState) => void;
-  onReset: () => void;
-  departments: string[];
-}) {
-  const [draft, setDraft] = useState<AdvancedFilterState>(filters);
-  const [activeTab, setActiveTab] = useState<'academic' | 'career' | 'profile'>('academic');
-
-  React.useEffect(() => {
-    setDraft(filters);
-  }, [filters, isOpen]);
-
-  if (!isOpen) return null;
-
-  const activeCount = Object.entries(draft).filter(([k, v]) => {
-    if (k === 'academicYear') return v !== 'All Time';
-    if (k === 'department') return v !== 'All';
-    if (typeof v === 'boolean') return v === true;
-    return v !== 'All';
-  }).length;
-
-  const applyPreset = (preset: 'all' | 'tech' | 'fresh' | 'verified' | 'high_salary') => {
-    if (preset === 'all') {
-      setDraft(DEFAULT_FILTERS);
-    } else if (preset === 'tech') {
-      setDraft({
-        ...DEFAULT_FILTERS,
-        department: 'Computer Science',
-        industrySector: 'Software & Technology',
-        degreeLevel: 'BSc',
-      });
-    } else if (preset === 'fresh') {
-      setDraft({
-        ...DEFAULT_FILTERS,
-        academicYear: '2024-25',
-        employmentStatus: 'Employed Full-Time',
-      });
-    } else if (preset === 'verified') {
-      setDraft({
-        ...DEFAULT_FILTERS,
-        verificationStatus: 'Verified Only',
-      });
-    } else if (preset === 'high_salary') {
-      setDraft({
-        ...DEFAULT_FILTERS,
-        salaryTier: '> 50,000 ETB',
-      });
-    }
-  };
-
-  return createPortal(
-    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-sm">
-              <SlidersHorizontal className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-slate-900">Advanced Analytics Filter Matrix</h3>
-                {activeCount > 0 && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-800 rounded-full">
-                    {activeCount} Active
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-slate-500">Refine institutional outcomes by academic, career, and verification parameters</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-all"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Quick Presets Toolbar */}
-        <div className="flex flex-wrap items-center gap-2 px-6 py-3 bg-slate-100/70 border-b border-slate-200 text-xs">
-          <span className="font-semibold text-slate-500 uppercase tracking-wider text-[11px] flex items-center gap-1">
-            <Zap className="w-3.5 h-3.5 text-amber-500" /> Presets:
-          </span>
-          <button
-            onClick={() => applyPreset('all')}
-            className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-600 font-medium hover:bg-slate-50 transition-all"
-          >
-            All Data
-          </button>
-          <button
-            onClick={() => applyPreset('tech')}
-            className="px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 font-medium hover:bg-blue-100 transition-all"
-          >
-            💻 Tech &amp; Software
-          </button>
-          <button
-            onClick={() => applyPreset('fresh')}
-            className="px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 font-medium hover:bg-emerald-100 transition-all"
-          >
-            🎓 Fresh Graduates (2024)
-          </button>
-          <button
-            onClick={() => applyPreset('verified')}
-            className="px-2.5 py-1 bg-violet-50 border border-violet-200 rounded-lg text-violet-700 font-medium hover:bg-violet-100 transition-all"
-          >
-            🛡️ Verified Alumni Only
-          </button>
-          <button
-            onClick={() => applyPreset('high_salary')}
-            className="px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 font-medium hover:bg-amber-100 transition-all"
-          >
-            💰 High Earners (&gt;50k ETB)
-          </button>
-        </div>
-
-        {/* Category Navigation Tabs */}
-        <div className="flex border-b border-slate-200 bg-white px-6">
-          <button
-            onClick={() => setActiveTab('academic')}
-            className={`flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-xs transition-all ${
-              activeTab === 'academic'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <GraduationCap className="w-4 h-4" /> Academic &amp; Graduation
-          </button>
-          <button
-            onClick={() => setActiveTab('career')}
-            className={`flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-xs transition-all ${
-              activeTab === 'career'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <Briefcase className="w-4 h-4" /> Career &amp; Employment
-          </button>
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 py-3 px-4 border-b-2 font-semibold text-xs transition-all ${
-              activeTab === 'profile'
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            <ShieldCheck className="w-4 h-4" /> Verification &amp; Profile
-          </button>
-        </div>
-
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {activeTab === 'academic' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                  <CalendarRange className="w-3.5 h-3.5 text-blue-600" /> Academic Batch / Year
-                </label>
-                <select
-                  value={draft.academicYear}
-                  onChange={(e) => setDraft({ ...draft, academicYear: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  {academicYears.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                  <School className="w-3.5 h-3.5 text-blue-600" /> Department / Specialization
-                </label>
-                <select
-                  value={draft.department}
-                  onChange={(e) => setDraft({ ...draft, department: e.target.value as DepartmentFilter })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="All">All Departments</option>
-                  {departments.map((dept) => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Degree Level</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['All', 'BSc', 'MSc', 'PhD'].map((deg) => (
-                    <button
-                      key={deg}
-                      type="button"
-                      onClick={() => setDraft({ ...draft, degreeLevel: deg })}
-                      className={`p-2 text-xs font-semibold rounded-lg border transition-all text-center ${
-                        draft.degreeLevel === deg
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {deg === 'All' ? 'All Degrees' : `${deg} Degree`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Graduation Distinction / CGPA Tier</label>
-                <select
-                  value={draft.cgpaTier}
-                  onChange={(e) => setDraft({ ...draft, cgpaTier: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="All">All GPA Categories</option>
-                  <option value="High (>=3.5)">Distinction / High Honors (&gt;= 3.50 CGPA)</option>
-                  <option value="Medium (3.0-3.49)">Upper Division (3.00 - 3.49 CGPA)</option>
-                  <option value="Standard (<3.0)">Standard Pass (&lt; 3.00 CGPA)</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'career' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Employment Status</label>
-                <select
-                  value={draft.employmentStatus}
-                  onChange={(e) => setDraft({ ...draft, employmentStatus: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="All">All Employment Statuses</option>
-                  <option value="Employed Full-Time">Employed Full-Time</option>
-                  <option value="Employed Part-Time">Employed Part-Time</option>
-                  <option value="Self-Employed / Founder">Self-Employed / Founder</option>
-                  <option value="Unemployed / Job Seeking">Unemployed / Job Seeking</option>
-                  <option value="Pursuing Higher Education">Pursuing Higher Education</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Industry / Economic Sector</label>
-                <select
-                  value={draft.industrySector}
-                  onChange={(e) => setDraft({ ...draft, industrySector: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="All">All Industry Sectors</option>
-                  <option value="Software & Technology">Software &amp; Technology</option>
-                  <option value="Telecommunications">Telecommunications</option>
-                  <option value="Construction & Civil">Construction &amp; Civil Engineering</option>
-                  <option value="Banking & Financial Services">Banking &amp; Financial Services</option>
-                  <option value="Government & Public Sector">Government &amp; Public Sector</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Monthly Compensation Bracket</label>
-                <select
-                  value={draft.salaryTier}
-                  onChange={(e) => setDraft({ ...draft, salaryTier: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="All">All Salary Brackets</option>
-                  <option value="< 15,000 ETB">&lt; 15,000 ETB / month</option>
-                  <option value="15k - 30k ETB">15,000 - 30,000 ETB / month</option>
-                  <option value="30k - 50k ETB">30,000 - 50,000 ETB / month</option>
-                  <option value="> 50,000 ETB">&gt; 50,000 ETB / month</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Primary Work Location</label>
-                <select
-                  value={draft.workLocation}
-                  onChange={(e) => setDraft({ ...draft, workLocation: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="All">All Geographical Locations</option>
-                  <option value="Addis Ababa">Addis Ababa Metropolitan</option>
-                  <option value="Adama">Adama / Oromia Region</option>
-                  <option value="Regional">Regional Cities (Hawassa, Bahir Dar, Mekelle)</option>
-                  <option value="International / Remote">International &amp; Remote Work</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'profile' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Alumni Verification Status</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: 'All', label: 'All Alumni' },
-                    { id: 'Verified Only', label: 'Verified Only' },
-                    { id: 'Pending / Unverified', label: 'Pending' },
-                  ].map((v) => (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => setDraft({ ...draft, verificationStatus: v.id })}
-                      className={`p-2 text-xs font-semibold rounded-lg border transition-all text-center ${
-                        draft.verificationStatus === v.id
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {v.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-3 pt-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block">Digital Profile Artifacts</label>
-                <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
-                  <input
-                    type="checkbox"
-                    checked={draft.hasResume}
-                    onChange={(e) => setDraft({ ...draft, hasResume: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500"
-                  />
-                  <div>
-                    <div className="text-xs font-bold text-slate-800">Has Uploaded Resume / CV</div>
-                    <div className="text-[11px] text-slate-500">Filter profiles with active PDF resume attachments</div>
-                  </div>
-                </label>
-
-                <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all">
-                  <input
-                    type="checkbox"
-                    checked={draft.hasLinkedIn}
-                    onChange={(e) => setDraft({ ...draft, hasLinkedIn: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500"
-                  />
-                  <div>
-                    <div className="text-xs font-bold text-slate-800">Has LinkedIn Profile URL</div>
-                    <div className="text-[11px] text-slate-500">Filter alumni with verified LinkedIn network links</div>
-                  </div>
-                </label>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Modal Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <button
-            type="button"
-            onClick={() => {
-              setDraft(DEFAULT_FILTERS);
-              onReset();
-            }}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all"
-          >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset All Filters
-          </button>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onApply(draft);
-                onClose();
-              }}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2"
-            >
-              <Check className="w-4 h-4" /> Apply Filter Matrix
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-export interface IncludedSuitesState {
-  kpi: boolean;
-  yoyForecast: boolean;
-  suite1: boolean;
-  suite2: boolean;
-  suite3: boolean;
-  suite4: boolean;
-  suite5: boolean;
-  suite6: boolean;
-  suite7: boolean;
-  suite8: boolean;
-  domain1: boolean;
-  domain2: boolean;
-  domain3: boolean;
-  domain4: boolean;
-  domain5: boolean;
-}
-
-export const DEFAULT_SUITES_SELECTION: IncludedSuitesState = {
-  kpi: true,
-  yoyForecast: true,
-  suite1: true,
-  suite2: true,
-  suite3: true,
-  suite4: true,
-  suite5: true,
-  suite6: true,
-  suite7: true,
-  suite8: true,
-  domain1: true,
-  domain2: true,
-  domain3: true,
-  domain4: true,
-  domain5: true,
-};
-
-const SUITES_METADATA = [
-  {
-    group: 'Executive Core Metrics',
-    items: [
-      { key: 'kpi', label: 'Executive KPI Cards & Totals', count: '4 Cards' },
-      { key: 'yoyForecast', label: 'YoY Rate Comparison & 2027 AI Predictive Forecast Model', count: 'Historical & Predictive' },
-    ],
-  },
-  {
-    group: '78 Report Center Analytics Suites (Suites 1–8)',
-    items: [
-      { key: 'suite1', label: 'Suite 1: University-Industry & Corporate MoU Analysis', count: '10 Analyses' },
-      { key: 'suite2', label: 'Suite 2: Multi-Year Department Performance Matrix', count: '10 Analyses' },
-      { key: 'suite3', label: 'Suite 3: Registrar Batch Import & Data Integrity Audit', count: '10 Analyses' },
-      { key: 'suite4', label: 'Suite 4: Document Request Fulfillment Response SLA', count: '10 Analyses' },
-      { key: 'suite5', label: 'Suite 5: Platform Active User Engagement & Account Audit', count: '10 Analyses' },
-      { key: 'suite6', label: 'Suite 6: Digital Profile & Identity Verification Suite', count: '10 Analyses' },
-      { key: 'suite7', label: 'Suite 7: Institutional SLA & Operations Suite', count: '10 Analyses' },
-      { key: 'suite8', label: 'Suite 8: Academic Performance & Degree Outcome Suite', count: '8 Analyses' },
-    ],
-  },
-  {
-    group: '50 Executive Innovation Domains (Out-of-the-Box Analyses)',
-    items: [
-      { key: 'domain1', label: 'Domain 1: National Economic & Strategic Impact Matrix', count: '10 Analyses' },
-      { key: 'domain2', label: 'Domain 2: Institutional Curriculum & Skills Readiness Radar', count: '10 Analyses' },
-      { key: 'domain3', label: 'Domain 3: Global Career & Postgraduate Mobility Trends', count: '10 Analyses' },
-      { key: 'domain4', label: 'Domain 4: Alumni Startup Ecosystem & Patent Velocity', count: '10 Analyses' },
-      { key: 'domain5', label: 'Domain 5: Industry Partnership & Internship Outcomes', count: '10 Analyses' },
-    ],
-  },
-];
-
-function ScopeSelectionGrid({
-  selectedSuites,
-  setSelectedSuites,
-}: {
-  selectedSuites: IncludedSuitesState;
-  setSelectedSuites: React.Dispatch<React.SetStateAction<IncludedSuitesState>>;
-}) {
-  const activeCount = Object.values(selectedSuites).filter(Boolean).length;
-
-  const applyPreset = (preset: 'all' | 'none' | '78only' | '50only' | 'kpionly') => {
-    if (preset === 'all') {
-      setSelectedSuites(DEFAULT_SUITES_SELECTION);
-    } else if (preset === 'none') {
-      setSelectedSuites({
-        kpi: false,
-        yoyForecast: false,
-        suite1: false,
-        suite2: false,
-        suite3: false,
-        suite4: false,
-        suite5: false,
-        suite6: false,
-        suite7: false,
-        suite8: false,
-        domain1: false,
-        domain2: false,
-        domain3: false,
-        domain4: false,
-        domain5: false,
-      });
-    } else if (preset === '78only') {
-      setSelectedSuites({
-        kpi: false,
-        yoyForecast: false,
-        suite1: true,
-        suite2: true,
-        suite3: true,
-        suite4: true,
-        suite5: true,
-        suite6: true,
-        suite7: true,
-        suite8: true,
-        domain1: false,
-        domain2: false,
-        domain3: false,
-        domain4: false,
-        domain5: false,
-      });
-    } else if (preset === '50only') {
-      setSelectedSuites({
-        kpi: false,
-        yoyForecast: false,
-        suite1: false,
-        suite2: false,
-        suite3: false,
-        suite4: false,
-        suite5: false,
-        suite6: false,
-        suite7: false,
-        suite8: false,
-        domain1: true,
-        domain2: true,
-        domain3: true,
-        domain4: true,
-        domain5: true,
-      });
-    } else if (preset === 'kpionly') {
-      setSelectedSuites({
-        kpi: true,
-        yoyForecast: true,
-        suite1: false,
-        suite2: false,
-        suite3: false,
-        suite4: false,
-        suite5: false,
-        suite6: false,
-        suite7: false,
-        suite8: false,
-        domain1: false,
-        domain2: false,
-        domain3: false,
-        domain4: false,
-        domain5: false,
-      });
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      {/* Presets Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-slate-100/80 border border-slate-200">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-          <Zap className="w-4 h-4 text-amber-500" />
-          <span>Quick Scope Presets:</span>
-          <span className="ml-1 px-2 py-0.5 text-[11px] font-extrabold bg-blue-600 text-white rounded-full">
-            {activeCount} of 15 Included
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => applyPreset('all')}
-            className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-bold transition-all"
-          >
-            Select All
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('78only')}
-            className="px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 hover:bg-blue-100 font-bold transition-all"
-          >
-            78 Report Center Suites Only
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('50only')}
-            className="px-2.5 py-1 bg-purple-50 border border-purple-200 rounded-lg text-purple-700 hover:bg-purple-100 font-bold transition-all"
-          >
-            50 Executive Domains Only
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('kpionly')}
-            className="px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 hover:bg-emerald-100 font-bold transition-all"
-          >
-            Core KPIs Only
-          </button>
-          <button
-            type="button"
-            onClick={() => applyPreset('none')}
-            className="px-2.5 py-1 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 hover:bg-rose-100 font-bold transition-all"
-          >
-            Clear All
-          </button>
-        </div>
-      </div>
-
-      {/* Categorized Checkbox List */}
-      <div className="space-y-4 max-h-[340px] overflow-y-auto pr-1">
-        {SUITES_METADATA.map((group) => (
-          <div key={group.group} className="space-y-2">
-            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
-              {group.group}
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {group.items.map((item) => {
-                const key = item.key as keyof IncludedSuitesState;
-                const isChecked = selectedSuites[key];
-                return (
-                  <label
-                    key={item.key}
-                    className={`flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
-                      isChecked
-                        ? 'border-blue-500 bg-blue-50/60 shadow-xs'
-                        : 'border-slate-200 bg-slate-50/40 hover:bg-slate-100/60 opacity-60'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={(e) =>
-                        setSelectedSuites((prev) => ({
-                          ...prev,
-                          [key]: e.target.checked,
-                        }))
-                      }
-                      className="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-500 mt-0.5"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-slate-900 leading-snug">{item.label}</div>
-                      <div className="text-[10px] text-slate-500 font-medium">{item.count}</div>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ExportReportModal({
-  isOpen,
-  onClose,
-  academicYear,
-  department,
-  reportData,
-  selectedSuites,
-  setSelectedSuites,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  academicYear: string;
-  department: string;
-  reportData: any;
-  selectedSuites: IncludedSuitesState;
-  setSelectedSuites: React.Dispatch<React.SetStateAction<IncludedSuitesState>>;
-}) {
-  const [selectedFormat, setSelectedFormat] = useState<'pdf' | 'excel' | 'csv' | 'json'>('pdf');
-  const [reportTitle, setReportTitle] = useState('ASTU Alumni Outcomes & Institutional Analytics Report');
-  const [includeLetterhead, setIncludeLetterhead] = useState(true);
-  const [watermark, setWatermark] = useState('CONFIDENTIAL - INTERNAL USE');
-  const [isExporting, setIsExporting] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  if (!isOpen) return null;
-
-  const handleExecuteExport = () => {
-    setIsExporting(true);
-    setProgress(30);
-
-    setTimeout(() => setProgress(75), 200);
-
-    setTimeout(() => {
-      setProgress(100);
-      setIsExporting(false);
-
-      if (selectedFormat === 'json') {
-        const filteredPayload: any = {
-          metadata: {
-            title: reportTitle,
-            academicYear,
-            department,
-            generatedAt: new Date().toISOString(),
-            includedSuites: selectedSuites,
-          },
-        };
-
-        if (selectedSuites.kpi) filteredPayload.overallEmployment = reportData?.overallEmployment;
-        if (selectedSuites.yoyForecast) filteredPayload.yoyTrend = reportData?.overallEmployment?.employmentTrend;
-        if (selectedSuites.suite1) filteredPayload.universityIndustryMoU = reportData?.universityIndustryMoU;
-        if (selectedSuites.suite2) filteredPayload.departmentPerformance = reportData?.departmentAnalytics;
-        if (selectedSuites.suite3) filteredPayload.registrarImportTelemetry = reportData?.registrarImportTelemetry;
-        if (selectedSuites.suite4) filteredPayload.documentRequestSLA = reportData?.documentRequestSLA;
-        if (selectedSuites.suite5) filteredPayload.platformUserEngagement = reportData?.platformUserEngagement;
-        if (selectedSuites.suite6) filteredPayload.verificationRatio = reportData?.verificationRatio;
-        if (selectedSuites.suite7) filteredPayload.systemHealthAndAI = reportData?.systemHealthAndAI;
-        if (selectedSuites.suite8) filteredPayload.academicPerformance = reportData?.academicPerformance;
-        if (selectedSuites.domain1) filteredPayload.additionalFiftyAnalyses = reportData?.additionalFiftyAnalyses;
-
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(filteredPayload, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `ASTU_Analytics_Selected_Suites_${academicYear.replace(/\s+/g, '_')}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-        onClose();
-      } else if (selectedFormat === 'csv' || selectedFormat === 'excel') {
-        let csvContent = "data:text/csv;charset=utf-8,Category,Metric,Details\n";
-        csvContent += `Metadata,Report Title,"${reportTitle}"\n`;
-        csvContent += `Metadata,Academic Year,"${academicYear}"\n`;
-        csvContent += `Metadata,Department Filter,"${department}"\n`;
-
-        if (selectedSuites.kpi) {
-          csvContent += `KPI,Overall Employment Rate,"${reportData?.overallEmployment?.employmentRate || 0}%"\n`;
-          csvContent += `KPI,Average Time to Hire,"${reportData?.overallEmployment?.averageTimeToHireMonths || 0} months"\n`;
-          csvContent += `KPI,Average Starting Salary,"${reportData?.overallEmployment?.averageSalary || 0} ETB/mo"\n`;
-        }
-
-        if (selectedSuites.suite2 && reportData?.departmentAnalytics?.departmentMetrics) {
-          csvContent += `\nDepartment Breakdown,Total Alumni,Employment Rate\n`;
-          reportData.departmentAnalytics.departmentMetrics.forEach((d: any) => {
-            csvContent += `Department,"${d.departmentName}",${d.totalAlumni},${d.employmentRate}%\n`;
-          });
-        }
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `ASTU_Analytics_${selectedFormat.toUpperCase()}_${academicYear.replace(/\s+/g, '_')}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        onClose();
-      } else {
-        // PDF Mode: CLOSE MODAL FIRST so backdrop is removed from DOM!
-        onClose();
-        setTimeout(() => {
-          window.print();
-        }, 200);
-      }
-    }, 400);
-  };
-
-  return createPortal(
-    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-[#003580]/10 p-1.5 border border-[#003580]/20 flex items-center justify-center">
-              <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-full w-full object-contain" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-900">ASTU Executive Report &amp; Data Export Suite</h3>
-              <p className="text-xs text-slate-500">Configure report scope, institutional branding, and download format</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-all"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Format Selector Grid */}
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
-              1. Select Export Format
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { id: 'pdf', title: 'PDF Executive', desc: 'Print-ready document', icon: FileText, color: 'text-rose-600 border-rose-200 bg-rose-50/50' },
-                { id: 'excel', title: 'Excel (.xlsx)', desc: 'Multi-sheet workbook', icon: FileSpreadsheet, color: 'text-emerald-600 border-emerald-200 bg-emerald-50/50' },
-                { id: 'csv', title: 'CSV Raw Data', desc: 'Tabular dataset', icon: FileCode, color: 'text-blue-600 border-blue-200 bg-blue-50/50' },
-                { id: 'json', title: 'JSON Payload', desc: 'Structured API JSON', icon: Share2, color: 'text-purple-600 border-purple-200 bg-purple-50/50' },
-              ].map((fmt) => {
-                const IconComp = fmt.icon;
-                const isSel = selectedFormat === fmt.id;
-                return (
-                  <button
-                    key={fmt.id}
-                    type="button"
-                    onClick={() => setSelectedFormat(fmt.id as any)}
-                    className={`p-3.5 rounded-xl border text-left transition-all ${
-                      isSel
-                        ? `ring-2 ring-blue-600 border-blue-600 bg-blue-50/80 shadow-sm`
-                        : 'border-slate-200 bg-white hover:bg-slate-50'
-                    }`}
-                  >
-                    <IconComp className={`w-6 h-6 mb-2 ${fmt.color.split(' ')[0]}`} />
-                    <div className="text-xs font-bold text-slate-900">{fmt.title}</div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">{fmt.desc}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Section Checklist Grid with Presets */}
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
-              2. Granular Report Scope &amp; Suite Inclusion
-            </label>
-            <ScopeSelectionGrid selectedSuites={selectedSuites} setSelectedSuites={setSelectedSuites} />
-          </div>
-
-          {/* Custom Settings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Custom Document Title</label>
-              <input
-                type="text"
-                value={reportTitle}
-                onChange={(e) => setReportTitle(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Document Watermark</label>
-              <select
-                value={watermark}
-                onChange={(e) => setWatermark(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-medium text-slate-800 outline-none focus:border-blue-500"
-              >
-                <option value="CONFIDENTIAL - INTERNAL USE">CONFIDENTIAL - INTERNAL USE</option>
-                <option value="OFFICIAL BOARD REPORT">OFFICIAL BOARD REPORT</option>
-                <option value="DRAFT - FOR REVIEW">DRAFT - FOR REVIEW</option>
-                <option value="NONE">No Watermark</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={includeLetterhead}
-              onChange={(e) => setIncludeLetterhead(e.target.checked)}
-              className="w-4 h-4 text-blue-600 rounded-sm"
-            />
-            <span className="text-xs font-semibold text-slate-600">Include ASTU Official Header &amp; Stamp</span>
-          </label>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleExecuteExport}
-              disabled={isExporting}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 disabled:opacity-50"
-            >
-              {isExporting ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" /> Compiling ({progress}%)...
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" /> Download Report ({selectedFormat.toUpperCase()})
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
-
-function PrintDashboardModal({
-  isOpen,
-  onClose,
-  academicYear,
-  department,
-  selectedSuites,
-  setSelectedSuites,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  academicYear: string;
-  department: string;
-  selectedSuites: IncludedSuitesState;
-  setSelectedSuites: React.Dispatch<React.SetStateAction<IncludedSuitesState>>;
-}) {
-  const [printMode, setPrintMode] = useState<'full' | 'summary' | 'charts' | 'tables'>('full');
-  const [orientation, setOrientation] = useState<'landscape' | 'portrait'>('landscape');
-  const [colorTheme, setColorTheme] = useState<'color' | 'eco'>('eco');
-  const [includeLetterhead, setIncludeLetterhead] = useState(true);
-
-  if (!isOpen) return null;
-
-  const activeCount = Object.values(selectedSuites).filter(Boolean).length;
-
-  const handleLaunchPrint = () => {
-    onClose();
-    setTimeout(() => {
-      window.print();
-    }, 150);
-  };
-
-  return createPortal(
-    <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative flex flex-col w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden my-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 shrink-0 rounded-xl bg-[#003580]/10 p-1.5 border border-[#003580]/20 flex items-center justify-center">
-              <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-full w-full object-contain" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-900">Print ASTU Executive Dashboard Setup</h3>
-              <p className="text-xs text-slate-500">Customize print orientation, YoY comparison scope, and ASTU letterhead</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-xl transition-all"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Print Mode */}
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
-              1. Print Content Mode
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { id: 'full', title: 'Full Dashboard', desc: 'All selected charts & tables' },
-                { id: 'summary', title: 'Executive Summary', desc: 'KPI cards & key charts' },
-                { id: 'charts', title: 'Charts Only', desc: 'Visual graphs only' },
-                { id: 'tables', title: 'Tables Only', desc: 'Auditing tabular data' },
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setPrintMode(m.id as any)}
-                  className={`p-3.5 rounded-xl border text-left transition-all ${
-                    printMode === m.id
-                      ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-600 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50'
-                  }`}
-                >
-                  <div className="text-xs font-bold text-slate-900">{m.title}</div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">{m.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Granular Suite Inclusion Selection */}
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block mb-3">
-              2. Select Analyses &amp; Suites to Print ({activeCount} of 15 Included)
-            </label>
-            <ScopeSelectionGrid selectedSuites={selectedSuites} setSelectedSuites={setSelectedSuites} />
-          </div>
-
-          {/* Orientation & Theme */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Page Orientation</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setOrientation('landscape')}
-                  className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                    orientation === 'landscape'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
-                  }`}
-                >
-                  ↔️ Landscape (Recommended)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOrientation('portrait')}
-                  className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                    orientation === 'portrait'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
-                  }`}
-                >
-                  ↕️ Portrait
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600">Color Palette Theme</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setColorTheme('eco')}
-                  className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                    colorTheme === 'eco'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
-                  }`}
-                >
-                  ⚪ High-Contrast Eco (Save Ink)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setColorTheme('color')}
-                  className={`p-3 rounded-xl border text-xs font-bold text-center transition-all ${
-                    colorTheme === 'color'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600'
-                  }`}
-                >
-                  🔵 Full Color Presentation
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Live Thumbnail Box */}
-          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
-            <div className="text-xs font-bold text-slate-700 flex items-center justify-between">
-              <span>Print Layout Live Preview</span>
-              <span className="text-[10px] text-slate-500 uppercase">{orientation} • {colorTheme} theme</span>
-            </div>
-            <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs space-y-2 text-[10px] text-slate-600 font-mono">
-              <div className="border-b pb-1 font-bold text-slate-900 flex justify-between">
-                <span>ADAMA SCIENCE AND TECHNOLOGY UNIVERSITY</span>
-                <span>ADMIN REPORT</span>
-              </div>
-              <div className="text-slate-500">Filter: {academicYear} | Department: {department}</div>
-              <div className="grid grid-cols-3 gap-1 py-1">
-                <div className="bg-slate-100 p-1 rounded text-center">KPI Metric 1</div>
-                <div className="bg-slate-100 p-1 rounded text-center">KPI Metric 2</div>
-                <div className="bg-slate-100 p-1 rounded text-center">KPI Metric 3</div>
-              </div>
-              <div className="bg-blue-50 p-2 rounded text-center text-blue-800 font-bold">
-                [ {activeCount} of 15 ANALYTICS MODULES INCLUDED FOR PRINT ]
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={includeLetterhead}
-              onChange={(e) => setIncludeLetterhead(e.target.checked)}
-              className="w-4 h-4 text-blue-600 rounded-sm"
-            />
-            <span className="text-xs font-semibold text-slate-600">Include Official ASTU Header &amp; Stamp</span>
-          </label>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleLaunchPrint}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2"
-            >
-              <Printer className="w-4 h-4" /> Launch Print Dialog ({activeCount} Suites)
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body
-  );
-}
 
 export default function AnalyticsOverview() {
   const location = useLocation();
@@ -1524,7 +133,7 @@ export default function AnalyticsOverview() {
         setActivePageTab(tabFromUrl);
       }
     }
-  }, [searchParams]);
+  }, [searchParams, activePageTab]);
 
   const handleTabChange = (newTab: AnalyticsPageTab) => {
     setActivePageTab(newTab);
@@ -1625,17 +234,28 @@ export default function AnalyticsOverview() {
     }
   }, [reportData]);
 
-  React.useEffect(() => {
-    const fetchAnalytics = async () => {
-      setIsLoading(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  const fetchAnalytics = React.useCallback(async () => {
+    setIsLoading(true);
+    setFetchError(null);
+    try {
       const result = await adminService.getAnalyticsReport({ academicYear, department });
       if (result.ok) {
         setReportData(result.data);
+      } else {
+        setFetchError(result.message || 'Failed to fetch analytics report from server.');
       }
+    } catch (err: any) {
+      setFetchError(err.message || 'Unexpected network error while retrieving analytics.');
+    } finally {
       setIsLoading(false);
-    };
-    fetchAnalytics();
+    }
   }, [academicYear, department]);
+
+  React.useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const hasBatchData = useMemo(() => {
     if (!reportData) return true;
@@ -2417,20 +1037,48 @@ export default function AnalyticsOverview() {
         )}
       </div>
 
+      {fetchError && reportData && (
+        <div className="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs text-rose-800 dark:text-rose-300">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+            <span>Server sync notice: {fetchError}. Displaying active snapshot data.</span>
+          </div>
+          <button
+            type="button"
+            onClick={fetchAnalytics}
+            className="font-bold underline hover:text-rose-950 dark:hover:text-rose-100 cursor-pointer"
+          >
+            Retry Sync
+          </button>
+        </div>
+      )}
+
+      {fetchError && !reportData && (
+        <AdminEmptyState
+          variant="error"
+          title="Unable to Load Analytics Warehouse"
+          description={fetchError}
+          actionLabel="Retry Analytics Sync"
+          onAction={fetchAnalytics}
+          className="my-6"
+        />
+      )}
+
       {!hasBatchData && (
-        <div className="bg-amber-50/90 border border-amber-200 rounded-[12px] p-8 text-center space-y-3 shadow-sm">
-          <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+        <div className="bg-amber-50/90 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-8 text-center space-y-3 shadow-xs">
+          <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto">
             <AlertCircle className="h-6 w-6" />
           </div>
-          <h3 className="text-base font-bold text-amber-900">
-            No Analysis is worked for this batch ({academicYear})
+          <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">
+            No Analysis available for batch ({academicYear})
           </h3>
-          <p className="text-xs text-amber-700 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs text-amber-700 dark:text-amber-300 max-w-md mx-auto leading-relaxed">
             No alumni graduation records or tracer survey responses have been registered for batch {academicYear} in PostgreSQL yet.
           </p>
           <button
+            type="button"
             onClick={() => setAcademicYear('All Time')}
-            className="px-4 py-2 bg-amber-800 text-white rounded-lg text-xs font-semibold hover:bg-amber-900 transition-all shadow-sm inline-flex items-center gap-1.5"
+            className="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-semibold transition-all shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Reset Filter to All Time
           </button>
@@ -2542,16 +1190,16 @@ export default function AnalyticsOverview() {
           <div className="lg:col-span-2 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5 font-bold text-slate-700">
+                <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200">
                   <span className="h-3 w-3 rounded-full bg-[#003580] inline-block"></span> Verified Historical Rate
                 </span>
-                <span className="flex items-center gap-1.5 font-bold text-purple-700">
+                <span className="flex items-center gap-1.5 font-bold text-purple-700 dark:text-purple-300">
                   <span className="h-3 w-3 rounded-full bg-[#8B5CF6] inline-block"></span>
-                  2027 AI Forecasted Rate
+                  2027 Statistical Projection (AI Heuristic)
                 </span>
               </div>
-              <div className="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
-                Historical Growth: +{yoyComparison.avgDelta}% / year avg
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
+                Historical Slope: +{yoyComparison.avgDelta}% / year avg
               </div>
             </div>
 
@@ -2563,7 +1211,7 @@ export default function AnalyticsOverview() {
                   <YAxis domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} unit="%" />
                   <Tooltip
                     formatter={(val: any, name: any, item: any) => [
-                      `${val}% ${item.payload.isForecast ? '(2027 AI Forecasted Rate)' : '(Verified Rate)'}`,
+                      `${val}% ${item.payload.isForecast ? '(Statistical Projection - Heuristic Estimate)' : '(Verified Rate)'}`,
                       'Employment Rate'
                     ]}
                   />
@@ -2583,9 +1231,9 @@ export default function AnalyticsOverview() {
             </div>
 
             {/* Historical Breakdown Table */}
-            <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     <th className="px-3.5 py-2.5">Graduation Batch</th>
                     <th className="px-3.5 py-2.5 text-right">Graduates</th>
@@ -2594,25 +1242,25 @@ export default function AnalyticsOverview() {
                     <th className="px-3.5 py-2.5 text-center">YoY Growth Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {yoyComparison.fullChartData.map((row: any) => (
-                    <tr key={row.year} className={`hover:bg-slate-50 transition-colors ${row.isForecast ? 'bg-purple-50/40 font-bold' : ''}`}>
-                      <td className="px-3.5 py-2.5 font-bold text-slate-900 flex items-center gap-1.5">
+                    <tr key={row.year} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${row.isForecast ? 'bg-purple-50/40 dark:bg-purple-950/20 font-bold' : ''}`}>
+                      <td className="px-3.5 py-2.5 font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                         {row.isForecast ? (
-                          <span className="flex items-center gap-1 text-purple-700">
-                            Class of {row.year} (AI Model)
+                          <span className="flex items-center gap-1 text-purple-700 dark:text-purple-300">
+                            Class of {row.year} (Projection)
                           </span>
                         ) : (
                           `Class of ${row.year}`
                         )}
                       </td>
-                      <td className="px-3.5 py-2.5 text-right text-slate-700">{row.count} grads</td>
-                      <td className="px-3.5 py-2.5 text-right font-semibold text-slate-800">{row.employed}</td>
-                      <td className="px-3.5 py-2.5 text-right font-extrabold text-[#003580]">{row.rate}%</td>
+                      <td className="px-3.5 py-2.5 text-right text-slate-700 dark:text-slate-300">{row.count} grads</td>
+                      <td className="px-3.5 py-2.5 text-right font-semibold text-slate-800 dark:text-slate-200">{row.employed}</td>
+                      <td className="px-3.5 py-2.5 text-right font-extrabold text-[#003580] dark:text-blue-400">{row.rate}%</td>
                       <td className="px-3.5 py-2.5 text-center">
                         {row.isForecast ? (
-                          <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-extrabold text-[10px] border border-purple-200">
-                            +{yoyComparison.avgDelta}% Projected
+                          <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 font-extrabold text-[10px] border border-purple-200 dark:border-purple-800">
+                            +{yoyComparison.avgDelta}% Projection
                           </span>
                         ) : (
                           <AdminBadge variant={row.rate >= yoyComparison.prevRate ? 'success' : 'warning'}>
@@ -2632,14 +1280,14 @@ export default function AnalyticsOverview() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold border border-purple-400/30">
-                  AI Outcome Predictor
+                  Statistical Model &bull; AI Projection
                 </span>
                 <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-8 w-8 object-contain opacity-80" />
               </div>
 
               <h3 className="mt-4 text-lg font-bold text-white">2027 Employment Rate Prediction</h3>
               <p className="mt-1 text-xs text-blue-200 leading-relaxed">
-                Forecasted graduate outcome model compiled from 4-year institutional trajectories and active corporate hiring pipelines.
+                Forecasted graduate outcome model compiled from 4-year institutional trajectories and active corporate hiring pipelines (statistical estimate based on historical slope).
               </p>
 
               <div className="mt-6 p-4 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
@@ -3018,166 +1666,23 @@ export default function AnalyticsOverview() {
           </section>
 
         <div className={!selectedSuites.suite2 ? 'print:hidden' : ''}>
-          <SectionCard
-            title="Multi-Year Department Detail Performance Matrix"
-            subtitle="Annual employment velocity, average starting salaries, and official document request volumes per academic department."
-          >
-            {/* Toolbar Filters & Per Page Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-xs">
-              <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-                <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 shadow-xs flex-1 max-w-xs focus-within:border-[#003580]">
-                  <Search className="h-3.5 w-3.5 text-slate-400" />
-                  <input
-                    type="text"
-                    value={matrixSearch}
-                    onChange={(e) => setMatrixSearch(e.target.value)}
-                    placeholder="Search department, year, rate..."
-                    className="w-full bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
-                  />
-                  {matrixSearch && (
-                    <button type="button" onClick={() => setMatrixSearch('')} className="text-slate-400 hover:text-slate-600">
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
-                </label>
-
-                {matrixDepartments.length > 2 && (
-                  <label className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-xs">
-                    <Filter className="h-3.5 w-3.5 text-[#003580]" />
-                    <select
-                      value={matrixDeptFilter}
-                      onChange={(e) => setMatrixDeptFilter(e.target.value)}
-                      className="bg-transparent font-medium text-slate-700 outline-none"
-                    >
-                      {matrixDepartments.map((d) => (
-                        <option key={d} value={d}>
-                          {d === 'All' ? 'All Departments' : d}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-
-                {matrixYears.length > 2 && (
-                  <label className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 shadow-xs">
-                    <CalendarRange className="h-3.5 w-3.5 text-slate-500" />
-                    <select
-                      value={matrixYearFilter}
-                      onChange={(e) => setMatrixYearFilter(e.target.value)}
-                      className="bg-transparent font-medium text-slate-700 outline-none"
-                    >
-                      {matrixYears.map((y) => (
-                        <option key={y} value={y}>
-                          {y === 'All' ? 'All Batch Years' : `Class of ${y}`}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-
-                {(matrixSearch || matrixDeptFilter !== 'All' || matrixYearFilter !== 'All') && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMatrixSearch('');
-                      setMatrixDeptFilter('All');
-                      setMatrixYearFilter('All');
-                    }}
-                    className="text-rose-600 font-semibold hover:underline flex items-center gap-1 text-[11px]"
-                  >
-                    <RotateCcw className="h-3 w-3" /> Reset
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-slate-500 font-semibold">Per Page:</span>
-                <select
-                  value={matrixLimit}
-                  onChange={(e) => {
-                    setMatrixLimit(e.target.value as any);
-                    setMatrixPage(1);
-                  }}
-                  className="rounded-md border border-slate-200 bg-white px-2.5 py-1 font-bold text-[#003580] outline-none shadow-xs"
-                >
-                  <option value="10">10 per page</option>
-                  <option value="25">25 per page</option>
-                  <option value="50">50 per page</option>
-                  <option value="100">100 per page</option>
-                  <option value="all">All ({filteredMatrixRecords.length} records)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-3">Department / Program</th>
-                      <th className="px-4 py-3 text-center">Batch Year</th>
-                      <th className="px-4 py-3 text-right">Graduates</th>
-                      <th className="px-4 py-3 text-right">Employment Rate</th>
-                      <th className="px-4 py-3 text-right">Avg Starting Salary</th>
-                      <th className="px-4 py-3 text-right">Doc Requests</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {paginatedMatrixRecords.length > 0 ? (
-                      paginatedMatrixRecords.map((row: any, idx: number) => (
-                        <tr key={`${row.department}-${row.year}-${idx}`} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 font-bold text-slate-900">{row.department}</td>
-                          <td className="px-4 py-3 text-center font-medium text-slate-600">Class of {row.year}</td>
-                          <td className="px-4 py-3 text-right text-slate-700">{row.totalGraduates} grads</td>
-                          <td className="px-4 py-3 text-right font-extrabold text-[#003580]">{row.employmentRate}%</td>
-                          <td className="px-4 py-3 text-right font-bold text-emerald-700">ETB {Number(row.avgSalary).toLocaleString()}</td>
-                          <td className="px-4 py-3 text-right text-slate-600">{row.docRequestsCount}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-slate-400 italic">
-                          No multi-year department performance records found matching active filter parameters.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Matrix Table Pagination Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
-                <div>
-                  Showing <span className="font-bold text-slate-900">{filteredMatrixRecords.length > 0 ? (matrixLimit === 'all' ? 1 : (matrixPage - 1) * parseInt(matrixLimit) + 1) : 0}</span> to{' '}
-                  <span className="font-bold text-slate-900">{matrixLimit === 'all' ? filteredMatrixRecords.length : Math.min(matrixPage * parseInt(matrixLimit), filteredMatrixRecords.length)}</span> of{' '}
-                  <span className="font-bold text-slate-900">{filteredMatrixRecords.length}</span> department year records
-                </div>
-                {matrixLimit !== 'all' && totalMatrixPages > 1 && (
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled={matrixPage === 1}
-                      onClick={() => setMatrixPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    >
-                      Previous
-                    </button>
-                    <span className="px-2 font-bold text-slate-800">
-                      Page {matrixPage} of {totalMatrixPages}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={matrixPage >= totalMatrixPages}
-                      onClick={() => setMatrixPage((p) => Math.min(totalMatrixPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </SectionCard>
+          <EmploymentPlacementMatrix
+            matrixSearch={matrixSearch}
+            setMatrixSearch={setMatrixSearch}
+            matrixDeptFilter={matrixDeptFilter}
+            setMatrixDeptFilter={setMatrixDeptFilter}
+            matrixYearFilter={matrixYearFilter}
+            setMatrixYearFilter={setMatrixYearFilter}
+            matrixLimit={matrixLimit}
+            setMatrixLimit={setMatrixLimit}
+            matrixPage={matrixPage}
+            setMatrixPage={setMatrixPage}
+            matrixDepartments={matrixDepartments}
+            matrixYears={matrixYears}
+            filteredMatrixRecords={filteredMatrixRecords}
+            paginatedMatrixRecords={paginatedMatrixRecords}
+            totalMatrixPages={totalMatrixPages}
+          />
         </div>
 
 

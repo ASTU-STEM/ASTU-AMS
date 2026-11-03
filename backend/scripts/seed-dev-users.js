@@ -63,6 +63,33 @@ const users = [
     updatedAt: new Date().toISOString()
   },
   {
+    id: 'user-dept-2',
+    email: 'depthead.ece@astu.edu.et',
+    password: defaultPasswordHash,
+    role: 'DEPARTMENT_HEAD',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'user-dept-3',
+    email: 'depthead.meg@astu.edu.et',
+    password: defaultPasswordHash,
+    role: 'DEPARTMENT_HEAD',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'user-dept-4',
+    email: 'depthead.cve@astu.edu.et',
+    password: defaultPasswordHash,
+    role: 'DEPARTMENT_HEAD',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
     id: 'test-employer-user-uuid',
     email: 'safaricom@mail.com',
     password: defaultPasswordHash,
@@ -83,6 +110,15 @@ const users = [
   {
     id: 'test-alumni-user-uuid',
     email: 'bob@alumni.com',
+    password: defaultPasswordHash,
+    role: 'ALUMNI',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: 'alice-alumni-user',
+    email: 'alice@alumni.com',
     password: defaultPasswordHash,
     role: 'ALUMNI',
     isActive: true,

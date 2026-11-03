@@ -71,16 +71,16 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
     return (sum / validGpas.length).toFixed(2);
   }, [graduates]);
 
-  const employmentRate = useMemo(() => {
+  const registeredCoverageRate = useMemo(() => {
     if (!graduates.length) return '0.0%';
-    const activeOrEmployed = graduates.filter(g => g.status === 'Active' || g.identityVerified).length;
-    return `${Math.round((activeOrEmployed / graduates.length) * 100)}%`;
+    const activeOrVerified = graduates.filter(g => g.status === 'Active' || g.identityVerified).length;
+    return `${Math.round((activeOrVerified / graduates.length) * 100)}%`;
   }, [graduates]);
 
   const departmentPerformance = useMemo(() => {
     const map = new Map<string, { count: number; sumCgpa: number }>();
     graduates.forEach(g => {
-      const dept = g.department || 'Software Engineering';
+      const dept = g.department && g.department !== '—' ? g.department : 'Unspecified';
       const cgpaVal = parseFloat(g.cgpa) || 0;
       if (!map.has(dept)) map.set(dept, { count: 0, sumCgpa: 0 });
       const entry = map.get(dept)!;
@@ -360,7 +360,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
             {[
               { label: 'Total Graduates Tracked', value: totalGrads.toLocaleString(), change: `Live Database`, trend: '✓' },
               { label: 'Average CGPA', value: avgCgpa, change: `Live Calculation`, trend: '↑' },
-              { label: 'Employment Rate', value: employmentRate, change: `Real-time`, trend: '↑' },
+              { label: 'Active / Verified Rate', value: registeredCoverageRate, change: `Roster-based`, trend: '↑' },
               { label: 'Data Exports Generated', value: exportLogs.length.toLocaleString(), change: 'Live Counter', trend: '↑' },
             ].map((kpi, i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-lg transition-all">
@@ -897,7 +897,7 @@ export const ReportingTab: React.FC<ReportingTabProps> = ({ graduates = [] }) =>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
               { label: 'Curriculum Alignment', value: `${departmentPerformance.length > 0 ? '94%' : '90%'}`, status: 'On Track', icon: 'school', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-              { label: 'Graduate Outcome Assessment', value: employmentRate, status: 'Live Database', icon: 'analytics', color: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: 'Active / Verified Coverage', value: registeredCoverageRate, status: 'Roster-based', icon: 'analytics', color: 'text-blue-600', bg: 'bg-blue-50' },
               { label: 'Verification Audit Trail', value: `${totalGrads} Grads`, status: '100% Verified', icon: 'verified_user', color: 'text-purple-600', bg: 'bg-purple-50' },
               { label: 'Continuous Improvement Docs', value: `${exportLogs.length + 8}`, status: 'Up to Date', icon: 'description', color: 'text-amber-600', bg: 'bg-amber-50' },
             ].map((item, i) => (

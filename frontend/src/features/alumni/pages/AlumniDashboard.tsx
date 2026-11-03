@@ -957,7 +957,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   ];
 
   return (
-    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="app-shell min-h-screen bg-[#0B0F19] font-['Inter',sans-serif] text-[#F1F5F9] antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -996,14 +996,14 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           type="button"
           aria-label="Close navigation"
           onClick={() => setMobileSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-sm md:hidden"
         />
       )}
 
-      {/* Premium Sidebar — theme-aware */}
-      <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-card)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-        {/* Sidebar Brand Header — every value comes from GET /admin/settings/public */}
-        <div className="relative z-10 px-4 py-4 border-b border-[var(--border-color)]">
+      {/* Premium Sidebar — Enterprise Dark */}
+      <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-[#080D18] border-r border-[#2A3749] text-[#F1F5F9] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+        {/* Sidebar Brand Header */}
+        <div className="relative z-10 px-4 py-4 border-b border-[#2A3749] bg-[#080D18]">
           <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
             {brandLogo ? (
               <div className="relative shrink-0 flex items-center justify-center h-10 w-10">
@@ -1014,14 +1014,14 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 />
               </div>
             ) : brandMonogram ? (
-              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[#003366] text-white text-[11px] font-extrabold tracking-tight">
+              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] text-[11px] font-extrabold tracking-tight">
                 {brandMonogram}
               </div>
             ) : null}
             {!sidebarCollapsed && (brandName || brandTagline) && (
               <div className="min-w-0">
-                {brandName && <h1 className="text-base font-bold text-[var(--text-primary)] tracking-tight truncate">{brandName}</h1>}
-                {brandTagline && <p className="text-[9px] text-emerald-600 dark:text-emerald-400 uppercase tracking-widest font-extrabold truncate">{brandTagline}</p>}
+                {brandName && <h1 className="text-base font-bold text-[#F1F5F9] tracking-tight truncate">{brandName}</h1>}
+                {brandTagline && <p className="text-[9px] text-[#22D3EE] uppercase tracking-widest font-extrabold truncate">{brandTagline}</p>}
               </div>
             )}
           </div>
@@ -1033,7 +1033,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           <div>
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-3 mb-2">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Recruiting & Career</p>
+                <p className="text-[9px] font-extrabold text-[#8493A8] uppercase tracking-widest">Recruiting & Career</p>
               </div>
             )}
             <div className="space-y-1">
@@ -1042,24 +1042,24 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
                     } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                      ? 'bg-[#2196F3] text-white font-bold shadow-md'
+                      : 'text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B]'
                     }`}
                 >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white shadow-xs' : 'bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white group-hover:border-[#2196F3]'
                     }`}>
                     <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
                   </span>
                   {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
                   {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-[#3B1A22] text-[#F87171] border border-[#71313A]">
                       {item.badge}
                     </span>
                   )}
                   {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-white shrink-0"></div>
                   )}
                 </button>
               ))}
@@ -1070,7 +1070,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           <div>
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-3 mb-2 pt-1">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Community</p>
+                <p className="text-[9px] font-extrabold text-[#8493A8] uppercase tracking-widest">Community</p>
               </div>
             )}
             <div className="space-y-1">
@@ -1079,19 +1079,19 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
                     } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                      ? 'bg-[#2196F3] text-white font-bold shadow-md'
+                      : 'text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B]'
                     }`}
                 >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white shadow-xs' : 'bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white group-hover:border-[#2196F3]'
                     }`}>
                     <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
                   </span>
                   {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
                   {activeTab === item.id && !sidebarCollapsed && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-white shrink-0"></div>
                   )}
                 </button>
               ))}
@@ -1102,7 +1102,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           <div>
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-3 mb-2 pt-1">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Services</p>
+                <p className="text-[9px] font-extrabold text-[#8493A8] uppercase tracking-widest">Services</p>
               </div>
             )}
             <div className="space-y-1">
@@ -1111,24 +1111,24 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
                     } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                      ? 'bg-[#2196F3] text-white font-bold shadow-md'
+                      : 'text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B]'
                     }`}
                 >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white shadow-xs' : 'bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white group-hover:border-[#2196F3]'
                     }`}>
                     <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
                   </span>
                   {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
                   {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-[#3B1A22] text-[#F87171] border border-[#71313A]">
                       {item.badge}
                     </span>
                   )}
                   {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-white shrink-0"></div>
                   )}
                 </button>
               ))}
@@ -1137,32 +1137,32 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="relative z-10 p-3 border-t border-slate-100 space-y-1">
+        <div className="relative z-10 p-3 border-t border-[#2A3749] bg-[#080D18] space-y-1">
           <button
             type="button"
             onClick={() => {
               toggleTheme();
               toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
             }}
-            className={`w-full flex items-center rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-[#B0BDCE] hover:bg-[#151D2B] hover:text-[#F1F5F9] transition-all cursor-pointer ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
               }`}
             title={sidebarCollapsed ? (darkMode ? 'Light Mode' : 'Dark Mode') : undefined}
           >
-            {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-500 shrink-0" /> : <Moon className="h-4.5 w-4.5 text-slate-600 shrink-0" />}
+            {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-400 shrink-0" /> : <Moon className="h-4.5 w-4.5 text-[#22D3EE] shrink-0" />}
             {!sidebarCollapsed && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
           </button>
           <button
             onClick={() => setHelpOpen(true)}
-            className={`w-full flex items-center rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-[#B0BDCE] hover:bg-[#151D2B] hover:text-[#F1F5F9] transition-all cursor-pointer ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
               }`}
             title={sidebarCollapsed ? 'Help Center' : undefined}
           >
-            <HelpCircle className="h-4.5 w-4.5 text-[#003366] shrink-0" />
+            <HelpCircle className="h-4.5 w-4.5 text-[#22D3EE] shrink-0" />
             {!sidebarCollapsed && <span>Help Center</span>}
           </button>
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center rounded-xl text-sm font-medium text-rose-600 hover:bg-rose-50 transition-all ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-[#F87171] hover:bg-[#3B1A22] transition-all cursor-pointer ${sidebarCollapsed ? 'justify-center py-2.5' : 'gap-3 py-2 px-3'
               }`}
             title={sidebarCollapsed ? 'Logout' : undefined}
           >
@@ -1173,40 +1173,35 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
       </aside>
 
       {/* Main Content Area */}
-      <div className={`app-shell min-h-screen flex flex-col bg-[#f8fafc] dark:bg-slate-950 transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-        {/* Enhanced Header with Glass Effect */}
+      <div className={`app-shell min-h-screen flex flex-col bg-[#0B0F19] text-[#F1F5F9] transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+        {/* Enhanced Header with Enterprise Dark styling */}
         <header
-          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 shrink-0"
-          style={{
-            background: 'var(--bg-navbar)',
-            borderColor: 'var(--border-color)',
-          }}
+          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#2A3749] bg-[#101725] px-4 shadow-sm sm:px-6 shrink-0 text-[#F1F5F9]"
         >
           <div className="flex min-w-0 items-center gap-3">
             <button type="button" onClick={() => setSidebarCollapsed((v) => !v)}
-              className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:inline-flex"
+              className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] md:inline-flex cursor-pointer"
               title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
               <Menu className="h-5 w-5" />
             </button>
             <button type="button" onClick={() => { setSidebarCollapsed(false); setMobileSidebarOpen(true); }}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 md:hidden" aria-label="Open navigation">
+              className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] md:hidden cursor-pointer" aria-label="Open navigation">
               <Menu className="h-5 w-5" />
             </button>
             <div className="min-w-0">
-              <h1 className="truncate text-[16px] font-bold tracking-tight text-[var(--text-primary)]">
+              <h1 className="truncate text-[16px] font-bold tracking-tight text-[#F1F5F9]">
                 {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <label className="group hidden h-11 w-full max-w-[300px] xl:max-w-[400px] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
-              style={{ borderColor: 'var(--border-color)' }}>
-              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
+            <label className="group hidden h-11 w-full max-w-[300px] xl:max-w-[400px] items-center rounded-xl border border-[#2A3749] bg-[#151D2B] px-3 text-sm transition-all duration-200 md:flex focus-within:border-[#2196F3] focus-within:ring-2 focus-within:ring-[#2196F3]/20">
+              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8493A8]">
                 <Search className="h-4.5 w-4.5 flex-none" />
               </span>
               <input type="text" placeholder="Search alumni, companies, or mentors..."
-                className="w-full bg-transparent outline-none placeholder:text-[#7C879D] dark:placeholder:text-[#97A0B8]"
+                className="w-full bg-transparent outline-none placeholder:text-[#8493A8] text-[#F1F5F9]"
                 onChange={(e) => { if (activeTab === 'dashboard' && e.target.value.trim().length > 1) setActiveTab('jobs'); }} />
             </label>
 
@@ -1216,35 +1211,35 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 toggleTheme();
                 toast.success(darkMode ? 'Light theme activated' : 'Dark theme activated');
               }}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)] transition-colors"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] text-[#B0BDCE] hover:bg-[#151D2B] hover:text-[#F1F5F9] transition-colors cursor-pointer"
               aria-label="Toggle dark mode"
               title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-400" /> : <Moon className="h-4.5 w-4.5 text-slate-600 dark:text-slate-300" />}
+              {darkMode ? <Sun className="h-4.5 w-4.5 text-amber-400" /> : <Moon className="h-4.5 w-4.5 text-[#22D3EE]" />}
             </button>
 
             <div className="relative shrink-0" data-admin-notifications>
               <button type="button" onClick={() => setNotificationOpen((v) => !v)}
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5">
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] cursor-pointer">
                 <Bell className="h-4 w-4" />
                 {unreadNotificationsCount > 0 && (
-                  <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white">{unreadNotificationsCount}</span>
+                  <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#F87171] text-[9px] font-semibold leading-none text-white">{unreadNotificationsCount}</span>
                 )}
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-                  <div className="border-b border-[var(--border-color)] px-4 py-3">
+                <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#2A3749] bg-[#151D2B] shadow-2xl text-[#F1F5F9]">
+                  <div className="border-b border-[#2A3749] px-4 py-3 bg-[#1B2636]">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-sm font-semibold text-[var(--text-primary)]">Notifications</div>
-                        <div className="text-xs text-[var(--text-secondary)]">Recent updates</div>
+                        <div className="text-sm font-semibold text-[#F1F5F9]">Notifications</div>
+                        <div className="text-xs text-[#B0BDCE]">Recent updates</div>
                       </div>
                       <button
                         onClick={async () => {
                           await handleMarkNotificationsRead();
                           toast.success('All notifications marked as read.');
                         }}
-                        className="text-xs font-semibold text-[#E24B4A] hover:underline"
+                        className="text-xs font-semibold text-[#F87171] hover:underline cursor-pointer"
                       >
                         Mark All as Read
                       </button>
@@ -1261,13 +1256,13 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                           setNotificationOpen(false);
                           setSelectedNotificationDetail(n);
                         }}
-                        className="flex cursor-pointer items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-black/5"
+                        className="flex cursor-pointer items-start gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-[#202E40]"
                       >
-                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
+                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${n.unread ? 'bg-[#2196F3]' : 'bg-[#2A3749]'}`} />
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">{n.title || 'Notification'}</p>
-                          <p className="text-xs text-[var(--text-secondary)] line-clamp-2">{n.text}</p>
-                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{n.time}</p>
+                          <p className="text-xs font-bold text-[#F1F5F9] truncate">{n.title || 'Notification'}</p>
+                          <p className="text-xs text-[#B0BDCE] line-clamp-2">{n.text}</p>
+                          <p className="text-[10px] text-[#8493A8] mt-0.5">{n.time}</p>
                         </div>
                         <button
                           type="button"
@@ -1275,22 +1270,22 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                             e.stopPropagation();
                             await handleClearNotification(n.id);
                           }}
-                          className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="shrink-0 text-[#8493A8] hover:text-[#F1F5F9] p-1 rounded hover:bg-[#1B2636]"
                           title="Mark as read"
                         >
                           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                       </div>
-                    )) : <p className="px-2 py-6 text-center text-sm text-[var(--text-secondary)]">No notifications</p>}
+                    )) : <p className="px-2 py-6 text-center text-sm text-[#8493A8]">No notifications</p>}
                   </div>
-                  <div className="border-t border-[var(--border-color)] px-4 py-3">
+                  <div className="border-t border-[#2A3749] px-4 py-3 bg-[#1B2636]">
                     <button
                       type="button"
                       onClick={() => {
                         setNotificationOpen(false);
                         setShowAllNotificationsModal(true);
                       }}
-                      className="text-sm font-semibold text-[#003580] hover:underline"
+                      className="text-sm font-semibold text-[#22D3EE] hover:underline cursor-pointer"
                     >
                       View all →
                     </button>

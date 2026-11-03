@@ -361,6 +361,23 @@ export const authService = {
     }
   },
 
+  // ==================== ALUMNI ACCOUNT ACTIVATION ====================
+  async activateAlumni(data: { token: string; password: string }): Promise<ApiResult<{ success: boolean; message: string }>> {
+    try {
+      const response = await apiClient.post<AuthResponse>('/auth/activate-alumni', data);
+      if (response.data.success) {
+        return { ok: true, data: { success: true, message: response.data.message || 'Account activated successfully!' } };
+      }
+      return { ok: false, errorCode: 'ACTIVATION_FAILED', message: response.data.message || 'Failed to activate account.' };
+    } catch (error) {
+      let message = 'An unexpected error occurred during activation.';
+      if (axios.isAxiosError(error) && error.response?.data) {
+        message = (error.response.data as any).message || message;
+      }
+      return { ok: false, errorCode: 'ACTIVATION_ERROR', message };
+    }
+  },
+
   // ==================== OTP VERIFICATION ====================
   async verifyOtp(studentId: string, otp: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {

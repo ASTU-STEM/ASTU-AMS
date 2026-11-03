@@ -62,6 +62,7 @@ router.delete('/jobs/:id', requirePermission('approve_jobs'), adminController.de
 
 // System Logs
 router.get('/logs', requirePermission('view_universal_logs'), adminController.getLogs);
+router.get('/system-logs', requirePermission('view_universal_logs'), adminController.getLogs);
 router.get('/logs/stats', adminController.getLogStats);
 
 // Notifications

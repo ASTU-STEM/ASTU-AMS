@@ -186,26 +186,35 @@ async function main() {
     },
   });
 
-  // SWE Department Head
-  const deptHeadUser = await prisma.user.upsert({
-    where: { email: 'depthead.swe@astu.edu.et' },
-    update: { isActive: true },
-    create: {
-      email: 'depthead.swe@astu.edu.et',
-      password: defaultPassword,
-      role: Role.DEPARTMENT_HEAD,
-      isActive: true,
-    },
-  });
+  // Academic Department Heads
+  const deptHeads = [
+    { email: 'depthead.swe@astu.edu.et', deptId: swe.id, name: 'Software Engineering' },
+    { email: 'depthead.ece@astu.edu.et', deptId: ece.id, name: 'Electrical and Computer Engineering' },
+    { email: 'depthead.meg@astu.edu.et', deptId: meg.id, name: 'Mechanical Engineering' },
+    { email: 'depthead.cve@astu.edu.et', deptId: cve.id, name: 'Civil Engineering' },
+  ];
 
-  await prisma.departmentHeadProfile.upsert({
-    where: { userId: deptHeadUser.id },
-    update: { departmentId: swe.id },
-    create: {
-      userId: deptHeadUser.id,
-      departmentId: swe.id,
-    },
-  });
+  for (const dh of deptHeads) {
+    const dhUser = await prisma.user.upsert({
+      where: { email: dh.email },
+      update: { isActive: true },
+      create: {
+        email: dh.email,
+        password: defaultPassword,
+        role: Role.DEPARTMENT_HEAD,
+        isActive: true,
+      },
+    });
+
+    await prisma.departmentHeadProfile.upsert({
+      where: { userId: dhUser.id },
+      update: { departmentId: dh.deptId },
+      create: {
+        userId: dhUser.id,
+        departmentId: dh.deptId,
+      },
+    });
+  }
 
   // 3. Create active mock Employer
   console.log('Creating mock employer Safaricom...');

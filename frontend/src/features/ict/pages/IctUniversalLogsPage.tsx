@@ -101,13 +101,19 @@ export default function IctUniversalLogsPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-    fetch('/api/admin/system-logs', {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    fetch('/api/admin/logs', { headers })
+      .then(r => {
+        if (!r.ok && r.status === 404) {
+          return fetch('/api/admin/system-logs', { headers });
+        }
+        return r;
+      })
       .then(r => r.json())
       .then(d => {
-        if (d.success && Array.isArray(d.data?.logs)) {
-          const mapped: LogItem[] = d.data.logs.map((item: any, idx: number) => ({
+        const rawLogs = d.data?.logs || d.data || d.logs;
+        if (Array.isArray(rawLogs)) {
+          const mapped: LogItem[] = rawLogs.map((item: any, idx: number) => ({
             id: item.id || `LOG-${idx + 1}`,
             timestamp: item.timestamp || item.createdAt || new Date().toISOString(),
             portal: (item.portal || item.role || 'ICT').toUpperCase() as any,

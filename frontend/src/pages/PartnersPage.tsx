@@ -49,9 +49,11 @@ import { partnerLogos } from '../components/PartnerLogos';
 import { usePublicMetrics } from '../services/publicMetrics.service';
 import homepageCmsService, {
   defaultPartnersPageConfig,
+  defaultPartnersList,
   PartnersPageConfig,
   Partner,
 } from '../features/admin/services/homepageCms.service';
+import PartnerMarquee from '../components/PartnerMarquee';
 import { mediaUrl } from '../config';
 
 export type ViewMode = 'grid' | 'list';
@@ -59,214 +61,7 @@ export type SortMode = 'featured' | 'name-asc' | 'name-desc';
 export const PAGE_SIZE_OPTIONS = [12, 24, 48, 'All'] as const;
 export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 
-/** Verified base catalog of ASTU partner organizations */
-const SEED_PARTNERS: Partner[] = [
-  {
-    id: 'PT-1',
-    name: 'Ethio Telecom',
-    active: true,
-    industry: 'Telecom, Cloud & FinTech',
-    partnershipType: 'Strategic',
-    status: 'Tier 1 Strategic Partner',
-    mouYear: '2021',
-    location: 'Addis Ababa & Regional Hubs',
-    openings: '14+ Graduate Engineering Tracks',
-    website: 'https://www.ethiotelecom.et',
-    contactEmail: 'careers@ethiotelecom.et',
-    featured: true,
-    description:
-      'National telecommunications and digital infrastructure leader collaborating with ASTU on enterprise cloud data centers, 5G testbeds, software engineering internships, and graduate trainee pipelines.',
-    tags: ['Cloud Computing', '5G Infrastructure', 'Telebirr', 'Networking'],
-  },
-  {
-    id: 'PT-2',
-    name: 'Ethiopian Airlines',
-    active: true,
-    industry: 'Aviation Engineering & ICT',
-    partnershipType: 'Strategic',
-    status: 'Aviation Tech Partner',
-    mouYear: '2020',
-    location: 'Bole, Addis Ababa',
-    openings: '8 Aviation Cadet & Internship Tracks',
-    website: 'https://www.ethiopianairlines.com',
-    contactEmail: 'careers@ethiopianairlines.com',
-    featured: true,
-    description:
-      "Africa's premier aviation group partnering with ASTU on avionics diagnostics, aircraft maintenance training, mechanical design pipelines, and global airline ICT operations.",
-    tags: ['Avionics Systems', 'Aerospace CAD', 'Airlines IT', 'Diagnostics'],
-  },
-  {
-    id: 'PT-3',
-    name: 'INSA',
-    active: true,
-    industry: 'Cybersecurity & Defense Intelligence',
-    partnershipType: 'Research',
-    status: 'Govt Research Partner',
-    mouYear: '2022',
-    location: 'Addis Ababa',
-    openings: '6 Advanced Research Placements',
-    website: 'https://www.insa.gov.et',
-    contactEmail: 'linkage@insa.gov.et',
-    featured: true,
-    description:
-      'Information Network Security Administration spearheading cyber defense, digital forensics, cryptographic research, and specialized security engineering labs at ASTU.',
-    tags: ['Cybersecurity', 'SOC Telemetry', 'Digital Forensics', 'Cryptography'],
-  },
-  {
-    id: 'PT-4',
-    name: 'Huawei',
-    active: true,
-    industry: 'ICT Infrastructure & 5G',
-    partnershipType: 'Technology',
-    status: 'Global Innovation Partner',
-    mouYear: '2019',
-    location: 'Adama & Addis Ababa',
-    openings: '11 ICT Academy Certification Paths',
-    website: 'https://www.huawei.com',
-    contactEmail: 'academy.ethiopia@huawei.com',
-    featured: true,
-    description:
-      'Global ICT technology leader sponsoring the ASTU Huawei Authorized Information and Network Academy (HAINA), AI certifications, and high-performance routing research.',
-    tags: ['Routing & Switching', 'Ascend AI', '5G Core', 'Cloud Certification'],
-  },
-  {
-    id: 'PT-5',
-    name: 'Safaricom',
-    active: true,
-    industry: 'Telecommunications & 5G Infrastructure',
-    partnershipType: 'Recruitment',
-    status: 'Strategic Corporate Partner',
-    mouYear: '2022',
-    location: 'Ethiopia Network Hubs',
-    openings: '12 Digital Engineering Roles',
-    website: 'https://www.safaricom.et',
-    contactEmail: 'recruitment@safaricom.et',
-    featured: true,
-    description:
-      'Next-generation telecommunications operator driving mobile broadband and M-PESA fintech expansion, offering fast-track graduate development in mobile network and software architecture.',
-    tags: ['5G RAN', 'M-PESA', 'Fiber Transmission', 'FinTech'],
-  },
-  {
-    id: 'PT-6',
-    name: 'Commercial Bank of Ethiopia',
-    active: true,
-    industry: 'Financial Technology & Digital Banking',
-    partnershipType: 'Recruitment',
-    status: 'Enterprise Banking Partner',
-    mouYear: '2021',
-    location: 'CBE Tower, Addis Ababa',
-    openings: '20+ IT & Security Openings',
-    website: 'https://www.combanketh.et',
-    contactEmail: 'jobs@cbe.com.et',
-    featured: true,
-    description:
-      "Ethiopia's apex banking institution powering over 10 million daily electronic transactions, recruiting software developers, database administrators, and cyber risk analysts.",
-    tags: ['Core Banking', 'Enterprise Java', 'FinTech APIs', 'Microservices'],
-  },
-  {
-    id: 'PT-7',
-    name: 'DAAD (German Academic Exchange Service)',
-    active: true,
-    industry: 'International Academic & Research Consortia',
-    partnershipType: 'Research',
-    status: 'Academic Consortia Partner',
-    mouYear: '2018',
-    location: 'Bonn, Germany / Addis Ababa',
-    openings: 'Joint Research & Exchange Fellowships',
-    website: 'https://www.daad.de',
-    contactEmail: 'info@daad-ethiopia.org',
-    featured: false,
-    description:
-      'Global academic agency funding postgraduate scholarships, collaborative engineering research labs, and doctoral faculty exchange between ASTU and German technical universities.',
-    tags: ['Research Grants', 'Doctoral Exchange', 'Engineering Fellowships'],
-  },
-  {
-    id: 'PT-8',
-    name: 'Meta Finetec PLC',
-    active: true,
-    industry: 'Enterprise Software & Cloud Systems',
-    partnershipType: 'Internship',
-    status: 'Software Solutions Partner',
-    mouYear: '2023',
-    location: 'Addis Ababa',
-    openings: '5 Full-Stack Developer Roles',
-    website: 'https://metafinetec.com',
-    contactEmail: 'careers@metafinetec.com',
-    featured: false,
-    description:
-      'Technology engineering consultancy providing senior engineering students with real-world agile microservices experience and enterprise database migrations.',
-    tags: ['Enterprise ERP', 'Cloud Migration', 'Microservices', 'PostgreSQL'],
-  },
-  {
-    id: 'PT-9',
-    name: 'Ministry of Innovation and Technology',
-    active: true,
-    industry: 'Government Digital Transformation',
-    partnershipType: 'Government',
-    status: 'Government Strategic Partner',
-    mouYear: '2021',
-    location: 'Addis Ababa',
-    openings: 'National Hackathons & Tech Incubation',
-    website: 'https://mint.gov.et',
-    contactEmail: 'info@mint.gov.et',
-    featured: true,
-    description:
-      'Federal ministry guiding Digital Ethiopia 2025. Collaborates with ASTU on e-government architecture, public tech incubation, and digital policy research.',
-    tags: ['Digital Ethiopia', 'E-Governance', 'Public Cloud', 'Policy R&D'],
-  },
-  {
-    id: 'PT-10',
-    name: 'Ethiopian Artificial Intelligence Institute',
-    active: true,
-    industry: 'Applied AI & Cognitive Computing',
-    partnershipType: 'Research',
-    status: 'Advanced AI Research Partner',
-    mouYear: '2022',
-    location: 'Addis Ababa',
-    openings: 'AI Fellowships & Lab Internships',
-    website: 'https://ai.et',
-    contactEmail: 'info@ai.et',
-    featured: true,
-    description:
-      'National autonomous research institute specializing in localized Ethiopic NLP, computer vision for healthcare, and smart agriculture robotics in partnership with ASTU labs.',
-    tags: ['Deep Learning', 'Computer Vision', 'Ethiopic NLP', 'Robotics'],
-  },
-  {
-    id: 'PT-11',
-    name: 'Ethiopian Electric Power',
-    active: true,
-    industry: 'High-Voltage Grids & Renewable Energy',
-    partnershipType: 'Strategic',
-    status: 'National Energy Partner',
-    mouYear: '2020',
-    location: 'Addis Ababa / Regional Substations',
-    openings: 'Electrical & Power Systems Trainees',
-    website: 'https://www.eep.com.et',
-    contactEmail: 'corporate@eep.com.et',
-    featured: true,
-    description:
-      'National power generation and transmission authority managing hydroelectric, wind, and geothermal projects, regularly recruiting ASTU electrical and mechanical engineers.',
-    tags: ['Power Systems', 'Substation Automation', 'Renewable Energy', 'SCADA'],
-  },
-  {
-    id: 'PT-12',
-    name: 'Midroc Ethiopia',
-    active: true,
-    industry: 'Industrial Manufacturing & Engineering',
-    partnershipType: 'Strategic',
-    status: 'Industrial Conglomerate Partner',
-    mouYear: '2019',
-    location: 'Addis Ababa / Regional Hubs',
-    openings: 'Process Automation & Design Trainees',
-    website: 'https://midroc-ethiopia.com.et',
-    contactEmail: 'hr@midrocethiopia.com.et',
-    featured: false,
-    description:
-      'Multi-sector enterprise encompassing agro-processing, steel fabrication, and industrial manufacturing, serving as a primary destination for ASTU engineering graduates.',
-    tags: ['Heavy Machinery', 'Process Automation', 'Manufacturing'],
-  },
-];
-
+/** Live partners are loaded from the backend API / CMS. */
 const POPULAR_SEARCH_TOPICS = ['Telecom', 'Cloud', 'AI', 'Aviation', 'FinTech', 'Cybersecurity', 'Energy'];
 
 export default function PartnersPage() {
@@ -342,31 +137,26 @@ export default function PartnersPage() {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const settings = await homepageCmsService.fetchSettings();
+      const [settings, publishedPartners] = await Promise.all([
+        homepageCmsService.fetchSettings().catch(() => null),
+        homepageCmsService.fetchPublishedPartners().catch(() => []),
+      ]);
+
       if (settings?.partnersPage) {
         setPageConfig(settings.partnersPage);
       }
 
-      const backendPartners = settings?.partners;
-      if (Array.isArray(backendPartners) && backendPartners.length > 0) {
-        const seedMap = new Map(SEED_PARTNERS.map((sp) => [sp.name.toLowerCase().trim(), sp]));
-        const merged: Partner[] = backendPartners.map((bp) => {
-          const match = seedMap.get(bp.name?.toLowerCase().trim());
-          return match ? { ...match, ...bp } : bp;
-        });
+      // Live partners from API (published partners or settings.partners or default fallback)
+      const list = (publishedPartners && publishedPartners.length > 0)
+        ? publishedPartners
+        : (Array.isArray(settings?.partners) && settings.partners.length > 0)
+          ? settings.partners.filter((p: any) => p.active !== false)
+          : defaultPartnersList;
 
-        SEED_PARTNERS.forEach((sp) => {
-          if (!merged.some((m) => m.name?.toLowerCase().trim() === sp.name.toLowerCase().trim())) {
-            merged.push(sp);
-          }
-        });
-        setPartners(merged);
-      } else {
-        setPartners(SEED_PARTNERS);
-      }
+      setPartners(list && list.length > 0 ? list : defaultPartnersList);
     } catch {
-      setLoadError('Unable to load live partner records. Displaying local verified catalog.');
-      setPartners(SEED_PARTNERS);
+      setLoadError('Unable to load partner records.');
+      setPartners(defaultPartnersList);
     } finally {
       setIsLoading(false);
     }
@@ -432,7 +222,7 @@ export default function PartnersPage() {
     const t = searchParams.get('type');
     if (q !== null && q !== partnerSearch) setPartnerSearch(q);
     if (t !== null && t !== typeFilter) setTypeFilter(t);
-  }, [searchParams]);
+  }, [searchParams, partnerSearch, typeFilter]);
 
   // Reset pagination on filter or search changes
   useEffect(() => {
@@ -583,7 +373,7 @@ export default function PartnersPage() {
     if (LogoComp) {
       return (
         <div className={`flex items-center justify-center shrink-0 ${sizeClass}`}>
-          <LogoComp className="max-h-full max-w-full object-contain" />
+          <LogoComp className="max-h-full max-w-full object-contain partner-logo-svg" />
         </div>
       );
     }
@@ -592,7 +382,7 @@ export default function PartnersPage() {
         <img
           src={mediaUrl(partner.logo)}
           alt={`${partner.name} logo`}
-          className={`shrink-0 object-contain ${sizeClass}`}
+          className={`shrink-0 object-contain partner-logo-img ${sizeClass}`}
           loading="lazy"
           onError={(e) => {
             (e.target as HTMLElement).style.display = 'none';
@@ -716,6 +506,28 @@ export default function PartnersPage() {
           </div>
         </section>
 
+        {/* ── Partner Movement Marquee Strip ── */}
+        <section
+          aria-label="Partner Organizations Continuous Showcase"
+          className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 py-6 backdrop-blur-xs"
+        >
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">
+                Official Strategic &amp; Enterprise Partners
+              </p>
+            </div>
+            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500 hidden sm:inline">
+              Hover to pause &bull; Click any partner to view details
+            </span>
+          </div>
+          <PartnerMarquee
+            partners={partners}
+            onPartnerClick={(p) => setSelectedCompanyModal(p)}
+          />
+        </section>
+
         {/* ── 2. Meaningful Partner Statistics (Genuine Backend Data Only) ── */}
         <section
           id="partner-stats"
@@ -768,7 +580,7 @@ export default function PartnersPage() {
                   <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
                     {metrics.registeredAlumniFormatted && metrics.registeredAlumniFormatted !== '—'
                       ? metrics.registeredAlumniFormatted
-                      : '1,215+'}
+                      : '—'}
                   </span>
                   <div className="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
                     <Users className="w-4 h-4" />
@@ -1171,10 +983,12 @@ export default function PartnersPage() {
                 <Search className="h-5 w-5" />
               </div>
               <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1">
-                No Matching Partner Records Found
+                {partners.length === 0 ? 'No Partner Records Published Yet' : 'No Matching Partner Records Found'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto mb-5 leading-relaxed">
-                {debouncedSearch ? (
+                {partners.length === 0 ? (
+                  <>Partner organizations published via the ASTU Admin CMS or backend API will appear here automatically.</>
+                ) : debouncedSearch ? (
                   <>
                     We couldn't find any partners matching{' '}
                     <strong className="text-slate-800 dark:text-slate-200">"{debouncedSearch}"</strong>
@@ -1185,36 +999,40 @@ export default function PartnersPage() {
                 )}
               </p>
 
-              {/* Clickable suggested searches */}
-              <div className="flex flex-col items-center justify-center gap-2 mb-6">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Suggested searches:</span>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  {['Telecom', 'Aviation', 'Cybersecurity', 'Huawei', 'Banking', 'Energy'].map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => {
-                        setPartnerSearch(suggestion);
-                        setTypeFilter('All');
-                      }}
-                      className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
-                    >
-                      #{suggestion}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {partners.length > 0 && (
+                <>
+                  {/* Clickable suggested searches */}
+                  <div className="flex flex-col items-center justify-center gap-2 mb-6">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Suggested searches:</span>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      {['Telecom', 'Aviation', 'Cybersecurity', 'Huawei', 'Banking', 'Energy'].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => {
+                            setPartnerSearch(suggestion);
+                            setTypeFilter('All');
+                          }}
+                          className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+                        >
+                          #{suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={handleClearFilters}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Reset All Filters</span>
-                </button>
-              </div>
+                  <div className="flex flex-wrap items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleClearFilters}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Reset All Filters</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

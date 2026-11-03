@@ -56,12 +56,13 @@ import ShareCampaignModal from "../components/ShareCampaignModal";
 import ShareModal, { ShareItem } from "../components/ShareModal";
 import TelebirrDonationModal from "../components/TelebirrDonationModal";
 import VideoDetailModal from "../components/VideoDetailModal";
-import { partnerLogos } from "../components/PartnerLogos";
+import PartnerMarquee from "../components/PartnerMarquee";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
 import storiesService from "../features/admin/services/stories.service";
 import homepageCmsService, {
   Partner,
+  defaultPartnersList,
   defaultSectionLinks as cmsDefaultSectionLinks,
 } from "../features/admin/services/homepageCms.service";
 import publicStatsService, { PublicStat } from "../features/public/services/publicStats.service";
@@ -207,138 +208,7 @@ const navSections = [
   { label: "Contact", id: "contact" }
 ];
 
-/** Soft defaults so Campus Life / FAQ / Network voices stay visible when CMS has not published yet */
-export const DEFAULT_CAMPUS_LIFE = [
-  {
-    id: 'CL-1',
-    title: 'Student Clubs & Chapters',
-    campus: 'Main Campus',
-    description: 'Professional societies, cultural clubs, and alumni chapters that keep graduates connected to campus.',
-    image: '/images/astusteam.jpg',
-    action: 'Explore Campus Life',
-    link: '/info/campus-life',
-    active: true,
-  },
-  {
-    id: 'CL-2',
-    title: 'Facilities & Innovation Spaces',
-    campus: 'Innovation Spaces',
-    description: 'Laboratories, research centers, libraries, student services, and employer interview rooms.',
-    image: '/images/electriclabs.jpeg',
-    action: 'Explore Facilities',
-    link: '/info/facilities',
-    active: true,
-  },
-  {
-    id: 'CL-3',
-    title: 'Sports & Cultural Life',
-    campus: 'Campus Grounds',
-    description: 'Athletics, arts, and community gatherings that shape everyday life across ASTU campuses.',
-    image: '/images/arc.jpg',
-    action: 'Learn More',
-    link: '/info/campus-life',
-    active: true,
-  },
-];
-
-export const DEFAULT_GALLERY_IMAGES = [
-  { id: 'GI-1', title: 'ASTU Main Campus Architecture', src: '/images/astu-building.jpg', album: 'Campus Gallery', date: 'June 2026', active: true },
-  { id: 'GI-2', title: 'Campus Walkway & Innovation Hub', src: '/images/campus-2.jpeg', album: 'Campus Gallery', date: 'May 2026', active: true },
-  { id: 'GI-3', title: 'Advanced Electrical & Robotics Labs', src: '/images/electriclabs.jpeg', album: 'Research Gallery', date: 'May 2026', active: true },
-  { id: 'GI-4', title: 'Research & Innovation Arc', src: '/images/arc.jpg', album: 'Research Gallery', date: 'April 2026', active: true },
-  { id: 'GI-5', title: 'Graduation & Assembly Hall', src: '/images/gc7.jpg', album: 'Graduation Gallery', date: 'March 2026', active: true },
-  { id: 'GI-6', title: 'University Main Gate & Entrance', src: '/images/astuget.jpg', album: 'Campus Gallery', date: 'February 2026', active: true },
-];
-
-export const DEFAULT_VIDEO_HIGHLIGHTS = [
-  {
-    id: 'VI-1',
-    title: 'ASTU Campus Highlights & Academic Excellence',
-    subtitle: 'A guided aerial and ground visual tour of laboratories, student hubs, and campus facilities.',
-    image: '/images/astu-building.jpg',
-    duration: '04:28',
-    category: 'Campus Virtual Tours',
-    link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    active: true,
-  },
-  {
-    id: 'VI-2',
-    title: 'Annual Applied Research & Innovation Forum',
-    subtitle: 'Keynote presentations, robotics exhibitions, and industry-sponsored engineering projects.',
-    image: '/images/arc.jpg',
-    duration: '06:15',
-    category: 'Research Showcases',
-    link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    active: true,
-  },
-  {
-    id: 'VI-3',
-    title: 'ASTU Grand Graduation & Alumni Replay',
-    subtitle: 'Celebration of graduating classes, honorary guest addresses, and alumni leadership awards.',
-    image: '/images/gc7.jpg',
-    duration: '08:42',
-    category: 'Event Recordings',
-    link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    active: true,
-  },
-];
-
-export const DEFAULT_FAQ = [
-  {
-    id: 'FAQ-1',
-    question: 'Who can use ASTU-AMS?',
-    answer: 'Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.',
-    active: true,
-  },
-  {
-    id: 'FAQ-2',
-    question: 'How are tracer studies used?',
-    answer: 'Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.',
-    active: true,
-  },
-  {
-    id: 'FAQ-3',
-    question: 'Can employers register events?',
-    answer: 'Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports.',
-    active: true,
-  },
-  {
-    id: 'FAQ-4',
-    question: 'How does Alumni Giving work?',
-    answer: 'Alumni and partners can contribute directly via Chapa, Telebirr, and CBE to verified departmental, research, and scholarship campaigns with transparent receipts.',
-    active: true,
-  },
-];
-
-export const DEFAULT_NETWORK_VOICES = [
-  {
-    id: 'network-voice-1',
-    name: 'Dr. Ruth Alemu',
-    role: 'Lead AI Researcher',
-    company: 'Ethiopian Artificial Intelligence Institute',
-    message: 'ASTU gave me the computational rigor and research mindset that propelled my career in machine learning. Staying connected through ASTU-AMS keeps our alumni knowledge exchange alive.',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-    source: 'testimonial' as const,
-  },
-  {
-    id: 'network-voice-2',
-    name: 'Eng. Yonas Bekele',
-    role: 'Senior Embedded Systems Engineer',
-    company: 'Ethio Telecom',
-    message: 'The hands-on lab projects and industry linkages at ASTU prepared our cohort to design mission-critical telecommunications infrastructure across East Africa.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    source: 'community' as const,
-  },
-  {
-    id: 'network-voice-3',
-    name: 'Kalkidan Tadesse',
-    role: 'Fintech Innovation Lead',
-    company: 'Commercial Bank of Ethiopia',
-    message: 'Mentoring junior ASTU graduates through AMS has been an incredible experience. The university continues to cultivate world-class software engineers and innovators.',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    source: 'story' as const,
-  },
-];
+/** All content comes from the API/CMS. No demo data. */
 
 const getHomeCampaignImage = (campaign: any) => {
   if (campaign?.image && typeof campaign.image === 'string' && campaign.image.trim() !== '') {
@@ -564,7 +434,7 @@ export default function HomePage() {
       const active = config.campusLife.filter((c: any) => c.active !== false);
       if (active.length > 0) return active;
     }
-    return DEFAULT_CAMPUS_LIFE;
+    return [];
   });
   const [liveCampuses, setLiveCampuses] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
@@ -584,7 +454,7 @@ export default function HomePage() {
       const active = config.gallery.filter((g: any) => g.active !== false);
       if (active.length) return active;
     }
-    return DEFAULT_GALLERY_IMAGES;
+    return [];
   });
   const [galleryFilterTab, setGalleryFilterTab] = useState<string>('ALL');
   const [activeLightboxPhoto, setActiveLightboxPhoto] = useState<any | null>(null);
@@ -626,20 +496,26 @@ export default function HomePage() {
       const active = config.videos.filter((v: any) => v.active !== false);
       if (active.length) return active;
     }
-    return DEFAULT_VIDEO_HIGHLIGHTS;
+    return [];
   });
   const [activeVideoModalItem, setActiveVideoModalItem] = useState<any | null>(null);
   const [shareMediaModalItem, setShareMediaModalItem] = useState<ShareItem | null>(null);
-  const [livePartners, setLivePartners] = useState<Partner[]>([]);
-  const [partnersLoading, setPartnersLoading] = useState(true);
-  const [failedPartnerLogos, setFailedPartnerLogos] = useState<Set<string>>(() => new Set());
+  const [livePartners, setLivePartners] = useState<Partner[]>(() => {
+    const config = homepageCmsService.getSettings();
+    if (Array.isArray(config?.partners) && config.partners.length > 0) {
+      const active = config.partners.filter((p: any) => p.active !== false);
+      if (active.length > 0) return active;
+    }
+    return defaultPartnersList;
+  });
+  const [partnersLoading, setPartnersLoading] = useState(false);
   const [liveFaq, setLiveFaq] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
     if (Array.isArray(config?.faq) && config.faq.length > 0) {
       const active = config.faq.filter((f: any) => f.active !== false);
       if (active.length > 0) return active;
     }
-    return DEFAULT_FAQ;
+    return [];
   });
   const [liveCommunityPosts, setLiveCommunityPosts] = useState<any[]>(() => {
     const config = homepageCmsService.getSettings();
@@ -981,7 +857,7 @@ export default function HomePage() {
     // Keep alumni stories exclusive to the Success Stories section.
     const merged = [...fromTestimonials, ...fromPosts];
     if (merged.length > 0) return merged.slice(0, 3);
-    return DEFAULT_NETWORK_VOICES.slice(0, 3);
+    return [];
   }, [liveTestimonials, liveCommunityPosts]);
 
   // Alumni stories carousel state
@@ -1243,11 +1119,10 @@ export default function HomePage() {
       try {
         const partners = await homepageCmsService.fetchPublishedPartners();
         if (isMounted) {
-          setLivePartners(partners);
-          setFailedPartnerLogos(new Set());
+          setLivePartners(partners && partners.length > 0 ? partners : defaultPartnersList);
         }
       } catch {
-        if (isMounted) setLivePartners([]);
+        if (isMounted) setLivePartners(defaultPartnersList);
       } finally {
         if (isMounted) setPartnersLoading(false);
       }
@@ -1288,7 +1163,7 @@ export default function HomePage() {
       }
       if (Array.isArray(cmsConfig.campusLife)) {
         const active = cmsConfig.campusLife.filter((c: any) => c.active !== false);
-        setLiveCampusLife(active.length > 0 ? active : DEFAULT_CAMPUS_LIFE);
+        setLiveCampusLife(active);
       }
       if (Array.isArray(cmsConfig.campuses)) {
         setLiveCampuses(cmsConfig.campuses.filter((c: any) => c.active !== false));
@@ -1298,11 +1173,11 @@ export default function HomePage() {
       }
       if (Array.isArray(cmsConfig.gallery)) {
         const active = cmsConfig.gallery.filter((g: any) => g.active !== false);
-        setLiveGallery(active.length > 0 ? active : DEFAULT_GALLERY_IMAGES);
+        setLiveGallery(active);
       }
       if (Array.isArray(cmsConfig.videos)) {
         const active = cmsConfig.videos.filter((v: any) => v.active !== false);
-        setLiveVideos(active.length > 0 ? active : DEFAULT_VIDEO_HIGHLIGHTS);
+        setLiveVideos(active);
       }
       if (Array.isArray(cmsConfig.newsItems)) {
         setLiveNews(cmsConfig.newsItems.filter((n: any) => n.active !== false));
@@ -1321,7 +1196,7 @@ export default function HomePage() {
       }
       if (Array.isArray(cmsConfig.faq)) {
         const active = cmsConfig.faq.filter((f: any) => f.active !== false);
-        setLiveFaq(active.length > 0 ? active : DEFAULT_FAQ);
+        setLiveFaq(active);
       }
       if (cmsConfig.faqHeaders) setLiveFaqHeaders(cmsConfig.faqHeaders);
       if (Array.isArray(cmsConfig.communityPosts) || Array.isArray(cmsConfig.liveCommunityPosts)) {
@@ -2101,86 +1976,90 @@ location: e.location || 'Location to be confirmed',
             </button>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {(() => {
-              const isDuplicateCampusLifeCard = (card: any) => {
-                const link = String(card.link || '').toLowerCase();
-                const title = String(card.title || '').toLowerCase();
-                const action = String(card.action || '').toLowerCase();
-                const blob = `${link} ${title} ${action}`;
-                return (
-                  blob.includes('/gallery') ||
-                  blob.includes('#gallery') ||
-                  blob.includes('/events') ||
-                  blob.includes('#events') ||
-                  blob.includes('success-stories') ||
-                  blob.includes('alumni-stories') ||
-                  title.includes('gallery') ||
-                  title.includes('museum') ||
-                  (title.includes('event') && !title.includes('student'))
-                );
-              };
-              const source = liveCampusLife.length > 0 ? liveCampusLife : DEFAULT_CAMPUS_LIFE;
-              const distinct = source.filter((card: any) => !isDuplicateCampusLifeCard(card));
-              return (distinct.length > 0 ? distinct : DEFAULT_CAMPUS_LIFE).slice(0, 3);
-            })().map((card: any, idx: number) => {
-              const targetRoute =
-                card.link ||
-                (card.action?.toLowerCase().includes('facilit')
-                    ? '/info/facilities'
-                    : '/info/campus-life');
-
-              const handleNavigate = () => {
-                if (typeof targetRoute === 'string' && targetRoute.startsWith('#')) {
-                  document.getElementById(targetRoute.slice(1))?.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  navigate(targetRoute);
-                }
-              };
-
+          {(() => {
+            const isDuplicateCampusLifeCard = (card: any) => {
+              const link = String(card.link || '').toLowerCase();
+              const title = String(card.title || '').toLowerCase();
+              const action = String(card.action || '').toLowerCase();
+              const blob = `${link} ${title} ${action}`;
               return (
-                <article
-                  key={card.id || card.title || idx}
-                  className={`reveal reveal-delay-${(idx % 3) + 1} group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]`}
-                >
-                  <button type="button" onClick={handleNavigate} className="relative block h-44 w-full overflow-hidden text-left">
-                    <img
-                      src={mediaUrl(card.image) || card.image || DEFAULT_HERO_IMAGE}
-                      alt={card.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      onError={handleImageError}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
-                    <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-navy">
-                      {card.campus || 'ASTU Campus'}
-                    </span>
-                  </button>
-                  <div className="flex flex-1 flex-col justify-between p-5">
-                    <div>
-                      <button
-                        type="button"
-                        onClick={handleNavigate}
-                        className="cursor-pointer text-left text-lg font-bold text-astu-navy transition-colors hover:text-astu-red dark:text-white dark:hover:text-amber-400"
-                      >
-                        {card.title}
-                      </button>
-                      <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-3">
-                        {card.description}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleNavigate}
-                      className="mt-4 inline-flex items-center gap-1.5 self-start text-xs font-bold text-astu-navy transition-all hover:gap-2 dark:text-sky-300"
-                    >
-                      {card.action || 'Learn more'}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </article>
+                blob.includes('/gallery') ||
+                blob.includes('#gallery') ||
+                blob.includes('/events') ||
+                blob.includes('#events') ||
+                blob.includes('success-stories') ||
+                blob.includes('alumni-stories') ||
+                title.includes('gallery') ||
+                title.includes('museum') ||
+                (title.includes('event') && !title.includes('student'))
               );
-            })}
-          </div>
+            };
+            const distinct = liveCampusLife.filter((card: any) => !isDuplicateCampusLifeCard(card));
+            if (distinct.length === 0) {
+              return <EmptySection message="No campus life cards published yet. Published items will appear here from the CMS." />;
+            }
+            return (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {distinct.slice(0, 3).map((card: any, idx: number) => {
+                  const targetRoute =
+                    card.link ||
+                    (card.action?.toLowerCase().includes('facilit')
+                        ? '/info/facilities'
+                        : '/info/campus-life');
+
+                  const handleNavigate = () => {
+                    if (typeof targetRoute === 'string' && targetRoute.startsWith('#')) {
+                      document.getElementById(targetRoute.slice(1))?.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                      navigate(targetRoute);
+                    }
+                  };
+
+                  return (
+                    <article
+                      key={card.id || card.title || idx}
+                      className={`reveal reveal-delay-${(idx % 3) + 1} group flex flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]`}
+                    >
+                      <button type="button" onClick={handleNavigate} className="relative block h-44 w-full overflow-hidden text-left">
+                        <img
+                          src={mediaUrl(card.image) || card.image || DEFAULT_HERO_IMAGE}
+                          alt={card.title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          onError={handleImageError}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
+                        <span className="absolute bottom-3 left-3 rounded-full bg-white/90 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-navy">
+                          {card.campus || 'ASTU Campus'}
+                        </span>
+                      </button>
+                      <div className="flex flex-1 flex-col justify-between p-5">
+                        <div>
+                          <button
+                            type="button"
+                            onClick={handleNavigate}
+                            className="cursor-pointer text-left text-lg font-bold text-astu-navy transition-colors hover:text-astu-red dark:text-white dark:hover:text-amber-400"
+                          >
+                            {card.title}
+                          </button>
+                          <p className="mt-2 text-sm leading-relaxed text-on-surface-variant dark:text-slate-400 line-clamp-3">
+                            {card.description}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleNavigate}
+                          className="mt-4 inline-flex items-center gap-1.5 self-start text-xs font-bold text-astu-navy transition-all hover:gap-2 dark:text-sky-300"
+                        >
+                          {card.action || 'Learn more'}
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </section>
 
         {liveCampuses.length > 0 && (
@@ -2757,72 +2636,76 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Gallery Grid — only 3 moments on the homepage */}
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredGalleryList.slice(0, 3).map((photo: any, idx: number) => {
-                const photoSrc = mediaUrl(photo.src) || photo.src || '/images/astu-building.jpg';
-                return (
-                  <article
-                    key={photo.id || idx}
-                    className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer"
-                    onClick={() => {
-                      setActiveLightboxPhoto(photo);
-                      setLightboxIndex(idx);
-                    }}
-                  >
-                    <div className="relative h-56 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-                      <img
-                        src={photoSrc}
-                        alt={photo.title || 'ASTU Campus Moment'}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          target.onerror = null;
-                          target.src = '/images/astu-building.jpg';
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+            {filteredGalleryList.length === 0 ? (
+              <EmptySection message="No campus gallery photos published yet. Photos will appear here once published from the CMS." />
+            ) : (
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredGalleryList.slice(0, 3).map((photo: any, idx: number) => {
+                  const photoSrc = mediaUrl(photo.src) || photo.src || '/images/astu-building.jpg';
+                  return (
+                    <article
+                      key={photo.id || idx}
+                      className="group relative overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+                      onClick={() => {
+                        setActiveLightboxPhoto(photo);
+                        setLightboxIndex(idx);
+                      }}
+                    >
+                      <div className="relative h-56 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                        <img
+                          src={photoSrc}
+                          alt={photo.title || 'ASTU Campus Moment'}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.onerror = null;
+                            target.src = '/images/astu-building.jpg';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
 
-                      {/* Top Album Pill */}
-                      <span className="absolute top-3.5 left-3.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-navy dark:text-sky-300 shadow-sm">
-                        {photo.album || 'Campus Moment'}
-                      </span>
+                        {/* Top Album Pill */}
+                        <span className="absolute top-3.5 left-3.5 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-astu-navy dark:text-sky-300 shadow-sm">
+                          {photo.album || 'Campus Moment'}
+                        </span>
 
-                      {/* Quick Share Button */}
-                      <button
-                        type="button"
-                        aria-label="Share this moment"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShareMediaModalItem({
-                            id: photo.id || String(idx),
-                            title: photo.title || 'ASTU Campus Moment',
-                            subtitle: photo.album || 'Campus Gallery',
-                            text: `Explore this campus moment from Adama Science and Technology University: ${photo.title}`,
-                            image: photoSrc,
-                            url: '/gallery',
-                            type: 'gallery',
-                          });
-                        }}
-                        className="absolute top-3.5 right-3.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-astu-navy"
-                      >
-                        <Share2 className="h-3.5 w-3.5" />
-                      </button>
+                        {/* Quick Share Button */}
+                        <button
+                          type="button"
+                          aria-label="Share this moment"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShareMediaModalItem({
+                              id: photo.id || String(idx),
+                              title: photo.title || 'ASTU Campus Moment',
+                              subtitle: photo.album || 'Campus Gallery',
+                              text: `Explore this campus moment from Adama Science and Technology University: ${photo.title}`,
+                              image: photoSrc,
+                              url: '/gallery',
+                              type: 'gallery',
+                            });
+                          }}
+                          className="absolute top-3.5 right-3.5 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 backdrop-blur-md border border-white/20 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-astu-navy"
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
+                        </button>
 
-                      {/* Bottom Info inside image */}
-                      <div className="absolute bottom-3 left-3 right-3 text-white">
-                        <h4 className="text-base font-bold leading-snug line-clamp-1 drop-shadow-sm group-hover:text-amber-300 transition-colors">
-                          {photo.title || 'Campus Moment'}
-                        </h4>
-                        <p className="mt-0.5 text-xs text-slate-300 flex items-center justify-between">
-                          <span>{photo.date || 'Campus Archive'}</span>
-                          <span className="text-[11px] font-semibold text-sky-300 group-hover:underline">Click to view</span>
-                        </p>
+                        {/* Bottom Info inside image */}
+                        <div className="absolute bottom-3 left-3 right-3 text-white">
+                          <h4 className="text-base font-bold leading-snug line-clamp-1 drop-shadow-sm group-hover:text-amber-300 transition-colors">
+                            {photo.title || 'Campus Moment'}
+                          </h4>
+                          <p className="mt-0.5 text-xs text-slate-300 flex items-center justify-between">
+                            <span>{photo.date || 'Campus Archive'}</span>
+                            <span className="text-[11px] font-semibold text-sky-300 group-hover:underline">Click to view</span>
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
         </section>
 
         {/* =========================================================================
@@ -2854,8 +2737,11 @@ location: e.location || 'Location to be confirmed',
             </div>
 
             {/* Video Cards Grid — only 3 videos on the homepage */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {liveVideos.slice(0, 3).map((video: any, idx: number) => {
+            {liveVideos.length === 0 ? (
+              <EmptySection message="No video highlights published yet. Videos will appear here once published from the CMS." />
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {liveVideos.slice(0, 3).map((video: any, idx: number) => {
                 const videoImg = mediaUrl(video.image) || video.image || '/images/astu-building.jpg';
                 return (
                   <article
@@ -2945,6 +2831,7 @@ location: e.location || 'Location to be confirmed',
                 );
               })}
             </div>
+            )}
         </section>
 
         <section id="success-stories" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
@@ -3434,89 +3321,49 @@ location: e.location || 'Location to be confirmed',
           </div>
         </section>
 
-        <section id="partners" className="relative w-full mx-auto max-w-[1440px] overflow-hidden px-4 py-16 md:px-8 md:py-20 isolate">
-          <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-            <div className="max-w-2xl reveal">
-              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
-                {livePartnersHeaders?.eyebrow || 'Our Partners'}
-              </p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl">
-                {livePartnersHeaders?.title || 'Partner Companies'}
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
-                {livePartnersHeaders?.description ||
-                  'Institutional partners supporting employability, internships, and research collaboration.'}
-              </p>
+        {/* ── Partners Marquee Section ──────────────────────────── */}
+        <section
+          id="partners"
+          className="relative w-full overflow-hidden py-16 md:py-24"
+          aria-labelledby="partners-heading"
+        >
+          {/* Subtle background wash */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-50/60 via-white to-slate-50/40 dark:from-[#0c0f1a] dark:via-[#0f1117] dark:to-[#0c0f1a] pointer-events-none" />
+
+          {/* Header */}
+          <div className="relative mx-auto max-w-[1440px] px-4 md:px-8">
+            <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end reveal">
+              <div className="max-w-2xl">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-astu-red">
+                  {livePartnersHeaders?.eyebrow || 'Our Partners'}
+                </p>
+                <h2
+                  id="partners-heading"
+                  className="mt-2 text-2xl font-black tracking-tight text-astu-navy dark:text-white md:text-3xl"
+                >
+                  {livePartnersHeaders?.title || 'Trusted Partner Companies'}
+                </h2>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-on-surface-variant dark:text-slate-400">
+                  {livePartnersHeaders?.description ||
+                    'Institutions and enterprises collaborating with ASTU on employability, internships, and research.'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/partners')}
+                className="home-btn home-btn--navy home-btn--sm shrink-0"
+              >
+                View all partners
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => navigate('/partners')}
-              className="home-btn home-btn--navy home-btn--sm"
-            >
-              View all partners
-              <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
-            </button>
           </div>
 
-          {partnersLoading ? (
-            <div
-              className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6"
-              aria-label="Loading partners"
-            >
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex h-24 items-center justify-center rounded-2xl border border-slate-200/90 bg-white dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
-                >
-                  <div className="h-10 w-24 animate-pulse rounded-lg bg-slate-200/80 dark:bg-slate-700/60" />
-                </div>
-              ))}
-            </div>
-          ) : livePartners.length === 0 ? (
-            <div className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 px-6 py-10 text-center dark:border-[var(--border-color)]">
-              <Building2 className="h-7 w-7 text-slate-400" />
-              <p className="mt-3 text-sm font-bold text-astu-navy dark:text-white">No published partners yet</p>
-              <p className="mt-1 max-w-md text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                Partner logos will appear here once published from the ASTU CMS.
-              </p>
-            </div>
-          ) : (
-            <div role="list" className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {livePartners.slice(0, 6).map((partner) => {
-                const logoUrl = partner.logo ? mediaUrl(partner.logo) : '';
-                const logoFailed = failedPartnerLogos.has(partner.id);
-                const PartnerLogoComp = partnerLogos[partner.name];
-
-                return (
-                  <article
-                    key={partner.id}
-                    role="listitem"
-                    title={partner.name}
-                    className="group flex h-24 items-center justify-center rounded-2xl border border-slate-200/90 bg-white px-4 shadow-[var(--shadow-soft)] transition hover:-translate-y-0.5 hover:shadow-md dark:border-[var(--border-color)] dark:bg-[var(--bg-card)]"
-                  >
-                    {logoUrl && !logoFailed ? (
-                      <img
-                        src={logoUrl}
-                        alt={`${partner.name} logo`}
-                        loading="lazy"
-                        decoding="async"
-                        className="max-h-12 max-w-full object-contain opacity-85 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0"
-                        onError={() =>
-                          setFailedPartnerLogos((current) => new Set(current).add(partner.id))
-                        }
-                      />
-                    ) : PartnerLogoComp ? (
-                      <PartnerLogoComp className="max-h-10 w-auto opacity-85 transition duration-300 group-hover:opacity-100" />
-                    ) : (
-                      <span className="text-center text-xs font-bold uppercase tracking-wide text-astu-navy/70 transition group-hover:text-astu-navy dark:text-slate-300 dark:group-hover:text-white">
-                        {partner.name}
-                      </span>
-                    )}
-                  </article>
-                );
-              })}
-            </div>
-          )}
+          {/* ── Continuous Partner Logos Movement Marquee ── */}
+          <PartnerMarquee
+            partners={livePartners}
+            onPartnerClick={() => navigate('/partners')}
+          />
         </section>
 
 
@@ -3535,46 +3382,50 @@ location: e.location || 'Location to be confirmed',
           </div>
 
           <div className="mx-auto max-w-3xl space-y-3">
-            {(liveFaq.length > 0 ? liveFaq : DEFAULT_FAQ).slice(0, 4).map((item: any, idx: number) => {
-              const itemId = String(item.id || idx);
-              const isOpen = openFaqId === itemId;
-              return (
-                <div
-                  key={itemId}
-                  className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] transition-all dark:border-[var(--border-color)] dark:bg-[var(--bg-card)] ${
-                    isOpen ? 'ring-1 ring-astu-navy/20 dark:ring-sky-400/30' : ''
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaqId(isOpen ? null : itemId)}
-                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
-                    aria-expanded={isOpen}
-                    aria-controls={`faq-panel-${itemId}`}
-                    id={`faq-button-${itemId}`}
+            {liveFaq.length === 0 ? (
+              <EmptySection message="No FAQ items published yet. Frequently asked questions will appear here once published from the CMS." />
+            ) : (
+              liveFaq.slice(0, 4).map((item: any, idx: number) => {
+                const itemId = String(item.id || idx);
+                const isOpen = openFaqId === itemId;
+                return (
+                  <div
+                    key={itemId}
+                    className={`reveal reveal-delay-${(idx % 3) + 1} overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[var(--shadow-soft)] transition-all dark:border-[var(--border-color)] dark:bg-[var(--bg-card)] ${
+                      isOpen ? 'ring-1 ring-astu-navy/20 dark:ring-sky-400/30' : ''
+                    }`}
                   >
-                    <span className="text-sm font-bold text-astu-navy dark:text-white md:text-base">
-                      {item.question}
-                    </span>
-                    <HelpCircle
-                      className={`h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 ${
-                        isOpen ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <div
-                      id={`faq-panel-${itemId}`}
-                      role="region"
-                      aria-labelledby={`faq-button-${itemId}`}
-                      className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-on-surface-variant dark:border-[var(--border-color)] dark:text-slate-300"
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaqId(isOpen ? null : itemId)}
+                      className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left"
+                      aria-expanded={isOpen}
+                      aria-controls={`faq-panel-${itemId}`}
+                      id={`faq-button-${itemId}`}
                     >
-                      {item.answer}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                      <span className="text-sm font-bold text-astu-navy dark:text-white md:text-base">
+                        {item.question}
+                      </span>
+                      <HelpCircle
+                        className={`h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 ${
+                          isOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div
+                        id={`faq-panel-${itemId}`}
+                        role="region"
+                        aria-labelledby={`faq-button-${itemId}`}
+                        className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-on-surface-variant dark:border-[var(--border-color)] dark:text-slate-300"
+                      >
+                        {item.answer}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
 
           <div className="mt-8 flex justify-center reveal">

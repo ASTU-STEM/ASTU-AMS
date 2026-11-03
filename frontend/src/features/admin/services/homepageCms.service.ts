@@ -414,8 +414,111 @@ export interface Partner {
   tags?: string[];
 }
 
-/** Partners come from CMS / API only — no demo directory. */
-export const defaultPartnersList: Partner[] = [];
+/** Default strategic ASTU enterprise and institutional partners */
+export const defaultPartnersList: Partner[] = [
+  {
+    id: 'P-1',
+    name: 'Ethio Telecom',
+    active: true,
+    industry: 'Telecommunications & Cloud Services',
+    location: 'Addis Ababa',
+    partnershipType: 'Strategic',
+    openings: 'Telecom Engineering & Cloud Infrastructure',
+    description: 'National telecommunications provider collaborating with ASTU on nationwide 5G trials, campus connectivity, and graduate trainee programs.',
+    featured: true,
+    website: 'https://www.ethiotelecom.et',
+    logo: '/images/partners/ethio-telecom.png',
+  },
+  {
+    id: 'P-2',
+    name: 'INSA',
+    active: true,
+    industry: 'Cybersecurity & National Intelligence',
+    location: 'Addis Ababa',
+    partnershipType: 'Research',
+    openings: 'Cyber Defense & Cryptography Placements',
+    description: 'Information Network Security Administration partnering with ASTU on cyber defense labs, forensic research, and specialized cryptography tracks.',
+    featured: true,
+    website: 'https://www.insa.gov.et',
+    logo: '/images/partners/insa.png',
+  },
+  {
+    id: 'P-3',
+    name: 'Ethiopian Airlines',
+    active: true,
+    industry: 'Aviation Technology & ICT Systems',
+    location: 'Addis Ababa',
+    partnershipType: 'Strategic',
+    openings: 'Aviation Cadet & Enterprise Systems',
+    description: "Africa's largest airline carrier collaborating on aerospace engineering, software automation, avionics maintenance, and campus recruitment.",
+    featured: true,
+    website: 'https://www.ethiopianairlines.com',
+    logo: '/images/partners/ethiopian-airlines.svg',
+  },
+  {
+    id: 'P-4',
+    name: 'Safaricom Ethiopia',
+    active: true,
+    industry: 'Mobile Telecommunications & Digital Financials',
+    location: 'Addis Ababa',
+    partnershipType: 'Recruitment',
+    openings: 'Digital Network Engineering & M-PESA Tech',
+    description: 'Leading digital communications operator running fast-track graduate engineer development programs for ASTU computer science and electrical engineers.',
+    featured: true,
+    website: 'https://www.safaricom.et',
+    logo: '/images/partners/safaricom.png',
+  },
+  {
+    id: 'P-5',
+    name: 'Huawei Ethiopia',
+    active: true,
+    industry: 'ICT Infrastructure & Smart Devices',
+    location: 'Adama',
+    partnershipType: 'Technology',
+    openings: 'HAINA Academy Certifications & Datacom',
+    description: 'Global ICT leader operating the Huawei ICT Academy at ASTU, delivering hands-on networking certifications, 5G testbeds, and competition sponsorships.',
+    featured: true,
+    website: 'https://www.huawei.com',
+    logo: '/images/partners/huawei.svg',
+  },
+  {
+    id: 'P-6',
+    name: 'Commercial Bank of Ethiopia',
+    active: true,
+    industry: 'FinTech & Core Banking Systems',
+    location: 'Addis Ababa',
+    partnershipType: 'Recruitment',
+    openings: 'FinTech, DevOps & Core Banking Engineers',
+    description: 'Ethiopia’s premier financial institution recruiting top ASTU software, statistics, and cybersecurity graduates for core banking platforms.',
+    featured: true,
+    website: 'https://www.combanketh.et',
+    logo: '/images/partners/cbe.png',
+  },
+  {
+    id: 'P-7',
+    name: 'Ministry of Innovation & Technology (MInT)',
+    active: true,
+    industry: 'Government & Digital Transformation',
+    location: 'Addis Ababa',
+    partnershipType: 'Strategic',
+    openings: 'National Digital Strategy & Innovation Fellowships',
+    description: 'Lead ministry spearheading the Digital Ethiopia strategy, working with ASTU on applied research incubators and tech commercialization.',
+    featured: true,
+    website: 'https://mint.gov.et',
+  },
+  {
+    id: 'P-8',
+    name: 'Artificial Intelligence Institute',
+    active: true,
+    industry: 'Artificial Intelligence & Robotics Research',
+    location: 'Addis Ababa',
+    partnershipType: 'Research',
+    openings: 'NLP, Computer Vision & Robotics Fellowships',
+    description: 'National institute partnering on high-performance compute access, joint AI graduate fellowships, and language model research.',
+    featured: true,
+    website: 'https://eaii.gov.et',
+  },
+];
 
 export interface FeaturedEmployerItem {
   id: string;
@@ -930,10 +1033,13 @@ export const homepageCmsService = {
     try {
       const res = await axios.get(`${API_URL}/content/homepage/config`, { timeout: 5000 });
       const partners = res.data?.success ? res.data?.data?.partners : [];
-      if (!Array.isArray(partners)) return [];
-      return deepSanitizeImages(partners).filter((partner: Partner) => partner?.active !== false);
+      if (!Array.isArray(partners) || partners.length === 0) {
+        return defaultPartnersList;
+      }
+      const active = deepSanitizeImages(partners).filter((partner: Partner) => partner?.active !== false);
+      return active.length > 0 ? active : defaultPartnersList;
     } catch {
-      return [];
+      return defaultPartnersList;
     }
   },
 

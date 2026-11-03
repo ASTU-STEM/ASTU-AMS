@@ -134,7 +134,7 @@ const templatesList: Template[] = [
     category: 'Survey & Feedback',
     title: 'Reminder: Please Complete Your ASTU Tracer Survey',
     message: 'Hello {first_name}, please take 5 minutes to complete the official ASTU Alumni Tracer Survey. Your feedback shapes our academic programs and alumni services.',
-    ctaLink: 'http://localhost:5173/alumni/tracer-survey',
+    ctaLink: '/alumni/tracer-survey',
     ctaText: 'Complete Tracer Survey Now',
   },
   {
@@ -143,7 +143,7 @@ const templatesList: Template[] = [
     title: 'New Career Opportunities Matching Your Profile',
     message: 'Dear Alumni, top partner employers have posted new job openings matching your engineering specialization. Log into ASTU AMS to view and apply.',
     imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/jobs',
+    ctaLink: '/jobs',
     ctaText: 'Explore Job Opportunities',
   },
   {
@@ -152,7 +152,7 @@ const templatesList: Template[] = [
     title: 'Upcoming ASTU Annual Alumni Grand Homecoming',
     message: 'Join us for the ASTU Annual Alumni Homecoming & Tech Expo. Connect with fellow graduates, faculty, and industry leaders. Reserve your spot today!',
     imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/events',
+    ctaLink: '/events',
     ctaText: 'RSVP for Homecoming',
   },
   {
@@ -160,7 +160,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Welcome to the Official ASTU Alumni Management System',
     message: 'Welcome {first_name}! Your ASTU Alumni portal account has been activated. Discover networking opportunities, career resources, and university updates.',
-    ctaLink: 'http://localhost:5173/profile',
+    ctaLink: '/profile',
     ctaText: 'Access Your Profile',
   },
   {
@@ -168,7 +168,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Urgent: Complete Your Graduation Clearance Requirements',
     message: 'Notice to graduating batch: Please submit all outstanding clearance documents before the deadline to receive official transcript issuance.',
-    ctaLink: 'http://localhost:5173/clearance',
+    ctaLink: '/clearance',
     ctaText: 'Submit Clearance Docs',
   },
   {
@@ -176,7 +176,7 @@ const templatesList: Template[] = [
     category: 'Mentorship & Network',
     title: 'Join the ASTU Alumni Mentorship Network',
     message: 'Share your professional experience! Become an ASTU Alumni Mentor and guide current engineering students in their career journeys.',
-    ctaLink: 'http://localhost:5173/mentorship',
+    ctaLink: '/mentorship',
     ctaText: 'Become a Mentor',
   },
   {
@@ -185,7 +185,7 @@ const templatesList: Template[] = [
     title: 'Support the ASTU Innovation & Student Scholarship Fund',
     message: 'Your contribution empowers the next generation of engineers and researchers at ASTU. Donate today to support student scholarships.',
     imageUrl: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb0?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/donations',
+    ctaLink: '/donations',
     ctaText: 'Donate to Scholarship Fund',
   },
   {
@@ -193,7 +193,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Document Verification Request Processed',
     message: 'Your document verification request has been reviewed and approved by the ASTU Registrar Office. Download your official document from your profile.',
-    ctaLink: 'http://localhost:5173/documents',
+    ctaLink: '/documents',
     ctaText: 'Download Verified Document',
   },
   {
@@ -202,7 +202,7 @@ const templatesList: Template[] = [
     title: 'ASTU National Tech & Engineering Career Fair',
     message: 'Register for the ASTU Virtual Career Fair featuring over 30 leading technology and industrial partner companies. Upload your resume to participate.',
     imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop',
-    ctaLink: 'http://localhost:5173/career-fair',
+    ctaLink: '/career-fair',
     ctaText: 'Register for Career Fair',
   },
   {
@@ -210,7 +210,7 @@ const templatesList: Template[] = [
     category: 'Clearance & Admin',
     title: 'Security Update: Please Verify Your Security Preferences',
     message: 'We noticed a new login attempt on your ASTU AMS account. If this was not you, please update your password and enable Two-Factor Authentication immediately.',
-    ctaLink: 'http://localhost:5173/settings/security',
+    ctaLink: '/settings/security',
     ctaText: 'Manage Account Security',
   },
   {
@@ -1312,7 +1312,7 @@ export default function NotificationCenter() {
         toast.success('Inserted Success Callout Component.');
         break;
       case 'cta_button':
-        setCtaLink('http://localhost:5173/alumni');
+        setCtaLink('/alumni/dashboard');
         setCtaText('Access ASTU Portal Now');
         toast.success('Inserted Primary CTA Action Button Component.');
         break;
@@ -1353,11 +1353,11 @@ export default function NotificationCenter() {
         toast.success('Inserted Countdown Urgency Badge Component.');
         break;
       case 'component_rsvp_grid':
-        insertFormatting('\n\n[ RSVP YES ](http://localhost:5173/events/rsvp?status=yes) | [ RSVP MAYBE ](http://localhost:5173/events/rsvp?status=maybe) | [ RSVP NO ](http://localhost:5173/events/rsvp?status=no)\n');
+        insertFormatting('\n\n[ RSVP YES ](/events/rsvp?status=yes) | [ RSVP MAYBE ](/events/rsvp?status=maybe) | [ RSVP NO ](/events/rsvp?status=no)\n');
         toast.success('Inserted Interactive RSVP Button Grid Component.');
         break;
       case 'component_document_card':
-        insertFormatting('\n **Attachment Document:** [Download ASTU Clearance Form (PDF)](http://localhost:5173/documents/clearance-form.pdf)\n');
+        insertFormatting('\n **Attachment Document:** [Download ASTU Clearance Form (PDF)](/documents/clearance-form.pdf)\n');
         toast.success('Inserted PDF Attachment Document Card.');
         break;
 
@@ -1605,27 +1605,27 @@ export default function NotificationCenter() {
         toast.success('Auto-BCC Active: alumni-office@astu.edu.et added to hidden copy list.');
         break;
       case 'auto_token_survey_url':
-        setCtaLink('http://localhost:5173/alumni/tracer-survey');
+        setCtaLink('/alumni/tracer-survey');
         setCtaText('Complete Survey Now');
         toast.success('Attached Tracer Survey link token.');
         break;
       case 'auto_token_employer_url':
-        setCtaLink('http://localhost:5173/employer/dashboard');
+        setCtaLink('/employer/dashboard');
         setCtaText('Open Employer Dashboard');
         toast.success('Attached Employer Portal link token.');
         break;
       case 'auto_token_event_url':
-        setCtaLink('http://localhost:5173/events');
+        setCtaLink('/events');
         setCtaText('Register for Event');
         toast.success('Attached Event Registration link token.');
         break;
       case 'auto_token_password_url':
-        setCtaLink('http://localhost:5173/reset-password');
+        setCtaLink('/reset-password');
         setCtaText('Reset Password');
         toast.success('Attached Password Reset link token.');
         break;
       case 'auto_token_transcript_url':
-        setCtaLink('http://localhost:5173/registrar/transcripts');
+        setCtaLink('/registrar/dashboard');
         setCtaText('Request Official Transcript');
         toast.success('Attached Transcript Request link token.');
         break;
@@ -1655,7 +1655,7 @@ export default function NotificationCenter() {
 
       // --- SECURITY & COMPLIANCE (106-120) ---
       case 'sec_unsubscribe':
-        insertFormatting('\n\n---\n<small>To update your email notification preferences, click [Unsubscribe Preferences](http://localhost:5173/settings/notifications)</small>');
+        insertFormatting('\n\n---\n<small>To update your email notification preferences, click [Unsubscribe Preferences](/settings/notifications)</small>');
         toast.success('Inserted GDPR / Privacy Unsubscribe Footer.');
         break;
       case 'sec_pii_masking':

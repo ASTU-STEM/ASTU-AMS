@@ -1,94 +1,121 @@
 {
   "users": [
     {
+      "id": "user-super-admin-1",
+      "email": "superadmin@astu.edu.et",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
+      "role": "SUPER_ADMIN",
+      "isActive": true,
+      "createdAt": "2026-11-02T14:50:37.305Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
+    },
+    {
+      "id": "user-super-admin-2",
+      "email": "admin@astust.edu.et",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
+      "role": "SUPER_ADMIN",
+      "isActive": true,
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
+    },
+    {
       "id": "user-admin-1",
       "email": "admin@astu.edu.et",
-      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "ADMIN",
       "isActive": true,
-      "createdAt": "2026-09-07T20:51:22.076Z",
-      "updatedAt": "2026-09-07T20:51:22.083Z"
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
       "id": "user-registrar-1",
       "email": "registrar@astu.edu.et",
-      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "REGISTRAR",
       "isActive": true,
-      "createdAt": "2026-09-07T20:51:22.083Z",
-      "updatedAt": "2026-09-07T20:51:22.083Z"
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
       "id": "user-cms-1",
       "email": "alumnioffice@astu.edu.et",
-      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "ALUMNI_OFFICE",
       "isActive": true,
-      "createdAt": "2026-09-07T20:51:22.083Z",
-      "updatedAt": "2026-09-07T20:51:22.083Z"
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
       "id": "user-dept-1",
       "email": "depthead.swe@astu.edu.et",
-      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "DEPARTMENT_HEAD",
       "isActive": true,
-      "createdAt": "2026-09-07T20:51:22.083Z",
-      "updatedAt": "2026-09-07T20:51:22.083Z"
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
+    },
+    {
+      "id": "user-dept-2",
+      "email": "depthead.ece@astu.edu.et",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
+      "role": "DEPARTMENT_HEAD",
+      "isActive": true,
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
+    },
+    {
+      "id": "user-dept-3",
+      "email": "depthead.meg@astu.edu.et",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
+      "role": "DEPARTMENT_HEAD",
+      "isActive": true,
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
+    },
+    {
+      "id": "user-dept-4",
+      "email": "depthead.cve@astu.edu.et",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
+      "role": "DEPARTMENT_HEAD",
+      "isActive": true,
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
       "id": "test-employer-user-uuid",
       "email": "safaricom@mail.com",
-      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "EMPLOYER",
       "isActive": true,
-      "createdAt": "2026-09-07T20:51:22.083Z",
-      "updatedAt": "2026-09-07T20:51:22.083Z"
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
       "id": "e2e-alumni-user",
       "email": "helen@alumni.com",
-      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "ALUMNI",
       "isActive": true,
-      "createdAt": "2026-09-07T20:51:22.083Z",
-      "updatedAt": "2026-09-07T20:51:22.083Z"
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
       "id": "test-alumni-user-uuid",
       "email": "bob@alumni.com",
-      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "ALUMNI",
       "isActive": true,
-      "createdAt": "2026-09-07T20:51:22.083Z",
-      "updatedAt": "2026-09-07T20:51:22.083Z"
+      "createdAt": "2026-11-02T14:50:37.306Z",
+      "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
-      "email": "didit_test_1792422682795@alumni.astu.edu.et",
-      "password": "hash123",
+      "id": "alice-alumni-user",
+      "email": "alice@alumni.com",
+      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "ALUMNI",
       "isActive": true,
-      "id": "dev-1792422684633",
-      "createdAt": "2026-10-19T15:11:24.633Z",
-      "updatedAt": "2026-10-19T15:11:24.633Z"
-    },
-    {
-      "email": "didit_test_1792423377097@alumni.astu.edu.et",
-      "password": "hash123",
-      "role": "ALUMNI",
-      "isActive": true,
-      "id": "dev-1792423379026",
-      "createdAt": "2026-10-19T15:22:59.026Z",
-      "updatedAt": "2026-10-19T15:22:59.026Z"
-    },
-    {
-      "email": "didit_test_1792510708358@alumni.astu.edu.et",
-      "password": "hash123",
-      "role": "ALUMNI",
-      "isActive": true,
-      "id": "dev-1792510709793",
-      "createdAt": "2026-10-20T15:38:29.793Z",
-      "updatedAt": "2026-10-20T15:38:29.793Z"
+      "createdAt": "2026-11-03T11:56:50.763Z",
+      "updatedAt": "2026-11-03T11:56:50.763Z"
     }
   ],
   "alumniProfiles": [
@@ -34005,6 +34032,33 @@
       "pendingVerificationCode": null,
       "verificationCodeExpiresAt": null,
       "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "studentId": "ASTU/SWE/001/20",
+      "fullName": "Alice Johnson",
+      "email": "alice@alumni.com",
+      "cgpa": 3.82,
+      "graduationYear": 2024,
+      "gender": "Female",
+      "departmentId": "dev-dept-swe",
+      "status": "ACTIVE",
+      "skills": [
+        "React",
+        "Node.js",
+        "PostgreSQL",
+        "TypeScript",
+        "Docker"
+      ],
+      "id": "dev-alumni-alice",
+      "createdAt": "2026-11-03T11:56:50.763Z",
+      "updatedAt": "2026-11-03T11:56:50.763Z",
+      "employmentStatus": "EMPLOYED",
+      "salary": 28000,
+      "preferences": {
+        "company": "Safaricom Ethiopia",
+        "currentRole": "Junior Fullstack Engineer"
+      }
     }
   ],
   "employerProfiles": [

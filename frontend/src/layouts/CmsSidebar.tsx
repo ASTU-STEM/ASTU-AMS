@@ -52,6 +52,7 @@ interface EnhancedNavItem extends AdminNavItem {
 
 const navItems: EnhancedNavItem[] = [
   { label: 'Dashboard', path: '/cms/dashboard', icon: LayoutDashboard, exact: true, section: 'alumni-office', tooltip: 'Alumni Office overview & statistics' },
+  { label: 'Alumni Directory', path: '/cms/alumni-directory', icon: Users, section: 'alumni-office', tooltip: 'Verified alumni database & graduate records' },
   { label: 'Tracer Surveys', path: '/cms/surveys', icon: ClipboardList, section: 'alumni-office', tooltip: 'Longitudinal tracer study engine & cohorts' },
   { label: 'Analytics & Insights', path: '/cms/analytics', icon: BarChart3, section: 'alumni-office', tooltip: 'Employment rate, time-to-hire & skill gaps' },
   { label: 'Reports Center', path: '/cms/reports', icon: FileBarChart, section: 'alumni-office', tooltip: 'Official ETA & accreditation export dossiers' },

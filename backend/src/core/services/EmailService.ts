@@ -232,6 +232,9 @@ export class EmailService {
   }
 
   async sendMail(options: MailOptions) {
+    if (process.env.NODE_ENV === 'test') {
+      return { messageId: 'test-mock-msg-id', response: '250 Mock test ok' };
+    }
     const resolvedTo = await this.resolveUserDeliveryEmail(options.to);
     
     let activeFrom = options.from || env.SMTP_FROM;

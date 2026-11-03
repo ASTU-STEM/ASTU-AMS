@@ -110,8 +110,6 @@ export default function VideoDetailModal({
   onSelectRelatedVideo,
   relatedVideos = [],
 }: VideoDetailModalProps) {
-  if (!video) return null;
-
   // Player mode: 'stream' (Direct Interactive Campus HD Stream) | 'embed' (External YouTube/Vimeo)
   const [playerMode, setPlayerMode] = useState<'stream' | 'embed'>('stream');
   const [isPlaying, setIsPlaying] = useState(false);
@@ -123,12 +121,12 @@ export default function VideoDetailModal({
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
   const totalDurationSeconds = useMemo(() => {
-    return parseTimeToSeconds(video.duration) || 522; // default ~08:42
-  }, [video.duration]);
+    return parseTimeToSeconds(video?.duration) || 522; // default ~08:42
+  }, [video?.duration]);
 
   // Synthesis of rich ASTU ceremonial/academic metadata when missing
   const enrichedMetadata = useMemo(() => {
-    const titleLower = (video.title || '').toLowerCase();
+    const titleLower = (video?.title || '').toLowerCase();
     const isGraduation = titleLower.includes('graduation') || titleLower.includes('commencement');
     const isResearch = titleLower.includes('research') || titleLower.includes('innovation') || titleLower.includes('forum');
     const isRobotics = titleLower.includes('robotics') || titleLower.includes('mechatronics') || titleLower.includes('lab');
@@ -210,12 +208,12 @@ export default function VideoDetailModal({
 [02:00] Lead Presenter: "Our engineering laboratories have unified computational research with tangible physical prototypes, delivering accelerated outcomes for national industry partners."`;
 
     return {
-      venue: video.venue || defaultVenue,
-      producer: video.producer || defaultProducer,
-      speakers: video.speakers && video.speakers.length > 0 ? video.speakers : defaultSpeakers,
-      chapters: video.chapters && video.chapters.length > 0 ? video.chapters : defaultChapters,
-      highlights: video.highlights && video.highlights.length > 0 ? video.highlights : defaultHighlights,
-      transcript: video.transcript || defaultTranscript,
+      venue: video?.venue || defaultVenue,
+      producer: video?.producer || defaultProducer,
+      speakers: video?.speakers && video.speakers.length > 0 ? video.speakers : defaultSpeakers,
+      chapters: video?.chapters && video.chapters.length > 0 ? video.chapters : defaultChapters,
+      highlights: video?.highlights && video.highlights.length > 0 ? video.highlights : defaultHighlights,
+      transcript: video?.transcript || defaultTranscript,
     };
   }, [video]);
 
@@ -276,6 +274,8 @@ export default function VideoDetailModal({
       toast.success('Ready to share video highlight!');
     }
   };
+
+  if (!video) return null;
 
   const videoPoster = video.image || '/images/gc7.jpg';
   const embedUrl = getEmbedVideoUrl(video.link);

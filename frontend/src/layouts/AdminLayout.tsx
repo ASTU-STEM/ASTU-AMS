@@ -57,6 +57,7 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/admin/surveys': { title: 'Survey Management', breadcrumb: [{ label: 'Admin' }, { label: 'Surveys' }] },
   '/admin/jobs': { title: 'Jobs Management', breadcrumb: [{ label: 'Admin' }, { label: 'Jobs' }] },
   '/admin/departments': { title: 'Departments', breadcrumb: [{ label: 'Admin' }, { label: 'Departments' }] },
+  '/admin/donations': { title: 'Donations & Giving', breadcrumb: [{ label: 'Admin' }, { label: 'Donations' }] },
   '/admin/notifications': { title: 'Notifications', breadcrumb: [{ label: 'Admin' }, { label: 'Notifications' }] },
   '/admin/logs': { title: 'System Logs', breadcrumb: [{ label: 'Admin' }, { label: 'Logs' }] },
   '/admin/backup': { title: 'Backup & Security', breadcrumb: [{ label: 'Admin' }, { label: 'Backup' }] },
@@ -141,8 +142,11 @@ export default function AdminLayout() {
   }, []);
 
   const meta = useMemo(() => {
-    const current = routeMeta[location.pathname] || routeMeta['/admin/dashboard'];
-    return current;
+    if (routeMeta[location.pathname]) return routeMeta[location.pathname];
+    if (location.pathname.startsWith('/admin/departments/')) {
+      return { title: 'Department Details', breadcrumb: [{ label: 'Admin' }, { label: 'Departments' }, { label: 'Details' }] };
+    }
+    return routeMeta['/admin/dashboard'];
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -209,7 +213,7 @@ export default function AdminLayout() {
       <NavLink
         to="/admin/profile"
         onClick={() => setMenuOpen(false)}
-        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#1B2636] hover:text-[var(--text-primary)]"
       >
         <User className="h-4 w-4" />
         My Profile
@@ -217,7 +221,7 @@ export default function AdminLayout() {
       <NavLink
         to="/admin/settings"
         onClick={() => setMenuOpen(false)}
-        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#1B2636] hover:text-[var(--text-primary)]"
       >
         <Settings className="h-4 w-4" />
         Settings
@@ -228,7 +232,7 @@ export default function AdminLayout() {
           setMenuOpen(false);
           setHelpOpen(true);
         }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#1B2636] hover:text-[var(--text-primary)]"
       >
         <HelpCircle className="h-4 w-4" />
         Help
@@ -240,7 +244,7 @@ export default function AdminLayout() {
           setMenuOpen(false);
           handleLogout();
         }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50"
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50 dark:hover:bg-[#3B1A22]/50"
       >
         <LogOut className="h-4 w-4" />
         Logout
@@ -314,23 +318,22 @@ export default function AdminLayout() {
 
           <div className="flex items-center gap-3">
             <label
-              className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#003580] focus-within:ring-2 focus-within:ring-[#003580]/10 dark:bg-[#1E2130]"
-              style={{ borderColor: 'var(--border-color)' }}
+              className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#2196F3] focus-within:ring-2 focus-within:ring-[#2196F3]/15 dark:bg-[#151D2B] dark:border-[#2A3749]"
             >
-              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8FA3BF]">
+              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-slate-400 dark:text-[#8493A8]">
                 <Search className="h-4.5 w-4.5 flex-none" />
               </span>
               <input
                 type="text"
                 placeholder="Search resources..."
-                className="w-full bg-transparent outline-none placeholder:text-[#7C879D] dark:placeholder:text-[#97A0B8]"
+                className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-[#8493A8] text-slate-900 dark:text-[#F1F5F9]"
               />
             </label>
 
             <button
               type="button"
               onClick={toggleTheme}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#151D2B]"
               aria-label="Toggle dark mode"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -340,7 +343,7 @@ export default function AdminLayout() {
               <button
                 type="button"
                 onClick={handleToggleNotifications}
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#151D2B]"
                 title={unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"}
               >
                 <Bell className="h-4 w-4" />
@@ -351,17 +354,17 @@ export default function AdminLayout() {
                 )}
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-                  <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5">
+                <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-2 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#2A3749] px-3 py-2.5">
                     <div>
-                      <div className="text-sm font-extrabold text-slate-900">Notifications</div>
-                      <div className="text-[11px] font-medium text-slate-500">{unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}</div>
+                      <div className="text-sm font-extrabold text-slate-900 dark:text-[#F1F5F9]">Notifications</div>
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-[#8493A8]">{unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}</div>
                     </div>
                     {unreadCount > 0 && (
                       <button
                         type="button"
                         onClick={handleMarkAllRead}
-                        className="text-[11px] font-bold text-[#003580] hover:underline"
+                        className="text-[11px] font-bold text-[#003580] dark:text-[#22D3EE] hover:underline"
                       >
                         Mark all as read
                       </button>
@@ -369,7 +372,7 @@ export default function AdminLayout() {
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-1 p-1">
                     {displayNotifications.length === 0 ? (
-                      <div className="py-8 text-center text-xs text-slate-400">
+                      <div className="py-8 text-center text-xs text-slate-400 dark:text-[#8493A8]">
                         No new notifications
                       </div>
                     ) : (
@@ -383,33 +386,33 @@ export default function AdminLayout() {
                               setRealNotifications((prev) => prev.map((n) => n.id === item.id ? { ...n, isRead: true, read: true } : n));
                               setUnreadCount((prev) => Math.max(0, prev - 1));
                             }}
-                            className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50' : 'hover:bg-slate-50'}`}
+                            className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50 dark:bg-[#1B2636] dark:hover:bg-[#202E40]' : 'hover:bg-slate-50 dark:hover:bg-[#1B2636]'}`}
                           >
                             <span
                               className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
-                              style={{ backgroundColor: item.tone || (isUnread ? '#003580' : '#94A3B8') }}
+                              style={{ backgroundColor: item.tone || (isUnread ? '#2196F3' : '#8493A8') }}
                             />
                             <div className="min-w-0 flex-1">
-                              {item.title && <p className="text-xs font-extrabold text-slate-900">{item.title}</p>}
-                              <p className="text-xs font-medium text-slate-700 leading-snug">{item.message || item.text || item.content}</p>
-                              <p className="mt-1 text-[10px] font-semibold text-slate-400">
+                              {item.title && <p className="text-xs font-extrabold text-slate-900 dark:text-[#F1F5F9]">{item.title}</p>}
+                              <p className="text-xs font-medium text-slate-700 dark:text-[#B0BDCE] leading-snug">{item.message || item.text || item.content}</p>
+                              <p className="mt-1 text-[10px] font-semibold text-slate-400 dark:text-[#8493A8]">
                                 {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : item.time || 'Recently'}
                               </p>
                             </div>
-                            {isUnread && <span className="w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0 mt-1.5" />}
+                            {isUnread && <span className="w-1.5 h-1.5 rounded-full bg-[#003580] dark:bg-[#22D3EE] shrink-0 mt-1.5" />}
                           </div>
                         );
                       })
                     )}
                   </div>
-                  <div className="border-t border-slate-100 px-3 py-2.5 text-center">
+                  <div className="border-t border-slate-100 dark:border-[#2A3749] px-3 py-2.5 text-center">
                     <button
                       type="button"
                       onClick={() => {
                         setNotificationOpen(false);
                         navigate('/admin/notifications');
                       }}
-                      className="text-xs font-extrabold text-[#003580] hover:underline"
+                      className="text-xs font-extrabold text-[#003580] dark:text-[#22D3EE] hover:underline"
                     >
                       View all notifications →
                     </button>
@@ -432,14 +435,14 @@ export default function AdminLayout() {
                   <div className="text-sm font-medium text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">{user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator'}</div>
                 </div>
-                <ChevronDown className="h-4 w-4 text-slate-400" />
+                <ChevronDown className="h-4 w-4 text-slate-400 dark:text-[#8493A8]" />
               </button>
               {menuOpen && menu}
             </div>
           </div>
         </header>
 
-        <main id="main-content" tabIndex={-1}className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1} className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 dark:bg-[#0B0F19] p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
             <Outlet />
           </AdminRouteBoundary>

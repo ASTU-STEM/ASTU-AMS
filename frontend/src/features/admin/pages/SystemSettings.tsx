@@ -1,22 +1,28 @@
 import React, { useMemo, useState } from 'react';
 import {
   Building2,
+  Check,
   CheckCircle2,
   ChevronRight,
   CloudUpload,
   Database,
   Download,
+  Eye,
   Globe2,
   ImagePlus,
   Info,
+  Layout,
   Link2,
   Mail,
+  Monitor,
+  Moon,
   Palette,
   RefreshCw,
   Save,
   Send,
   Settings2,
   Sparkles,
+  Sun,
   ToggleLeft,
   ToggleRight,
   UploadCloud,
@@ -31,6 +37,7 @@ import AdminStatCard from '../components/AdminStatCard';
 import { toast } from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
 import { useSystemSettings } from '../../../context/SystemSettingsContext';
+import { useTheme, type ThemeMode } from '../../../hooks/useTheme';
 
 type SettingsTab = 'general' | 'email' | 'integrations' | 'data' | 'appearance';
 
@@ -205,6 +212,7 @@ function IntegrationItem({
 
 export default function SystemSettings() {
   const { updateSettingsState } = useSystemSettings();
+  const { themeMode, setThemeMode, theme, darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [testEmailOpen, setTestEmailOpen] = useState(false);
   const [testConnectionOpen, setTestConnectionOpen] = useState(false);
@@ -1271,97 +1279,286 @@ export default function SystemSettings() {
       )}
 
       {activeTab === 'appearance' && (
-        <SectionCard title="Appearance" subtitle="Branding and visual identity configuration.">
-          <input
-            type="file"
-            ref={logoFileInputRef}
-            onChange={handleLogoFileChange}
-            accept="image/*"
-            className="hidden"
-          />
-          <div className="grid gap-4 xl:grid-cols-2">
-            <div className="space-y-4">
-              <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900">University Logo</h4>
-                    <p className="mt-1 text-xs text-slate-500">Upload and preview the institution logo.</p>
+        <div className="space-y-6">
+          {/* Theme Mode Selector Card */}
+          <SectionCard
+            title="Portal Theme Mode"
+            subtitle="Choose your global display theme. Changes apply immediately across all university portals and sync with user preferences."
+          >
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                {
+                  id: 'light' as ThemeMode,
+                  title: 'Light Mode',
+                  description: 'Clean bright canvas with high-contrast text and ASTU navy accents.',
+                  icon: Sun,
+                  activeColor: 'border-[#003580] bg-blue-50/50 dark:bg-blue-950/20 text-[#003580] dark:text-blue-400',
+                  previewBg: 'bg-white border-slate-200 text-slate-800',
+                },
+                {
+                  id: 'dark' as ThemeMode,
+                  title: 'Dark Mode',
+                  description: 'Deep slate canvas with optimized contrast, reduced glare, and low eye-strain.',
+                  icon: Moon,
+                  activeColor: 'border-blue-500 bg-blue-950/30 text-blue-400',
+                  previewBg: 'bg-slate-900 border-slate-800 text-slate-100',
+                },
+                {
+                  id: 'system' as ThemeMode,
+                  title: 'System Default',
+                  description: 'Automatically synchronizes with your operating system or browser theme preference.',
+                  icon: Monitor,
+                  activeColor: 'border-[#003580] bg-slate-50 dark:bg-slate-800/50 text-[#003580] dark:text-blue-400',
+                  previewBg: 'bg-gradient-to-r from-white to-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100',
+                },
+              ].map((mode) => {
+                const Icon = mode.icon;
+                const isSelected = themeMode === mode.id;
+                return (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    onClick={() => {
+                      setThemeMode(mode.id);
+                      toast.success(`Theme mode set to ${mode.title}`);
+                    }}
+                    className={`relative flex flex-col items-start p-4 rounded-xl border text-left transition-all duration-200 hover:shadow-md cursor-pointer ${
+                      isSelected
+                        ? `ring-2 ring-[#003580] dark:ring-blue-500 ${mode.activeColor} shadow-xs`
+                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full mb-3">
+                      <div className={`p-2 rounded-lg border ${isSelected ? 'border-[#003580]/20 bg-[#003580]/10 text-[#003580] dark:text-blue-400' : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      {isSelected ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400">
+                          <Check className="w-3 h-3" />
+                          Active
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                          Select
+                        </span>
+                      )}
+                    </div>
+                    <div className="font-bold text-sm text-slate-900 dark:text-white mb-1">
+                      {mode.title}
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
+                      {mode.description}
+                    </p>
+                    <div className={`mt-3 w-full h-2 rounded-full border ${mode.previewBg}`} />
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700 p-3 text-xs text-slate-600 dark:text-slate-300">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-[#003580] dark:text-blue-400 shrink-0" />
+                <span>
+                  Currently rendering in <strong className="text-slate-900 dark:text-white uppercase font-extrabold">{theme} mode</strong> (Mode Setting: <span className="font-semibold">{themeMode}</span>).
+                </span>
+              </div>
+              <AdminBadge variant={darkMode ? 'purple' : 'info'}>
+                {darkMode ? 'Dark Engine Active' : 'Light Engine Active'}
+              </AdminBadge>
+            </div>
+          </SectionCard>
+
+          {/* ASTU Color Presets & Branding */}
+          <SectionCard title="Branding & Palette" subtitle="University logos, signature color presets, and customizable primary and accent colorways.">
+            <input
+              type="file"
+              ref={logoFileInputRef}
+              onChange={handleLogoFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+
+            {/* Presets Grid */}
+            <div className="mb-6">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
+                ASTU Institutional Palette Presets
+              </label>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  { name: 'ASTU Official Gold & Navy', primary: '#003366', accent: '#FFCC00', desc: 'Standard ASTU visual identity' },
+                  { name: 'Executive Royal Tech', primary: '#003580', accent: '#E8A020', desc: 'High-contrast institutional admin' },
+                  { name: 'Emerald Campus Green', primary: '#006633', accent: '#FFD700', desc: 'Research & academic growth' },
+                  { name: 'Modern STEM Slate', primary: '#0F172A', accent: '#38BDF8', desc: 'Telemetry & engineering focus' },
+                ].map((preset) => {
+                  const isCurrent = primaryColor.toUpperCase() === preset.primary.toUpperCase();
+                  return (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      onClick={() => {
+                        setPrimaryColor(preset.primary);
+                        setAccentColor(preset.accent);
+                        toast.success(`Applied ${preset.name} preset`);
+                      }}
+                      className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        isCurrent
+                          ? 'border-[#003580] dark:border-blue-500 bg-blue-50/30 dark:bg-blue-950/20 ring-1 ring-[#003580]/20'
+                          : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2 w-full">
+                        <span className="w-5 h-5 rounded-full shadow-xs border border-white/20 shrink-0" style={{ backgroundColor: preset.primary }} />
+                        <span className="w-5 h-5 rounded-full shadow-xs border border-white/20 shrink-0" style={{ backgroundColor: preset.accent }} />
+                        {isCurrent && <Check className="w-3.5 h-3.5 text-[#003580] dark:text-blue-400 ml-auto" />}
+                      </div>
+                      <div className="font-bold text-xs text-slate-900 dark:text-white leading-tight">
+                        {preset.name}
+                      </div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                        {preset.desc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-2">
+              <div className="space-y-4">
+                <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-900 dark:text-white">University Logo</h4>
+                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Upload and preview the institution logo.</p>
+                    </div>
+                    <AdminBadge variant="neutral">Preview</AdminBadge>
                   </div>
-                  <AdminBadge variant="neutral">Preview</AdminBadge>
+                  <div className="mt-4 flex items-center gap-4">
+                    <img src={logoPreview} alt="University logo preview" className="h-20 w-20 rounded-[10px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 object-contain p-2 shadow-xs" />
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => logoFileInputRef.current?.click()}
+                        className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-[#003580] dark:text-blue-400 hover:bg-[#003580]/5 shadow-xs"
+                      >
+                        <ImagePlus className="h-4 w-4" />
+                        Upload Logo
+                      </button>
+                      <div>
+                        <button
+                          type="button"
+                          onClick={resetDefaults}
+                          className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                        >
+                          <WandSparkles className="h-3.5 w-3.5 text-[#E8A020]" />
+                          Reset to ASTU Defaults
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-4 flex items-center gap-4">
-                  <img src={logoPreview} alt="University logo preview" className="h-20 w-20 rounded-[10px] border border-slate-200 bg-white object-contain p-2 shadow-xs" />
+
+                {/* Custom Color Inputs */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <InputLabel label="Primary color">
+                    <div className="flex items-center gap-3 rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2">
+                      <input type="color" value={primaryColor} onChange={(event) => setPrimaryColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-slate-200 dark:border-slate-700" />
+                      <input
+                        type="text"
+                        value={primaryColor}
+                        onChange={(event) => setPrimaryColor(event.target.value)}
+                        className="w-full text-sm font-medium text-slate-700 dark:text-slate-200 bg-transparent outline-none uppercase"
+                      />
+                    </div>
+                  </InputLabel>
+                  <InputLabel label="Accent color">
+                    <div className="flex items-center gap-3 rounded-[8px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2">
+                      <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-slate-200 dark:border-slate-700" />
+                      <input
+                        type="text"
+                        value={accentColor}
+                        onChange={(event) => setAccentColor(event.target.value)}
+                        className="w-full text-sm font-medium text-slate-700 dark:text-slate-200 bg-transparent outline-none uppercase"
+                      />
+                    </div>
+                  </InputLabel>
+                </div>
+              </div>
+
+              {/* Interactive Live Component Preview */}
+              <div className="space-y-4">
+                <div className="rounded-[10px] border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-[#003580] dark:text-blue-400" />
+                      Live Theme &amp; Component Preview
+                    </h4>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Interactive
+                    </span>
+                  </div>
+
+                  {/* Simulated Mini Admin Component */}
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm space-y-3">
+                    <div
+                      className="p-3 rounded-lg text-white flex items-center justify-between shadow-xs"
+                      style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}CC 100%)` }}
+                    >
+                      <div>
+                        <div className="text-[9px] font-extrabold uppercase tracking-widest text-[#FFCC00]">
+                          ASTU Alumni Office
+                        </div>
+                        <div className="text-xs font-extrabold">Executive Preview Console</div>
+                      </div>
+                      <span
+                        className="px-2 py-0.5 rounded-full text-[9px] font-bold text-slate-900 shadow-2xs"
+                        style={{ backgroundColor: accentColor }}
+                      >
+                        Accent Live
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">Status</span>
+                        <div className="font-extrabold text-slate-900 dark:text-white mt-0.5">High-Availability</div>
+                      </div>
+                      <div className="p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">Coverage</span>
+                        <div className="font-extrabold text-slate-900 dark:text-white mt-0.5">99.4% Verified</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="flex gap-2">
+                        <span className="h-4 w-4 rounded-full border border-slate-300 dark:border-slate-600" style={{ backgroundColor: primaryColor }} title="Primary" />
+                        <span className="h-4 w-4 rounded-full border border-slate-300 dark:border-slate-600" style={{ backgroundColor: accentColor }} title="Accent" />
+                      </div>
+                      <button
+                        type="button"
+                        className="px-3 py-1 rounded-lg text-xs font-bold text-white shadow-xs transition-opacity hover:opacity-90"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        Action Button
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
                   <button
                     type="button"
-                    onClick={() => logoFileInputRef.current?.click()}
-                    className="inline-flex items-center gap-2 rounded-[8px] border border-[#003580]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#003580] hover:bg-[#003580]/5 shadow-xs"
+                    onClick={handleSaveSettings}
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 shadow-sm cursor-pointer"
                   >
-                    <ImagePlus className="h-4 w-4" />
-                    Upload Logo
+                    <Save className="h-4 w-4" />
+                    {saving ? 'Saving...' : 'Save Appearance'}
                   </button>
                 </div>
               </div>
-
-              <button
-                type="button"
-                onClick={resetDefaults}
-                className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 shadow-xs"
-              >
-                <WandSparkles className="h-4 w-4 text-[#E8A020]" />
-                Reset to ASTU Defaults
-              </button>
             </div>
-
-            <div className="space-y-4">
-              <InputLabel label="Primary color">
-                <div className="flex items-center gap-3 rounded-[8px] border border-slate-200 bg-white px-3 py-2">
-                  <input type="color" value={primaryColor} onChange={(event) => setPrimaryColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-slate-200" />
-                  <input
-                    type="text"
-                    value={primaryColor}
-                    onChange={(event) => setPrimaryColor(event.target.value)}
-                    className="w-full text-sm font-medium text-slate-700 outline-none uppercase"
-                  />
-                </div>
-              </InputLabel>
-              <InputLabel label="Accent color">
-                <div className="flex items-center gap-3 rounded-[8px] border border-slate-200 bg-white px-3 py-2">
-                  <input type="color" value={accentColor} onChange={(event) => setAccentColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded-md border border-slate-200" />
-                  <input
-                    type="text"
-                    value={accentColor}
-                    onChange={(event) => setAccentColor(event.target.value)}
-                    className="w-full text-sm font-medium text-slate-700 outline-none uppercase"
-                  />
-                </div>
-              </InputLabel>
-
-              <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
-                <h4 className="text-sm font-semibold text-slate-900">Palette Preview</h4>
-                <div className="mt-3 flex gap-3">
-                  <div className="flex h-14 w-28 items-center justify-center rounded-[10px] text-xs font-bold text-white shadow-inner" style={{ backgroundColor: primaryColor }}>
-                    Primary
-                  </div>
-                  <div className="flex h-14 w-28 items-center justify-center rounded-[10px] text-xs font-bold text-white shadow-inner" style={{ backgroundColor: accentColor }}>
-                    Accent
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-2 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSaveSettings}
-                  disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 shadow-sm"
-                >
-                  <Save className="h-4 w-4" />
-                  {saving ? 'Saving...' : 'Save Appearance'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </SectionCard>
+          </SectionCard>
+        </div>
       )}
 
       <AdminModal

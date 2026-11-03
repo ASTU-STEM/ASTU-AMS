@@ -28,6 +28,7 @@ import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
 import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
+import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
 import SupportPage from "./features/support/pages/SupportPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
@@ -70,6 +71,8 @@ function AppContent() {
         <Route path="/verify-2fa" element={<Verify2FAPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
+        <Route path="/activate-alumni" element={<AlumniActivationPage />} />
+        <Route path="/activate" element={<Navigate to="/activate-alumni" replace />} />
 
         {/* Verification routes protected by VerificationRouteGuard */}
         <Route element={<VerificationRouteGuard />}>

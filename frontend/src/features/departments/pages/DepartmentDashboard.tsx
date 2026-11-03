@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
-import { HelpCircle, LogOut, Menu, ChevronDown, FileText, BarChart3, Settings } from 'lucide-react';
+import { HelpCircle, LogOut, Menu, ChevronDown, FileText, BarChart3, Settings, Sparkles, CheckCircle2, ArrowRight, Award, GraduationCap, Users, BookOpen } from 'lucide-react';
+import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
 import HelpCenter from '../../../components/HelpCenter';
 
 // Components
@@ -164,21 +165,118 @@ const DepartmentDashboard = () => {
         switch (activeTab) {
             case 'management':
                 return (
-                    <section className="space-y-6 p-4 md:p-6">
-                        <div className="rounded-[20px] border border-white/10 bg-gradient-to-r from-astu-navy via-[#0f4f86] to-astu-green p-5 text-white shadow-md md:p-6">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Department management</p>
-                            <h2 className="mt-2 text-2xl font-semibold tracking-tight">Manage analytics, curriculum, KPIs, partnerships, and reports</h2>
-                            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-white/85">
-                                Graduate outcomes, curriculum review, ranking/KPI evidence, research collaboration, employability reporting, and industry partnership analytics.
-                            </p>
+                    <section className="space-y-6">
+                        {/* 1. Shared Institutional Hub Bridge */}
+                        <InstitutionalHubBridge currentHub="department" />
+
+                        {/* 2. Enhanced Department Hero */}
+                        <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#002244] via-[#003580] to-indigo-900 p-6 md:p-8 text-white shadow-xl">
+                            <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/4 pointer-events-none" />
+                            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                                <div className="max-w-3xl space-y-2">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-indigo-400/20 text-indigo-200 border border-indigo-400/30">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                                            Software Engineering (SWE) Academic Directorate
+                                        </span>
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                                        Department Academic Management Hub
+                                    </h2>
+                                    <p className="text-sm leading-relaxed text-white/80">
+                                        Curriculum alignment, tracer study analytics, ETA accreditation evidence, corporate industry advisory links, and graduate employability outcomes.
+                                    </p>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2.5">
+                                    <button
+                                        onClick={() => setActiveTab('curriculum')}
+                                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-bold border border-white/20 transition-all"
+                                    >
+                                        <BookOpen className="w-3.5 h-3.5 text-indigo-300" />
+                                        <span>Curriculum Review</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('accreditation')}
+                                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-md transition-all"
+                                    >
+                                        <Award className="w-3.5 h-3.5" />
+                                        <span>Accreditation Center</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* 3. Department Key Metrics */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                    <BookOpen className="w-4 h-4 text-indigo-500" />
+                                    <p className="text-[10px] font-bold uppercase tracking-wider">Curriculum Alignment</p>
+                                </div>
+                                <p className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2">94.2%</p>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Industry market matched</p>
+                            </div>
+
+                            <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                    <Award className="w-4 h-4 text-emerald-500" />
+                                    <p className="text-[10px] font-bold uppercase tracking-wider">Accreditation (ETA)</p>
+                                </div>
+                                <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">Criterion Met</p>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Criteria 4 & 8 certified</p>
+                            </div>
+
+                            <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                    <GraduationCap className="w-4 h-4 text-[#003580] dark:text-blue-400" />
+                                    <p className="text-[10px] font-bold uppercase tracking-wider">Employability Rate</p>
+                                </div>
+                                <p className="text-2xl font-extrabold text-[#003580] dark:text-blue-400 mt-2">88.4%</p>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">6-month tracer cohort</p>
+                            </div>
+
+                            <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                    <Users className="w-4 h-4 text-purple-500" />
+                                    <p className="text-[10px] font-bold uppercase tracking-wider">Industry Partners</p>
+                                </div>
+                                <p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400 mt-2">18 Active</p>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Telecom, FinTech & AI labs</p>
+                            </div>
+                        </div>
+
+                        {/* 4. Action Cards */}
                         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                             {departmentManagementActions.map((action) => (
-                                <button key={action.title} onClick={() => setActiveTab(action.tab)} className={`rounded-[10px] border p-5 text-left shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all hover:border-astu-navy/30 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-gray-200 bg-white'}`}>
-                                    <span className="material-symbols-outlined rounded-[8px] bg-astu-navy/10 p-2 text-astu-navy">{action.icon}</span>
-                                    <h3 className="mt-4 text-sm font-semibold">{action.title}</h3>
-                                    <p className="mt-1 text-xs leading-relaxed text-gray-500">{action.desc}</p>
-                                    <span className="mt-4 inline-flex rounded-[8px] bg-astu-navy px-3 py-2 text-xs font-semibold text-white">Manage / Create</span>
+                                <button
+                                    key={action.title}
+                                    onClick={() => setActiveTab(action.tab)}
+                                    className={`group rounded-2xl border p-5 text-left shadow-2xs hover:border-[#003580]/40 dark:hover:border-blue-500/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between ${
+                                        darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'
+                                    }`}
+                                >
+                                    <div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="material-symbols-outlined rounded-xl bg-[#003580]/10 dark:bg-blue-950/60 p-2.5 text-[#003580] dark:text-blue-400 group-hover:scale-110 transition-transform duration-300 text-xl">
+                                                {action.icon}
+                                            </span>
+                                            <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#003580] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                                        </div>
+                                        <h3 className="mt-3.5 text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#003580] dark:group-hover:text-blue-400 transition-colors">
+                                            {action.title}
+                                        </h3>
+                                        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                                            {action.desc}
+                                        </p>
+                                    </div>
+                                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                        <span className="text-[11px] font-bold text-[#003580] dark:text-blue-400">
+                                            Launch Workspace
+                                        </span>
+                                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                                            Tab: {action.tab}
+                                        </span>
+                                    </div>
                                 </button>
                             ))}
                         </div>
@@ -223,22 +321,21 @@ const DepartmentDashboard = () => {
 
     return (
         <>
-            <div className={`role-shell min-h-screen font-sans antialiased transition-all duration-300 ${darkMode ? 'bg-slate-950 text-white' : 'bg-[#f4f6fa] text-slate-800'
-                }`}>
+            <div className="app-shell role-shell min-h-screen bg-[#0B0F19] font-['Inter',sans-serif] text-[#F1F5F9] antialiased">
 
                 {mobileSidebarOpen && (
                     <button
                         type="button"
                         aria-label="Close navigation"
                         onClick={() => setMobileSidebarOpen(false)}
-                        className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
+                        className="fixed inset-0 z-30 bg-slate-950/60 backdrop-blur-sm md:hidden"
                     />
                 )}
 
-                {/* Exact Registrar-Inspired Premium White/Dark Sidebar Navigation */}
-                <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 ${darkMode ? 'bg-slate-900 border-r border-slate-800 text-slate-100' : 'bg-white border-r border-slate-200/80 text-slate-800'} ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'w-20 md:w-20' : 'w-72 md:w-72'}`}>
+                {/* Exact Enterprise Dark Sidebar Navigation */}
+                <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-[#080D18] border-r border-[#2A3749] text-[#F1F5F9] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'w-20 md:w-20' : 'w-72 md:w-72'}`}>
                     {/* Sidebar Logo Header */}
-                    <div className={`relative z-10 h-16 shrink-0 px-4 flex items-center border-b transition-colors ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'}`}>
+                    <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-[#2A3749] bg-[#080D18]">
                         <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
                             <div className="relative shrink-0 flex items-center justify-center h-10 w-10 overflow-hidden rounded-full">
                                 <img
@@ -249,8 +346,8 @@ const DepartmentDashboard = () => {
                             </div>
                             {!sidebarCollapsed && (
                                 <div>
-                                    <h1 className={`text-base font-extrabold tracking-tight leading-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>ASTU Department</h1>
-                                    <p className={`text-[11px] uppercase tracking-[0.16em] font-extrabold truncate mt-0.5 ${darkMode ? 'text-blue-400' : 'text-[#003580]'}`}>Management Portal</p>
+                                    <h1 className="text-base font-extrabold tracking-tight leading-tight text-[#F1F5F9]">ASTU Department</h1>
+                                    <p className="text-[11px] uppercase tracking-[0.16em] font-extrabold truncate mt-0.5 text-[#22D3EE]">Management Portal</p>
                                 </div>
                             )}
                         </div>
@@ -292,7 +389,7 @@ const DepartmentDashboard = () => {
                             <div key={group.sectionKey}>
                                 {!sidebarCollapsed && (
                                     <div className="px-2.5 mb-1.5 mt-1">
-                                        <p className={`text-[11.5px] font-extrabold uppercase tracking-[0.16em] ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{group.sectionLabel}</p>
+                                        <p className="text-[11.5px] font-extrabold uppercase tracking-[0.16em] text-[#8493A8]">{group.sectionLabel}</p>
                                     </div>
                                 )}
                                 <div className="space-y-1">
@@ -301,22 +398,14 @@ const DepartmentDashboard = () => {
                                             key={item.id}
                                             onClick={() => setActiveTab(item.id)}
                                             title={sidebarCollapsed ? item.label : item.tooltip}
-                                            className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
-                                                    ? darkMode
-                                                        ? 'bg-blue-600/20 text-blue-400 font-bold shadow-2xs ring-1 ring-blue-500/30'
-                                                        : 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
-                                                    : darkMode
-                                                        ? 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                                                        : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
+                                            className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
+                                                    ? 'bg-[#2196F3] text-white font-bold shadow-md'
+                                                    : 'text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B]'
                                                 }`}
                                         >
                                             <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id
-                                                    ? darkMode
-                                                        ? 'bg-blue-600 text-white shadow-xs'
-                                                        : 'bg-[#003580] text-white shadow-xs'
-                                                    : darkMode
-                                                        ? 'bg-slate-800 text-slate-400 group-hover:text-blue-400'
-                                                        : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
+                                                    ? 'bg-white/20 text-white shadow-xs'
+                                                    : 'bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white group-hover:border-[#2196F3]'
                                                 }`}>
                                                 <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
                                             </span>
@@ -325,10 +414,8 @@ const DepartmentDashboard = () => {
                                                     <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
                                                     {item.badge && (
                                                         <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${item.badge === 'NEW'
-                                                                ? 'bg-blue-600 text-white'
-                                                                : darkMode
-                                                                    ? 'bg-slate-800 text-slate-300 border border-slate-700'
-                                                                    : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                                                ? 'bg-[#2196F3] text-white'
+                                                                : 'bg-[#151D2B] text-[#B0BDCE] border border-[#2A3749]'
                                                             }`}>
                                                             {item.badge}
                                                         </span>
@@ -336,7 +423,7 @@ const DepartmentDashboard = () => {
                                                 </>
                                             )}
                                             {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                                                <div className={`ml-1 w-1.5 h-1.5 rounded-full shrink-0 ${darkMode ? 'bg-blue-400' : 'bg-[#003580]'}`} />
+                                                <div className="ml-1 w-1.5 h-1.5 rounded-full shrink-0 bg-white" />
                                             )}
                                         </button>
                                     ))}
@@ -346,50 +433,30 @@ const DepartmentDashboard = () => {
                     </nav>
 
                     {/* Sidebar Footer */}
-                    <div className={`relative z-10 p-3 border-t transition-colors space-y-1 ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'}`}>
+                    <div className="relative z-10 p-3 border-t border-[#2A3749] bg-[#080D18] space-y-1">
                         {!sidebarCollapsed && (
                             <>
                                 <button
                                     onClick={() => setHelpOpen(true)}
-                                    className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group gap-3.5 ${
-                                        darkMode
-                                            ? 'text-slate-400 hover:text-blue-400 hover:bg-slate-800/60'
-                                            : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
-                                    }`}
+                                    className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group gap-3.5 text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] cursor-pointer"
                                 >
-                                    <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                                        darkMode
-                                            ? 'bg-slate-800 text-slate-400 group-hover:text-blue-400'
-                                            : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
-                                    }`}>
+                                    <span className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white">
                                         <span className="material-symbols-outlined text-[20px]">help</span>
                                     </span>
                                     <span className="text-sm font-semibold flex-1 truncate">Help Center</span>
-                                    <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md border ${
-                                        darkMode
-                                            ? 'text-slate-400 bg-slate-800 border-slate-700'
-                                            : 'text-slate-400 bg-slate-100 border-slate-200'
-                                    }`}>
+                                    <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-md border text-[#8493A8] bg-[#151D2B] border-[#2A3749]">
                                         v1.4
                                     </span>
                                 </button>
                                 <button
                                     onClick={handleLogout}
-                                    className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group gap-3.5 ${
-                                        darkMode
-                                            ? 'text-rose-400 hover:bg-rose-950/40'
-                                            : 'text-rose-600 hover:bg-rose-50'
-                                    }`}
+                                    className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group gap-3.5 text-[#F87171] hover:bg-[#3B1A22] cursor-pointer"
                                 >
-                                    <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                                        darkMode
-                                            ? 'bg-rose-950/60 text-rose-400'
-                                            : 'bg-rose-50 text-rose-600'
-                                    }`}>
+                                    <span className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#3B1A22] border border-[#71313A] text-[#F87171]">
                                         <span className="material-symbols-outlined text-[20px]">logout</span>
                                     </span>
                                     <span className="text-sm font-bold flex-1 truncate">Logout</span>
-                                    <span className="text-[10px] text-rose-400 font-bold">Alt+L</span>
+                                    <span className="text-[10px] text-[#8493A8] font-bold">Alt+L</span>
                                 </button>
                             </>
                         )}
@@ -397,27 +464,19 @@ const DepartmentDashboard = () => {
                             <>
                                 <button
                                     onClick={() => setHelpOpen(true)}
-                                    className={`nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
-                                        darkMode ? 'text-slate-400 hover:bg-slate-800/60' : 'text-slate-600 hover:bg-slate-50'
-                                    }`}
+                                    className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 group relative text-[#B0BDCE] hover:bg-[#151D2B] cursor-pointer"
                                     title="Help Center"
                                 >
-                                    <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                                        darkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'
-                                    }`}>
+                                    <span className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#151D2B] border border-[#2A3749] text-[#22D3EE]">
                                         <span className="material-symbols-outlined text-[20px]">help</span>
                                     </span>
                                 </button>
                                 <button
                                     onClick={handleLogout}
-                                    className={`nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
-                                        darkMode ? 'text-rose-400 hover:bg-rose-950/40' : 'text-rose-600 hover:bg-rose-50'
-                                    }`}
+                                    className="nav-btn w-full flex items-center justify-center px-3 py-2.5 rounded-xl transition-all duration-200 group relative text-[#F87171] hover:bg-[#3B1A22] cursor-pointer"
                                     title="Logout"
                                 >
-                                    <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                                        darkMode ? 'bg-rose-950/60 text-rose-400' : 'bg-rose-50 text-rose-600'
-                                    }`}>
+                                    <span className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#3B1A22] border border-[#71313A] text-[#F87171]">
                                         <span className="material-symbols-outlined text-[20px]">logout</span>
                                     </span>
                                 </button>
@@ -430,13 +489,12 @@ const DepartmentDashboard = () => {
                 <main className={`min-h-screen flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-0 md:ml-20' : 'ml-0 md:ml-72'}`}>
 
                     {/* Header Section */}
-                    <header className={`sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b px-4 sm:px-6 shadow-2xs transition-all duration-300 ${darkMode ? 'bg-slate-900/95 border-slate-800 text-white' : 'bg-white/95 border-slate-200/80 text-slate-800'
-                        }`}>
+                    <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[#2A3749] px-4 sm:px-6 shadow-sm bg-[#101725] text-[#F1F5F9]">
                         <div className="flex min-w-0 items-center gap-3">
                             <button
                                 type="button"
                                 onClick={() => setSidebarCollapsed((value) => !value)}
-                                className={`hidden h-10 w-10 items-center justify-center rounded-[8px] md:inline-flex ${darkMode ? 'text-slate-300 hover:bg-white/5' : 'text-slate-600 hover:bg-black/5'}`}
+                                className="hidden h-10 w-10 items-center justify-center rounded-[8px] md:inline-flex text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] cursor-pointer"
                                 title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                             >
                                 <span className="material-symbols-outlined text-[20px]">menu</span>
@@ -447,13 +505,13 @@ const DepartmentDashboard = () => {
                                     setSidebarCollapsed(false);
                                     setMobileSidebarOpen(true);
                                 }}
-                                className={`inline-flex h-10 w-10 items-center justify-center rounded-[8px] md:hidden ${darkMode ? 'text-slate-300 hover:bg-white/5' : 'text-slate-600 hover:bg-black/5'}`}
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] md:hidden text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] cursor-pointer"
                                 aria-label="Open navigation"
                             >
                                 <span className="material-symbols-outlined text-[20px]">menu</span>
                             </button>
                             <div className="min-w-0">
-                                <h1 className={`truncate text-[16px] font-bold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                                <h1 className="truncate text-[16px] font-bold tracking-tight text-[#F1F5F9]">
                                     {activeTab === 'dashboard' ? 'Dashboard' : activeTab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                                 </h1>
                             </div>
@@ -462,7 +520,7 @@ const DepartmentDashboard = () => {
 
                             {/* Search Bar with Live Recommendations Autocomplete */}
                             <div className="relative group hidden sm:block w-72 md:w-96" data-search-container>
-                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#8493A8] text-sm">search</span>
                                 <input
                                     value={searchQuery}
                                     onChange={(e) => {
@@ -470,8 +528,7 @@ const DepartmentDashboard = () => {
                                         setSearchFocused(true);
                                     }}
                                     onFocus={() => setSearchFocused(true)}
-                                    className={`w-full pl-9 pr-4 py-2 text-xs rounded-full border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 ${darkMode ? 'bg-slate-800 border-slate-700 text-white focus:bg-slate-750' : 'bg-[#F3F5FA] border-slate-200 focus:bg-white text-gray-900'
-                                        }`}
+                                    className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#2A3749] bg-[#151D2B] text-[#F1F5F9] placeholder:text-[#8493A8] focus:border-[#2196F3] focus:outline-none focus:ring-2 focus:ring-[#2196F3]/20 transition-all duration-300"
                                     placeholder="Search graduates, reports, or analytics..."
                                     type="text"
                                 />
@@ -543,18 +600,17 @@ const DepartmentDashboard = () => {
 
                                 {/* Notification Dropdown Menu */}
                                 {showNotifications && (
-                                    <div className={`absolute right-0 top-12 w-[min(22rem,calc(100vw-2rem))] border rounded-2xl shadow-xl z-50 p-4 space-y-3 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200 text-gray-900'
-                                        }`}>
-                                        <div className="flex justify-between items-center pb-2 border-b border-gray-100/10">
+                                    <div className="absolute right-0 top-12 w-[min(22rem,calc(100vw-2rem))] border border-[#2A3749] rounded-2xl shadow-2xl z-50 p-4 space-y-3 bg-[#151D2B] text-[#F1F5F9]">
+                                        <div className="flex justify-between items-center pb-2 border-b border-[#2A3749]">
                                             <div className="flex items-center gap-2">
-                                                <h4 className="font-bold text-sm">Notifications</h4>
+                                                <h4 className="font-bold text-sm text-[#F1F5F9]">Notifications</h4>
                                                 {unreadNotificationsCount > 0 && (
-                                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-700 rounded-full">{unreadNotificationsCount} new</span>
+                                                    <span className="px-2 py-0.5 text-[10px] font-bold bg-[#3B1A22] text-[#F87171] border border-[#71313A] rounded-full">{unreadNotificationsCount} new</span>
                                                 )}
                                             </div>
                                             <button
                                                 onClick={handleMarkNotificationsRead}
-                                                className="text-xs text-astu-navy dark:text-blue-400 font-semibold hover:underline"
+                                                className="text-xs text-[#22D3EE] font-semibold hover:underline cursor-pointer"
                                             >
                                                 Mark read
                                             </button>
@@ -564,13 +620,13 @@ const DepartmentDashboard = () => {
                                                 <div
                                                     key={notif.id}
                                                     onClick={() => handleOpenNotifDetail(notif)}
-                                                    className={`flex items-start gap-3 p-2.5 rounded-xl cursor-pointer transition-all ${notif.unread ? (darkMode ? 'bg-slate-800/80' : 'bg-blue-50/70 border border-blue-100') : (darkMode ? 'hover:bg-slate-800/40' : 'hover:bg-gray-50')}`}
+                                                    className={`flex items-start gap-3 p-2.5 rounded-xl cursor-pointer transition-all ${notif.unread ? 'bg-[#1B2636] border border-[#2A3749]' : 'hover:bg-[#202E40]'}`}
                                                 >
-                                                    <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${notif.unread ? 'bg-blue-600' : 'bg-transparent'}`} />
+                                                    <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${notif.unread ? 'bg-[#2196F3]' : 'bg-transparent'}`} />
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center justify-between gap-1 mb-0.5">
-                                                            <h5 className="text-xs font-bold truncate">{notif.title}</h5>
-                                                            <span className="text-[10px] text-gray-400 shrink-0">{notif.time}</span>
+                                                            <h5 className="text-xs font-bold truncate text-[#F1F5F9]">{notif.title}</h5>
+                                                            <span className="text-[10px] text-[#8493A8] shrink-0">{notif.time}</span>
                                                         </div>
                                                         <p className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2">{notif.text}</p>
                                                         <span className="mt-1 inline-block text-[10px] font-bold text-astu-navy dark:text-blue-400 hover:underline">Click for details &rarr;</span>

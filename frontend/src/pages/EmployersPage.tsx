@@ -24,9 +24,11 @@ import Footer from "../components/Footer";
 import { usePublicMetrics } from "../services/publicMetrics.service";
 import homepageCmsService, {
   defaultPartnersPageConfig,
+  defaultPartnersList,
   PartnersPageConfig,
   Partner,
 } from "../features/admin/services/homepageCms.service";
+import PartnerMarquee from "../components/PartnerMarquee";
 import { partnerLogos } from "../components/PartnerLogos";
 import { mediaUrl } from "../config";
 
@@ -34,7 +36,13 @@ export default function EmployersPage() {
   const navigate = useNavigate();
   const { metrics } = usePublicMetrics();
 
-  const [partners, setPartners] = useState<Partner[]>([]);
+  const [partners, setPartners] = useState<Partner[]>(() => {
+    const settings = homepageCmsService.getSettings();
+    if (Array.isArray(settings?.partners) && settings.partners.length > 0) {
+      return settings.partners;
+    }
+    return defaultPartnersList;
+  });
   const [pageConfig, setPageConfig] = useState<PartnersPageConfig>(defaultPartnersPageConfig);
   const [openFaqId, setOpenFaqId] = useState<number | string | null>(0);
 
@@ -47,6 +55,8 @@ export default function EmployersPage() {
       }
       if (Array.isArray(settings?.partners) && settings.partners.length > 0) {
         setPartners(settings.partners);
+      } else {
+        setPartners(defaultPartnersList);
       }
     });
     return () => {
@@ -221,6 +231,33 @@ export default function EmployersPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ── Partner Movement Marquee Strip ── */}
+      <section
+        aria-label="Partner Organizations Continuous Showcase"
+        className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 py-6 backdrop-blur-xs"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">
+              Corporate &amp; Enterprise Partner Network
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/partners")}
+            className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+          >
+            <span>View All Partner MoUs</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+        </div>
+        <PartnerMarquee
+          partners={partners}
+          onPartnerClick={() => navigate("/partners")}
+        />
       </section>
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 flex-1 w-full space-y-16">

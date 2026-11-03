@@ -18,5 +18,12 @@ router.use(requireRoles([Role.DEPARTMENT_HEAD, Role.ADMIN, Role.SUPER_ADMIN]));
 
 router.get('/my-stats', asyncHandler(DepartmentController.getMyDepartmentStats));
 router.get('/my-alumni', asyncHandler(DepartmentController.getMyDepartmentAlumni));
+router.get('/my-department', asyncHandler(DepartmentController.getDashboardOverview));
+router.get('/my-analytics', asyncHandler(DepartmentController.getDashboardOverview));
+
+router.get('/:departmentId/stats', asyncHandler(DepartmentController.getMyDepartmentStats));
+router.get('/:departmentId/alumni', asyncHandler(DepartmentController.getMyDepartmentAlumni));
+router.get('/:departmentId/profile', asyncHandler(DepartmentController.getDashboardOverview));
+router.get('/:departmentId/analytics', asyncHandler(DepartmentController.getDashboardOverview));
 
 export default router;

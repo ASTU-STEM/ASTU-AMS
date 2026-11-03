@@ -36,6 +36,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
 import { adminService } from '../services/admin.service';
 
 type ModuleStatus = 'Live' | 'Configured' | 'Needs Review' | 'Planned';
@@ -482,6 +483,9 @@ export default function SuperAdminModules() {
         actions={<AdminBadge variant="danger">Super Admin</AdminBadge>}
       />
 
+      {/* Cross-Directorate Multi-Hub Bridge */}
+      <InstitutionalHubBridge currentHub="admin" className="mb-6" />
+
       {/* Module Group Switcher Tabs */}
       <section className="grid gap-4 md:grid-cols-3">
         {moduleGroups.map((group) => {
@@ -497,17 +501,17 @@ export default function SuperAdminModules() {
               onClick={() => setActiveGroup(group.name)}
               className={`rounded-2xl border p-5 text-left transition-all ${
                 isActive
-                  ? 'border-[#003580] bg-[#003580]/5 shadow-sm ring-1 ring-[#003580]/30'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs'
+                  ? 'border-[#003580] dark:border-blue-500 bg-[#003580]/5 dark:bg-blue-950/20 shadow-sm ring-1 ring-[#003580]/30 dark:ring-blue-500/30'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs'
               }`}
             >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-extrabold text-slate-900">{group.name}</p>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+                <p className="text-sm font-extrabold text-slate-900 dark:text-white">{group.name}</p>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                   {activeCount}/{group.modules.length} Live
                 </span>
               </div>
-              <p className="mt-2 text-xs text-slate-500 leading-relaxed">{group.description}</p>
+              <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{group.description}</p>
             </button>
           );
         })}
@@ -516,12 +520,12 @@ export default function SuperAdminModules() {
       {/* Main Governance Grid & Sidebar */}
       <section className="grid gap-6 xl:grid-cols-[1fr_360px]">
         {/* Governed Modules Panel */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                 <span>{currentGroup.name}</span>
-                <span className="text-xs font-normal text-slate-400">({currentGroup.modules.length} Governed Subsystems)</span>
+                <span className="text-xs font-normal text-slate-400 dark:text-slate-500">({currentGroup.modules.length} Governed Subsystems)</span>
               </h2>
               <p className="mt-0.5 text-xs text-slate-500">
                 Click any module card to inspect configuration, update status, or launch the subsystem route.
