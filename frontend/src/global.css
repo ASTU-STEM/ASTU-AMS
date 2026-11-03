@@ -1233,8 +1233,18 @@ a {
   100% { transform: translateX(-50%); }
 }
 .animate-scroll {
-  animation: scroll-loop 30s linear infinite;
+  animation: scroll-loop 36s linear infinite;
   width: fit-content;
+}
+
+.partners-marquee:hover .animate-scroll {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scroll {
+    animation: none;
+  }
 }
 
 /* ───────────────────────────────────────────────────────────

@@ -137,7 +137,23 @@ export default function IctSecuritySocPage() {
         const d = res.data;
         if (d.success && d.data) {
           if (d.data.currentThreatLevel) setThreatLevel(d.data.currentThreatLevel);
-          if (Array.isArray(d.data.blacklistedIps)) setBlacklistedIps(d.data.blacklistedIps);
+          if (Array.isArray(d.data.blacklistedIps)) {
+            setBlacklistedIps(
+              d.data.blacklistedIps
+                .filter((item: unknown) => item != null)
+                .map((item: any, idx: number) => {
+                  if (typeof item === 'string') {
+                    return { ip: item, reason: 'Blocked by WAF', added: '—', count: 0 };
+                  }
+                  return {
+                    ip: String(item.ip || item.address || `unknown-${idx}`),
+                    reason: String(item.reason || item.detail || item.type || 'Blocked'),
+                    added: String(item.added || item.timestamp || '—'),
+                    count: Number(item.count) || 0,
+                  };
+                })
+            );
+          }
           if (d.data.failedLogins24h !== undefined) setFailedLoginsCount(d.data.failedLogins24h);
         }
       })
@@ -304,7 +320,7 @@ export default function IctSecuritySocPage() {
                   <div className="p-4 pt-0 border-t border-slate-200/60 dark:border-slate-800/60 space-y-3 mt-2">
                     <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 pt-2">Active ASTU Protection Controls:</div>
                     <div className="grid gap-2 sm:grid-cols-2">
-                      {item.activeControls.map((control) => (
+                      {(item.activeControls ?? []).map((control) => (
                         <div key={control} className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs font-medium text-slate-700 dark:text-slate-300">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                           <span>{control}</span>

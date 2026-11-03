@@ -156,31 +156,40 @@ export default function IctPoliciesSessionsPage() {
         </div>
 
         <div className="space-y-3">
-          {sessions.map((sess) => (
-            <div
-              key={sess.id}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40"
-            >
-              <div>
-                <span className="text-xs font-bold text-slate-900 dark:text-white">{sess.user}</span>
-                <p className="text-[11px] text-slate-500 font-mono">{sess.device} | IP: {sess.ip}</p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{sess.status}</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSessions((prev) => prev.filter((s) => s.id !== sess.id));
-                    toast.success(`Revoked session for ${sess.user}`);
-                  }}
-                  className="px-3 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold hover:bg-rose-200 dark:bg-rose-950/60 dark:text-rose-300 cursor-pointer"
-                >
-                  Revoke
-                </button>
-              </div>
+          {sessions.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-800/40">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No active administrative sessions</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Live sessions will list here when session instrumentation is available. Emergency revoke still works as a control action.
+              </p>
             </div>
-          ))}
+          ) : (
+            sessions.map((sess) => (
+              <div
+                key={sess.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40"
+              >
+                <div>
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">{sess.user}</span>
+                  <p className="text-[11px] text-slate-500 font-mono">{sess.device} | IP: {sess.ip}</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{sess.status}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSessions((prev) => prev.filter((s) => s.id !== sess.id));
+                      toast.success(`Revoked session for ${sess.user}`);
+                    }}
+                    className="px-3 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold hover:bg-rose-200 dark:bg-rose-950/60 dark:text-rose-300 cursor-pointer"
+                  >
+                    Revoke
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

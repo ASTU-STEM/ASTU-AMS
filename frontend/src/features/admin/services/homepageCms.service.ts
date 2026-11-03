@@ -766,7 +766,10 @@ export const homepageCmsService = {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     try {
-      const res = await axios.put(`${API_URL}/content/homepage/config`, config, { headers });
+      const res = await axios.put(`${API_URL}/content/homepage/config`, config, {
+        headers,
+        timeout: 15000,
+      });
       if (res.status === 200 || res.status === 201) {
         return true;
       }
@@ -783,14 +786,15 @@ export const homepageCmsService = {
             author: 'CMS Admin',
             updatedAt: new Date().toISOString(),
           },
-          { headers }
+          { headers, timeout: 15000 }
         );
         return true;
       } catch (postErr) {
         console.warn('Failed fallback sync Homepage CMS config:', postErr);
+        return false;
       }
     }
-    return true; // localStorage update succeeded even if network was slow
+    return false;
   },
 
   async fetchFromApi(): Promise<HomepageCmsConfig | null> {

@@ -36,9 +36,9 @@ class IctRouteBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="rounded-xl border border-rose-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Something went wrong loading this ICT page.</h2>
-          <p className="mt-2 text-sm text-slate-600">
+        <div className="rounded-xl border border-rose-200 bg-white p-6 shadow-sm dark:border-rose-900/50 dark:bg-slate-900">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Something went wrong loading this ICT page.</h2>
+          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
             {this.state.message || 'A render error occurred in the ICT Portal workspace.'}
           </p>
         </div>

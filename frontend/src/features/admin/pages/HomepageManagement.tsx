@@ -646,14 +646,15 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSaveAll]);
 
-  // Every CMS mutation is backend-first. This small debounce batches text
-  // edits, while delete/toggle/add actions are also covered, so a page refresh
-  // can no longer bring back a locally removed item from stale server data.
+  // Every CMS mutation is backend-first. Debounce text edits into one publish.
+  // Keep handleSaveAll behind a ref so identity churn cannot retrigger a save loop.
+  const handleSaveAllRef = useRef(handleSaveAll);
+  handleSaveAllRef.current = handleSaveAll;
   useEffect(() => {
     if (!hasUnsavedChanges || isSaving || isInitialLoad.current) return;
-    const timer = window.setTimeout(() => void handleSaveAll(false), 700);
+    const timer = window.setTimeout(() => void handleSaveAllRef.current(false), 1200);
     return () => window.clearTimeout(timer);
-  }, [hasUnsavedChanges, isSaving, handleSaveAll]);
+  }, [hasUnsavedChanges, isSaving]);
 
   // Total active count across all sections
   const totalActiveItems = useMemo(() => {

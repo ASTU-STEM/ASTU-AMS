@@ -157,12 +157,17 @@ const sections: HelpSection[] = [
   },
 ];
 
-const quickLinks = [
-  { label: "Registration Guide", icon: MdBookOnline, desc: "Step-by-step registration" },
-  { label: "Job Search Tips", icon: MdWork, desc: "Optimize your job hunt" },
-  { label: "Resume Templates", icon: MdDescription, desc: "Professional templates" },
-  { label: "Mentorship Guide", icon: MdGroups, desc: "Get the most out of mentorship" },
-  { label: "FAQ", icon: FaQuestionCircle, desc: "Common questions answered" },
+const quickLinks: {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  desc: string;
+  sectionTitle: string | null;
+}[] = [
+  { label: "Registration Guide", icon: MdBookOnline, desc: "Step-by-step registration", sectionTitle: "Account & Profile" },
+  { label: "Job Search Tips", icon: MdWork, desc: "Optimize your job hunt", sectionTitle: "Jobs & Careers" },
+  { label: "Resume Templates", icon: MdDescription, desc: "Professional templates", sectionTitle: "Documents & Transcripts" },
+  { label: "Mentorship Guide", icon: MdGroups, desc: "Get the most out of mentorship", sectionTitle: "Mentorship" },
+  { label: "FAQ", icon: FaQuestionCircle, desc: "Common questions answered", sectionTitle: "Account & Profile" },
 ];
 
 export default function HelpCenter({
@@ -183,15 +188,16 @@ export default function HelpCenter({
 
   const filteredSections = searchQuery.trim()
     ? sections
-      .map((s) => ({
-        ...s,
-        faqs: s.faqs.filter(
-          (f) =>
-            f.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            f.answer.toLowerCase().includes(searchQuery.toLowerCase())
-        ),
-      }))
-      .filter((s) => s.faqs.length > 0)
+        .map((s) => ({
+          ...s,
+          faqs: (s.faqs ?? []).filter((f) => {
+            const q = String(f?.question || "").toLowerCase();
+            const a = String(f?.answer || "").toLowerCase();
+            const needle = searchQuery.toLowerCase();
+            return q.includes(needle) || a.includes(needle);
+          }),
+        }))
+        .filter((s) => s.faqs.length > 0)
     : sections;
 
   return (
@@ -200,31 +206,32 @@ export default function HelpCenter({
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl animate-[mega-menu-fade-in_150ms_ease-out_both] flex flex-col max-h-[90vh]">
+      <div className="relative flex w-full max-w-3xl max-h-[90vh] flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl animate-[mega-menu-fade-in_150ms_ease-out_both] dark:border-slate-700 dark:bg-slate-900">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant shrink-0">
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-slate-700">
           <div>
-            <h2 className="text-xl font-bold text-astu-navy">Help Center</h2>
-            <p className="text-sm text-on-surface-variant/70 mt-0.5">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Help Center</h2>
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
               Find answers, guides, and support resources
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-astu-navy/5 text-on-surface-variant hover:text-astu-navy transition-colors"
+            className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
           >
             <HiXMark className="h-5 w-5" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="px-6 py-4 border-b border-outline-variant/50 shrink-0">
+        <div className="shrink-0 border-b border-slate-200/80 px-6 py-4 dark:border-slate-700/80">
           <div className="relative">
-            <HiMagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface-variant" />
+            <HiMagnifyingGlass className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-outline-variant bg-surface-container-low py-3 pl-11 pr-4 text-sm focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-900 placeholder:text-slate-400 transition-all focus:border-[#003580] focus:outline-none focus:ring-2 focus:ring-[#003580]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500"
               placeholder="Search help topics..."
               type="text"
             />
@@ -235,34 +242,28 @@ export default function HelpCenter({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {/* Quick Links */}
           <div className="mb-6">
-            <h3 className="text-sm font-bold text-on-surface-variant uppercase tracking-wider mb-3">
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Quick Links
             </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {quickLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <button
                     key={link.label}
+                    type="button"
                     onClick={() => {
-                      const section = sections.find((s) =>
-                        s.faqs.some((f) =>
-                          f.question
-                            .toLowerCase()
-                            .includes(link.label.toLowerCase().replace("guide", "").trim())
-                        )
-                      );
-                      if (section) {
-                        setOpenSection(section.title);
-                        setSearchQuery("");
+                      setSearchQuery("");
+                      if (link.sectionTitle) {
+                        setOpenSection(link.sectionTitle);
                       }
                     }}
-                    className="flex items-start gap-3 rounded-xl border border-outline-variant/60 p-3 text-left hover:border-astu-navy/30 hover:bg-astu-navy/5 transition-all group"
+                    className="group flex items-start gap-3 rounded-xl border border-slate-200 p-3 text-left transition-all hover:border-[#003580]/30 hover:bg-[#003580]/5 dark:border-slate-700 dark:hover:border-blue-500/40 dark:hover:bg-blue-950/30"
                   >
-                    <Icon className="h-5 w-5 text-astu-navy/60 group-hover:text-astu-navy shrink-0 mt-0.5" />
+                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#003580]/60 group-hover:text-[#003580] dark:text-blue-400/70 dark:group-hover:text-blue-300" />
                     <div>
-                      <p className="text-sm font-bold text-astu-navy">{link.label}</p>
-                      <p className="text-xs text-on-surface-variant/60">{link.desc}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">{link.label}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{link.desc}</p>
                     </div>
                   </button>
                 );
@@ -271,15 +272,16 @@ export default function HelpCenter({
           </div>
 
           {filteredSections.length === 0 ? (
-            <div className="text-center py-12">
-              <MdFeedback className="h-12 w-12 text-on-surface-variant/30 mx-auto mb-3" />
-              <p className="text-on-surface-variant font-semibold">No results found</p>
-              <p className="text-sm text-on-surface-variant/60 mt-1">
+            <div className="py-12 text-center">
+              <MdFeedback className="mx-auto mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
+              <p className="font-semibold text-slate-700 dark:text-slate-200">No results found</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                 Try different keywords or browse the categories below
               </p>
               <button
+                type="button"
                 onClick={() => setSearchQuery("")}
-                className="mt-3 text-sm font-bold text-astu-navy hover:underline"
+                className="mt-3 text-sm font-bold text-[#003580] hover:underline dark:text-blue-400"
               >
                 Clear search
               </button>
@@ -289,44 +291,53 @@ export default function HelpCenter({
               {filteredSections.map((section) => {
                 const Icon = section.icon;
                 const isSectionOpen = openSection === section.title;
+                const faqs = section.faqs ?? [];
                 return (
                   <div
                     key={section.title}
-                    className="rounded-xl border border-outline-variant/60 overflow-hidden"
+                    className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
                   >
                     <button
+                      type="button"
                       onClick={() => toggleSection(section.title)}
-                      className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-astu-navy/5 transition-colors"
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/70"
                     >
                       <span className="flex items-center gap-3">
-                        <Icon className="h-5 w-5 text-astu-navy/60" />
-                        <span className="text-sm font-bold text-astu-navy">
+                        <Icon className="h-5 w-5 text-[#003580]/60 dark:text-blue-400/70" />
+                        <span className="text-sm font-bold text-slate-900 dark:text-white">
                           {section.title}
                         </span>
-                        <span className="text-[11px] text-on-surface-variant/50 font-semibold bg-astu-navy/5 px-2 py-0.5 rounded-full">
-                          {section.faqs.length}
+                        <span className="rounded-full bg-[#003580]/5 px-2 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-blue-950/50 dark:text-slate-400">
+                          {faqs.length}
                         </span>
                       </span>
                       <HiChevronDown
-                        className={`h-4 w-4 text-on-surface-variant transition-transform duration-200 ${isSectionOpen ? "rotate-180" : ""
-                          }`}
+                        className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${
+                          isSectionOpen ? "rotate-180" : ""
+                        }`}
                       />
                     </button>
                     {isSectionOpen && (
-                      <div className="border-t border-outline-variant/40 px-4 py-2 space-y-1">
-                        {section.faqs.map((faq, i) => (
-                          <div
-                            key={i}
-                            className="rounded-lg px-3 py-3 hover:bg-astu-navy/5 transition-colors"
-                          >
-                            <p className="text-sm font-bold text-astu-navy mb-1">
-                              {faq.question}
-                            </p>
-                            <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">
-                              {faq.answer}
-                            </p>
-                          </div>
-                        ))}
+                      <div className="space-y-1 border-t border-slate-200 px-4 py-2 dark:border-slate-700">
+                        {faqs.length === 0 ? (
+                          <p className="px-3 py-3 text-sm text-slate-500 dark:text-slate-400">
+                            No articles in this category yet.
+                          </p>
+                        ) : (
+                          faqs.map((faq, i) => (
+                            <div
+                              key={i}
+                              className="rounded-lg px-3 py-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/60"
+                            >
+                              <p className="mb-1 text-sm font-bold text-slate-900 dark:text-white">
+                                {faq?.question || "Untitled question"}
+                              </p>
+                              <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                {faq?.answer || "No answer available."}
+                              </p>
+                            </div>
+                          ))
+                        )}
                       </div>
                     )}
                   </div>
@@ -336,14 +347,14 @@ export default function HelpCenter({
           )}
 
           {/* Contact Support */}
-          <div className="mt-6 rounded-xl bg-gradient-to-r from-astu-navy to-astu-navy/90 p-5 text-white">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white/70 mb-3">
+          <div className="mt-6 rounded-xl bg-gradient-to-r from-[#003580] to-[#002866] p-5 text-white">
+            <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white/70">
               Still need help?
             </h3>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <a
                 href="mailto:irccd@astu.edu.et"
-                className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20 transition-colors"
+                className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 transition-colors hover:bg-white/20"
               >
                 <MdEmail className="h-5 w-5 text-white/70" />
                 <div>
@@ -353,7 +364,7 @@ export default function HelpCenter({
               </a>
               <a
                 href="tel:+251221110000"
-                className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 hover:bg-white/20 transition-colors"
+                className="flex items-center gap-3 rounded-lg bg-white/10 px-4 py-3 transition-colors hover:bg-white/20"
               >
                 <MdPhone className="h-5 w-5 text-white/70" />
                 <div>
@@ -362,7 +373,7 @@ export default function HelpCenter({
                 </div>
               </a>
             </div>
-            <p className="text-xs text-white/50 mt-3 text-center">
+            <p className="mt-3 text-center text-xs text-white/50">
               Response time: within 1 business day
             </p>
           </div>

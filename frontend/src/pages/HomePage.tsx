@@ -45,7 +45,7 @@ export default function HomePage() {
 
   const [liveSlides, setLiveSlides] = useState<any[]>([]);
   const [welcomeMessage, setWelcomeMessage] = useState("");
-  const [liveHeroBadge, setLiveHeroBadge] = useState("ASTU Alumni Management System");
+  const [liveHeroBadge, setLiveHeroBadge] = useState("ASTU");
   const [liveHeroButtons, setLiveHeroButtons] = useState<any>({
     primaryText: "Alumni Portal",
     primaryLink: "/register",
@@ -106,9 +106,11 @@ export default function HomePage() {
       {
         id: "brand-hero",
         image: DEFAULT_HERO_IMAGE,
-        tagline: "ASTU-AMS",
+        tagline: "Adama Science and Technology University",
         title: "Alumni Management System",
-        description: welcomeMessage || "",
+        description:
+          welcomeMessage ||
+          "Connect graduates, employers, and departments for careers, mentorship, and lifelong university engagement.",
       },
     ];
   }, [liveSlides, welcomeMessage]);

@@ -32,19 +32,19 @@ function PartnerLogoItem({
     <button
       type="button"
       onClick={onNavigate}
-      className="flex h-16 w-[148px] shrink-0 items-center justify-center rounded-xl border border-transparent bg-white/70 px-3 transition hover:border-slate-200 hover:bg-white hover:shadow-sm dark:bg-slate-900/40 dark:hover:border-slate-700 dark:hover:bg-slate-900"
-      aria-label={partner.name}
+      className="group flex h-[4.5rem] w-[168px] shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white px-4 transition duration-300 hover:-translate-y-0.5 hover:border-astu-navy/25 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-sky-500/30"
+      aria-label={`View ${partner.name}`}
       title={partner.name}
     >
       {showMonogram ? (
-        <span className="text-sm font-black tracking-wide text-slate-500 dark:text-slate-400">
+        <span className="text-sm font-black tracking-wide text-astu-navy dark:text-sky-300">
           {partnerMonogram(partner.name)}
         </span>
       ) : (
         <img
           src={logo}
-          alt={partner.name}
-          className="max-h-10 max-w-[120px] object-contain opacity-80"
+          alt=""
+          className="max-h-11 max-w-[128px] object-contain opacity-85 transition duration-300 group-hover:opacity-100"
           loading="lazy"
           onError={onFail}
         />
@@ -72,46 +72,56 @@ export default function PartnersStrip({
     <SectionShell
       id="partners"
       tone="plain"
-      eyebrow={headers?.eyebrow}
+      eyebrow={headers?.eyebrow || "Industry Network"}
       title={headers?.title || "Partners"}
-      description={headers?.description}
+      description={
+        headers?.description ||
+        "Organizations collaborating with ASTU on talent, research, and campus engagement."
+      }
       action={
         <ViewAllButton
-          label="View All"
+          label="View All Partners"
           visible={active.length > 0}
           onClick={() => onNavigate("/partners")}
         />
       }
     >
       {loading ? (
-        <div className="flex h-14 items-center justify-center gap-12">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-8 w-24 animate-pulse rounded bg-slate-200/70 dark:bg-slate-800" />
+        <div className="flex h-16 items-center justify-center gap-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-14 w-36 animate-pulse rounded-2xl bg-slate-200/70 dark:bg-slate-800"
+            />
           ))}
         </div>
       ) : (
-        <div className="partners-marquee relative overflow-hidden py-1">
+        <div className="partners-marquee relative overflow-hidden py-2">
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--bg-page)] to-transparent sm:w-20"
+            className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--bg-page)] to-transparent sm:w-24"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--bg-page)] to-transparent sm:w-20"
+            className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--bg-page)] to-transparent sm:w-24"
             aria-hidden="true"
           />
           <div
-            className={`flex w-max items-center gap-12 ${
+            className={`flex w-max items-center gap-5 sm:gap-8 ${
               active.length > 2 ? "animate-scroll" : "mx-auto justify-center"
             }`}
             role="list"
             aria-label="Partner logos"
           >
             {loop.map((partner, idx) => (
-              <div key={`${partner.id}-${idx}`} role="listitem" className="bg-transparent">
+              <div key={`${partner.id}-${idx}`} role="listitem">
                 <PartnerLogoItem
                   partner={partner}
                   failed={failed.has(partner.id)}
-                  onNavigate={() => onNavigate("/partners")}
+                  onNavigate={() =>
+                    onNavigate(
+                      `/partners?partner=${encodeURIComponent(partner.id || partner.name)}`
+                    )
+                  }
                   onFail={() =>
                     setFailed((prev) => {
                       const next = new Set(prev);

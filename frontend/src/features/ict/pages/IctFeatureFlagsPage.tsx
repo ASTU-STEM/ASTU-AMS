@@ -84,56 +84,65 @@ export default function IctFeatureFlagsPage() {
         </div>
 
         <div className="space-y-4">
-          {features.map((f) => (
-            <div
-              key={f.id}
-              className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 space-y-3"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white">{f.name}</h3>
-                  <p className="text-[11px] text-slate-500">Targeting: {f.target}</p>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-                    {f.enabled ? `${f.rolloutPct}% ROLLOUT` : 'DISABLED'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => toggleFeature(f.id)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
-                      f.enabled ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        f.enabled ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-
-              {f.enabled && (
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] text-slate-500">
-                    <span>Rollout Percentage</span>
-                    <span>{f.rolloutPct}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="5"
-                    value={f.rolloutPct}
-                    onChange={(e) => updateRollout(f.id, parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-blue-600"
-                  />
-                </div>
-              )}
+          {features.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-800/40">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No feature flags in {environment}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Flags and percentage rollouts will appear here once the release config store is connected.
+              </p>
             </div>
-          ))}
+          ) : (
+            features.map((f) => (
+              <div
+                key={f.id}
+                className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 dark:text-white">{f.name}</h3>
+                    <p className="text-[11px] text-slate-500">Targeting: {f.target}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                      {f.enabled ? `${Number.isFinite(f.rolloutPct) ? f.rolloutPct : 0}% ROLLOUT` : 'DISABLED'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleFeature(f.id)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                        f.enabled ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          f.enabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {f.enabled && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-slate-500">
+                      <span>Rollout Percentage</span>
+                      <span>{Number.isFinite(f.rolloutPct) ? f.rolloutPct : 0}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="5"
+                      value={Number.isFinite(f.rolloutPct) ? f.rolloutPct : 0}
+                      onChange={(e) => updateRollout(f.id, parseInt(e.target.value, 10) || 0)}
+                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700 accent-blue-600"
+                    />
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 

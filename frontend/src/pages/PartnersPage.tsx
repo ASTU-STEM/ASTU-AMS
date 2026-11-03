@@ -30,6 +30,17 @@ import { partnerMonogram } from "../features/public/components/home/homeShared";
 
 const TYPE_FILTERS = ["All", "Strategic", "Recruitment", "Research", "Internship", "Technology"] as const;
 
+function matchesPartnerType(partner: Partner, typeFilter: string): boolean {
+  if (typeFilter === "All") return true;
+  const raw = String(partner.partnershipType || partner.industry || "").toLowerCase();
+  const filter = typeFilter.toLowerCase();
+  if (raw === filter || raw.includes(filter)) return true;
+  if (filter === "strategic" && /strategic|alliance|enterprise/.test(raw)) return true;
+  if (filter === "recruitment" && /recruit|employer|hiring|enterprise/.test(raw)) return true;
+  if (filter === "technology" && /tech|digital|network|software/.test(raw)) return true;
+  return false;
+}
+
 function PartnerLogo({
   partner,
   className = "h-14 w-14",
@@ -101,10 +112,18 @@ export default function PartnersPage() {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const settings = await homepageCmsService.fetchSettings();
+      const [settings, published] = await Promise.all([
+        homepageCmsService.fetchSettings(),
+        homepageCmsService.fetchPublishedPartners(),
+      ]);
       if (settings?.partnersPage) setPageConfig(settings.partnersPage);
-      const backendPartners = Array.isArray(settings?.partners) ? settings.partners : [];
-      setPartners(backendPartners.filter((p: Partner) => p && p.active !== false));
+      const list = (published.length
+        ? published
+        : Array.isArray(settings?.partners)
+          ? settings.partners
+          : []
+      ).filter((p: Partner) => p && p.active !== false && p.name);
+      setPartners(list);
     } catch {
       setLoadError("Unable to load live partner records. Please try again.");
       setPartners([]);
@@ -120,16 +139,24 @@ export default function PartnersPage() {
     return () => window.removeEventListener("astu-cms-homepage-updated", onUpdate);
   }, [loadPartnerData]);
 
+  // Deep-link: /partners?partner=<id|name>
+  useEffect(() => {
+    const key = searchParams.get("partner");
+    if (!key || !partners.length) return;
+    const needle = decodeURIComponent(key).toLowerCase();
+    const match = partners.find(
+      (p) =>
+        String(p.id || "").toLowerCase() === needle ||
+        String(p.name || "").toLowerCase() === needle
+    );
+    if (match) setSelectedPartner(match);
+  }, [partners, searchParams]);
+
   const filteredPartners = useMemo(() => {
     const q = debouncedSearch.toLowerCase();
     return partners
       .filter((p) => {
-        const typeOk =
-          typeFilter === "All" ||
-          String(p.partnershipType || "").toLowerCase() === typeFilter.toLowerCase() ||
-          (typeFilter === "Recruitment" &&
-            /recruit|employer|hiring/i.test(String(p.partnershipType || p.industry || "")));
-        if (!typeOk) return false;
+        if (!matchesPartnerType(p, typeFilter)) return false;
         if (!q) return true;
         const haystack = [p.name, p.industry, p.location, p.description, p.partnershipType, ...(p.tags || [])]
           .filter(Boolean)
@@ -167,9 +194,20 @@ export default function PartnersPage() {
 
       {/* Hero — brand-first, full-bleed */}
       <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(196,30,58,0.28),_transparent_55%),radial-gradient(ellipse_at_bottom_left,_rgba(15,76,129,0.45),_transparent_50%)]" />
-        <div className="relative mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.2em] text-amber-300">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(196,30,58,0.32),_transparent_55%),radial-gradient(ellipse_at_bottom_left,_rgba(15,76,129,0.5),_transparent_50%)]" />
+        <div
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")",
+          }}
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-24">
+          <p className="mb-2 text-sm font-black uppercase tracking-[0.28em] text-amber-300/95">
+            ASTU
+          </p>
+          <p className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-white/70">
             {pageConfig.heroBadge || "Employer & Industry Partnerships"}
           </p>
           <h1 className="max-w-3xl text-3xl font-black leading-tight tracking-tight md:text-5xl">
@@ -203,17 +241,17 @@ export default function PartnersPage() {
             </button>
           </div>
 
-          <div className="mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-12 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
             {liveStats.map((stat) => {
               const Icon = stat.icon;
               return (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm"
+                  className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-4 backdrop-blur-sm"
                 >
                   <Icon className="mb-2 h-4 w-4 text-amber-300" aria-hidden="true" />
-                  <p className="text-xl font-black tabular-nums">{stat.value}</p>
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-white/65">
+                  <p className="text-2xl font-black tabular-nums tracking-tight">{stat.value}</p>
+                  <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-white/65">
                     {stat.label}
                   </p>
                 </div>
@@ -368,7 +406,7 @@ export default function PartnersPage() {
                   {partner.openings ? (
                     <p className="flex items-center gap-1.5">
                       <Users className="h-3.5 w-3.5" aria-hidden="true" />
-                      {partner.openings} openings
+                      {partner.openings}
                     </p>
                   ) : null}
                 </div>
@@ -514,7 +552,14 @@ export default function PartnersPage() {
       {selectedPartner ? (
         <CompanyDetailModal
           company={selectedPartner as any}
-          onClose={() => setSelectedPartner(null)}
+          onClose={() => {
+            setSelectedPartner(null);
+            const next = new URLSearchParams(searchParams);
+            if (next.has("partner")) {
+              next.delete("partner");
+              setSearchParams(next, { replace: true });
+            }
+          }}
         />
       ) : null}
     </div>

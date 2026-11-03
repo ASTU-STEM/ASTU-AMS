@@ -42010,6 +42010,14 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1793727115045",
       "createdAt": "2026-11-03T17:31:55.045Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793728633744",
+      "createdAt": "2026-11-03T17:57:13.744Z"
     }
   ],
   "notifications": [
@@ -63639,46 +63647,8 @@
       "id": "hc-main",
       "key": "main",
       "data": {
-        "events": [
-          {
-            "id": "E-REAL-001",
-            "title": "EthiopiaLics International Conference 2025",
-            "date": "2025-06-13",
-            "location": "ASTU Main Campus Auditorium",
-            "image": "https://www.astu.edu.et/images/slidephoto/summit1.jpg",
-            "description": "Adama Science and Technology University hosts the 1st EthiopiaLics International Conference on “Fostering Innovation Ecosystem for Knowledge Economy Transition and Sustainable Development.”",
-            "active": true
-          },
-          {
-            "id": "E-002",
-            "title": "ASTU Alumni Career & Innovation Summit",
-            "date": "2026-12-05",
-            "location": "Senate Hall, ASTU Main Campus",
-            "image": "/images/astu-building.jpg",
-            "description": "Annual career acceleration gathering connecting final-year students with high-achieving alumni executives and industry partners.",
-            "active": true
-          }
-        ],
-        "workshops": [
-          {
-            "id": "WS-001",
-            "title": "Data Science & Machine Learning Bootcamp",
-            "date": "2026-11-20",
-            "location": "Engineering Lab Block B",
-            "seats": "120 Seats Registered",
-            "focus": "Technical Training & Labs",
-            "active": true
-          },
-          {
-            "id": "WS-002",
-            "title": "Cloud Architecture & DevOps Masterclass",
-            "date": "2026-12-15",
-            "location": "Innovation Hall C",
-            "seats": "80 Seats Registered",
-            "focus": "Technical Training & Labs",
-            "active": true
-          }
-        ],
+        "events": [],
+        "workshops": [],
         "eventsHeaders": {
           "eyebrow": "Events & Workshops",
           "title": "Gatherings & Technical Training",
@@ -63999,7 +63969,26 @@
           "benefitsEyebrow": "MUTUAL VALUE & TALENT ACCESS",
           "benefitsTitle": "Why Partner with ASTU?",
           "benefitsSubtitle": "Join leading industry enterprises, public institutions, and research consortia actively recruiting and collaborating with ASTU.",
-          "benefits": [],
+          "benefits": [
+            {
+              "id": "PB-1",
+              "title": "Verified Talent Access",
+              "description": "Reach credential-verified ASTU graduates across engineering, applied science, and technology programs.",
+              "active": true
+            },
+            {
+              "id": "PB-2",
+              "title": "Campus Recruitment Support",
+              "description": "Coordinate career fairs, info sessions, and targeted hiring campaigns with Alumni Office support.",
+              "active": true
+            },
+            {
+              "id": "PB-3",
+              "title": "Research & Internship Collaboration",
+              "description": "Co-design internships, applied research placements, and skills partnerships with academic departments.",
+              "active": true
+            }
+          ],
           "partnersCarouselTitle": "Corporate & Institutional Partners",
           "partnersCarouselSubtitle": "Leading employers collaborating with ASTU across telecom, aviation, cybersecurity, banking, and technology sectors.",
           "featuresEyebrow": "ENTERPRISE ECOSYSTEM",
@@ -64026,7 +64015,111 @@
           "contactPhone": "+251-221-110000",
           "contactAddress": "Adama Science and Technology University, Adama, Oromia, Ethiopia"
         },
-        "partners": [],
+        "partners": [
+          {
+            "id": "P-ETHIOTEL",
+            "name": "Ethio Telecom",
+            "logo": "/images/partners/ethio-telecom.png",
+            "website": "https://www.ethiotelecom.et",
+            "industry": "Telecom & Cloud",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Graduate & internship tracks",
+            "partnershipType": "Strategic",
+            "description": "Strategic telecom partner collaborating with ASTU on graduate hiring, digital skills, and campus engagement.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Telecom",
+              "Cloud",
+              "Recruitment"
+            ]
+          },
+          {
+            "id": "P-EAL",
+            "name": "Ethiopian Airlines",
+            "logo": "/images/partners/ethiopian-airlines.svg",
+            "website": "https://www.ethiopianairlines.com",
+            "industry": "Aviation Technology",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Engineering internship tracks",
+            "partnershipType": "Recruitment",
+            "description": "Industry partner supporting aviation technology talent pipelines and applied engineering placements.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Aviation",
+              "Engineering"
+            ]
+          },
+          {
+            "id": "P-INSA",
+            "name": "INSA",
+            "logo": "/images/partners/insa.png",
+            "website": "https://www.insa.gov.et",
+            "industry": "Cybersecurity",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Research & security placements",
+            "partnershipType": "Research",
+            "description": "National cybersecurity partner collaborating on research placements and applied security talent development.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Cybersecurity",
+              "Research"
+            ]
+          },
+          {
+            "id": "P-HUAWEI",
+            "name": "Huawei Ethiopia",
+            "logo": "/images/partners/huawei.svg",
+            "website": "https://www.huawei.com",
+            "industry": "Network Engineering",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Certification & network engineering paths",
+            "partnershipType": "Technology",
+            "description": "Technology partner supporting network engineering skills, certifications, and campus collaboration.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Networking",
+              "Technology"
+            ]
+          },
+          {
+            "id": "P-SAFARICOM",
+            "name": "Safaricom Ethiopia",
+            "logo": "/images/partners/safaricom.png",
+            "website": "https://www.safaricom.et",
+            "industry": "Telecom & Digital Services",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Digital & software graduate roles",
+            "partnershipType": "Recruitment",
+            "description": "Digital services partner engaging ASTU graduates across software, networks, and customer technology roles.",
+            "featured": false,
+            "active": true,
+            "tags": [
+              "Telecom",
+              "Software"
+            ]
+          },
+          {
+            "id": "P-CBE",
+            "name": "Commercial Bank of Ethiopia",
+            "logo": "/images/partners/cbe.png",
+            "website": "https://www.combanketh.et",
+            "industry": "Banking & FinTech",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "IT & graduate analyst roles",
+            "partnershipType": "Internship",
+            "description": "Financial sector partner collaborating on IT internships and graduate analyst opportunities.",
+            "featured": false,
+            "active": true,
+            "tags": [
+              "Banking",
+              "FinTech"
+            ]
+          }
+        ],
         "announcements": [
           {
             "id": "C-6636",
@@ -64038,7 +64131,35 @@
             "author": "Content Manager"
           }
         ],
-        "heroSlides": [],
+        "heroSlides": [
+          {
+            "id": "HS-1",
+            "title": "Alumni Management System",
+            "tagline": "Adama Science and Technology University",
+            "description": "Connect graduates, employers, and departments for careers, mentorship, and lifelong university engagement.",
+            "image": "/images/astu-building.jpg",
+            "backgroundImage": "/images/astu-building.jpg",
+            "active": true
+          },
+          {
+            "id": "HS-2",
+            "title": "Industry Partnerships",
+            "tagline": "Talent · Internships · Research",
+            "description": "Partner with ASTU to recruit verified engineering and technology graduates across Ethiopia.",
+            "image": "/images/campus-2.jpeg",
+            "backgroundImage": "/images/campus-2.jpeg",
+            "active": true
+          },
+          {
+            "id": "HS-3",
+            "title": "Campus & Community",
+            "tagline": "Events · Giving · Mentorship",
+            "description": "Stay involved through alumni events, giving campaigns, and mentorship that strengthen the ASTU network.",
+            "image": "/images/astusteam.jpg",
+            "backgroundImage": "/images/astusteam.jpg",
+            "active": true
+          }
+        ],
         "campusLife": [
           {
             "id": "CL-1",
@@ -64160,7 +64281,7 @@
             "duration": "04:28",
             "category": "Campus Virtual Tours",
             "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "active": true
+            "active": false
           },
           {
             "id": "VI-2",
@@ -64170,7 +64291,7 @@
             "duration": "06:15",
             "category": "Research Showcases",
             "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "active": true
+            "active": false
           },
           {
             "id": "VI-3",
@@ -64180,47 +64301,22 @@
             "duration": "08:42",
             "category": "Event Recordings",
             "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "active": true
+            "active": false
           }
         ],
-        "stories": [
-          {
-            "id": "SS-1",
-            "name": "Eng. Dawit Alemu",
-            "role": "Lead Systems Architect · Safaricom Ethiopia",
-            "text": "The rigorous engineering foundations and mentorship at ASTU shaped my entire professional journey. ASTU-AMS now connects us directly to graduating engineers ready for enterprise impact.",
-            "image": "/images/State-M.jpg",
-            "active": true
-          },
-          {
-            "id": "SS-2",
-            "name": "Dr. Bethlehem Tadesse",
-            "role": "AI Research Lead & Assistant Professor",
-            "text": "ASTU instilled in me a passion for applied technological research. Through this network, we continue to bridge academic projects with real-world innovation in Ethiopia.",
-            "image": "/images/gc7.jpg",
-            "active": true
-          },
-          {
-            "id": "SS-3",
-            "name": "Eng. Samuel Tesfaye",
-            "role": "Hardware Systems Engineer · Ethiopian Airlines",
-            "text": "From classroom lab experiments to maintaining avionics systems, ASTU-AMS helped me find mentorship and verify credentials with zero friction.",
-            "image": "/images/arc.jpg",
-            "active": true
-          }
-        ],
+        "stories": [],
         "stats": {
           "graduates": "45,000+",
           "chapters": "12"
         },
-        "heroBadge": "ASTU Alumni Management System",
-        "welcomeMessage": "Welcome to the ASTU Alumni Management System — Connecting graduates, employers, and departments for longitudinal career tracking and institutional excellence.",
+        "heroBadge": "ASTU",
+        "welcomeMessage": "Connecting graduates, employers, and departments for longitudinal career tracking and university engagement.",
         "welcomeEnabled": true,
         "heroButtons": {
           "primaryText": "Alumni Portal",
-          "primaryLink": "/info/alumni-portal",
+          "primaryLink": "/register",
           "secondaryText": "Employer Partnership",
-          "secondaryLink": "/info/employer-portal"
+          "secondaryLink": "/employers"
         },
         "impactHeaders": {
           "eyebrow": "ASTU IMPACT AT A GLANCE",
@@ -64246,7 +64342,7 @@
               "Mentor current students and connect with peers."
             ],
             "cta": "Access Alumni Portal",
-            "route": "/info/alumni-portal",
+            "route": "/register",
             "active": true
           },
           {
@@ -64259,7 +64355,7 @@
               "Provide feedback to enhance curriculum relevance."
             ],
             "cta": "Partner With ASTU",
-            "route": "/info/employer-portal",
+            "route": "/employers",
             "active": true
           },
           {
@@ -64272,7 +64368,7 @@
               "Generate accreditation-ready reports."
             ],
             "cta": "View Department Analytics",
-            "route": "/info/department-portal",
+            "route": "/login",
             "active": true
           },
           {
@@ -64285,7 +64381,7 @@
               "Send tracer study reminders and audit notifications."
             ],
             "cta": "Open Registrar Portal",
-            "route": "/info/registrar-portal",
+            "route": "/login",
             "active": true
           },
           {
@@ -64298,7 +64394,7 @@
               "Oversee institutional analytics and accreditation reports."
             ],
             "cta": "Admin Console",
-            "route": "/admin",
+            "route": "/admin/dashboard",
             "active": true
           }
         ],
@@ -64312,70 +64408,9 @@
           "title": "News & Announcements",
           "description": "University notices, academic bulletins, and alumni community circulars."
         },
-        "newsItems": [
-          {
-            "id": "NW-1",
-            "title": "ASTU Engineering Innovation Summit 2026",
-            "date": "Sep 9, 2026",
-            "active": true
-          },
-          {
-            "id": "NW-2",
-            "title": "ASTU Research Grant Winners Announced",
-            "date": "May 28, 2026",
-            "active": true
-          },
-          {
-            "id": "NW-3",
-            "title": "ASTU Alumni Network: Bridging Generations",
-            "date": "May 25, 2026",
-            "active": true
-          }
-        ],
-        "testimonials": [
-          {
-            "id": "TT-1",
-            "by": "Eng. Dawit Alemu",
-            "role": "Lead Systems Architect",
-            "company": "Safaricom Ethiopia",
-            "quote": "ASTU-AMS provides an unprecedented direct link between university research labs and industry engineering teams.",
-            "active": true
-          },
-          {
-            "id": "TT-2",
-            "by": "Dr. Bethlehem Tadesse",
-            "role": "Research Fellow",
-            "company": "ASTU AI Center",
-            "quote": "The tracer study analytics give our curriculum committees real data to keep engineering standards globally accredited.",
-            "active": true
-          },
-          {
-            "id": "TT-3",
-            "by": "Eng. Samuel Tesfaye",
-            "role": "Aviation Systems Engineer",
-            "company": "Ethiopian Airlines",
-            "quote": "I connected with mentors and verified my degree transcripts through the digital portal in minutes.",
-            "active": true
-          }
-        ],
-        "communityPosts": [
-          {
-            "id": "CP-1",
-            "name": "Eng. Dawit Alemu",
-            "role": "Lead Architect",
-            "company": "Safaricom",
-            "message": "Proud to see the ASTU engineering community expanding worldwide. Keep pushing boundaries!",
-            "active": true
-          },
-          {
-            "id": "CP-2",
-            "name": "Dr. Bethlehem Tadesse",
-            "role": "AI Specialist",
-            "company": "Tech Institute",
-            "message": "Our latest research paper on sustainable microgrids was co-authored with fellow ASTU alumni.",
-            "active": true
-          }
-        ],
+        "newsItems": [],
+        "testimonials": [],
+        "communityPosts": [],
         "liveCommunitySection": {
           "title": "ASTU Alumni Community",
           "subtitle": "Connect with graduates worldwide, share opportunities, and help grow the Adama Science and Technology University alumni network."
@@ -64445,62 +64480,16 @@
           "title": "Ready to Join the ASTU Network?",
           "description": "Connect with fellow alumni, discover career opportunities, and contribute to university excellence.",
           "primaryCtaText": "Alumni Portal",
-          "primaryCtaLink": "/login",
+          "primaryCtaLink": "/register",
           "secondaryCtaText": "Employer Partnership",
-          "secondaryCtaLink": "/login"
+          "secondaryCtaLink": "/employers"
         },
         "newsHeaders": {
           "eyebrow": "Campus News",
           "title": "Latest ASTU Highlights",
           "description": "University notices, academic bulletins, and alumni community circulars."
         },
-        "impactStats": [
-          {
-            "id": "IS-1",
-            "label": "Registered Alumni Members",
-            "value": "1,239",
-            "suffix": "+",
-            "detail": "Registered in the alumni network",
-            "icon": "Users",
-            "active": true
-          },
-          {
-            "id": "IS-2",
-            "label": "Partner Organizations",
-            "value": "500",
-            "suffix": "+",
-            "detail": "Hiring, internships, and feedback",
-            "icon": "Building2",
-            "active": true
-          },
-          {
-            "id": "IS-3",
-            "label": "Employment Rate",
-            "value": "87",
-            "suffix": "%",
-            "detail": "Graduate employment rate",
-            "icon": "LineChart",
-            "active": true
-          },
-          {
-            "id": "IS-4",
-            "label": "Digital Requests",
-            "value": "6K",
-            "suffix": "+",
-            "detail": "Transcript and certificate requests",
-            "icon": "FileCheck2",
-            "active": true
-          },
-          {
-            "id": "IS-5",
-            "label": "Engagement Hub",
-            "value": "24/7",
-            "suffix": "",
-            "detail": "Always-on alumni engagement",
-            "icon": "MessageSquareText",
-            "active": true
-          }
-        ],
+        "impactStats": [],
         "tracerSpotlight": {
           "enabled": true,
           "title": "Tracer Study 2026",
@@ -64554,36 +64543,7 @@
           "title": "Alumni & Partner Stories",
           "description": "Hear from our graduates making regional impact and enterprise employers building the future."
         },
-        "featuredEmployers": [
-          {
-            "id": "FE-1",
-            "name": "Ethio Telecom",
-            "area": "Telecom & Cloud",
-            "openings": "14 graduate roles",
-            "active": true
-          },
-          {
-            "id": "FE-2",
-            "name": "Ethiopian Airlines",
-            "area": "Aviation Technology",
-            "openings": "8 internship tracks",
-            "active": true
-          },
-          {
-            "id": "FE-3",
-            "name": "INSA",
-            "area": "Cybersecurity",
-            "openings": "6 research placements",
-            "active": true
-          },
-          {
-            "id": "FE-4",
-            "name": "Huawei Ethiopia",
-            "area": "Network Engineering",
-            "openings": "11 certification paths",
-            "active": true
-          }
-        ],
+        "featuredEmployers": [],
         "bottomCta": {
           "enabled": true,
           "title": "Ready to Join the ASTU Network?",
@@ -64606,32 +64566,7 @@
           "socialLinkedin": "#",
           "copyrightText": "Adama Science and Technology University. All rights reserved."
         },
-        "liveCommunityPosts": [
-          {
-            "id": "CP-1",
-            "name": "Abebe Yosef",
-            "role": "Software Engineer",
-            "text": "I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.",
-            "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-            "active": true
-          },
-          {
-            "id": "CP-2",
-            "name": "Bekele Kebede",
-            "role": "Employer Partner",
-            "text": "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.",
-            "image": "/uploads/cms/photo_2026-06-25_21-27-10-1793183781308-460665.jpg",
-            "active": true
-          },
-          {
-            "id": "CP-3",
-            "name": "Helina Sileshi",
-            "role": "Mentor & Alumni",
-            "text": "Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!",
-            "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
-            "active": true
-          }
-        ],
+        "liveCommunityPosts": [],
         "campusLifePage": {
           "slug": "campus-life",
           "title": "Campus Life at ASTU",
@@ -64750,7 +64685,7 @@
           ]
         }
       },
-      "updatedAt": "2026-11-03T17:41:38.587Z",
+      "updatedAt": "2026-11-03T17:55:44.437Z",
       "updatedBy": "CMS Admin"
     }
   ],

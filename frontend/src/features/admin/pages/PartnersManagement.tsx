@@ -217,7 +217,7 @@ export default function PartnersManagement() {
       industry: 'Technology & Software',
       location: 'Addis Ababa / Adama, Ethiopia',
       openings: '3 Active Graduate Roles',
-      partnershipType: 'Enterprise',
+      partnershipType: 'Strategic',
       description: 'Collaborates with ASTU on talent acquisition, technical workshops, and student internships.',
       website: '',
       contactEmail: '',
@@ -1424,14 +1424,12 @@ export default function PartnersManagement() {
               <div>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Partnership Tier</label>
                 <select
-                  value={editingCompany.partnershipType || 'Enterprise'}
+                  value={editingCompany.partnershipType || 'Strategic'}
                   onChange={(e) => setEditingCompany({ ...editingCompany, partnershipType: e.target.value })}
                   className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 text-xs text-slate-900 dark:text-white font-bold"
                 >
-                  <option value="Strategic Alliance">Strategic Alliance</option>
-                  <option value="Enterprise">Enterprise</option>
-                  <option value="Academic Sponsor">Academic Sponsor</option>
-                  <option value="Recruitment Partner">Recruitment Partner</option>
+                  <option value="Strategic">Strategic</option>
+                  <option value="Recruitment">Recruitment</option>
                   <option value="Research">Research</option>
                   <option value="Internship">Internship</option>
                   <option value="Technology">Technology</option>

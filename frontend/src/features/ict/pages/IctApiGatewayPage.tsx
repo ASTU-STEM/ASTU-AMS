@@ -47,14 +47,42 @@ interface EndpointHealth {
   health: 'HEALTHY' | 'DEGRADED' | 'DOWN';
 }
 
-const mockApiKeys: ApiKeyItem[] = [];
-
 const mockEndpoints: EndpointHealth[] = [
   { endpoint: '/api/v1/auth/login', method: 'POST', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 25, health: 'HEALTHY' },
   { endpoint: '/api/v1/alumni/profile', method: 'GET', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 30, health: 'HEALTHY' },
   { endpoint: '/api/v1/jobs', method: 'GET', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 28, health: 'HEALTHY' },
   { endpoint: '/api/v1/surveys/active', method: 'GET', status2xx: 100.0, status4xx: 0.0, status5xx: 0.0, p95LatencyMs: 35, health: 'HEALTHY' },
 ];
+
+function normalizeScopes(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.map(String).filter(Boolean);
+  }
+  if (typeof raw === 'string' && raw.trim()) {
+    return raw.split(/[,\s|]+/).map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+function normalizeApiKey(raw: Record<string, unknown>, index: number): ApiKeyItem {
+  const statusRaw = String(raw.status || 'ACTIVE').toUpperCase();
+  const status: ApiKeyItem['status'] =
+    statusRaw === 'REVOKED' || statusRaw === 'EXPIRED' ? statusRaw : 'ACTIVE';
+
+  return {
+    id: String(raw.id || `key-${index}`),
+    clientName: String(raw.clientName || raw.name || 'Unknown Client'),
+    service: String(raw.service || raw.type || 'External Partner Service'),
+    keyPrefix: String(raw.keyPrefix || raw.prefix || 'astu_live_••••'),
+    scopes: normalizeScopes(raw.scopes ?? raw.permissions),
+    rateLimit: String(raw.rateLimit || '—'),
+    ipWhitelist: String(raw.ipWhitelist || '0.0.0.0/0 (Any IP)'),
+    status,
+    created: String(raw.created || raw.createdAt || '—'),
+    lastUsed: String(raw.lastUsed || '—'),
+    requestCount: Number(raw.requestCount) || 0,
+  };
+}
 
 export default function IctApiGatewayPage() {
   const [apiKeys, setApiKeys] = useState<ApiKeyItem[]>([]);
@@ -67,7 +95,11 @@ export default function IctApiGatewayPage() {
       .then((res) => {
         const d = res.data;
         if (d.success && Array.isArray(d.data?.apiKeys)) {
-          setApiKeys(d.data.apiKeys);
+          setApiKeys(
+            d.data.apiKeys
+              .filter((k: unknown) => k && typeof k === 'object')
+              .map((k: Record<string, unknown>, i: number) => normalizeApiKey(k, i))
+          );
         }
       })
       .catch(() => {});
@@ -241,11 +273,15 @@ export default function IctApiGatewayPage() {
 
                       <td className="px-4 py-3.5 max-w-xs">
                         <div className="flex flex-wrap gap-1">
-                          {key.scopes.map((s) => (
-                            <span key={s} className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                              {s}
-                            </span>
-                          ))}
+                          {(key.scopes ?? []).length === 0 ? (
+                            <span className="text-[10px] text-slate-400">No scopes</span>
+                          ) : (
+                            (key.scopes ?? []).map((s) => (
+                              <span key={s} className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                {s}
+                              </span>
+                            ))
+                          )}
                         </div>
                       </td>
 
@@ -267,7 +303,7 @@ export default function IctApiGatewayPage() {
                       </td>
 
                       <td className="px-4 py-3.5 font-mono text-[11px] text-slate-700 dark:text-slate-300 whitespace-nowrap">
-                        {key.requestCount.toLocaleString()} reqs
+                        {Number(key.requestCount || 0).toLocaleString()} reqs
                       </td>
 
                       <td className="px-4 py-3.5 text-right whitespace-nowrap space-x-2">

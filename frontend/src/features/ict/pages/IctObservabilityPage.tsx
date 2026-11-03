@@ -94,46 +94,57 @@ export default function IctObservabilityPage() {
           </div>
         </div>
 
-        {/* Selected Trace Header */}
-        <div className="rounded-xl bg-slate-900 p-4 text-white mb-6 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold text-blue-400">{currentTrace.id}</span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              {currentTrace.status}
-            </span>
+        {!currentTrace ? (
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-800/40">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No request traces available</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Distributed tracing data will appear here once instrumentation is collecting live spans.
+            </p>
           </div>
-          <p className="text-base font-mono font-bold text-white">{currentTrace.endpoint}</p>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-300">
-            <span>User: <strong>{currentTrace.user}</strong></span>
-            <span>Total Time: <strong className="text-amber-400">{currentTrace.totalDuration}</strong></span>
-            <span>Time: <strong>{currentTrace.timestamp}</strong></span>
-          </div>
-        </div>
-
-        {/* Waterfall Visualizer */}
-        <div className="space-y-3">
-          {currentTrace.spans.map((span, idx) => (
-            <div key={idx} className="space-y-1">
-              <div className="flex items-center justify-between text-xs font-medium">
-                <span className="text-slate-800 dark:text-slate-200 font-semibold flex items-center gap-2">
-                  {span.layer}
-                  {span.isBottleneck && (
-                    <span className="px-2 py-0.5 text-[9px] font-extrabold bg-rose-100 text-rose-700 rounded dark:bg-rose-950/60 dark:text-rose-300">
-                      ⚠ BOTTLENECK ({span.duration})
-                    </span>
-                  )}
+        ) : (
+          <>
+            {/* Selected Trace Header */}
+            <div className="rounded-xl bg-slate-900 p-4 text-white mb-6 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold text-blue-400">{currentTrace.id}</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  {currentTrace.status}
                 </span>
-                <span className="font-mono text-slate-500 dark:text-slate-400">{span.duration} ({span.pct}%)</span>
               </div>
-              <div className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
-                <div
-                  className={`h-full rounded-full ${span.color} transition-all duration-500`}
-                  style={{ width: `${Math.max(span.pct, 4)}%` }}
-                />
+              <p className="text-base font-mono font-bold text-white">{currentTrace.endpoint}</p>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-300">
+                <span>User: <strong>{currentTrace.user}</strong></span>
+                <span>Total Time: <strong className="text-amber-400">{currentTrace.totalDuration}</strong></span>
+                <span>Time: <strong>{currentTrace.timestamp}</strong></span>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Waterfall Visualizer */}
+            <div className="space-y-3">
+              {(currentTrace.spans ?? []).map((span, idx) => (
+                <div key={idx} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-medium">
+                    <span className="text-slate-800 dark:text-slate-200 font-semibold flex items-center gap-2">
+                      {span.layer}
+                      {span.isBottleneck && (
+                        <span className="px-2 py-0.5 text-[9px] font-extrabold bg-rose-100 text-rose-700 rounded dark:bg-rose-950/60 dark:text-rose-300">
+                          ⚠ BOTTLENECK ({span.duration})
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-mono text-slate-500 dark:text-slate-400">{span.duration} ({span.pct}%)</span>
+                  </div>
+                  <div className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-slate-800">
+                    <div
+                      className={`h-full rounded-full ${span.color} transition-all duration-500`}
+                      style={{ width: `${Math.max(span.pct, 4)}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Database Slow Query Inspector */}
@@ -155,19 +166,28 @@ export default function IctObservabilityPage() {
         </div>
 
         <div className="space-y-3">
-          {slowQueries.map((q, idx) => (
-            <div key={idx} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
-              <div className="flex items-center justify-between mb-2">
-                <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300">
-                  {q.impact} IMPACT ({q.duration})
-                </span>
-                <span className="text-xs font-medium text-slate-500">{q.calls} executions today</span>
-              </div>
-              <code className="block text-xs font-mono bg-slate-900 text-emerald-400 p-3 rounded-lg overflow-x-auto">
-                {q.query}
-              </code>
+          {slowQueries.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center dark:border-slate-700 dark:bg-slate-800/40">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No slow queries recorded</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                High-latency database statements will show up here when query logging is enabled.
+              </p>
             </div>
-          ))}
+          ) : (
+            slowQueries.map((q, idx) => (
+              <div key={idx} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-300">
+                    {q.impact} IMPACT ({q.duration})
+                  </span>
+                  <span className="text-xs font-medium text-slate-500">{q.calls} executions today</span>
+                </div>
+                <code className="block text-xs font-mono bg-slate-900 text-emerald-400 p-3 rounded-lg overflow-x-auto">
+                  {q.query}
+                </code>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -76,33 +76,42 @@ export default function IctIntegrationsPage() {
           </div>
 
           <div className="space-y-3">
-            {integrations.map((item) => (
-              <div
-                key={item.name}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">{item.name}</span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${
-                        item.status === 'HEALTHY'
-                          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 font-mono text-[11px] text-slate-500">{item.endpoint}</p>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs font-medium text-slate-600 dark:text-slate-300">
-                  <span>Latency: <strong>{item.latency}</strong></span>
-                  <span>Failures: <strong>{item.failuresToday}</strong></span>
-                </div>
+            {integrations.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-800/40">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No integrations configured</p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                  External partner endpoints will appear here once integration health probes are connected.
+                </p>
               </div>
-            ))}
+            ) : (
+              integrations.map((item) => (
+                <div
+                  key={item.name}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">{item.name}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${
+                          item.status === 'HEALTHY'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                            : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 font-mono text-[11px] text-slate-500">{item.endpoint}</p>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <span>Latency: <strong>{item.latency}</strong></span>
+                    <span>Failures: <strong>{item.failuresToday}</strong></span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
@@ -165,24 +174,33 @@ export default function IctIntegrationsPage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              {dataQualityItems.map((item) => (
-                <div
-                  key={item.type}
-                  className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 flex items-center justify-between"
-                >
-                  <div>
-                    <h3 className="text-xs font-bold text-slate-900 dark:text-white">{item.type}</h3>
-                    <p className="text-xs text-amber-600 font-semibold">{item.count} items detected</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => toast.success(`Auto-fixed: ${item.type}`)}
-                    className="text-xs font-bold text-blue-600 hover:underline cursor-pointer dark:text-blue-400"
-                  >
-                    {item.fixAction} →
-                  </button>
+              {dataQualityItems.length === 0 ? (
+                <div className="sm:col-span-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-800/40">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No data-quality issues detected</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Duplicate, incomplete, or invalid institutional records will show here when audits run.
+                  </p>
                 </div>
-              ))}
+              ) : (
+                dataQualityItems.map((item) => (
+                  <div
+                    key={item.type}
+                    className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-800/40 flex items-center justify-between"
+                  >
+                    <div>
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-white">{item.type}</h3>
+                      <p className="text-xs text-amber-600 font-semibold">{item.count} items detected</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toast.success(`Auto-fixed: ${item.type}`)}
+                      className="text-xs font-bold text-blue-600 hover:underline cursor-pointer dark:text-blue-400"
+                    >
+                      {item.fixAction} →
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

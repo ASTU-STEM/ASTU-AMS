@@ -106,20 +106,22 @@ export default function IctUniversalLogsPage() {
       .then((res) => {
         const d = res.data;
         if (d.success && Array.isArray(d.data?.logs)) {
-          const mapped: LogItem[] = d.data.logs.map((item: any, idx: number) => ({
-            id: item.id || `LOG-${idx + 1}`,
-            timestamp: item.timestamp || item.createdAt || new Date().toISOString(),
-            portal: (item.portal || item.role || 'ICT').toUpperCase() as any,
-            category: (item.category || 'SYSTEM').toUpperCase() as any,
-            severity: (item.severity || 'INFO').toUpperCase() as any,
-            action: item.action || 'SYSTEM_EVENT',
-            actor: item.userName || item.actor || 'System',
-            actorEmail: item.userEmail || item.actorEmail || 'system@astu.edu.et',
-            ipAddress: item.ipAddress || '127.0.0.1',
-            details: item.details || item.description || '',
-            beforeState: item.beforeState,
-            afterState: item.afterState,
-          }));
+          const mapped: LogItem[] = d.data.logs
+            .filter((item: unknown) => item && typeof item === 'object')
+            .map((item: any, idx: number) => ({
+              id: String(item.id || `LOG-${idx + 1}`),
+              timestamp: String(item.timestamp || item.createdAt || new Date().toISOString()),
+              portal: String(item.portal || item.role || 'ICT').toUpperCase() as LogItem['portal'],
+              category: String(item.category || 'SYSTEM').toUpperCase() as LogItem['category'],
+              severity: String(item.severity || 'INFO').toUpperCase() as LogItem['severity'],
+              action: String(item.action || 'SYSTEM_EVENT'),
+              actor: String(item.userName || item.actor || 'System'),
+              actorEmail: String(item.userEmail || item.actorEmail || 'system@astu.edu.et'),
+              ipAddress: String(item.ipAddress || '127.0.0.1'),
+              details: String(item.details || item.description || ''),
+              beforeState: item.beforeState,
+              afterState: item.afterState,
+            }));
           setLogs(mapped);
         }
       })
