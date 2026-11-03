@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3 } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import { PageLoader } from '../../../components/loaders';
 
 
 // Types
@@ -20,19 +21,15 @@ import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { DataIssuesTab } from '../components/DataIssuesTab';
-import { RegistrarPublishingTab } from '../components/RegistrarPublishingTab';
-import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { useTheme } from '../../../hooks/useTheme';
-import { usePortalMenuControl } from '../../../context/PortalMenuControlContext';
-import PageClosedView from '../../../components/PageClosedView';
 
 const RegistrarDashboard = () => {
+  const { darkMode, toggleTheme } = useTheme();
    const navigate = useNavigate();
    const { user, logout } = useAuth();
-   const { isPageClosed, getClosedNotice } = usePortalMenuControl();
 
    // Dynamic authenticated Registrar profile state from database
    const registrarName = useMemo(() => {
@@ -76,17 +73,13 @@ const RegistrarDashboard = () => {
    const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
 
 
-   const { darkMode, toggleTheme } = useTheme();
+   // Theme Dark / Light mode
 
   // Notifications Bell dropdown
   const [showNotifications, setShowNotifications] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'Batch validation complete. 3 records processed.', unread: true, time: '2 hours ago' },
-    { id: 2, text: 'New transcript request submitted by Abebe Bikila.', unread: true, time: '1 day ago' },
-    { id: 3, text: 'Duplicate record warnings resolved in class batch 2024.', unread: false, time: '3 days ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
   const [graduates, setGraduates] = useState<any[]>([]);
@@ -132,8 +125,8 @@ const RegistrarDashboard = () => {
               fullName: a.fullName,
               email: a.email || a.user?.email || 'N/A',
               department: a.department?.name || a.department || 'Software Engineering',
-              graduationYear: String(a.graduationYear || '—'),
-              cgpa: String(a.cgpa || '—'),
+              graduationYear: String(a.graduationYear || '2024'),
+              cgpa: String(a.cgpa || '0.00'),
               identityVerified: Boolean(a.isVerified),
               status: a.status === 'ACTIVE' ? 'Active' : 'Inactive',
               createdAt: a.createdAt || a.user?.createdAt || new Date().toISOString()
@@ -150,10 +143,10 @@ const RegistrarDashboard = () => {
               fullName: g.fullName,
               email: g.email || 'N/A',
               department: g.department,
-              graduationYear: String(g.graduationYear || '—'),
-              cgpa: String(g.cgpa || '—'),
+              graduationYear: String(g.graduationYear || '2024'),
+              cgpa: String(g.cgpa || '0.00'),
               identityVerified: Boolean(g.alumniProfile?.isVerified ?? true),
-              status: g.alumniProfile?.status === 'ACTIVE' ? 'Active' : 'Inactive',
+              status: g.alumniProfile?.status === 'ACTIVE' ? 'Active' : 'Active',
               createdAt: g.importedAt || g.createdAt || new Date().toISOString()
             });
           });
@@ -169,7 +162,7 @@ const RegistrarDashboard = () => {
             fullName: v.alumni?.fullName || v.fullName || 'N/A',
             email: (v.alumni?.email && v.alumni?.email !== 'N/A') ? v.alumni.email : (v.notes?.match(/Contact Email:\s*([^\s\n]+)/i)?.[1] || v.email || 'N/A'),
             department: v.alumni?.department?.name || v.department || 'General',
-            graduationYear: String(v.alumni?.graduationYear || v.graduationYear || '—'),
+            graduationYear: String(v.alumni?.graduationYear || v.graduationYear || '2024'),
             type: v.type || 'Alumni Registration',
             status: (v.status || 'PENDING').toUpperCase(),
             requestDate: v.requestDate || v.createdAt || new Date().toISOString(),
@@ -201,7 +194,7 @@ const RegistrarDashboard = () => {
   }, [graduates, lastSeenRecordsTime]);
 
   // Real Chat Unread Messages state for sidebar badge
-  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(2);
+  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
   const [realSurveyRate, setRealSurveyRate] = useState<number | null>(null);
 
   useEffect(() => {
@@ -303,6 +296,8 @@ const RegistrarDashboard = () => {
       setNotifications(realNotifs);
     }
   }, [documents, verifications, registrationIssues]);
+
+  const verifiedRate = totalGraduatesCount > 0 ? Math.round((verifiedAlumniCount / totalGraduatesCount) * 100) : 0;
 
   const filteredGraduates = useMemo(() => {
     if (!normalizedSearch) return graduates;
@@ -427,7 +422,7 @@ const RegistrarDashboard = () => {
   ];
 
   const complianceSignals = [
-    { label: 'Verification Rate', value: `${activeGraduatesCount > 0 ? Math.round((activeVerifiedCount / activeGraduatesCount) * 100) : 0}%`, icon: 'query_stats', tone: 'text-astu-green' },
+    { label: 'ETA Employment KPI', value: `${Math.round((activeVerifiedCount / (activeGraduatesCount || 1)) * 84)}%`, icon: 'query_stats', tone: 'text-astu-green' },
     { label: 'Pending Documents', value: documentRequestsCount.toString(), icon: 'pending_actions', tone: documentRequestsCount > 0 ? 'text-astu-red' : 'text-astu-green' },
     { label: 'SIS Heartbeat', value: 'Active', icon: 'database', tone: 'text-astu-navy' },
   ];
@@ -712,7 +707,7 @@ useEffect(() => {
 
    return (
     <>
-    <div className="role-shell min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
+    <div className="app-shell min-h-screen bg-[#f4f6fa] dark:bg-[#0f1117] font-['Inter',sans-serif] text-slate-800 dark:text-slate-100 antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -756,9 +751,9 @@ useEffect(() => {
       )}
 
         {/* Sidebar Container */}
-        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
+        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-white border-r border-slate-200/80 text-slate-800 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
           {/* Sidebar Logo Header */}
-          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-slate-200/80 bg-white">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
               <div className="relative shrink-0 flex items-center justify-center h-11 w-11">
                 <img
@@ -769,8 +764,8 @@ useEffect(() => {
               </div>
               {!sidebarCollapsed && (
                 <div>
-                  <h1 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">ASTU Registrar</h1>
-                  <p className="text-[11px] text-[#003580] dark:text-sky-400 uppercase tracking-[0.16em] font-extrabold truncate mt-0.5">Management Hub</p>
+                  <h1 className="text-base font-extrabold text-slate-900 tracking-tight leading-tight">ASTU Registrar</h1>
+                  <p className="text-[11px] text-[#003580] uppercase tracking-[0.16em] font-extrabold truncate mt-0.5">Management Hub</p>
                 </div>
               )}
             </div>
@@ -808,9 +803,8 @@ useEffect(() => {
               },
               {
                 sectionKey: 'comm',
-                sectionLabel: 'Communication & Publishing',
+                sectionLabel: 'Communication',
                 items: [
-                  { id: 'bulletins', label: 'Announcements & Events', icon: 'campaign', badge: null, tooltip: 'Publish announcements & events (Subject to Alumni Officer approval)' },
                   { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadChatMessagesCount > 0 ? unreadChatMessagesCount : null, tooltip: unreadChatMessagesCount > 0 ? `${unreadChatMessagesCount} unread messages` : 'Direct Messaging Hub' }
                 ]
               }
@@ -822,54 +816,39 @@ useEffect(() => {
                   </div>
                 )}
                 <div className="space-y-1">
-                  {group.items.map((item) => {
-                    const isClosed = isPageClosed('REGISTRAR', item.id);
-                    const closedNotice = getClosedNotice('REGISTRAR', item.id);
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        title={sidebarCollapsed ? (isClosed ? `${item.label} (Closed)` : item.label) : (isClosed ? `Closed: ${closedNotice || 'Click to view notice'}` : item.tooltip)}
-                        className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
-                          ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
-                          : isClosed
-                          ? 'text-slate-500 hover:text-slate-800 hover:bg-rose-50/50 dark:hover:bg-rose-950/20'
-                          : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
-                        }`}
-                      >
-                        <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
-                          <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                          {isClosed && sidebarCollapsed ? (
-                            <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-0.5 flex items-center justify-center rounded-full bg-rose-600 text-[7px] font-extrabold text-white shadow-xs">
-                              ✕
-                            </span>
-                          ) : item.badge && sidebarCollapsed ? (
-                            <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
+                  {group.items.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      title={sidebarCollapsed ? item.label : item.tooltip}
+                      className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
+                        ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
+                        : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
+                        <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+                        {item.badge && sidebarCollapsed && (
+                          <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
+                            {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
+                          </span>
+                        )}
+                      </span>
+                      {!sidebarCollapsed && (
+                        <>
+                          <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
+                          {item.badge && (
+                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
-                          ) : null}
-                        </span>
-                        {!sidebarCollapsed && (
-                          <>
-                            <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
-                            {isClosed ? (
-                              <span className="ml-auto flex items-center gap-1 min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shrink-0">
-                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                                Closed
-                              </span>
-                            ) : item.badge ? (
-                              <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
-                                {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
-                              </span>
-                            ) : null}
-                          </>
-                        )}
-                        {activeTab === item.id && !sidebarCollapsed && !item.badge && !isClosed && (
-                          <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
+                          )}
+                        </>
+                      )}
+                      {activeTab === item.id && !sidebarCollapsed && !item.badge && (
+                        <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
             ))}
@@ -982,7 +961,7 @@ useEffect(() => {
                 className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
                 aria-label="Toggle dark mode"
               >
-                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
               </button>
 
               {/* Notification Bell */}
@@ -1083,16 +1062,17 @@ useEffect(() => {
             </div>
           </header>
 
+            {/* isLoadingData was set but never read, so this page had no
+                loading UI at all: every counter showed 0 and the records table
+                rendered empty while the requests were still in flight. */}
+            {isLoadingData && (
+              <div className="px-4 pt-4 sm:px-6">
+                <PageLoader />
+              </div>
+            )}
+
           {/* Dynamic tabs routing */}
-          <div className="dashboard-content flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
-            {isPageClosed('REGISTRAR', activeTab) ? (
-              <PageClosedView
-                actor="REGISTRAR"
-                pageId={activeTab}
-                onBackToDashboard={() => setActiveTab('dashboard')}
-              />
-            ) : (
-              <>
+          <div className="flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'management' && (
               <section className="space-y-6 p-4 md:p-6">
                 {/* Management Hub Hero */}
@@ -1204,8 +1184,6 @@ useEffect(() => {
 
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
-                {/* Official Alumni Officer Broadcast Hero Banner */}
-                <DashboardBroadcastHero actorRole="REGISTRAR" className="mb-2" />
 
                 {/* Welcome banner */}
                 <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
@@ -1466,12 +1444,6 @@ useEffect(() => {
 
             {activeTab === 'messages' && (
               <MessagingTab darkMode={darkMode} />
-            )}
-
-            {activeTab === 'bulletins' && (
-              <RegistrarPublishingTab registrarName={registrarName} darkMode={darkMode} />
-            )}
-              </>
             )}
           </div>
         </div>

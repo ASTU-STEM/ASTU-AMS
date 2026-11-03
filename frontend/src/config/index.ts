@@ -4,12 +4,18 @@ const backendOrigin = import.meta.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, ''
   || apiUrl.replace(/\/api\/?$/, '')
   || 'http://localhost:5000';
 
+/** Canonical public ASTU seal used when settings omit or supply an unusable logo. */
+const DEFAULT_LOGO_PATH = '/images/astu-seal-logo.png';
+
 /**
  * Turn a backend-stored media path into a loadable URL.
  *
  * Uploaded assets live on the backend (served from /uploads) while the app is
  * served by Vite on another port, so a bare "/uploads/..." path would resolve
  * against the dev server and 404. Absolute URLs are passed through untouched.
+ *
+ * Relative paths such as `images/foo.png` are normalised to root-absolute
+ * `/images/foo.png` so nested React Router URLs do not break asset resolution.
  */
 const mediaUrl = (raw?: string | null): string => {
   const value = (raw || '').trim();
@@ -26,10 +32,24 @@ const mediaUrl = (raw?: string | null): string => {
   return `/${normalised}`;
 };
 
+/**
+ * Resolve the site/navbar logo for any route depth.
+ * Rejects placeholder Google CDN seeds and forces a root-absolute path.
+ */
+const resolveLogoUrl = (raw?: string | null): string => {
+  const value = (raw || '').trim();
+  if (!value || /googleusercontent|aida-public/i.test(value)) {
+    return DEFAULT_LOGO_PATH;
+  }
+  return mediaUrl(value) || DEFAULT_LOGO_PATH;
+};
+
 const config = {
   apiUrl,
   backendOrigin,
   mediaUrl,
+  resolveLogoUrl,
+  DEFAULT_LOGO_PATH,
   appName: 'ASTU Alumni Management System',
   appShortName: 'ASTU-AMS',
   version: '1.0.0',
@@ -56,5 +76,5 @@ const config = {
   toastDuration: 4000,
 };
 
-export { mediaUrl };
+export { mediaUrl, resolveLogoUrl, DEFAULT_LOGO_PATH };
 export default config;

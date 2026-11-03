@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import ShareModal, { ShareItem } from '../components/ShareModal';
 import eventsService, { ApiEvent } from '../features/admin/services/events.service';
 import astuBuildingImg from '../assets/imgs/astu-building.jpg';
 import gc7Img from '../assets/images/gc7.jpg';
@@ -289,7 +291,8 @@ export default function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // URL Query Sync
-  const initialCategory = (searchParams.get('category')?.toUpperCase() as CategoryFilter) || 'ALL';
+  const catParam = searchParams.get('category') || searchParams.get('type') || searchParams.get('kind');
+  const initialCategory = (catParam?.toUpperCase() as CategoryFilter) || 'ALL';
   const initialDateFilter = (searchParams.get('date')?.toUpperCase() as DateFilter) || 'ALL';
   const initialSearch = searchParams.get('q') || '';
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
@@ -302,6 +305,8 @@ export default function EventsPage() {
     ['UPCOMING', 'PAST', 'ALL'].includes(initialDateFilter) ? initialDateFilter : 'ALL'
   );
   const [currentPage, setCurrentPage] = useState(isNaN(initialPage) || initialPage < 1 ? 1 : initialPage);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   // Data states
   const [rawEvents, setRawEvents] = useState<DisplayEvent[]>([]);
@@ -652,7 +657,7 @@ export default function EventsPage() {
             </h1>
 
             <p className="max-w-3xl text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              Connect with fellow ASTU engineers, industry leaders, and researchers. Explore upcoming career summits, hands-on bootcamps, and academic symposiums hosted across our Adama campus.
+              <span className="font-semibold text-white">Gatherings & training</span> · Connect with fellow ASTU engineers, industry leaders, and researchers across upcoming career summits, hands-on bootcamps, and academic symposiums hosted across our Adama campus.
             </p>
           </div>
 
@@ -966,6 +971,27 @@ export default function EventsPage() {
                       >
                         Details
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShareItem({
+                            id: event.id,
+                            title: event.title,
+                            subtitle: `${formatEventDate(event.date)} · ${event.location}`,
+                            text: `${event.title} - ${event.kind} organized by ASTU. Scheduled on ${formatEventDate(event.date)} at ${event.location}.`,
+                            url: `/events/${event.id}`,
+                            image: event.image,
+                            badge: event.kind,
+                            type: 'event',
+                          });
+                          setIsShareOpen(true);
+                        }}
+                        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                        title="Share event"
+                      >
+                        <Share2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -1225,6 +1251,15 @@ export default function EventsPage() {
           </div>
         </div>
       )}
+
+      {/* ── MODAL: Universal Share Modal ── */}
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        item={shareItem}
+      />
+
+      <Footer />
     </div>
   );
 }

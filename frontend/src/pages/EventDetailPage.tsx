@@ -18,6 +18,7 @@ import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import eventsService, { ApiEvent } from '../features/admin/services/events.service';
+import ShareModal from '../components/ShareModal';
 
 const DEFAULT_EVENT_IMAGES: Record<string, string> = {
   'ASTU Alumni Career Summit': '/images/astu-building.jpg',
@@ -36,6 +37,7 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -173,7 +175,7 @@ export default function EventDetailPage() {
 
       {/* Header Banner Navigation */}
       <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-colors">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-3 sm:px-6">
           <button
             onClick={() => navigate('/events')}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
@@ -182,20 +184,17 @@ export default function EventDetailPage() {
           </button>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                toast.success('Link copied to clipboard');
-              }}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              onClick={() => setIsShareModalOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-xs cursor-pointer"
             >
-              <Share2 className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" /> Share
+              <Share2 className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" /> Share Event
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Left Column: Media & Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -475,6 +474,26 @@ export default function EventDetailPage() {
       )}
 
       <Footer />
+
+      {/* Universal Share Modal */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        item={
+          eventData
+            ? {
+                id: eventData.id,
+                title: eventData.title,
+                subtitle: `${eventData.date} · ${eventData.location || 'ASTU Main Campus'}`,
+                text: eventData.description,
+                image: eventData.image || DEFAULT_EVENT_IMAGES[eventData.title],
+                badge: eventData.category || 'Event',
+                type: 'event',
+                url: window.location.pathname,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

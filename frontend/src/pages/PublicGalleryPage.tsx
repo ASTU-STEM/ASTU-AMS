@@ -1,25 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
-  Calendar,
-  CheckCircle2,
-  Film,
   Filter,
-  GraduationCap,
   Image as ImageIcon,
-  ImagePlus,
-  Microscope,
   PlayCircle,
   Search,
-  Tag,
-  User,
   X,
+  Share2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
+import PaginationBar from '../components/PaginationBar';
+import ShareModal, { ShareItem } from '../components/ShareModal';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
+import contentService from '../features/admin/services/content.service';
 
 interface GalleryItem {
   id: string;
@@ -97,8 +93,6 @@ const defaultGalleryItems: GalleryItem[] = [
 ];
 
 export default function PublicGalleryPage() {
-  const navigate = useNavigate();
-
   const loadMedia = () => {
     try {
       const stored = localStorage.getItem('astu_ams_cms_gallery_items');
@@ -118,10 +112,15 @@ export default function PublicGalleryPage() {
     return defaultGalleryItems;
   };
 
+  const GALLERY_PAGE_SIZE = 6;
   const [items, setItems] = useState<GalleryItem[]>(loadMedia);
+  const [loading, setLoading] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<string>('All');
   const [selectedType, setSelectedType] = useState<'All' | 'Photo' | 'Video'>('All');
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [galleryPage, setGalleryPage] = useState(0);
   const [activeModalItem, setActiveModalItem] = useState<GalleryItem | null>(null);
 
   useEffect(() => {
@@ -133,6 +132,93 @@ export default function PublicGalleryPage() {
       window.removeEventListener('astu-cms-homepage-updated', sync);
     };
   }, []);
+
+  // Fetch live published gallery from backend API
+  useEffect(() => {
+    let isMounted = true;
+    const fetchBackendMedia = async () => {
+      setLoading(true);
+      try {
+        const [config, mediaAssets] = await Promise.all([
+          homepageCmsService.fetchFromApi(),
+          contentService.getMediaAssets(),
+        ]);
+        if (!isMounted) return;
+
+        let mergedList: GalleryItem[] = [];
+        const seenIds = new Set<string>();
+
+        if (config?.gallery && Array.isArray(config.gallery)) {
+          config.gallery.forEach((g: any) => {
+            if (g && g.active !== false && g.src) {
+              seenIds.add(g.id);
+              mergedList.push({
+                id: g.id,
+                title: g.title || 'ASTU Campus Moment',
+                type: 'Photo',
+                album: g.album || 'Campus Gallery',
+                src: g.src,
+                image: g.src,
+                status: 'Approved',
+                date: g.date || 'Recent Moment',
+              });
+            }
+          });
+        }
+
+        if (Array.isArray(mediaAssets)) {
+          mediaAssets.forEach((m: any) => {
+            if (m && !seenIds.has(m.id)) {
+              seenIds.add(m.id);
+              mergedList.push({
+                id: m.id,
+                title: m.altText || m.filename || 'Campus Media',
+                type: m.mimeType?.startsWith('video') ? 'Video' : 'Photo',
+                album: m.album || 'Campus Gallery',
+                src: m.url,
+                image: m.url,
+                status: 'Approved',
+                uploadedBy: m.uploaderName || 'Alumni Office',
+                date: m.createdAt ? new Date(m.createdAt).toLocaleDateString() : 'Recent Moment',
+              });
+            }
+          });
+        }
+
+        const localStored = localStorage.getItem('astu_ams_cms_gallery_items');
+        if (localStored) {
+          try {
+            const parsed = JSON.parse(localStored);
+            if (Array.isArray(parsed)) {
+              parsed.forEach((item: any) => {
+                if (item && !seenIds.has(item.id)) {
+                  seenIds.add(item.id);
+                  mergedList.push(item);
+                }
+              });
+            }
+          } catch {}
+        }
+
+        if (mergedList.length > 0) {
+          setItems(mergedList);
+        }
+      } catch (e) {
+        console.warn('Error fetching live gallery:', e);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchBackendMedia();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setGalleryPage(0);
+  }, [selectedAlbum, selectedType, search]);
 
   const albumsList = ['All', 'Event Gallery', 'Workshop Gallery', 'Graduation Gallery', 'Campus Gallery', 'Research Gallery'];
 
@@ -152,84 +238,161 @@ export default function PublicGalleryPage() {
     });
   }, [items, selectedAlbum, selectedType, search]);
 
+  useEffect(() => {
+    if (!activeModalItem) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveModalItem(null);
+      if (e.key === 'ArrowLeft') {
+        const curIdx = filtered.findIndex((i) => i.id === activeModalItem.id);
+        const prevIdx = (curIdx - 1 + filtered.length) % filtered.length;
+        setActiveModalItem(filtered[prevIdx]);
+      }
+      if (e.key === 'ArrowRight') {
+        const curIdx = filtered.findIndex((i) => i.id === activeModalItem.id);
+        const nextIdx = (curIdx + 1) % filtered.length;
+        setActiveModalItem(filtered[nextIdx]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModalItem, filtered]);
+
+  const galleryTotalPages = Math.max(1, Math.ceil(filtered.length / GALLERY_PAGE_SIZE));
+  const safeGalleryPage = Math.min(galleryPage, galleryTotalPages - 1);
+  const pagedGallery = filtered.slice(
+    safeGalleryPage * GALLERY_PAGE_SIZE,
+    safeGalleryPage * GALLERY_PAGE_SIZE + GALLERY_PAGE_SIZE
+  );
+
   return (
     <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar />
 
-      {/* Header Banner */}
-      <div className="bg-[#003580] text-white py-12 px-4 sm:px-6">
-        <div className="mx-auto max-w-[1240px]">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#FFD700]">
-              <ImageIcon className="h-6 w-6" />
-            </span>
-            <div>
-              <h1 className="text-2xl font-black sm:text-4xl">ASTU Media & Photo Gallery</h1>
-              <p className="text-xs sm:text-sm text-slate-200 mt-1">
-                Visual showcases, event archives, research expos, graduation ceremonies, and campus life at Adama Science and Technology University.
-              </p>
-            </div>
-          </div>
+      {/* Hero Header Banner */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-astu-navy to-slate-900 text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-500 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-amber-500 blur-3xl" />
         </div>
-      </div>
 
-      {/* Main Container */}
-      <main className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
-        {/* Filters & Search */}
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm md:flex-row md:items-center md:justify-between transition-colors">
-          {/* Album Tabs */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {albumsList.map((albumName) => (
-              <button
-                key={albumName}
-                type="button"
-                onClick={() => setSelectedAlbum(albumName)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                  selectedAlbum === albumName
-                    ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-              >
-                {albumName}
-              </button>
-            ))}
-          </div>
-
-          {/* Type Filter & Search */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-1 text-xs">
-              {(['All', 'Photo', 'Video'] as const).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`rounded-md px-2.5 py-1 font-semibold transition-all ${
-                    selectedType === type ? 'bg-[#003580] text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  {type}
-                </button>
-              ))}
+        <div className="relative mx-auto max-w-[1440px]">
+          <div className="flex flex-col items-start gap-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-300 backdrop-blur-md">
+              <img src="/images/astu-seal-logo.png" alt="ASTU Seal" className="h-4 w-4 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              <span>ASTU Media &amp; Photo Archives</span>
             </div>
 
-            <div className="relative w-48 sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+              Gallery & Campus Moments
+            </h1>
+
+            <p className="max-w-3xl text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+              <span className="font-semibold text-white">Campus moments</span> · Visual highlights, event archives, research expos, graduation ceremonies, and everyday campus life at Adama Science and Technology University.
+            </p>
+          </div>
+
+          <div className="mt-8 max-w-3xl">
+            <div className="relative flex items-center rounded-2xl bg-white/10 dark:bg-slate-900/80 backdrop-blur-md border border-white/20 p-1.5 shadow-2xl focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-400/20 transition-all">
+              <Search className="h-5 w-5 text-slate-300 ml-3.5 shrink-0 pointer-events-none" />
               <input
+                type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search gallery..."
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white py-1.5 pl-9 pr-3 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 transition-colors"
+                placeholder="Search gallery by title, album, or keyword..."
+                aria-label="Search gallery"
+                className="w-full bg-transparent px-3 py-2.5 text-sm sm:text-base text-white placeholder-slate-400 outline-none"
               />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
+      </section>
 
+      {/* Filter Toolbar */}
+      <nav
+        aria-label="Gallery filters"
+        className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm transition-colors"
+      >
+        <div className="mx-auto max-w-[1440px] px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Album Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0" role="tablist">
+              {albumsList.map((albumName) => {
+                const isActive = selectedAlbum === albumName;
+                return (
+                  <button
+                    key={albumName}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setSelectedAlbum(albumName)}
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                      isActive
+                        ? 'bg-astu-navy text-white shadow-md dark:bg-blue-600'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {albumName}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Type Filter & Count */}
+            <div className="flex items-center justify-between md:justify-end gap-3">
+              <div className="flex items-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-1 text-xs">
+                {(['All', 'Photo', 'Video'] as const).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setSelectedType(type)}
+                    className={`rounded-lg px-3 py-1 font-bold transition-all ${
+                      selectedType === type
+                        ? 'bg-astu-navy text-white shadow-sm dark:bg-blue-600'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <Filter className="h-4 w-4" />
+                <span>
+                  Showing{' '}
+                  <strong className="text-slate-900 dark:text-white">
+                    {filtered.length === 0 ? 0 : safeGalleryPage * GALLERY_PAGE_SIZE + 1}
+                  </strong>
+                  –
+                  <strong className="text-slate-900 dark:text-white">
+                    {Math.min(filtered.length, (safeGalleryPage + 1) * GALLERY_PAGE_SIZE)}
+                  </strong>{' '}
+                  of <strong className="text-slate-900 dark:text-white">{filtered.length}</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Container */}
+      <main className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8 flex-1 w-full space-y-6">
         {/* Gallery Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item) => (
+          {pagedGallery.map((item) => (
             <article
               key={item.id}
               onClick={() => setActiveModalItem(item)}
-              className="group cursor-pointer overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-astu-navy/30 dark:hover:border-blue-500/30"
             >
               <div className="relative h-56 w-full overflow-hidden bg-slate-900">
                 <img
@@ -252,6 +415,28 @@ export default function PublicGalleryPage() {
                     {item.album || 'Gallery'}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  aria-label={`Share ${item.title}`}
+                  title="Share this moment"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShareItem({
+                      id: item.id,
+                      title: item.title,
+                      subtitle: `${item.album} · ASTU Media Gallery`,
+                      text: `Check out "${item.title}" from the ASTU photo & media gallery.`,
+                      url: `/gallery`,
+                      image: item.src || item.image,
+                      badge: item.type,
+                      type: 'gallery',
+                    });
+                    setIsShareOpen(true);
+                  }}
+                  className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-astu-navy z-10 cursor-pointer"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                </button>
               </div>
               <div className="p-4">
                 <h3 className="text-base font-bold text-[#003580] dark:text-blue-200 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
@@ -273,6 +458,20 @@ export default function PublicGalleryPage() {
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Try adjusting your album or filter search term.</p>
           </div>
         )}
+
+        {filtered.length > 0 && (
+          <PaginationBar
+            currentPage={safeGalleryPage}
+            totalPages={galleryTotalPages}
+            total={filtered.length}
+            pageSize={GALLERY_PAGE_SIZE}
+            onPageChange={(p) => {
+              setGalleryPage(p);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            noun="media items"
+          />
+        )}
       </main>
 
       {/* Lightbox Modal */}
@@ -291,28 +490,87 @@ export default function PublicGalleryPage() {
             >
               <X className="h-5 w-5" />
             </button>
-            <div className="max-h-[75vh] overflow-hidden rounded-xl bg-black flex items-center justify-center">
+            <div className="relative max-h-[75vh] overflow-hidden rounded-xl bg-black flex items-center justify-center">
               <img
                 src={activeModalItem.src || activeModalItem.image || '/images/fallback-campus.svg'}
                 alt={activeModalItem.title}
                 className="max-h-[75vh] w-auto object-contain"
               />
+              {filtered.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous item"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const curIdx = filtered.findIndex((i) => i.id === activeModalItem.id);
+                      const prevIdx = (curIdx - 1 + filtered.length) % filtered.length;
+                      setActiveModalItem(filtered[prevIdx]);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/90 transition-all border border-white/20"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next item"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const curIdx = filtered.findIndex((i) => i.id === activeModalItem.id);
+                      const nextIdx = (curIdx + 1) % filtered.length;
+                      setActiveModalItem(filtered[nextIdx]);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/60 p-2 text-white hover:bg-black/90 transition-all border border-white/20"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </>
+              )}
             </div>
-            <div className="mt-4 flex items-center justify-between">
+            <div className="mt-4 flex items-center justify-between gap-4">
               <div>
                 <span className="rounded-md bg-blue-100 dark:bg-blue-900/40 text-[#003580] dark:text-blue-300 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider">
                   {activeModalItem.album}
                 </span>
                 <h2 className="mt-2 text-lg font-bold text-slate-900 dark:text-slate-100">{activeModalItem.title}</h2>
               </div>
-              <div className="text-right text-xs text-slate-500 dark:text-slate-400">
-                <p className="font-semibold text-slate-700 dark:text-slate-300">{activeModalItem.uploadedBy || 'ASTU Office'}</p>
-                <p>{activeModalItem.date || 'Recent'}</p>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShareItem({
+                      id: activeModalItem.id,
+                      title: activeModalItem.title,
+                      subtitle: `${activeModalItem.album} · ASTU Media Gallery`,
+                      text: `Check out "${activeModalItem.title}" from the ASTU photo & media gallery.`,
+                      url: `/gallery`,
+                      image: activeModalItem.src || activeModalItem.image,
+                      badge: activeModalItem.type,
+                      type: 'gallery',
+                    });
+                    setIsShareOpen(true);
+                  }}
+                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Share2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>Share</span>
+                </button>
+                <div className="text-right text-xs text-slate-500 dark:text-slate-400">
+                  <p className="font-semibold text-slate-700 dark:text-slate-300">{activeModalItem.uploadedBy || 'ASTU Office'}</p>
+                  <p>{activeModalItem.date || 'Recent'}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* ── MODAL: Universal Share Modal ── */}
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        item={shareItem}
+      />
 
       <Footer />
       <ChatBot />

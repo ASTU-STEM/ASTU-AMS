@@ -17,6 +17,8 @@ export default function Spinner({ size = 'md', className = '' }: SpinnerProps) {
       className={`animate-spin text-astu-navy ${sizes[size]} ${className}`}
       viewBox="0 0 24 24"
       fill="none"
+      role="status"
+      aria-label="Loading"
     >
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
@@ -30,7 +32,9 @@ export default function Spinner({ size = 'md', className = '' }: SpinnerProps) {
 
 export function PageLoader() {
   return (
-    <div className="flex items-center justify-center h-64">
+    // aria-live so assistive tech hears that content is loading; without it the
+    // page just appeared silent.
+    <div className="flex items-center justify-center h-64" role="status" aria-live="polite" aria-busy="true">
       <div className="text-center">
         <Spinner size="lg" />
         <p className="mt-3 text-sm text-on-surface-variant">Loading...</p>

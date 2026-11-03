@@ -406,7 +406,12 @@ export interface Partner {
   partnershipType?: 'Strategic' | 'Recruitment' | 'Research' | 'Internship' | 'Technology' | string;
   description?: string;
   contactEmail?: string;
+  contactPhone?: string;
   featured?: boolean;
+  hiredCount?: string;
+  mouYear?: string;
+  status?: string;
+  tags?: string[];
 }
 
 /** Partners come from CMS / API only — no demo directory. */
@@ -599,13 +604,15 @@ export interface HomepageCmsConfig {
   newsHeaders?: {
     eyebrow: string;
     title: string;
+    description?: string;
   };
   newsItems: NewsItem[];
   announcementsHeaders?: {
     eyebrow: string;
     title: string;
-    subscribeTitle: string;
-    subscribeDesc: string;
+    subscribeTitle?: string;
+    subscribeDesc?: string;
+    description?: string;
   };
   announcements: Announcement[];
   storiesHeaders?: {
@@ -770,6 +777,38 @@ export const homepageCmsService = {
         if (!Array.isArray(parsed.partners) || parsed.partners.length === 0) {
           parsed.partners = defaultPartnersList;
         }
+        if (parsed.eventsHeaders) {
+          const raw = parsed.eventsHeaders;
+          const desc = String(raw.description || '').replace(/^Gatherings\s*(&|and)\s*training\s*·\s*/i, '').trim();
+          const eyebrow = /calendar.*gatherings/i.test(String(raw.eyebrow || ''))
+            ? 'Events & Workshops'
+            : raw.eyebrow || 'Events & Workshops';
+          parsed.eventsHeaders = {
+            ...raw,
+            eyebrow,
+            title: raw.title || 'Gatherings & Technical Training',
+            description: desc || 'Join campus career expos, technical workshops, and alumni reunions across ASTU.',
+          };
+        }
+        if (parsed.newsHeaders) {
+          const raw = parsed.newsHeaders;
+          parsed.newsHeaders = {
+            ...raw,
+            eyebrow: raw.eyebrow || 'Campus News',
+            title: raw.title || 'Latest ASTU Highlights',
+            description: raw.description || 'University notices, academic bulletins, and alumni community circulars.',
+          };
+        }
+        if (parsed.announcementsHeaders) {
+          const raw = parsed.announcementsHeaders;
+          const desc = String(raw.description || '').replace(/^Official\s*updates\s*·\s*/i, '').trim();
+          parsed.announcementsHeaders = {
+            ...raw,
+            eyebrow: raw.eyebrow || 'Official Updates',
+            title: raw.title || 'News & Announcements',
+            description: desc || 'University notices, academic bulletins, and alumni community circulars.',
+          };
+        }
         return parsed;
       }
     } catch {
@@ -881,6 +920,10 @@ export const homepageCmsService = {
     }
 
     return this.getSettings();
+  },
+
+  async fetchSettings(): Promise<HomepageCmsConfig | null> {
+    return this.fetchFromApi();
   },
 
   async fetchPublishedPartners(): Promise<Partner[]> {

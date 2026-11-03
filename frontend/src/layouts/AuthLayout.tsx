@@ -114,11 +114,11 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
             {showLogo && (
               <div className="flex justify-center mb-4">
                 <img 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" 
+                  src="/images/astu-seal-logo.png" 
                   alt="ASTU Logo" 
                   className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 object-contain"
                   onError={(e) => {
-                    e.currentTarget.src = "/images/astu-logo.jpeg";
+                    e.currentTarget.src = "/images/astu-seal-logo.png";
                   }}
                 />
               </div>

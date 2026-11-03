@@ -62,7 +62,7 @@ export class OpenRouterService {
               'HTTP-Referer': 'https://github.com/astu-ams',
               'Content-Type': 'application/json',
             },
-            timeout: 15000,
+            timeout: 5000,
           }
         );
 
@@ -71,9 +71,6 @@ export class OpenRouterService {
         }
       } catch (error: any) {
         console.warn(`OpenRouter model [${currentModel}] call notice:`, error.response?.data?.error?.message || error.message);
-        if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-          break; // Host unreachable; fail fast to high-precision local fallback
-        }
       }
     }
 

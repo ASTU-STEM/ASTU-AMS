@@ -100,9 +100,9 @@ export default function IctUniversalLogsPage() {
   const [selectedDiffLog, setSelectedDiffLog] = useState<LogItem | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
     fetch('/api/admin/system-logs', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
       .then(r => r.json())
       .then(d => {

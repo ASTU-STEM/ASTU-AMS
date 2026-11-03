@@ -18,6 +18,12 @@ import {
   getPublicMetricsController,
   getPublicDonationCampaignsController,
   recordPublicDonationController,
+  getContentTemplatesController,
+  getContentTemplateByIdController,
+  createContentTemplateController,
+  updateContentTemplateController,
+  deleteContentTemplateController,
+  useContentTemplateController,
 } from './content.controller';
 import {
   getMenuControlsController,
@@ -69,6 +75,14 @@ router.get('/homepage/config', optionalAuthenticateJWT, getHomepageConfigControl
 router.get('/donations/campaigns', optionalAuthenticateJWT, getPublicDonationCampaignsController);
 router.post('/donations/public-donate', optionalAuthenticateJWT, recordPublicDonationController);
 router.get('/media', optionalAuthenticateJWT, getMediaAssetsController);
+// ─── Content Templates (DB-backed Reusable Layouts) ───
+router.get('/templates', optionalAuthenticateJWT, getContentTemplatesController);
+router.get('/templates/:id', optionalAuthenticateJWT, getContentTemplateByIdController);
+router.post('/templates', optionalAuthenticateJWT, createContentTemplateController);
+router.put('/templates/:id', optionalAuthenticateJWT, updateContentTemplateController);
+router.delete('/templates/:id', optionalAuthenticateJWT, deleteContentTemplateController);
+router.post('/templates/:id/use', optionalAuthenticateJWT, useContentTemplateController);
+
 router.get('/', optionalAuthenticateJWT, getContentController);
 router.get('/:id', optionalAuthenticateJWT, getContentByIdOrSlugController);
 

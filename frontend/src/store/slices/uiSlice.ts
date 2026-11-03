@@ -37,6 +37,11 @@ const uiSlice = createSlice({
     setDarkMode(state, action: PayloadAction<boolean>) {
       state.darkMode = action.payload;
       localStorage.setItem('theme', action.payload ? 'dark' : 'light');
+      // This previously only wrote localStorage, so calling setDarkMode left the
+      // `light`/`dark` class on <html> untouched and the page never changed.
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(action.payload ? 'dark' : 'light');
+      document.documentElement.style.colorScheme = action.payload ? 'dark' : 'light';
     },
     setMobileMenuOpen(state, action: PayloadAction<boolean>) {
       state.mobileMenuOpen = action.payload;

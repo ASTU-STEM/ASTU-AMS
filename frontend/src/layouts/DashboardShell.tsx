@@ -83,7 +83,9 @@ export function DashboardShell({
     localStorage.setItem(`dashboard_shell_${brand}_collapsed`, String(sidebarCollapsed));
   }, [brand, sidebarCollapsed]);
 
-  // Logout handler
+// Sync theme
+
+   // Logout handler
   const handleLocalLogout = () => {
     setMenuOpen(false);
     onLogout();
@@ -94,7 +96,7 @@ export function DashboardShell({
 
   return (
     <>
-    <div className="flex h-dvh w-full overflow-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
+    <div className="app-shell flex h-dvh w-full overflow-hidden bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       {mobileSidebarOpen && (
         <button
           type="button"
@@ -368,7 +370,9 @@ export function DashboardShell({
 
         {/* Content Area */}
         <main
-          className="flex-1 overflow-y-auto bg-[var(--bg-page)] p-6 lg:p-8"
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-y-auto bg-[var(--bg-page)] p-6 lg:p-8 outline-none"
           style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}
         >
           {children}

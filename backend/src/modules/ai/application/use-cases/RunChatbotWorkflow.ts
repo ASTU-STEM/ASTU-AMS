@@ -348,10 +348,11 @@ ${state.query}`;
       settings: settings || null,
     };
 
+    let timer: NodeJS.Timeout | undefined;
     try {
       const graphPromise = this.compiledGraph.invoke(initialState);
       const timeoutPromise = new Promise<ChatbotState>((resolve) => {
-        setTimeout(async () => {
+        timer = setTimeout(async () => {
           try {
             const dbResult = await DatabaseQueryTool.searchDatabase(query);
             const formatted = await UniversalDataQueryAgent.execute(query, '', dbResult.summaryText);
@@ -385,6 +386,10 @@ ${state.query}`;
         ...initialState,
         response: errFallback,
       };
+    } finally {
+      if (timer) {
+        clearTimeout(timer);
+      }
     }
   }
 }

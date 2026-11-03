@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSystemSettings } from '../context/SystemSettingsContext';
+import { resolveLogoUrl } from '../config';
 import {
   SidebarAiButton,
   SidebarBrand,
@@ -93,7 +94,7 @@ export default function IctSidebar({
     <aside className={sidebarShellClass(collapsed, isOpen)} aria-label="ICT navigation">
       <SidebarBrand
         collapsed={collapsed}
-        logoSrc={settings.appearance?.logoUrl || '/images/astu-seal-logo.png'}
+        logoSrc={resolveLogoUrl(settings.appearance?.logoUrl)}
         logoAlt={`${settings.general?.abbreviation || 'ASTU'} Seal`}
         title={`${settings.general?.abbreviation || 'ASTU'} ICT`}
         subtitle="Systems Directorate"

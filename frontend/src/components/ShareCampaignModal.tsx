@@ -31,6 +31,7 @@ interface CampaignPreview {
   donorCount?: number;
   image?: string;
   contentType?: string;
+  url?: string;
 }
 
 interface ShareCampaignModalProps {
@@ -57,8 +58,10 @@ export default function ShareCampaignModal({
   if (!isOpen || !campaign) return null;
 
   // Build the direct shareable campaign URL
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
-  const shareUrl = `${origin}/donations?cause=${encodeURIComponent(campaign.id)}`;
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://astu-ams.et';
+  const shareUrl = campaign.url
+    ? (campaign.url.startsWith('http') ? campaign.url : `${origin}${campaign.url}`)
+    : `${origin}/donations?cause=${encodeURIComponent(campaign.id)}`;
 
   const percent = campaign.goal && campaign.goal > 0
     ? Math.min(100, Math.round(((campaign.raised || 0) / campaign.goal) * 100))
@@ -67,23 +70,38 @@ export default function ShareCampaignModal({
   const shareText = `Support "${campaign.title}" at Adama Science and Technology University (ASTU). Every contribution empowers our student engineers, postgraduate research labs, and innovators:`;
 
   const handleCopyLink = async () => {
+    let success = false;
     try {
       if (navigator?.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareUrl);
-      } else {
-        // Fallback for older browsers
+        success = true;
+      }
+    } catch {
+      // Fall through to fallback
+    }
+
+    if (!success) {
+      try {
         const textarea = document.createElement('textarea');
         textarea.value = shareUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
         document.body.appendChild(textarea);
+        textarea.focus();
         textarea.select();
-        document.execCommand('copy');
+        success = document.execCommand('copy');
         document.body.removeChild(textarea);
+      } catch {
+        success = false;
       }
+    }
+
+    if (success) {
       setCopied(true);
       toast.success('Campaign link copied to clipboard!');
       setTimeout(() => setCopied(false), 2500);
-    } catch {
-      toast.error('Could not copy link to clipboard');
+    } else {
+      toast.error('Could not copy link automatically. Please select and copy manually.');
     }
   };
 
@@ -161,7 +179,10 @@ export default function ShareCampaignModal({
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-lg bg-white dark:bg-[#0f172a] rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-100 animate-in zoom-in-95 duration-200">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-white dark:bg-[#0f172a] rounded-3xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-100 animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-astu-navy via-[#003875] to-blue-800 p-5 sm:p-6 text-white relative">
           <div className="flex items-center justify-between mb-2">

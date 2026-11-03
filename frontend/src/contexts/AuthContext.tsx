@@ -1,27 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import type { User, UserRole } from '../types';
 import { authService } from '../features/auth/services/auth.service';
+import config from '../config';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (role: UserRole, name?: string) => void;
   logout: () => void;
   hasPermission: (allowedRoles: UserRole[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
-
-const MOCK_USERS: Record<string, User> = {
-  ALUMNI: { id: 'alum-001', email: 'abebe@astu.edu.et', firstName: 'Abebe', lastName: 'Bikila', role: 'ALUMNI', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  EMPLOYER: { id: 'emp-001', email: 'tigist@safir.com', firstName: 'Tigist', lastName: 'Haile', role: 'EMPLOYER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  REGISTRAR: { id: 'reg-001', email: 'registrar@astu.edu.et', firstName: 'Abebe', lastName: 'Assefa', role: 'REGISTRAR', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  DEPARTMENT_HEAD: { id: 'dept-001', email: 'cs.head@astu.edu.et', firstName: 'Meseret', lastName: 'Alemu', department: 'Computer Science', role: 'DEPARTMENT_HEAD', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  ADMIN: { id: 'adm-001', email: 'admin@astu.edu.et', firstName: 'System', lastName: 'Administrator', role: 'ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  SUPER_ADMIN: { id: 'super-adm-001', email: 'admin@astust.edu.et', firstName: 'Tolosa Abebe', lastName: 'Badho', role: 'SUPER_ADMIN', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-  CMS_MANAGER: { id: 'cms-mgr-001', email: 'cms@astu.edu.et', firstName: 'Content', lastName: 'Manager', role: 'CMS_MANAGER', isActive: true, createdAt: '2024-01-01', updatedAt: '2026-01-01' },
-};
 
 const normalizeRole = (role?: string | null): UserRole | null => {
   switch (role?.toUpperCase()) {
@@ -38,41 +28,108 @@ const normalizeRole = (role?: string | null): UserRole | null => {
   }
 };
 
-const readStoredUser = (): User | null => {
-  const storedUser = localStorage.getItem('user');
-  if (storedUser) {
-    try {
-      const parsed = JSON.parse(storedUser);
-      const role = normalizeRole(parsed.role);
-      if (role) {
-        const mock = MOCK_USERS[role];
-        const rawName = parsed.name || parsed.fullName || '';
-        const firstName = parsed.firstName !== undefined && parsed.firstName !== '' 
-          ? parsed.firstName 
-          : (rawName ? rawName.split(' ')[0] : (mock?.firstName ?? ''));
-        const lastName = parsed.lastName !== undefined && parsed.lastName !== ''
-          ? parsed.lastName 
-          : (rawName ? rawName.split(' ').slice(1).join(' ') : (mock?.lastName ?? ''));
-        
-        return {
-          id: String(parsed.id ?? mock?.id ?? ''),
-          email: String(parsed.email ?? mock?.email ?? ''),
-          firstName: String(firstName),
-          lastName: String(lastName),
-          name: String(rawName || `${firstName} ${lastName}`.trim()),
-          department: parsed.department || mock?.department,
-          role,
-          isActive: true,
-          createdAt: parsed.createdAt ?? '2024-01-01',
-          updatedAt: parsed.updatedAt ?? '2026-01-01',
-        };
-      }
-    } catch {
-      console.warn('Failed to restore stored auth user');
-    }
+/**
+ * Read the `exp` claim from a JWT without verifying it.
+ *
+ * The access token lives 60 minutes (backend/.env JWT_ACCESS_EXPIRY). The old
+ * restore path only checked that a token *existed*, so after an hour the user
+ * still appeared signed in while every authenticated request returned 401.
+ */
+const isTokenExpired = (token: string, skewSeconds = 15): boolean => {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return true;
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+    const claims = JSON.parse(atob(padded));
+    if (typeof claims.exp !== 'number') return false;
+    return claims.exp * 1000 - skewSeconds * 1000 <= Date.now();
+  } catch {
+    return false;
   }
-  const savedRole = normalizeRole(localStorage.getItem('astu_ams_user_role'));
-  return savedRole ? MOCK_USERS[savedRole] ?? null : null;
+};
+
+/**
+ * Exchange the refresh token for a new access token.
+ *
+ * Returns true when localStorage now holds a fresh access token. Used on boot
+ * so an expired access token self-heals instead of blanking the dashboard.
+ */
+const refreshAccessToken = async (): Promise<boolean> => {
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) return false;
+  try {
+    const response = await fetch(`${config.apiUrl}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!response.ok) return false;
+    const body = await response.json();
+    const token = body?.data?.accessToken ?? body?.data?.token;
+    if (!token) return false;
+    localStorage.setItem('authToken', token);
+    if (body.data.refreshToken) localStorage.setItem('refreshToken', body.data.refreshToken);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const clearAuthStorage = () => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('astu_ams_user_role');
+};
+
+const readStoredUser = (): User | null => {
+  const token = localStorage.getItem('authToken');
+  // Reject legacy demo sessions that never came from the real auth API
+  if (!token || token.startsWith('mock-jwt-token-')) {
+    if (token?.startsWith('mock-jwt-token-')) clearAuthStorage();
+    return null;
+  }
+
+  const storedUser = localStorage.getItem('user');
+  if (!storedUser) return null;
+
+  try {
+    const parsed = JSON.parse(storedUser);
+    const role = normalizeRole(parsed.role);
+    if (!role) return null;
+
+    const rawName = String(parsed.name || parsed.fullName || '').trim();
+    const firstName =
+      parsed.firstName !== undefined && parsed.firstName !== ''
+        ? String(parsed.firstName)
+        : rawName
+          ? rawName.split(' ')[0]
+          : '';
+    const lastName =
+      parsed.lastName !== undefined && parsed.lastName !== ''
+        ? String(parsed.lastName)
+        : rawName
+          ? rawName.split(' ').slice(1).join(' ')
+          : '';
+
+    if (!parsed.id || !parsed.email) return null;
+
+    return {
+      id: String(parsed.id),
+      email: String(parsed.email),
+      firstName,
+      lastName,
+      name: rawName || `${firstName} ${lastName}`.trim(),
+      role,
+      isActive: parsed.isActive !== false,
+      createdAt: parsed.createdAt ?? new Date().toISOString(),
+      updatedAt: parsed.updatedAt ?? new Date().toISOString(),
+    };
+  } catch {
+    console.warn('Failed to restore stored auth user');
+    return null;
+  }
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -80,8 +137,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setUser(readStoredUser());
-    setIsLoading(false);
+    // A stale access token used to be accepted as a valid session, which left
+    // the user "signed in" with every authenticated API call returning 401 and
+    // the dashboard showing "couldn't load" for each panel. Try to renew it
+    // before deciding the session is dead.
+    const boot = async () => {
+      const token = localStorage.getItem('authToken');
+      if (token && isTokenExpired(token)) {
+        const renewed = await refreshAccessToken();
+        if (!renewed) {
+          clearAuthStorage();
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+      }
+      setUser(readStoredUser());
+      setIsLoading(false);
+    };
+
+    void boot();
 
     const syncStoredUser = () => {
       setUser(readStoredUser());
@@ -96,23 +171,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
-  const login = useCallback((role: UserRole, name?: string) => {
-    const mockUser = MOCK_USERS[role];
-    if (!mockUser) return;
-    const userData = name ? { ...mockUser, firstName: name.split(' ')[0], lastName: name.split(' ').slice(1).join(' ') } : mockUser;
-    localStorage.setItem('astu_ams_user_role', role);
-    localStorage.setItem('user', JSON.stringify(userData));
-    localStorage.setItem('authToken', 'mock-jwt-token-' + Date.now());
-    window.dispatchEvent(new Event('astu-auth-changed'));
-    setUser(userData);
-  }, []);
-
   const logout = useCallback(async () => {
     try {
       await authService.logout();
     } catch (e) {
       console.error('Logout error', e);
     } finally {
+      clearAuthStorage();
       setUser(null);
     }
   }, []);
@@ -123,7 +188,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, hasPermission }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, logout, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

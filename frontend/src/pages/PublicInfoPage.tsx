@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Award,
@@ -25,7 +25,9 @@ import {
   MapPin,
   Phone,
   Mail,
+  ChevronLeft,
   ChevronRight,
+  LayoutGrid,
   Sparkles,
   ExternalLink,
   CheckCircle2,
@@ -41,6 +43,8 @@ import {
   Quote,
   X,
   Filter,
+  Share2,
+  Play,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
@@ -54,8 +58,23 @@ import storiesService, { AlumniStory } from "../features/admin/services/stories.
 import PaginationBar from '../components/PaginationBar';
 import { partnerLogos } from "../components/PartnerLogos";
 import PartnerDetailLiveCustomizer from "../features/admin/components/PartnerDetailLiveCustomizer";
+import VideoDetailModal from "../components/VideoDetailModal";
 import CompanyDetailModal from "../components/CompanyDetailModal";
+import ShareModal, { ShareItem } from "../components/ShareModal";
 import { usePublicMetrics } from "../services/publicMetrics.service";
+
+const getEmbedVideoUrl = (link?: string) => {
+  if (!link) return null;
+  const ytMatch = link.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (ytMatch && ytMatch[1]) {
+    return `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+  }
+  const vimeoMatch = link.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch && vimeoMatch[1]) {
+    return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`;
+  }
+  return link;
+};
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Award,
@@ -120,6 +139,30 @@ export default function PublicInfoPage() {
   // Stories search, category filter, and submission modal states
   const [storiesSearch, setStoriesSearch] = useState("");
   const [storiesCategory, setStoriesCategory] = useState("All");
+  const [storyViewMode, setStoryViewMode] = useState<"slide" | "grid">("slide");
+  const [storySlideIndex, setStorySlideIndex] = useState(0);
+  const [searchParams] = useSearchParams();
+  const [shareItemModal, setShareItemModal] = useState<ShareItem | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("submit") === "true" || window.location.hash === "#submit-story") {
+      setShareStoryModalOpen(true);
+    }
+  }, [searchParams]);
+
+  const handleOpenShare = (story: AlumniStory) => {
+    setShareItemModal({
+      id: story.id,
+      title: story.name,
+      subtitle: [story.role, story.company].filter(Boolean).join(" · "),
+      text: story.text,
+      image: story.image,
+      badge: story.department || (story.graduationYear ? `Class of ${story.graduationYear}` : "Alumni Spotlight"),
+      url: `/stories/${story.id}`,
+      type: "story",
+    });
+  };
+
   const [shareStoryModalOpen, setShareStoryModalOpen] = useState(false);
   const [shareStoryForm, setShareStoryForm] = useState({
     name: "",
@@ -346,9 +389,25 @@ export default function PublicInfoPage() {
     });
   }, [alumniStories, storiesSearch, storiesCategory]);
 
+  const STORIES_PER_SLIDE = 3;
+  const totalStorySlides = filteredAlumniStories.length ? Math.ceil(filteredAlumniStories.length / STORIES_PER_SLIDE) : 0;
+  const safeStorySlideIndex = Math.min(storySlideIndex, Math.max(0, totalStorySlides - 1));
+
+  const handleStorySlideChange = (newIdx: number) => {
+    if (totalStorySlides <= 1) return;
+    setStorySlideIndex((newIdx + totalStorySlides) % totalStorySlides);
+  };
+
   const storyTotalPages = filteredAlumniStories.length ? Math.ceil(filteredAlumniStories.length / STORY_PAGE_SIZE) : 1;
   const safeStoryPage = Math.min(storyPage, Math.max(0, storyTotalPages - 1));
   const pagedStories = filteredAlumniStories.slice(safeStoryPage * STORY_PAGE_SIZE, safeStoryPage * STORY_PAGE_SIZE + STORY_PAGE_SIZE);
+
+  const slideStories = filteredAlumniStories.slice(
+    safeStorySlideIndex * STORIES_PER_SLIDE,
+    safeStorySlideIndex * STORIES_PER_SLIDE + STORIES_PER_SLIDE
+  );
+
+  const displayedStories = storyViewMode === "slide" ? slideStories : pagedStories;
 
   const handleShareStorySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -377,6 +436,109 @@ export default function PublicInfoPage() {
   const isStakeholders = slug === "stakeholders";
   const isOverviewPage = slug === "overview";
   const isContactPage = slug === "contact";
+  const isCampusLife = slug === "campus-life" || slug === "campuses" || slug === "facilities";
+  const isVideoGallery = slug === "video-gallery";
+  const [videoFilterCategory, setVideoFilterCategory] = useState<string>("ALL");
+  const [videoSearchQuery, setVideoSearchQuery] = useState<string>("");
+  const [activePlayVideo, setActivePlayVideo] = useState<any | null>(null);
+
+  const videoItemsList = useMemo(() => {
+    if (cmsConfig?.videos && Array.isArray(cmsConfig.videos) && cmsConfig.videos.length > 0) {
+      const active = cmsConfig.videos.filter((v: any) => v.active !== false);
+      if (active.length > 0) {
+        return active.map((v: any) => ({
+          id: v.id,
+          title: v.title,
+          subtitle: v.subtitle || 'Research presentations, event recordings, and campus video archives.',
+          image: v.image || '/images/astu-building.jpg',
+          duration: v.duration || '05:20',
+          category: v.category || (v.title.toLowerCase().includes('research') ? 'Research Showcases' : v.title.toLowerCase().includes('graduation') ? 'Event Recordings' : 'Campus Virtual Tours'),
+          link: v.link || 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          views: '1.2K views',
+          date: '2026',
+        }));
+      }
+    }
+    return [
+      {
+        id: 'VI-1',
+        title: 'ASTU Campus Highlights & Academic Excellence',
+        subtitle: 'A guided aerial and ground visual tour of laboratories, student hubs, and campus facilities.',
+        image: '/images/astu-building.jpg',
+        duration: '04:28',
+        category: 'Campus Virtual Tours',
+        link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        views: '3.4K views',
+        date: 'June 2026',
+      },
+      {
+        id: 'VI-2',
+        title: 'Annual Applied Research & Innovation Forum',
+        subtitle: 'Keynote presentations, robotics exhibitions, and industry-sponsored engineering projects.',
+        image: '/images/arc.jpg',
+        duration: '06:15',
+        category: 'Research Showcases',
+        link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        views: '2.1K views',
+        date: 'May 2026',
+      },
+      {
+        id: 'VI-3',
+        title: 'ASTU Grand Graduation & Alumni Replay',
+        subtitle: 'Celebration of graduating classes, honorary guest addresses, and alumni leadership awards.',
+        image: '/images/gc7.jpg',
+        duration: '08:42',
+        category: 'Event Recordings',
+        link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        views: '4.8K views',
+        date: 'March 2026',
+      },
+      {
+        id: 'VI-4',
+        title: 'Advanced Robotics & Mechatronics Lab Showcase',
+        subtitle: 'Applied engineering demonstrations with autonomous rovers and industrial automation rigs.',
+        image: '/images/electriclabs.jpeg',
+        duration: '05:50',
+        category: 'Research Showcases',
+        link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        views: '1.9K views',
+        date: 'February 2026',
+      },
+      {
+        id: 'VI-5',
+        title: 'DAAD International Alumni Workshop Highlights',
+        subtitle: 'East African regional water supply and environmental technology symposium proceedings.',
+        image: '/images/campus-2.jpeg',
+        duration: '07:10',
+        category: 'Event Recordings',
+        link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        views: '1.5K views',
+        date: 'January 2026',
+      },
+      {
+        id: 'VI-6',
+        title: 'ASTU Tech Incubator & Startup Pitch Day',
+        subtitle: 'Graduating seniors and alumni entrepreneurs pitching cutting-edge software and hardware ventures.',
+        image: '/images/astusteam.jpg',
+        duration: '09:12',
+        category: 'Research Showcases',
+        link: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        views: '2.7K views',
+        date: 'December 2025',
+      },
+    ];
+  }, [cmsConfig]);
+
+  const filteredVideoItems = useMemo(() => {
+    return videoItemsList.filter((v) => {
+      if (videoFilterCategory !== 'ALL' && v.category !== videoFilterCategory) return false;
+      if (videoSearchQuery.trim()) {
+        const q = videoSearchQuery.toLowerCase();
+        return v.title.toLowerCase().includes(q) || v.subtitle.toLowerCase().includes(q) || v.category.toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [videoItemsList, videoFilterCategory, videoSearchQuery]);
 
   const handleInquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -419,10 +581,10 @@ export default function PublicInfoPage() {
           <button
             type="button"
             onClick={() => navigate(`/cms/partners`)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/95 px-4 py-2.5 text-xs font-bold text-slate-800 shadow-xl backdrop-blur-md hover:bg-slate-100 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 px-4 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-xl backdrop-blur-md hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer"
             title="Open Full CMS Studio"
           >
-            <Edit3 className="h-3.5 w-3.5 text-astu-navy" />
+            <Edit3 className="h-3.5 w-3.5 text-astu-navy dark:text-sky-300" />
             <span>CMS Studio</span>
           </button>
         </div>
@@ -456,50 +618,22 @@ export default function PublicInfoPage() {
 
       <main>
         {/* ── HERO SECTION ── */}
-        <section className={`relative overflow-hidden text-white ${isStoriesPage ? '' : 'bg-gradient-to-br from-astu-navy via-primary-container to-astu-navy'}`}>
-          {/* Hero background */}
-          {isStoriesPage ? (
-            <div className="absolute inset-0">
-              <img
-                alt={page.title}
-                className="h-full w-full object-cover object-center scale-105 transition-transform duration-[7000ms] ease-out hover:scale-100"
-                src={
-                  !page.image || page.image.includes("unsplash.com")
-                    ? "/images/astu-building.jpg"
-                    : page.image
-                }
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/images/astu-building.jpg";
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-astu-navy/85 to-slate-950/90 backdrop-blur-[1px]" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400/10 via-transparent to-transparent" />
-              <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-astu-navy via-astu-red to-astu-green" />
-            </div>
-          ) : (
-            <div className="absolute inset-0 opacity-20 mix-blend-overlay">
-              <img
-                alt={page.title}
-                className="h-full w-full object-cover"
-                src={page.image}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "/images/astu-building.jpg";
-                }}
-              />
-            </div>
-          )}
+        <section className="relative overflow-hidden text-white bg-gradient-to-br from-[#001f3f] via-[#002f6c] to-[#001730] dark:from-slate-950 dark:via-[#001933] dark:to-slate-950 border-b border-white/10 dark:border-slate-800">
+          {/* Top Tri-Color University Ribbon */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-astu-green via-sky-400 to-astu-red z-20" />
 
-          {/* Clean grid pattern */}
-          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
+          {/* Ambient Lighting & Depth Glows (clean, executive atmosphere without photographic clutter) */}
+          <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-sky-500/15 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400/10 via-transparent to-transparent" />
 
-          <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-16 sm:px-6 lg:px-8 lg:pt-16 lg:pb-24">
+          <div className="relative mx-auto max-w-[1440px] px-4 pt-12 pb-16 sm:px-6 lg:px-8 lg:pt-16 lg:pb-24">
             {/* Top Navigation Row */}
             <div className="flex items-center justify-between mb-8">
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white cursor-pointer shadow-sm"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Back to Home</span>
@@ -528,9 +662,9 @@ export default function PublicInfoPage() {
             {/* Hero Main Content */}
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <div className="mb-4 inline-flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/10 p-2.5 backdrop-blur-md">
-                  <IconComponent className="h-5 w-5 text-astu-green" />
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-astu-green">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3.5 py-1.5 backdrop-blur-md text-emerald-300 shadow-sm">
+                  <IconComponent className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
                     {page.badge || "ASTU Institutional Resource"}
                   </span>
                 </div>
@@ -579,6 +713,25 @@ export default function PublicInfoPage() {
                       <span>Employer Login</span>
                     </button>
                   </>
+                ) : isVideoGallery ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/gallery")}
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-astu-navy shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
+                    >
+                      <GalleryHorizontal className="h-4 w-4" />
+                      <span>Photo Gallery</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/events")}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 cursor-pointer"
+                    >
+                      <CalendarDays className="h-3.5 w-3.5" />
+                      <span>Upcoming Events</span>
+                    </button>
+                  </>
                 ) : isContactPage ? (
                   <>
                     <a
@@ -624,6 +777,27 @@ export default function PublicInfoPage() {
                       <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   </>
+                ) : page.primaryCtaText && page.primaryCtaLink ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => navigate(page.primaryCtaLink!)}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-astu-red to-rose-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:brightness-110 hover:scale-105 cursor-pointer"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      <span>{page.primaryCtaText}</span>
+                    </button>
+                    {page.secondaryCtaText && page.secondaryCtaLink && (
+                      <button
+                        type="button"
+                        onClick={() => navigate(page.secondaryCtaLink!)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 cursor-pointer"
+                      >
+                        <span>{page.secondaryCtaText}</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <>
                     <button
@@ -651,13 +825,13 @@ export default function PublicInfoPage() {
 
         {/* Metric Impact Strip */}
         {page.stats && page.stats.length > 0 && (
-          <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10 relative z-10">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl">
+          <section className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10 relative z-10">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xl">
               {page.stats.map((stat, idx) => (
-                <div key={stat.id || idx} className="text-center p-2 border-r last:border-r-0 border-slate-100">
-                  <p className="text-2xl sm:text-3xl font-black text-astu-navy">{stat.value}</p>
-                  <p className="text-xs font-bold text-slate-800 mt-1">{stat.label}</p>
-                  {stat.desc && <p className="text-[11px] text-slate-500 mt-0.5">{stat.desc}</p>}
+                <div key={stat.id || idx} className="text-center p-2 border-r last:border-r-0 border-slate-100 dark:border-slate-800">
+                  <p className="text-2xl sm:text-3xl font-black text-astu-navy dark:text-sky-300">{stat.value}</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">{stat.label}</p>
+                  {stat.desc && <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{stat.desc}</p>}
                 </div>
               ))}
             </div>
@@ -665,7 +839,7 @@ export default function PublicInfoPage() {
         )}
 
         {/* ── CONTENT SECTION ── */}
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <section className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           {/* 1. SPECIAL RICH GRID FOR ALUMNI STORIES */}
           {isStoriesPage ? (
             <div className="space-y-10">
@@ -690,11 +864,68 @@ export default function PublicInfoPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {/* View Mode Switcher */}
+                    <div className="inline-flex items-center rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200/80 dark:border-slate-700/80">
+                      <button
+                        type="button"
+                        onClick={() => setStoryViewMode("slide")}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                          storyViewMode === "slide"
+                            ? "bg-white dark:bg-slate-900 text-astu-navy dark:text-sky-300 shadow-xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                        title="Carousel Slide View with Next & Previous navigation"
+                      >
+                        <GalleryHorizontal className="h-3.5 w-3.5" />
+                        <span>Slide View</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setStoryViewMode("grid")}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                          storyViewMode === "grid"
+                            ? "bg-white dark:bg-slate-900 text-astu-navy dark:text-sky-300 shadow-xs"
+                            : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                        title="Full Grid View"
+                      >
+                        <LayoutGrid className="h-3.5 w-3.5" />
+                        <span>Grid View</span>
+                      </button>
+                    </div>
+
+                    {/* Quick Slide Header Controls */}
+                    {storyViewMode === "slide" && totalStorySlides > 1 && (
+                      <div className="inline-flex items-center gap-1 rounded-xl bg-slate-50 dark:bg-slate-800/90 px-2 py-1 border border-slate-200 dark:border-slate-700">
+                        <button
+                          type="button"
+                          onClick={() => handleStorySlideChange(safeStorySlideIndex - 1)}
+                          aria-label="Previous slide"
+                          title="Previous slide"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 px-1.5 whitespace-nowrap">
+                          Slide {safeStorySlideIndex + 1} of {totalStorySlides}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleStorySlideChange(safeStorySlideIndex + 1)}
+                          aria-label="Next slide"
+                          title="Next slide"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                        >
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
+
                     <button
                       type="button"
                       onClick={() => setShareStoryModalOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-astu-navy to-[#1a4f8a] px-4 py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-astu-navy to-[#1a4f8a] px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 transition-all cursor-pointer"
                     >
                       <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                       <span>Submit Your Story</span>
@@ -716,6 +947,7 @@ export default function PublicInfoPage() {
                       onChange={(e) => {
                         setStoriesSearch(e.target.value);
                         setStoryPage(0);
+                        setStorySlideIndex(0);
                       }}
                       placeholder="Search by alumni name, company, role, or major..."
                       className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 py-2.5 pl-10 pr-9 text-xs font-medium text-slate-800 dark:text-slate-200 outline-none focus:border-astu-navy focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-astu-navy/10 transition-all"
@@ -726,6 +958,7 @@ export default function PublicInfoPage() {
                         onClick={() => {
                           setStoriesSearch("");
                           setStoryPage(0);
+                          setStorySlideIndex(0);
                         }}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                       >
@@ -751,6 +984,7 @@ export default function PublicInfoPage() {
                           onClick={() => {
                             setStoriesCategory(cat.id);
                             setStoryPage(0);
+                            setStorySlideIndex(0);
                           }}
                           className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                             isActive
@@ -780,6 +1014,7 @@ export default function PublicInfoPage() {
                       setStoriesSearch("");
                       setStoriesCategory("All");
                       setStoryPage(0);
+                      setStorySlideIndex(0);
                     }}
                     className="mt-4 rounded-xl bg-astu-navy px-4 py-2 text-xs font-bold text-white hover:brightness-110 shadow-xs"
                   >
@@ -787,8 +1022,11 @@ export default function PublicInfoPage() {
                   </button>
                 </div>
               ) : (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {pagedStories.map((story) => (
+                <div
+                  key={storyViewMode === "slide" ? `slide-${safeStorySlideIndex}` : `grid-${safeStoryPage}`}
+                  className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 animate-card-slide"
+                >
+                  {displayedStories.map((story) => (
                     <article
                       key={story.id}
                       className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:shadow-xl"
@@ -865,29 +1103,100 @@ export default function PublicInfoPage() {
                       </div>
 
                       {/* Card Footer */}
-                      <div className="mt-5 border-t border-slate-100 dark:border-slate-800 pt-4">
+                      <div className="mt-5 border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center gap-2">
                         <Link
                           to={`/stories/${story.id}`}
-                          className="inline-flex items-center justify-between w-full rounded-xl bg-slate-50 dark:bg-slate-800/80 px-4 py-2.5 text-xs font-bold text-astu-navy dark:text-white group-hover:bg-astu-navy group-hover:text-white dark:group-hover:bg-sky-600 transition-all shadow-2xs"
+                          className="inline-flex items-center justify-between flex-1 rounded-xl bg-slate-50 dark:bg-slate-800/80 px-4 py-2.5 text-xs font-bold text-astu-navy dark:text-white group-hover:bg-astu-navy group-hover:text-white dark:group-hover:bg-sky-600 transition-all shadow-2xs"
                         >
                           <span>Read Full Journey</span>
                           <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenShare(story)}
+                          className="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-astu-navy dark:hover:text-sky-300 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:bg-slate-50 dark:hover:bg-slate-700/80 transition-all shadow-2xs cursor-pointer"
+                          title="Share this alumni story"
+                        >
+                          <Share2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </article>
                   ))}
                 </div>
               )}
 
-              {/* Pagination Controls */}
-              <PaginationBar
-                currentPage={safeStoryPage}
-                totalPages={storyTotalPages}
-                total={filteredAlumniStories.length}
-                pageSize={STORY_PAGE_SIZE}
-                onPageChange={setStoryPage}
-                noun="stories"
-              />
+              {/* Slide Mode Carousel Navigation Controls */}
+              {storyViewMode === "slide" && totalStorySlides > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
+                  {/* Range Counter */}
+                  <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Showing stories{" "}
+                    <span className="font-bold text-slate-800 dark:text-white">
+                      {safeStorySlideIndex * STORIES_PER_SLIDE + 1}–
+                      {Math.min(filteredAlumniStories.length, (safeStorySlideIndex + 1) * STORIES_PER_SLIDE)}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-bold text-slate-800 dark:text-white">
+                      {filteredAlumniStories.length}
+                    </span>
+                    <span className="ml-2 text-slate-400 dark:text-slate-500 font-normal">
+                      (Slide {safeStorySlideIndex + 1} of {totalStorySlides})
+                    </span>
+                  </div>
+
+                  {/* Slide Indicators / Dots */}
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalStorySlides }).map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setStorySlideIndex(idx)}
+                        aria-label={`Go to slide ${idx + 1}`}
+                        title={`Slide ${idx + 1}`}
+                        className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                          safeStorySlideIndex === idx
+                            ? "w-8 bg-astu-navy dark:bg-sky-500 shadow-2xs"
+                            : "w-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Previous & Next Buttons */}
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => handleStorySlideChange(safeStorySlideIndex - 1)}
+                      disabled={safeStorySlideIndex === 0}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer hover:scale-102 active:scale-98"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      <span>Previous</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleStorySlideChange(safeStorySlideIndex + 1)}
+                      disabled={safeStorySlideIndex >= totalStorySlides - 1}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-astu-navy to-[#1a4f8a] dark:from-sky-600 dark:to-blue-700 px-5 py-2 text-xs font-bold text-white shadow-sm hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer hover:scale-102 active:scale-98"
+                    >
+                      <span>Next Slide</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Grid Mode Pagination Controls */}
+              {storyViewMode === "grid" && (
+                <PaginationBar
+                  currentPage={safeStoryPage}
+                  totalPages={storyTotalPages}
+                  total={filteredAlumniStories.length}
+                  pageSize={STORY_PAGE_SIZE}
+                  onPageChange={setStoryPage}
+                  noun="stories"
+                />
+              )}
 
               {/* Inspiring "Share Your Story" Callout Card */}
               <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-gradient-to-br from-astu-navy via-[#0c3970] to-slate-900 p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
@@ -1072,6 +1381,175 @@ export default function PublicInfoPage() {
                 ))}
               </div>
             </div>
+          ) : isVideoGallery ? (
+            <div className="space-y-10">
+              {/* Controls: Search, Category Filters, and Stats */}
+              <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs space-y-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-md bg-rose-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-astu-red dark:text-rose-400">
+                        ASTU Video Gallery
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-astu-green">
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        Verified Media Archives
+                      </span>
+                    </div>
+                    <h2 className="mt-1 text-2xl font-black tracking-tight text-astu-navy dark:text-white">
+                      Video Highlights & Media Archives
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      <span className="font-semibold text-astu-navy dark:text-sky-300">Video highlights</span> · Research presentations, event recordings, campus virtual tours, and keynote archives.
+                    </p>
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="relative min-w-[280px]">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={videoSearchQuery}
+                      onChange={(e) => setVideoSearchQuery(e.target.value)}
+                      placeholder="Search videos by title, topic..."
+                      className="w-full pl-9 pr-8 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-astu-navy dark:focus:border-sky-400"
+                    />
+                    {videoSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setVideoSearchQuery("")}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Category Filter Pills */}
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  {["ALL", "Research Showcases", "Event Recordings", "Campus Virtual Tours"].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setVideoFilterCategory(cat)}
+                      className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                        videoFilterCategory === cat
+                          ? "bg-astu-navy text-white shadow-xs dark:bg-sky-600"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      {cat === "ALL" ? "All Video Highlights" : cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Video Cards Grid */}
+              {filteredVideoItems.length === 0 ? (
+                <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-12 text-center">
+                  <PlayCircle className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
+                  <h3 className="mt-4 text-base font-bold text-slate-800 dark:text-slate-200">No videos found</h3>
+                  <p className="mt-1 text-xs text-slate-500">Try adjusting your search query or category filter.</p>
+                </div>
+              ) : (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {filteredVideoItems.map((video, idx) => (
+                    <article
+                      key={video.id || idx}
+                      className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    >
+                      {/* Video Poster */}
+                      <div
+                        className="relative h-48 w-full overflow-hidden bg-slate-900 cursor-pointer"
+                        onClick={() => setActivePlayVideo(video)}
+                      >
+                        <img
+                          src={video.image}
+                          alt={video.title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.onerror = null;
+                            target.src = "/images/astu-building.jpg";
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-black/30 to-black/10" />
+
+                        {/* Centered Play Button */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-astu-red text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:bg-rose-600">
+                            <Play className="h-6 w-6 fill-current ml-0.5" />
+                          </div>
+                        </div>
+
+                        {/* Top / Bottom Badges */}
+                        <span className="absolute top-3 left-3 rounded-full bg-black/60 backdrop-blur-md border border-white/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                          {video.category}
+                        </span>
+                        <span className="absolute bottom-3 right-3 rounded-full bg-black/75 px-2.5 py-0.5 text-[11px] font-bold text-white flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          <span>{video.duration}</span>
+                        </span>
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex flex-1 flex-col justify-between p-5">
+                        <div>
+                          <h3
+                            onClick={() => setActivePlayVideo(video)}
+                            className="cursor-pointer text-base font-bold text-astu-navy dark:text-white group-hover:text-astu-red dark:group-hover:text-amber-400 transition-colors line-clamp-2"
+                          >
+                            {video.title}
+                          </h3>
+                          <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                            {video.subtitle}
+                          </p>
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => setActivePlayVideo(video)}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy dark:text-sky-300 hover:text-astu-red dark:hover:text-sky-200 transition-colors cursor-pointer"
+                          >
+                            <PlayCircle className="h-4 w-4" />
+                            <span>Watch Highlights</span>
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Share video"
+                            onClick={() =>
+                              setShareItemModal({
+                                id: video.id || String(idx),
+                                title: video.title,
+                                subtitle: `${video.category} · Video Highlights`,
+                                text: `Watch "${video.title}" from Adama Science and Technology University`,
+                                image: video.image,
+                                url: "/info/video-gallery",
+                                type: "video",
+                              })
+                            }
+                            className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-astu-navy dark:hover:text-white transition-all cursor-pointer"
+                            title="Share this video"
+                          >
+                            <Share2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+
+              {/* Video Player Modal with HD Streaming, Scrubber, Chapters, Transcript, & Details */}
+              <VideoDetailModal
+                video={activePlayVideo}
+                onClose={() => setActivePlayVideo(null)}
+                onSelectRelatedVideo={(v) => setActivePlayVideo(v)}
+                relatedVideos={videoItemsList}
+              />
+            </div>
           ) : isContactPage ? (
             /* 3. DEDICATED INSTITUTIONAL CONTACT DIRECTORY LAYOUT */
             <div className="space-y-12">
@@ -1079,10 +1557,10 @@ export default function PublicInfoPage() {
                 {/* Left Column: Official Contact Channels */}
                 <div className="lg:col-span-7 space-y-6">
                   <div>
-                    <h2 className="text-2xl font-black tracking-tight text-astu-navy">
+                    <h2 className="text-2xl font-black tracking-tight text-astu-navy dark:text-white">
                       Institutional Contact Directory
                     </h2>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Direct contact points for the ASTU Alumni Relations Directorate, Industry Liaison, and Registrar.
                     </p>
                   </div>
@@ -1117,34 +1595,34 @@ export default function PublicInfoPage() {
                       return (
                         <div
                           key={sec.id || idx}
-                          className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between hover:border-astu-navy/30 transition-all"
+                          className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between hover:border-astu-navy/30 dark:hover:border-sky-500/30 transition-all"
                         >
                           <div>
                             <div className="flex items-center gap-3 mb-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-astu-navy">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-astu-navy dark:text-sky-300">
                                 <Icon className="h-5 w-5" />
                               </div>
                               <div>
-                                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
                                   {sec.heading}
                                 </h3>
                                 {sec.badge && (
-                                  <span className="text-[10px] text-slate-400 font-semibold">{sec.badge}</span>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">{sec.badge}</span>
                                 )}
                               </div>
                             </div>
-                            <p className="text-xs sm:text-sm text-slate-600 whitespace-pre-line leading-relaxed">
+                            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 whitespace-pre-line leading-relaxed">
                               {sec.body}
                             </p>
                           </div>
 
                           {(sec.linkUrl || actionHref) && (
-                            <div className="mt-4 pt-3 border-t border-slate-100">
+                            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
                               <a
                                 href={sec.linkUrl || actionHref}
                                 target={actionHref.startsWith("http") ? "_blank" : undefined}
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy hover:underline"
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy dark:text-sky-300 hover:underline"
                               >
                                 <span>{sec.linkText || actionText || "Open"}</span>
                                 <ExternalLink className="h-3 w-3" />
@@ -1159,21 +1637,21 @@ export default function PublicInfoPage() {
 
                 {/* Right Column: Interactive Direct Message Form */}
                 <div id="inquiry-form" className="lg:col-span-5">
-                  <div className="rounded-3xl border border-slate-200/90 bg-white p-7 sm:p-8 shadow-md">
+                  <div className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 sm:p-8 shadow-md">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-astu-green/10 text-astu-green">
                         <MessageSquare className="h-4 w-4" />
                       </div>
-                      <h3 className="text-lg font-black text-slate-900">Send an Official Inquiry</h3>
+                      <h3 className="text-lg font-black text-slate-900 dark:text-white">Send an Official Inquiry</h3>
                     </div>
-                    <p className="text-xs text-slate-500 mb-6">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
                       Have a query about transcripts, employer partnerships, or alumni chapters? Submit your request directly.
                     </p>
 
                     {inquirySent ? (
                       <div className="rounded-2xl bg-astu-green/10 border border-astu-green/20 p-6 text-center space-y-3">
                         <CheckCircle2 className="h-10 w-10 text-astu-green mx-auto" />
-                        <h4 className="text-sm font-bold text-astu-navy">Inquiry Dispatched Successfully</h4>
+                        <h4 className="text-sm font-bold text-astu-navy dark:text-sky-300">Inquiry Dispatched Successfully</h4>
                         <p className="text-xs text-astu-green">
                           Thank you for contacting ASTU. Your message has been routed to the respective institutional department.
                         </p>
@@ -1188,47 +1666,47 @@ export default function PublicInfoPage() {
                     ) : (
                       <form onSubmit={handleInquirySubmit} className="space-y-4">
                         <div>
-                          <label className="text-xs font-bold text-slate-700">Full Name *</label>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Full Name *</label>
                           <input
                             type="text"
                             required
                             placeholder="e.g. Dr. Abebe Bikila"
                             value={inquiryForm.name}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, name: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
+                            className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20"
                           />
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div>
-                            <label className="text-xs font-bold text-slate-700">Email Address *</label>
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Email Address *</label>
                             <input
                               type="email"
                               required
                               placeholder="name@example.com"
                               value={inquiryForm.email}
                               onChange={(e) => setInquiryForm((prev) => ({ ...prev, email: e.target.value }))}
-                              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
+                              className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20"
                             />
                           </div>
                           <div>
-                            <label className="text-xs font-bold text-slate-700">Phone (Optional)</label>
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Phone (Optional)</label>
                             <input
                               type="tel"
                               placeholder="+251-9..."
                               value={inquiryForm.phone}
                               onChange={(e) => setInquiryForm((prev) => ({ ...prev, phone: e.target.value }))}
-                              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
+                              className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="text-xs font-bold text-slate-700">Stakeholder Role</label>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Stakeholder Role</label>
                           <select
                             value={inquiryForm.category}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, category: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
+                            className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-medium text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20"
                           >
                             <option value="Alumni">ASTU Alum / Graduate</option>
                             <option value="Employer">Corporate Employer / Recruiter</option>
@@ -1239,32 +1717,32 @@ export default function PublicInfoPage() {
                         </div>
 
                         <div>
-                          <label className="text-xs font-bold text-slate-700">Subject</label>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Subject</label>
                           <input
                             type="text"
                             placeholder="e.g. Tracer survey clarification or transcript verification"
                             value={inquiryForm.subject}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, subject: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
+                            className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20"
                           />
                         </div>
 
                         <div>
-                          <label className="text-xs font-bold text-slate-700">Your Message *</label>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Your Message *</label>
                           <textarea
                             required
                             rows={3}
                             placeholder="Type your detailed inquiry or feedback here..."
                             value={inquiryForm.message}
                             onChange={(e) => setInquiryForm((prev) => ({ ...prev, message: e.target.value }))}
-                            className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-astu-navy/20 resize-none"
+                            className="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20 resize-none"
                           />
                         </div>
 
                         <button
                           type="submit"
                           disabled={isSubmittingInquiry}
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-astu-navy hover:bg-astu-navy text-white py-3 text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-60"
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-astu-navy dark:bg-sky-600 hover:bg-astu-navy dark:hover:bg-sky-500 text-white py-3 text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-60"
                         >
                           <Send className="h-3.5 w-3.5" />
                           <span>{isSubmittingInquiry ? "Sending Inquiry..." : "Submit Inquiry to Directorate"}</span>
@@ -1278,10 +1756,10 @@ export default function PublicInfoPage() {
           ) : isFeaturedEmployers ? (
             /* 4. FEATURED EMPLOYERS SPECIALIZED LAYOUT */
             <div className="space-y-12">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
                 <div>
-                  <h2 className="text-2xl font-black text-astu-navy">Verified Partner Organizations</h2>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <h2 className="text-2xl font-black text-astu-navy dark:text-white">Verified Partner Organizations</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     Leading enterprise companies actively hiring, hosting internships, and collaborating with ASTU.
                   </p>
                 </div>
@@ -1294,7 +1772,7 @@ export default function PublicInfoPage() {
                     placeholder="Search by company, sector, location..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-xs font-medium text-slate-900 shadow-xs focus:outline-none focus:ring-2 focus:ring-astu-navy/20"
+                    className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 pl-10 pr-4 py-2.5 text-xs font-medium text-slate-900 dark:text-white shadow-xs focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20"
                   />
                 </div>
               </div>
@@ -1309,8 +1787,8 @@ export default function PublicInfoPage() {
                     onClick={() => setSelectedIndustry(ind)}
                     className={`rounded-xl px-4 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                       selectedIndustry === ind
-                        ? "bg-astu-navy text-white shadow-sm"
-                        : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                        ? "bg-astu-navy text-white shadow-sm dark:bg-sky-600"
+                        : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
                     }`}
                   >
                     {ind}
@@ -1341,17 +1819,17 @@ export default function PublicInfoPage() {
                     return (
                       <article
                         key={company.id}
-                        className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 hover:shadow-xl"
+                        className="group relative flex flex-col justify-between rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:shadow-xl"
                       >
                         <div>
                           <div className="flex items-start justify-between gap-4 mb-5">
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-50 border border-slate-100 p-2 shadow-xs group-hover:scale-105 transition-transform">
+                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-2 shadow-xs group-hover:scale-105 transition-transform">
                               {company.logo ? (
                                 <img src={company.logo} alt={company.name} className="h-full w-full object-contain" />
                               ) : LogoComponent ? (
                                 <LogoComponent className="h-10 w-10" />
                               ) : (
-                                <Building2 className="h-7 w-7 text-astu-navy" />
+                                <Building2 className="h-7 w-7 text-astu-navy dark:text-sky-300" />
                               )}
                             </div>
 
@@ -1361,40 +1839,40 @@ export default function PublicInfoPage() {
                                 Verified
                               </span>
                               {company.featured && (
-                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                                <span className="rounded-full bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
                                   ⭐ Top Partner
                                 </span>
                               )}
                             </div>
                           </div>
 
-                          <h3 className="text-base font-black text-slate-900 group-hover:text-astu-navy transition-colors">
+                          <h3 className="text-base font-black text-slate-900 dark:text-white group-hover:text-astu-navy dark:group-hover:text-sky-300 transition-colors">
                             {company.name}
                           </h3>
-                          <p className="text-xs text-slate-500 mt-1">{company.industry || "Technology & Engineering"}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{company.industry || "Technology & Engineering"}</p>
 
-                          <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50/60 p-2.5 text-xs font-bold text-astu-navy">
-                            <Briefcase className="h-3.5 w-3.5 text-astu-navy" />
+                          <div className="mt-4 flex items-center gap-2 rounded-xl bg-blue-50/60 dark:bg-blue-950/40 p-2.5 text-xs font-bold text-astu-navy dark:text-sky-300">
+                            <Briefcase className="h-3.5 w-3.5 text-astu-navy dark:text-sky-300" />
                             <span>{company.openings || "Active Trainee Roles"}</span>
                           </div>
 
-                          <p className="mt-3 text-xs leading-relaxed text-slate-600 line-clamp-3">
+                          <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300 line-clamp-3">
                             {company.description ||
                               `${company.name} collaborates with ASTU through verified graduate employment tracks and student internships.`}
                           </p>
                         </div>
 
-                        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                           <button
                             type="button"
                             onClick={() => setSelectedCompanyModal(company)}
-                            className="font-bold text-astu-navy hover:underline cursor-pointer inline-flex items-center gap-1"
+                            className="font-bold text-astu-navy dark:text-sky-300 hover:underline cursor-pointer inline-flex items-center gap-1"
                           >
                             <span>Company Profile</span>
                             <ChevronRight className="h-3 w-3" />
                           </button>
 
-                          <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+                          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
                             <span>{company.location || "Ethiopia"}</span>
                           </span>
@@ -1406,14 +1884,14 @@ export default function PublicInfoPage() {
 
               {/* Strategic Recruitment Pillars (Managed Sections) */}
               <div className="space-y-6 pt-6">
-                <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                <div className="border-b border-slate-200 dark:border-slate-800 pb-3 flex items-center justify-between">
                   <div>
-                    <h3 className="text-xl font-black text-astu-navy">Recruitment Framework & Institutional Pillars</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <h3 className="text-xl font-black text-astu-navy dark:text-white">Recruitment Framework & Institutional Pillars</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                       Strategic mechanisms enabling longitudinal career tracking and verified employer placement.
                     </p>
                   </div>
-                  <span className="text-xs font-bold text-slate-400">
+                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
                     {page.sections.length} Verified Modules
                   </span>
                 </div>
@@ -1422,18 +1900,18 @@ export default function PublicInfoPage() {
                   {page.sections.map((sec, idx) => (
                     <div
                       key={sec.id || idx}
-                      className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs flex flex-col justify-between hover:border-astu-navy/30 transition-all"
+                      className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs flex flex-col justify-between hover:border-astu-navy/30 dark:hover:border-sky-500/30 transition-all"
                     >
                       <div>
-                        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy">
+                        <span className="rounded-full bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy dark:text-sky-300">
                           {sec.badge || `Pillar ${idx + 1}`}
                         </span>
-                        <h4 className="text-base font-bold text-slate-900 mt-3">{sec.heading}</h4>
-                        <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">{sec.body}</p>
+                        <h4 className="text-base font-bold text-slate-900 dark:text-white mt-3">{sec.heading}</h4>
+                        <p className="mt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{sec.body}</p>
                       </div>
 
-                      <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-400 text-[11px]">Track {idx + 1}</span>
+                      <div className="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                        <span className="font-semibold text-slate-400 dark:text-slate-500 text-[11px]">Track {idx + 1}</span>
                         <span className="inline-flex items-center gap-1 text-astu-green font-bold text-[11px]">
                           <CheckCircle2 className="h-3 w-3" />
                           <span>Accredited</span>
@@ -1447,15 +1925,15 @@ export default function PublicInfoPage() {
               {/* FAQs Accordion */}
               {page.faqs && page.faqs.length > 0 && (
                 <div className="space-y-4 pt-6">
-                  <h3 className="text-xl font-black text-astu-navy">Frequently Asked Questions</h3>
+                  <h3 className="text-xl font-black text-astu-navy dark:text-white">Frequently Asked Questions</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {page.faqs.map((faq, idx) => (
-                      <div key={faq.id || idx} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2">
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                          <HelpCircle className="h-4 w-4 text-astu-navy shrink-0" />
+                      <div key={faq.id || idx} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-2">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          <HelpCircle className="h-4 w-4 text-astu-navy dark:text-sky-400 shrink-0" />
                           <span>{faq.question}</span>
                         </h4>
-                        <p className="text-xs text-slate-600 leading-relaxed pl-6">{faq.answer}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-6">{faq.answer}</p>
                       </div>
                     ))}
                   </div>
@@ -1498,9 +1976,9 @@ export default function PublicInfoPage() {
           ) : isStakeholders ? (
             /* 5. STAKEHOLDERS & INDUSTRY COLLABORATORS LAYOUT */
             <div className="space-y-12">
-              <div className="border-b border-slate-200 pb-4">
-                <h2 className="text-2xl font-black text-astu-navy">Strategic Alliances & Industry Consortia</h2>
-                <p className="text-xs text-slate-500 mt-1">
+              <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
+                <h2 className="text-2xl font-black text-astu-navy dark:text-white">Strategic Alliances & Industry Consortia</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Active cooperation frameworks with government agencies, multinational tech enterprises, and international research organizations.
                 </p>
               </div>
@@ -1514,41 +1992,41 @@ export default function PublicInfoPage() {
                     return (
                       <div
                         key={company.id}
-                        className="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-xs flex flex-col justify-between hover:border-astu-navy/40 hover:shadow-lg transition-all"
+                        className="rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 shadow-xs flex flex-col justify-between hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:shadow-lg transition-all"
                       >
                         <div>
                           <div className="flex items-center justify-between gap-3 mb-4">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 p-1.5">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-1.5">
                               {company.logo ? (
                                 <img src={company.logo} alt={company.name} className="h-full w-full object-contain" />
                               ) : LogoComponent ? (
                                 <LogoComponent className="h-8 w-8" />
                               ) : (
-                                <Building2 className="h-6 w-6 text-astu-navy" />
+                                <Building2 className="h-6 w-6 text-astu-navy dark:text-sky-300" />
                               )}
                             </div>
-                            <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy">
+                            <span className="rounded-full bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy dark:text-sky-300">
                               {company.partnershipType || "Strategic Alliance"}
                             </span>
                           </div>
 
-                          <h3 className="text-base font-black text-slate-900">{company.name}</h3>
-                          <p className="text-xs text-slate-500 mt-0.5">{company.industry}</p>
-                          <p className="mt-3 text-xs leading-relaxed text-slate-600 line-clamp-3">
+                          <h3 className="text-base font-black text-slate-900 dark:text-white">{company.name}</h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{company.industry}</p>
+                          <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300 line-clamp-3">
                             {company.description ||
                               `${company.name} collaborates with ASTU on applied research projects, faculty development, and graduate placement.`}
                           </p>
                         </div>
 
-                        <div className="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <div className="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                           <button
                             type="button"
                             onClick={() => setSelectedCompanyModal(company)}
-                            className="font-bold text-astu-navy hover:underline cursor-pointer"
+                            className="font-bold text-astu-navy dark:text-sky-300 hover:underline cursor-pointer"
                           >
                             Alliance Details →
                           </button>
-                          <span className="text-[11px] text-slate-400">{company.location || "Ethiopia"}</span>
+                          <span className="text-[11px] text-slate-400 dark:text-slate-500">{company.location || "Ethiopia"}</span>
                         </div>
                       </div>
                     );
@@ -1557,9 +2035,9 @@ export default function PublicInfoPage() {
 
               {/* Stakeholder Pillars */}
               <div className="space-y-6 pt-6">
-                <div className="border-b border-slate-200 pb-3">
-                  <h3 className="text-xl font-black text-astu-navy">Institutional Cooperation Pillars</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                <div className="border-b border-slate-200 dark:border-slate-800 pb-3">
+                  <h3 className="text-xl font-black text-astu-navy dark:text-white">Institutional Cooperation Pillars</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Curriculum advisory boards, joint applied laboratories, and international grants.
                   </p>
                 </div>
@@ -1568,13 +2046,13 @@ export default function PublicInfoPage() {
                   {page.sections.map((sec, idx) => (
                     <div
                       key={sec.id || idx}
-                      className="rounded-2xl border border-slate-200/90 bg-white p-6 space-y-2.5"
+                      className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 space-y-2.5"
                     >
-                      <span className="rounded-md bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy">
+                      <span className="rounded-md bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 text-[10px] font-bold text-astu-navy dark:text-sky-300">
                         {sec.badge || `Alliance Track ${idx + 1}`}
                       </span>
-                      <h4 className="text-base font-bold text-slate-900">{sec.heading}</h4>
-                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{sec.body}</p>
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white">{sec.heading}</h4>
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{sec.body}</p>
                     </div>
                   ))}
                 </div>
@@ -1583,15 +2061,15 @@ export default function PublicInfoPage() {
               {/* FAQs */}
               {page.faqs && page.faqs.length > 0 && (
                 <div className="space-y-4 pt-6">
-                  <h3 className="text-xl font-black text-astu-navy">Stakeholder & Partnership FAQs</h3>
+                  <h3 className="text-xl font-black text-astu-navy dark:text-white">Stakeholder & Partnership FAQs</h3>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {page.faqs.map((faq, idx) => (
-                      <div key={faq.id || idx} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-2">
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                          <HelpCircle className="h-4 w-4 text-astu-navy shrink-0" />
+                      <div key={faq.id || idx} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 space-y-2">
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          <HelpCircle className="h-4 w-4 text-astu-navy dark:text-sky-400 shrink-0" />
                           <span>{faq.question}</span>
                         </h4>
-                        <p className="text-xs text-slate-600 leading-relaxed pl-6">{faq.answer}</p>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-6">{faq.answer}</p>
                       </div>
                     ))}
                   </div>
@@ -1624,49 +2102,50 @@ export default function PublicInfoPage() {
                   return (
                     <article
                       key={section.id || section.heading + index}
-                      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 hover:shadow-lg hover:shadow-slate-200/60"
+                      className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:shadow-lg dark:hover:shadow-sky-950/40"
                     >
                       <div>
                         {section.image && (
-                          <div className="mb-4 overflow-hidden rounded-xl border border-slate-100">
+                          <div className="mb-4 overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800">
                             <img src={section.image} alt={section.heading} className="h-36 w-full object-cover" />
                           </div>
                         )}
 
                         <div className="mb-5 flex items-center justify-between">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-astu-navy ring-1 ring-blue-500/10 group-hover:bg-astu-navy group-hover:text-white transition-colors duration-200">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-astu-navy dark:text-sky-300 ring-1 ring-blue-500/10 dark:ring-blue-500/20 group-hover:bg-astu-navy dark:group-hover:bg-sky-600 group-hover:text-white transition-colors duration-200">
                             <SectionIcon className="h-6 w-6" />
                           </div>
                           {section.badge && (
-                            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
+                            <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">
                               {section.badge}
                             </span>
                           )}
                         </div>
 
-                        <h2 className="text-lg font-bold text-slate-900 group-hover:text-astu-navy transition-colors">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-astu-navy dark:group-hover:text-sky-300 transition-colors">
                           {section.heading}
                         </h2>
-                        <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600 whitespace-pre-line">
+                        <p className="mt-3 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-300 whitespace-pre-line">
                           {section.body}
                         </p>
                       </div>
 
-                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                         {section.linkUrl ? (
-                          <a
-                            href={section.linkUrl}
-                            className="inline-flex items-center gap-1 font-bold text-astu-navy hover:underline"
+                          <button
+                            type="button"
+                            onClick={() => navigate(section.linkUrl!)}
+                            className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-blue-300 hover:text-astu-red dark:hover:text-amber-400 transition-colors cursor-pointer"
                           >
-                            <span>{section.linkText || "View Portal"}</span>
-                            <ChevronRight className="h-3 w-3" />
-                          </a>
+                            <span>{section.linkText || "Explore Details"}</span>
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
                         ) : (
-                          <span className="font-semibold text-slate-400">Section {index + 1}</span>
+                          <span className="font-semibold text-slate-400 dark:text-slate-500 text-xs">{section.badge || "ASTU Certified"}</span>
                         )}
-                        <span className="inline-flex items-center gap-1 font-bold text-astu-navy opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40">
+                          <CheckCircle2 className="h-3 w-3 text-astu-green" />
                           <span>Verified</span>
-                          <CheckCircle2 className="h-3.5 w-3.5 text-astu-green" />
                         </span>
                       </div>
                     </article>
@@ -1675,27 +2154,31 @@ export default function PublicInfoPage() {
               </div>
 
               {/* Quick Institutional Action Banner */}
-              <div className="rounded-2xl border border-slate-200/80 bg-gradient-to-r from-astu-navy to-astu-navy p-8 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+              <div className="rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-r from-slate-950 via-astu-navy to-slate-900 p-8 sm:p-10 text-white shadow-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div>
-                  <h3 className="text-xl font-black text-white">Need Further Institutional Assistance?</h3>
+                  <h3 className="text-xl sm:text-2xl font-black text-white">
+                    {isCampusLife ? "Experience Student Life & Innovation at ASTU" : "Need Further Institutional Assistance?"}
+                  </h3>
                   <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-xl">
-                    Reach the ASTU Industry Relations, Quality Assurance Directorate, or Registrar Office directly through our verified digital channels.
+                    {isCampusLife
+                      ? "Connect with active student chapters, tour research laboratories, attend tech symposiums, and participate in campus recreation."
+                      : "Reach the ASTU Industry Relations, Quality Assurance Directorate, or Registrar Office directly through our verified digital channels."}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <button
                     type="button"
-                    onClick={() => navigate("/partners")}
+                    onClick={() => navigate(isCampusLife ? "/gallery" : "/partners")}
                     className="rounded-xl bg-astu-green px-5 py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all cursor-pointer shadow-md"
                   >
-                    Partner Office
+                    {isCampusLife ? "Campus Photo Gallery" : "Partner Office"}
                   </button>
                   <button
                     type="button"
-                    onClick={() => navigate("/info/contact")}
+                    onClick={() => navigate(isCampusLife ? "/events" : "/info/contact")}
                     className="rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition-all cursor-pointer"
                   >
-                    Contact Directory
+                    {isCampusLife ? "Upcoming Events" : "Contact Directory"}
                   </button>
                 </div>
               </div>
@@ -1842,6 +2325,9 @@ export default function PublicInfoPage() {
 
       {/* Selected Company Modal */}
       <CompanyDetailModal company={selectedCompanyModal} onClose={() => setSelectedCompanyModal(null)} />
+
+      {/* Universal Share Modal */}
+      <ShareModal isOpen={!!shareItemModal} onClose={() => setShareItemModal(null)} item={shareItemModal} />
     </div>
   );
 }

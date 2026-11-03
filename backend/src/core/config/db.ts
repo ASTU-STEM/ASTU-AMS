@@ -4,7 +4,9 @@ import fs from 'fs';
 import path from 'path';
 
 // ─── In-memory dev DB helpers ───
-const DEV_DB_PATH = path.join(process.cwd(), 'data', 'dev-db.json');
+const DEV_DB_PATH = process.env.NODE_ENV === 'test'
+  ? path.join(process.cwd(), 'data', 'test-db.json')
+  : path.join(process.cwd(), 'data', 'dev-db.json');
 const CMS_CONTENT_PATH = path.join(process.cwd(), 'data', 'cms-content.json');
 
 function readDevDb(): any {
@@ -12,6 +14,11 @@ function readDevDb(): any {
   try {
     if (fs.existsSync(DEV_DB_PATH)) {
       store = JSON.parse(fs.readFileSync(DEV_DB_PATH, 'utf-8'));
+    } else if (process.env.NODE_ENV === 'test') {
+      const templatePath = path.join(process.cwd(), 'data', 'dev-db.json');
+      if (fs.existsSync(templatePath)) {
+        store = JSON.parse(fs.readFileSync(templatePath, 'utf-8'));
+      }
     }
   } catch { /* ignore */ }
   if (!store) {
@@ -70,10 +77,227 @@ function readDevDb(): any {
     'contentItems', 'mediaAssets', 'homepageConfigs', 'jobs', 'events', 'eventRSVPs',
     'surveys', 'surveyResponses', 'mentorships', 'communityMembers',
     'departmentHeadProfiles', 'verificationRequests', 'forumPosts', 'employerFeedbacks',
-    'knowledgeDocuments', 'knowledgeChunks',
+    'donationCampaigns',
+    'contentTemplates',
   ];
   for (const key of COLLECTIONS) {
     if (!Array.isArray(store[key])) store[key] = store[key] ?? [];
+  }
+
+  if (!store.contentTemplates || store.contentTemplates.length === 0) {
+    store.contentTemplates = [
+      {
+        id: 'tpl-001',
+        name: 'Hero Landing Page',
+        description: 'Full-width hero with CTA, statistics strip, and feature grid for portal pages.',
+        category: 'Landing',
+        iconName: 'Sparkles',
+        color: '#003580',
+        usage: 18,
+        lastUpdated: 'Starter',
+        thumbnail: 'landing',
+        isDefault: true,
+        isFeatured: true,
+        fields: ['Hero Title', 'Hero Subtitle', 'Primary CTA', 'Stat 1-4', 'Feature Cards', 'Footer CTA'],
+        starterBody: '# Welcome to ASTU Alumni & Partner Gateway\n\nEmpowering tomorrow\'s technology leaders and fostering global STEM collaborations.\n\n## Impact Overview\n- **1,215+** Registered Alumni Worldwide\n- **90.3%** National Employment Rate\n- **500+** Active Industry Corporate Partners\n\n### Strategic Pillars\n1. **Applied Engineering Excellence**\n2. **Enterprise Innovation Incubation**\n3. **Global Fellowship & Career Placement**',
+        createdAt: '2026-01-10T08:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-002',
+        name: 'Alumni Spotlight Story',
+        description: 'Profile template with biography, career timeline, achievements, and gallery.',
+        category: 'Post',
+        iconName: 'GraduationCap',
+        color: '#7C3AED',
+        usage: 24,
+        lastUpdated: 'Starter',
+        thumbnail: 'story',
+        isDefault: false,
+        isFeatured: true,
+        fields: ['Alumni Name', 'Graduation Year', 'Major', 'Executive Bio', 'Career Timeline', 'Photo Gallery', 'Video URL'],
+        starterBody: '# Alumni Spotlight: Trailblazing ASTU Graduate in Tech Leadership\n\n> "ASTU taught me not only the engineering rigor to solve tough problems, but the discipline to innovate under pressure."\n\n## Biography & Background\nGraduating from the Department of Software Engineering, our alumnus has contributed to top national and international digital infrastructures.\n\n### Career Highlights\n- **2021**: Senior Systems Architect at National Technology Hub\n- **2023**: Founded FinTech startup serving 250k+ local enterprises\n- **2025**: ASTU Distinguished Alumnus Innovation Award Recipient',
+        createdAt: '2026-01-12T09:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-003',
+        name: 'Event Detail Showcase',
+        description: 'Event showcase with date, location, registration form, and corporate sponsors.',
+        category: 'Event',
+        iconName: 'Calendar',
+        color: '#E24B4A',
+        usage: 12,
+        lastUpdated: 'Starter',
+        thumbnail: 'event',
+        isDefault: false,
+        isFeatured: true,
+        fields: ['Event Title', 'Date & Time', 'Venue & Hall', 'Keynote Speakers', 'Registration Form', 'Corporate Sponsors'],
+        starterBody: '# Annual ASTU Alumni Homecoming & Technology Summit 2026\n\nJoin fellow graduates, academic faculty, and industry visionaries for a two-day conference exploring cutting-edge AI, renewable energy, and robotics.\n\n### Event Agenda\n- **08:30 AM**: Registration & Welcome Networking Breakfast\n- **10:00 AM**: Presidential Address & Keynote Speech\n- **02:00 PM**: Breakout Panels: Industry 4.0 in East Africa\n- **05:00 PM**: Alumni Networking Gala & Awards Ceremony',
+        createdAt: '2026-01-15T10:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-004',
+        name: 'University News Release',
+        description: 'Standard university news release with hero image, body, tags, and related stories.',
+        category: 'Post',
+        iconName: 'Newspaper',
+        color: '#1D9E75',
+        usage: 31,
+        lastUpdated: 'Starter',
+        thumbnail: 'news',
+        isDefault: false,
+        isFeatured: false,
+        fields: ['Headline', 'Executive Summary', 'Hero Image', 'Spokesperson', 'Press Release Body', 'Media Attachments', 'Related Articles'],
+        starterBody: '**ADAMA, ETHIOPIA** — Adama Science and Technology University announces a landmark milestone in international academic accreditation and industrial collaboration.\n\n## Official Statement\nThe university administration reaffirms its commitment to producing high-caliber engineers and technologists who lead transformative socio-economic change.\n\n### Key Takeaways\n- Accreditation renewal awarded across all core engineering departments.\n- Enhanced research grants allocated for renewable energy and artificial intelligence initiatives.\n- New exchange programs launched with world-class partner universities.',
+        createdAt: '2026-01-20T11:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-005',
+        name: 'Emergency Campus Announcement',
+        description: 'High-visibility alert banner with priority indicators and actionable campus notice.',
+        category: 'Announcement',
+        iconName: 'Megaphone',
+        color: '#E8A020',
+        usage: 8,
+        lastUpdated: 'Starter',
+        thumbnail: 'alert',
+        isDefault: false,
+        isFeatured: false,
+        fields: ['Alert Title', 'Severity Level', 'Effective Period', 'Action Required', 'Contact Department', 'Dispatch Hotline'],
+        starterBody: '> **URGENT NOTICE**: High-Priority University Operational Update\n\nAttention all faculty, students, alumni visitors, and campus personnel. Please take note of the following scheduled system maintenance and facility access protocol.\n\n### Action Required\n1. Ensure all active portal submissions are finalized before the designated window.\n2. Inquiries should be forwarded directly to the Alumni Relations Office or Campus Security Dispatch.',
+        createdAt: '2026-01-22T12:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-006',
+        name: 'Research Publication & Patent',
+        description: 'Academic research showcase with abstract, authors, DOI, citations, and PDF link.',
+        category: 'Page',
+        iconName: 'Trophy',
+        color: '#0284C7',
+        usage: 9,
+        lastUpdated: 'Starter',
+        thumbnail: 'research',
+        isDefault: false,
+        isFeatured: false,
+        fields: ['Paper Title', 'Principal Investigators', 'Research Lab', 'Abstract', 'DOI / Patent Ref', 'Citations', 'PDF Attachment'],
+        starterBody: '# Advanced Renewable Nanomaterials for High-Efficiency Solar Cells\n\n**Principal Investigators:** Dr. Abebe Tadesse, Eng. Selamawit Bekele (Department of Materials Science & Engineering)\n\n### Abstract\nThis publication presents novel synthesis methodologies for perovskite photovoltaic cells with extended operational longevity under harsh thermal conditions.\n\n- **DOI:** 10.1016/j.astu.nano.2026.04.012\n- **Research Lab:** Advanced Materials & Nanotechnology Center of Excellence',
+        createdAt: '2026-01-25T13:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-007',
+        name: 'Campus Photo Gallery Album',
+        description: 'Grid gallery with captions, lightbox, and campus category filters.',
+        category: 'Page',
+        iconName: 'Image',
+        color: '#4F46E5',
+        usage: 15,
+        lastUpdated: 'Starter',
+        thumbnail: 'gallery',
+        isDefault: false,
+        isFeatured: false,
+        fields: ['Album Title', 'Occasion & Date', 'Cover Image', 'Photo Collection', 'Captions & Credits', 'Category Tag'],
+        starterBody: '# 33rd Annual Commencement Ceremony Moments\n\nExplore high-resolution visual memories capturing the joy, dedication, and triumph of our graduates, faculty members, and proud families.\n\n### Photo Collection Highlights\n- Presidential Robing and Procession\n- Gold Medalist Honors and Valedictory Address\n- Departmental Class Celebrations and Alumni Welcome Roster',
+        createdAt: '2026-02-01T14:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-008',
+        name: 'Newsletter Bulletin',
+        description: 'Monthly electronic newsletter with featured stories, announcements, and portal CTAs.',
+        category: 'Email',
+        iconName: 'FileText',
+        color: '#059669',
+        usage: 27,
+        lastUpdated: 'Starter',
+        thumbnail: 'email',
+        isDefault: false,
+        isFeatured: true,
+        fields: ['Header Banner', 'Featured Story', 'Dean\'s Message', 'Secondary Highlights', 'Upcoming Events', 'Alumni Giving Impact', 'Footer & Unsubscribe'],
+        starterBody: '# ASTU Alumni Connection — Monthly Digest (Vol. 14)\n\nGreetings from the Alumni Affairs and International Relations Directorate!\n\n### This Month\'s Top Stories\n1. **New Tech Incubation Center Launched**: Fostering 20 student-led tech ventures with direct alumni mentorship.\n2. **Alumni Giving Breakthrough**: Over 1.8M ETB raised for the 2026 STEM Scholarship Endowment Fund.\n3. **Upcoming Career Fair**: 45+ premier technology companies recruiting on-campus next month.\n\nStay connected and keep inspiring!',
+        createdAt: '2026-02-05T15:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-009',
+        name: 'Career Fair & Industry Expo',
+        description: 'Industry showcase with participating tech leaders, hiring roles, and booth directory.',
+        category: 'Event',
+        iconName: 'Briefcase',
+        color: '#D97706',
+        usage: 16,
+        lastUpdated: 'Starter',
+        thumbnail: 'event',
+        isDefault: false,
+        isFeatured: false,
+        fields: ['Expo Title', 'Participating Employers', 'Hiring Domains', 'Resume Drop Portal', 'Venue Floorplan', 'Interview Schedule'],
+        starterBody: '# ASTU STEM & Engineering Career Expo 2026\n\nConnecting exceptional engineering talent with Ethiopia\'s leading industrial firms, software enterprises, and multinational corporations.\n\n### Participating Sectors\n- Software & Cloud Engineering\n- Embedded Systems & Telecommunications\n- Industrial Manufacturing & Renewable Energy\n- Civil & Structural Infrastructure Management',
+        createdAt: '2026-02-10T16:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'tpl-010',
+        name: 'Academic Scholarship & Grant Notice',
+        description: 'Financial aid and merit fellowship notice with eligibility requirements and portal links.',
+        category: 'Announcement',
+        iconName: 'Award',
+        color: '#9333EA',
+        usage: 22,
+        lastUpdated: 'Starter',
+        thumbnail: 'alert',
+        isDefault: false,
+        isFeatured: false,
+        fields: ['Grant Title', 'Funding Donors', 'Eligibility Criteria', 'Award Amount (ETB/USD)', 'Application Checklist', 'Submission Portal'],
+        starterBody: '# ASTU Alumni Excellence STEM Scholarship Call 2026-2027\n\nIn partnership with the ASTU Global Alumni Network, the University is pleased to invite applications for competitive merit and need-based undergraduate fellowships.\n\n### Fellowship Details\n- **Coverage:** Full tuition, laboratory resource allowance, and monthly stipend.\n- **Eligibility:** Enrolled 2nd-year to 5th-year engineering students maintaining CGPA >= 3.5.\n- **Application Deadline:** Rolling review until filled.',
+        createdAt: '2026-02-15T17:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+  }
+
+  if (!store.donationCampaigns || store.donationCampaigns.length === 0) {
+    store.donationCampaigns = [
+      {
+        id: 'camp-001',
+        title: 'ASTU STEM Scholarship Fund 2026',
+        category: 'Scholarship',
+        description: 'Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.',
+        goal: 5000000,
+        raised: 1851000,
+        donorCount: 349,
+        status: 'ACTIVE',
+        createdAt: '2026-01-15T08:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'camp-002',
+        title: 'AI Research Lab & Robotics Equipment',
+        category: 'Research',
+        description: 'Fund high-performance GPU compute clusters, sensory rigs, and laboratory instrumentation for advanced postgraduate engineering researchers.',
+        goal: 8000000,
+        raised: 3201000,
+        donorCount: 158,
+        status: 'ACTIVE',
+        createdAt: '2026-02-10T09:30:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'camp-003',
+        title: 'Campus Innovation Makerspace & Incubator',
+        category: 'Infrastructure',
+        description: 'Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.',
+        goal: 12000000,
+        raised: 6800000,
+        donorCount: 220,
+        status: 'ACTIVE',
+        createdAt: '2026-03-01T10:00:00.000Z',
+        updatedAt: new Date().toISOString(),
+      },
+    ];
   }
 
   return store;
@@ -359,17 +583,27 @@ class FakePrisma {
       if (where?.name) return depts.find((d: any) => (d.name || '').toLowerCase() === String(where.name).toLowerCase()) || null;
       return null;
     },
-    findMany: async ({ orderBy, include }: any = {}) => {
+    findMany: async ({ orderBy, include, select }: any = {}) => {
       const store = readDevDb();
       const depts = store.departments || [];
       const alumniProfiles = store.alumniProfiles || [];
       const users = store.users || [];
+      const matchDept = (a: any, d: any) =>
+        a.departmentId === d.id ||
+        (d.code && a.departmentId?.toLowerCase().includes(d.code.toLowerCase())) ||
+        (d.code && a.studentId?.toLowerCase().includes('/' + d.code.toLowerCase() + '/')) ||
+        a.department === d.name;
+
       return depts.map((d: any) => {
+        const matchedProfiles = alumniProfiles.filter((a: any) => matchDept(a, d));
         const rec: any = {
           ...d,
           departmentHeadProfiles: d.departmentHeadProfiles || [],
-          _count: { alumniProfiles: alumniProfiles.filter((a: any) => a.departmentId === d.id).length },
+          _count: { alumniProfiles: matchedProfiles.length },
         };
+        if (include?.alumniProfiles || select?.alumniProfiles) {
+          rec.alumniProfiles = matchedProfiles;
+        }
         if (include?.departmentHeadProfiles?.include?.user) {
           rec.departmentHeadProfiles = (rec.departmentHeadProfiles || []).map((h: any) => ({
             ...h,
@@ -577,7 +811,7 @@ class FakePrisma {
           companyName: 'INSA Corporation',
           industry: 'Cybersecurity & Defense Tech',
           location: 'Addis Ababa, Ethiopia',
-          logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+          logoUrl: '/images/partners/insa.png',
           website: 'https://insa.gov.et'
         };
         return {
@@ -601,7 +835,7 @@ class FakePrisma {
         companyName: 'INSA Corporation',
         industry: 'Cybersecurity & Defense Tech',
         location: 'Addis Ababa, Ethiopia',
-        logoUrl: '/images/AdamaScienceandTechnologyUniversityASTU-logo-350x350.jpg',
+        logoUrl: '/images/partners/insa.png',
         website: 'https://insa.gov.et'
       };
       return {
@@ -924,6 +1158,163 @@ class FakePrisma {
         store.mediaAssets = store.mediaAssets.filter((m: any) => m.id !== where.id);
         writeDevDb(store);
       }
+      return {};
+    },
+  };
+
+
+  contentTemplate = {
+    findMany: async ({ where, orderBy }: any = {}) => {
+      const store = readDevDb();
+      let list = [...(store.contentTemplates || [])];
+      if (where?.category && where.category !== 'all' && where.category !== 'ALL') {
+        list = list.filter((t: any) => String(t.category).toLowerCase() === String(where.category).toLowerCase());
+      }
+      if (where?.isFeatured !== undefined) {
+        list = list.filter((t: any) => Boolean(t.isFeatured) === Boolean(where.isFeatured));
+      }
+      if (where?.search) {
+        const q = String(where.search).toLowerCase();
+        list = list.filter((t: any) =>
+          (t.name && t.name.toLowerCase().includes(q)) ||
+          (t.description && t.description.toLowerCase().includes(q)) ||
+          (t.category && t.category.toLowerCase().includes(q)) ||
+          (Array.isArray(t.fields) && t.fields.some((f: string) => f.toLowerCase().includes(q)))
+        );
+      }
+      // Sort: Featured first, then by usage descending
+      list.sort((a: any, b: any) => {
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        return (b.usage || 0) - (a.usage || 0);
+      });
+      return list;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.contentTemplates || []).find((t: any) => t.id === where?.id) || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let list = [...(store.contentTemplates || [])];
+      if (where?.category && where.category !== 'all' && where.category !== 'ALL') {
+        list = list.filter((t: any) => String(t.category).toLowerCase() === String(where.category).toLowerCase());
+      }
+      return list.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      store.contentTemplates = store.contentTemplates || [];
+      const rec = {
+        ...data,
+        id: data.id || `tpl-${Date.now()}`,
+        usage: Number(data.usage) || 0,
+        lastUpdated: data.lastUpdated || 'Just now',
+        isDefault: Boolean(data.isDefault),
+        isFeatured: Boolean(data.isFeatured),
+        fields: Array.isArray(data.fields) ? data.fields : [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      store.contentTemplates.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const list = store.contentTemplates || [];
+      const idx = list.findIndex((t: any) => t.id === where?.id);
+      if (idx === -1) throw new Error('Template not found');
+      list[idx] = {
+        ...list[idx],
+        ...data,
+        updatedAt: new Date().toISOString(),
+        lastUpdated: 'Just now',
+      };
+      store.contentTemplates = list;
+      writeDevDb(store);
+      return list[idx];
+    },
+    delete: async ({ where }: any) => {
+      const store = readDevDb();
+      store.contentTemplates = (store.contentTemplates || []).filter((t: any) => t.id !== where?.id);
+      writeDevDb(store);
+      return { success: true };
+    },
+    incrementUsage: async ({ where }: any) => {
+      const store = readDevDb();
+      const list = store.contentTemplates || [];
+      const idx = list.findIndex((t: any) => t.id === where?.id);
+      if (idx === -1) throw new Error('Template not found');
+      list[idx].usage = (Number(list[idx].usage) || 0) + 1;
+      list[idx].lastUpdated = 'Just now';
+      list[idx].updatedAt = new Date().toISOString();
+      store.contentTemplates = list;
+      writeDevDb(store);
+      return list[idx];
+    },
+  };
+
+  donationCampaign = {
+    findMany: async ({ where, orderBy }: any = {}) => {
+      const store = readDevDb();
+      let list = [...(store.donationCampaigns || [])];
+      if (where?.status && where.status !== 'ALL') {
+        list = list.filter((c: any) => c.status === where.status);
+      }
+      if (where?.category && where.category !== 'ALL') {
+        list = list.filter((c: any) => c.category === where.category);
+      }
+      return list;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      return (store.donationCampaigns || []).find((c: any) => c.id === where?.id) || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let list = store.donationCampaigns || [];
+      if (where?.status && where.status !== 'ALL') {
+        list = list.filter((c: any) => c.status === where.status);
+      }
+      return list.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `camp-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.donationCampaigns = store.donationCampaigns || [];
+      store.donationCampaigns.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    createMany: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const items = Array.isArray(data) ? data : [data];
+      const created = items.map((c: any) => ({
+        ...c,
+        id: c.id || `camp-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
+      store.donationCampaigns = store.donationCampaigns || [];
+      store.donationCampaigns.push(...created);
+      writeDevDb(store);
+      return { count: created.length };
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const list = store.donationCampaigns || [];
+      const idx = list.findIndex((c: any) => c.id === where?.id);
+      if (idx === -1) throw new Error('Campaign not found');
+      list[idx] = { ...list[idx], ...data, updatedAt: new Date().toISOString() };
+      store.donationCampaigns = list;
+      writeDevDb(store);
+      return list[idx];
+    },
+    delete: async ({ where }: any) => {
+      const store = readDevDb();
+      store.donationCampaigns = (store.donationCampaigns || []).filter((c: any) => c.id !== where?.id);
+      writeDevDb(store);
       return {};
     },
   };
@@ -1278,134 +1669,88 @@ function sanitizeItemForRead(item: any): any {
 }
 
 const createSafeModel = (name: string) => {
-  const getCollectionKey = (): string => {
-    if (name === 'knowledgeDocument') return 'knowledgeDocuments';
-    if (name === 'knowledgeChunk') return 'knowledgeChunks';
-    return name.endsWith('s') ? name : `${name}s`;
-  };
-
-  const getStore = () => {
-    const db = readDevDb();
-    const key = getCollectionKey();
-    if (!Array.isArray(db[key])) db[key] = [];
-    return { db, store: db[key], key };
-  };
-
-  const matchesWhere = (item: any, where: any): boolean => {
-    if (!where || Object.keys(where).length === 0) return true;
-    return Object.entries(where).every(([k, v]: [string, any]) => {
-      if (v === undefined) return true;
-      if (v !== null && typeof v === 'object' && 'in' in v && Array.isArray(v.in)) {
-        return v.in.includes(item[k]);
-      }
-      return item[k] === v;
-    });
-  };
-
+  const store: any[] = [];
   return {
     findMany: async ({ where }: any = {}) => {
-      const { store } = getStore();
-      const results = where && Object.keys(where).length > 0
-        ? store.filter((item: any) => matchesWhere(item, where))
-        : [...store];
+      let results = store;
+      if (where && Object.keys(where).length > 0) {
+        results = store.filter((item: any) => {
+          return Object.entries(where).every(([k, v]) => item[k] === v);
+        });
+      }
       return results.map((item: any) => sanitizeItemForRead(item));
     },
     findUnique: async ({ where }: any = {}) => {
       if (!where) return null;
-      const { store } = getStore();
-      const found = store.find((item: any) => matchesWhere(item, where));
+      const found = store.find((item: any) => {
+        return Object.entries(where).every(([k, v]) => item[k] === v);
+      });
       return found ? sanitizeItemForRead(found) : null;
     },
     findFirst: async ({ where }: any = {}) => {
-      const { store } = getStore();
       if (!where || Object.keys(where).length === 0) return store[0] ? sanitizeItemForRead(store[0]) : null;
-      const found = store.find((item: any) => matchesWhere(item, where));
+      const found = store.find((item: any) => {
+        return Object.entries(where).every(([k, v]) => item[k] === v);
+      });
       return found ? sanitizeItemForRead(found) : null;
     },
     count: async ({ where }: any = {}) => {
-      const { store } = getStore();
       if (!where || Object.keys(where).length === 0) return store.length;
-      return store.filter((item: any) => matchesWhere(item, where)).length;
+      return store.filter((item: any) => Object.entries(where).every(([k, v]) => item[k] === v)).length;
     },
     create: async ({ data }: any) => {
-      const { db, store } = getStore();
       const sanitized = sanitizePrismaCreate(data);
       const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      const rec = { id, ...sanitized, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      const rec = { id, ...sanitized };
       store.push(rec);
-      writeDevDb(db);
       return sanitizeItemForRead(rec);
     },
     createMany: async ({ data }: any = {}) => {
-      const { db, store } = getStore();
       const items = Array.isArray(data) ? data : [data];
       const created = items.map((item: any) => {
         const sanitized = sanitizePrismaCreate(item);
         const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-        const rec = { id, ...sanitized, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        const rec = { id, ...sanitized };
         store.push(rec);
         return rec;
       });
-      writeDevDb(db);
       return { count: created.length };
     },
     update: async ({ where, data }: any) => {
-      const { db, store } = getStore();
-      let item = store.find((i: any) => matchesWhere(i, where));
+      let item = store.find((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
       if (!item) {
         const id = where?.id || `dev-${name}-${Date.now()}`;
         item = { id, ...where };
         store.push(item);
       }
       applyPrismaUpdate(item, data);
-      writeDevDb(db);
       return sanitizeItemForRead(item);
     },
     delete: async ({ where }: any = {}) => {
-      const { db, store } = getStore();
-      const idx = store.findIndex((i: any) => matchesWhere(i, where));
+      const idx = store.findIndex((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
       if (idx !== -1) {
-        const removed = store.splice(idx, 1)[0];
-        writeDevDb(db);
-        return removed;
+        return store.splice(idx, 1)[0];
       }
       return {};
     },
-    deleteMany: async ({ where }: any = {}) => {
-      const { db, store, key } = getStore();
-      if (!where || Object.keys(where).length === 0) {
-        const count = store.length;
-        db[key] = [];
-        writeDevDb(db);
-        return { count };
-      }
-      const beforeCount = store.length;
-      db[key] = store.filter((item: any) => !matchesWhere(item, where));
-      writeDevDb(db);
-      return { count: beforeCount - db[key].length };
-    },
     upsert: async ({ where, create, update }: any) => {
-      const { db, store } = getStore();
-      let item = store.find((i: any) => matchesWhere(i, where));
+      let item = store.find((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
       if (item) {
         applyPrismaUpdate(item, update);
-        writeDevDb(db);
         return sanitizeItemForRead(item);
       }
       const sanitized = sanitizePrismaCreate(create);
-      const rec = { id: `dev-${name}-${Date.now()}`, ...sanitized, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      const rec = { id: `dev-${name}-${Date.now()}`, ...sanitized };
       store.push(rec);
-      writeDevDb(db);
       return sanitizeItemForRead(rec);
     },
     updateMany: async ({ where, data }: any = {}) => {
-      const { db, store } = getStore();
-      const items = store.filter((i: any) => matchesWhere(i, where));
-      items.forEach((i: any) => applyPrismaUpdate(i, data));
-      writeDevDb(db);
+      const items = store.filter((i: any) => Object.entries(where || {}).every(([k, v]) => i[k] === v));
+      items.forEach(i => applyPrismaUpdate(i, data));
       return { count: items.length };
     },
-    aggregate: async () => ({ _avg: { salary: 0, technicalSkill: 0, communicationSkill: 0, leadershipSkill: 0, teamworkSkill: 0, problemSolvingSkill: 0, innovationSkill: 0 }, _count: { id: 0 } }),
+    deleteMany: async () => ({ count: 0 }),
+    aggregate: async () => ({ _avg: { salary: 0, technicalSkill: 0, communicationSkill: 0, leadershipSkill: 0, teamworkSkill: 0, problemSolvingSkill: 0, innovationSkill: 0 }, _count: { id: store.length } }),
     groupBy: async () => [],
   };
 };

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone, ForumPost, DonationCampaign } from '../types/alumni.types';
 import toast from 'react-hot-toast';
+import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { alumniService } from '../services/alumni.service';
-import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -43,7 +43,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [tempRole, setTempRole] = useState(profile.currentRole);
   const [tempCompany, setTempCompany] = useState(profile.company);
-  const [tempSalary, setTempSalary] = useState(profile.salaryRange || '—');
+  const [tempSalary, setTempSalary] = useState(profile.salaryRange || '30,001 - 60,000 ETB');
   const [timelineFilter, setTimelineFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED'>('ALL');
 
   const [forumPosts, setForumPosts] = useState<ForumPost[]>([]);
@@ -63,33 +63,67 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     }).catch(console.error);
   }, []);
 
-  // Static/dynamic career milestones
-  const milestones: CareerMilestone[] = [
-    {
-      id: 1,
-      year: '2025 - Present',
-      title: profile.currentRole || 'Junior Fullstack Engineer',
-      company: profile.company || 'Chapa Financial Technologies',
-      description: 'Drives user acquisition interfaces, checkouts developer tools, and fintech integrations.',
-      type: 'professional'
-    },
-    {
-      id: 2,
-      year: '2024',
-      title: 'BSc degree in Computer Science and Engineering',
-      company: 'Adama Science and Technology University',
-      description: `Graduated with Great Distinction (CGPA: ${profile.cgpa || '—'}). Focused on Software Systems.`,
-      type: 'academic'
-    },
-    {
-      id: 3,
-      year: '2023',
-      title: 'Software DevOps Intern',
-      company: 'Safaricom Telecommunications',
-      description: 'Assisted DevOps teams in setting up automated GitLab pipelines and Kubernetes environments.',
-      type: 'professional'
+  // Dynamic career milestones from genuine user profile
+  const milestones: CareerMilestone[] = React.useMemo(() => {
+    const list: CareerMilestone[] = [];
+    if (profile.currentRole || profile.company) {
+      list.push({
+        id: 1,
+        year: 'Current',
+        title: profile.currentRole || 'Employed',
+        company: profile.company || 'Organization',
+        description: profile.salaryRange ? `Salary bracket: ${profile.salaryRange}` : 'Employment record verified on ASTU Alumni portal.',
+        type: 'professional',
+      });
     }
-  ];
+    if (profile.department || profile.graduationYear) {
+      list.push({
+        id: 2,
+        year: profile.graduationYear ? String(profile.graduationYear) : 'Graduation',
+        title: profile.department ? `BSc in ${profile.department}` : 'ASTU Degree Graduate',
+        company: 'Adama Science and Technology University',
+        description: profile.cgpa ? `Graduated with Cumulative GPA: ${profile.cgpa}` : 'Adama Science and Technology University degree completion record.',
+        type: 'academic',
+      });
+    }
+    return list;
+  }, [profile]);
+
+  const skillsData = React.useMemo(() => {
+    if (Array.isArray(profile.skills) && profile.skills.length > 0) {
+      return profile.skills.map((skill) => ({
+        name: skill,
+        value: 1,
+      }));
+    }
+    return [];
+  }, [profile.skills]);
+
+  const dynamicActivities: ActivityEntry[] = React.useMemo(() => {
+    const list: ActivityEntry[] = [];
+    let actId = 1;
+    surveys.forEach((s) => {
+      list.push({
+        id: actId++,
+        type: 'survey',
+        title: s.title,
+        description: s.status === 'PENDING' ? 'Tracer survey pending completion.' : 'Tracer survey submitted.',
+        timestamp: 'Active',
+        unread: s.status === 'PENDING',
+      });
+    });
+    recentJobs.slice(0, 3).forEach((j) => {
+      list.push({
+        id: actId++,
+        type: 'job',
+        title: `Matched: ${j.title}`,
+        description: `${j.company} • ${j.location || 'Ethiopia'}`,
+        timestamp: 'Recent',
+        unread: !j.applied,
+      });
+    });
+    return list;
+  }, [surveys, recentJobs]);
 
   const handleStatusSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,10 +170,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           background-size: 200% 200%;
         }
       `}</style>
-
-      {/* Official Alumni Officer Broadcast Hero Banner */}
-      <DashboardBroadcastHero actorRole="ALUMNI" className="mb-2" />
-
       <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1d9e75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6 dash-glow">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-5 left-[10%] w-2 h-2 rounded-full bg-white/20 animate-float" />
@@ -460,7 +490,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}/20 to-${stat.color}/10`}>
                   <span className={`material-symbols-outlined text-2xl text-${stat.color}`}>{stat.icon}</span>
                 </div>
-                <span className="text-xs font-semibold text-astu-green bg-astu-green/15 px-3 py-1 rounded-full">+5%</span>
               </div>
 
               <p className="text-sm text-gray-600 font-medium mb-2">{stat.label}</p>
@@ -531,7 +560,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-lg font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{job.title}</h4>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${job.applied ? 'bg-blue-100 text-blue-800' : 'bg-astu-green/15 text-astu-green'}`}>
-                          {job.applied ? 'Applied' : (job.match ? `${job.match} Match` : 'Recommended')}
+                          {job.applied ? 'Applied' : `${job.match} Match`}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 font-medium mb-2">{job.company}</p>
@@ -581,46 +610,60 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             {/* Vertical timeline structure */}
             <div className="relative pl-6 border-l-2 border-gray-150 space-y-6 py-1">
-              {milestones.map((milestone) => (
-                <div key={milestone.id} className="relative">
-                  {/* Bullet */}
-                  <span className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white shadow flex items-center justify-center ${
-                    milestone.type === 'academic' ? 'bg-astu-navy' : 'bg-astu-green'
-                  }`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-                  </span>
-                  
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-extrabold uppercase text-gray-400">{milestone.year}</span>
-                    <h4 className="text-sm font-bold text-gray-900 leading-snug">{milestone.title}</h4>
-                    <p className="text-xs font-bold text-astu-navy">{milestone.company}</p>
-                    <p className="text-[11px] text-gray-500 leading-normal">{milestone.description}</p>
-                  </div>
+              {milestones.length === 0 ? (
+                <div className="py-6 text-center text-xs text-gray-400">
+                  No career or graduation milestones logged yet. Update your employment status to populate your career timeline.
                 </div>
-              ))}
+              ) : (
+                milestones.map((milestone) => (
+                  <div key={milestone.id} className="relative">
+                    {/* Bullet */}
+                    <span className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white shadow flex items-center justify-center ${
+                      milestone.type === 'academic' ? 'bg-astu-navy' : 'bg-astu-green'
+                    }`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                    </span>
+                    
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-extrabold uppercase text-gray-400">{milestone.year}</span>
+                      <h4 className="text-sm font-bold text-gray-900 leading-snug">{milestone.title}</h4>
+                      <p className="text-xs font-bold text-astu-navy">{milestone.company}</p>
+                      <p className="text-[11px] text-gray-500 leading-normal">{milestone.description}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </section>
         </div>
 
       </div>
 
-      {/* Analytics Charts Row — only render when real series are available */}
+      {/* Analytics Charts Row */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-[10px] border border-gray-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <h3 className="text-sm font-semibold text-gray-900">Employment Rate Trend</h3>
-          <p className="mt-1 text-xs text-gray-500">No employment analytics available yet for your cohort.</p>
-          <p className="mt-8 text-center text-sm text-gray-400">—</p>
-        </div>
-        <div className="rounded-[10px] border border-gray-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <h3 className="text-sm font-semibold text-gray-900">Skills Distribution</h3>
-          <p className="mt-1 text-xs text-gray-500">Skills insights will appear once alumni skill data is collected.</p>
-          <p className="mt-8 text-center text-sm text-gray-400">—</p>
-        </div>
+        <AnalyticsChart
+          type="area"
+          title="Employment Rate Trend"
+          subtitle="Graduate employment rates across institutional cohorts"
+          data={[]}
+          xKey="year"
+          series={[{ key: 'rate', label: 'Employment %' }]}
+          height={220}
+        />
+        <AnalyticsChart
+          type="pie"
+          title="Skills Profile Breakdown"
+          subtitle="Verified skills documented on your alumni profile"
+          data={skillsData}
+          xKey="name"
+          series={[{ key: 'value', label: 'Skill Weight' }]}
+          height={220}
+        />
       </div>
 
       {/* Activity Timeline */}
       <ActivityTimeline
-        activities={[] as ActivityEntry[]}
+        activities={dynamicActivities}
         onViewAll={() => onTabChange('messages')}
       />
 
@@ -725,24 +768,21 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {donationCampaigns.slice(0, 3).map((campaign) => {
-            const raisedNum = typeof campaign.raised === 'object' && campaign.raised ? Number((campaign.raised as any).increment || 0) : Number(campaign.raised || 0);
-            const goalNum = typeof campaign.goal === 'object' && campaign.goal ? Number((campaign.goal as any).increment || 0) : Number(campaign.goal || 1);
-            const donorCountNum = typeof campaign.donorCount === 'object' && campaign.donorCount ? Number((campaign.donorCount as any).increment || 0) : Number(campaign.donorCount || 0);
-            const progress = Math.round((raisedNum / Math.max(1, goalNum)) * 100);
+            const progress = Math.round((campaign.raised / campaign.goal) * 100);
             return (
               <div key={campaign.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[9px] font-bold rounded-full uppercase">
                     {campaign.category}
                   </span>
-                  <span className="text-[10px] text-gray-400">{donorCountNum} donors</span>
+                  <span className="text-[10px] text-gray-400">{campaign.donorCount} donors</span>
                 </div>
                 <h4 className="text-sm font-bold text-gray-900 mb-1">{campaign.title}</h4>
                 <p className="text-[11px] text-gray-500 leading-relaxed mb-3 line-clamp-2">{campaign.description}</p>
                 <div className="mb-2">
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-astu-navy">{raisedNum.toLocaleString()} ETB</span>
-                    <span className="text-gray-400">of {goalNum.toLocaleString()} ETB</span>
+                    <span className="font-bold text-astu-navy">{campaign.raised.toLocaleString()} ETB</span>
+                    <span className="text-gray-400">of {campaign.goal.toLocaleString()} ETB</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-gradient-to-r from-astu-navy to-astu-green transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>

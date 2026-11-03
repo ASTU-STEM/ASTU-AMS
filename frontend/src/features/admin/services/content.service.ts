@@ -151,10 +151,10 @@ Through structured tracer surveys, regional alumni chapter meetups, and dedicate
   },
   {
     id: 'C-003',
-    title: 'Semester Break: Campus Safety Notice',
+    title: 'Inter-Semester Recess: Laboratory Safety & Campus Clearance Guidelines',
     type: 'announcement',
     status: 'Published',
-    excerpt: 'Important safety reminders for students, faculty, and visitors during the upcoming semester break.',
+    excerpt: 'Important safety reminders, laboratory power-down procedures, and access guidelines for the upcoming semester break.',
     content: 'University Security Directorate issues standard campus access guidelines during the inter-semester recess. Please ensure laboratory equipment is safely powered down and dormitory clearances are logged.',
     image: '/images/astu-building.jpg',
     author: 'ASTU Directorate Notice',
@@ -362,6 +362,21 @@ export const contentService = {
     return items[index];
   },
 
+  async uploadCmsImage(file: File): Promise<string> {
+    const form = new FormData();
+    form.append('file', file);
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const res = await axios.post(`${API_URL}/content/media/upload`, form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    const url = res?.data?.data?.url;
+    if (!url) throw new Error('Upload succeeded but no media URL was returned');
+    return url;
+  },
+
   deleteItem(id: string): boolean {
     const items = this.getItems();
     const filtered = items.filter((i) => i.id !== id);
@@ -491,6 +506,19 @@ export const contentService = {
       return res.data;
     } catch (err: any) {
       return { success: false, message: err.response?.data?.message || 'Failed to submit donation' };
+    }
+  },
+  async getMediaAssets(album?: string): Promise<any[]> {
+    try {
+      const res = await axios.get(`${API_URL}/content/media`, {
+        params: album && album !== 'All' ? { album } : {},
+      });
+      if (res.data?.success && Array.isArray(res.data?.data)) {
+        return res.data.data;
+      }
+      return [];
+    } catch {
+      return [];
     }
   },
 };

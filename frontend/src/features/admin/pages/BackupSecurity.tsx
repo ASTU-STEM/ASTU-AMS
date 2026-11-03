@@ -342,19 +342,36 @@ export default function BackupSecurity() {
     }
   };
 
+  // These three toggles are optimistic and previously ignored the result, so a
+  // rejected write left the UI showing a value the server never accepted.
+  const persist = async (
+    patch: { schedule?: BackupFrequency; time?: string; rateLimit?: number },
+    revert: () => void,
+    label: string,
+  ) => {
+    revert();
+    const result = await adminService.updateBackupSecurityConfig({
+      schedule: patch.schedule ?? schedule,
+      time: patch.time ?? time,
+      rateLimit: patch.rateLimit ?? rateLimit,
+    });
+    if (!result.ok) {
+      toast.error(result.message || `Could not save ${label}.`);
+      return;
+    }
+    toast.success(`${label} saved.`);
+  };
+
   const handleScheduleChange = async (newSchedule: BackupFrequency) => {
-    setSchedule(newSchedule);
-    await adminService.updateBackupSecurityConfig({ schedule: newSchedule, time, rateLimit });
+    await persist({ schedule: newSchedule }, () => setSchedule(newSchedule), 'Backup schedule');
   };
 
   const handleTimeChange = async (newTime: string) => {
-    setTime(newTime);
-    await adminService.updateBackupSecurityConfig({ schedule, time: newTime, rateLimit });
+    await persist({ time: newTime }, () => setTime(newTime), 'Backup time');
   };
 
   const handleRateLimitChange = async (newRateLimit: number) => {
-    setRateLimit(newRateLimit);
-    await adminService.updateBackupSecurityConfig({ schedule, time, rateLimit: newRateLimit });
+    await persist({ rateLimit: newRateLimit }, () => setRateLimit(newRateLimit), 'Rate limit');
   };
 
   return (

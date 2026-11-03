@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Globe,
   Users,
@@ -23,6 +23,7 @@ import {
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ShareModal, { ShareItem } from '../components/ShareModal';
 import communityMembersService, { CommunityMember } from '../features/admin/services/communityMembers.service';
 import PaginationBar from '../components/PaginationBar';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
@@ -44,12 +45,15 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function AlumniCommunityPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeModalMember, setActiveModalMember] = useState<CommunityMember | null>(null);
   const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
   const [membersLoading, setMembersLoading] = useState(true);
   const [communityPage, setCommunityPage] = useState(0);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const { metrics } = usePublicMetrics();
   const dynamicHeroStats = useMemo(() => [
@@ -183,12 +187,38 @@ export default function AlumniCommunityPage() {
     setCommunityPage((prev) => Math.min(prev, Math.max(0, communityTotalPages - 1)));
   }, [communityTotalPages]);
 
-  const handleCopyShare = (member: CommunityMember) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(`${member.name} — ${member.role} at ${member.org} (ASTU Alumni Community)`);
-      toast.success(`Copied ${member.name}'s profile highlight!`);
+  useEffect(() => {
+    const memberId = searchParams.get('member');
+    if (!memberId || communityMembers.length === 0) return;
+    const decoded = decodeURIComponent(memberId).toLowerCase();
+    const found = communityMembers.find(
+      (m) => m.id?.toLowerCase() === decoded || m.name.toLowerCase() === decoded
+    );
+    if (found) setActiveModalMember(found);
+  }, [searchParams, communityMembers]);
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['all', 'executive', 'policy', 'academia', 'engineering'].includes(tab)) {
+      setSelectedCategory(tab);
     }
+  }, [searchParams]);
+
+  const handleOpenShare = (member: CommunityMember) => {
+    setShareItem({
+      id: member.id,
+      title: `${member.name} — ASTU Alumni Leader`,
+      subtitle: `${member.role} at ${member.org}`,
+      text: `${member.name} (${member.gradYear ? `Class of ${member.gradYear}` : 'ASTU Graduate'}) is recognized in the ASTU Alumni Community network as ${member.role} at ${member.org}.`,
+      url: `/community?member=${encodeURIComponent(member.id)}`,
+      image: member.image,
+      badge: 'Alumni Community',
+      type: 'page',
+    });
+    setIsShareOpen(true);
   };
+
+  const handleCopyShare = handleOpenShare;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-on-surface dark:bg-slate-950 dark:text-slate-100">
@@ -222,7 +252,8 @@ export default function AlumniCommunityPage() {
                 ASTU-AMS
               </p>
               <span className="mt-3 inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-astu-green backdrop-blur-md">
-                <Globe className="h-3.5 w-3.5" /> Global Alumni Network
+                <img src="/images/astu-seal-logo.png" alt="ASTU Seal" className="h-4 w-4 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                <span>Global Alumni Network</span>
               </span>
               <h1 className="mt-4 text-3xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
                 {communityPageHero.title}
@@ -247,6 +278,24 @@ export default function AlumniCommunityPage() {
                 className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-bold text-white backdrop-blur-md hover:bg-white/10 transition-all cursor-pointer"
               >
                 <Users className="h-4 w-4" /> Explore Directory
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShareItem({
+                    title: 'ASTU Global Alumni Network & Community',
+                    subtitle: 'Directory of ASTU leaders across aviation, technology, academia and civil industry',
+                    text: 'Connect with verified graduates and chapter leaders across the global Adama Science and Technology University alumni community.',
+                    url: '/community',
+                    badge: 'Alumni Community',
+                    type: 'page',
+                  });
+                  setIsShareOpen(true);
+                }}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/5 px-5 py-3.5 text-sm font-bold text-white backdrop-blur-md hover:bg-white/10 transition-all cursor-pointer"
+                title="Share Community Directory"
+              >
+                <Share2 className="h-4 w-4 text-emerald-400" /> Share Directory
               </button>
             </div>
           </div>
@@ -687,6 +736,13 @@ export default function AlumniCommunityPage() {
           </div>
         </div>
       )}
+
+      {/* ── MODAL: Universal Share Modal ── */}
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        item={shareItem}
+      />
 
       <Footer />
     </div>

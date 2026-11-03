@@ -43,7 +43,7 @@ export default function AuthInput({
     <div className="space-y-1.5">
       <label 
         htmlFor={name} 
-        className="block text-sm font-semibold text-on-surface-variant"
+        className="block text-sm font-semibold text-on-surface-variant dark:text-slate-300"
       >
         {label}
         {required && <span className="text-astu-red ml-1">*</span>}
@@ -62,12 +62,13 @@ export default function AuthInput({
           className={`
             w-full rounded-lg border px-4 py-3 text-sm
             transition-all duration-200
-            placeholder:text-on-surface-variant/50
+            text-on-surface dark:text-white
+            placeholder:text-on-surface-variant/50 dark:placeholder:text-slate-500
             focus:outline-none focus:ring-2
             disabled:cursor-not-allowed disabled:opacity-50
             ${hasError
-              ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5'
-              : 'border-outline-variant focus:border-astu-navy focus:ring-astu-navy/20 bg-white hover:border-outline-variant/80'
+              ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5 dark:bg-red-950/20 dark:border-red-500'
+              : 'border-outline-variant focus:border-astu-navy focus:ring-astu-navy/20 bg-white hover:border-outline-variant/80 dark:bg-slate-800/80 dark:border-slate-700 dark:focus:border-blue-400 dark:focus:ring-blue-400/20'
             }
           `}
           aria-invalid={hasError ? true : undefined}
@@ -77,7 +78,7 @@ export default function AuthInput({
           <button
             type="button"
             onClick={onTogglePassword}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-astu-navy transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-astu-navy dark:text-slate-400 dark:hover:text-blue-300 transition-colors p-1"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             {showPassword ? (

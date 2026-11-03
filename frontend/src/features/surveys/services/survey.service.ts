@@ -2,10 +2,13 @@ const getApiBaseUrl = () => {
   return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 };
 
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-});
+const getHeaders = () => {
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+};
 
 async function handleResponse(res: Response) {
   const data = await res.json();

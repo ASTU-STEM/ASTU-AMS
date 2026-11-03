@@ -31,9 +31,9 @@ export default function IctForensicsAuditPage() {
   useEffect(() => {
     const fetchAuditLogs = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
         const res = await fetch('/api/admin/system-logs?limit=50', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         const data = await res.json();
         const rawLogs = data?.data?.logs || data?.data || data?.logs || [];

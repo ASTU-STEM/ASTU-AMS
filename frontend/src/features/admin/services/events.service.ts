@@ -27,6 +27,7 @@ export interface ApiEvent {
   description?: string;
   date: string;
   location: string;
+  /** Delivery mode only: "ONLINE" | "IN_PERSON". Not an event category. */
   type: string;
   // Optional presentation metadata: the events table does not store all of
   // these, but CMS-authored / legacy rows may, and the homepage maps them
@@ -46,7 +47,12 @@ export interface ApiEvent {
 }
 
 export const eventsService = {
-  async getAllEvents(): Promise<ApiEvent[]> {
+  /**
+   * Public event directory. The `/events` API returns the full list (no
+   * page/limit query params today), so callers paginate client-side.
+   * Pass `{ throwOnError: true }` when the UI must show an error state.
+   */
+  async getAllEvents(options?: { throwOnError?: boolean }): Promise<ApiEvent[]> {
     try {
       const response = await apiClient.get<{ success: boolean; data: ApiEvent[] }>('/events');
       if (response.data.success && Array.isArray(response.data.data)) {
@@ -55,6 +61,7 @@ export const eventsService = {
       return [];
     } catch (error) {
       console.warn('Failed to fetch events from API:', error);
+      if (options?.throwOnError) throw error;
       return [];
     }
   },

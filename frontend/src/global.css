@@ -3,6 +3,10 @@
 /* ── Import additional animation styles (must be first) ── */
 @import "./styles/animations.css";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ═══════════════════════════════════════════════════════════
    GLOBAL SPACING SCALE & THEME TOKENS (4px base unit)
    4px/8px/12px/16px/20px/24px/32px/40px

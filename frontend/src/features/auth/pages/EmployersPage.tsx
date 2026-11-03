@@ -7,6 +7,7 @@ import AuthLayout from '../../../layouts/AuthLayout';
 import AuthInput from '../components/AuthInput';
 import AuthButton from '../components/AuthButton';
 import AuthFooterLink from '../components/AuthFooterLink';
+import authService from '../services/auth.service';
 import * as yup from 'yup';
 
 const employerLoginSchema = yup.object().shape({
@@ -38,12 +39,23 @@ export default function EmployersPage() {
   const handleLoginSubmit = async (values: EmployerLoginFormData) => {
     setIsLoading(true);
     try {
-      // TODO: Call employer login API
-      // const response = await authService.login({ ...values, role: 'EMPLOYER' });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const response = await authService.employerLogin({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (!response.ok || !response.data) {
+        toast.error(response.message || 'Login failed. Please check your credentials.');
+        return;
+      }
+
+      const role = response.data.user?.role;
+      if (role !== 'EMPLOYER') {
+        toast.error('This account is not registered as an employer partner.');
+        authService.logout();
+        return;
+      }
+
       toast.success('Login successful!', { id: 'login-success' });
       navigate('/employer/dashboard');
     } catch (error) {

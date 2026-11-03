@@ -11,7 +11,7 @@ const api: AxiosInstance = axios.create({
 
 api.interceptors.request.use(
   (requestConfig: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem(config.auth.storageKey);
+    const token = localStorage.getItem(config.auth.storageKey) || localStorage.getItem('token') || localStorage.getItem('authToken');
     if (token && requestConfig.headers) {
       requestConfig.headers.Authorization = `Bearer ${token}`;
     }
@@ -52,7 +52,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem(config.auth.refreshStorageKey);
         if (refreshToken) {
           const response = await axios.post(`${config.apiUrl}/auth/refresh`, { refreshToken });
-          const token = response.data?.data?.accessToken || response.data?.data?.token || response.data?.accessToken || response.data?.token;
+          const token = response.data?.data?.accessToken ?? response.data?.data?.token;
           if (token) {
             localStorage.setItem(config.auth.storageKey, token);
             originalRequest.headers.Authorization = `Bearer ${token}`;
