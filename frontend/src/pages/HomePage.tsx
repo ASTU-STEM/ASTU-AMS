@@ -1697,51 +1697,61 @@ location: e.location || 'Location to be confirmed',
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-astu-navy via-slate-900 to-slate-950" />
                 )}
-                {/* Soft left scrim for copy — keeps the right side of the photo visible */}
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/35 to-transparent md:via-slate-950/25 md:to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-slate-950/20" />
+                {/* Multi-layered dark scrim and directional gradient to guarantee 100% legibility */}
+                <div className="absolute inset-0 bg-slate-950/65" />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/45" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/40" />
               </div>
             ))}
           </div>
 
-          {/* Hero copy — brand-first: one brand signal, one headline, one CTA group */}
-          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-12 md:px-6 md:py-14">
-            <div className="max-w-2xl space-y-4 rounded-2xl bg-slate-950/30 p-5 backdrop-blur-[2px] md:bg-transparent md:p-0 md:backdrop-blur-none animate-slide-up">
-              <span className="inline-block rounded-full bg-astu-red px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-white shadow-lg animate-glow">
-                {activeHero?.tagline || liveHeroBadge || 'ASTU-AMS'}
-              </span>
-              <h1 className="text-3xl font-black leading-[1.15] tracking-tight text-white drop-shadow-sm md:text-4xl lg:text-5xl">
+          {/* Hero copy — high-contrast frosted glass card */}
+          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-12 md:px-8">
+            <div className="max-w-2xl rounded-3xl border border-white/15 bg-slate-950/70 p-6 shadow-2xl backdrop-blur-md sm:p-8 md:p-10">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/15 px-3.5 py-1 text-xs font-black uppercase tracking-[0.2em] text-amber-300 shadow-sm backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)] animate-pulse" />
+                <span>{liveHeroBadge || 'ASTU'}</span>
+              </div>
+
+              {activeHero?.tagline ? (
+                <p className="mt-3.5 text-xs font-bold uppercase tracking-[0.2em] text-sky-300 drop-shadow-sm md:text-sm">
+                  {activeHero.tagline}
+                </p>
+              ) : null}
+
+              <h1 className="mt-3 text-3xl font-black leading-[1.08] tracking-tight text-white drop-shadow-md sm:text-4xl md:text-5xl lg:text-[3.25rem]">
                 {(activeHero?.title || '').includes(" to the ") ? (
                   <>
                     {activeHero?.title.split(" to the ")[0]}
                     <br />
-                    to the <span className="text-astu-green">{activeHero?.title.split(" to the ")[1]}</span>
+                    to the <span className="text-sky-400">{activeHero?.title.split(" to the ")[1]}</span>
                   </>
                 ) : (
                   activeHero?.title || 'Alumni Management System'
                 )}
               </h1>
-              <p className="max-w-xl text-sm leading-relaxed text-white/90 md:text-base">
+
+              <p className="mt-4 max-w-xl text-sm font-normal leading-relaxed text-slate-100 drop-shadow-sm sm:text-base md:text-lg">
                 {activeHero?.description || welcomeMessage || 'Connecting ASTU graduates, employers, and academic departments through verified career and alumni services.'}
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <button
                   type="button"
-                  className="home-btn home-btn--primary"
+                  className="home-btn home-btn--primary home-btn--lg w-full sm:w-auto shadow-lg shadow-blue-900/40"
                   onClick={() => navigate(liveHeroButtons?.primaryLink || '/info/alumni-portal')}
                 >
                   <Users className="home-btn__icon" aria-hidden="true" />
-                  {liveHeroButtons?.primaryText || 'Alumni Portal'}
+                  <span>{liveHeroButtons?.primaryText || 'Alumni Portal'}</span>
                   <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
                 </button>
                 <button
                   type="button"
-                  className="home-btn home-btn--secondary"
+                  className="home-btn home-btn--secondary home-btn--lg w-full sm:w-auto shadow-md"
                   onClick={() => navigate(liveHeroButtons?.secondaryLink || '/info/employer-portal')}
                 >
-                  {liveHeroButtons?.secondaryText || 'Employer Partnership'}
                   <Handshake className="home-btn__icon" aria-hidden="true" />
+                  <span>{liveHeroButtons?.secondaryText || 'Employer Partnership'}</span>
                 </button>
               </div>
             </div>
