@@ -42018,6 +42018,22 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1793728633744",
       "createdAt": "2026-11-03T17:57:13.744Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729272691",
+      "createdAt": "2026-11-03T18:07:52.691Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729276018",
+      "createdAt": "2026-11-03T18:07:56.018Z"
     }
   ],
   "notifications": [
