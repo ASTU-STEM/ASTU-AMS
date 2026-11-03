@@ -1,0 +1,328 @@
+{
+  "users": [
+    {
+      "id": "user-admin-1",
+      "email": "admin@astu.edu.et",
+      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "role": "ADMIN",
+      "isActive": true,
+      "createdAt": "2026-09-07T20:51:22.076Z",
+      "updatedAt": "2026-09-07T20:51:22.083Z"
+    },
+    {
+      "id": "user-registrar-1",
+      "email": "registrar@astu.edu.et",
+      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "role": "REGISTRAR",
+      "isActive": true,
+      "createdAt": "2026-09-07T20:51:22.083Z",
+      "updatedAt": "2026-09-07T20:51:22.083Z"
+    },
+    {
+      "id": "user-cms-1",
+      "email": "alumnioffice@astu.edu.et",
+      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "role": "ALUMNI_OFFICE",
+      "isActive": true,
+      "createdAt": "2026-09-07T20:51:22.083Z",
+      "updatedAt": "2026-09-07T20:51:22.083Z"
+    },
+    {
+      "id": "user-dept-1",
+      "email": "depthead.swe@astu.edu.et",
+      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "role": "DEPARTMENT_HEAD",
+      "isActive": true,
+      "createdAt": "2026-09-07T20:51:22.083Z",
+      "updatedAt": "2026-09-07T20:51:22.083Z"
+    },
+    {
+      "id": "test-employer-user-uuid",
+      "email": "safaricom@mail.com",
+      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "role": "EMPLOYER",
+      "isActive": true,
+      "createdAt": "2026-09-07T20:51:22.083Z",
+      "updatedAt": "2026-09-07T20:51:22.083Z"
+    },
+    {
+      "id": "e2e-alumni-user",
+      "email": "helen@alumni.com",
+      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "role": "ALUMNI",
+      "isActive": true,
+      "createdAt": "2026-09-07T20:51:22.083Z",
+      "updatedAt": "2026-09-07T20:51:22.083Z"
+    },
+    {
+      "id": "test-alumni-user-uuid",
+      "email": "bob@alumni.com",
+      "password": "$2a$10$B7IiOBQ63gg/I25B3N6LB.rS40hVDsm2B1k7m4O7ZKxdgBzIpb6P2",
+      "role": "ALUMNI",
+      "isActive": true,
+      "createdAt": "2026-09-07T20:51:22.083Z",
+      "updatedAt": "2026-09-07T20:51:22.083Z"
+    },
+    {
+      "email": "didit_test_1792422682795@alumni.astu.edu.et",
+      "password": "hash123",
+      "role": "ALUMNI",
+      "isActive": true,
+      "id": "dev-1792422684633",
+      "createdAt": "2026-10-19T15:11:24.633Z",
+      "updatedAt": "2026-10-19T15:11:24.633Z"
+    },
+    {
+      "email": "didit_test_1792423377097@alumni.astu.edu.et",
+      "password": "hash123",
+      "role": "ALUMNI",
+      "isActive": true,
+      "id": "dev-1792423379026",
+      "createdAt": "2026-10-19T15:22:59.026Z",
+      "updatedAt": "2026-10-19T15:22:59.026Z"
+    },
+    {
+      "email": "didit_test_1792510708358@alumni.astu.edu.et",
+      "password": "hash123",
+      "role": "ALUMNI",
+      "isActive": true,
+      "id": "dev-1792510709793",
+      "createdAt": "2026-10-20T15:38:29.793Z",
+      "updatedAt": "2026-10-20T15:38:29.793Z"
+    }
+  ],
+  "alumniProfiles": [
+    {
+      "userId": "e2e-alumni-user",
+      "studentId": "ASTU/MEG/999",
+      "fullName": "Helen Gidey",
+      "email": "helen@alumni.com",
+      "cgpa": 3.75,
+      "graduationYear": 2024,
+      "gender": "Female",
+      "departmentId": "dev-department-1787763781920",
+      "status": "ACTIVE",
+      "skills": [
+        "CAD",
+        "SolidWorks",
+        "MATLAB"
+      ],
+      "id": "dev-alumni-1787763781926",
+      "createdAt": "2026-08-26T17:03:01.926Z",
+      "updatedAt": "2026-10-20T15:38:31.662Z",
+      "employmentStatus": "EMPLOYED",
+      "salary": 18000,
+      "preferences": {
+        "company": "Safaricom Ethiopia",
+        "currentRole": "Mechanical Design Associate"
+      }
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "studentId": "ASTU/SWE/001",
+      "fullName": "Bob Marley",
+      "email": "bob@alumni.com",
+      "cgpa": 3.9,
+      "graduationYear": 2024,
+      "gender": "Male",
+      "departmentId": "dev-department-1787763781949",
+      "status": "ACTIVE",
+      "skills": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "id": "dev-alumni-1787763782058",
+      "createdAt": "2026-08-26T17:03:02.058Z",
+      "updatedAt": "2026-10-28T06:19:17.896Z",
+      "employmentStatus": "EMPLOYED",
+      "salary": 25000,
+      "preferences": {
+        "company": "Google East Africa",
+        "currentRole": "Fullstack Engineer"
+      }
+    },
+    {
+      "studentId": "UGR/TEST/9999_1792422682795",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1792422682795@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1792422682885",
+      "createdAt": "2026-10-19T15:11:22.885Z",
+      "updatedAt": "2026-10-19T15:11:25.090Z",
+      "userId": "dev-1792422684633",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1792423377097",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1792423377097@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1792423377189",
+      "createdAt": "2026-10-19T15:22:57.189Z",
+      "updatedAt": "2026-10-19T15:22:59.560Z",
+      "userId": "dev-1792423379026",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1792510708358",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1792510708358@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1792510708446",
+      "createdAt": "2026-10-20T15:38:28.446Z",
+      "updatedAt": "2026-10-20T15:38:30.281Z",
+      "userId": "dev-1792510709793",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
+    }
+  ],
+  "employerProfiles": [
+    {
+      "userId": "test-employer-user-uuid",
+      "companyName": "Google East Africa",
+      "industry": "Technology",
+      "location": "Addis Ababa",
+      "hrContact": "HR Lead",
+      "website": "https://google.com",
+      "description": "Google office in Ethiopia",
+      "companySize": "11-50",
+      "id": "dev-employer-1787763781981",
+      "createdAt": "2026-08-26T17:03:01.981Z",
+      "updatedAt": "2026-10-28T06:19:15.233Z"
+    }
+  ],
+  "departments": [
+    {
+      "id": "dept-com",
+      "name": "Computer Science",
+      "code": "COM",
+      "createdAt": "2026-10-02T12:05:14.550Z"
+    },
+    {
+      "id": "dept-swe",
+      "name": "Software Engineering",
+      "code": "SWE",
+      "createdAt": "2026-10-02T12:05:14.556Z"
+    },
+    {
+      "id": "dept-ece",
+      "name": "Electrical and Computer Engineering",
+      "code": "ECE",
+      "createdAt": "2026-10-02T12:05:14.556Z"
+    },
+    {
+      "id": "dept-meg",
+      "name": "Mechanical Engineering",
+      "code": "MEG",
+      "createdAt": "2026-10-02T12:05:14.556Z"
+    },
+    {
+      "id": "dept-cve",
+      "name": "Civil Engineering",
+      "code": "CVE",
+      "createdAt": "2026-10-02T12:05:14.556Z"
+    },
+    {
+      "id": "dept-che",
+      "name": "Chemical Engineering",
+      "code": "CHE",
+      "createdAt": "2026-10-02T12:05:14.556Z"
+    },
+    {
+      "id": "dept-geo",
+      "name": "Applied Geology",
+      "code": "GEO",
+      "createdAt": "2026-10-02T12:05:14.556Z"
+    },
+    {
+      "id": "dev-dept-ans",
+      "name": "Applied Natural Sciences & Technology",
+      "code": "ANS",
+      "createdAt": "2026-10-02T12:05:14.556Z"
+    }
+  ],
+  "registrarStudents": [
+    {
+      "id": "dev-sis-12345",
+      "studentId": "UGR/12345/24",
+      "fullName": "Abebe Kebede",
+      "email": null,
+      "phone": "+251911234567",
+      "cgpa": 3.65,
+      "graduationYear": 2024,
+      "department": "Software Engineering",
+      "departmentCode": "SWE",
+      "status": "GRADUATED",
+      "createdAt": "2026-09-04T00:00:00.000Z",
+      "updatedAt": "2026-09-04T00:00:00.000Z"
+    },
+    {
+      "id": "dev-sis-37999",
+      "studentId": "UGR/37999/87",
+      "fullName": "Tewodros Kassahun",
+      "email": null,
+      "phone": "+251912345678",
+      "cgpa": 3.8,
+      "graduationYear": 2024,
+      "department": "Software Engineering",
+      "departmentCode": "SWE",
+      "status": "GRADUATED",
+      "createdAt": "2026-09-04T00:00:00.000Z",
+      "updatedAt": "2026-09-04T00:00:00.000Z"
+    }
+  ],
+  "registrarSyncLogs": [],
+  "auditLogs": [],
+  "notifications": [],
+  "documentRequests": [],
+  "jobs": [],
+  "jobApplications": [],
+  "hiringEvents": [],
+  "employerFeedbacks": [],
+  "homepageConfigs": [
+    {
+      "id": "hc-main",
+      "key": "main",
+      "data": {},
+      "updatedAt": "2026-11-02T00:00:00.000Z"
+    }
+  ],
+  "contentItems": [],
+  "directMessages": [],
+  "verificationRequests": [],
+  "communityMembers": [],
+  "mediaAssets": [],
+  "events": [],
+  "eventRSVPs": [],
+  "surveys": [],
+  "surveyResponses": [],
+  "mentorships": [],
+  "departmentHeadProfiles": [],
+  "forumPosts": [],
+  "donationCampaigns": [],
+  "contentTemplates": []
+}
