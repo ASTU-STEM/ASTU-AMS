@@ -38,6 +38,8 @@ import { JobDetailsModal } from '../components/JobDetailsModal';
 import { MessagingTab } from '../components/MessagingTab';
 import { AlumniDirectoryTab } from '../components/AlumniDirectoryTab';
 import { AlumniToolsPage } from '../../tools/pages/AlumniToolsPage';
+import { usePortalMenuControl } from '../../../context/PortalMenuControlContext';
+import PageClosedView from '../../../components/PageClosedView';
 
 interface AlumniDashboardProps {
   defaultTab?: string;
@@ -46,6 +48,7 @@ interface AlumniDashboardProps {
 const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { isPageClosed, getClosedNotice } = usePortalMenuControl();
 
   const location = useLocation();
 
@@ -904,32 +907,48 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               </div>
             )}
             <div className="space-y-1">
-              {recruitingItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                      {item.badge}
+              {recruitingItems.map((item) => {
+                const isClosed = isPageClosed('ALUMNI', item.id);
+                const closedNotice = getClosedNotice('ALUMNI', item.id);
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    title={sidebarCollapsed ? (isClosed ? `${item.label} (Closed)` : item.label) : (isClosed ? `Temporarily Closed: ${closedNotice || 'Click to view notice'}` : undefined)}
+                    className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                      } ${activeTab === item.id
+                        ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
+                        : isClosed
+                        ? 'text-slate-500 hover:text-slate-800 hover:bg-rose-50/50 dark:hover:bg-rose-950/20'
+                        : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                      }`}
+                  >
+                    <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                      }`}>
+                      <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+                      {isClosed && sidebarCollapsed && (
+                        <span className="absolute -top-1 -right-1 min-w-[12px] h-3 px-0.5 flex items-center justify-center rounded-full bg-rose-600 text-[7px] font-extrabold text-white shadow-xs">
+                          ✕
+                        </span>
+                      )}
                     </span>
-                  )}
-                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
+                    {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+                    {isClosed && !sidebarCollapsed ? (
+                      <span className="ml-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                        Closed
+                      </span>
+                    ) : item.badge && !sidebarCollapsed ? (
+                      <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                        {item.badge}
+                      </span>
+                    ) : null}
+                    {activeTab === item.id && !sidebarCollapsed && !item.badge && !isClosed && (
+                      <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -941,27 +960,44 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               </div>
             )}
             <div className="space-y-1">
-              {communityItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {activeTab === item.id && !sidebarCollapsed && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
+              {communityItems.map((item) => {
+                const isClosed = isPageClosed('ALUMNI', item.id);
+                const closedNotice = getClosedNotice('ALUMNI', item.id);
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    title={sidebarCollapsed ? (isClosed ? `${item.label} (Closed)` : item.label) : (isClosed ? `Temporarily Closed: ${closedNotice || 'Click to view notice'}` : undefined)}
+                    className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                      } ${activeTab === item.id
+                        ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
+                        : isClosed
+                        ? 'text-slate-500 hover:text-slate-800 hover:bg-rose-50/50 dark:hover:bg-rose-950/20'
+                        : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                      }`}
+                  >
+                    <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                      }`}>
+                      <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+                      {isClosed && sidebarCollapsed && (
+                        <span className="absolute -top-1 -right-1 min-w-[12px] h-3 px-0.5 flex items-center justify-center rounded-full bg-rose-600 text-[7px] font-extrabold text-white shadow-xs">
+                          ✕
+                        </span>
+                      )}
+                    </span>
+                    {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+                    {isClosed && !sidebarCollapsed ? (
+                      <span className="ml-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                        Closed
+                      </span>
+                    ) : null}
+                    {activeTab === item.id && !sidebarCollapsed && !isClosed && (
+                      <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -973,32 +1009,48 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
               </div>
             )}
             <div className="space-y-1">
-              {serviceItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                      {item.badge}
+              {serviceItems.map((item) => {
+                const isClosed = isPageClosed('ALUMNI', item.id);
+                const closedNotice = getClosedNotice('ALUMNI', item.id);
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    title={sidebarCollapsed ? (isClosed ? `${item.label} (Closed)` : item.label) : (isClosed ? `Temporarily Closed: ${closedNotice || 'Click to view notice'}` : undefined)}
+                    className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                      } ${activeTab === item.id
+                        ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
+                        : isClosed
+                        ? 'text-slate-500 hover:text-slate-800 hover:bg-rose-50/50 dark:hover:bg-rose-950/20'
+                        : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                      }`}
+                  >
+                    <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                      }`}>
+                      <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+                      {isClosed && sidebarCollapsed && (
+                        <span className="absolute -top-1 -right-1 min-w-[12px] h-3 px-0.5 flex items-center justify-center rounded-full bg-rose-600 text-[7px] font-extrabold text-white shadow-xs">
+                          ✕
+                        </span>
+                      )}
                     </span>
-                  )}
-                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
+                    {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+                    {isClosed && !sidebarCollapsed ? (
+                      <span className="ml-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-900 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                        Closed
+                      </span>
+                    ) : item.badge && !sidebarCollapsed ? (
+                      <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                        {item.badge}
+                      </span>
+                    ) : null}
+                    {activeTab === item.id && !sidebarCollapsed && !item.badge && !isClosed && (
+                      <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </nav>
@@ -1170,6 +1222,12 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
             <div className="flex h-full items-center justify-center">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent"></div>
             </div>
+          ) : isPageClosed('ALUMNI', activeTab) ? (
+            <PageClosedView
+              actor="ALUMNI"
+              pageId={activeTab}
+              onBackToDashboard={() => setActiveTab('dashboard')}
+            />
           ) : (
             <>
               {activeTab === 'dashboard' && profile && (

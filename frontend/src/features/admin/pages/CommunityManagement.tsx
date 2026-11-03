@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Search,
@@ -58,7 +59,34 @@ interface CommunityPillarItem {
 
 export default function CommunityManagement() {
   const { metrics } = usePublicMetrics();
-  const [activeTab, setActiveTab] = useState<Tab>('members');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const tabParam = searchParams.get('tab') as Tab;
+    if (tabParam && ['members', 'community-page', 'regional-chapters', 'event-banner', 'pillars', 'detail-page'].includes(tabParam)) {
+      return tabParam;
+    }
+    return 'members';
+  });
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as Tab;
+    if (tabParam && ['members', 'community-page', 'regional-chapters', 'event-banner', 'pillars', 'detail-page'].includes(tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams, activeTab]);
+
+  const handleSelectTab = (tab: Tab) => {
+    setActiveTab(tab);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('tab', tab);
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
   const [showLivePreview, setShowLivePreview] = useState(true);
   const [deviceView, setDeviceView] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
@@ -540,13 +568,13 @@ export default function CommunityManagement() {
         {/* ── LEFT PANE: CMS CONTROL PANEL ── */}
         <div className={`w-full ${showLivePreview ? 'lg:w-1/2' : 'lg:w-full'} space-y-5 transition-all`}>
           {/* Section Navigation Tabs */}
-          <div className="flex gap-1.5 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-x-auto shadow-xs">
+          <div className="flex gap-2 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200/90 dark:border-slate-800 overflow-x-auto shadow-xs">
             {[
-              { id: 'members', label: 'Alumni Roster', icon: Users },
-              { id: 'community-page', label: 'Hero & Stats', icon: LayoutDashboard },
-              { id: 'regional-chapters', label: 'Regional Chapters', icon: Globe },
-              { id: 'event-banner', label: 'Event Banner', icon: Calendar },
-              { id: 'pillars', label: 'Community Pillars', icon: Shield },
+              { id: 'members', label: 'Community Leaders & Members', icon: Users, count: members.length },
+              { id: 'community-page', label: 'Hero & Live Stats', icon: LayoutDashboard },
+              { id: 'regional-chapters', label: 'Regional Chapters', icon: Globe, count: regionalChapters.length },
+              { id: 'event-banner', label: 'Homecoming Banner', icon: Calendar },
+              { id: 'pillars', label: 'Community Pillars', icon: Shield, count: communityPillars.length },
               { id: 'detail-page', label: 'Info & Governance', icon: FileText },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -554,15 +582,27 @@ export default function CommunityManagement() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as Tab)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all whitespace-nowrap cursor-pointer ${
+                  type="button"
+                  onClick={() => handleSelectTab(tab.id as Tab)}
+                  className={`px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer shrink-0 ${
                     isActive
-                      ? 'bg-[#003366] text-white shadow-sm'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      ? 'bg-[#003366] text-white shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <span
+                      className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  )}
                 </button>
               );
             })}

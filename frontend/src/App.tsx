@@ -42,6 +42,7 @@ import { RegistrationProvider } from "./features/auth/contexts/RegistrationConte
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
 
 import { SystemSettingsProvider } from "./context/SystemSettingsContext";
+import { PortalMenuControlProvider } from "./context/PortalMenuControlContext";
 
 function AppContent() {
   return (
@@ -189,9 +190,11 @@ function App() {
         }}
       />
       <SystemSettingsProvider>
-        <RegistrationProvider>
-          <AppContent />
-        </RegistrationProvider>
+        <PortalMenuControlProvider>
+          <RegistrationProvider>
+            <AppContent />
+          </RegistrationProvider>
+        </PortalMenuControlProvider>
       </SystemSettingsProvider>
     </Provider>
   );

@@ -21,6 +21,9 @@ import SupportDeskManagement from '../features/admin/pages/SupportDeskManagement
 import IctAdminDashboard from '../features/admin/pages/IctAdminDashboard';
 import { useAuth } from '../contexts/AuthContext';
 
+const KnowledgeBaseManagement = React.lazy(() => import('../features/admin/pages/KnowledgeBaseManagement'));
+const PortalMenuControls = React.lazy(() => import('../features/admin/pages/PortalMenuControls'));
+
 export default function AdminRoutes() {
   const { user } = useAuth();
   const defaultTab = user?.role === 'ADMIN' ? 'ict-portal' : 'dashboard';
@@ -32,6 +35,22 @@ export default function AdminRoutes() {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="ict-portal" element={<IctAdminDashboard />} />
         <Route path="modules" element={<SuperAdminModules />} />
+        <Route
+          path="knowledge-hub"
+          element={
+            <React.Suspense fallback={<div className="p-8 text-center text-slate-500">Loading Knowledge Hub...</div>}>
+              <KnowledgeBaseManagement />
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="rag-knowledge"
+          element={
+            <React.Suspense fallback={<div className="p-8 text-center text-slate-500">Loading Knowledge Hub...</div>}>
+              <KnowledgeBaseManagement />
+            </React.Suspense>
+          }
+        />
         <Route path="reports" element={<ReportsCenter />} />
         <Route path="messages" element={<AdminChatPage />} />
         <Route path="support-tickets" element={<SupportDeskManagement />} />
@@ -46,6 +65,22 @@ export default function AdminRoutes() {
         <Route path="notifications" element={<NotificationCenter />} />
         <Route path="logs" element={<SystemLogs />} />
         <Route path="backup" element={<BackupSecurity />} />
+        <Route
+          path="menu-controls"
+          element={
+            <React.Suspense fallback={<div className="p-8 text-center text-slate-500">Loading Portal Controls...</div>}>
+              <PortalMenuControls />
+            </React.Suspense>
+          }
+        />
+        <Route
+          path="portal-controls"
+          element={
+            <React.Suspense fallback={<div className="p-8 text-center text-slate-500">Loading Portal Controls...</div>}>
+              <PortalMenuControls />
+            </React.Suspense>
+          }
+        />
         <Route path="settings" element={<SystemSettings />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>

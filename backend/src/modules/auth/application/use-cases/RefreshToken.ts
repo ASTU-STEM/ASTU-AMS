@@ -22,7 +22,7 @@ export class RefreshToken {
       const payload = { userId: user.id, email: user.email, role: user.role as Role };
       const newAccessToken = generateAccessToken(payload);
 
-      return { accessToken: newAccessToken };
+      return { accessToken: newAccessToken, token: newAccessToken };
     } catch (err) {
       throw new InvalidTokenError();
     }

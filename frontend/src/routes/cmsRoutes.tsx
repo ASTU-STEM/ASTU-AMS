@@ -28,6 +28,8 @@ const ReportsCenter = lazy(() => import('../features/admin/pages/ReportsCenter')
 const AnalyticsOverview = lazy(() => import('../features/admin/pages/AnalyticsOverview'));
 const UserManagement = lazy(() => import('../features/admin/pages/UserManagement'));
 const AdminProfile = lazy(() => import('../features/admin/pages/AdminProfile'));
+const KnowledgeBaseManagement = lazy(() => import('../features/admin/pages/KnowledgeBaseManagement'));
+const PortalMenuControls = lazy(() => import('../features/admin/pages/PortalMenuControls'));
 
 export default function CmsRoutes() {
   return (
@@ -59,16 +61,20 @@ export default function CmsRoutes() {
         <Route path="employers" element={<PartnersManagement />} />
         <Route path="institutional-pages" element={<HomepageManagement initialCategory="detail-pages" />} />
         <Route path="community" element={<CommunityManagement />} />
-        <Route path="community-members" element={<CommunityMembersManagement />} />
+        <Route path="community-members" element={<Navigate to="/cms/community?tab=members" replace />} />
         <Route path="media-gallery" element={<MediaGalleryHub />} />
         <Route path="media" element={<MediaGalleryHub />} />
         <Route path="gallery" element={<MediaGalleryHub />} />
         <Route path="seo" element={<SEOManagement />} />
         <Route path="approvals" element={<ApprovalWorkflow />} />
         <Route path="templates" element={<ContentTemplates />} />
+        <Route path="knowledge-hub" element={<KnowledgeBaseManagement />} />
+        <Route path="rag-knowledge" element={<KnowledgeBaseManagement />} />
         <Route path="messages" element={<CmsChatPage />} />
         <Route path="notifications" element={<NotificationCenter />} />
         <Route path="profile" element={<AdminProfile />} />
+        <Route path="menu-controls" element={<PortalMenuControls />} />
+        <Route path="portal-controls" element={<PortalMenuControls />} />
         <Route path="settings" element={<CmsSettings />} />
       </Route>
     </Routes>

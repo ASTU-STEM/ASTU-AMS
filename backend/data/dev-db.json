@@ -41193,6 +41193,366 @@
       "ipAddress": "::1",
       "id": "dev-log-1792946857893",
       "createdAt": "2026-10-25T16:47:37.893Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1792951471990",
+      "createdAt": "2026-10-25T18:04:31.990Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1792952204096",
+      "createdAt": "2026-10-25T18:16:44.096Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1792952467834",
+      "createdAt": "2026-10-25T18:21:07.834Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1792952838205",
+      "createdAt": "2026-10-25T18:27:18.206Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1792953638103",
+      "createdAt": "2026-10-25T18:40:38.103Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1792955495115",
+      "createdAt": "2026-10-25T19:11:35.115Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1792955509056",
+      "createdAt": "2026-10-25T19:11:49.056Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1792956707521",
+      "createdAt": "2026-10-25T19:31:47.521Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1792956709402",
+      "createdAt": "2026-10-25T19:31:49.402Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1792958089599",
+      "createdAt": "2026-10-25T19:54:49.599Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1792958106316",
+      "createdAt": "2026-10-25T19:55:06.316Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793207464869",
+      "createdAt": "2026-10-28T17:11:04.869Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793216964853",
+      "createdAt": "2026-10-28T19:49:24.853Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793216992316",
+      "createdAt": "2026-10-28T19:49:52.316Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793216996844",
+      "createdAt": "2026-10-28T19:49:56.844Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217105491",
+      "createdAt": "2026-10-28T19:51:45.491Z"
+    },
+    {
+      "userId": "test-employer-user-uuid",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217189931",
+      "createdAt": "2026-10-28T19:53:09.931Z"
+    },
+    {
+      "userId": "test-employer-user-uuid",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217208798",
+      "createdAt": "2026-10-28T19:53:28.798Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217213863",
+      "createdAt": "2026-10-28T19:53:33.863Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217278445",
+      "createdAt": "2026-10-28T19:54:38.445Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217282678",
+      "createdAt": "2026-10-28T19:54:42.679Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217346358",
+      "createdAt": "2026-10-28T19:55:46.358Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793217354964",
+      "createdAt": "2026-10-28T19:55:54.964Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793220192127",
+      "createdAt": "2026-10-28T20:43:12.127Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221240923",
+      "createdAt": "2026-10-28T21:00:40.923Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221251103",
+      "createdAt": "2026-10-28T21:00:51.103Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221259860",
+      "createdAt": "2026-10-28T21:00:59.860Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221284735",
+      "createdAt": "2026-10-28T21:01:24.735Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221287926",
+      "createdAt": "2026-10-28T21:01:27.926Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221358131",
+      "createdAt": "2026-10-28T21:02:38.131Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221361974",
+      "createdAt": "2026-10-28T21:02:41.974Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221389125",
+      "createdAt": "2026-10-28T21:03:09.126Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793221393617",
+      "createdAt": "2026-10-28T21:03:13.617Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793222415356",
+      "createdAt": "2026-10-28T21:20:15.356Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793222925113",
+      "createdAt": "2026-10-28T21:28:45.113Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793222935991",
+      "createdAt": "2026-10-28T21:28:55.991Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793222967804",
+      "createdAt": "2026-10-28T21:29:27.804Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793222971876",
+      "createdAt": "2026-10-28T21:29:31.876Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793223073838",
+      "createdAt": "2026-10-28T21:31:13.838Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793223080550",
+      "createdAt": "2026-10-28T21:31:20.550Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793223353992",
+      "createdAt": "2026-10-28T21:35:53.993Z"
+    },
+    {
+      "userId": "test-employer-user-uuid",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793223362503",
+      "createdAt": "2026-10-28T21:36:02.503Z"
+    },
+    {
+      "userId": "test-employer-user-uuid",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::1",
+      "id": "dev-log-1793223386438",
+      "createdAt": "2026-10-28T21:36:26.438Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793223391269",
+      "createdAt": "2026-10-28T21:36:31.269Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793637576308",
+      "createdAt": "2026-11-02T16:39:36.308Z"
     }
   ],
   "notifications": [
@@ -64915,11 +65275,33 @@
           "sessions": 380
         }
       },
-      "updatedAt": "2026-10-25T16:51:22.891Z",
+      "updatedAt": "2026-11-02T20:08:20.418Z",
       "updatedBy": "CMS Admin"
     }
   ],
   "contentItems": [
+    {
+      "id": "C-7230",
+      "title": "News Article Draft",
+      "slug": "news-article-draft",
+      "type": "POST",
+      "status": "DRAFT",
+      "priority": "NORMAL",
+      "excerpt": "Standard university news release with hero image, body, tags, and related stories.",
+      "body": "",
+      "author": "Content Manager",
+      "authorId": null,
+      "tags": [
+        "post",
+        "template",
+        "draft"
+      ],
+      "pinned": false,
+      "featured": false,
+      "language": "EN",
+      "createdAt": "2026-10-25T18:06:07.230Z",
+      "updatedAt": "2026-10-25T18:06:07.230Z"
+    },
     {
       "id": "C-6636",
       "title": "ASTU Engineering Innovation Summit 2026",
@@ -65096,6 +65478,20 @@
       "id": "msg-1789076302163",
       "isRead": false,
       "createdAt": "2026-09-10T21:38:22.163Z"
+    },
+    {
+      "senderId": "user-registrar-1",
+      "receiverId": "candidate-1792479020918",
+      "sender": "REGISTRAR",
+      "receiverRole": "USER",
+      "text": "📞 Missed Voice Call",
+      "fileUrl": null,
+      "fileType": null,
+      "alumniId": null,
+      "employerId": null,
+      "id": "msg-1793217319527",
+      "isRead": false,
+      "createdAt": "2026-10-28T19:55:19.527Z"
     }
   ],
   "verificationRequests": [
@@ -68308,5 +68704,1468 @@
   "surveyResponses": [],
   "mentorships": [],
   "departmentHeadProfiles": [],
-  "forumPosts": []
+  "forumPosts": [
+    {
+      "id": "dev-forumPost-1793221262456-csdyi",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:01:02.456Z",
+      "updatedAt": "2026-10-28T21:01:02.457Z"
+    },
+    {
+      "id": "dev-forumPost-1793221262457-9tomr",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:01:02.457Z",
+      "updatedAt": "2026-10-28T21:01:02.457Z"
+    },
+    {
+      "id": "dev-forumPost-1793221265726-xtvl3",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:01:05.726Z",
+      "updatedAt": "2026-10-28T21:01:05.726Z"
+    },
+    {
+      "id": "dev-forumPost-1793221265726-0cuh3",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:01:05.726Z",
+      "updatedAt": "2026-10-28T21:01:05.727Z"
+    },
+    {
+      "id": "dev-forumPost-1793221266165-549bt",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:01:06.165Z",
+      "updatedAt": "2026-10-28T21:01:06.165Z"
+    },
+    {
+      "id": "dev-forumPost-1793221266165-2g8lo",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:01:06.165Z",
+      "updatedAt": "2026-10-28T21:01:06.165Z"
+    },
+    {
+      "id": "dev-forumPost-1793221266582-un16i",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:01:06.582Z",
+      "updatedAt": "2026-10-28T21:01:06.582Z"
+    },
+    {
+      "id": "dev-forumPost-1793221266582-72g5x",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:01:06.582Z",
+      "updatedAt": "2026-10-28T21:01:06.582Z"
+    },
+    {
+      "id": "dev-forumPost-1793221274056-w6qy6",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:01:14.056Z",
+      "updatedAt": "2026-10-28T21:01:14.057Z"
+    },
+    {
+      "id": "dev-forumPost-1793221274057-n4kbh",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:01:14.057Z",
+      "updatedAt": "2026-10-28T21:01:14.057Z"
+    },
+    {
+      "id": "dev-forumPost-1793221274432-ebjg0",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:01:14.432Z",
+      "updatedAt": "2026-10-28T21:01:14.432Z"
+    },
+    {
+      "id": "dev-forumPost-1793221274432-xc11c",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:01:14.432Z",
+      "updatedAt": "2026-10-28T21:01:14.432Z"
+    },
+    {
+      "id": "dev-forumPost-1793221363359-8mo62",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:02:43.359Z",
+      "updatedAt": "2026-10-28T21:02:43.359Z"
+    },
+    {
+      "id": "dev-forumPost-1793221363359-y4jvm",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:02:43.359Z",
+      "updatedAt": "2026-10-28T21:02:43.359Z"
+    },
+    {
+      "id": "dev-forumPost-1793221364572-5ibqo",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:02:44.572Z",
+      "updatedAt": "2026-10-28T21:02:44.572Z"
+    },
+    {
+      "id": "dev-forumPost-1793221364572-48dpa",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:02:44.572Z",
+      "updatedAt": "2026-10-28T21:02:44.572Z"
+    },
+    {
+      "id": "dev-forumPost-1793221365006-rcxfh",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:02:45.006Z",
+      "updatedAt": "2026-10-28T21:02:45.006Z"
+    },
+    {
+      "id": "dev-forumPost-1793221365006-4st1l",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:02:45.006Z",
+      "updatedAt": "2026-10-28T21:02:45.006Z"
+    },
+    {
+      "id": "dev-forumPost-1793221365444-m7wvy",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:02:45.444Z",
+      "updatedAt": "2026-10-28T21:02:45.444Z"
+    },
+    {
+      "id": "dev-forumPost-1793221365444-e3n9l",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:02:45.444Z",
+      "updatedAt": "2026-10-28T21:02:45.444Z"
+    },
+    {
+      "id": "dev-forumPost-1793222417986-jpyq2",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:20:17.986Z",
+      "updatedAt": "2026-10-28T21:20:17.986Z"
+    },
+    {
+      "id": "dev-forumPost-1793222417986-pqnfd",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:20:17.986Z",
+      "updatedAt": "2026-10-28T21:20:17.986Z"
+    },
+    {
+      "id": "dev-forumPost-1793222419433-fsil2",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:20:19.433Z",
+      "updatedAt": "2026-10-28T21:20:19.433Z"
+    },
+    {
+      "id": "dev-forumPost-1793222419433-dtudf",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:20:19.433Z",
+      "updatedAt": "2026-10-28T21:20:19.433Z"
+    },
+    {
+      "id": "dev-forumPost-1793222973654-3kigg",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:29:33.655Z",
+      "updatedAt": "2026-10-28T21:29:33.655Z"
+    },
+    {
+      "id": "dev-forumPost-1793222973655-xlcmn",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:29:33.655Z",
+      "updatedAt": "2026-10-28T21:29:33.655Z"
+    },
+    {
+      "id": "dev-forumPost-1793222976113-jma7h",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:29:36.113Z",
+      "updatedAt": "2026-10-28T21:29:36.113Z"
+    },
+    {
+      "id": "dev-forumPost-1793222976113-hdyj0",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:29:36.113Z",
+      "updatedAt": "2026-10-28T21:29:36.113Z"
+    },
+    {
+      "id": "dev-forumPost-1793222977343-8shss",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:29:37.343Z",
+      "updatedAt": "2026-10-28T21:29:37.343Z"
+    },
+    {
+      "id": "dev-forumPost-1793222977343-eomkc",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:29:37.343Z",
+      "updatedAt": "2026-10-28T21:29:37.343Z"
+    },
+    {
+      "id": "dev-forumPost-1793222978275-lom60",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Excited to connect with fellow graduates on the official ASTU Alumni Platform! Share opportunities and stay in touch. 🚀",
+      "likesCount": 18,
+      "commentsCount": 4,
+      "createdAt": "2026-10-28T21:29:38.275Z",
+      "updatedAt": "2026-10-28T21:29:38.275Z"
+    },
+    {
+      "id": "dev-forumPost-1793222978275-21tqw",
+      "alumniId": "dev-alumni-1787763781926",
+      "content": "Our engineering lab at INSA is hiring Junior & Mid-level AI/ML Engineers. Feel free to apply on the Jobs Board or reach out! 💡",
+      "likesCount": 29,
+      "commentsCount": 11,
+      "createdAt": "2026-10-28T21:29:38.275Z",
+      "updatedAt": "2026-10-28T21:29:38.275Z"
+    }
+  ],
+  "knowledgeDocuments": [
+    {
+      "id": "dev-knowledgeDocument-1792953122004-4gd53",
+      "title": "ASTU Official Registrar Services & Academic Transcript Manual",
+      "category": "Registrar",
+      "description": "Official university policies for requesting transcripts, degree certificates, and medium of instruction letters.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Official Transcript Request Procedures\nAdama Science and Technology University alumni and graduating students can request official academic transcripts through the ASTU-AMS Registrar portal.\n1. Sign in to your verified Alumni account.\n2. Navigate to Document Services -> Request Document.\n3. Select the document type: Official Transcript, Degree Certificate Copy, or English Medium of Instruction Letter.\n4. Provide the delivery destination address or institutional recipient email.\n5. Standard Registrar processing SLA is 24 to 48 business hours.\n6. Track processing status in real time under My Document Requests.\nRegistrar Contact: registrar@astu.edu.et | Campus Block 102",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-10-25T18:32:02.004Z",
+      "updatedAt": "2026-10-25T18:32:02.004Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "dev-knowledgeDocument-1792953122159-2ef5y",
+      "title": "ASTU Graduate Tracer Studies & National MoE Benchmarks",
+      "category": "Tracer Studies",
+      "description": "Institutional outcomes, national MoE alignment, graduate employment rates, and curriculum review surveys.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Wave 3 Graduate Tracer Study Guidelines\nThe ASTU Graduate Tracer Study is a longitudinal survey conducted at 6, 12, and 24 months post-graduation to track graduate employment outcomes.\nKey Institutional Telemetry:\n• Overall ASTU Graduate Employment Rate: 55.0%\n• Electrical & Computer Engineering (ECE) Placement: 75.0%\n• Software Engineering (SWE) Placement: 63.0%\n• Average Starting Salary: ETB 19,185 per month\n• Top Software Engineering Starting Salary: ETB 23,400 per month\n• Average Time to Employment: 16.3 months\nYour responses guide ASTU curriculum updates and ensure HERQA / ETA quality accreditation standards.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-10-25T18:32:02.159Z",
+      "updatedAt": "2026-10-25T18:32:02.159Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "dev-knowledgeDocument-1792953122318-u9njz",
+      "title": "ASTU Career Center, Job Placements & Partner Employers",
+      "category": "Careers & Jobs",
+      "description": "Job search procedures, campus hiring events, and partner employer directory.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Career Center & Verified Employer Vacancies\nASTU-AMS connects graduates with verified corporate and government employers across Ethiopia.\nTop Hiring Employers for ASTU Graduates:\n• Safaricom Ethiopia (Telecommunications & Cloud Infrastructure)\n• Ethio Telecom (Core Network & Mobile Financial Services)\n• Sunshine Construction (Civil Engineering & Project Management)\n• INSA - Information Network Security Administration (Cybersecurity & Defense)\n• Wabi Tena (Healthcare & Software Systems)\nHow to Apply:\n1. Open Career Center / Jobs in your portal.\n2. Filter vacancies by department (CSE, ECE, ME, CE) or employer.\n3. Submit your application directly using your ASTU verified profile.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-10-25T18:32:02.318Z",
+      "updatedAt": "2026-10-25T18:32:02.318Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "dev-knowledgeDocument-1792953122463-c9s8a",
+      "title": "ASTU Academic Engineering Departments & Programs",
+      "category": "Academic Departments",
+      "description": "Core engineering and applied science schools, departments, and skill requirements.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Engineering Programs & Department Directory\nAdama Science and Technology University is a premier STEM institution organized into key engineering departments:\n• Computer Science & Engineering (CSE) and Software Engineering (SWE)\n• Electrical & Computer Engineering (ECE)\n• Mechanical Engineering (ME)\n• Civil Engineering & Architecture (CE)\n• Applied Natural Sciences (Applied Physics, Chemistry, Mathematics)\nCurriculum Focus:\nHands-on laboratory training, senior capstone innovation projects, and mandatory industrial internships with national enterprise partners.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-10-25T18:32:02.463Z",
+      "updatedAt": "2026-10-25T18:32:02.463Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "dev-knowledgeDocument-1792953122581-n7tew",
+      "title": "ASTU Portal Registration & Account Activation Guide",
+      "category": "Admissions & Accounts",
+      "description": "Step-by-step guidance for alumni, students, and employers to create and verify portal accounts.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# How to Register on ASTU-AMS\nAccount Registration Steps:\n1. Click the Register button on the top navigation bar.\n2. Select your user role: Alumni, Student, or Partner Employer.\n3. Enter your full name, student ID number, graduation batch year, and active email address.\n4. Create a secure password.\n5. Verify the one-time code sent to your email to activate your account.\n6. Once verified, complete your career profile and skills portfolio to receive tailored job recommendations.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-10-25T18:32:02.581Z",
+      "updatedAt": "2026-10-25T18:32:02.581Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "dev-knowledgeDocument-1792956763982-7iahf",
+      "title": "sdfgh",
+      "category": "Registrar",
+      "description": "sdfgh",
+      "sourceType": "UPLOAD",
+      "fileName": "ASTU_AMS_RAG_Test_Knowledge_Document.pdf",
+      "mimeType": "application/pdf",
+      "fileSize": 36900,
+      "rawContent": "ASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT\nSYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 1\nASTU Alumni Information\n& Services Guide\nKnowledge Hub ingestion and retrieval test\nVersion 1.0 | Prepared 25 October 2026\nIMPORTANT NOTICE This document contains fictional, synthetic sample content created only to test the ASTU-AMS\ndocument-upload, text-extraction, chunking, search, answer-generation, and citation workflows. It is not an official Adama Science and\nTechnology University (ASTU) publication, does not state real university policies, and must not be presented to alumni as authoritative\nguidance.\n1. Purpose and Test Instructions\nUse this file as a controlled test source for the ASTU-AMS Knowledge Hub. Upload it through the administrative\ninterface, inspect the extracted text and processing status, and—if the application supports review and\npublication—publish it only in a non-production or test environment.\nAfter ingestion, ask the public chatbot the test questions in Section 8. Verify that answers are based on this document,\nthat the chatbot cites the correct document and relevant page or chunk when supported, and that it does not invent\npolicies or contact details.\n2. Document Metadata\nDocument title ASTU Alumni Information and Services Guide\nDocument ID RAG-TEST-ALUMNI-001\nContent type Synthetic general-information guide\nIntended audience ASTU alumni and recent graduates\nOwner (test value) ASTU-AMS Knowledge Hub Test Administrator\nVersion 1.0\nEffective date Test content only; no real effective date\nPublication status For testing; not an official publication\nReview date Before any use beyond a controlled test\n3. About the Alumni Management System\nThe ASTU Alumni Management System (ASTU-AMS) is the name used in this test document for a digital platform\nconcept intended to help alumni maintain profile information, discover alumni activities, and find information about\navailable services. The descriptions in this document are illustrative examples for software testing, not confirmation of\nthe university's actual services.\n3.1 Example capabilities represented in this test\n• Alumni profile: a place where a graduate could maintain contact and career information.\n• Alumni directory: a searchable list of alumni, subject to privacy and access rules.\n• Events and announcements: a place to publish reunions, networking sessions, and notices.\n• Surveys and feedback: forms that may be used to collect alumni feedback.\n• Support and help: guidance on how to find information or submit a question.\n\nASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT\nSYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 2\n4. Example Alumni Profile Workflow\nIn this fictional workflow, an alumnus opens the alumni portal, signs in, reviews their profile, updates permitted fields,\nand saves the changes. The application displays a confirmation when the save succeeds. If a field is invalid, the\ninterface explains what needs to be corrected.\n4.1 Suggested profile fields for this test\n• Full name\n• Graduation year\n• Academic program or department\n• Current professional role\n• Organization or employer (optional)\n• Preferred contact email (private by default)\n• Professional interests (optional)\nPrivacy test note: personal email addresses and phone numbers should not be included in public answers unless the\nplatform's explicit authorization and privacy rules allow it. This test document contains no real alumni personal data.\n5. Example Alumni Event\nASTU Alumni Networking Forum — Sample Event\nEvent type: Professional networking and career discussion\nDate: 15 November 2026 (fictional test date)\nTime: 09:00–12:00 East Africa Time (fictional test schedule)\nVenue: Main Conference Hall (fictional placeholder; not a verified venue)\nAudience: Alumni, recent graduates, and invited university community members\nRegistration: For testing, assume registration is completed through an event page in the portal.\nSample agenda: welcome and introductions; alumni career experiences; small-group networking; questions and\nfeedback. The event details above are fabricated test values and must not be treated as a real ASTU announcement.\n6. Example Support and Request Process\nFor this test scenario, an alumnus who cannot update a profile should first confirm that they are signed in and that\nrequired fields are complete. If the issue continues, the alumnus can use the portal's designated support or\ncontact-request feature, if available. The system should show a request reference when one is generated and should\navoid claiming that a request was submitted unless the backend confirms success.\nThe sample document does not specify a real office email address, telephone number, fee, deadline, or guaranteed\nresponse time. A grounded assistant should say that this document does not provide those details rather than\ninventing them.\n7. Frequently Asked Questions\nWhat is ASTU-AMS in this document?\nIt is the name used for a digital alumni-management platform concept in this synthetic test guide. The document does\nnot verify the production system's actual feature set.\nWhat information might an alumni profile contain?\nThe test example includes full name, graduation year, academic program or department, current role, optional\nemployer, preferred contact email, and optional professional interests.\n\nASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT\nSYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 3\nHow can an alumnus update a profile in the sample workflow?\nSign in, open the profile, edit permitted fields, and save. The interface should confirm success or explain validation\nerrors.\nDoes this document provide an official ASTU Alumni Office email address?\nNo. It contains no verified official email address.\nIs the ASTU Alumni Networking Forum a real confirmed event?\nNo. It is a fictional event included only to test document retrieval.\nWhat should the chatbot do if this document does not answer a question?\nIt should state that the available source does not contain enough information and direct the user to an official, verified\nuniversity channel if one is configured in the application. It should not guess or invent facts.\nDoes this guide establish official university policy?\nNo. It is synthetic test content and must not be treated as policy.\n8. Chatbot Test Questions and Expected Evidence\nUse these prompts after the document is ingested and published in a test environment. The expected answers are\nintentionally constrained to the contents of this file.\nTest type Question to ask Expected grounded behavior\nDirect retrieval What fields are included in the example alumni\nprofile?\nList the profile fields from Section 4.1. Cite this document.\nEvent detail What date and time are listed for the sample Alumni\nNetworking Forum?\nReturn 15 November 2026 and 09:00–12:00 East Africa\nTime, clearly noting that it is fictional test data.\nNegative /\nunsupported fact\nWhat is the official Alumni Office email address? Say that no verified official email address is provided in this\ndocument. Do not invent one.\nGrounding Is the Alumni Networking Forum a confirmed ASTU\nevent?\nSay no; Section 5 explicitly marks it as fictional test content.\nMulti-section\nsynthesis\nHow does the sample workflow suggest an alumnus\nshould update their profile, and what happens if\nvalidation fails?\nExplain sign in → open profile → edit permitted fields → save;\nmention confirmation on success and validation guidance on\nerror.\nScope boundary What are the official fees and deadlines for alumni\nservices?\nSay this document does not specify real fees or deadlines.\nCitation quality What should the assistant do when the knowledge\nsource does not contain an answer?\nSay it should acknowledge insufficient information, use a\nverified official channel if configured, and not guess. Cite\nSection 6 or 7.\n9. Acceptance Checklist\n• The upload accepts the DOCX file and records its title and metadata.\n• Text extraction preserves headings, paragraphs, FAQ questions, and table contents.\n• The ingestion pipeline creates searchable chunks and records processing errors clearly.\n• A reviewer can inspect the content before publication, if review is supported.\n• The public chatbot retrieves relevant sections rather than returning a generic canned response.\n• Answers cite the source document and, where supported, a page, heading, or chunk.\n• Unsupported questions produce an honest abstention rather than fabricated details.\n• Unpublished or restricted documents are not exposed to the public chatbot.\n\nASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT\nSYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 4\n• Logs and error messages do not leak API keys, private data, or internal stack traces.\n10. Test Administrator Notes\nRecommended filename: ASTU_AMS_RAG_Test_Knowledge_Document.docx. Use a clearly labeled test\nenvironment and a test-only collection or category. Do not upload this synthetic document as an official university\npolicy or leave it published in a production knowledge base where alumni could mistake its fictional event details for\nreal information.\nSuggested follow-up: create a second small test document with different fictional facts and ask the chatbot questions\nthat require it to distinguish the two sources. This can help test retrieval ranking, citation selection, and whether the\nsystem accidentally mixes unrelated content.",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "uploadedBy": "alumnioffice@astu.edu.et",
+      "uploaderId": "user-cms-1",
+      "createdAt": "2026-10-25T19:32:43.982Z",
+      "updatedAt": "2026-10-25T19:32:43.982Z",
+      "chunkCount": 4
+    }
+  ],
+  "knowledgeChunks": [
+    {
+      "id": "dev-knowledgeChunk-1792953122072-4muk4",
+      "documentId": "dev-knowledgeDocument-1792953122004-4gd53",
+      "chunkIndex": 0,
+      "title": "ASTU Official Registrar Services & Academic Transcript Manual",
+      "section": "Official Transcript Request Procedures",
+      "content": "# Official Transcript Request Procedures Adama Science and Technology University alumni and graduating students can request official academic transcripts through the ASTU-AMS Registrar portal. 1. Sign in to your verified Alumni account. 2. Navigate to Document Services -> Request Document. 3. Select the document type: Official Transcript, Degree Certificate Copy, or English Medium of Instruction Letter. 4. Provide the delivery destination address or institutional recipient email. 5. Standard Registrar processing SLA is 24 to 48 business hours. 6. Track processing status in real time under My Document Requests. Registrar Contact: registrar@astu.edu.et | Campus Block 102",
+      "tokenCount": 95,
+      "embedding": [],
+      "createdAt": "2026-10-25T18:32:02.072Z",
+      "updatedAt": "2026-10-25T18:32:02.072Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792953122221-r0ri3",
+      "documentId": "dev-knowledgeDocument-1792953122159-2ef5y",
+      "chunkIndex": 0,
+      "title": "ASTU Graduate Tracer Studies & National MoE Benchmarks",
+      "section": "Wave 3 Graduate Tracer Study Guidelines",
+      "content": "# Wave 3 Graduate Tracer Study Guidelines The ASTU Graduate Tracer Study is a longitudinal survey conducted at 6, 12, and 24 months post-graduation to track graduate employment outcomes. Key Institutional Telemetry: • Overall ASTU Graduate Employment Rate: 55.0% • Electrical & Computer Engineering (ECE) Placement: 75.0% • Software Engineering (SWE) Placement: 63.0% • Average Starting Salary: ETB 19,185 per month • Top Software Engineering Starting Salary: ETB 23,400 per month • Average Time to Employment: 16.3 months Your responses guide ASTU curriculum updates and ensure HERQA / ETA quality accreditation standards.",
+      "tokenCount": 92,
+      "embedding": [],
+      "createdAt": "2026-10-25T18:32:02.221Z",
+      "updatedAt": "2026-10-25T18:32:02.221Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792953122379-6fwtu",
+      "documentId": "dev-knowledgeDocument-1792953122318-u9njz",
+      "chunkIndex": 0,
+      "title": "ASTU Career Center, Job Placements & Partner Employers",
+      "section": "Career Center & Verified Employer Vacancies",
+      "content": "# Career Center & Verified Employer Vacancies ASTU-AMS connects graduates with verified corporate and government employers across Ethiopia. Top Hiring Employers for ASTU Graduates: • Safaricom Ethiopia (Telecommunications & Cloud Infrastructure) • Ethio Telecom (Core Network & Mobile Financial Services) • Sunshine Construction (Civil Engineering & Project Management) • INSA - Information Network Security Administration (Cybersecurity & Defense) • Wabi Tena (Healthcare & Software Systems) How to Apply: 1. Open Career Center / Jobs in your portal. 2. Filter vacancies by department (CSE, ECE, ME, CE) or employer. 3. Submit your application directly using your ASTU verified profile.",
+      "tokenCount": 98,
+      "embedding": [],
+      "createdAt": "2026-10-25T18:32:02.379Z",
+      "updatedAt": "2026-10-25T18:32:02.379Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792953122493-8lwe1",
+      "documentId": "dev-knowledgeDocument-1792953122463-c9s8a",
+      "chunkIndex": 0,
+      "title": "ASTU Academic Engineering Departments & Programs",
+      "section": "Engineering Programs & Department Directory",
+      "content": "# Engineering Programs & Department Directory Adama Science and Technology University is a premier STEM institution organized into key engineering departments: • Computer Science & Engineering (CSE) and Software Engineering (SWE) • Electrical & Computer Engineering (ECE) • Mechanical Engineering (ME) • Civil Engineering & Architecture (CE) • Applied Natural Sciences (Applied Physics, Chemistry, Mathematics) Curriculum Focus: Hands-on laboratory training, senior capstone innovation projects, and mandatory industrial internships with national enterprise partners.",
+      "tokenCount": 72,
+      "embedding": [],
+      "createdAt": "2026-10-25T18:32:02.493Z",
+      "updatedAt": "2026-10-25T18:32:02.493Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792953122640-4bw1k",
+      "documentId": "dev-knowledgeDocument-1792953122581-n7tew",
+      "chunkIndex": 0,
+      "title": "ASTU Portal Registration & Account Activation Guide",
+      "section": "How to Register on ASTU-AMS",
+      "content": "# How to Register on ASTU-AMS Account Registration Steps: 1. Click the Register button on the top navigation bar. 2. Select your user role: Alumni, Student, or Partner Employer. 3. Enter your full name, student ID number, graduation batch year, and active email address. 4. Create a secure password. 5. Verify the one-time code sent to your email to activate your account. 6. Once verified, complete your career profile and skills portfolio to receive tailored job recommendations.",
+      "tokenCount": 77,
+      "embedding": [],
+      "createdAt": "2026-10-25T18:32:02.640Z",
+      "updatedAt": "2026-10-25T18:32:02.640Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792956764066-r37wf",
+      "documentId": "dev-knowledgeDocument-1792956763982-7iahf",
+      "chunkIndex": 0,
+      "title": "sdfgh",
+      "section": "General Overview",
+      "pageNumber": 1,
+      "content": "ASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT SYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 1 ASTU Alumni Information & Services Guide Knowledge Hub ingestion and retrieval test Version 1.0 | Prepared 25 October 2026 IMPORTANT NOTICE This document contains fictional, synthetic sample content created only to test the ASTU-AMS document-upload, text-extraction, chunking, search, answer-generation, and citation workflows. It is not an official Adama Science and Technology University (ASTU) publication, does not state real university policies, and must not be presented to alumni as authoritative guidance. 1. Purpose and Test Instructions Use this file as a controlled test source for the ASTU-AMS Knowledge Hub. Upload it through the administrative interface, inspect the extracted text and processing status, and—if the application supports review and publication—publish it only in a non-production or test environment. After ingestion, ask the public chatbot the test questions in Section 8. Verify that answers are based on this document, that the chatbot cites the correct document and relevant page or chunk when supported, and that it does not invent policies or contact details. 2. Document Metadata Document title ASTU Alumni Information and Services Guide Document ID RAG-TEST-ALUMNI-001 Content type Synthetic general-information guide Intended audience ASTU alumni and recent graduates Owner (test value) ASTU-AMS Knowledge Hub Test Administrator Version 1.0 Effective date Test content only; no real effective date Publication status For testing; not an official publication Review date Before any use beyond a controlled test 3. About the Alumni Management System The ASTU Alumni Management System (ASTU-AMS) is the name used in this test document for a digital platform concept intended to help alumni maintain profile information, discover alumni activities, and find information about available services. The descriptions in this document are illustrative examples for software testing, not confirmation of the university's actual services. 3.1 Example capabilities represented in this test • Alumni profile: a place where a graduate could maintain contact and career information. • Alumni directory: a searchable list of alumni, subject to privacy and access rules. • Events and announcements: a place to publish reunions, networking sessions, and notices. • Surveys and feedback: forms that may be used to collect alumni feedback. • Support and help: guidance on how to find information or submit a question.",
+      "tokenCount": 374,
+      "embedding": [],
+      "createdAt": "2026-10-25T19:32:44.066Z",
+      "updatedAt": "2026-10-25T19:32:44.066Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792956764147-8kvau",
+      "documentId": "dev-knowledgeDocument-1792956763982-7iahf",
+      "chunkIndex": 1,
+      "title": "sdfgh",
+      "section": "General Overview",
+      "pageNumber": 1,
+      "content": "• Events and announcements: a place to publish reunions, networking sessions, and notices. • Surveys and feedback: forms that may be used to collect alumni feedback. • Support and help: guidance on how to find information or submit a question. ASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT SYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 2 4. Example Alumni Profile Workflow In this fictional workflow, an alumnus opens the alumni portal, signs in, reviews their profile, updates permitted fields, and saves the changes. The application displays a confirmation when the save succeeds. If a field is invalid, the interface explains what needs to be corrected. 4.1 Suggested profile fields for this test • Full name • Graduation year • Academic program or department • Current professional role • Organization or employer (optional) • Preferred contact email (private by default) • Professional interests (optional) Privacy test note: personal email addresses and phone numbers should not be included in public answers unless the platform's explicit authorization and privacy rules allow it. This test document contains no real alumni personal data. 5. Example Alumni Event ASTU Alumni Networking Forum — Sample Event Event type: Professional networking and career discussion Date: 15 November 2026 (fictional test date) Time: 09:00–12:00 East Africa Time (fictional test schedule) Venue: Main Conference Hall (fictional placeholder; not a verified venue) Audience: Alumni, recent graduates, and invited university community members Registration: For testing, assume registration is completed through an event page in the portal. Sample agenda: welcome and introductions; alumni career experiences; small-group networking; questions and feedback. The event details above are fabricated test values and must not be treated as a real ASTU announcement. 6. Example Support and Request Process For this test scenario, an alumnus who cannot update a profile should first confirm that they are signed in and that required fields are complete. If the issue continues, the alumnus can use the portal's designated support or contact-request feature, if available. The system should show a request reference when one is generated and should avoid claiming that a request was submitted unless the backend confirms success. The sample document does not specify a real office email address, telephone number, fee, deadline, or guaranteed response time. A grounded assistant should say that this document does not provide those details rather than inventing them. 7. Frequently Asked Questions What is ASTU-AMS in this document? It is the name used for a digital alumni-management platform concept in this synthetic test guide. The document does not verify the production system's actual feature set. What information might an alumni profile contain? The test example includes full name, graduation year, academic program or department, current role, optional employer, preferred contact email, and optional professional interests.",
+      "tokenCount": 453,
+      "embedding": [],
+      "createdAt": "2026-10-25T19:32:44.147Z",
+      "updatedAt": "2026-10-25T19:32:44.147Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792956764231-if4it",
+      "documentId": "dev-knowledgeDocument-1792956763982-7iahf",
+      "chunkIndex": 2,
+      "title": "sdfgh",
+      "section": "General Overview",
+      "pageNumber": 2,
+      "content": "document does not verify the production system's actual feature set. What information might an alumni profile contain? The test example includes full name, graduation year, academic program or department, current role, optional employer, preferred contact email, and optional professional interests. ASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT SYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 3 How can an alumnus update a profile in the sample workflow? Sign in, open the profile, edit permitted fields, and save. The interface should confirm success or explain validation errors. Does this document provide an official ASTU Alumni Office email address? No. It contains no verified official email address. Is the ASTU Alumni Networking Forum a real confirmed event? No. It is a fictional event included only to test document retrieval. What should the chatbot do if this document does not answer a question? It should state that the available source does not contain enough information and direct the user to an official, verified university channel if one is configured in the application. It should not guess or invent facts. Does this guide establish official university policy? No. It is synthetic test content and must not be treated as policy. 8. Chatbot Test Questions and Expected Evidence Use these prompts after the document is ingested and published in a test environment. The expected answers are intentionally constrained to the contents of this file. Test type Question to ask Expected grounded behavior Direct retrieval What fields are included in the example alumni profile? List the profile fields from Section 4.1. Cite this document. Event detail What date and time are listed for the sample Alumni Networking Forum? Return 15 November 2026 and 09:00–12:00 East Africa Time, clearly noting that it is fictional test data. Negative / unsupported fact What is the official Alumni Office email address? Say that no verified official email address is provided in this document. Do not invent one. Grounding Is the Alumni Networking Forum a confirmed ASTU event? Say no; Section 5 explicitly marks it as fictional test content. Multi-section synthesis How does the sample workflow suggest an alumnus should update their profile, and what happens if validation fails? Explain sign in → open profile → edit permitted fields → save; mention confirmation on success and validation guidance on error. Scope boundary What are the official fees and deadlines for alumni services? Say this document does not specify real fees or deadlines. Citation quality What should the assistant do when the knowledge source does not contain an answer? Say it should acknowledge insufficient information, use a verified official channel if configured, and not guess. Cite Section 6 or 7. 9. Acceptance Checklist • The upload accepts the DOCX file and records its title and metadata. • Text extraction preserves headings, paragraphs, FAQ questions, and table contents. • The ingestion pipeline creates searchable chunks and records processing errors clearly. • A reviewer can inspect the content before publication, if review is supported. • The public chatbot retrieves relevant sections rather than returning a generic canned response. • Answers cite the source document and, where supported, a page, heading, or chunk. • Unsupported questions produce an honest abstention rather than fabricated details. • Unpublished or restricted documents are not exposed to the public chatbot.",
+      "tokenCount": 543,
+      "embedding": [],
+      "createdAt": "2026-10-25T19:32:44.231Z",
+      "updatedAt": "2026-10-25T19:32:44.231Z"
+    },
+    {
+      "id": "dev-knowledgeChunk-1792956764343-s40kd",
+      "documentId": "dev-knowledgeDocument-1792956763982-7iahf",
+      "chunkIndex": 3,
+      "title": "sdfgh",
+      "section": "General Overview",
+      "pageNumber": 2,
+      "content": "generic canned response. • Answers cite the source document and, where supported, a page, heading, or chunk. • Unsupported questions produce an honest abstention rather than fabricated details. • Unpublished or restricted documents are not exposed to the public chatbot. ASTU-AMS | RAG KNOWLEDGE-HUB TEST DOCUMENT SYNTHETIC TEST CONTENT — NOT AN OFFICIAL ASTU POLICY • Page 4 • Logs and error messages do not leak API keys, private data, or internal stack traces. 10. Test Administrator Notes Recommended filename: ASTU_AMS_RAG_Test_Knowledge_Document.docx. Use a clearly labeled test environment and a test-only collection or category. Do not upload this synthetic document as an official university policy or leave it published in a production knowledge base where alumni could mistake its fictional event details for real information. Suggested follow-up: create a second small test document with different fictional facts and ask the chatbot questions that require it to distinguish the two sources. This can help test retrieval ranking, citation selection, and whether the system accidentally mixes unrelated content.",
+      "tokenCount": 165,
+      "embedding": [],
+      "createdAt": "2026-10-25T19:32:44.343Z",
+      "updatedAt": "2026-10-25T19:32:44.343Z"
+    }
+  ],
+  "donationCampaigns": [
+    {
+      "id": "dev-donationCampaign-1792953295053-xyb6h",
+      "title": "ASTU Scholarship Fund 2026",
+      "category": "Scholarship",
+      "description": "Support underprivileged engineering and technology students with full tuition, academic supplies, and campus living grants.",
+      "goal": 5000000,
+      "raised": 1851000,
+      "donorCount": 349,
+      "status": "ACTIVE",
+      "createdAt": "2026-10-25T18:34:55.053Z",
+      "updatedAt": "2026-10-25T18:34:55.053Z"
+    },
+    {
+      "id": "dev-donationCampaign-1792953295053-5w6v1",
+      "title": "AI Research Lab Equipment",
+      "category": "Research",
+      "description": "Fund high-performance GPU servers and laboratory instrumentation for advanced postgraduate engineering researchers.",
+      "goal": 8000000,
+      "raised": 3201000,
+      "donorCount": 158,
+      "status": "ACTIVE",
+      "createdAt": "2026-10-25T18:34:55.053Z",
+      "updatedAt": "2026-10-25T18:34:55.053Z"
+    },
+    {
+      "id": "dev-donationCampaign-1792953295053-ooujy",
+      "title": "Campus Innovation Makerspace",
+      "category": "Infrastructure",
+      "description": "Build a state-of-the-art student incubator, rapid prototyping center, and robotics testing laboratory on main campus.",
+      "goal": 12000000,
+      "raised": 6800000,
+      "donorCount": 220,
+      "status": "ACTIVE",
+      "createdAt": "2026-10-25T18:34:55.053Z",
+      "updatedAt": "2026-10-25T18:34:55.053Z"
+    }
+  ],
+  "supportTickets": [
+    {
+      "id": "dev-supportTicket-1792953643007-vwmh9",
+      "category": "auth_verification",
+      "studentId": "UGR/37898/17",
+      "fullName": "Mr Dereje Benti",
+      "graduationYear": "2021",
+      "contactEmail": "kenoderejeb@gmail.com",
+      "phone": "+251911445566",
+      "message": "I encountered an issue during verification on route /alumni/verify. OTP email was delayed by 15 minutes.",
+      "status": "OPEN",
+      "route": "/alumni/verify",
+      "lastErrorCode": "OTP_DELAYED",
+      "sessionId": "sess-889912",
+      "createdAt": "2026-10-25T18:40:43.007Z",
+      "updatedAt": "2026-10-25T18:40:43.007Z"
+    },
+    {
+      "id": "dev-supportTicket-1792953643007-pytt9",
+      "category": "didit_verification",
+      "studentId": "UGR/37898/14",
+      "fullName": "Mr Dereje Benti",
+      "graduationYear": "2018",
+      "contactEmail": "kenoderejeb@gmail.com",
+      "phone": "+251911445566",
+      "message": "National Fayda ID Didit QR verification scan failed with error code DIDIT_TIMEOUT.",
+      "status": "OPEN",
+      "route": "/alumni/didit",
+      "lastErrorCode": "DIDIT_TIMEOUT",
+      "sessionId": "sess-889914",
+      "createdAt": "2026-10-25T18:40:43.007Z",
+      "updatedAt": "2026-10-25T18:40:43.007Z"
+    },
+    {
+      "id": "dev-supportTicket-1792953643007-ja6va",
+      "category": "missing_record",
+      "studentId": "ASTU/1024/18",
+      "fullName": "Abebe Kebede",
+      "graduationYear": "2018",
+      "contactEmail": "abebe.kebede@astu.edu.et",
+      "phone": "+251911200101",
+      "message": "My degree transcript distinction says Great Distinction instead of First Class Distinction in SIS record.",
+      "status": "IN_PROGRESS",
+      "route": "/alumni/profile",
+      "lastErrorCode": "NONE",
+      "sessionId": "sess-772210",
+      "createdAt": "2026-10-25T18:40:43.007Z",
+      "updatedAt": "2026-10-25T18:40:43.007Z"
+    }
+  ],
+  "systemSettings": [
+    {
+      "id": "dev-systemSetting-1793216475056",
+      "key": "portal_menu_controls",
+      "value": [
+        {
+          "key": "ALUMNI:dashboard",
+          "id": "dashboard",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Dashboard Overview",
+          "category": "Recruiting & Career",
+          "icon": "dashboard",
+          "description": "Personalized graduate dashboard summary, KPIs, profile readiness score, and fast metrics.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:management",
+          "id": "management",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Management Hub",
+          "category": "Recruiting & Career",
+          "icon": "dashboard_customize",
+          "description": "Central portal hub for graduate services, ID issuance, CV builder, and alumni badges.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:jobs",
+          "id": "jobs",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Jobs Board",
+          "category": "Recruiting & Career",
+          "icon": "work",
+          "description": "Verified job openings, direct applications, salary bands, and employer outreach.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:career",
+          "id": "career",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Career Center",
+          "category": "Recruiting & Career",
+          "icon": "school",
+          "description": "Career workshops, networking events, mock interviews, and skill-building cohorts.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:surveys",
+          "id": "surveys",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Tracer Surveys",
+          "category": "Recruiting & Career",
+          "icon": "assignment",
+          "description": "Official national & institutional longitudinal tracer study feedback surveys.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:tools",
+          "id": "tools",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Alumni Tools",
+          "category": "Recruiting & Career",
+          "icon": "construction",
+          "description": "Career calculators, resume scanner, and transition tools.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:profile",
+          "id": "profile",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Graduate Profile",
+          "category": "Community & Network",
+          "icon": "account_circle",
+          "description": "Graduate identity, education history, portfolio, skills, and certifications.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:mentorship",
+          "id": "mentorship",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Mentorship Program",
+          "category": "Community & Network",
+          "icon": "diversity_3",
+          "description": "Connect senior industry mentors with recent graduates for career guidance.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:directory",
+          "id": "directory",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Alumni Directory",
+          "category": "Community & Network",
+          "icon": "travel_explore",
+          "description": "Search and connect with fellow ASTU alumni by year, discipline, and industry.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:forum",
+          "id": "forum",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Community Network",
+          "category": "Community & Network",
+          "icon": "group",
+          "description": "Peer forum, questions, professional discussions, and community posts.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:donations",
+          "id": "donations",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Giving & Donations",
+          "category": "Community & Network",
+          "icon": "volunteer_activism",
+          "description": "Endowment funds, campus infrastructure campaigns, and alumni contributions.",
+          "enabled": false,
+          "closedNotice": "fghjklpoi",
+          "closedAt": "2026-10-28T21:29:07.712Z",
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:documents",
+          "id": "documents",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Document Services",
+          "category": "Services & Support",
+          "icon": "description",
+          "description": "Request official transcripts, degree verifications, and graduation certificates.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:messages",
+          "id": "messages",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Messages Hub",
+          "category": "Services & Support",
+          "icon": "forum",
+          "description": "Direct messaging between alumni, employers, department heads, and officers.",
+          "enabled": false,
+          "closedAt": "2026-10-28T21:29:17.153Z",
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ALUMNI:settings",
+          "id": "settings",
+          "actor": "ALUMNI",
+          "actorLabel": "Alumni Portal",
+          "label": "Settings & Privacy",
+          "category": "Services & Support",
+          "icon": "settings",
+          "description": "Communication preferences, security controls, and notification settings.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:dashboard",
+          "id": "dashboard",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Recruitment Dashboard",
+          "category": "Recruiting",
+          "icon": "dashboard",
+          "description": "Overview of company hiring pipeline, applications, applicant velocity, and talent stats.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:management",
+          "id": "management",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Management Hub",
+          "category": "Recruiting",
+          "icon": "dashboard_customize",
+          "description": "Full overview of job scaffolders, interview schedules, and university relations.",
+          "enabled": false,
+          "closedNotice": "Service under administrative review by the ASTU Alumni Relations Directorate.",
+          "closedAt": "2026-10-28T21:35:18.067Z",
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:post_job",
+          "id": "post_job",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Job Scaffolder / Post Job",
+          "category": "Recruiting",
+          "icon": "work",
+          "description": "Create and publish employment openings, internships, and graduate trainee positions.",
+          "enabled": false,
+          "closedNotice": "dfghjkl",
+          "closedAt": "2026-10-28T21:35:36.346Z",
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:candidates",
+          "id": "candidates",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Applications & Candidates",
+          "category": "Recruiting",
+          "icon": "description",
+          "description": "Review applicant resumes, shortlist candidates, and manage interview invitations.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:search_talent",
+          "id": "search_talent",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Talent Search",
+          "category": "Recruiting",
+          "icon": "search",
+          "description": "Search verified graduate roster by skills, department, graduation year, and GPA.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:feedback",
+          "id": "feedback",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Graduate Feedback Audits",
+          "category": "Management & Feedback",
+          "icon": "rate_review",
+          "description": "Submit employer satisfaction surveys regarding ASTU graduate workplace performance.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:chat",
+          "id": "chat",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Messaging Hub",
+          "category": "Management & Feedback",
+          "icon": "forum",
+          "description": "Chat directly with applicants and the ASTU Corporate Placement Officer.",
+          "enabled": false,
+          "closedNotice": "Scheduled system maintenance and platform updates in progress.   6tytrr",
+          "closedAt": "2026-10-28T21:35:45.456Z",
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:analytics",
+          "id": "analytics",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Recruitment Analytics",
+          "category": "Management & Feedback",
+          "icon": "analytics",
+          "description": "Hiring funnel metrics, applicant conversion rates, and department placement trends.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "EMPLOYER:profile",
+          "id": "profile",
+          "actor": "EMPLOYER",
+          "actorLabel": "Employer Portal",
+          "label": "Company Profile",
+          "category": "Management & Feedback",
+          "icon": "business",
+          "description": "Company corporate branding, tax identification, partner badge, and HR contacts.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:dashboard",
+          "id": "dashboard",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Registrar Dashboard",
+          "category": "Registrar Core",
+          "icon": "dashboard",
+          "description": "Registrar operational cockpit, pending verifications, sync logs, and student status.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:management",
+          "id": "management",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Management Hub",
+          "category": "Registrar Core",
+          "icon": "dashboard_customize",
+          "description": "Batch clearance, diploma validation, graduation registry, and degree certification.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:records",
+          "id": "records",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Alumni Records Archive",
+          "category": "Registrar Core",
+          "icon": "people",
+          "description": "Official master registry of verified graduates and historical student dossiers.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:data_integration",
+          "id": "data_integration",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Batch Import & SIS Sync",
+          "category": "Registrar Core",
+          "icon": "cloud_upload",
+          "description": "Batch CSV/Excel ingestion and real-time ASTU ERP database synchronization.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:verification",
+          "id": "verification",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Verifications Queue",
+          "category": "Verification Queue",
+          "icon": "verified_user",
+          "description": "Authenticate graduate degrees, Fayda national ID matching, and diploma checks.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:documents",
+          "id": "documents",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Document Queue",
+          "category": "Verification Queue",
+          "icon": "description",
+          "description": "Process official transcript requests, letters of recommendation, and degree copies.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:data_issues",
+          "id": "data_issues",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Data Corrections",
+          "category": "Verification Queue",
+          "icon": "report_problem",
+          "description": "Review and approve name spelling, birth date, and degree credential change requests.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:surveys",
+          "id": "surveys",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Tracer Survey Tracking",
+          "category": "Tracer & Reports",
+          "icon": "assignment",
+          "description": "Monitor graduate participation rates in institutional tracer cohorts.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:reporting",
+          "id": "reporting",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Reports & Export",
+          "category": "Tracer & Reports",
+          "icon": "analytics",
+          "description": "Generate Ministry of Education and ETA accreditation compliance exports.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:bulletins",
+          "id": "bulletins",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Announcements & Events",
+          "category": "Communication",
+          "icon": "campaign",
+          "description": "Publish registrar notices, graduation bulletins, and ceremony deadlines.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "REGISTRAR:messages",
+          "id": "messages",
+          "actor": "REGISTRAR",
+          "actorLabel": "Registrar Portal",
+          "label": "Messages Hub",
+          "category": "Communication",
+          "icon": "forum",
+          "description": "Registrar communications with students, alumni, and departmental offices.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:dashboard",
+          "id": "dashboard",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Department Dashboard",
+          "category": "Department Core",
+          "icon": "dashboard",
+          "description": "Departmental executive overview, graduate outcomes, and academic performance.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:messages",
+          "id": "messages",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Department Messages",
+          "category": "Department Core",
+          "icon": "chat",
+          "description": "Direct communication with departmental graduates, faculty, and alumni office.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:management",
+          "id": "management",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Management Hub",
+          "category": "Department Core",
+          "icon": "dashboard_customize",
+          "description": "Manage departmental alumni affairs, advisory councils, and employer relations.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:employment-analytics",
+          "id": "employment-analytics",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Employment Analytics",
+          "category": "Department Core",
+          "icon": "trending_up",
+          "description": "Graduate employment rates, time-to-first-job, industry placement, and career tracks.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:department-surveys",
+          "id": "department-surveys",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Department Surveys",
+          "category": "Analytics & Surveys",
+          "icon": "edit_note",
+          "description": "Create custom departmental surveys for alumni curriculum evaluation.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:skill-gap",
+          "id": "skill-gap",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Skill Gap Reports",
+          "category": "Analytics & Surveys",
+          "icon": "school",
+          "description": "Identify technical and soft-skill deficiencies reported by hiring industries.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:employer-feedback",
+          "id": "employer-feedback",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Employer Feedback",
+          "category": "Analytics & Surveys",
+          "icon": "rate_review",
+          "description": "Review corporate evaluations of departmental graduates to refine course syllabus.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:tracer-reports",
+          "id": "tracer-reports",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Tracer Reports",
+          "category": "Reports & Audit",
+          "icon": "assignment",
+          "description": "Departmental tracer study reports filtered by graduating cohort and degree program.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:curriculum",
+          "id": "curriculum",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Curriculum Insights",
+          "category": "Reports & Audit",
+          "icon": "menu_book",
+          "description": "Actionable data recommendations for updating course modules and laboratory training.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:accreditation",
+          "id": "accreditation",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Accreditation Reports",
+          "category": "Reports & Audit",
+          "icon": "verified",
+          "description": "Generate ETA, ABET, and Higher Education Authority accreditation evidence dossiers.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "DEPARTMENT_HEAD:export",
+          "id": "export",
+          "actor": "DEPARTMENT_HEAD",
+          "actorLabel": "Department Portal",
+          "label": "Export Reports",
+          "category": "Reports & Audit",
+          "icon": "download",
+          "description": "Export raw datasets, Excel synthesis, and high-resolution audit graphs.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:dashboard",
+          "id": "dashboard",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Dashboard Overview",
+          "category": "System Core",
+          "icon": "dashboard",
+          "description": "System administrator command center, key university KPIs, and user metrics.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:messages",
+          "id": "messages",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Messages Hub",
+          "category": "System Core",
+          "icon": "forum",
+          "description": "Direct institutional messaging, stakeholder broadcasts, and cross-office communication.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:support-tickets",
+          "id": "support-tickets",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Support Desk",
+          "category": "Administration",
+          "icon": "support_agent",
+          "description": "User inquiry tracking, issue resolution tickets, and technical help desk queue.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:modules",
+          "id": "modules",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Super Admin Modules",
+          "category": "Administration",
+          "icon": "shield",
+          "description": "Advanced super-admin feature flag modules, system extensions, and core toggles.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:knowledge-hub",
+          "id": "knowledge-hub",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "RAG Knowledge Hub",
+          "category": "Administration",
+          "icon": "auto_awesome",
+          "description": "Institutional knowledge embeddings, document ingestion, and AI Chatbot knowledge base.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:reports",
+          "id": "reports",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Reports Center",
+          "category": "Administration",
+          "icon": "analytics",
+          "description": "Generate institutional reports, analytics dossiers, and government compliance exports.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:users",
+          "id": "users",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "User Management",
+          "category": "Administration",
+          "icon": "manage_accounts",
+          "description": "Manage registered alumni, employers, staff, verification status, and credentials.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:roles",
+          "id": "roles",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Role Management",
+          "category": "Administration",
+          "icon": "admin_panel_settings",
+          "description": "Role-based access control (RBAC), security groups, and granular permissions.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:analytics",
+          "id": "analytics",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Platform Analytics",
+          "category": "Administration",
+          "icon": "monitoring",
+          "description": "System traffic, registration velocity, survey completion, and engagement analytics.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:surveys",
+          "id": "surveys",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Survey Management",
+          "category": "Administration",
+          "icon": "assignment",
+          "description": "Survey builder, cohort distribution, question bank, and longitudinal tracer studies.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:jobs",
+          "id": "jobs",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Jobs Management",
+          "category": "Administration",
+          "icon": "work",
+          "description": "Approve employer job listings, manage corporate partners, and audit postings.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:departments",
+          "id": "departments",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Departments",
+          "category": "Administration",
+          "icon": "school",
+          "description": "Manage academic departments, schools, programs, and departmental head assignments.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:donations",
+          "id": "donations",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Donations & Giving",
+          "category": "Administration",
+          "icon": "volunteer_activism",
+          "description": "University endowment campaigns, Telebirr/Chapa payment gateways, and donor ledger.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:notifications",
+          "id": "notifications",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "System Notifications",
+          "category": "Configuration",
+          "icon": "notifications",
+          "description": "Broadcast notifications, automated email triggers, and system alert configuration.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:logs",
+          "id": "logs",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "System Logs",
+          "category": "Configuration",
+          "icon": "receipt_long",
+          "description": "Security audit trail, authentication logs, database events, and change history.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:backup",
+          "id": "backup",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "Backup & Security",
+          "category": "Configuration",
+          "icon": "security",
+          "description": "Database snapshot archives, 2FA policies, IP whitelists, and encryption keys.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        },
+        {
+          "key": "ADMIN:settings",
+          "id": "settings",
+          "actor": "ADMIN",
+          "actorLabel": "Admin Portal",
+          "label": "System Settings",
+          "category": "Configuration",
+          "icon": "settings",
+          "description": "Global university branding, SMTP mail servers, API credentials, and portal config.",
+          "enabled": true,
+          "closedAt": null,
+          "closedBy": "alumnioffice@astu.edu.et"
+        }
+      ],
+      "createdAt": "2026-10-28T19:41:15.056Z",
+      "updatedAt": "2026-10-28T19:41:15.056Z"
+    }
+  ],
+  "mentorProfiles": [
+    {
+      "id": "dev-mentorProfile-1793221262003",
+      "alumniId": "dev-alumni-1787763781926",
+      "expertise": [
+        "System Architecture",
+        "AI/ML Research",
+        "Career Transition",
+        "Full-Stack Web"
+      ],
+      "availability": "Available 2h/week",
+      "yearsExperience": 5,
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-28T21:01:02.003Z",
+      "updatedAt": "2026-10-28T21:01:02.003Z"
+    },
+    {
+      "id": "dev-mentorProfile-1793221262083",
+      "alumniId": "dev-alumni-1787763782058",
+      "expertise": [
+        "System Architecture",
+        "AI/ML Research",
+        "Career Transition",
+        "Full-Stack Web"
+      ],
+      "availability": "Available 2h/week",
+      "yearsExperience": 5,
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-28T21:01:02.083Z",
+      "updatedAt": "2026-10-28T21:01:02.083Z"
+    },
+    {
+      "id": "dev-mentorProfile-1793221262156",
+      "alumniId": "dev-alumni-1787765356770",
+      "expertise": [
+        "System Architecture",
+        "AI/ML Research",
+        "Career Transition",
+        "Full-Stack Web"
+      ],
+      "availability": "Available 2h/week",
+      "yearsExperience": 5,
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-28T21:01:02.156Z",
+      "updatedAt": "2026-10-28T21:01:02.156Z"
+    },
+    {
+      "id": "dev-mentorProfile-1793221262238",
+      "alumniId": "dev-alumni-12345",
+      "expertise": [
+        "System Architecture",
+        "AI/ML Research",
+        "Career Transition",
+        "Full-Stack Web"
+      ],
+      "availability": "Available 2h/week",
+      "yearsExperience": 5,
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-28T21:01:02.239Z",
+      "updatedAt": "2026-10-28T21:01:02.239Z"
+    }
+  ]
 }
