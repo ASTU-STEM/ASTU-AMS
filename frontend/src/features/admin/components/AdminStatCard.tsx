@@ -35,7 +35,7 @@ export default function AdminStatCard({
     trendDirection === 'down'
       ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-[#3B1A22] dark:text-[#F87171] dark:border-[#F87171]/30'
       : trendDirection === 'flat'
-        ? 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-[#1B2636] dark:text-[#B0BDCE] dark:border-[#2A3749]'
+        ? 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-[var(--bg-card-secondary)] dark:text-[var(--text-secondary)] dark:border-[var(--border-color)]'
         : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-[#163828] dark:text-[#22C55E] dark:border-[#22C55E]/30';
 
   const interactive = Boolean(onClick || to);
@@ -48,11 +48,11 @@ export default function AdminStatCard({
     <>
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1.5 min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-[#8493A8]">{heading}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-[var(--text-muted)]">{heading}</p>
           {loading ? (
-            <div className="h-8 w-20 animate-pulse rounded-md bg-slate-200 dark:bg-[#1B2636]" />
+            <div className="h-8 w-20 animate-pulse rounded-md bg-slate-200 dark:bg-[var(--bg-card-secondary)]" />
           ) : (
-            <p className={`${valueSize} font-bold tracking-tight text-slate-900 dark:text-[#F1F5F9] truncate`}>{value}</p>
+            <p className={`${valueSize} font-bold tracking-tight text-slate-900 dark:text-[var(--text-primary)] truncate`}>{value}</p>
           )}
         </div>
         <div
@@ -70,10 +70,10 @@ export default function AdminStatCard({
             </span>
           )}
           {supportText && !trendText && (
-            <p className="text-[11px] font-medium text-slate-500 dark:text-[#8493A8]">{supportText}</p>
+            <p className="text-[11px] font-medium text-slate-500 dark:text-[var(--text-muted)]">{supportText}</p>
           )}
           {supportText && trendText && (
-            <p className="text-[11px] font-medium text-slate-500 dark:text-[#8493A8]">{supportText}</p>
+            <p className="text-[11px] font-medium text-slate-500 dark:text-[var(--text-muted)]">{supportText}</p>
           )}
         </div>
       )}
@@ -81,7 +81,7 @@ export default function AdminStatCard({
   );
 
   const baseClass = [
-    'group rounded-xl border border-slate-200 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] shadow-sm transition-all duration-200',
+    'group rounded-xl border border-slate-200 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] shadow-sm transition-all duration-200',
     padding,
     interactive ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:border-[#003580]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#003580]/30' : 'hover:-translate-y-0.5 hover:shadow-md',
     className,

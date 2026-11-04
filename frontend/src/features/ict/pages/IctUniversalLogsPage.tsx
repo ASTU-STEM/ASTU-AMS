@@ -1,469 +1,279 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import {
-  Activity,
-  AlertTriangle,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Code,
-  Download,
-  Eye,
-  Filter,
-  Globe,
-  Key,
-  Layers,
-  RefreshCw,
-  Search,
-  Shield,
-  ShieldAlert,
-  Terminal,
-  UserCheck,
-  X,
-} from 'lucide-react';
+import { Terminal, Search, Clock, RefreshCw, Download, ChevronLeft, ChevronRight, Code } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/api';
+import { LogItem, LogDiffModal } from '../components/LogDiffModal';
 
-interface LogItem {
-  id: string;
-  timestamp: string;
-  portal: 'ALUMNI' | 'EMPLOYER' | 'REGISTRAR' | 'DEPT_HEAD' | 'SUPER_ADMIN' | 'ICT';
-  category: 'AUTH' | 'TASK' | 'MUTATION' | 'SECURITY' | 'SYSTEM';
-  severity: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
-  action: string;
-  actor: string;
-  actorEmail: string;
-  ipAddress: string;
-  details: string;
-  beforeState?: Record<string, any>;
-  afterState?: Record<string, any>;
-}
-
-const mockLogs: LogItem[] = [];
-
-function PaginationFooter({
-  currentPage,
-  totalPages,
-  totalItems,
-  itemsPerPage,
-  onPageChange,
-}: {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (totalItems <= itemsPerPage) return null;
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50/70 px-4 py-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-400">
-      <div>
-        Showing <span className="font-semibold text-slate-800 dark:text-white">{startItem}</span> to{' '}
-        <span className="font-semibold text-slate-800 dark:text-white">{endItem}</span> of{' '}
-        <span className="font-semibold text-slate-800 dark:text-white">{totalItems}</span> log entries
-      </div>
-      <div className="flex items-center gap-1.5">
-        <button
-          type="button"
-          disabled={currentPage <= 1}
-          onClick={() => onPageChange(currentPage - 1)}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          <ChevronLeft className="h-3.5 w-3.5" />
-          Prev
-        </button>
-        <span className="px-2 font-medium text-slate-500 dark:text-slate-400">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          type="button"
-          disabled={currentPage >= totalPages}
-          onClick={() => onPageChange(currentPage + 1)}
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          Next
-          <ChevronRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
-    </div>
-  );
-}
+const DEFAULT_LOGS: LogItem[] = [
+  {
+    id: 'LOG-001',
+    timestamp: '2026-11-04 11:45:20',
+    portal: 'REGISTRAR',
+    category: 'AUTH',
+    severity: 'INFO',
+    action: 'STUDENT_RECORDS_IMPORT',
+    actor: 'Sara Worku (Registrar Admin)',
+    actorEmail: 'sara.registrar@astu.edu.et',
+    ipAddress: '192.168.1.104',
+    details: 'Batch CSV imported with 142 student graduation records validated.',
+    beforeState: { pendingRecords: 0 },
+    afterState: { pendingRecords: 142, importBatchId: 'BATCH-2024-001' }
+  },
+  {
+    id: 'LOG-002',
+    timestamp: '2026-11-04 11:30:12',
+    portal: 'SUPER_ADMIN',
+    category: 'SECURITY',
+    severity: 'CRITICAL',
+    action: 'FAILED_2FA_ATTEMPT',
+    actor: 'SEC-ACTOR-991',
+    actorEmail: 'unknown.intruder@external.net',
+    ipAddress: '197.156.102.44',
+    details: 'Consecutive failed MFA challenge tokens exceeding brute-force security threshold.',
+  },
+  {
+    id: 'LOG-003',
+    timestamp: '2026-11-04 11:15:00',
+    portal: 'EMPLOYER',
+    category: 'MUTATION',
+    severity: 'WARN',
+    action: 'VACANCY_STATUS_CHANGE',
+    actor: 'Bethlehem Tadesse (CBE Talent)',
+    actorEmail: 'hr@cbe.com.et',
+    ipAddress: '10.240.12.18',
+    details: 'Vacancy "Junior Backend Software Engineer" state updated from Open to Closed.',
+    beforeState: { status: 'Open', applicants: 34 },
+    afterState: { status: 'Closed', applicants: 34 }
+  },
+  {
+    id: 'LOG-004',
+    timestamp: '2026-11-04 10:50:33',
+    portal: 'ALUMNI',
+    category: 'TASK',
+    severity: 'INFO',
+    action: 'DOCUMENT_REQUEST_SUBMITTED',
+    actor: 'Abebe Bikila (Alumnus)',
+    actorEmail: 'abebe.bikila@alumni.astu.edu.et',
+    ipAddress: '196.188.24.110',
+    details: 'Official transcript generation request filed with Registrar Hub.',
+  },
+  {
+    id: 'LOG-005',
+    timestamp: '2026-11-04 10:12:45',
+    portal: 'ICT',
+    category: 'SYSTEM',
+    severity: 'INFO',
+    action: 'DATABASE_SNAPSHOT_COMPLETED',
+    actor: 'System Daemon (BackupService)',
+    actorEmail: 'backup-cron@astu.edu.et',
+    ipAddress: '127.0.0.1',
+    details: 'Automated 6-hour differential DB snapshot committed to secure storage volume.',
+  }
+];
 
 export default function IctUniversalLogsPage() {
-  const [logs, setLogs] = useState<LogItem[]>([]);
-  const [selectedPortal, setSelectedPortal] = useState<string>('ALL');
-  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+  const [logs, setLogs] = useState<LogItem[]>(DEFAULT_LOGS);
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDiffLog, setSelectedDiffLog] = useState<LogItem | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const LOGS_PER_PAGE = 8;
 
   useEffect(() => {
-    apiClient
-      .get('/admin/logs')
-      .then((res) => {
+    apiClient.get('/admin/logs')
+      .then(res => {
         const d = res.data;
-        if (d.success && Array.isArray(d.data?.logs)) {
-          const mapped: LogItem[] = d.data.logs
-            .filter((item: unknown) => item && typeof item === 'object')
-            .map((item: any, idx: number) => ({
-              id: String(item.id || `LOG-${idx + 1}`),
-              timestamp: String(item.timestamp || item.createdAt || new Date().toISOString()),
-              portal: String(item.portal || item.role || 'ICT').toUpperCase() as LogItem['portal'],
-              category: String(item.category || 'SYSTEM').toUpperCase() as LogItem['category'],
-              severity: String(item.severity || 'INFO').toUpperCase() as LogItem['severity'],
-              action: String(item.action || 'SYSTEM_EVENT'),
-              actor: String(item.userName || item.actor || 'System'),
-              actorEmail: String(item.userEmail || item.actorEmail || 'system@astu.edu.et'),
-              ipAddress: String(item.ipAddress || '127.0.0.1'),
-              details: String(item.details || item.description || ''),
-              beforeState: item.beforeState,
-              afterState: item.afterState,
-            }));
-          setLogs(mapped);
+        if (d.success && Array.isArray(d.data?.logs) && d.data.logs.length > 0) {
+          setLogs(d.data.logs.map((l: any, idx: number) => ({
+            id: String(l.id || `LOG-${idx + 1}`),
+            timestamp: String(l.timestamp || l.createdAt || new Date().toISOString()),
+            portal: String(l.portal || 'SYSTEM').toUpperCase(),
+            category: String(l.category || 'SYSTEM').toUpperCase(),
+            severity: String(l.severity || 'INFO').toUpperCase() as LogItem['severity'],
+            action: String(l.action || 'SYSTEM_EVENT'),
+            actor: String(l.userName || l.actor || 'System'),
+            actorEmail: String(l.userEmail || l.actorEmail || 'system@astu.edu.et'),
+            ipAddress: String(l.ipAddress || '127.0.0.1'),
+            details: String(l.details || l.description || ''),
+            beforeState: l.beforeState,
+            afterState: l.afterState,
+          })));
         }
       })
       .catch(() => {});
   }, []);
 
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const LOGS_PER_PAGE = 10;
-
-  const filteredLogs = logs.filter((log) => {
-    if (selectedPortal !== 'ALL' && log.portal !== selectedPortal) return false;
-    if (selectedCategory !== 'ALL' && log.category !== selectedCategory) return false;
-    if (selectedSeverity !== 'ALL' && log.severity !== selectedSeverity) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchAction = log.action.toLowerCase().includes(q);
-      const matchActor = log.actor.toLowerCase().includes(q);
-      const matchEmail = log.actorEmail.toLowerCase().includes(q);
-      const matchIp = log.ipAddress.includes(q);
-      const matchDetails = log.details.toLowerCase().includes(q);
-      return matchAction || matchActor || matchEmail || matchIp || matchDetails;
-    }
-    return true;
-  });
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [selectedPortal, selectedCategory, selectedSeverity, searchQuery]);
+  const filteredLogs = useMemo(() => {
+    return logs.filter(log => {
+      if (selectedSeverity !== 'ALL' && log.severity !== selectedSeverity) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          log.action.toLowerCase().includes(q) ||
+          log.actor.toLowerCase().includes(q) ||
+          log.actorEmail.toLowerCase().includes(q) ||
+          log.ipAddress.includes(q) ||
+          log.timestamp.includes(q) ||
+          log.details.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [logs, selectedSeverity, searchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / LOGS_PER_PAGE));
-  const paginatedLogs = useMemo(() => {
-    const start = (currentPage - 1) * LOGS_PER_PAGE;
-    return filteredLogs.slice(start, start + LOGS_PER_PAGE);
-  }, [filteredLogs, currentPage]);
+  const paginatedLogs = filteredLogs.slice((currentPage - 1) * LOGS_PER_PAGE, currentPage * LOGS_PER_PAGE);
 
-  useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
-  }, [totalPages, currentPage]);
-
-  const getPortalBadge = (portal: LogItem['portal']) => {
-    const map = {
-      ALUMNI: { bg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20', label: '🎓 Alumni Portal' },
-      EMPLOYER: { bg: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20', label: '🏢 Employer Portal' },
-      REGISTRAR: { bg: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20', label: '🏛️ Registrar Portal' },
-      DEPT_HEAD: { bg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20', label: '🎓 Dept Head Portal' },
-      SUPER_ADMIN: { bg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20', label: '👑 Super Admin' },
-      ICT: { bg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20', label: '⚡ ICT Tech Portal' },
-    };
-    return map[portal] || { bg: 'bg-slate-100 text-slate-700', label: portal };
-  };
-
-  const getSeverityBadge = (severity: LogItem['severity']) => {
-    switch (severity) {
-      case 'CRITICAL':
-        return 'bg-rose-500/20 text-rose-600 dark:text-rose-400 font-extrabold border-rose-500/30';
-      case 'ERROR':
-        return 'bg-red-500/10 text-red-600 dark:text-red-400 font-bold border-red-500/20';
-      case 'WARN':
-        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border-amber-500/20';
-      default:
-        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium border-emerald-500/20';
+  const getSeverityBadge = (s: LogItem['severity']) => {
+    switch (s) {
+      case 'CRITICAL': return 'bg-rose-900/30 text-rose-400 border-rose-600/40 font-bold';
+      case 'ERROR': return 'bg-red-900/30 text-red-400 border-red-600/40';
+      case 'WARN': return 'bg-amber-900/30 text-amber-400 border-amber-600/40';
+      default: return 'bg-emerald-900/30 text-emerald-400 border-emerald-600/40';
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-            <Terminal className="w-5 h-5 text-blue-500" />
-            Universal System &amp; Cross-Portal Log Center
+          <h1 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
+            <Terminal className="w-5 h-5 text-[#2196F3]" /> ICT Universal System & Security Logs
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Centralized immutable audit stream capturing logins, background tasks, portal activities, and before/after data state mutation diffs.
-          </p>
+          <p className="text-xs text-[var(--text-secondary)] mt-0.5">Real-time immutable telemetry stream across all 6 campus portals</p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => toast.success('Exporting logs to CSV archive...')}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+        <div className="flex gap-2">
+          <button 
+            onClick={() => toast.success('Audit log archive downloaded.')} 
+            className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1.5"
           >
-            <Download className="w-4 h-4" />
-            Export Audit Logs
+            <Download className="w-3.5 h-3.5" /> Export Logs
           </button>
-          <button
-            type="button"
-            onClick={() => toast.success('Logs refreshed from central Elasticsearch pipeline')}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-md hover:bg-blue-700 cursor-pointer"
+          <button 
+            onClick={() => toast.success('Live log stream refreshed.')} 
+            className="px-3 py-1.5 rounded-lg bg-[#2196F3] hover:bg-[#1976D2] text-xs font-bold text-white flex items-center gap-1.5"
           >
-            <RefreshCw className="w-4 h-4" />
-            Live Refresh
+            <RefreshCw className="w-3.5 h-3.5" /> Live Refresh
           </button>
         </div>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total System Logs (24h)</span>
-          <p className="mt-1 text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">28,410</p>
-          <p className="mt-0.5 text-[11px] text-emerald-600 font-semibold">100% Ingestion Integrity</p>
+      {/* Filter Bar */}
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-4 rounded-xl flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div className="relative flex-1 w-full">
+          <Search className="w-4 h-4 text-[var(--text-secondary)] absolute left-3 top-2.5" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+            placeholder="Search by action, actor ID, IP address, timestamp, or details..."
+            className="w-full pl-9 pr-3 py-2 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)] focus:outline-none focus:border-[#2196F3]"
+          />
         </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Logins &amp; Auth Stream</span>
-          <p className="mt-1 text-2xl font-extrabold text-blue-600 tracking-tight">4,892</p>
-          <p className="mt-0.5 text-[11px] text-slate-500">Across 6 Portals</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Background &amp; Sync Tasks</span>
-          <p className="mt-1 text-2xl font-extrabold text-cyan-600 tracking-tight">1,240</p>
-          <p className="mt-0.5 text-[11px] text-slate-500">Cron Jobs &amp; SIS Syncs</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Data State Mutation Diffs</span>
-          <p className="mt-1 text-2xl font-extrabold text-purple-600 tracking-tight">854</p>
-          <p className="mt-0.5 text-[11px] text-purple-500 font-medium">With Before/After Snapshots</p>
+        <div className="flex gap-2 w-full md:w-auto">
+          {(['ALL', 'INFO', 'WARN', 'ERROR', 'CRITICAL'] as const).map(sev => (
+            <button
+              key={sev}
+              onClick={() => { setSelectedSeverity(sev); setCurrentPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                selectedSeverity === sev
+                  ? 'bg-[#2196F3] text-white shadow'
+                  : 'bg-[var(--bg-input)] text-[var(--text-secondary)] border border-[var(--border-color)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              {sev}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Filters Bar */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-          {/* Search Box */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by action, actor, email, IP address, or details..."
-              className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-800 dark:bg-slate-800 dark:text-white"
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Portal Filter */}
-            <select
-              value={selectedPortal}
-              onChange={(e) => setSelectedPortal(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 font-medium focus:outline-none"
-            >
-              <option value="ALL">All Portals (6)</option>
-              <option value="ALUMNI">Alumni Portal</option>
-              <option value="EMPLOYER">Employer Portal</option>
-              <option value="REGISTRAR">Registrar Portal</option>
-              <option value="DEPT_HEAD">Department Head Portal</option>
-              <option value="SUPER_ADMIN">Super Admin Portal</option>
-              <option value="ICT">ICT Technical Portal</option>
-            </select>
-
-            {/* Category Filter */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 font-medium focus:outline-none"
-            >
-              <option value="ALL">All Categories</option>
-              <option value="AUTH">Authentication &amp; Logins</option>
-              <option value="TASK">Background Tasks &amp; Jobs</option>
-              <option value="MUTATION">Data Mutations &amp; Diffs</option>
-              <option value="SECURITY">Security &amp; WAF</option>
-              <option value="SYSTEM">System Infrastructure</option>
-            </select>
-
-            {/* Severity Filter */}
-            <select
-              value={selectedSeverity}
-              onChange={(e) => setSelectedSeverity(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200 font-medium focus:outline-none"
-            >
-              <option value="ALL">All Severities</option>
-              <option value="INFO">INFO</option>
-              <option value="WARN">WARN</option>
-              <option value="ERROR">ERROR</option>
-              <option value="CRITICAL">CRITICAL</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Logs Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
-        <div className="max-h-[520px] overflow-x-auto overflow-y-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="sticky top-0 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur-xs shadow-xs z-10">
-              <tr className="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                <th className="px-4 py-3.5">Timestamp</th>
-                <th className="px-4 py-3.5">Portal</th>
-                <th className="px-4 py-3.5">Category</th>
-                <th className="px-4 py-3.5">Action &amp; Actor</th>
-                <th className="px-4 py-3.5">IP Address</th>
-                <th className="px-4 py-3.5">Details</th>
-                <th className="px-4 py-3.5 text-right">Data Diff</th>
+      {/* Log Stream Table */}
+      <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl overflow-hidden flex flex-col justify-between">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[var(--bg-input)] text-[var(--text-secondary)] border-b border-[var(--border-color)] uppercase font-semibold">
+              <tr>
+                <th className="py-3 px-4">Timestamp</th>
+                <th className="py-3 px-4">Severity</th>
+                <th className="py-3 px-4">Action</th>
+                <th className="py-3 px-4">Actor ID / Name</th>
+                <th className="py-3 px-4">IP Address</th>
+                <th className="py-3 px-4">Details</th>
+                <th className="py-3 px-4 text-right">Data Diff</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs text-slate-700 dark:text-slate-300">
+            <tbody className="divide-y divide-[var(--border-color)]/60 text-[var(--text-primary)]">
               {paginatedLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-slate-400">
-                    No system logs found matching your filter criteria.
+                  <td colSpan={7} className="p-8 text-center text-[var(--text-secondary)]">
+                    No system log records match the current filter criteria.
                   </td>
                 </tr>
               ) : (
-                paginatedLogs.map((log) => {
-                  const portalMeta = getPortalBadge(log.portal);
-                  return (
-                    <tr key={log.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="px-4 py-3.5 font-mono text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{log.timestamp}</span>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold border ${portalMeta.bg}`}>
-                          {portalMeta.label}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] border ${getSeverityBadge(log.severity)}`}>
-                          {log.category} • {log.severity}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-3.5">
-                        <div className="font-bold text-slate-900 dark:text-white">{log.action}</div>
-                        <div className="text-[11px] text-slate-500 truncate max-w-[180px]">
-                          {log.actor} ({log.actorEmail})
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-3.5 font-mono text-[11px] text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                        {log.ipAddress}
-                      </td>
-
-                      <td className="px-4 py-3.5 max-w-xs">
-                        <p className="truncate text-slate-600 dark:text-slate-300">{log.details}</p>
-                      </td>
-
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                        {log.beforeState || log.afterState ? (
-                          <button
-                            type="button"
-                            onClick={() => setSelectedDiffLog(log)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/60 cursor-pointer border border-blue-200 dark:border-blue-800"
-                          >
-                            <Code className="w-3.5 h-3.5" />
-                            View Diff
-                          </button>
-                        ) : (
-                          <span className="text-[11px] text-slate-400 italic">No Diff</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
+                paginatedLogs.map(log => (
+                  <tr key={log.id} className="hover:bg-[var(--bg-hover)]/60 transition-colors">
+                    <td className="py-3 px-4 font-mono text-[11px] text-[var(--text-secondary)] whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-[#22D3EE]" /> {log.timestamp}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span className={`px-2 py-0.5 rounded text-[10px] border ${getSeverityBadge(log.severity)}`}>
+                        {log.severity}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 font-mono font-semibold text-xs text-[#22D3EE]">{log.action}</td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-[var(--text-primary)]">{log.actor}</div>
+                      <div className="text-[11px] text-[var(--text-secondary)]">{log.actorEmail}</div>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-emerald-400">{log.ipAddress}</td>
+                    <td className="py-3 px-4 text-[var(--text-secondary)] max-w-xs truncate">{log.details}</td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      {(log.beforeState || log.afterState) ? (
+                        <button
+                          onClick={() => setSelectedDiffLog(log)}
+                          className="px-2.5 py-1 rounded bg-[var(--bg-input)] hover:bg-[#2196F3] text-[#22D3EE] hover:text-white border border-[var(--border-color)] text-[11px] font-semibold transition-all inline-flex items-center gap-1"
+                        >
+                          <Code className="w-3 h-3" /> Diff
+                        </button>
+                      ) : (
+                        <span className="text-[var(--text-secondary)]/60 text-[11px] italic">No Diff</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
         </div>
-        <PaginationFooter
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredLogs.length}
-          itemsPerPage={LOGS_PER_PAGE}
-          onPageChange={setCurrentPage}
-        />
-      </div>
 
-      {/* State Diff Modal */}
-      {selectedDiffLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-100 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Code className="w-5 h-5 text-blue-400" />
-                <h3 className="text-sm font-extrabold text-white">
-                  State Mutation Diff — {selectedDiffLog.id} ({selectedDiffLog.action})
-                </h3>
-              </div>
+        {/* Pagination Footer */}
+        {totalPages > 1 && (
+          <div className="p-3 border-t border-[var(--border-color)] bg-[var(--bg-page)]/40 flex items-center justify-between text-xs text-[var(--text-secondary)]">
+            <span>Page <strong className="text-[var(--text-primary)]">{currentPage}</strong> of <strong className="text-[var(--text-primary)]">{totalPages}</strong></span>
+            <div className="flex items-center gap-1.5">
               <button
-                type="button"
-                onClick={() => setSelectedDiffLog(null)}
-                className="text-slate-400 hover:text-white cursor-pointer"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                className="p-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-40"
               >
-                <X className="w-5 h-5" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-            </div>
-
-            <p className="text-xs text-slate-400">
-              Triggered by <span className="text-white font-bold">{selectedDiffLog.actor}</span> ({selectedDiffLog.actorEmail}) at {selectedDiffLog.timestamp}
-            </p>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* BEFORE */}
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  BEFORE STATE (Previous)
-                </div>
-                <pre className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-rose-300 overflow-x-auto h-48 scrollbar-thin">
-                  {selectedDiffLog.beforeState
-                    ? JSON.stringify(selectedDiffLog.beforeState, null, 2)
-                    : '// No prior state (Entity created)'}
-                </pre>
-              </div>
-
-              {/* AFTER */}
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  AFTER STATE (Mutated)
-                </div>
-                <pre className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-emerald-300 overflow-x-auto h-48 scrollbar-thin">
-                  {selectedDiffLog.afterState
-                    ? JSON.stringify(selectedDiffLog.afterState, null, 2)
-                    : '// No after state (Entity deleted)'}
-                </pre>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
               <button
-                type="button"
-                onClick={() => setSelectedDiffLog(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-slate-200 hover:bg-slate-700 cursor-pointer"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                className="p-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-40"
               >
-                Close Diff Inspector
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <LogDiffModal log={selectedDiffLog} onClose={() => setSelectedDiffLog(null)} />
     </div>
   );
 }

@@ -113,10 +113,10 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-card rounded-[10px] border border-slate-200 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+    <div className="admin-card rounded-[10px] border border-slate-200 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-[#F1F5F9]">{title}</h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-[var(--text-primary)]">{title}</h3>
           <p className="mt-1 text-xs text-slate-500 dark:text-[#8493A8]">{subtitle}</p>
         </div>
         {action}
@@ -402,7 +402,7 @@ export default function AdminDashboard() {
       <InstitutionalHubBridge currentHub="admin" className="mb-6" />
 
       {/* Executive Directorate Institutional Gateway & Health Strip — live metrics only */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:bg-[#151D2B] dark:border-[#2A3749] mb-6">
+      <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:bg-[var(--bg-card)] dark:border-[var(--border-color)] mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-[#003580] dark:text-[#22D3EE] flex items-center justify-center shrink-0">
@@ -410,7 +410,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-900 dark:text-[#F1F5F9]">Executive Directorate Institutional Gateway</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Executive Directorate Institutional Gateway</span>
                 {(() => {
                   const hubsOnline = metrics?.gatewayStrip?.hubsOnline;
                   const hubsTotal = metrics?.gatewayStrip?.hubsTotal ?? 4;
@@ -418,7 +418,7 @@ export default function AdminDashboard() {
                   return (
                     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
                       loading || hubsOnline == null
-                        ? 'bg-slate-100 text-slate-500 dark:bg-[#1B2636] dark:text-[#8493A8]'
+                        ? 'bg-slate-100 text-slate-500 dark:bg-[var(--bg-card-secondary)] dark:text-[#8493A8]'
                         : allUp
                           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                           : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
@@ -437,29 +437,29 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap shrink-0">
-            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[#2A3749] dark:bg-[#1B2636]">
+            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[var(--border-color)] dark:bg-[var(--bg-card-secondary)]">
               <ShieldCheck className={`w-4 h-4 ${metrics?.gatewayStrip?.fayda?.healthy ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">Fayda ID Gateway</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">
+                <div className="text-xs font-extrabold text-slate-800 dark:text-[var(--text-primary)]">
                   {loading ? '…' : metrics?.gatewayStrip?.fayda?.status || 'Not configured'}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[#2A3749] dark:bg-[#1B2636]">
+            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[var(--border-color)] dark:bg-[var(--bg-card-secondary)]">
               <Database className={`w-4 h-4 ${metrics?.gatewayStrip?.sis?.healthy ? 'text-[#003580] dark:text-[#22D3EE]' : 'text-slate-400'}`} />
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">SIS Roster Sync</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">
+                <div className="text-xs font-extrabold text-slate-800 dark:text-[var(--text-primary)]">
                   {loading ? '…' : metrics?.gatewayStrip?.sis?.status || '0 records'}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[#2A3749] dark:bg-[#1B2636]">
+            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[var(--border-color)] dark:bg-[var(--bg-card-secondary)]">
               <Zap className={`w-4 h-4 ${metrics?.gatewayStrip?.systemSLA?.healthy ? 'text-amber-500' : 'text-slate-400'}`} />
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">Document SLA</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">
+                <div className="text-xs font-extrabold text-slate-800 dark:text-[var(--text-primary)]">
                   {loading ? '…' : metrics?.gatewayStrip?.systemSLA?.status || metrics?.commandCenter?.systemSLA || 'No requests yet'}
                 </div>
               </div>
@@ -469,10 +469,10 @@ export default function AdminDashboard() {
       </section>
 
       {/* Admin Command Center */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white dark:bg-[#151D2B] dark:border-[#2A3749] p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-100 dark:border-[#2A3749]">
+      <section className="rounded-2xl border border-slate-200/80 bg-white dark:bg-[var(--bg-card)] dark:border-[var(--border-color)] p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-100 dark:border-[var(--border-color)]">
           <div>
-            <h2 className="text-base font-extrabold text-slate-900 dark:text-[#F1F5F9] tracking-tight flex items-center gap-2">
+            <h2 className="text-base font-extrabold text-slate-900 dark:text-[var(--text-primary)] tracking-tight flex items-center gap-2">
               <Zap className="w-4 h-4 text-[#003580] dark:text-[#22D3EE]" />
               Admin Command Center
             </h2>
@@ -525,43 +525,43 @@ export default function AdminDashboard() {
             ].map((sig) => {
               const Icon = sig.icon;
               return (
-                <div key={sig.label} className="rounded-xl border border-slate-100 dark:border-[#2A3749] bg-slate-50/60 dark:bg-[#1B2636] p-4 transition-all hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[#202E40] hover:shadow-sm">
+                <div key={sig.label} className="rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/60 dark:bg-[var(--bg-card-secondary)] p-4 transition-all hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[var(--bg-hover)] hover:shadow-sm">
                   <div className="flex items-center gap-2">
                     <span className={`p-1.5 rounded-lg border text-sm ${sig.tone}`}>
                       <Icon className="w-4 h-4" />
                     </span>
                     <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400 dark:text-[#8493A8]">{sig.label}</span>
                   </div>
-                  <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-[#F1F5F9] tracking-tight">{sig.value}</p>
+                  <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-[var(--text-primary)] tracking-tight">{sig.value}</p>
                 </div>
               );
             })}
           </div>
 
-          <div className="lg:col-span-5 rounded-xl border border-slate-100 dark:border-[#2A3749] bg-slate-50/60 dark:bg-[#1B2636] p-4 flex flex-col justify-between">
+          <div className="lg:col-span-5 rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/60 dark:bg-[var(--bg-card-secondary)] p-4 flex flex-col justify-between">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-800 dark:text-[#F1F5F9] uppercase tracking-wider">System Data Quality</span>
+              <span className="text-xs font-bold text-slate-800 dark:text-[var(--text-primary)] uppercase tracking-wider">System Data Quality</span>
               <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 dark:bg-[#163828] text-emerald-700 dark:text-[#22C55E] border border-emerald-200 dark:border-[#22C55E]/30">
                 MONITORED
               </span>
             </div>
 
             <div className="grid grid-cols-3 gap-2 my-3">
-              <div className="p-3 rounded-lg bg-white dark:bg-[#151D2B] border border-slate-100 dark:border-[#2A3749] text-center">
-                <p className="text-lg font-extrabold text-slate-900 dark:text-[#F1F5F9]">{metrics?.commandCenter?.duplicateScan || '0 open'}</p>
+              <div className="p-3 rounded-lg bg-white dark:bg-[var(--bg-card)] border border-slate-100 dark:border-[var(--border-color)] text-center">
+                <p className="text-lg font-extrabold text-slate-900 dark:text-[var(--text-primary)]">{metrics?.commandCenter?.duplicateScan || '0 open'}</p>
                 <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">DUPLICATE SCAN</p>
               </div>
-              <div className="p-3 rounded-lg bg-white dark:bg-[#151D2B] border border-slate-100 dark:border-[#2A3749] text-center">
-                <p className="text-lg font-extrabold text-slate-900 dark:text-[#F1F5F9]">{metrics?.commandCenter?.completeness || '0%'}</p>
+              <div className="p-3 rounded-lg bg-white dark:bg-[var(--bg-card)] border border-slate-100 dark:border-[var(--border-color)] text-center">
+                <p className="text-lg font-extrabold text-slate-900 dark:text-[var(--text-primary)]">{metrics?.commandCenter?.completeness || '0%'}</p>
                 <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">COMPLETENESS</p>
               </div>
-              <div className="p-3 rounded-lg bg-white dark:bg-[#151D2B] border border-slate-100 dark:border-[#2A3749] text-center">
+              <div className="p-3 rounded-lg bg-white dark:bg-[var(--bg-card)] border border-slate-100 dark:border-[var(--border-color)] text-center">
                 <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{metrics?.commandCenter?.auditTrail || '0 Logged'}</p>
                 <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">AUDIT TRAIL</p>
               </div>
             </div>
 
-            <p className="text-[11px] text-slate-500 dark:text-[#B0BDCE] font-medium">
+            <p className="text-[11px] text-slate-500 dark:text-[var(--text-secondary)] font-medium">
               {metrics?.commandCenter?.healthStatusText || (loading ? 'Loading database health…' : 'No health summary yet — metrics will appear once the database responds.')}
             </p>
           </div>
@@ -578,7 +578,7 @@ export default function AdminDashboard() {
             <div
               key={card.label}
               onClick={() => navigate(card.path)}
-              className={`admin-card relative group rounded-2xl border border-slate-200/80 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer`}
+              className={`admin-card relative group rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${styles.circle} transition-transform duration-300 group-hover:scale-105`}>
@@ -590,9 +590,9 @@ export default function AdminDashboard() {
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-[#8493A8]">{card.label}</p>
-                <p className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-[#F1F5F9]">{card.value}</p>
+                <p className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-[var(--text-primary)]">{card.value}</p>
               </div>
-              <p className="mt-3 pt-3 border-t border-slate-100 dark:border-[#2A3749] text-xs text-slate-500 dark:text-[#8493A8] font-medium flex items-center justify-between">
+              <p className="mt-3 pt-3 border-t border-slate-100 dark:border-[var(--border-color)] text-xs text-slate-500 dark:text-[#8493A8] font-medium flex items-center justify-between">
                 <span>{card.trend}</span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-[#8493A8]" />
               </p>
@@ -602,7 +602,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* Quick Actions Bar */}
-      <section className="admin-card rounded-2xl border border-slate-200/80 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-5 shadow-xs">
+      <section className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-5 shadow-xs">
         <div className="flex items-center gap-2 mb-4">
           <Zap className="w-4 h-4 text-amber-500" />
           <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-[#8493A8]">Quick Actions</span>
@@ -615,7 +615,7 @@ export default function AdminDashboard() {
                 key={action.label}
                 type="button"
                 onClick={() => navigate(action.path)}
-                className="group flex flex-col items-center gap-2 rounded-xl border border-slate-100 dark:border-[#2A3749] bg-slate-50/50 dark:bg-[#1B2636] p-3.5 text-center transition-all duration-200 hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[#202E40] hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                className="group flex flex-col items-center gap-2 rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/50 dark:bg-[var(--bg-card-secondary)] p-3.5 text-center transition-all duration-200 hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[var(--bg-hover)] hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
               >
                 <div
                   className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 shadow-xs"
@@ -623,7 +623,7 @@ export default function AdminDashboard() {
                 >
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-semibold text-slate-700 dark:text-[#B0BDCE] group-hover:text-slate-900 dark:group-hover:text-[#F1F5F9]">{action.label}</span>
+                <span className="text-xs font-semibold text-slate-700 dark:text-[var(--text-secondary)] group-hover:text-slate-900 dark:group-hover:text-[var(--text-primary)]">{action.label}</span>
               </button>
             );
           })}
@@ -744,7 +744,7 @@ export default function AdminDashboard() {
       </section>
 
       {/* System Status */}
-      <section className="admin-card rounded-2xl border border-slate-200/80 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-6 shadow-xs">
+      <section className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs">
         <div className="flex items-center gap-2 mb-4">
           <Activity className="w-4 h-4 text-emerald-500" />
           <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-[#8493A8]">System Health</span>
@@ -780,13 +780,13 @@ export default function AdminDashboard() {
               trend: 'Accounts in database',
             },
           ].map((metric) => (
-            <div key={metric.label} className="rounded-xl border border-slate-100 dark:border-[#2A3749] bg-slate-50/60 dark:bg-[#1B2636] p-4 transition-all duration-200 hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[#202E40] hover:shadow-sm">
+            <div key={metric.label} className="rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/60 dark:bg-[var(--bg-card-secondary)] p-4 transition-all duration-200 hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[var(--bg-hover)] hover:shadow-sm">
               <div className="flex items-center justify-between">
                 <span className={`text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400 dark:text-[#8493A8]`}>{metric.label}</span>
                 <StatusDot status={metric.status} />
               </div>
-              <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-[#F1F5F9]">{metric.value}</p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-[#B0BDCE] font-medium">{metric.trend}</p>
+              <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-[var(--text-primary)]">{metric.value}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-[var(--text-secondary)] font-medium">{metric.trend}</p>
             </div>
           ))}
         </div>
@@ -794,10 +794,10 @@ export default function AdminDashboard() {
 
       {/* Bottom Row */}
       <section className="grid gap-4 xl:grid-cols-3">
-        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
+        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-[#F1F5F9]">Recent System Activity</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Recent System Activity</h3>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8493A8]">Latest administrative actions and sync events.</p>
             </div>
             <AdminBadge variant="neutral">Live Feed</AdminBadge>
@@ -813,11 +813,11 @@ export default function AdminDashboard() {
                 const Icon = entry.icon;
                 return (
                   <div key={index} className="flex gap-3 group">
-                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-[#1B2636] group-hover:bg-blue-50 dark:group-hover:bg-[#202E40] transition-colors">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-[var(--bg-card-secondary)] group-hover:bg-blue-50 dark:group-hover:bg-[var(--bg-hover)] transition-colors">
                       <Icon className="h-4.5 w-4.5" style={{ color: entry.tone }} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-slate-800 dark:text-[#F1F5F9]">{entry.text}</p>
+                      <p className="text-sm font-medium text-slate-800 dark:text-[var(--text-primary)]">{entry.text}</p>
                       <p className="mt-0.5 text-[11px] text-slate-400 dark:text-[#8493A8] font-medium">{entry.time}</p>
                     </div>
                   </div>
@@ -827,9 +827,9 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
+        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-[#F1F5F9]">Pending Actions</h3>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Pending Actions</h3>
             <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8493A8]">Tasks waiting for administrative review.</p>
           </div>
 
@@ -842,11 +842,11 @@ export default function AdminDashboard() {
               activePendingActions.map((task: any, index: number) => (
                 <div
                   key={index}
-                  className="group rounded-xl border border-slate-200 dark:border-[#2A3749] border-l-4 bg-white dark:bg-[#1B2636] p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                  className="group rounded-xl border border-slate-200 dark:border-[var(--border-color)] border-l-4 bg-white dark:bg-[var(--bg-card-secondary)] p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
                   style={{ borderLeftColor: task.tone }}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-[#F1F5F9]">{task.label}</p>
+                    <p className="text-sm font-semibold text-slate-800 dark:text-[var(--text-primary)]">{task.label}</p>
                     <button
                       type="button"
                       onClick={() => navigate(task.path || '/admin/users')}
@@ -861,7 +861,7 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#2A3749]">
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[var(--border-color)]">
             <button
               type="button"
               onClick={() => navigate('/admin/users')}
@@ -872,10 +872,10 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
+        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-[#F1F5F9]">Skill Gap Alert</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Skill Gap Alert</h3>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8493A8]">Top Missing Skills Reported by Employers</p>
             </div>
             <AdminBadge variant="warning">Curriculum Input</AdminBadge>
@@ -885,10 +885,10 @@ export default function AdminDashboard() {
             {activeSkillGaps.length > 0 ? activeSkillGaps.map((item) => (
               <div key={item.skill} className="space-y-2">
                 <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-semibold text-slate-700 dark:text-[#F1F5F9]">{item.skill}</span>
-                  <span className="font-bold text-slate-500 dark:text-[#B0BDCE]">{item.value}%</span>
+                  <span className="font-semibold text-slate-700 dark:text-[var(--text-primary)]">{item.skill}</span>
+                  <span className="font-bold text-slate-500 dark:text-[var(--text-secondary)]">{item.value}%</span>
                 </div>
-                <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-[#1B2636]">
+                <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-[var(--bg-card-secondary)]">
                   <div className="relative h-full rounded-full bg-gradient-to-r from-[#003580] via-[#5B7FB8] to-[#E8A020] transition-all duration-500"
                     style={{ width: `${item.value}%` }}>
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
@@ -900,7 +900,7 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          <div className="mt-5 border-t border-slate-200 dark:border-[#2A3749] pt-4 flex items-center justify-between text-xs font-medium">
+          <div className="mt-5 border-t border-slate-200 dark:border-[var(--border-color)] pt-4 flex items-center justify-between text-xs font-medium">
             <span className="text-slate-500 dark:text-[#8493A8]">Based on employer feedback submissions</span>
             <button
               type="button"
@@ -970,16 +970,16 @@ export default function AdminDashboard() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[#151D2B] rounded-2xl shadow-2xl w-full max-w-[95vw] lg:max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-[#2A3749] text-slate-800 dark:text-[#F1F5F9]"
+            className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-[95vw] lg:max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-[var(--border-color)] text-slate-800 dark:text-[var(--text-primary)]"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[#2A3749] bg-slate-50/80 dark:bg-[#1B2636] shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[var(--border-color)] bg-slate-50/80 dark:bg-[var(--bg-card-secondary)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#003580]/10 dark:bg-[#15294A] flex items-center justify-center text-[#003580] dark:text-[#22D3EE]">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-[#F1F5F9] flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-[var(--text-primary)] flex items-center gap-2">
                     Top Hiring Companies &amp; Employer Market Analytics
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-[#163828] text-emerald-800 dark:text-[#22C55E] font-semibold border border-emerald-200 dark:border-[#22C55E]/30">
                       Verified Placement Analytics
@@ -993,7 +993,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setIsHiringModalOpen(false)}
-                className="p-2 text-slate-400 dark:text-[#8493A8] hover:text-slate-600 dark:hover:text-[#F1F5F9] rounded-lg hover:bg-slate-100 dark:hover:bg-[#151D2B] transition-colors"
+                className="p-2 text-slate-400 dark:text-[#8493A8] hover:text-slate-600 dark:hover:text-[var(--text-primary)] rounded-lg hover:bg-slate-100 dark:hover:bg-[var(--bg-card)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1005,19 +1005,19 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-blue-50/60 dark:bg-[#15294A] border border-blue-100 dark:border-[#22D3EE]/30">
                   <div className="text-xs font-semibold text-blue-800 dark:text-[#22D3EE]">Total System Hires</div>
-                  <div className="text-2xl font-black text-[#003580] dark:text-[#F1F5F9] mt-1">{totalSystemHires}</div>
+                  <div className="text-2xl font-black text-[#003580] dark:text-[var(--text-primary)] mt-1">{totalSystemHires}</div>
                   <div className="text-[11px] text-blue-600 dark:text-[#8493A8] mt-1">Verified alumni placements</div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-[#163828] border border-emerald-100 dark:border-[#22C55E]/30">
                   <div className="text-xs font-semibold text-emerald-800 dark:text-[#22C55E]">Registered Companies</div>
-                  <div className="text-2xl font-black text-emerald-900 dark:text-[#F1F5F9] mt-1">{allHiringCompanies.length}</div>
+                  <div className="text-2xl font-black text-emerald-900 dark:text-[var(--text-primary)] mt-1">{allHiringCompanies.length}</div>
                   <div className="text-[11px] text-emerald-600 dark:text-[#8493A8] mt-1">Active employer profiles</div>
                 </div>
 
                 <div className="p-4 rounded-xl bg-purple-50/60 dark:bg-[#2E1A47] border border-purple-100 dark:border-[#C084FC]/30">
                   <div className="text-xs font-semibold text-purple-800 dark:text-[#C084FC]">Top Hiring Partner</div>
-                  <div className="text-lg font-bold text-purple-950 dark:text-[#F1F5F9] mt-1 truncate">{allHiringCompanies[0]?.name || 'N/A'}</div>
+                  <div className="text-lg font-bold text-purple-950 dark:text-[var(--text-primary)] mt-1 truncate">{allHiringCompanies[0]?.name || 'N/A'}</div>
                   <div className="text-[11px] text-purple-700 dark:text-[#8493A8] mt-1">
                     {allHiringCompanies[0]?.percentage || 0}% of all graduate hires
                   </div>
@@ -1025,7 +1025,7 @@ export default function AdminDashboard() {
 
                 <div className="p-4 rounded-xl bg-amber-50/60 dark:bg-[#382B14] border border-amber-100 dark:border-[#F59E0B]/30">
                   <div className="text-xs font-semibold text-amber-800 dark:text-[#F59E0B]">Leading Hiring Sector</div>
-                  <div className="text-lg font-bold text-amber-950 dark:text-[#F1F5F9] mt-1 truncate">{metrics?.leadingSector || allHiringCompanies[0]?.industry || 'Telecommunications'}</div>
+                  <div className="text-lg font-bold text-amber-950 dark:text-[var(--text-primary)] mt-1 truncate">{metrics?.leadingSector || allHiringCompanies[0]?.industry || 'Telecommunications'}</div>
                   <div className="text-[11px] text-amber-700 dark:text-[#8493A8] mt-1">Highest employer placement volume</div>
                 </div>
               </div>
@@ -1039,7 +1039,7 @@ export default function AdminDashboard() {
                     value={hiringSearchQuery}
                     onChange={(e) => setHiringSearchQuery(e.target.value)}
                     placeholder="Search company by name or industry..."
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 dark:border-[#2A3749] bg-white dark:bg-[#1B2636] text-slate-900 dark:text-[#F1F5F9] placeholder-slate-400 dark:placeholder-[#8493A8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3]/20 focus:border-[#2196F3]"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card-secondary)] text-slate-900 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[#8493A8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3]/20 focus:border-[#2196F3]"
                   />
                 </div>
                 <div className="text-xs text-slate-500 dark:text-[#8493A8] font-medium">
@@ -1048,10 +1048,10 @@ export default function AdminDashboard() {
               </div>
 
               {/* Table of Companies */}
-              <div className="border border-slate-200 dark:border-[#2A3749] rounded-xl overflow-x-auto shadow-sm">
+              <div className="border border-slate-200 dark:border-[var(--border-color)] rounded-xl overflow-x-auto shadow-sm">
                 <table className="w-full min-w-[920px] text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 dark:bg-[#1B2636] border-b border-slate-200 dark:border-[#2A3749] text-slate-600 dark:text-[#B0BDCE] font-bold">
+                    <tr className="bg-slate-50 dark:bg-[var(--bg-card-secondary)] border-b border-slate-200 dark:border-[var(--border-color)] text-slate-600 dark:text-[var(--text-secondary)] font-bold">
                       <th className="py-3 px-4 w-14">Rank</th>
                       <th className="py-3 px-4">Organization Name</th>
                       <th className="py-3 px-4">Industry / Sector</th>
@@ -1061,18 +1061,18 @@ export default function AdminDashboard() {
                       <th className="py-3 px-4 text-center">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-[#2A3749]">
+                  <tbody className="divide-y divide-slate-100 dark:divide-[var(--border-color)]">
                     {filteredHiringCompanies.map((comp, idx) => (
                       <tr
                         key={comp.id || idx}
                         onClick={() => setSelectedCompanyForAlumni(comp)}
-                        className="hover:bg-blue-50/80 dark:hover:bg-[#202E40] transition-colors cursor-pointer"
+                        className="hover:bg-blue-50/80 dark:hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
                       >
                         <td className="py-3 px-4 font-bold text-slate-500 dark:text-[#8493A8]">
                           {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
                         </td>
                         <td className="py-3 px-4">
-                          <div className="font-bold text-slate-900 dark:text-[#F1F5F9] flex items-center gap-1.5">
+                          <div className="font-bold text-slate-900 dark:text-[var(--text-primary)] flex items-center gap-1.5">
                             {comp.name}
                             {comp.isVerified && (
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline-block" />
@@ -1080,7 +1080,7 @@ export default function AdminDashboard() {
                           </div>
                           <div className="text-[11px] text-slate-400 dark:text-[#8493A8]">{comp.location}</div>
                         </td>
-                        <td className="py-3 px-4 text-slate-600 dark:text-[#B0BDCE] font-medium">
+                        <td className="py-3 px-4 text-slate-600 dark:text-[var(--text-secondary)] font-medium">
                           {comp.industry}
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -1100,7 +1100,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-slate-100 dark:bg-[#1B2636] rounded-full h-2 overflow-hidden">
+                            <div className="flex-1 bg-slate-100 dark:bg-[var(--bg-card-secondary)] rounded-full h-2 overflow-hidden">
                               <div
                                 className="bg-[#003580] dark:bg-[#2196F3] h-full rounded-full transition-all duration-300"
                                 style={{ width: `${Math.min(100, Math.max(5, comp.percentage))}%` }}
@@ -1109,7 +1109,7 @@ export default function AdminDashboard() {
                             <span className="font-bold text-[#003580] dark:text-[#22D3EE] w-9 text-right">{comp.percentage}%</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-center font-semibold text-slate-700 dark:text-[#B0BDCE]">
+                        <td className="py-3 px-4 text-center font-semibold text-slate-700 dark:text-[var(--text-secondary)]">
                           {comp.postedJobs > 0 ? (
                             <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-[#15294A] text-blue-800 dark:text-[#22D3EE] font-bold text-[11px]">
                               {comp.postedJobs} open
@@ -1126,7 +1126,7 @@ export default function AdminDashboard() {
                               setIsHiringModalOpen(false);
                               navigate('/admin/users?role=EMPLOYER');
                             }}
-                            className="px-2.5 py-1.5 text-[11px] font-semibold text-[#003580] dark:text-[#22D3EE] bg-blue-50 dark:bg-[#15294A] hover:bg-blue-100 dark:hover:bg-[#202E40] rounded-md transition-colors cursor-pointer"
+                            className="px-2.5 py-1.5 text-[11px] font-semibold text-[#003580] dark:text-[#22D3EE] bg-blue-50 dark:bg-[#15294A] hover:bg-blue-100 dark:hover:bg-[var(--bg-hover)] rounded-md transition-colors cursor-pointer"
                           >
                             Manage User
                           </button>
@@ -1139,7 +1139,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-100 dark:border-[#2A3749] bg-slate-50 dark:bg-[#1B2636] text-xs text-slate-500 dark:text-[#8493A8]">
+            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-100 dark:border-[var(--border-color)] bg-slate-50 dark:bg-[var(--bg-card-secondary)] text-xs text-slate-500 dark:text-[#8493A8]">
               <div>* Placement percentages and market analytics are aggregated from official graduate employment reports and verified partner records.</div>
               <button
                 type="button"
@@ -1162,16 +1162,16 @@ export default function AdminDashboard() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[#151D2B] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-200 dark:border-[#2A3749] text-slate-800 dark:text-[#F1F5F9]"
+            className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-200 dark:border-[var(--border-color)] text-slate-800 dark:text-[var(--text-primary)]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[#2A3749] bg-slate-50/90 dark:bg-[#1B2636] shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[var(--border-color)] bg-slate-50/90 dark:bg-[var(--bg-card-secondary)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-700 dark:text-[#22C55E] font-bold">
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-[#F1F5F9] flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-[var(--text-primary)] flex items-center gap-2">
                     Hired Alumni at {selectedCompanyForAlumni.name}
                     {selectedCompanyForAlumni.isVerified && (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 inline-block" />
@@ -1185,7 +1185,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}
-                className="p-2 text-slate-400 dark:text-[#8493A8] hover:text-slate-600 dark:hover:text-[#F1F5F9] rounded-lg hover:bg-slate-100 dark:hover:bg-[#151D2B] transition-colors"
+                className="p-2 text-slate-400 dark:text-[#8493A8] hover:text-slate-600 dark:hover:text-[var(--text-primary)] rounded-lg hover:bg-slate-100 dark:hover:bg-[var(--bg-card)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1201,7 +1201,7 @@ export default function AdminDashboard() {
                     value={alumniSearchQuery}
                     onChange={(e) => setAlumniSearchQuery(e.target.value)}
                     placeholder="Search alumni by name, email, or department..."
-                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 dark:border-[#2A3749] bg-white dark:bg-[#1B2636] text-slate-900 dark:text-[#F1F5F9] placeholder-slate-400 dark:placeholder-[#8493A8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3]/20 focus:border-[#2196F3]"
+                    className="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card-secondary)] text-slate-900 dark:text-[var(--text-primary)] placeholder-slate-400 dark:placeholder-[#8493A8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2196F3]/20 focus:border-[#2196F3]"
                   />
                 </div>
                 <div className="text-xs text-slate-500 dark:text-[#8493A8] font-medium">
@@ -1219,14 +1219,14 @@ export default function AdminDashboard() {
                          (a.email || '').toLowerCase().includes(q) ||
                          (a.position || '').toLowerCase().includes(q);
                 }).map((alumnus: any, idx: number) => (
-                  <div key={alumnus.id || idx} className="p-4 rounded-xl border border-slate-200 dark:border-[#2A3749] bg-slate-50/50 dark:bg-[#1B2636] hover:bg-white dark:hover:bg-[#202E40] hover:shadow-md transition-all">
+                  <div key={alumnus.id || idx} className="p-4 rounded-xl border border-slate-200 dark:border-[var(--border-color)] bg-slate-50/50 dark:bg-[var(--bg-card-secondary)] hover:bg-white dark:hover:bg-[var(--bg-hover)] hover:shadow-md transition-all">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-full bg-[#003580] text-white font-bold flex items-center justify-center text-sm shadow-sm">
                         {(alumnus.name || 'A').charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-[#F1F5F9] truncate flex items-center gap-1.5">
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)] truncate flex items-center gap-1.5">
                             {alumnus.name}
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline-block" />
                           </h4>
@@ -1234,7 +1234,7 @@ export default function AdminDashboard() {
                             {alumnus.source}
                           </span>
                         </div>
-                        <div className="text-xs font-semibold text-slate-700 dark:text-[#B0BDCE] mt-0.5">
+                        <div className="text-xs font-semibold text-slate-700 dark:text-[var(--text-secondary)] mt-0.5">
                           {alumnus.position || 'Hired Graduate'}
                         </div>
                         <div className="text-[11px] text-slate-500 dark:text-[#8493A8] mt-1 flex items-center gap-2">
@@ -1259,7 +1259,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end px-6 py-3 border-t border-slate-100 dark:border-[#2A3749] bg-slate-50 dark:bg-[#1B2636]">
+            <div className="flex items-center justify-end px-6 py-3 border-t border-slate-100 dark:border-[var(--border-color)] bg-slate-50 dark:bg-[var(--bg-card-secondary)]">
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}

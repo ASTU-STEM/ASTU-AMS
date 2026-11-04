@@ -87,18 +87,19 @@
 }
 
 .dark {
-  --bg-page: #0b1120;
-  --bg-card: #141e2e;
-  --bg-card-secondary: #192538;
-  --bg-chrome: #101827;
-  --bg-sidebar: var(--bg-chrome);
-  --bg-navbar: var(--bg-chrome);
-  --bg-input: #111c2b;
-  --bg-hover: #202f43;
-  --border-color: #29384d;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
+  /* Official ASTU-AMS dark palette (architecture guide) */
+  --bg-page: #0b0f19;
+  --bg-card: #151d2b;
+  --bg-card-secondary: #1b2636;
+  --bg-chrome: #101725;
+  --bg-sidebar: #080d18;
+  --bg-navbar: #101725;
+  --bg-input: #0b0f19;
+  --bg-hover: #1b2636;
+  --border-color: #2a3749;
+  --text-primary: #f1f5f9;
+  --text-secondary: #b0bdce;
+  --text-muted: #8493a8;
   --brand-primary: #2196f3;
   --brand-navy: #2196f3;
   --accent-cyan: #22d3ee;
@@ -106,9 +107,9 @@
   --warning: #f59e0b;
   --error: #ef4444;
   --focus-ring: #2196f3;
-  --on-surface-variant: #cbd5e1;
-  --outline-variant: #29384d;
-  --surface-container-low: #141e2e;
+  --on-surface-variant: #b0bdce;
+  --outline-variant: #2a3749;
+  --surface-container-low: #151d2b;
 }
 
 /* ═══════════════════════════════════════════════════════════

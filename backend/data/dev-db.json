@@ -42082,6 +42082,62 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1793779319538",
       "createdAt": "2026-11-04T08:01:59.538Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784284506",
+      "createdAt": "2026-11-04T09:24:44.506Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784918596",
+      "createdAt": "2026-11-04T09:35:18.596Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784923097",
+      "createdAt": "2026-11-04T09:35:23.097Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784945332",
+      "createdAt": "2026-11-04T09:35:45.332Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784949180",
+      "createdAt": "2026-11-04T09:35:49.180Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793785193948",
+      "createdAt": "2026-11-04T09:39:53.948Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793785199261",
+      "createdAt": "2026-11-04T09:39:59.261Z"
     }
   ],
   "notifications": [
@@ -64730,8 +64786,8 @@
           ]
         }
       },
-      "updatedAt": "2026-11-04T08:26:55.409Z",
-      "updatedBy": "CMS Admin"
+      "updatedAt": "2026-11-04T09:35:44.011Z",
+      "updatedBy": "depthead.swe@astu.edu.et"
     }
   ],
   "contentItems": [

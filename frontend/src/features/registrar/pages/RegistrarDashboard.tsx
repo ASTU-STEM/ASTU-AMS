@@ -1722,7 +1722,7 @@ useEffect(() => {
                         <button
                           key={signal.label}
                           onClick={() => setActiveTab(signal.tab)}
-                          className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 shadow-sm cursor-pointer"
+                          className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 shadow-sm cursor-pointer"
                         >
                           <div className="flex items-center gap-2">
                             <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
@@ -1733,7 +1733,7 @@ useEffect(() => {
                       ))}
                     </div>
 
-                    <div className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] p-4">
+                    <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4">
                       <div className="mb-3 flex items-center justify-between">
                         <h4 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">SIS Data Quality</h4>
                         <span className="rounded-md bg-[#0F3323] border border-[#166534] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#4ADE80]">
@@ -1770,7 +1770,7 @@ useEffect(() => {
                     >
                       <div className="relative z-10 space-y-3">
                         <div className="flex items-start justify-between">
-                          <div className="p-2.5 rounded-xl bg-[#141D2B] border border-[var(--border-color)] text-[var(--accent-cyan)]">
+                          <div className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)]">
                             <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
                           </div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#4ADE80] bg-[#0F3323] border border-[#166534] px-2 py-0.5 rounded">
@@ -1802,7 +1802,7 @@ useEffect(() => {
                       onClick={() => setActiveTab(act.tab)}
                       className="group cursor-pointer rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-5 text-center transition-all hover:border-[var(--brand-primary)]/50 hover:shadow-lg space-y-3"
                     >
-                      <div className="mx-auto w-12 h-12 rounded-xl bg-[#141D2B] border border-[var(--border-color)] flex items-center justify-center group-hover:bg-[#2196F3]/20 transition-colors text-[var(--accent-cyan)] group-hover:text-white">
+                      <div className="mx-auto w-12 h-12 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center group-hover:bg-[#2196F3]/20 transition-colors text-[var(--accent-cyan)] group-hover:text-white">
                         <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
                       </div>
                       <div>
@@ -1829,7 +1829,7 @@ useEffect(() => {
                       <button
                         key={card.title}
                         onClick={() => setActiveTab(card.tab)}
-                        className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 hover:shadow-md cursor-pointer"
+                        className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 hover:shadow-md cursor-pointer"
                       >
                         <span className="material-symbols-outlined rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] p-2 text-[var(--accent-cyan)]">{card.icon}</span>
                         <h4 className="mt-3 text-sm font-bold text-[var(--text-primary)]">{card.title}</h4>
@@ -1840,7 +1840,7 @@ useEffect(() => {
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3 pt-2">
                     {complianceSignals.map((signal) => (
-                      <div key={signal.label} className="rounded-xl border border-[var(--border-color)] bg-[#141D2B] p-4">
+                      <div key={signal.label} className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4">
                         <div className="flex items-center gap-2">
                           <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
                           <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{signal.label}</p>

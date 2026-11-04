@@ -240,7 +240,7 @@ function statusClass(status: NotificationStatus) {
     case 'Scheduled':
       return 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-[#382B14] dark:text-[#F59E0B] dark:border-[#F59E0B]/30';
     case 'Draft':
-      return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-[#1B2636] dark:text-[#B0BDCE] dark:border-[#2A3749]';
+      return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-[var(--bg-card-secondary)] dark:text-[var(--text-secondary)] dark:border-[var(--border-color)]';
     case 'Failed':
       return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-[#3B1A22] dark:text-[#F87171] dark:border-[#F87171]/30';
     default:
@@ -268,7 +268,7 @@ function priorityClass(priority?: PriorityLevel) {
     case 'High':
       return 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-[#382B14] dark:text-[#F59E0B] dark:border-[#F59E0B]/30';
     case 'Low':
-      return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-[#1B2636] dark:text-[#B0BDCE] dark:border-[#2A3749]';
+      return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-[var(--bg-card-secondary)] dark:text-[var(--text-secondary)] dark:border-[var(--border-color)]';
     default:
       return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-[#15294A] dark:text-[#22D3EE] dark:border-[#22D3EE]/30';
   }

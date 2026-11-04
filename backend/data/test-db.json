@@ -89,6 +89,15 @@
       "id": "dev-1792510709793",
       "createdAt": "2026-10-20T15:38:29.793Z",
       "updatedAt": "2026-10-20T15:38:29.793Z"
+    },
+    {
+      "email": "didit_test_1793785921829@alumni.astu.edu.et",
+      "password": "hash123",
+      "role": "ALUMNI",
+      "isActive": true,
+      "id": "dev-1793785924758",
+      "createdAt": "2026-11-04T09:52:04.758Z",
+      "updatedAt": "2026-11-04T09:52:04.758Z"
     }
   ],
   "alumniProfiles": [
@@ -109,7 +118,7 @@
       ],
       "id": "dev-alumni-1787763781926",
       "createdAt": "2026-08-26T17:03:01.926Z",
-      "updatedAt": "2026-10-20T15:38:31.662Z",
+      "updatedAt": "2026-11-04T09:52:05.547Z",
       "employmentStatus": "EMPLOYED",
       "salary": 18000,
       "preferences": {
@@ -134,7 +143,7 @@
       ],
       "id": "dev-alumni-1787763782058",
       "createdAt": "2026-08-26T17:03:02.058Z",
-      "updatedAt": "2026-10-28T06:19:17.896Z",
+      "updatedAt": "2026-11-04T09:52:01.668Z",
       "employmentStatus": "EMPLOYED",
       "salary": 25000,
       "preferences": {
@@ -198,6 +207,24 @@
       "pendingVerificationCode": null,
       "verificationCodeExpiresAt": null,
       "verificationChannel": "NATIONAL_ID"
+    },
+    {
+      "userId": "tracer-alumni-user",
+      "studentId": "ASTU/CSE/777",
+      "fullName": "Tracer Test Alumni",
+      "email": "alumni.tracer@alumni.com",
+      "cgpa": 3.85,
+      "graduationYear": 2024,
+      "gender": "Male",
+      "departmentId": "dev-department-1793785926043",
+      "status": "ACTIVE",
+      "skills": [
+        "Cybersecurity",
+        "Python"
+      ],
+      "id": "dev-alumni-1793785926043",
+      "createdAt": "2026-11-04T09:52:06.043Z",
+      "updatedAt": "2026-11-04T09:52:06.043Z"
     }
   ],
   "employerProfiles": [
@@ -212,7 +239,7 @@
       "companySize": "11-50",
       "id": "dev-employer-1787763781981",
       "createdAt": "2026-08-26T17:03:01.981Z",
-      "updatedAt": "2026-10-28T06:19:15.233Z"
+      "updatedAt": "2026-11-04T09:52:01.597Z"
     }
   ],
   "departments": [
@@ -297,18 +324,184 @@
   ],
   "registrarSyncLogs": [],
   "auditLogs": [],
-  "notifications": [],
+  "notifications": [
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "Application SHORTLISTED",
+      "content": "Great news! Your application for \"Fullstack Engineer\" at Google East Africa has been shortlisted. They will be in touch with you soon.",
+      "id": "dev-notif-1793785921638",
+      "createdAt": "2026-11-04T09:52:01.638Z",
+      "isRead": false
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Fullstack Engineer on 11/5/2026, 12:52:01 PM.",
+      "id": "dev-notif-1793785921664",
+      "createdAt": "2026-11-04T09:52:01.664Z",
+      "isRead": false
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Google East Africa for the position of \"Fullstack Engineer\". Your profile placement has been updated to Employed at Google East Africa.",
+      "id": "dev-notif-1793785921669",
+      "createdAt": "2026-11-04T09:52:01.669Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "Interview Scheduled",
+      "content": "An interview has been scheduled for the position of Mechanical Design Associate on 11/5/2026, 12:52:05 PM.",
+      "id": "dev-notif-1793785925544",
+      "createdAt": "2026-11-04T09:52:05.544Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎉 Congratulations! You are Hired!",
+      "content": "Congratulations! You have been hired by Safaricom Ethiopia for the position of \"Mechanical Design Associate\". Your profile placement has been updated to Employed at Safaricom Ethiopia.",
+      "id": "dev-notif-1793785925547",
+      "createdAt": "2026-11-04T09:52:05.547Z",
+      "isRead": false
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "title": "🎓 [2024 GC] 🎓 New Survey Published: ASTU 6-Month Graduate Tracer Study",
+      "content": "Dear Helen Gidey (2024 GC), A new tracer study survey 'ASTU 6-Month Graduate Tracer Study' is available in your portal and due on 2026-11-25.",
+      "isRead": false,
+      "id": "dev-notif-1793785926050",
+      "createdAt": "2026-11-04T09:52:06.050Z"
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "title": "🎓 [2024 GC] 🎓 New Survey Published: ASTU 6-Month Graduate Tracer Study",
+      "content": "Dear Bob Marley (2024 GC), A new tracer study survey 'ASTU 6-Month Graduate Tracer Study' is available in your portal and due on 2026-11-25.",
+      "isRead": false,
+      "id": "dev-notif-1793785926053",
+      "createdAt": "2026-11-04T09:52:06.053Z"
+    },
+    {
+      "userId": "dev-1792422684633",
+      "title": "🎓 [2025 GC] 🎓 New Survey Published: ASTU 6-Month Graduate Tracer Study",
+      "content": "Dear Abebe Kebede Worku (2025 GC), A new tracer study survey 'ASTU 6-Month Graduate Tracer Study' is available in your portal and due on 2026-11-25.",
+      "isRead": false,
+      "id": "dev-notif-1793785926053",
+      "createdAt": "2026-11-04T09:52:06.053Z"
+    },
+    {
+      "userId": "dev-1792423379026",
+      "title": "🎓 [2025 GC] 🎓 New Survey Published: ASTU 6-Month Graduate Tracer Study",
+      "content": "Dear Abebe Kebede Worku (2025 GC), A new tracer study survey 'ASTU 6-Month Graduate Tracer Study' is available in your portal and due on 2026-11-25.",
+      "isRead": false,
+      "id": "dev-notif-1793785926053",
+      "createdAt": "2026-11-04T09:52:06.053Z"
+    },
+    {
+      "userId": "dev-1792510709793",
+      "title": "🎓 [2025 GC] 🎓 New Survey Published: ASTU 6-Month Graduate Tracer Study",
+      "content": "Dear Abebe Kebede Worku (2025 GC), A new tracer study survey 'ASTU 6-Month Graduate Tracer Study' is available in your portal and due on 2026-11-25.",
+      "isRead": false,
+      "id": "dev-notif-1793785926053",
+      "createdAt": "2026-11-04T09:52:06.053Z"
+    }
+  ],
   "documentRequests": [],
-  "jobs": [],
+  "jobs": [
+    {
+      "employerId": "dev-employer-1793785925536",
+      "title": "Mechanical Design Associate",
+      "description": "Design cellular tower components and enclosures.",
+      "location": "Hawassa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 1,
+      "skillsRequired": [
+        "CAD",
+        "SolidWorks"
+      ],
+      "deadline": "2026-11-09T09:52:05.538Z",
+      "salary": "18000",
+      "responsibilities": "Produce 3D models and CAD blueprints.",
+      "requirements": "Knowledge of mechanical assemblies.",
+      "experienceLevel": "JUNIOR",
+      "department": "MEG",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1793785925539",
+      "createdAt": "2026-11-04T09:52:05.539Z",
+      "views": 0
+    },
+    {
+      "employerId": "dev-employer-1787763781981",
+      "title": "Fullstack Engineer",
+      "description": "Looking for a senior fullstack engineer with React & Node experience.",
+      "location": "Addis Ababa",
+      "employmentType": "FULL_TIME",
+      "experienceRequired": 2,
+      "skillsRequired": [
+        "TypeScript",
+        "Node.js",
+        "React"
+      ],
+      "deadline": "2026-11-14T09:52:01.601Z",
+      "salary": "25000",
+      "responsibilities": "Build backend APIs and frontend UIs.",
+      "requirements": "2+ years of experience.",
+      "experienceLevel": "MID_LEVEL",
+      "department": "SWE",
+      "status": "PUBLISHED",
+      "isActive": true,
+      "id": "job-1793785921616",
+      "createdAt": "2026-11-04T09:52:01.616Z",
+      "views": 0
+    }
+  ],
   "jobApplications": [],
   "hiringEvents": [],
-  "employerFeedbacks": [],
+  "employerFeedbacks": [
+    {
+      "employerId": "dev-employer-1787763781981",
+      "alumniId": "dev-alumni-1787763782058",
+      "technicalSkill": 9,
+      "communicationSkill": 8,
+      "leadershipSkill": 7,
+      "teamworkSkill": 9,
+      "problemSolvingSkill": 8,
+      "innovationSkill": 8,
+      "feedbackText": "Great employee!",
+      "overallSatisfaction": 9,
+      "missingSkills": [
+        "Kubernetes"
+      ],
+      "technologiesNeeded": [
+        "GoLang"
+      ],
+      "wouldHireAgain": true,
+      "id": "fb-1793785921675",
+      "createdAt": "2026-11-04T09:52:01.675Z"
+    }
+  ],
   "homepageConfigs": [
     {
       "id": "hc-main",
       "key": "main",
-      "data": {},
-      "updatedAt": "2026-11-02T00:00:00.000Z"
+      "data": {
+        "heroSlides": [
+          {
+            "id": "slide-1",
+            "title": "Welcome to ASTU Alumni Portal",
+            "subtitle": "Empowering future innovators",
+            "active": true
+          }
+        ],
+        "stats": {
+          "graduates": "45,000+",
+          "chapters": "12"
+        },
+        "partners": []
+      },
+      "updatedAt": "2026-11-04T09:52:05.311Z",
+      "updatedBy": "admin@astu.edu.et"
     }
   ],
   "contentItems": [],
@@ -324,5 +517,7 @@
   "departmentHeadProfiles": [],
   "forumPosts": [],
   "donationCampaigns": [],
-  "contentTemplates": []
+  "contentTemplates": [],
+  "knowledgeDocuments": [],
+  "knowledgeChunks": []
 }

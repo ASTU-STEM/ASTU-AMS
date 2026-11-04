@@ -13,24 +13,24 @@
 
 export const enterpriseTheme = {
   colors: {
-    // Layout Surfaces (sidebar + top nav share one chrome color)
-    appBg: '#0B1120',
-    chromeBg: '#101827',
-    sidebarBg: '#101827',
-    topNavBg: '#101827',
-    panelBg: '#141E2E',
-    secondaryPanelBg: '#192538',
+    // Layout Surfaces (official ASTU-AMS dark palette)
+    appBg: '#0B0F19',
+    chromeBg: '#101725',
+    sidebarBg: '#080D18',
+    topNavBg: '#101725',
+    panelBg: '#151D2B',
+    secondaryPanelBg: '#1B2636',
 
     // Table & List Surfaces
-    tableBg: '#141E2E',
-    tableAltBg: '#192538',
-    tableHoverBg: '#202F43',
-    tableHeaderBg: '#192538',
+    tableBg: '#151D2B',
+    tableAltBg: '#1B2636',
+    tableHoverBg: '#1B2636',
+    tableHeaderBg: '#101725',
 
     // Text & Typography
-    textPrimary: '#F8FAFC',
-    textSecondary: '#CBD5E1',
-    textMuted: '#94A3B8',
+    textPrimary: '#F1F5F9',
+    textSecondary: '#B0BDCE',
+    textMuted: '#8493A8',
 
     // Semantic Accents
     primaryBlue: '#2196F3',
@@ -41,7 +41,7 @@ export const enterpriseTheme = {
     errorRed: '#EF4444',
 
     // Structural Borders
-    border: '#29384D',
+    border: '#2A3749',
     borderLight: '#37475E',
 
     // Status Badges
@@ -67,9 +67,9 @@ export const enterpriseTheme = {
         border: '#1E40AF',
       },
       neutral: {
-        bg: '#192538',
-        text: '#CBD5E1',
-        border: '#29384D',
+        bg: '#1B2636',
+        text: '#B0BDCE',
+        border: '#2A3749',
       },
     },
   },

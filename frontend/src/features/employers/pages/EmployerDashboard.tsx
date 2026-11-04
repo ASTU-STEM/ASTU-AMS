@@ -28,6 +28,8 @@ import { FeedbackTab } from '../components/FeedbackTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
 import { CandidateProfileModal } from '../components/CandidateProfileModal';
+import { CandidatePipelineKanban } from '../components/tabs/CandidatePipelineKanban';
+import { PartnerMoUDirectory } from '../components/tabs/PartnerMoUDirectory';
 import { useTheme } from '../../../hooks/useTheme';
 
 const EmployerDashboard = () => {
@@ -725,6 +727,7 @@ const EmployerDashboard = () => {
                 { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Jobs, candidates, events & analytics' },
                 { id: 'post_job', label: 'Job Scaffolder', icon: 'work', badge: jobBadge, tooltip: `${activeJobsCount} active job postings` },
                 { id: 'candidates', label: 'Applications', icon: 'description', badge: appBadge, tooltip: `${pendingApplicationsCount} pending reviews` },
+                { id: 'pipeline', label: 'Pipeline Kanban', icon: 'view_kanban', badge: null, tooltip: '5-stage candidate recruitment kanban' },
                 { id: 'search_talent', label: 'Talent Search', icon: 'search', badge: null, tooltip: 'Search alumni by skills & criteria' },
               ].map((item) => (
                 <button key={item.id} onClick={() => setActiveTab(item.id)}
@@ -768,6 +771,7 @@ const EmployerDashboard = () => {
             <div className="space-y-0.5">
               {[
                 { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbackBadge, tooltip: `${feedbacks.length} feedback submissions` },
+                { id: 'partnerships', label: 'MoU & Accreditation', icon: 'handshake', badge: null, tooltip: 'Partner accreditation directory & MoUs' },
                 { id: 'chat', label: 'Messages', icon: 'forum', badge: msgBadge, tooltip: `${realUnreadMessages} unread messages` },
                 { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
                 { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
@@ -1576,6 +1580,14 @@ const EmployerDashboard = () => {
                   toast.success(`Opening ASTU_AMS Hub chat with ${target.name}...`);
                 }}
               />
+            )}
+
+            {activeTab === 'pipeline' && (
+              <CandidatePipelineKanban />
+            )}
+
+            {activeTab === 'partnerships' && (
+              <PartnerMoUDirectory />
             )}
 
             {activeTab === 'feedback' && (
