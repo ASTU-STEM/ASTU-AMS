@@ -93,13 +93,13 @@ function AppContent() {
         <Route path="/cms" element={<Navigate to="/cms/dashboard" replace />} />
         <Route path="/ict" element={<Navigate to="/ict/dashboard" replace />} />
 
-        {/* Role-protected routes */}
+        {/* Role-protected routes — SUPER_ADMIN can open every institutional hub via the Hub Bridge */}
         <Route
           path="/alumni/dashboard"
           element={
             <ProtectedRoute
               element={<AlumniDashboard />}
-              allowedRoles={["ALUMNI"]}
+              allowedRoles={["ALUMNI", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -108,7 +108,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<AlumniDashboard defaultTab="tools" />}
-              allowedRoles={["ALUMNI"]}
+              allowedRoles={["ALUMNI", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -117,7 +117,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<AlumniDashboard defaultTab="jobs" />}
-              allowedRoles={["ALUMNI"]}
+              allowedRoles={["ALUMNI", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -126,7 +126,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<EmployerDashboard />}
-              allowedRoles={["EMPLOYER"]}
+              allowedRoles={["EMPLOYER", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -135,7 +135,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<RegistrarDashboard />}
-              allowedRoles={["REGISTRAR"]}
+              allowedRoles={["REGISTRAR", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -144,7 +144,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<DepartmentDashboard />}
-              allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
+              allowedRoles={["DEPARTMENT_HEAD", "ADMIN", "SUPER_ADMIN"]}
             />
           }
         />
@@ -171,7 +171,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<CmsRoutes />}
-              allowedRoles={["ADMIN", "CMS_MANAGER", "ALUMNI_OFFICE"]}
+              allowedRoles={["ADMIN", "CMS_MANAGER", "ALUMNI_OFFICE", "SUPER_ADMIN"]}
             />
           }
         />

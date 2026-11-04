@@ -122,7 +122,10 @@ export default function HowItWorksSection({
       tone="muted"
       eyebrow={headers?.eyebrow || "Get Started"}
       title={headers?.title || "How ASTU-AMS Works"}
-      description={headers?.description}
+      description={
+        headers?.description ||
+        "From registration to real impact — here is how our platform empowers alumni, employers, and the university community in four simple steps."
+      }
       action={
         <ViewAllButton
           label={viewAllLabel}
@@ -131,31 +134,31 @@ export default function HowItWorksSection({
         />
       }
     >
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
         {pageItems.map((item, idx) => {
           const Icon = resolveIcon(item, page * HOME_PREVIEW_COUNT + idx);
           const stepNum = String(item.step).padStart(2, "0");
           return (
             <article
               key={`${item.id}-${page}`}
-              className="group flex h-full flex-col justify-between border-b border-slate-200 bg-transparent pb-5 pt-1 transition duration-300 hover:border-astu-navy/40 dark:border-slate-700 motion-reduce:transition-none sm:border-b-0 sm:border-l sm:pb-0 sm:pl-5 sm:pt-0 first:sm:border-l-0 first:sm:pl-0"
+              className="group flex h-full flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <div>
-                <div className="mb-4 flex items-center justify-between gap-2">
-                  <span className="text-[11px] font-extrabold tracking-[0.2em] text-astu-red">
+                <div className="mb-5 flex items-center justify-between gap-2">
+                  <span className="text-xs font-extrabold tracking-[0.22em] text-astu-red">
                     {stepNum}
                   </span>
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.iconBg}`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconBg} transition duration-300 group-hover:scale-105`}
                   >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
+                    <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </div>
-                <h3 className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
+                <h3 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white md:text-xl">
                   {item.title}
                 </h3>
                 {item.description ? (
-                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-[0.95rem]">
                     {item.description}
                   </p>
                 ) : null}
@@ -163,10 +166,13 @@ export default function HowItWorksSection({
               <button
                 type="button"
                 onClick={() => onNavigate(item.route)}
-                className="home-btn home-btn--soft home-btn--sm mt-5"
+                className="group/btn mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-astu-navy transition-all duration-300 hover:border-astu-navy hover:bg-astu-navy hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 dark:border-slate-600 dark:bg-slate-800/60 dark:text-sky-300 dark:hover:border-sky-500 dark:hover:bg-sky-600 dark:hover:text-white"
               >
                 <span>{item.cta}</span>
-                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
+                <ArrowRight
+                  className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover/btn:translate-x-1"
+                  aria-hidden="true"
+                />
               </button>
             </article>
           );

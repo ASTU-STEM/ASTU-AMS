@@ -32,7 +32,7 @@ function PartnerLogoItem({
     <button
       type="button"
       onClick={onNavigate}
-      className="group flex h-[4.5rem] w-[168px] shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white px-4 transition duration-300 hover:-translate-y-0.5 hover:border-astu-navy/25 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-sky-500/30"
+      className="group flex h-[5.25rem] w-[180px] shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white px-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-sky-500/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       aria-label={`View ${partner.name}`}
       title={partner.name}
     >
@@ -72,11 +72,11 @@ export default function PartnersStrip({
     <SectionShell
       id="partners"
       tone="plain"
-      eyebrow={headers?.eyebrow || "Industry Network"}
-      title={headers?.title || "Partners"}
+      eyebrow={headers?.eyebrow || "Our Partners"}
+      title={headers?.title || "Partner Companies"}
       description={
         headers?.description ||
-        "Organizations collaborating with ASTU on talent, research, and campus engagement."
+        "Institutional partners supporting employability, internships, and research collaboration."
       }
       action={
         <ViewAllButton

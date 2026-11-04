@@ -969,48 +969,6 @@ export default function AnalyticsOverview() {
               </span>
             )}
 
-            {filters.degreeLevel !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Degree: {filters.degreeLevel}
-                <button onClick={() => setFilters(f => ({ ...f, degreeLevel: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.employmentStatus !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Status: {filters.employmentStatus}
-                <button onClick={() => setFilters(f => ({ ...f, employmentStatus: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.industrySector !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Industry: {filters.industrySector}
-                <button onClick={() => setFilters(f => ({ ...f, industrySector: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.salaryTier !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Salary: {filters.salaryTier}
-                <button onClick={() => setFilters(f => ({ ...f, salaryTier: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.verificationStatus !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Verification: {filters.verificationStatus}
-                <button onClick={() => setFilters(f => ({ ...f, verificationStatus: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.hasResume && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Resume Attached
-                <button onClick={() => setFilters(f => ({ ...f, hasResume: false }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
             <button
               onClick={resetFilters}
               className="ml-auto font-bold text-rose-600 hover:text-rose-800 hover:underline text-xs flex items-center gap-1 cursor-pointer transition-colors"

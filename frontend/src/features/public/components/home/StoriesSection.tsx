@@ -38,7 +38,7 @@ export default function StoriesSection({ stories, headers, onNavigate }: Stories
     <SectionShell
       id="success-stories"
       tone="muted"
-      eyebrow={headers?.eyebrow}
+      eyebrow={headers?.eyebrow || "Alumni Voices"}
       title={headers?.title || "Alumni Success Stories"}
       description={headers?.description}
       action={
@@ -49,16 +49,16 @@ export default function StoriesSection({ stories, headers, onNavigate }: Stories
         />
       }
     >
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-3 md:gap-6">
         {pageItems.map((story) => (
           <button
             key={`${story.id}-${page}`}
             type="button"
             onClick={() => onNavigate(`/stories/${story.id}`)}
-            className="group rounded-xl border border-slate-200/80 bg-white/60 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-astu-navy/25 hover:bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-900/40 dark:hover:border-sky-500/40 dark:hover:bg-slate-900"
+            className="group rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
-            <div className="mb-4 flex items-center gap-3">
-              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+            <div className="mb-5 flex items-center gap-3.5">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-2 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
                 {story.image ? (
                   <img
                     src={resolveMedia(story.image)}
@@ -67,14 +67,16 @@ export default function StoriesSection({ stories, headers, onNavigate }: Stories
                     loading="lazy"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm font-bold text-astu-navy dark:text-sky-300">
+                  <div className="flex h-full w-full items-center justify-center text-base font-bold text-astu-navy dark:text-sky-300">
                     {(story.name || "A").slice(0, 1)}
                   </div>
                 )}
               </div>
               <div className="min-w-0">
-                <h3 className="truncate font-bold text-slate-900 dark:text-white">{story.name}</h3>
-                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                <h3 className="truncate text-base font-bold text-slate-900 dark:text-white md:text-lg">
+                  {story.name}
+                </h3>
+                <p className="truncate text-sm text-slate-500 dark:text-slate-400">
                   {[
                     story.role,
                     story.company,
@@ -86,8 +88,8 @@ export default function StoriesSection({ stories, headers, onNavigate }: Stories
               </div>
             </div>
             {story.quote || story.text ? (
-              <p className="line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                <Quote className="mb-0.5 mr-1 inline h-3.5 w-3.5 text-astu-red" aria-hidden="true" />
+              <p className="line-clamp-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-[0.95rem]">
+                <Quote className="mb-0.5 mr-1 inline h-4 w-4 text-astu-red" aria-hidden="true" />
                 {story.quote || story.text}
               </p>
             ) : null}

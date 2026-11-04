@@ -1,11 +1,13 @@
 import React, { useMemo } from "react";
 import type { PublicStat } from "../../services/publicStats.service";
-import { HOME_PREVIEW_COUNT, SectionShell, STAT_PRESENTATION } from "./homeShared";
+import { STAT_PRESENTATION } from "./homeShared";
 
 interface ImpactCountersProps {
   stats: PublicStat[];
   headers?: { eyebrow?: string; title?: string; description?: string };
 }
+
+const MAX_STATS = 4;
 
 export default function ImpactCounters({ stats, headers }: ImpactCountersProps) {
   const visible = useMemo(
@@ -19,39 +21,43 @@ export default function ImpactCounters({ stats, headers }: ImpactCountersProps) 
           (entry): entry is { stat: PublicStat; presentation: (typeof STAT_PRESENTATION)[string] } =>
             Boolean(entry)
         )
-        .slice(0, HOME_PREVIEW_COUNT),
+        .slice(0, MAX_STATS),
     [stats]
   );
 
   if (!visible.length) return null;
 
   return (
-    <SectionShell
+    <section
       id="impact-numbers"
-      tone="band"
-      eyebrow={headers?.eyebrow}
-      title={headers?.title || "ASTU at a Glance"}
-      description={headers?.description}
+      className="relative isolate z-0 w-full overflow-x-clip border-b border-astu-red bg-slate-950"
+      aria-label={headers?.title || "ASTU impact at a glance"}
     >
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(7,89,166,0.18),_transparent_55%)]" aria-hidden="true" />
+      <div className="relative mx-auto grid max-w-[1440px] grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">
         {visible.map(({ stat, presentation }) => {
           const Icon = presentation.Icon;
           return (
-            <div key={stat.key} className="border-t border-slate-200 pt-4 dark:border-slate-700">
-              <div className={`mb-3 inline-flex rounded-lg p-2 ${presentation.accent}`}>
-                <Icon className="h-4 w-4" aria-hidden="true" />
+            <div
+              key={stat.key}
+              className="group flex flex-col items-center justify-center gap-3 bg-slate-950 px-4 py-10 text-center transition duration-300 hover:bg-slate-900 sm:py-12 md:px-6 motion-reduce:transition-none"
+            >
+              <div
+                className={`inline-flex rounded-xl p-3 ${presentation.accent} ring-1 ring-white/10 transition duration-300 group-hover:scale-105 motion-reduce:group-hover:scale-100`}
+              >
+                <Icon className="h-5 w-5 md:h-6 md:w-6" aria-hidden="true" />
               </div>
-              <p className="animate-count text-2xl font-black tabular-nums text-slate-900 dark:text-white md:text-3xl">
+              <p className="animate-count text-3xl font-black tabular-nums tracking-tight text-white md:text-4xl lg:text-[2.75rem]">
                 {stat.value.toLocaleString()}
                 {stat.suffix || ""}
               </p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400 md:text-xs">
                 {presentation.label}
               </p>
             </div>
           );
         })}
       </div>
-    </SectionShell>
+    </section>
   );
 }

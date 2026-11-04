@@ -48,9 +48,11 @@ class AdminRouteBoundary extends React.Component<
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/admin/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Admin' }, { label: 'Dashboard' }] },
   '/admin/ict-portal': { title: 'ICT Technical Portal', breadcrumb: [{ label: 'Admin' }, { label: 'ICT Portal' }] },
-  '/admin/messages': { title: 'ASTU_AMS Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Messages' }] },
+  '/admin/messages': { title: 'Messages', breadcrumb: [{ label: 'Admin' }, { label: 'Messages' }] },
   '/admin/support-tickets': { title: 'Support Desk', breadcrumb: [{ label: 'Admin' }, { label: 'Support Desk' }] },
   '/admin/modules': { title: 'Super Admin Modules', breadcrumb: [{ label: 'Admin' }, { label: 'Modules' }] },
+  '/admin/knowledge-hub': { title: 'Knowledge Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Knowledge Hub' }] },
+  '/admin/rag-knowledge': { title: 'Knowledge Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Knowledge Hub' }] },
   '/admin/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Admin' }, { label: 'Reports' }] },
   '/admin/users': { title: 'User Management', breadcrumb: [{ label: 'Admin' }, { label: 'Users' }] },
   '/admin/roles': { title: 'Role Management', breadcrumb: [{ label: 'Admin' }, { label: 'Roles' }] },
@@ -59,10 +61,10 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/admin/jobs': { title: 'Jobs Management', breadcrumb: [{ label: 'Admin' }, { label: 'Jobs' }] },
   '/admin/departments': { title: 'Departments', breadcrumb: [{ label: 'Admin' }, { label: 'Departments' }] },
   '/admin/donations': { title: 'Donations & Giving', breadcrumb: [{ label: 'Admin' }, { label: 'Donations' }] },
-  '/admin/notifications': { title: 'Notifications', breadcrumb: [{ label: 'Admin' }, { label: 'Notifications' }] },
-  '/admin/logs': { title: 'System Logs', breadcrumb: [{ label: 'Admin' }, { label: 'Logs' }] },
+  '/admin/notifications': { title: 'Notification Center', breadcrumb: [{ label: 'Admin' }, { label: 'Configuration' }, { label: 'Notification Center' }] },
+  '/admin/logs': { title: 'System Logs', breadcrumb: [{ label: 'Admin' }, { label: 'Configuration' }, { label: 'System Logs' }] },
   '/admin/backup': { title: 'Backup & Security', breadcrumb: [{ label: 'Admin' }, { label: 'Backup' }] },
-  '/admin/settings': { title: 'Settings', breadcrumb: [{ label: 'Admin' }, { label: 'Settings' }] },
+  '/admin/settings': { title: 'System Settings', breadcrumb: [{ label: 'Admin' }, { label: 'Configuration' }, { label: 'System Settings' }] },
   '/admin/profile': { title: 'My Profile', breadcrumb: [{ label: 'Admin' }, { label: 'Profile' }] },
 };
 

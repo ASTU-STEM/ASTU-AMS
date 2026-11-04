@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import {
   GraduationCap,
@@ -38,6 +39,11 @@ interface HubDefinition {
   allowedRoles: string[];
 }
 
+/**
+ * Cross-role navigation strip shared by directorate dashboards.
+ * Lets authorized roles jump between institutional workspaces (Registrar, Admin,
+ * ICT, CMS, Department, Employer, Alumni) without logging out.
+ */
 const HUBS: HubDefinition[] = [
   {
     key: 'registrar',
@@ -59,7 +65,7 @@ const HUBS: HubDefinition[] = [
     icon: Shield,
     accentColor: 'from-slate-800 to-slate-900',
     badge: 'Super Admin',
-    allowedRoles: ['SUPER_ADMIN', 'ADMIN'],
+    allowedRoles: ['SUPER_ADMIN'],
   },
   {
     key: 'ict',
@@ -81,7 +87,7 @@ const HUBS: HubDefinition[] = [
     icon: Newspaper,
     accentColor: 'from-amber-700 to-orange-800',
     badge: 'CMS Relations',
-    allowedRoles: ['ALUMNI_OFFICE', 'SUPER_ADMIN', 'ADMIN'],
+    allowedRoles: ['ALUMNI_OFFICE', 'CMS_MANAGER', 'SUPER_ADMIN', 'ADMIN'],
   },
   {
     key: 'department',
@@ -130,20 +136,31 @@ export const InstitutionalHubBridge: React.FC<InstitutionalHubBridgeProps> = ({
   const currentUserRole = user?.role || 'GUEST';
   const currentHubDef = HUBS.find((h) => h.key === currentHub) || HUBS[0];
 
+  const isRoleAuthorized = (hub: HubDefinition) => hub.allowedRoles.includes(currentUserRole);
+
+  const accessibleCount = useMemo(
+    () => HUBS.filter((hub) => isRoleAuthorized(hub)).length,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentUserRole]
+  );
+
   const handleNavigateToHub = (hub: HubDefinition) => {
     if (hub.key === currentHub) return;
-    navigate(hub.path);
-  };
 
-  const isRoleAuthorized = (hub: HubDefinition) => {
-    return hub.allowedRoles.includes(currentUserRole);
+    if (!isRoleAuthorized(hub)) {
+      toast.error(
+        `Access restricted. ${hub.shortTitle} requires ${hub.allowedRoles.join(' or ')}.`
+      );
+      return;
+    }
+
+    navigate(hub.path);
   };
 
   return (
     <div
       className={`rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-xs overflow-hidden transition-all duration-300 ${className}`}
     >
-      {/* Header bar / Ecosystem Status Banner */}
       <div className="px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/50">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-[#003580] text-white flex items-center justify-center shadow-xs">
@@ -154,9 +171,19 @@ export const InstitutionalHubBridge: React.FC<InstitutionalHubBridgeProps> = ({
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#003580] dark:text-emerald-400">
                 ASTU-AMS Institutional Network
               </span>
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                7 Hubs Connected
+              <span
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                  accessibleCount === HUBS.length
+                    ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                    : 'bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300'
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    accessibleCount === HUBS.length ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                  }`}
+                />
+                {accessibleCount} of {HUBS.length} hubs accessible
               </span>
             </div>
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
@@ -171,10 +198,13 @@ export const InstitutionalHubBridge: React.FC<InstitutionalHubBridgeProps> = ({
         <div className="flex items-center gap-2">
           <div className="hidden md:flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 mr-2">
             <Activity className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Role: <strong className="text-slate-700 dark:text-slate-300">{currentUserRole}</strong></span>
+            <span>
+              Role: <strong className="text-slate-700 dark:text-slate-300">{currentUserRole}</strong>
+            </span>
           </div>
 
           <button
+            type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750 transition-colors"
           >
@@ -193,11 +223,11 @@ export const InstitutionalHubBridge: React.FC<InstitutionalHubBridgeProps> = ({
         </div>
       </div>
 
-      {/* Expanded Grid of Interconnected Dashboards */}
       {isExpanded && (
         <div className="p-4 sm:p-5">
           <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium">
-            Shared institutional workspace. Seamlessly transition between registrar records, department outcomes, corporate employers, alumni community, and technical directorates.
+            Switch between institutional workspaces you are authorized to open — Registrar SIS,
+            Executive Admin, ICT, Alumni Office CMS, Department, Employer, and Alumni portals.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2.5">
@@ -209,24 +239,24 @@ export const InstitutionalHubBridge: React.FC<InstitutionalHubBridgeProps> = ({
               return (
                 <button
                   key={hub.key}
+                  type="button"
                   onClick={() => handleNavigateToHub(hub)}
                   disabled={isCurrent}
                   title={
                     isCurrent
                       ? 'Currently viewing this dashboard'
                       : authorized
-                      ? `Switch to ${hub.title}`
-                      : `Requires ${hub.allowedRoles.join(' or ')} permission`
+                        ? `Open ${hub.title}`
+                        : `Requires ${hub.allowedRoles.join(' or ')}`
                   }
                   className={`relative flex flex-col p-3 rounded-xl border text-left transition-all duration-200 ${
                     isCurrent
                       ? 'border-[#003580] dark:border-blue-500 bg-[#003580]/5 dark:bg-blue-950/20 shadow-xs ring-1 ring-[#003580]/30 cursor-default'
                       : authorized
-                      ? 'border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs hover:-translate-y-0.5'
-                      : 'border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 opacity-75 hover:opacity-90'
+                        ? 'border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs hover:-translate-y-0.5'
+                        : 'border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/30 opacity-70'
                   }`}
                 >
-                  {/* Active Indicator Pin */}
                   {isCurrent && (
                     <span className="absolute top-2 right-2 flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider text-[#003580] dark:text-blue-400 bg-blue-100/80 dark:bg-blue-950/70 px-1.5 py-0.5 rounded-full">
                       <CheckCircle2 className="w-2.5 h-2.5" />
@@ -235,7 +265,7 @@ export const InstitutionalHubBridge: React.FC<InstitutionalHubBridgeProps> = ({
                   )}
 
                   {!isCurrent && !authorized && (
-                    <span className="absolute top-2 right-2 text-slate-400 dark:text-slate-500" title="Restricted role access">
+                    <span className="absolute top-2 right-2 text-slate-400 dark:text-slate-500">
                       <Lock className="w-3 h-3" />
                     </span>
                   )}
@@ -263,9 +293,19 @@ export const InstitutionalHubBridge: React.FC<InstitutionalHubBridgeProps> = ({
                   </span>
 
                   {!isCurrent && (
-                    <span className="mt-2.5 inline-flex items-center gap-1 text-[10px] font-semibold text-[#003580] dark:text-blue-400">
-                      <span>{authorized ? 'Open Hub' : 'View Hub'}</span>
-                      <ExternalLink className="w-2.5 h-2.5" />
+                    <span
+                      className={`mt-2.5 inline-flex items-center gap-1 text-[10px] font-semibold ${
+                        authorized
+                          ? 'text-[#003580] dark:text-blue-400'
+                          : 'text-slate-400 dark:text-slate-500'
+                      }`}
+                    >
+                      <span>{authorized ? 'Open Hub' : 'Locked'}</span>
+                      {authorized ? (
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      ) : (
+                        <Lock className="w-2.5 h-2.5" />
+                      )}
                     </span>
                   )}
                 </button>

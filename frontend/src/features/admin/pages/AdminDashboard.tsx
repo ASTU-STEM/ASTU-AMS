@@ -271,11 +271,11 @@ export default function AdminDashboard() {
     id: `comp-${i}`,
     name: c.name,
     hires: c.hires,
-    percentage: c.percentage || Math.round((c.hires / (activeHiringCompanies.reduce((s, x) => s + x.hires, 0) || 1)) * 100),
+    percentage: c.percentage ?? 0,
     postedJobs: 0,
-    industry: 'Technology & Enterprise',
-    isVerified: true,
-    location: 'Ethiopia',
+    industry: 'Unspecified',
+    isVerified: false,
+    location: 'Unspecified',
     alumniList: []
   }));
 
@@ -379,15 +379,15 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center gap-2 text-slate-300/80">
               <RefreshCw className="w-3.5 h-3.5 text-[#FFCC00]" />
-              <span>Last sync: {metrics?.headerInfo?.lastSync || 'Just now'}</span>
+              <span>Last sync: {metrics?.headerInfo?.lastSync || (loading ? '…' : 'Never synced')}</span>
             </div>
             <div className="flex items-center gap-2 text-slate-300/80">
               <Database className="w-3.5 h-3.5 text-[#FFCC00]" />
-              <span>{metrics?.headerInfo?.totalRecords || 'Connected'}</span>
+              <span>{metrics?.headerInfo?.totalRecords || (loading ? '…' : '0 records')}</span>
             </div>
             <div className="flex items-center gap-2 text-slate-300/80">
               <Users className="w-3.5 h-3.5 text-[#FFCC00]" />
-              <span>{metrics?.headerInfo?.activeSessions || 'Active'}</span>
+              <span>{metrics?.headerInfo?.activeSessions || (loading ? '…' : '0 registered users')}</span>
             </div>
           </div>
 
@@ -401,7 +401,7 @@ export default function AdminDashboard() {
       {/* Cross-Directorate Multi-Hub Bridge */}
       <InstitutionalHubBridge currentHub="admin" className="mb-6" />
 
-      {/* Executive Directorate Institutional Gateway & Health Strip */}
+      {/* Executive Directorate Institutional Gateway & Health Strip — live metrics only */}
       <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:bg-[#151D2B] dark:border-[#2A3749] mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -411,36 +411,57 @@ export default function AdminDashboard() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-slate-900 dark:text-[#F1F5F9]">Executive Directorate Institutional Gateway</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  All 4 Core Hubs Online
-                </span>
+                {(() => {
+                  const hubsOnline = metrics?.gatewayStrip?.hubsOnline;
+                  const hubsTotal = metrics?.gatewayStrip?.hubsTotal ?? 4;
+                  const allUp = typeof hubsOnline === 'number' && hubsOnline === hubsTotal;
+                  return (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
+                      loading || hubsOnline == null
+                        ? 'bg-slate-100 text-slate-500 dark:bg-[#1B2636] dark:text-[#8493A8]'
+                        : allUp
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                    }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${allUp ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                      {loading
+                        ? 'Checking hubs…'
+                        : metrics?.gatewayStrip?.hubsLabel || `${hubsOnline ?? 0} of ${hubsTotal} core hubs online`}
+                    </span>
+                  );
+                })()}
               </div>
               <p className="text-xs text-slate-500 dark:text-[#8493A8] mt-0.5">
-                ASTU High-Performance Institutional Backbone: Real-time telemetry across Registrar SIS, Fayda National ID Gateway, Telebirr &amp; Chapa Payment Rail, and Department Tracer Services.
+                Live status for Registrar SIS, Fayda National ID (Didit), Chapa payment rail, and document SLA — from settings and database counts.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap shrink-0">
             <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[#2A3749] dark:bg-[#1B2636]">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <ShieldCheck className={`w-4 h-4 ${metrics?.gatewayStrip?.fayda?.healthy ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">Fayda ID Gateway</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">Active &bull; Verified</div>
+                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">
+                  {loading ? '…' : metrics?.gatewayStrip?.fayda?.status || 'Not configured'}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[#2A3749] dark:bg-[#1B2636]">
-              <Database className="w-4 h-4 text-[#003580] dark:text-[#22D3EE]" />
+              <Database className={`w-4 h-4 ${metrics?.gatewayStrip?.sis?.healthy ? 'text-[#003580] dark:text-[#22D3EE]' : 'text-slate-400'}`} />
               <div>
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">SIS Roster Sync</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">3,450 Records</div>
+                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">
+                  {loading ? '…' : metrics?.gatewayStrip?.sis?.status || '0 records'}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[#2A3749] dark:bg-[#1B2636]">
-              <Zap className="w-4 h-4 text-amber-500" />
+              <Zap className={`w-4 h-4 ${metrics?.gatewayStrip?.systemSLA?.healthy ? 'text-amber-500' : 'text-slate-400'}`} />
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">System SLA</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">99.98% High-Avail</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">Document SLA</div>
+                <div className="text-xs font-extrabold text-slate-800 dark:text-[#F1F5F9]">
+                  {loading ? '…' : metrics?.gatewayStrip?.systemSLA?.status || metrics?.commandCenter?.systemSLA || 'No requests yet'}
+                </div>
               </div>
             </div>
           </div>
@@ -470,9 +491,11 @@ export default function AdminDashboard() {
                 ['Active Jobs', metrics?.kpis?.activeJobs || 0],
                 ['Identity Coverage', metrics?.commandCenter?.identityCoverage || '0%'],
                 ['Approval Queue Count', metrics?.commandCenter?.approvalQueueCount || 0],
-                ['System SLA', metrics?.commandCenter?.systemSLA || '100%'],
+                ['Document SLA', metrics?.commandCenter?.systemSLA || 'No requests yet'],
                 ['Profile Completeness', metrics?.commandCenter?.completeness || '0%'],
-                ['Total Database Records', metrics?.headerInfo?.totalRecords || '0'],
+                ['Total Database Records', metrics?.headerInfo?.totalRecords || '0 records'],
+                ['SIS Roster', metrics?.gatewayStrip?.sis?.status || '0 records'],
+                ['Fayda Gateway', metrics?.gatewayStrip?.fayda?.status || 'Not configured'],
                 ['Report Generated At', new Date().toISOString()],
               ].map(e => e.join(',')).join('\n');
 
@@ -496,9 +519,9 @@ export default function AdminDashboard() {
           <div className="lg:col-span-7 grid grid-cols-2 gap-3.5">
             {[
               { label: 'IDENTITY COVERAGE', value: metrics?.commandCenter?.identityCoverage || '0%', icon: CheckCircle2, tone: 'text-emerald-600 bg-emerald-50 dark:bg-[#163828] border-emerald-100 dark:border-[#22C55E]/30' },
-              { label: 'APPROVAL QUEUE', value: (metrics?.commandCenter?.approvalQueueCount ?? activePendingActions.length).toString(), icon: AlertTriangle, tone: 'text-amber-600 bg-amber-50 dark:bg-[#382B14] border-amber-100 dark:border-[#F59E0B]/30' },
-              { label: 'SYSTEM SLA', value: metrics?.commandCenter?.systemSLA || '100% On-Time', icon: Clock3, tone: 'text-emerald-600 bg-emerald-50 dark:bg-[#163828] border-emerald-100 dark:border-[#22C55E]/30' },
-              { label: 'EXPORT STATUS', value: metrics?.commandCenter?.exportStatus || 'Ready', icon: FileSpreadsheet, tone: 'text-[#003580] dark:text-[#22D3EE] bg-blue-50 dark:bg-[#15294A] border-blue-100 dark:border-[#22D3EE]/30' },
+              { label: 'APPROVAL QUEUE', value: (metrics?.commandCenter?.approvalQueueCount ?? 0).toString(), icon: AlertTriangle, tone: 'text-amber-600 bg-amber-50 dark:bg-[#382B14] border-amber-100 dark:border-[#F59E0B]/30' },
+              { label: 'DOCUMENT SLA', value: metrics?.commandCenter?.systemSLA || 'No requests yet', icon: Clock3, tone: 'text-emerald-600 bg-emerald-50 dark:bg-[#163828] border-emerald-100 dark:border-[#22C55E]/30' },
+              { label: 'EXPORT STATUS', value: metrics?.commandCenter?.exportStatus || 'No Data', icon: FileSpreadsheet, tone: 'text-[#003580] dark:text-[#22D3EE] bg-blue-50 dark:bg-[#15294A] border-blue-100 dark:border-[#22D3EE]/30' },
             ].map((sig) => {
               const Icon = sig.icon;
               return (
@@ -533,13 +556,13 @@ export default function AdminDashboard() {
                 <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">COMPLETENESS</p>
               </div>
               <div className="p-3 rounded-lg bg-white dark:bg-[#151D2B] border border-slate-100 dark:border-[#2A3749] text-center">
-                <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{metrics?.commandCenter?.auditTrail || 'Live'}</p>
+                <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{metrics?.commandCenter?.auditTrail || '0 Logged'}</p>
                 <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">AUDIT TRAIL</p>
               </div>
             </div>
 
             <p className="text-[11px] text-slate-500 dark:text-[#B0BDCE] font-medium">
-              {metrics?.commandCenter?.healthStatusText || 'System database health verified conflict-free. All audit trails logging active.'}
+              {metrics?.commandCenter?.healthStatusText || (loading ? 'Loading database health…' : 'No health summary yet — metrics will appear once the database responds.')}
             </p>
           </div>
         </div>
@@ -562,7 +585,7 @@ export default function AdminDashboard() {
                   <Icon className={`h-5 w-5 ${styles.label}`} />
                 </div>
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 dark:bg-[#163828] text-emerald-600 dark:text-[#22C55E] border border-emerald-100 dark:border-[#22C55E]/30">
-                  SYSTEM VERIFIED
+                  {loading ? 'LOADING' : metrics ? 'LIVE DATA' : 'NO DATA'}
                 </span>
               </div>
               <div className="space-y-1">
@@ -624,33 +647,39 @@ export default function AdminDashboard() {
             }
           >
             <div className="h-[340px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={activeEmploymentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
-                  <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <YAxis
-                    tick={{ fill: '#64748B', fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                    domain={[0, 100]}
-                    tickFormatter={(value) => `${value}%`}
-                  />
-                  <Tooltip
-                    formatter={(value) => [`${value}%`, 'Employment Rate']}
-                    contentStyle={{
-                      borderRadius: 12,
-                      border: '1px solid #E8EDF5',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                    }}
-                  />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                    {activeEmploymentData.map((entry: any, index: number) => (
-                      <Cell key={`cell-${entry.department}`} fill={index === 4 ? '#E8A020' : '#003580'} />
-                    ))}
-                    <LabelList dataKey="value" position="top" formatter={(value: number) => `${value}%`} fill="#334155" fontSize={12} />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              {activeEmploymentData.length === 0 ? (
+                <div className="flex h-full items-center justify-center text-sm text-slate-400 dark:text-[#8493A8] text-center px-6">
+                  {loading ? 'Loading employment rates…' : 'No department employment data yet. Rates appear when alumni profiles include employment status.'}
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={activeEmploymentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
+                    <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
+                    <YAxis
+                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                      domain={[0, 100]}
+                      tickFormatter={(value) => `${value}%`}
+                    />
+                    <Tooltip
+                      formatter={(value) => [`${value}%`, 'Employment Rate']}
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: '1px solid #E8EDF5',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                      {activeEmploymentData.map((entry: any, index: number) => (
+                        <Cell key={`cell-${entry.department}`} fill={index === 4 ? '#E8A020' : '#003580'} />
+                      ))}
+                      <LabelList dataKey="value" position="top" formatter={(value: number) => `${value}%`} fill="#334155" fontSize={12} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </ChartCard>
         </div>
@@ -726,10 +755,30 @@ export default function AdminDashboard() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'API Response Time', value: metrics?.systemHealth?.apiLatency || '<20ms', status: (metrics?.systemHealth?.apiLatencyNum || 0) < 300 ? ('healthy' as const) : ('warning' as const), trend: metrics?.systemHealth?.latencyTrend || 'Optimal' },
-            { label: 'Database Status', value: metrics?.systemHealth?.dbStatus || metrics?.headerInfo?.totalRecords || 'Connected', status: 'healthy' as const, trend: 'Prisma DB Live' },
-            { label: 'Profile Completeness', value: metrics?.systemHealth?.completeness || metrics?.commandCenter?.completeness || '0%', status: 'healthy' as const, trend: 'Data Verified' },
-            { label: 'Active Sessions', value: metrics?.systemHealth?.activeSessions || metrics?.headerInfo?.activeSessions || '1 active session', status: 'healthy' as const, trend: 'User Accounts' },
+            {
+              label: 'API Response Time',
+              value: metrics?.systemHealth?.apiLatency || (loading ? '…' : '—'),
+              status: (metrics?.systemHealth?.apiLatencyNum ?? 0) < 300 ? ('healthy' as const) : ('warning' as const),
+              trend: metrics?.systemHealth?.latencyTrend || (loading ? 'Measuring' : 'No sample yet'),
+            },
+            {
+              label: 'Database Status',
+              value: metrics?.systemHealth?.dbStatus || metrics?.headerInfo?.totalRecords || (loading ? '…' : '0 records'),
+              status: metrics ? ('healthy' as const) : ('warning' as const),
+              trend: metrics ? 'Prisma connected' : 'Awaiting metrics',
+            },
+            {
+              label: 'Profile Completeness',
+              value: metrics?.systemHealth?.completeness || metrics?.commandCenter?.completeness || '0%',
+              status: 'healthy' as const,
+              trend: 'Alumni sample score',
+            },
+            {
+              label: 'Registered Users',
+              value: metrics?.systemHealth?.activeSessions || metrics?.headerInfo?.activeSessions || (loading ? '…' : '0 registered users'),
+              status: 'healthy' as const,
+              trend: 'Accounts in database',
+            },
           ].map((metric) => (
             <div key={metric.label} className="rounded-xl border border-slate-100 dark:border-[#2A3749] bg-slate-50/60 dark:bg-[#1B2636] p-4 transition-all duration-200 hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[#202E40] hover:shadow-sm">
               <div className="flex items-center justify-between">
@@ -755,20 +804,26 @@ export default function AdminDashboard() {
           </div>
 
           <div className="mt-5 space-y-4">
-            {activeSystemActivities.map((entry: any, index: number) => {
-              const Icon = entry.icon;
-              return (
-                <div key={index} className="flex gap-3 group">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-[#1B2636] group-hover:bg-blue-50 dark:group-hover:bg-[#202E40] transition-colors">
-                    <Icon className="h-4.5 w-4.5" style={{ color: entry.tone }} />
+            {activeSystemActivities.length === 0 ? (
+              <p className="text-sm text-slate-400 dark:text-[#8493A8] py-6 text-center">
+                {loading ? 'Loading activity…' : 'No audit events yet. Administrative actions will appear here as they are logged.'}
+              </p>
+            ) : (
+              activeSystemActivities.map((entry: any, index: number) => {
+                const Icon = entry.icon;
+                return (
+                  <div key={index} className="flex gap-3 group">
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-[#1B2636] group-hover:bg-blue-50 dark:group-hover:bg-[#202E40] transition-colors">
+                      <Icon className="h-4.5 w-4.5" style={{ color: entry.tone }} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-slate-800 dark:text-[#F1F5F9]">{entry.text}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400 dark:text-[#8493A8] font-medium">{entry.time}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-slate-800 dark:text-[#F1F5F9]">{entry.text}</p>
-                    <p className="mt-0.5 text-[11px] text-slate-400 dark:text-[#8493A8] font-medium">{entry.time}</p>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -779,25 +834,31 @@ export default function AdminDashboard() {
           </div>
 
           <div className="mt-5 space-y-3">
-            {activePendingActions.map((task: any, index: number) => (
-              <div
-                key={index}
-                className="group rounded-xl border border-slate-200 dark:border-[#2A3749] border-l-4 bg-white dark:bg-[#1B2636] p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-                style={{ borderLeftColor: task.tone }}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-[#F1F5F9]">{task.label}</p>
-                  <button
-                    type="button"
-                    onClick={() => navigate(task.path || '/admin/users')}
-                    className="rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 hover:shadow-md cursor-pointer"
-                    style={{ backgroundColor: task.tone }}
-                  >
-                    {task.action} →
-                  </button>
+            {activePendingActions.length === 0 ? (
+              <p className="text-sm text-slate-400 dark:text-[#8493A8] py-6 text-center">
+                {loading ? 'Checking queue…' : 'No pending verifications, employer approvals, draft jobs, or document requests.'}
+              </p>
+            ) : (
+              activePendingActions.map((task: any, index: number) => (
+                <div
+                  key={index}
+                  className="group rounded-xl border border-slate-200 dark:border-[#2A3749] border-l-4 bg-white dark:bg-[#1B2636] p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                  style={{ borderLeftColor: task.tone }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-[#F1F5F9]">{task.label}</p>
+                    <button
+                      type="button"
+                      onClick={() => navigate(task.path || '/admin/users')}
+                      className="rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 hover:shadow-md cursor-pointer"
+                      style={{ backgroundColor: task.tone }}
+                    >
+                      {task.action} →
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[#2A3749]">

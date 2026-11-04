@@ -40,7 +40,7 @@ export default function EventsSection({ items, headers, onNavigate }: EventsSect
     <SectionShell
       id="events"
       tone="band"
-      eyebrow={headers?.eyebrow}
+      eyebrow={headers?.eyebrow || "Campus Calendar"}
       title={headers?.title || "Events & Workshops"}
       description={headers?.description}
       action={
@@ -51,15 +51,15 @@ export default function EventsSection({ items, headers, onNavigate }: EventsSect
         />
       }
     >
-      <div className="grid gap-5 md:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-3 md:gap-6">
         {pageItems.map((event) => (
           <button
             key={`${event.id}-${page}`}
             type="button"
             onClick={() => onNavigate(`/events/${event.id}`)}
-            className="group overflow-hidden rounded-xl border border-slate-200/80 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:border-astu-navy/25 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40"
+            className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
-            <div className="aspect-[16/9] overflow-hidden bg-slate-100 dark:bg-slate-800">
+            <div className="aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
               <img
                 src={resolveMedia(event.image)}
                 alt=""
@@ -67,22 +67,22 @@ export default function EventsSection({ items, headers, onNavigate }: EventsSect
                 loading="lazy"
               />
             </div>
-            <div className="space-y-2 p-4">
+            <div className="space-y-2.5 p-5 md:p-6">
               {event.kind ? (
-                <span className="text-[11px] font-bold uppercase tracking-wider text-astu-red">
+                <span className="text-xs font-bold uppercase tracking-wider text-astu-red">
                   {event.kind}
                 </span>
               ) : null}
-              <h3 className="line-clamp-2 text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="line-clamp-2 text-lg font-bold text-slate-900 dark:text-white">
                 {event.title}
               </h3>
-              <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <p className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                <CalendarDays className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="truncate">{event.date}</span>
               </p>
               {event.location ? (
-                <p className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <p className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                  <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="truncate">{event.location}</span>
                 </p>
               ) : null}

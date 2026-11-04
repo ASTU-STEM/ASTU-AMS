@@ -42034,6 +42034,54 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1793729276018",
       "createdAt": "2026-11-03T18:07:56.018Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729849656",
+      "createdAt": "2026-11-03T18:17:29.656Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729852763",
+      "createdAt": "2026-11-03T18:17:32.763Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729877222",
+      "createdAt": "2026-11-03T18:17:57.222Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729881311",
+      "createdAt": "2026-11-03T18:18:01.311Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793779252314",
+      "createdAt": "2026-11-04T08:00:52.314Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793779319538",
+      "createdAt": "2026-11-04T08:01:59.538Z"
     }
   ],
   "notifications": [
@@ -64149,30 +64197,11 @@
         ],
         "heroSlides": [
           {
-            "id": "HS-1",
-            "title": "Alumni Management System",
-            "tagline": "Adama Science and Technology University",
-            "description": "Connect graduates, employers, and departments for careers, mentorship, and lifelong university engagement.",
-            "image": "/images/astu-building.jpg",
-            "backgroundImage": "/images/astu-building.jpg",
-            "active": true
-          },
-          {
-            "id": "HS-2",
-            "title": "Industry Partnerships",
-            "tagline": "Talent · Internships · Research",
-            "description": "Partner with ASTU to recruit verified engineering and technology graduates across Ethiopia.",
-            "image": "/images/campus-2.jpeg",
-            "backgroundImage": "/images/campus-2.jpeg",
-            "active": true
-          },
-          {
-            "id": "HS-3",
-            "title": "Campus & Community",
-            "tagline": "Events · Giving · Mentorship",
-            "description": "Stay involved through alumni events, giving campaigns, and mentorship that strengthen the ASTU network.",
-            "image": "/images/astusteam.jpg",
-            "backgroundImage": "/images/astusteam.jpg",
+            "id": "HS-1793779280398",
+            "image": "/uploads/cms/astuget-1793779312662-924966.jpg",
+            "tagline": "ASTU Innovation & Excellence",
+            "title": "Empowering the Next Generation of Engineers & Leaders",
+            "description": "Connecting university research, verified graduate outcomes, and premier industrial partnerships.",
             "active": true
           }
         ],
@@ -64701,7 +64730,7 @@
           ]
         }
       },
-      "updatedAt": "2026-11-03T17:55:44.437Z",
+      "updatedAt": "2026-11-04T08:06:31.237Z",
       "updatedBy": "CMS Admin"
     }
   ],
@@ -68088,6 +68117,19 @@
   ],
   "communityMembers": [],
   "mediaAssets": [
+    {
+      "filename": "astuget-1793779312662-924966.jpg",
+      "originalName": "astuget.jpg",
+      "mimeType": "image/jpeg",
+      "size": 1764540,
+      "url": "/uploads/cms/astuget-1793779312662-924966.jpg",
+      "album": "General",
+      "altText": "astuget.jpg",
+      "uploaderId": null,
+      "id": "media-1793779312691",
+      "createdAt": "2026-11-04T08:01:52.691Z",
+      "updatedAt": "2026-11-04T08:01:52.691Z"
+    },
     {
       "id": "M-001",
       "filename": "astu-building.jpg",

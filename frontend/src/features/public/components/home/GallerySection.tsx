@@ -59,9 +59,12 @@ export default function GallerySection({ images, headers, onNavigate }: GalleryS
     <SectionShell
       id="gallery"
       tone="band"
-      eyebrow={headers?.eyebrow}
-      title={headers?.title || "Photo Gallery"}
-      description={headers?.subtitle}
+      eyebrow={headers?.eyebrow || "Campus Gallery"}
+      title={headers?.title || "Campus Life & Moments"}
+      description={
+        headers?.subtitle ||
+        "A glimpse of life at ASTU — research, innovation, graduation ceremonies, and alumni milestones."
+      }
       action={
         <ViewAllButton
           label={headers?.buttonText || "View All"}
@@ -70,29 +73,29 @@ export default function GallerySection({ images, headers, onNavigate }: GalleryS
         />
       }
     >
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
         {pageItems.map((item, idx) => {
           const src = resolveMedia(item.src || item.image || item.url);
+          const caption = item.title || item.album;
           return (
             <button
               key={item.id || `gallery-${page}-${idx}`}
               type="button"
               onClick={() => onNavigate(viewAllLink)}
-              className="group relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-800"
+              className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-slate-100 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <img
                 src={src}
-                alt={item.title || item.album || "Campus photo"}
+                alt={caption || "Campus photo"}
                 className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 loading="lazy"
               />
-              {(item.title || item.album) && (
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent p-3.5">
-                  <p className="truncate text-xs font-semibold text-white">
-                    {item.title || item.album}
-                  </p>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-90 transition duration-300 group-hover:opacity-100" />
+              {caption ? (
+                <div className="absolute inset-x-0 bottom-0 p-5">
+                  <p className="truncate text-base font-semibold text-white">{caption}</p>
                 </div>
-              )}
+              ) : null}
             </button>
           );
         })}

@@ -169,11 +169,11 @@ export default function Footer() {
                 Alumni Bulletin &amp; Dispatch
               </span>
               <h3 className="text-xl sm:text-2xl font-black text-white">
-                {cmsConfig.newsletterTitle || "Stay Connected with the ASTU Community"}
+                {cmsConfig.newsletterTitle || "Stay Connected with ASTU"}
               </h3>
               <p className="mt-1 text-xs sm:text-sm text-slate-400 leading-relaxed font-medium">
                 {cmsConfig.newsletterSubtitle ||
-                  "Receive annual institutional reports, homecoming invitations, career networking notices, and alumni achievements."}
+                  "Get updates on reunions, career expos, and graduate employment reports."}
               </p>
             </div>
 
