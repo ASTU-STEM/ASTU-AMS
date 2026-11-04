@@ -13,16 +13,18 @@ import {
   Share2,
   UserCheck,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
+import ShareModal, { ShareItem } from '../components/ShareModal';
 import storiesService, { AlumniStory } from '../features/admin/services/stories.service';
 
 export default function StoryDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [story, setStory] = useState<AlumniStory | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -36,10 +38,17 @@ export default function StoryDetailPage() {
   const relatedStories = allStories.filter((s) => s.id !== story?.id).slice(0, 3);
 
   const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Story link copied to clipboard!');
-    }
+    if (!story) return;
+    setShareItem({
+      id: story.id,
+      title: story.name,
+      subtitle: `${story.role}${story.company ? ` · ${story.company}` : ''}`,
+      text: story.text,
+      url: `/stories/${story.id}`,
+      badge: 'Alumni Story',
+      type: 'story',
+    });
+    setShareOpen(true);
   };
 
   if (!story) {
@@ -148,11 +157,12 @@ export default function StoryDetailPage() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleShare}
-                  className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                  title="Share Story"
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-200 hover:text-blue-800 transition-colors"
+                  title="Share story via Telegram, LinkedIn, WhatsApp, or copy link"
                 >
-                  <Share2 className="h-4 w-4" /> Share
+                  <Share2 className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Share
                 </button>
               </div>
             </div>
@@ -228,6 +238,7 @@ export default function StoryDetailPage() {
         </div>
       </div>
 
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} item={shareItem} />
       <Footer />
       <ChatBot />
     </div>

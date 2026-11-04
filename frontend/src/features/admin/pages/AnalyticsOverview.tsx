@@ -92,6 +92,7 @@ import { SectionCard, ChartCard } from './analytics/AnalyticsCards';
 import { AdvancedFiltersModal } from './analytics/AdvancedFiltersModal';
 import { ExportReportModal } from './analytics/ExportReportModal';
 import { PrintDashboardModal } from './analytics/PrintDashboardModal';
+import ShareModal from '../../../components/ShareModal';
 import {
   ANALYTICS_PAGE_TABS,
   DEFAULT_FILTERS,
@@ -110,6 +111,7 @@ export default function AnalyticsOverview() {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [shareDashboardOpen, setShareDashboardOpen] = useState(false);
   const [selectedSuites, setSelectedSuites] = useState<IncludedSuitesState>(DEFAULT_SUITES_SELECTION);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -927,6 +929,16 @@ export default function AnalyticsOverview() {
 
             {/* Action Buttons Group */}
             <div className="flex items-center gap-2.5 shrink-0 self-end lg:self-auto">
+              <button
+                type="button"
+                onClick={() => setShareDashboardOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:border-blue-300 hover:text-blue-800 hover:bg-blue-50/50 shadow-xs transition-all active:scale-[0.98]"
+                title="Share analytics dashboard link"
+              >
+                <Share2 className="h-4 w-4 text-blue-600" />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setExportModalOpen(true)}
@@ -4551,6 +4563,19 @@ export default function AnalyticsOverview() {
         department={department}
         selectedSuites={selectedSuites}
         setSelectedSuites={setSelectedSuites}
+      />
+
+      <ShareModal
+        isOpen={shareDashboardOpen}
+        onClose={() => setShareDashboardOpen(false)}
+        item={{
+          title: 'ASTU Institutional Analytics Dashboard',
+          subtitle: `${academicYear} · ${department === 'All' ? 'All Departments' : department}`,
+          text: 'Verified ASTU alumni outcomes, employment, and institutional analytics dashboard.',
+          url: typeof window !== 'undefined' ? window.location.href : '/admin/analytics',
+          badge: 'Analytics',
+          type: 'page',
+        }}
       />
     </div>
   );

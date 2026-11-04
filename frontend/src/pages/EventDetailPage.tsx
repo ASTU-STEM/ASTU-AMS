@@ -17,6 +17,7 @@ import {
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ShareModal, { ShareItem } from '../components/ShareModal';
 import eventsService, { ApiEvent } from '../features/admin/services/events.service';
 
 const DEFAULT_EVENT_IMAGES: Record<string, string> = {
@@ -36,6 +37,8 @@ export default function EventDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isRegistered, setIsRegistered] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -154,7 +157,11 @@ export default function EventDetailPage() {
   };
 
   const bannerImg = eventData ? DEFAULT_EVENT_IMAGES[eventData.title] || '/images/astu-building.jpg' : '/images/astu-building.jpg';
-  const isWorkshop = eventData?.type === 'Workshop' || eventData?.type === 'WORKSHOP' || eventData?.title.toLowerCase().includes('workshop') || eventData?.title.toLowerCase().includes('bootcamp');
+  const isWorkshop =
+    eventData?.type === 'Workshop' ||
+    eventData?.type === 'WORKSHOP' ||
+    !!eventData?.title?.toLowerCase().includes('workshop') ||
+    !!eventData?.title?.toLowerCase().includes('bootcamp');
 
   if (loading) {
     return (
@@ -182,13 +189,23 @@ export default function EventDetailPage() {
           </button>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
-                toast.success('Link copied to clipboard');
+                setShareItem({
+                  id: eventData?.id || id,
+                  title: eventData?.title || 'ASTU Event',
+                  subtitle: eventData?.location || 'ASTU Campus',
+                  text: eventData?.description || eventData?.title,
+                  url: `/events/${eventData?.id || id}`,
+                  badge: isWorkshop ? 'Workshop' : 'Event',
+                  type: 'event',
+                });
+                setShareOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-200 hover:text-blue-800 transition-colors"
+              title="Share event via Telegram, LinkedIn, WhatsApp, or copy link"
             >
-              <Share2 className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" /> Share
+              <Share2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /> Share
             </button>
           </div>
         </div>
@@ -474,6 +491,7 @@ export default function EventDetailPage() {
         </div>
       )}
 
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} item={shareItem} />
       <Footer />
     </div>
   );

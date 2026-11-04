@@ -265,8 +265,9 @@ export default function AnnouncementListPage() {
                           });
                           setIsShareOpen(true);
                         }}
-                        className="rounded-lg p-1 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                        title="Share notice"
+                        className="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 text-slate-500 hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50 dark:hover:text-blue-300 dark:hover:bg-slate-700 transition-colors"
+                        title="Share notice via Telegram, LinkedIn, WhatsApp, or copy link"
+                        aria-label={`Share ${item.title}`}
                       >
                         <Share2 className="h-4 w-4" />
                       </button>

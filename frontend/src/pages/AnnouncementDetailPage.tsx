@@ -14,10 +14,10 @@ import {
   Tag,
   User,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
+import ShareModal, { ShareItem } from '../components/ShareModal';
 import contentService from '../features/admin/services/content.service';
 import { ContentCardItem } from '../features/admin/components/ContentCard';
 
@@ -26,6 +26,8 @@ export default function AnnouncementDetailPage() {
   const navigate = useNavigate();
   const [item, setItem] = useState<ContentCardItem | null>(null);
   const [related, setRelated] = useState<ContentCardItem[]>([]);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -68,13 +70,20 @@ export default function AnnouncementDetailPage() {
   }, [id]);
 
   const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Announcement link copied to clipboard!');
-    } else {
-      toast.success('Announcement link ready to share');
-    }
+    if (!item) return;
+    setShareItem({
+      id: item.id,
+      title: item.title,
+      subtitle: `${item.type || 'Official'} Notice · ASTU Directorate`,
+      text: item.excerpt || item.title,
+      url: `/announcements/${slugifiedId(item.title)}`,
+      badge: item.type,
+      type: 'announcement',
+    });
+    setShareOpen(true);
   };
+
+  const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   if (!item) {
     return (
@@ -84,8 +93,6 @@ export default function AnnouncementDetailPage() {
       </div>
     );
   }
-
-  const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   return (
     <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
@@ -159,10 +166,12 @@ export default function AnnouncementDetailPage() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleShare}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-200 hover:text-blue-800 transition-colors"
+                  title="Share notice via Telegram, LinkedIn, WhatsApp, or copy link"
                 >
-                  <Share2 className="h-3.5 w-3.5" />
+                  <Share2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                   Share
                 </button>
               </div>
@@ -293,6 +302,7 @@ export default function AnnouncementDetailPage() {
         </div>
       </main>
 
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} item={shareItem} />
       <Footer />
       <ChatBot />
     </div>
