@@ -112,8 +112,8 @@ export default function IctIncidentsPage() {
                   </div>
 
                   <div className="text-right text-xs text-slate-500">
-                    <div>Started: <strong>{inc.started}</strong></div>
-                    <div>Affected Users: <strong>{inc.affectedUsers.toLocaleString()}</strong></div>
+                    <div>Started: <strong>{inc.started || '—'}</strong></div>
+                    <div>Affected Users: <strong>{Number(inc.affectedUsers || 0).toLocaleString()}</strong></div>
                   </div>
                 </div>
 
@@ -122,7 +122,7 @@ export default function IctIncidentsPage() {
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Lifecycle Progress</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1.5 text-center text-[10px] font-bold">
                     {['Detected', 'Investigating', 'Identified', 'Mitigating', 'Resolved', 'Postmortem'].map((step, idx) => {
-                      const isCurrent = step.toLowerCase() === inc.status.toLowerCase();
+                      const isCurrent = step.toLowerCase() === String(inc.status || '').toLowerCase();
                       const isPassed = idx < 2;
                       return (
                         <div
@@ -146,12 +146,16 @@ export default function IctIncidentsPage() {
                 <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 dark:bg-slate-800/40 dark:border-slate-800">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Incident Timeline</p>
                   <div className="space-y-2 text-xs">
-                    {inc.timeline.map((event, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <span className="font-mono text-slate-400 font-bold">{event.time}</span>
-                        <span className="text-slate-700 dark:text-slate-300">{event.text}</span>
-                      </div>
-                    ))}
+                    {(inc.timeline ?? []).length === 0 ? (
+                      <p className="text-slate-400">No timeline events recorded yet.</p>
+                    ) : (
+                      (inc.timeline ?? []).map((event, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="font-mono text-slate-400 font-bold">{event.time}</span>
+                          <span className="text-slate-700 dark:text-slate-300">{event.text}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>

@@ -22,3 +22,6 @@ export type {
   NotificationDetailModalProps,
   ShellNotification,
 } from './NotificationModals';
+
+export { PaginationControls } from './PaginationControls';
+export type { PaginationControlsProps } from './PaginationControls';

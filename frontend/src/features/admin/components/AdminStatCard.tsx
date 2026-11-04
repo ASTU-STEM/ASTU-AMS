@@ -16,40 +16,92 @@ export default function AdminStatCard({
   value,
   change,
   trend,
+  description,
   icon: Icon,
   tone = 'blue',
   accentColor,
   trendDirection,
+  onClick,
+  to,
+  loading,
+  compact,
+  className = '',
 }: AdminStatCardData) {
   const style = toneStyles[tone];
   const heading = title ?? label ?? '';
   const trendText = trend ?? change ?? '';
+  const supportText = description || '';
   const trendTone =
     trendDirection === 'down'
       ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-[#3B1A22] dark:text-[#F87171] dark:border-[#F87171]/30'
       : trendDirection === 'flat'
-        ? 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-[#1B2636] dark:text-[#B0BDCE] dark:border-[#2A3749]'
+        ? 'bg-slate-100 text-slate-500 border-slate-200 dark:bg-[var(--bg-card-secondary)] dark:text-[var(--text-secondary)] dark:border-[var(--border-color)]'
         : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-[#163828] dark:text-[#22C55E] dark:border-[#22C55E]/30';
 
-  return (
-    <div className="group rounded-xl border border-slate-200 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-7 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+  const interactive = Boolean(onClick || to);
+  const padding = compact ? 'p-4' : 'p-7';
+  const valueSize = compact ? 'text-2xl' : 'text-[32px]';
+  const iconBox = compact ? 'h-10 w-10' : 'h-12 w-12';
+  const iconSize = compact ? 'h-5 w-5' : 'h-6 w-6';
+
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-[#8493A8]">{heading}</p>
-          <p className="text-[32px] font-bold tracking-tight text-slate-900 dark:text-[#F1F5F9]">{value}</p>
+        <div className="space-y-1.5 min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-[var(--text-muted)]">{heading}</p>
+          {loading ? (
+            <div className="h-8 w-20 animate-pulse rounded-md bg-slate-200 dark:bg-[var(--bg-card-secondary)]" />
+          ) : (
+            <p className={`${valueSize} font-bold tracking-tight text-slate-900 dark:text-[var(--text-primary)] truncate`}>{value}</p>
+          )}
         </div>
         <div
-          className={`flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 ${style.bg}`}
+          className={`flex ${iconBox} shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 ${style.bg}`}
           style={accentColor ? { backgroundColor: `${accentColor}12`, color: accentColor } : undefined}
         >
-          <Icon className={`h-6 w-6 ${style.icon}`} />
+          <Icon className={`${iconSize} ${style.icon}`} />
         </div>
       </div>
-      {trendText && (
-        <div className="mt-4">
-          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${trendTone}`}>{trendText}</span>
+      {(trendText || supportText) && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {trendText && (
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${trendTone}`}>
+              {trendText}
+            </span>
+          )}
+          {supportText && !trendText && (
+            <p className="text-[11px] font-medium text-slate-500 dark:text-[var(--text-muted)]">{supportText}</p>
+          )}
+          {supportText && trendText && (
+            <p className="text-[11px] font-medium text-slate-500 dark:text-[var(--text-muted)]">{supportText}</p>
+          )}
         </div>
       )}
-    </div>
+    </>
   );
+
+  const baseClass = [
+    'group rounded-xl border border-slate-200 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] shadow-sm transition-all duration-200',
+    padding,
+    interactive ? 'cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:border-[#003580]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#003580]/30' : 'hover:-translate-y-0.5 hover:shadow-md',
+    className,
+  ].join(' ');
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={`${baseClass} w-full text-left`}>
+        {content}
+      </button>
+    );
+  }
+
+  if (to) {
+    return (
+      <a href={to} className={`${baseClass} block`}>
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={baseClass}>{content}</div>;
 }

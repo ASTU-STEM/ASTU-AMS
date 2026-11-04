@@ -42,6 +42,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import AdminStatGrid from '../components/AdminStatGrid';
 import ImageUploader from '../components/ImageUploader';
 import homepageCmsService from '../services/homepageCms.service';
 import eventsService from '../services/events.service';
@@ -71,91 +72,10 @@ interface EventItem {
   active?: boolean;
 }
 
-const EVENTS_STORAGE_KEY = 'astu_ams_cms_events_items';
+const EVENTS_STORAGE_KEY = 'astu_ams_cms_events_items_v2';
 const FALLBACK_IMAGE = '/images/astu-building.jpg';
 
-const initialEvents: EventItem[] = [
-  {
-    id: 'WS-001',
-    title: 'Data Science & Machine Learning Bootcamp',
-    kind: 'Workshop',
-    category: 'Technical Training & Labs',
-    date: '2026-11-20',
-    time: '09:00 AM – 04:00 PM (EAT)',
-    rsvps: 120,
-    attendance: 120,
-    status: 'Open',
-    location: 'Engineering Building Room 305',
-    image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
-    description: 'Intensive bootcamp covering machine learning, data visualization, and statistical analysis using Python and R. Practical assignments with ASTU computing clusters.',
-    organizer: 'ASTU Alumni Office',
-    capacity: 185,
-    registrationInfo: 'Free registration for all verified ASTU alumni, students, and partners.',
-    highlights: 'Python & R Data Science Stack\nMachine Learning Modeling\nHands-on Practical Lab Sessions\nCertificate of Completion',
-    pinned: true,
-    active: true,
-  },
-  {
-    id: 'E-REAL-001',
-    title: 'EthiopiaLics International Conference 2025',
-    kind: 'Event',
-    category: 'Academic & Research Conference',
-    date: '2025-06-13',
-    time: '08:30 AM – 05:00 PM (EAT)',
-    rsvps: 340,
-    attendance: 300,
-    status: 'Open',
-    location: 'ASTU Main Campus Auditorium',
-    image: 'https://www.astu.edu.et/images/slidephoto/summit1.jpg',
-    description: 'Adama Science and Technology University hosts the 1st EthiopiaLics International Conference on “Fostering Innovation Ecosystem for Knowledge Economy Transition and Sustainable Development.”',
-    organizer: 'ASTU Alumni Office',
-    capacity: 500,
-    registrationInfo: 'Free registration for all verified ASTU alumni, students, and partners.',
-    highlights: 'Official Keynote Sessions\nAlumni Networking Lounge\nResearch Poster Presentations\nCertificate of Participation',
-    pinned: true,
-    active: true,
-  },
-  {
-    id: 'E-002',
-    title: 'ASTU Alumni Career & Innovation Summit',
-    kind: 'Event',
-    category: 'Career & Job Fair',
-    date: '2026-12-05',
-    time: '09:00 AM – 02:00 PM (EAT)',
-    rsvps: 210,
-    attendance: 210,
-    status: 'Open',
-    location: 'Senate Hall, ASTU Main Campus',
-    image: '/images/astu-building.jpg',
-    description: 'Annual career acceleration gathering connecting final-year students with high-achieving alumni executives and industry partners. Meet 30+ top enterprise recruiters.',
-    organizer: 'Career Development & Placement Center',
-    capacity: 300,
-    registrationInfo: 'Free registration for all verified ASTU alumni, students, and partners.',
-    highlights: 'Keynote Speeches by Industry CEOs\nCareer Speed Networking\nTracer Study Insights & Hiring Trends\nOne-on-One Mentorship Booths',
-    pinned: false,
-    active: true,
-  },
-  {
-    id: 'WS-002',
-    title: 'Enterprise Cloud Architecture & DevOps Lab',
-    kind: 'Workshop',
-    category: 'Technical Training & Labs',
-    date: '2026-11-28',
-    time: '01:30 PM – 05:30 PM (EAT)',
-    rsvps: 95,
-    attendance: 95,
-    status: 'Open',
-    location: 'ICT Directorate Computer Lab 2',
-    image: '/images/electriclabs.jpeg',
-    description: 'Hands-on deployment training covering AWS, Docker containers, Kubernetes clusters, and continuous delivery pipelines for enterprise software architectures.',
-    organizer: 'ICT & Systems Directorate',
-    capacity: 120,
-    registrationInfo: 'Free registration for all verified ASTU alumni, students, and partners.',
-    highlights: 'Docker & Kubernetes Labs\nAWS Cloud Architecture\nCI/CD Pipeline Setup\nCertificate of Completion',
-    pinned: false,
-    active: true,
-  },
-];
+const initialEvents: EventItem[] = [];
 
 /* ── PRESET SUGGESTIONS (Can also be typed freely) ── */
 const categoryPresets = [
@@ -338,8 +258,8 @@ export default function EventWorkshopManagement() {
     const s = (homepageCmsService.getSettings() || {}) as any;
     return {
       eventsHeaders: s.eventsHeaders || {
-        eyebrow: 'Calendar',
-        title: 'Upcoming Events & Workshops',
+        eyebrow: 'Events & Workshops',
+        title: 'Gatherings & Training',
         description: 'Join campus career expos, technical workshops, and alumni reunions.',
       },
       eventsPage: s.eventsPage || {
@@ -542,8 +462,9 @@ export default function EventWorkshopManagement() {
     if (!confirm(`Are you sure you want to delete ${selectedEventIds.length} selected event(s)?`)) return;
 
     const results = await Promise.all(selectedEventIds.map((id) => eventsService.deleteEvent(id)));
-    const deletedIds = selectedEventIds.filter((_, idx) => results[idx]);
+    const deletedIds = selectedEventIds.filter((_, idx) => results[idx]?.ok);
     const failed = selectedEventIds.length - deletedIds.length;
+    const failMessage = results.find((r) => !r?.ok)?.message;
 
     if (deletedIds.length > 0) {
       setEvents((prev) => prev.filter((e) => !deletedIds.includes(e.id)));
@@ -553,7 +474,7 @@ export default function EventWorkshopManagement() {
     if (failed === 0) {
       toast.success(`Removed ${deletedIds.length} event(s)`);
     } else if (deletedIds.length === 0) {
-      toast.error('Could not delete selected events on the server.');
+      toast.error(failMessage || 'Could not delete selected events on the server.');
     } else {
       toast.error(`Removed ${deletedIds.length}, but ${failed} could not be deleted on the server.`);
     }
@@ -773,13 +694,13 @@ export default function EventWorkshopManagement() {
 
   const deleteEvent = async (id: string) => {
     if (!confirm('Are you sure you want to delete this event post?')) return;
-    const ok = await eventsService.deleteEvent(id);
-    if (!ok) {
-      toast.error('Could not delete event on the server.');
+    const result = await eventsService.deleteEvent(id);
+    if (!result.ok) {
+      toast.error(result.message || 'Could not delete event on the server.');
       return;
     }
     setEvents((prev) => prev.filter((e) => e.id !== id));
-    toast.success('Post removed');
+    toast.success(result.notFound ? 'Removed local post (already gone on server)' : 'Post removed');
   };
 
   const editEvent = (event: EventItem) => {
@@ -851,23 +772,42 @@ export default function EventWorkshopManagement() {
         }
       />
 
-      {/* Quick Statistics Banner */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'Total Posts', value: events.length },
-          { label: 'Pinned on Homepage', value: events.filter((e) => e.pinned).length },
-          { label: 'Open for Registration', value: events.filter((e) => e.status === 'Open').length },
-          { label: 'Workshops & Labs', value: events.filter((e) => e.kind === 'Workshop').length },
-        ].map((s) => (
-          <div
-            key={s.label}
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900"
-          >
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{s.label}</p>
-            <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white">{s.value}</p>
-          </div>
-        ))}
-      </div>
+      <AdminStatGrid
+        cols={4}
+        compact
+        stats={[
+          {
+            title: 'Total Posts',
+            value: String(events.length),
+            icon: CalendarDays,
+            tone: 'blue',
+            description: 'Events & workshops published',
+          },
+          {
+            title: 'Pinned on Homepage',
+            value: String(events.filter((e) => e.pinned).length),
+            icon: Pin,
+            tone: 'gold',
+            trend: 'Featured carousel',
+            trendDirection: 'up',
+          },
+          {
+            title: 'Open for Registration',
+            value: String(events.filter((e) => e.status === 'Open').length),
+            icon: CheckCircle2,
+            tone: 'green',
+            trend: 'Accepting RSVPs',
+            trendDirection: 'up',
+          },
+          {
+            title: 'Workshops & Labs',
+            value: String(events.filter((e) => e.kind === 'Workshop').length),
+            icon: Layers,
+            tone: 'purple',
+            description: 'Hands-on training sessions',
+          },
+        ]}
+      />
 
       {/* Optional Collapsible Page Headers Settings */}
       {showPageSettings && (
@@ -884,7 +824,7 @@ export default function EventWorkshopManagement() {
                   eventsHeaders: { ...p.eventsHeaders, eyebrow: e.target.value },
                 }))
               }
-              placeholder="Eyebrow (e.g. Calendar)"
+              placeholder="Eyebrow (e.g. Events & Workshops)"
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
             <input
@@ -895,7 +835,7 @@ export default function EventWorkshopManagement() {
                   eventsHeaders: { ...p.eventsHeaders, title: e.target.value },
                 }))
               }
-              placeholder="Title (e.g. Upcoming Events & Workshops)"
+              placeholder="Title (e.g. Gatherings & Training)"
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             />
             <textarea

@@ -21,11 +21,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   const defaultIcon = <AlertCircle className="h-12 w-12 text-red-500" />;
 
   return (
-    <div
-      role="alert"
-      aria-live="assertive"
-      className={`flex flex-col items-center justify-center p-12 text-center ${className}`}
-    >
+    <div className={`flex flex-col items-center justify-center p-12 text-center ${className}`}>
       <div className="mb-4">
         {icon || defaultIcon}
       </div>

@@ -38,9 +38,9 @@ const megaMenus: MegaMenu[] = [
     items: [
       { label: "About ASTU", route: "/about", description: "Mission, vision & history" },
       { label: "Campuses", route: "/info/campuses", description: "Our campuses & facilities" },
-      { label: "Campus Life", sectionId: "campus-life", route: "/info/campus-life", description: "Student activities & culture" },
-      { label: "Research", route: "/info/research", description: "Innovation & discoveries" },
-      { label: "Success Stories", sectionId: "success-stories", route: "/info/alumni-stories", description: "Alumni achievements" },
+      { label: "Campus Life", sectionId: "gallery", route: "/gallery", description: "Student activities & culture" },
+      { label: "Research", route: "/about", description: "Innovation & discoveries" },
+      { label: "Success Stories", sectionId: "success-stories", route: "/community", description: "Alumni achievements" },
     ],
   },
   {
@@ -49,9 +49,9 @@ const megaMenus: MegaMenu[] = [
     items: [
       { label: "Giving & Donations", sectionId: "giving", route: "/donations", description: "Support student scholarships & research" },
       { label: "Alumni Community", route: "/community", description: "Directory of graduates, chapters and mentors" },
-      { label: "Stakeholders", route: "/partners?tab=stakeholders", description: "Partners & collaborators" },
+      { label: "Stakeholders", route: "/partners", description: "Partners & collaborators" },
       { label: "Career Opportunities", route: "/partners?tab=employers", description: "Jobs & internships" },
-      { label: "Testimonials", sectionId: "testimonials", route: "/community", description: "What alumni say" },
+      { label: "Employers", route: "/employers", description: "Corporate hiring portal" },
     ],
   },
   {
@@ -59,11 +59,11 @@ const megaMenus: MegaMenu[] = [
     icon: MdCampaign,
     items: [
       { label: "Events", sectionId: "events", route: "/events", description: "Upcoming gatherings" },
-      { label: "Workshops", sectionId: "workshops", route: "/events", description: "Skill-building sessions" },
+      { label: "Workshops", sectionId: "events", route: "/events", description: "Skill-building sessions" },
       { label: "News", sectionId: "news", route: "/announcements", description: "Latest updates" },
-      { label: "Announcements", sectionId: "announcements", route: "/announcements", description: "Official notices" },
-      { label: "Gallery", route: "/gallery", description: "Photo moments" },
-      { label: "Video Gallery", route: "/info/video-gallery", description: "Video highlights" },
+      { label: "Announcements", route: "/announcements", description: "Official notices" },
+      { label: "Gallery", sectionId: "gallery", route: "/gallery", description: "Photo moments" },
+      { label: "FAQ", sectionId: "faq", route: "/info/faq", description: "Common questions" },
     ],
   },
 ];
@@ -222,17 +222,16 @@ export default function Navbar() {
             <span className="text-white/20">|</span>
             <span className="font-medium">{settings.general?.phoneNumber || "+251-221-110000"}</span>
           </div>
-          <div className="flex items-center gap-3 text-[13px]">
+          <div className="flex items-center gap-2 text-[13px]">
             <Link
               to="/login"
-              className="text-white/80 hover:text-white transition-colors font-medium"
+              className="inline-flex items-center rounded-md px-2.5 py-1 font-semibold text-white/85 transition-colors hover:bg-white/10 hover:text-white"
             >
               Login
             </Link>
-            <span className="text-white/20">|</span>
             <Link
               to="/register"
-              className="text-white/80 hover:text-white transition-colors font-medium"
+              className="inline-flex items-center rounded-md bg-white/15 px-2.5 py-1 font-semibold text-white transition-colors hover:bg-white/25"
             >
               Register
             </Link>
@@ -391,8 +390,14 @@ export default function Navbar() {
           </button>
 
           <Link
+            to="/login"
+            className="hidden sm:inline-flex items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-bold text-astu-navy transition-all duration-200 hover:border-astu-navy hover:bg-slate-50 dark:border-slate-700 dark:text-sky-300 dark:hover:bg-slate-800"
+          >
+            Login
+          </Link>
+          <Link
             to="/register"
-            className="hidden sm:inline-flex rounded-lg bg-astu-navy px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-astu-navy/90 hover:shadow-lg"
+            className="hidden sm:inline-flex items-center rounded-lg bg-astu-navy px-5 py-2.5 text-sm font-bold text-white shadow-[0_8px_18px_-10px_rgba(7,89,166,0.65)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-astu-navy/90 hover:shadow-lg"
           >
             Join Network
           </Link>

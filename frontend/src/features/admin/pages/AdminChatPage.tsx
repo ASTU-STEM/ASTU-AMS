@@ -1,6 +1,10 @@
 import React from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
+import { MessageSquareText } from 'lucide-react';
 import { TelegramChat } from '../../../components/TelegramChat';
+import AdminPageHeader from '../components/AdminPageHeader';
+import AdminBadge from '../components/AdminBadge';
+import AdminSectionCard from '../components/AdminSectionCard';
 
 export default function AdminChatPage() {
   const location = useLocation();
@@ -23,16 +27,30 @@ export default function AdminChatPage() {
   } : null);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">ASTU_AMS Hub & Direct Messages</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Real-time direct messaging center with Alumni Candidates, Corporate Recruiters, Registrar, and Department Chairs.
-          </p>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Messages"
+        subtitle="Real-time direct messaging with alumni candidates, recruiters, registrar, and department chairs."
+        breadcrumbs={[{ label: 'Admin' }, { label: 'Messages' }]}
+        actions={
+          <div className="flex items-center gap-2">
+            <AdminBadge variant="success">Live Hub</AdminBadge>
+            <span className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-[#FFCC00]">
+              <MessageSquareText className="h-5 w-5" />
+            </span>
+          </div>
+        }
+      />
+
+      <AdminSectionCard
+        title="ASTU_AMS Hub"
+        subtitle="Continue conversations, hand off leads, and keep institutional messaging in one place."
+        bodyClassName="-mx-1"
+      >
+        <div className="overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]">
+          <TelegramChat darkMode={false} initialTarget={initialTarget} />
         </div>
-      </div>
-      <TelegramChat darkMode={false} initialTarget={initialTarget} />
+      </AdminSectionCard>
     </div>
   );
 }

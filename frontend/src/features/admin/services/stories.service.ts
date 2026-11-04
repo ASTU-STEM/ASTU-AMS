@@ -1,4 +1,3 @@
-import homepageCmsService from './homepageCms.service';
 import contentService from './content.service';
 
 export interface AlumniStory {
@@ -13,111 +12,126 @@ export interface AlumniStory {
   image?: string;
   featured?: boolean;
   publishedAt?: string;
-  active?: boolean;
 }
 
-const normalizeStory = (raw: any, index = 0): AlumniStory => ({
-  id: String(raw?.id || `story-${index}`),
-  name: raw?.name || raw?.author || raw?.title || 'ASTU Alumni',
-  role: raw?.role || 'ASTU Graduate',
-  company: raw?.company || undefined,
-  graduationYear: raw?.graduationYear || undefined,
-  department: raw?.department || undefined,
-  text: raw?.text || raw?.excerpt || raw?.description || '',
-  fullStory: raw?.fullStory || raw?.body || raw?.excerpt || raw?.text || '',
-  image: raw?.image || raw?.coverImage || raw?.photo || undefined,
-  featured: raw?.featured !== false,
-  publishedAt: raw?.publishedAt || raw?.updatedAt || raw?.date,
-  active: raw?.active !== false,
-});
+/** Bumped to drop legacy fabricated story snapshots. */
+const STORAGE_KEY = 'astu_alumni_custom_stories_v2';
 
-const fromHomepageConfig = (): AlumniStory[] => {
-  const config = homepageCmsService.getSettings();
-  if (!config?.stories?.length) return [];
-  return config.stories
-    .filter((s: any) => s?.active !== false)
-    .map((s: any, i: number) => normalizeStory(s, i));
-};
-
-const fromContentItems = (): AlumniStory[] => {
-  const cmsItems = contentService.getItems();
-  const storyCmsItems = cmsItems.filter(
-    (i) =>
-      i.status === 'Published' &&
-      (i.tags?.includes('story') || i.tags?.includes('success-story'))
-  );
-  return storyCmsItems.map((item, idx) =>
-    normalizeStory(
-      {
-        id: item.id,
-        name: item.author || item.title,
-        role: item.tags?.[1] || 'ASTU Graduate',
-        text: item.excerpt || item.title,
-        fullStory: item.excerpt || item.title,
-        image: (item as any).coverImage || (item as any).image,
-        featured: item.featured,
-        publishedAt: item.publishedAt || item.updatedAt,
-      },
-      idx
-    )
-  );
-};
-
-const defaultStories: AlumniStory[] = [
-  {
-    id: 'story-yohannes',
-    name: 'Yohannes Melese',
-    role: 'Senior AI Engineer & Tech Lead',
-    company: 'Gebeya Inc.',
-    graduationYear: '2023',
-    department: 'School of Electrical Engineering & Computing',
-    text: 'Graduating as an ASTU Gold Medalist with a dual background in Software Engineering and Electronics, Yohannes now leads cross-border distributed ML infrastructure.',
-    fullStory: `Yohannes Melese graduated from ASTU with a dual major in Electronics & Communication Engineering and Computer Science, achieving an outstanding CGPA of 3.98.\n\nDuring his time at ASTU, Yohannes spearheaded multiple robotics initiatives in the university's advanced laboratories and represented Ethiopia in regional technical hackathons.\n\nToday, Yohannes works as a Senior AI Engineer and Technical Lead at Gebeya Inc., architecting scalable distributed machine learning pipelines and mentoring ASTU final-year engineering students through the ASTU-AMS mentorship program.`,
-    image: '/images/astusteam.jpg',
-    featured: true,
-    publishedAt: '2026-03-07',
-    active: true,
-  },
-  {
-    id: 'story-selamawit',
-    name: 'Selamawit Bekele',
-    role: 'Renewable Power Systems Director',
-    company: 'Ethiopian Electric Power',
-    graduationYear: '2020',
-    department: 'Department of Electrical & Power Engineering',
-    text: 'Spearheading national clean energy grid transitions. Her ASTU lab experiments laid the groundwork for large-scale solar and hydroelectric automation.',
-    fullStory: `Selamawit Bekele graduated from ASTU in 2020 with honors in Electrical & Power Engineering.\n\nHer undergraduate research conducted in the ASTU high-voltage electrical laboratories explored smart grid distribution and fault prediction algorithms for regional transmission networks.\n\nShe currently directs renewable power system integration at Ethiopian Electric Power, overseeing automation for solar-hydro hybrid stations, and actively participates in ASTU alumni advisory boards to align university lab curricula with international clean energy standards.`,
-    image: '/images/electriclabs.jpeg',
-    featured: true,
-    publishedAt: '2026-02-15',
-    active: true,
-  },
-  {
-    id: 'story-dawit',
-    name: 'Dawit Alemayehu',
-    role: 'Founder & CEO',
-    company: 'AfroTech Innovations',
-    graduationYear: '2021',
-    department: 'Department of Mechanical & Vehicle Engineering',
-    text: 'Building autonomous agritech robotics for Ethiopian farmers. Secured venture funding and employs 15 fellow ASTU graduates in Adama.',
-    fullStory: `Dawit Alemayehu founded AfroTech Innovations after graduating from ASTU's Mechanical and Vehicle Engineering program in 2021.\n\nLeveraging ASTU's maker spaces and business incubation programs, Dawit designed cost-effective autonomous agricultural tilling and weeding robots suited for smallholder farms across East Africa.\n\nAfroTech has raised seed venture funding and established manufacturing workshops in Adama, employing over 15 fellow ASTU engineering and software graduates.`,
-    image: '/images/arc.jpg',
-    featured: true,
-    publishedAt: '2026-01-20',
-    active: true,
-  },
-];
+/** No fabricated alumni stories — CMS/community members only. */
+export const initialStories: AlumniStory[] = [];
 
 export const storiesService = {
-  /** Public stories: Homepage CMS first, then tagged content items, then fallback stories. */
+  /**
+   * Normalise CMS-authored success stories (which use a looser field set than
+   * the dashboard editor) into the Dashboard `AlumniStory` shape. Returns an
+   * empty array when the CMS has no stories, so callers can fall back cleanly.
+   */
+  fromConfig(stories?: any[] | null): AlumniStory[] {
+    if (!Array.isArray(stories)) return [];
+    return stories
+      .filter((s) => s && s.active !== false && (s.name || s.title || s.author))
+      .map((s: any, idx: number) => ({
+        id: String(s.id ?? `S-cms-${idx + 1}`),
+        name: s.name || s.author || s.title,
+        role: s.role || s.position || s.subtitle || '',
+        company: s.company,
+        graduationYear: s.graduationYear || s.classOf || s.year,
+        department: s.department,
+        text: s.text || s.quote || s.excerpt || s.summary || '',
+        fullStory: s.fullStory || s.content || s.body || s.text || s.quote || '',
+        image: s.image || s.photo || s.imageUrl || '',
+        featured: s.featured ?? s.active ?? true,
+        publishedAt: s.publishedAt || s.date,
+      }));
+  },
+
   getStories(): AlumniStory[] {
-    const fromHomepage = fromHomepageConfig();
-    if (fromHomepage.length) return fromHomepage;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const sampleIds = new Set(['S-001', 'S-002', 'S-003', 'S-004', 'S-005', 'S-006']);
+          const cleaned = parsed.filter(
+            (p: any) => p && !sampleIds.has(String(p.id || ''))
+          );
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+          }
+          return cleaned;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    return [];
+  },
 
-    const fromContent = fromContentItems();
-    if (fromContent.length) return fromContent;
+  saveStories(stories: AlumniStory[]): void {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stories));
+    window.dispatchEvent(new Event('astu-cms-stories-changed'));
+  },
 
-    return defaultStories;
+  addStory(story: Omit<AlumniStory, 'id'>): AlumniStory {
+    const id = `S-${Date.now().toString().slice(-4)}`;
+    const newStory: AlumniStory = {
+      ...story,
+      id,
+      publishedAt:
+        story.publishedAt ||
+        new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      featured: story.featured ?? true,
+    };
+
+    const current = this.getStories();
+    current.unshift(newStory);
+    this.saveStories(current);
+
+    // Also add to contentService so feeds sync
+    contentService.addItem({
+      title: `${newStory.name} — ${newStory.role}`,
+      type: 'post',
+      status: 'Published',
+      excerpt: newStory.text,
+      content: newStory.fullStory || newStory.text,
+      image: newStory.image || '',
+      author: newStory.name,
+      tags: ['story', 'success-story', (newStory.department || 'Engineering').toLowerCase().replace(/\s+/g, '-')],
+      featured: newStory.featured,
+      publishedAt: newStory.publishedAt,
+    });
+
+    return newStory;
+  },
+
+  updateStory(id: string, updates: Partial<AlumniStory>): AlumniStory | null {
+    const stories = this.getStories();
+    const index = stories.findIndex((s) => s.id === id);
+    if (index === -1) return null;
+
+    stories[index] = { ...stories[index], ...updates };
+    this.saveStories(stories);
+    return stories[index];
+  },
+
+  deleteStory(id: string): boolean {
+    const stories = this.getStories();
+    const filtered = stories.filter((s) => s.id !== id);
+    if (filtered.length === stories.length) return false;
+
+    this.saveStories(filtered);
+    return true;
+  },
+
+  toggleFeatured(id: string): boolean {
+    const stories = this.getStories();
+    const target = stories.find((s) => s.id === id);
+    if (!target) return false;
+    const nextState = !target.featured;
+
+    target.featured = nextState;
+    this.saveStories(stories);
+    return nextState;
   },
 
   getStoryByIdOrSlug(idOrSlug: string): AlumniStory | null {
@@ -125,20 +139,26 @@ export const storiesService = {
     const needle = decodeURIComponent(idOrSlug).toLowerCase();
     const slugified = needle.replace(/[^a-z0-9]+/g, '-');
 
-    return (
+    // 1. Try exact ID or slug match in current stories
+    let found =
       stories.find((s) => s.id.toLowerCase() === needle) ||
       stories.find((s) => s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slugified) ||
-      stories.find((s) => s.name.toLowerCase().includes(needle)) ||
-      null
-    );
-  },
+      stories.find((s) => s.name.toLowerCase().includes(needle));
 
-  /** Merge API homepage config stories without writing localStorage. */
-  fromConfig(stories: any[] | undefined | null): AlumniStory[] {
-    if (!Array.isArray(stories) || !stories.length) return [];
-    return stories
-      .filter((s) => s?.active !== false)
-      .map((s, i) => normalizeStory(s, i));
+    if (found) return found;
+
+    // 2. Try numeric ID match (e.g. AS-2 -> S-002, or SS-1 -> S-001)
+    const numMatch = needle.match(/\d+/);
+    if (numMatch) {
+      const num = parseInt(numMatch[0], 10);
+      const targetId = `s-00${num}`;
+      found =
+        stories.find((s) => s.id.toLowerCase() === targetId) ||
+        stories[num - 1] ||
+        null;
+    }
+
+    return found || null;
   },
 };
 

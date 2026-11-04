@@ -122,7 +122,7 @@ const CATEGORIES: { id: CmsCategory; label: string; icon: React.ComponentType<{ 
   { id: 'partners-portal', label: '7. Partners', icon: Briefcase, desc: 'Partner logos, featured employers & recruitment tracks' },
   { id: 'community', label: '8. Community & Stories', icon: MessageSquareText, desc: 'Community strip, alumni voices, success stories & testimonials' },
   { id: 'giving-campaigns', label: '9. Giving', icon: Heart, desc: 'Homepage giving header & research fund callouts' },
-  { id: 'accreditation-faq', label: '10. FAQ', icon: ShieldCheck, desc: 'Accreditation banner copy & frequently asked questions' },
+  { id: 'accreditation-faq', label: '10. FAQ', icon: ShieldCheck, desc: 'Homepage FAQ preview (3 items) + full /info/faq page — keep in sync' },
   { id: 'footer-cta', label: '11. CTA & Footer', icon: MapPin, desc: 'Community CTA buttons, office contacts & copyright' },
   { id: 'detail-pages', label: 'Sub-Pages', icon: FileText, desc: 'Overview, Contact Us and 22+ institutional pages linked from the homepage' },
 ];
@@ -131,111 +131,23 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Users, Building2, LineChart, FileCheck2, MessageSquareText, Briefcase, LockKeyhole, Globe, BookOpen, Star, Handshake, ShieldCheck, Trophy, GraduationCap, Zap, Phone, Mail, MapPin, CalendarDays, Award: Trophy,
 };
 
-/* ─── Initial Fallback Data ─── */
-const initialHeroSlides: HeroSlide[] = [
-  { id: 'HS-1', image: '/images/astuget.jpg', tagline: 'Empowering Future Innovators', title: 'Welcome to ASTU Alumni Portal', description: 'Welcome to the ASTU Alumni Management System, a digital bridge between graduates, employers, departments, and university services.', active: true },
-  { id: 'HS-2', image: '/images/campus-2.jpeg', tagline: 'Enterprise Networking & Placement', title: 'Empowering ASTU Graduates in Modern Workspaces', description: 'Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.', active: true },
-  { id: 'HS-3', image: 'https://images.unsplash.com/photo-1562774053-701939374585', tagline: 'Academic Innovation & Tracer Feedback', title: 'Coordinating Strategic Tracer Studies & Skill Gaps', description: 'Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.', active: true },
-];
-
-const initialImpactStats: ImpactStat[] = [
-  { id: 'IS-1', label: 'Registered Alumni Members', value: '1,238', suffix: '+', detail: 'Registered in the alumni network', icon: 'Users', action: 'View Network', target: '/register', active: true },
-  { id: 'IS-2', label: 'Partner Organizations', value: '500', suffix: '+', detail: 'Hiring, internships, and feedback', icon: 'Building2', action: 'Meet Partners', target: '/info/featured-employers', active: true },
-  { id: 'IS-3', label: 'Employment Rate', value: '87', suffix: '%', detail: 'Graduate employment rate tracked', icon: 'LineChart', action: 'View Outcomes', target: '/info/impact-numbers', active: true },
-];
-
-const initialPortals: StakeholderPortal[] = [
-  { id: 'SP-1', title: 'Alumni', icon: 'Users', points: ['Create and maintain your professional profile.', 'Access verified job listings and internship opportunities.', 'Complete tracer surveys to guide curriculum development.', 'Mentor current students and connect with peers.'], cta: 'Access Alumni Portal', route: '/info/alumni-portal', active: true, step: 1, color: 'from-astu-navy to-[#1a4f8a]', iconBg: 'bg-astu-navy/10 text-astu-navy' },
-  { id: 'SP-2', title: 'Employers', icon: 'Briefcase', points: ['Post employment opportunities for ASTU graduates.', 'Search alumni by expertise, skills, and department.', 'Provide feedback to enhance curriculum relevance.'], cta: 'Partner With ASTU', route: '/info/employer-portal', active: true, step: 2, color: 'from-astu-red to-[#c0392b]', iconBg: 'bg-astu-red/10 text-astu-red' },
-  { id: 'SP-3', title: 'Departments', icon: 'LineChart', points: ['Monitor graduate employment outcomes and metrics.', 'Identify skill gaps through employer analytics.', 'Generate accreditation-ready reports.'], cta: 'View Department Analytics', route: '/info/department-portal', active: true, step: 3, color: 'from-astu-green to-[#1e8449]', iconBg: 'bg-astu-green/10 text-astu-green' },
-  { id: 'SP-4', title: 'Registrar', icon: 'FileCheck2', points: ['Validate alumni credentials against SIS records.', 'Process transcript and certificate requests.', 'Send tracer study reminders and audit notifications.'], cta: 'Open Registrar Portal', route: '/info/registrar-portal', active: true, step: 4, color: 'from-violet-600 to-violet-800', iconBg: 'bg-violet-100 text-violet-700' },
-];
-
-const initialCampusLife: CampusLifeCard[] = [
-  { id: 'CL-1', title: 'Student Clubs & Chapters', campus: 'Main Campus', description: 'Professional societies, cultural clubs, and alumni chapters that keep graduates connected to campus.', image: '/images/astusteam.jpg', action: 'Explore Campus Life', link: '/info/campus-life', active: true },
-  { id: 'CL-2', title: 'Facilities & Innovation Spaces', campus: 'Innovation Spaces', description: 'Laboratories, research centers, libraries, student services, and employer interview rooms.', image: '/images/electriclabs.jpeg', action: 'Explore Facilities', link: '/info/facilities', active: true },
-  { id: 'CL-3', title: 'Sports & Cultural Life', campus: 'Campus Grounds', description: 'Athletics, arts, and community gatherings that shape everyday life across ASTU campuses.', image: '/images/arc.jpg', action: 'Learn More', link: '/info/campus-life', active: true },
-];
-
-const initialCampuses: Campus[] = [
-  { id: 'CM-1', name: 'Main Campus', description: 'Central hub for alumni services, registrar workflows, and institutional engagement.', image: '/images/astu-building.jpg', active: true },
-  { id: 'CM-2', name: 'Engineering Labs', description: 'Applied research, workshops, innovation programs, and industry-linked training.', image: '/images/electriclabs.jpeg', active: true },
-  { id: 'CM-3', name: 'Graduation & Events Hall', description: 'Ceremonies, career fairs, alumni awards, and university achievement programs.', image: '/images/gc7.jpg', active: true },
-  { id: 'CM-4', name: 'Research Collaboration Center', description: 'Research publications, industry projects, and department KPI evidence.', image: '/images/arc.jpg', active: true },
-];
-
-const initialGallery: GalleryImage[] = [
-  { id: 'GI-1', title: 'ASTU Main Campus Architecture', src: '/images/astu-building.jpg', active: true },
-  { id: 'GI-2', title: 'Innovation and Collaboration Hub', src: '/images/campus-2.jpeg', active: true },
-  { id: 'GI-3', title: 'ASTU Alumni Identity & Legacy', src: '/images/astu-seal-logo.png', active: true },
-];
-
-const initialVideos: VideoItem[] = [
-  { id: 'VI-1', title: 'Career Expo Highlights', image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80', active: true },
-  { id: 'VI-2', title: 'Research & Innovation Forum', image: '/images/arc.jpg', active: true },
-  { id: 'VI-3', title: 'Graduation Ceremony Replay', image: '/images/gc7.jpg', active: true },
-];
-
-const initialEvents: EventItem[] = [
-  { id: 'EV-1', title: 'ASTU Alumni Carnival 2026', date: 'April 25-26, 2026', location: 'Main Campus', image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80', active: true },
-  { id: 'EV-2', title: 'DAAD Alumni Workshop', date: 'March 2026', location: 'ASTU Research Center', image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1200&q=80', active: true },
-];
-
-const initialWorkshops: WorkshopItem[] = [
-  { id: 'WS-1', title: 'AI for Engineering Research', date: 'June 14, 2026', seats: '120 seats', focus: 'Research & Innovation', active: true },
-  { id: 'WS-2', title: 'CV Builder and Interview Lab', date: 'June 20, 2026', seats: '80 seats', focus: 'Career Readiness', active: true },
-  { id: 'WS-3', title: 'Startup Finance for Alumni', date: 'July 4, 2026', seats: '60 seats', focus: 'Entrepreneurship', active: true },
-];
-
-const initialNews: NewsItem[] = [
-  { id: 'NW-1', title: 'New Engineering Lab Inaugurated', date: 'May 28, 2026', excerpt: 'Cutting-edge robotics and IoT facilities opened for graduate research.', active: true },
-  { id: 'NW-2', title: 'ASTU Research Grant Winners', date: 'May 25, 2026', excerpt: 'Three applied research initiatives secure funding from regional partners.', active: true },
-  { id: 'NW-3', title: 'Annual Career Expo Announced', date: 'May 20, 2026', excerpt: 'Over 50 tech and engineering employers confirmed for on-campus hiring.', active: true },
-];
-
-const initialAnnouncements: Announcement[] = [
-  { id: 'AN-1', title: 'ASTU Alumni Association Inspires Graduating Class with Career Tips!', date: 'March 7, 2025', type: 'Alumni Announcement', active: true },
-  { id: 'AN-2', title: 'ASTU hosts a five-day DAAD Alumni workshop', date: 'March 7, 2025', type: 'Employer Announcement', active: true },
-  { id: 'AN-3', title: 'ASTU alumni serve as model United Nations secretariats!', date: 'January 7, 2025', type: 'Alumni Achievement', active: true },
-  { id: 'AN-4', title: 'Tracer Study 2026 response window is open', date: 'May 31, 2026', type: 'Alumni Announcement', active: true },
-  { id: 'AN-5', title: 'Call for employer partners: campus recruitment week', date: 'May 28, 2026', type: 'Employer Announcement', active: true },
-];
-
-const initialStories: SuccessStory[] = [
-  { id: 'SS-1', name: 'Abebe Yosef', role: 'Software Engineer', text: 'I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.', image: '/images/State-M.jpg', active: true },
-  { id: 'SS-2', name: 'Bekele Kebede', role: 'Employer Partner', text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.', image: '/images/gc7.jpg', active: true },
-  { id: 'SS-3', name: 'Helina Sileshi', role: 'Mentor & Alumni', text: 'Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!', image: '/images/arc.jpg', active: true },
-];
-
-const initialPartners: Partner[] = [
-  { id: 'PT-1', name: 'Ethio Telecom', active: true },
-  { id: 'PT-2', name: 'INSA', active: true },
-  { id: 'PT-3', name: 'Ethiopian Airlines', active: true },
-  { id: 'PT-4', name: 'Safaricom', active: true },
-  { id: 'PT-5', name: 'Huawei', active: true },
-  { id: 'PT-6', name: 'Commercial Bank of Ethiopia', active: true },
-];
-
-const initialFeaturedEmployers: FeaturedEmployerItem[] = [
-  { id: 'FE-1', name: 'Ethio Telecom', area: 'Telecom & Cloud', openings: '14 graduate roles', active: true },
-  { id: 'FE-2', name: 'Ethiopian Airlines', area: 'Aviation Technology', openings: '8 internship tracks', active: true },
-  { id: 'FE-3', name: 'INSA', area: 'Cybersecurity', openings: '6 research placements', active: true },
-  { id: 'FE-4', name: 'Huawei Ethiopia', area: 'Network Engineering', openings: '11 certification paths', active: true },
-];
-
-const initialTestimonials: Testimonial[] = [
-  { id: 'TT-1', quote: 'ASTU-AMS gave our department the evidence we needed for skill-gap review.', by: 'Department Head', active: true },
-  { id: 'TT-2', quote: 'The candidate search and feedback tools improved our campus recruitment cycle.', by: 'Employer Partner', active: true },
-  { id: 'TT-3', quote: 'I found mentorship, events, and job matches without leaving the alumni portal.', by: 'ASTU Alumna', active: true },
-];
-
-const initialFaq: FaqItem[] = [
-  { id: 'FQ-1', question: 'Who can use ASTU-AMS?', answer: 'Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.', category: 'General', active: true },
-  { id: 'FQ-2', question: 'How are tracer studies used?', answer: 'Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.', category: 'Tracer', active: true },
-  { id: 'FQ-3', question: 'Can employers register events?', answer: 'Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports.', category: 'Employers', active: true },
-  { id: 'FQ-4', question: 'How do I request a transcript?', answer: 'Log into your alumni profile, navigate to Document Requests, and submit a digital request through the Registrar portal.', category: 'Registrar', active: true },
-  { id: 'FQ-5', question: 'What is the Tracer Study cycle?', answer: 'A longitudinal survey that tracks graduate employment outcomes at 6, 12, and 24-month intervals for accreditation.', category: 'Tracer', active: true },
-];
+/* ─── Empty starters — post real CMS content, then test; never auto-fill demo rows ─── */
+const initialHeroSlides: HeroSlide[] = [];
+const initialImpactStats: ImpactStat[] = [];
+const initialPortals: StakeholderPortal[] = [];
+const initialCampusLife: CampusLifeCard[] = [];
+const initialCampuses: Campus[] = [];
+const initialGallery: GalleryImage[] = [];
+const initialVideos: VideoItem[] = [];
+const initialEvents: EventItem[] = [];
+const initialWorkshops: WorkshopItem[] = [];
+const initialNews: NewsItem[] = [];
+const initialAnnouncements: Announcement[] = [];
+const initialStories: SuccessStory[] = [];
+const initialPartners: Partner[] = [];
+const initialFeaturedEmployers: FeaturedEmployerItem[] = [];
+const initialTestimonials: Testimonial[] = [];
+const initialFaq: FaqItem[] = [];
 
 export default function HomepageManagement({ initialCategory }: { initialCategory?: CmsCategory } = {}) {
   const [searchParams] = useSearchParams();
@@ -521,9 +433,9 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         // slides during the next backend reload.
         if (Array.isArray(cfg.heroSlides)) setHeroSlides(cfg.heroSlides);
         if (cfg.impactHeaders) setImpactHeaders(cfg.impactHeaders);
-        if (Array.isArray(cfg.impactStats) && cfg.impactStats.length) setImpactStats(cfg.impactStats);
+        if (Array.isArray(cfg.impactStats)) setImpactStats(cfg.impactStats);
         if (cfg.portalsHeaders) setPortalsHeaders(cfg.portalsHeaders);
-        if (Array.isArray(cfg.portals) && cfg.portals.length) setPortals(cfg.portals);
+        if (Array.isArray(cfg.portals)) setPortals(cfg.portals);
         if (cfg.campusLifeHeaders) setCampusLifeHeaders(cfg.campusLifeHeaders);
         if (Array.isArray(cfg.campusLife)) setCampusLife(cfg.campusLife);
         if (Array.isArray(cfg.campuses)) setCampuses(cfg.campuses);
@@ -573,11 +485,11 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
         if (Array.isArray(cfg.stories)) setStories(cfg.stories);
         if (Array.isArray(cfg.testimonials)) setTestimonials(cfg.testimonials);
         if (cfg.partnersHeaders) setPartnersHeaders(cfg.partnersHeaders);
-        if (Array.isArray(cfg.partners) && cfg.partners.length) setPartners(cfg.partners);
-        if (Array.isArray(cfg.featuredEmployers) && cfg.featuredEmployers.length) setFeaturedEmployers(cfg.featuredEmployers);
+        if (Array.isArray(cfg.partners)) setPartners(cfg.partners);
+        if (Array.isArray(cfg.featuredEmployers)) setFeaturedEmployers(cfg.featuredEmployers);
         if (cfg.accreditation) setAccreditation(cfg.accreditation);
         if (cfg.faqHeaders) setFaqHeaders(cfg.faqHeaders);
-        if (Array.isArray(cfg.faq) && cfg.faq.length) setFaq(cfg.faq);
+        if (Array.isArray(cfg.faq)) setFaq(cfg.faq);
         if (cfg.ctaSection) setCtaSection(cfg.ctaSection);
         if (cfg.footer) setFooter(cfg.footer);
         if (cfg.sectionLinks) setSectionLinks(prev => ({ ...prev, ...cfg.sectionLinks }));
@@ -588,7 +500,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
           setPartnersPage({ ...defaultPartnersPageConfig, ...cfg.partnersPage });
         }
         if (cfg.liveCommunitySection) setLiveCommunitySection(cfg.liveCommunitySection);
-        if (Array.isArray(cfg.liveCommunityPosts) && cfg.liveCommunityPosts.length) setLiveCommunityPosts(cfg.liveCommunityPosts);
+        if (Array.isArray(cfg.liveCommunityPosts)) setLiveCommunityPosts(cfg.liveCommunityPosts);
         if (cfg.givingSection) setGivingSection(cfg.givingSection);
       }
       setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -734,14 +646,15 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleSaveAll]);
 
-  // Every CMS mutation is backend-first. This small debounce batches text
-  // edits, while delete/toggle/add actions are also covered, so a page refresh
-  // can no longer bring back a locally removed item from stale server data.
+  // Every CMS mutation is backend-first. Debounce text edits into one publish.
+  // Keep handleSaveAll behind a ref so identity churn cannot retrigger a save loop.
+  const handleSaveAllRef = useRef(handleSaveAll);
+  handleSaveAllRef.current = handleSaveAll;
   useEffect(() => {
     if (!hasUnsavedChanges || isSaving || isInitialLoad.current) return;
-    const timer = window.setTimeout(() => void handleSaveAll(false), 700);
+    const timer = window.setTimeout(() => void handleSaveAllRef.current(false), 1200);
     return () => window.clearTimeout(timer);
-  }, [hasUnsavedChanges, isSaving, handleSaveAll]);
+  }, [hasUnsavedChanges, isSaving]);
 
   // Total active count across all sections
   const totalActiveItems = useMemo(() => {
@@ -1967,7 +1880,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
               <div className="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">News & Announcements Headers</h3>
-                <p className="text-xs text-slate-500 mt-0.5">Controls the eyebrow and title on the public homepage News section.</p>
+                <p className="text-xs text-slate-500 mt-0.5">Controls eyebrow, title, and description on the public homepage News section.</p>
               </div>
               <div className="space-y-3">
                 <div>
@@ -1988,6 +1901,72 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
                     className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold"
                   />
                 </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description</label>
+                  <textarea
+                    value={newsHeaders.description || ''}
+                    onChange={e => { setNewsHeaders({ ...newsHeaders, description: e.target.value }); notifyChange(); }}
+                    rows={2}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Events section headers */}
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-xs">
+              <div className="border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Events & Workshops Headers</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Controls the public homepage Events section copy and View All link.</p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Eyebrow</label>
+                  <input
+                    type="text"
+                    value={eventsHeaders.eyebrow}
+                    onChange={e => { setEventsHeaders({ ...eventsHeaders, eyebrow: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold text-rose-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Section Title</label>
+                  <input
+                    type="text"
+                    value={eventsHeaders.title}
+                    onChange={e => { setEventsHeaders({ ...eventsHeaders, title: e.target.value }); notifyChange(); }}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Description</label>
+                  <textarea
+                    value={eventsHeaders.description || ''}
+                    onChange={e => { setEventsHeaders({ ...eventsHeaders, description: e.target.value }); notifyChange(); }}
+                    rows={2}
+                    className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs"
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">View All Label</label>
+                    <input
+                      type="text"
+                      value={eventsHeaders.viewAllText}
+                      onChange={e => { setEventsHeaders({ ...eventsHeaders, viewAllText: e.target.value }); notifyChange(); }}
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">View All Link</label>
+                    <input
+                      type="text"
+                      value={eventsHeaders.viewAllLink}
+                      onChange={e => { setEventsHeaders({ ...eventsHeaders, viewAllLink: e.target.value }); notifyChange(); }}
+                      className="mt-1 w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2.5 text-xs"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1996,7 +1975,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">Upcoming Alumni Events ({events.length})</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Calendar events with RSVP registration and venue details.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Toggle Active / Hidden — only Active items publish to the live homepage.</p>
                 </div>
                 <button
                   type="button"
@@ -2385,7 +2364,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">Alumni & Partner Success Stories ({stories.length})</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Quotes and experiences highlighting graduate employability and mentorship.</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Toggle Active / Hidden — only Active stories publish to the live homepage.</p>
                 </div>
                 <button
                   type="button"

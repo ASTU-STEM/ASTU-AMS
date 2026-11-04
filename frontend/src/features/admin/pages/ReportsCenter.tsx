@@ -60,6 +60,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import AdminStatGrid from '../components/AdminStatGrid';
 import { adminService } from '../services/admin.service';
 import { generateAndDownloadReport } from '../utils/reportPdfGenerator';
 
@@ -350,7 +351,7 @@ export default function ReportsCenter() {
       <AdminPageHeader
         title="Institutional Reports"
         subtitle="Generate and download accreditation-ready PDF exports across employment, tracer studies, industry, engagement, events, and quality domains."
-        breadcrumbs={[{ label: 'Admin' }, { label: 'Reports' }]}
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Reports Center' }]}
         actions={
           <div className="flex items-center gap-2">
             <button
@@ -386,36 +387,51 @@ export default function ReportsCenter() {
         </div>
       )}
 
-      {/* Metric Cards */}
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: 'Employment Rate', value: metrics.employmentRate, icon: GraduationCap, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200/60 dark:border-emerald-800/50' },
-          { label: 'Employer Satisfaction', value: metrics.employerSatisfaction, icon: Building2, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200/60 dark:border-amber-800/50' },
-          { label: 'Mapped Countries', value: metrics.mappedCountries, icon: Globe2, color: 'text-blue-600 dark:text-sky-400', bg: 'bg-blue-50 dark:bg-blue-950/50 border-blue-200/60 dark:border-blue-800/50' },
-          { label: 'Exported This Month', value: metrics.exportedThisMonth, icon: Download, color: 'text-astu-navy dark:text-sky-300', bg: 'bg-sky-50 dark:bg-sky-950/50 border-sky-200/60 dark:border-sky-800/50' },
-        ].map((metric) => {
-          const Icon = metric.icon;
-          const isUnavailable = !metricsLoading && (metric.value === UNAVAILABLE || metricsError);
-          return (
-            <div key={metric.label} className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm transition-all hover:shadow-md dark:hover:shadow-sky-950/30">
-              <div className="flex items-center justify-between">
-                <span className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border ${metric.bg}`}>
-                  <Icon className={`h-5 w-5 ${metric.color}`} />
-                </span>
-              </div>
-              <p className="mt-3 text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">{metric.label}</p>
-              <p className={`mt-1 text-2xl font-black font-mono ${isUnavailable ? 'text-slate-400 dark:text-slate-600 text-lg' : 'text-slate-900 dark:text-white'}`}>
-                {metricsLoading ? <RefreshCw className="h-5 w-5 animate-spin text-slate-400 dark:text-slate-500" /> : metric.value}
-              </p>
-            </div>
-          );
-        })}
-      </section>
+      <AdminStatGrid
+        cols={4}
+        compact
+        stats={[
+          {
+            title: 'Employment Rate',
+            value: String(metrics.employmentRate),
+            icon: GraduationCap,
+            tone: 'green',
+            loading: metricsLoading,
+            trend: metricsError || metrics.employmentRate === UNAVAILABLE ? 'Unavailable' : 'Accreditation metric',
+            trendDirection: metricsError || metrics.employmentRate === UNAVAILABLE ? 'flat' : 'up',
+          },
+          {
+            title: 'Employer Satisfaction',
+            value: String(metrics.employerSatisfaction),
+            icon: Building2,
+            tone: 'amber',
+            loading: metricsLoading,
+            description: 'Industry feedback index',
+          },
+          {
+            title: 'Mapped Countries',
+            value: String(metrics.mappedCountries),
+            icon: Globe2,
+            tone: 'blue',
+            loading: metricsLoading,
+            description: 'Alumni geographic coverage',
+          },
+          {
+            title: 'Exported This Month',
+            value: String(metrics.exportedThisMonth),
+            icon: Download,
+            tone: 'purple',
+            loading: metricsLoading,
+            trend: 'PDF export center',
+            trendDirection: 'up',
+          },
+        ]}
+      />
 
       {/* Main Report Library Grid */}
       <section className="grid gap-6 xl:grid-cols-[300px_1fr]">
         {/* Category Switcher Sidebar */}
-        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-sm h-fit space-y-1 lg:sticky lg:top-4">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-[var(--bg-card)] p-3 shadow-sm h-fit space-y-1 lg:sticky lg:top-4">
           <p className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-2">
             Report Domains ({reports.length})
           </p>
@@ -447,7 +463,7 @@ export default function ReportsCenter() {
         </div>
 
         {/* Selected Domain Report Library */}
-        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm space-y-5">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-[var(--bg-card)] p-6 shadow-sm space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
@@ -510,7 +526,7 @@ export default function ReportsCenter() {
 
           {/* Cards */}
           {filteredReports.length === 0 ? (
-            <div className="py-12 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8">
+            <div className="py-12 text-center border border-dashed border-[var(--border-color)] rounded-2xl p-8">
               <FileSpreadsheet className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
               <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No reports matching your filter</p>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try adjusting your search terms or clearing the cadence filter.</p>
@@ -582,7 +598,7 @@ export default function ReportsCenter() {
               if (e.target === e.currentTarget) setShowBuildModal(false);
             }}
           >
-            <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="bg-[var(--bg-card)] rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-6 animate-in zoom-in-95 duration-200">
               {/* Header */}
               <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div className="flex items-center gap-3">

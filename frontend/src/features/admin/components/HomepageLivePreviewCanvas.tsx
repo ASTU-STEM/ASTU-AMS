@@ -1126,10 +1126,13 @@ export default function HomepageLivePreviewCanvas({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {(events.length > 0 ? events.slice(0, 3) : [
-              { id: '1', title: 'ASTU Alumni Carnival 2026', date: 'April 25-26, 2026', location: 'Main Campus' },
-              { id: '2', title: 'DAAD Alumni Workshop', date: 'March 2026', location: 'Research Center' },
-            ]).map((ev: any, idx: number) => (
+            {(events.filter((e: any) => e && e.active !== false).length > 0
+              ? events.filter((e: any) => e && e.active !== false).slice(0, 3)
+              : [
+                  { id: '1', title: 'ASTU Alumni Carnival 2026', date: 'April 25-26, 2026', location: 'Main Campus' },
+                  { id: '2', title: 'DAAD Alumni Workshop', date: 'March 2026', location: 'Research Center' },
+                ]
+            ).map((ev: any, idx: number) => (
               <div key={ev.id || idx} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-xs">
                 <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
                   <span className="font-bold text-rose-600">{ev.date}</span>
@@ -1140,13 +1143,13 @@ export default function HomepageLivePreviewCanvas({
             ))}
           </div>
 
-          {announcements.length > 0 && (
+          {announcements.filter((a) => a.active !== false).length > 0 && (
             <div className="mt-4 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#003366] dark:text-sky-300 block mb-1">
                 📢 {announcementsHeaders?.title || 'Official Notices'}
               </span>
               <div className="space-y-1">
-                {announcements.slice(0, 2).map((a, i) => (
+                {announcements.filter((a) => a.active !== false).slice(0, 2).map((a, i) => (
                   <p key={a.id || i} className="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-1 flex items-center gap-1.5">
                     <span className="h-1 w-1 rounded-full bg-rose-600 shrink-0" />
                     <span>{a.title}</span>
@@ -1199,15 +1202,29 @@ export default function HomepageLivePreviewCanvas({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 items-center justify-items-center gap-x-6 gap-y-7">
-            {partners.filter((p) => p.active !== false && p.logo).slice(0, 6).map((p) => (
-              <img
-                key={p.id}
-                src={p.logo}
-                alt={`${p.name} logo`}
-                className="max-h-12 max-w-[120px] object-contain"
-              />
-            ))}
+          <div className="relative overflow-hidden py-2">
+            <div className="animate-scroll flex w-max items-center gap-14">
+              {[
+                ...partners.filter((p) => p.active !== false),
+                ...partners.filter((p) => p.active !== false),
+              ].map((p, idx) =>
+                p.logo ? (
+                  <img
+                    key={`${p.id}-${idx}`}
+                    src={p.logo}
+                    alt={`${p.name} logo`}
+                    className="max-h-12 max-w-[120px] shrink-0 object-contain opacity-80"
+                  />
+                ) : (
+                  <span
+                    key={`${p.id}-${idx}`}
+                    className="shrink-0 text-xs font-bold uppercase tracking-wide text-[#003366]/70"
+                  >
+                    {p.name}
+                  </span>
+                )
+              )}
+            </div>
           </div>
         </div>
 

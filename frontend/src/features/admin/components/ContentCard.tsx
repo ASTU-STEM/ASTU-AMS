@@ -24,7 +24,7 @@ export type ContentType = 'page' | 'post' | 'announcement' | 'gallery' | 'event'
 export type ContentCardItem = {
   id: string;
   title: string;
-  type: ContentType;
+  type: ContentType | string;
   status: ContentStatus;
   excerpt?: string;
   image?: string;
@@ -38,17 +38,19 @@ export type ContentCardItem = {
   pinned?: boolean;
   featured?: boolean;
   language?: string;
-  content?: string;
-  category?: string;
-  buttonText?: string;
-  targetAudience?: string;
-  registrationLink?: string;
   requiresRegistration?: boolean;
   registeredCount?: number;
   registrationCapacity?: number;
   registrationDeadline?: string;
   registrationType?: string;
+  content?: string;
+  authorityLabel?: string;
+  buttonText?: string;
+  category?: string;
+  targetAudience?: string;
+  priorityBadge?: string;
 };
+
 
 const statusStyles: Record<ContentStatus, string> = {
   Published: 'bg-emerald-50 text-emerald-700',
@@ -66,7 +68,7 @@ const statusIcons: Record<ContentStatus, React.ComponentType<{ className?: strin
   Archived: Archive,
 };
 
-const typeColors: Record<ContentType, string> = {
+const typeColors: Record<string, string> = {
   page: 'bg-blue-100 text-blue-700',
   post: 'bg-teal-100 text-teal-700',
   announcement: 'bg-amber-100 text-amber-700',
@@ -129,7 +131,7 @@ export default function ContentCard({
               className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 text-[#003580] focus:ring-[#003580]"
             />
           )}
-          <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeColors[item.type]}`}>
+          <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeColors[item.type] || 'bg-blue-100 text-blue-700'}`}>
             {item.type}
           </span>
           <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold ${statusStyles[item.status]}`}>

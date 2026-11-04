@@ -29,6 +29,7 @@ import {
   Youtube,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ShareModal, { ShareItem } from './ShareModal';
 
 export interface VideoSpeaker {
   name: string;
@@ -118,6 +119,8 @@ export default function VideoDetailModal({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [activeTab, setActiveTab] = useState<'overview' | 'chapters' | 'transcript' | 'related'>('overview');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
   const totalDurationSeconds = useMemo(() => {
@@ -267,12 +270,18 @@ export default function VideoDetailModal({
   };
 
   const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success('Video link copied to clipboard!');
-    } else {
-      toast.success('Ready to share video highlight!');
-    }
+    if (!video) return;
+    setShareItem({
+      id: video.id,
+      title: video.title,
+      subtitle: video.subtitle || 'ASTU Video Highlight',
+      text: video.description || video.subtitle || video.title,
+      url: video.link || (typeof window !== 'undefined' ? window.location.href : undefined),
+      image: video.image,
+      badge: 'Video',
+      type: 'video',
+    });
+    setShareOpen(true);
   };
 
   if (!video) return null;
@@ -544,7 +553,8 @@ export default function VideoDetailModal({
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700 transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-300 hover:bg-sky-500/20 hover:border-sky-400 transition-all cursor-pointer"
+              title="Share video via Telegram, LinkedIn, WhatsApp, or copy link"
             >
               <Share2 className="h-3.5 w-3.5" />
               <span>Share</span>
@@ -719,6 +729,8 @@ export default function VideoDetailModal({
           )}
         </div>
       </div>
+
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} item={shareItem} />
     </div>
   );
 }

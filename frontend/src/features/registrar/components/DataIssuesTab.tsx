@@ -66,11 +66,11 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
     fullName: '',
     studentId: '',
     graduationYear: '',
-    department: 'Computer Science & Engineering',
+    department: '',
     email: '',
     phone: '',
-    cgpa: '3.50',
-    nationality: 'Ethiopian',
+    cgpa: '',
+    nationality: '',
     dateOfBirth: '',
   });
 
@@ -83,7 +83,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
   useEffect(() => {
     setImgError(false);
     if (selectedIssue) {
-      let dept = 'Computer Science & Engineering';
+      let dept = '';
       if (selectedIssue.issueDescription) {
         const match = selectedIssue.issueDescription.match(/Department:\s*([^\n\r;]+)/i);
         if (match && match[1]) dept = match[1].trim();
@@ -91,12 +91,12 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
       setEditForm({
         fullName: selectedIssue.fullName || '',
         studentId: selectedIssue.studentId || '',
-        graduationYear: String(selectedIssue.graduationYear || '2024'),
+        graduationYear: selectedIssue.graduationYear != null ? String(selectedIssue.graduationYear) : '',
         department: dept,
         email: selectedIssue.contactEmail || '',
         phone: selectedIssue.phoneNumber || '',
-        cgpa: '3.50',
-        nationality: 'Ethiopian',
+        cgpa: '',
+        nationality: '',
         dateOfBirth: '',
       });
       setIsEditing(false);
@@ -479,6 +479,7 @@ export const DataIssuesTab: React.FC<DataIssuesTabProps> = ({ onIssuesChange }) 
                             onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                             className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white font-semibold focus:outline-none focus:border-astu-navy"
                           >
+                            <option value="">Select department</option>
                             <option value="Computer Science & Engineering">Computer Science & Engineering</option>
                             <option value="Software Engineering">Software Engineering</option>
                             <option value="Electrical & Computer Engineering">Electrical & Computer Engineering</option>

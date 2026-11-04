@@ -28,6 +28,8 @@ import { FeedbackTab } from '../components/FeedbackTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
 import { CandidateProfileModal } from '../components/CandidateProfileModal';
+import { CandidatePipelineKanban } from '../components/tabs/CandidatePipelineKanban';
+import { PartnerMoUDirectory } from '../components/tabs/PartnerMoUDirectory';
 import { useTheme } from '../../../hooks/useTheme';
 
 const EmployerDashboard = () => {
@@ -686,7 +688,7 @@ const EmployerDashboard = () => {
         )}
 
         {/* Enhanced Sidebar Navigation */}
-        <aside className={`fixed left-0 top-0 z-[60] flex h-dvh w-64 flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-[#080D18] border-r border-[#2A3749] text-[#F1F5F9] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
+        <aside className={`fixed left-0 top-0 z-[60] flex h-dvh w-64 flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
           {/* Animated overlay */}
           <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(34,211,238,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite] pointer-events-none" />
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -696,7 +698,7 @@ const EmployerDashboard = () => {
           </div>
 
           {/* Sidebar Logo with Enhanced Status */}
-          <div className="relative z-10 px-4 py-4 border-b border-[#2A3749] bg-[#080D18]">
+          <div className="relative z-10 px-4 py-4 border-b border-[var(--border-color)] bg-[var(--bg-sidebar)]">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
               <div className="relative group/logo">
                 <div className="w-11 h-11 flex items-center justify-center">
@@ -706,8 +708,8 @@ const EmployerDashboard = () => {
                 <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 " />
               </div>
               {!sidebarCollapsed && <div>
-                <h1 className="text-base font-extrabold text-[#F1F5F9] tracking-tight">ASTU Employer</h1>
-                <p className="text-[9px] text-[#22D3EE] uppercase tracking-[0.2em] font-extrabold">Recruitment Hub</p>
+                <h1 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">ASTU Employer</h1>
+                <p className="text-[9px] text-[var(--accent-cyan)] uppercase tracking-[0.2em] font-extrabold">Recruitment Hub</p>
               </div>}
             </div>
           </div>
@@ -716,7 +718,7 @@ const EmployerDashboard = () => {
           <nav className="relative z-10 flex-grow px-2 py-4 overflow-y-auto scrollbar-thin">
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-2 mb-2">
-                <p className="text-[9px] font-extrabold text-[#8493A8] uppercase tracking-[0.2em]">Recruiting</p>
+                <p className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.2em]">Recruiting</p>
               </div>
             )}
             <div className="space-y-0.5">
@@ -725,12 +727,13 @@ const EmployerDashboard = () => {
                 { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Jobs, candidates, events & analytics' },
                 { id: 'post_job', label: 'Job Scaffolder', icon: 'work', badge: jobBadge, tooltip: `${activeJobsCount} active job postings` },
                 { id: 'candidates', label: 'Applications', icon: 'description', badge: appBadge, tooltip: `${pendingApplicationsCount} pending reviews` },
+                { id: 'pipeline', label: 'Pipeline Kanban', icon: 'view_kanban', badge: null, tooltip: '5-stage candidate recruitment kanban' },
                 { id: 'search_talent', label: 'Talent Search', icon: 'search', badge: null, tooltip: 'Search alumni by skills & criteria' },
               ].map((item) => (
                 <button key={item.id} onClick={() => setActiveTab(item.id)}
                   title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-2 py-2 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} ${activeTab === item.id ? 'bg-[#2196F3] text-white font-bold shadow-md' : 'text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B]'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white group-hover:border-[#2196F3]'}`}>
+                  className={`nav-btn w-full flex items-center px-2 py-2 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} ${activeTab === item.id ? 'bg-[#2196F3] text-white font-bold shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}>
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)] group-hover:text-white group-hover:border-[var(--brand-primary)]'}`}>
                     <span className="material-symbols-outlined">{item.icon}</span>
                     {item.badge && sidebarCollapsed && (
                       <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-[#F87171] text-[7px] font-extrabold text-white shadow-lg animate-pulse">
@@ -742,7 +745,7 @@ const EmployerDashboard = () => {
                     <>
                       <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
                       {item.badge && (
-                        <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg transition-all duration-300 transform scale-100 ${String(item.id) === 'candidates' ? 'bg-[#3B1A22] text-[#F87171] border border-[#71313A]' : 'bg-[#151D2B] text-[#B0BDCE] border border-[#2A3749]'}`}>
+                        <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg transition-all duration-300 transform scale-100 ${String(item.id) === 'candidates' ? 'bg-[#3B1A22] text-[#F87171] border border-[#71313A]' : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-color)]'}`}>
                           {item.badge > 9 ? '9+' : item.badge}
                         </span>
                       )}
@@ -750,7 +753,7 @@ const EmployerDashboard = () => {
                     </>
                   )}
                   {sidebarCollapsed && (
-                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#151D2B] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[#2A3749] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                       {item.label}
                       {item.badge && <span className="ml-1.5 text-[#F87171] font-bold">({item.badge})</span>}
                     </div>
@@ -761,21 +764,22 @@ const EmployerDashboard = () => {
 
             {!sidebarCollapsed && (
               <div className="flex items-center justify-between px-2 mt-5 mb-2">
-                <p className="text-[9px] font-extrabold text-[#8493A8] uppercase tracking-[0.2em]">Management</p>
+                <p className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.2em]">Management</p>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#22D3EE] animate-pulse" />
               </div>
             )}
             <div className="space-y-0.5">
               {[
                 { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbackBadge, tooltip: `${feedbacks.length} feedback submissions` },
+                { id: 'partnerships', label: 'MoU & Accreditation', icon: 'handshake', badge: null, tooltip: 'Partner accreditation directory & MoUs' },
                 { id: 'chat', label: 'Messages', icon: 'forum', badge: msgBadge, tooltip: `${realUnreadMessages} unread messages` },
                 { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
                 { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
               ].map((item) => (
                 <button key={item.id} onClick={() => setActiveTab(item.id)}
                   title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-[#2196F3] text-white font-bold shadow-md' : 'text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B]'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white group-hover:border-[#2196F3]'}`}>
+                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-[#2196F3] text-white font-bold shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}>
+                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)] group-hover:text-white group-hover:border-[var(--brand-primary)]'}`}>
                     <span className="material-symbols-outlined">{item.icon}</span>
                     {item.badge && sidebarCollapsed && (
                       <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-[#F87171] text-[7px] font-extrabold text-white shadow-lg animate-pulse">
@@ -795,7 +799,7 @@ const EmployerDashboard = () => {
                     </>
                   )}
                   {sidebarCollapsed && (
-                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#151D2B] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[#2A3749] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                       {item.label}
                       {item.badge && <span className="ml-1.5 text-[#F87171] font-bold">({item.badge})</span>}
                     </div>
@@ -814,34 +818,34 @@ const EmployerDashboard = () => {
           </nav>
 
           {/* Sidebar Footer with Enhanced Actions */}
-          <div className="relative z-10 px-2 py-4 border-t border-[#2A3749] bg-[#080D18] space-y-1">
+          <div className="relative z-10 px-2 py-4 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-1">
             {!sidebarCollapsed && (
               <>
                 <button onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] transition-all duration-200 text-left group gap-2.5 cursor-pointer">
-                  <span className="w-8 h-8 rounded-lg bg-[#151D2B] border border-[#2A3749] flex items-center justify-center text-[#22D3EE] group-hover:text-white material-symbols-outlined">help</span>
+                  className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 text-left group gap-2.5 cursor-pointer">
+                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] group-hover:text-white material-symbols-outlined">help</span>
                   <span className="text-sm font-medium">Help Center</span>
-                  <span className="ml-auto text-[8px] text-[#8493A8] font-bold px-1.5 py-0.5 bg-[#151D2B] rounded border border-[#2A3749]">v1.4</span>
+                  <span className="ml-auto text-[8px] text-[var(--text-muted)] font-bold px-1.5 py-0.5 bg-[var(--bg-card)] rounded border border-[var(--border-color)]">v1.4</span>
                 </button>
                 <button onClick={handleLogout}
                   className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-[#F87171] hover:text-white hover:bg-[#3B1A22] transition-all duration-200 text-left group gap-2.5 cursor-pointer">
                   <span className="w-8 h-8 rounded-lg bg-[#3B1A22] border border-[#71313A] flex items-center justify-center text-[#F87171] group-hover:text-white material-symbols-outlined text-[18px]">logout</span>
                   <span className="text-sm font-medium">Logout</span>
-                  <span className="ml-auto text-[8px] text-[#8493A8] font-medium">Alt+L</span>
+                  <span className="ml-auto text-[8px] text-[var(--text-muted)] font-medium">Alt+L</span>
                 </button>
               </>
             )}
             {sidebarCollapsed && (
               <>
                 <button onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-2 rounded-xl text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] transition-all duration-200 group relative cursor-pointer" title="Help Center">
-                  <span className="w-8 h-8 rounded-lg bg-[#151D2B] border border-[#2A3749] flex items-center justify-center text-[#22D3EE] group-hover:text-white material-symbols-outlined">help</span>
-                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#151D2B] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[#2A3749] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
+                  className="nav-btn w-full flex items-center justify-center px-2 py-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 group relative cursor-pointer" title="Help Center">
+                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] group-hover:text-white material-symbols-outlined">help</span>
+                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
                 </button>
                 <button onClick={handleLogout}
                   className="nav-btn w-full flex items-center justify-center px-2 py-2 rounded-xl text-[#F87171] hover:text-white hover:bg-[#3B1A22] transition-all duration-200 group relative cursor-pointer" title="Logout">
                   <span className="w-8 h-8 rounded-lg bg-[#3B1A22] border border-[#71313A] flex items-center justify-center material-symbols-outlined text-[#F87171] group-hover:text-white">logout</span>
-                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#151D2B] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[#2A3749] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Logout</div>
+                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Logout</div>
                 </button>
               </>
             )}
@@ -853,13 +857,13 @@ const EmployerDashboard = () => {
 
           {/* Header Section - Enterprise Dark Style */}
           <header
-            className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[#2A3749] px-4 shadow-sm sm:px-6 bg-[#101725] text-[#F1F5F9]"
+            className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-navbar)] px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 text-[var(--text-primary)]"
           >
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setSidebarCollapsed((value) => !value)}
-                className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] md:inline-flex cursor-pointer"
+                className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:inline-flex cursor-pointer"
                 title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
                 <Menu className="h-5 w-5" />
@@ -870,13 +874,13 @@ const EmployerDashboard = () => {
                   setSidebarCollapsed(false);
                   setMobileSidebarOpen(true);
                 }}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] md:hidden cursor-pointer"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:hidden cursor-pointer"
                 aria-label="Open navigation"
               >
                 <Menu className="h-5 w-5" />
               </button>
               <div className="min-w-0 space-y-0.5">
-                <h1 className="truncate text-[16px] font-bold tracking-tight text-[#F1F5F9]">
+                <h1 className="truncate text-[16px] font-bold tracking-tight text-[var(--text-primary)]">
                   {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}
                 </h1>
               </div>
@@ -886,15 +890,15 @@ const EmployerDashboard = () => {
               {/* Live Search Bar with Floating Dropdown Overlay */}
               <div className="relative hidden md:block" data-admin-search>
                 <label
-                  className="group flex h-11 w-[420px] max-w-[36vw] items-center rounded-xl border border-[#2A3749] bg-[#151D2B] px-3 text-sm transition-all duration-200 focus-within:border-[#2196F3] focus-within:ring-2 focus-within:ring-[#2196F3]/20"
+                  className="group flex h-11 w-[420px] max-w-[36vw] items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-sm transition-all duration-200 focus-within:border-[var(--brand-primary)] focus-within:ring-2 focus-within:ring-[#2196F3]/20"
                 >
-                  <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[#8493A8]">
+                  <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[var(--text-muted)]">
                     <Search className="h-4.5 w-4.5 flex-none" />
                   </span>
                   <input
                     type="text"
                     placeholder="Search candidates, departments, or postings..."
-                    className="w-full bg-transparent outline-none placeholder:text-[#8493A8] text-[#F1F5F9]"
+                    className="w-full bg-transparent outline-none placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -902,7 +906,7 @@ const EmployerDashboard = () => {
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="text-[#8493A8] hover:text-[#F1F5F9] p-1 text-xs font-bold cursor-pointer"
+                      className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 text-xs font-bold cursor-pointer"
                     >
                       ✕
                     </button>
@@ -911,9 +915,9 @@ const EmployerDashboard = () => {
 
                 {/* Floating Search Results Dropdown */}
                 {searchResults && (
-                  <div className="absolute left-0 top-13 z-50 w-full max-h-[28rem] overflow-y-auto rounded-2xl border border-[#2A3749] bg-[#151D2B] shadow-2xl p-3 space-y-3 text-[#F1F5F9]">
-                    <div className="flex justify-between items-center px-2 pb-2 border-b border-[#2A3749]">
-                      <span className="text-xs font-bold text-[#8493A8] uppercase tracking-wider">
+                  <div className="absolute left-0 top-13 z-50 w-full max-h-[28rem] overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl p-3 space-y-3 text-[var(--text-primary)]">
+                    <div className="flex justify-between items-center px-2 pb-2 border-b border-[var(--border-color)]">
+                      <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
                         Search Results ({searchResults.totalMatches} matches)
                       </span>
                       <button onClick={() => setSearchQuery('')} className="text-[10px] font-bold text-[#F87171] hover:underline cursor-pointer">
@@ -1576,6 +1580,14 @@ const EmployerDashboard = () => {
                   toast.success(`Opening ASTU_AMS Hub chat with ${target.name}...`);
                 }}
               />
+            )}
+
+            {activeTab === 'pipeline' && (
+              <CandidatePipelineKanban />
+            )}
+
+            {activeTab === 'partnerships' && (
+              <PartnerMoUDirectory />
             )}
 
             {activeTab === 'feedback' && (

@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// In Vite dev, always use same-origin `/api` (proxied) so 127.0.0.1 vs localhost never breaks CORS.
+const isViteDev =
+  typeof window !== 'undefined' && /:(5173|5174)$/.test(window.location.host);
+const API_BASE_URL = isViteDev
+  ? '/api'
+  : import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_URL ||
+    'http://localhost:5000/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -12,7 +19,11 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token') || localStorage.getItem('authToken') || localStorage.getItem('astu_token');
+    const token =
+      localStorage.getItem('token') ||
+      localStorage.getItem('authToken') ||
+      localStorage.getItem('astu_token') ||
+      localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,7 +38,6 @@ export interface ApiEvent {
   description?: string;
   date: string;
   location: string;
-  /** Delivery mode only: "ONLINE" | "IN_PERSON". Not an event category. */
   type: string;
   // Optional presentation metadata: the events table does not store all of
   // these, but CMS-authored / legacy rows may, and the homepage maps them
@@ -47,12 +57,7 @@ export interface ApiEvent {
 }
 
 export const eventsService = {
-  /**
-   * Public event directory. The `/events` API returns the full list (no
-   * page/limit query params today), so callers paginate client-side.
-   * Pass `{ throwOnError: true }` when the UI must show an error state.
-   */
-  async getAllEvents(options?: { throwOnError?: boolean }): Promise<ApiEvent[]> {
+  async getAllEvents(): Promise<ApiEvent[]> {
     try {
       const response = await apiClient.get<{ success: boolean; data: ApiEvent[] }>('/events');
       if (response.data.success && Array.isArray(response.data.data)) {
@@ -61,7 +66,6 @@ export const eventsService = {
       return [];
     } catch (error) {
       console.warn('Failed to fetch events from API:', error);
-      if (options?.throwOnError) throw error;
       return [];
     }
   },
@@ -98,13 +102,20 @@ export const eventsService = {
     }
   },
 
-  async deleteEvent(eventId: string): Promise<boolean> {
+  async deleteEvent(eventId: string): Promise<{ ok: boolean; notFound?: boolean; message?: string }> {
     try {
-      const response = await apiClient.delete<{ success: boolean }>(`/events/${eventId}`);
-      return !!response.data.success;
-    } catch (error) {
+      const response = await apiClient.delete<{ success: boolean; message?: string }>(`/events/${eventId}`);
+      return { ok: !!response.data.success, message: response.data.message };
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Could not delete event on the server.';
       console.error('Error deleting event via API:', error);
-      return false;
+      // Local-only / already-removed rows — treat as removable on the client.
+      if (status === 404) return { ok: true, notFound: true, message };
+      return { ok: false, message };
     }
   },
 

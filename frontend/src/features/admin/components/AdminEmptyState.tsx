@@ -1,75 +1,29 @@
 import React from 'react';
-import { LucideIcon, Inbox, AlertTriangle } from 'lucide-react';
-
-export interface AdminEmptyStateProps {
-  title: string;
-  description?: string;
-  icon?: LucideIcon | React.ComponentType<{ className?: string }>;
-  action?: React.ReactNode;
-  actionLabel?: string;
-  onAction?: () => void;
-  secondaryActionLabel?: string;
-  onSecondaryAction?: () => void;
-  variant?: 'empty' | 'error' | 'search';
-  className?: string;
-}
+import { Inbox } from 'lucide-react';
 
 export default function AdminEmptyState({
+  icon: Icon = Inbox,
   title,
   description,
-  icon,
   action,
-  actionLabel,
-  onAction,
-  secondaryActionLabel,
-  onSecondaryAction,
-  variant = 'empty',
   className = '',
-}: AdminEmptyStateProps) {
-  const IconComponent = icon || (variant === 'error' ? AlertTriangle : Inbox);
-
-  const iconStyles = {
-    empty: 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
-    error: 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400',
-    search: 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400',
-  }[variant];
-
+}: {
+  icon?: React.ComponentType<{ className?: string }>;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-8 text-center transition-colors ${className}`}
+      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-page)] px-6 py-12 text-center ${className}`}
     >
-      <div className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xs mb-4 ${iconStyles}`}>
-        <IconComponent className="h-7 w-7" />
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#003580]/10 text-[#003580] dark:bg-sky-500/15 dark:text-sky-300">
+        <Icon className="h-5 w-5" />
       </div>
-      <h3 className="text-sm font-bold text-slate-900 dark:text-white">{title}</h3>
-      {description && (
-        <p className="mt-1.5 max-w-sm text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          {description}
-        </p>
-      )}
+      <p className="text-sm font-semibold text-[var(--text-primary)]">{title}</p>
+      {description && <p className="mt-1 max-w-sm text-xs text-[var(--text-secondary)]">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
-      {(actionLabel || secondaryActionLabel) && (
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-          {actionLabel && onAction && (
-            <button
-              type="button"
-              onClick={onAction}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#003580] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#002660] focus:outline-hidden dark:bg-blue-600 dark:hover:bg-blue-500 cursor-pointer"
-            >
-              {actionLabel}
-            </button>
-          )}
-          {secondaryActionLabel && onSecondaryAction && (
-            <button
-              type="button"
-              onClick={onSecondaryAction}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 shadow-2xs transition hover:bg-slate-50 dark:hover:bg-slate-700/60 focus:outline-hidden cursor-pointer"
-            >
-              {secondaryActionLabel}
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }

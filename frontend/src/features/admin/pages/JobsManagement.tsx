@@ -160,7 +160,7 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
         {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
@@ -635,7 +635,7 @@ export default function JobsManagement() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-[10px] border border-slate-200 bg-white p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         {statusButton('All Jobs', activeTab === 'jobs', () => setActiveTab('jobs'))}
         {statusButton('Applications', activeTab === 'applications', () => setActiveTab('applications'))}
         {statusButton('Analytics', activeTab === 'analytics', () => setActiveTab('analytics'))}
@@ -644,7 +644,7 @@ export default function JobsManagement() {
       {activeTab === 'jobs' && (
         <div className="space-y-4">
           {/* Modern Source Segment Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1.5">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-[#003580]" /> Filter By Source:
@@ -706,9 +706,9 @@ export default function JobsManagement() {
           </div>
 
           {/* Detailed Filters Controls Toolbar */}
-          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-4 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-4 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
                 <Search className="h-4 w-4 text-slate-400" />
                 <input
                   value={query}
@@ -723,7 +723,7 @@ export default function JobsManagement() {
                 )}
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-2 focus-within:border-[#003580] focus-within:bg-white transition-all">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-2 focus-within:border-[#003580] focus-within:bg-white transition-all">
                 <ShieldCheck className="h-4 w-4 text-[#003580]" />
                 <select value={selectedJobStatus} onChange={(event) => setSelectedJobStatus(event.target.value as typeof selectedJobStatus)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
                   {jobStatuses.map((status) => (
@@ -734,7 +734,7 @@ export default function JobsManagement() {
                 </select>
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
                 <Building2 className="h-4 w-4 text-slate-500" />
                 <select value={selectedEmployer} onChange={(event) => setSelectedEmployer(event.target.value)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
                   {employers.map((employer) => (
@@ -745,7 +745,7 @@ export default function JobsManagement() {
                 </select>
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
                 <Briefcase className="h-4 w-4 text-slate-500" />
                 <select value={selectedJobType} onChange={(event) => setSelectedJobType(event.target.value as typeof selectedJobType)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
                   {jobTypes.map((type) => (
@@ -812,7 +812,7 @@ export default function JobsManagement() {
                     setJobsLimit(e.target.value as any);
                     setJobsPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-[#003580] outline-none"
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] px-2 py-1 text-xs font-bold text-[#003580] outline-none"
                 >
                   <option value="10">10 per page</option>
                   <option value="25">25 per page</option>
@@ -918,7 +918,7 @@ export default function JobsManagement() {
                       type="button"
                       disabled={jobsPage === 1}
                       onClick={() => setJobsPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Previous
                     </button>
@@ -929,7 +929,7 @@ export default function JobsManagement() {
                       type="button"
                       disabled={jobsPage >= totalJobPages}
                       onClick={() => setJobsPage((p) => Math.min(totalJobPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Next
                     </button>
@@ -944,7 +944,7 @@ export default function JobsManagement() {
       {activeTab === 'applications' && (
         <div className="space-y-4">
           {/* Modern Source Segment Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1.5">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-[#003580]" /> Filter By Job Owner:
@@ -1006,9 +1006,9 @@ export default function JobsManagement() {
           </div>
 
           {/* Detailed Applications Filter Controls Toolbar */}
-          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-5 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-5 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
                 <Search className="h-4 w-4 text-slate-400" />
                 <input
                   value={query}
@@ -1023,7 +1023,7 @@ export default function JobsManagement() {
                 )}
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
+              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
                 <Filter className="h-4 w-4 text-slate-400" />
                 <select value={selectedApplicantStatus} onChange={(event) => setSelectedApplicantStatus(event.target.value as typeof selectedApplicantStatus)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
                   <option value="All">All Candidate Statuses</option>
@@ -1099,7 +1099,7 @@ export default function JobsManagement() {
                     setAppsLimit(e.target.value as any);
                     setAppsPage(1);
                   }}
-                  className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-bold text-[#003580] outline-none"
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] px-2 py-1 text-xs font-bold text-[#003580] outline-none"
                 >
                   <option value="10">10 per page</option>
                   <option value="25">25 per page</option>
@@ -1180,7 +1180,7 @@ export default function JobsManagement() {
                                 type="button"
                                 title="View Application Details & Cover Letter"
                                 onClick={() => setSelectedAppModal(application)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-[#003580] shadow-sm transition-colors"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] text-slate-600 hover:bg-slate-100 hover:text-[#003580] shadow-sm transition-colors"
                               >
                                 <Eye className="h-4 w-4" />
                               </button>
@@ -1188,7 +1188,7 @@ export default function JobsManagement() {
                                 type="button"
                                 title="Open Chat in ASTU_AMS Hub"
                                 onClick={() => handleOpenChatWithAlumni(application)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-slate-200 bg-white text-[#003580] hover:bg-blue-50 shadow-sm transition-colors"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] text-[#003580] hover:bg-blue-50 shadow-sm transition-colors"
                               >
                                 <MessageSquare className="h-4 w-4" />
                               </button>
@@ -1196,7 +1196,7 @@ export default function JobsManagement() {
                                 <select
                                   value={application.status}
                                   onChange={(e) => handleSingleAppStatusChange(application.id, e.target.value as ApplicationStatus)}
-                                  className="rounded-[6px] border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-[#003580]"
+                                  className="rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-[#003580]"
                                 >
                                   {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((st) => (
                                     <option key={st} value={st}>
@@ -1236,7 +1236,7 @@ export default function JobsManagement() {
                       type="button"
                       disabled={appsPage === 1}
                       onClick={() => setAppsPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Previous
                     </button>
@@ -1247,7 +1247,7 @@ export default function JobsManagement() {
                       type="button"
                       disabled={appsPage >= totalAppPages}
                       onClick={() => setAppsPage((p) => Math.min(totalAppPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-white font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Next
                     </button>
@@ -1262,7 +1262,7 @@ export default function JobsManagement() {
       {activeTab === 'analytics' && (
         <div className="space-y-6">
           {/* Detailed Hired Alumni Placement Breakdown */}
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
@@ -1537,7 +1537,7 @@ export default function JobsManagement() {
         >
           <div className="space-y-5 text-slate-800">
             {/* Header Profile Info */}
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]/80 p-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#003580] text-lg font-bold text-white shadow-md">
                   {selectedAppModal.applicant.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()}
@@ -1617,7 +1617,7 @@ export default function JobsManagement() {
             {/* Cover Letter / Statement of Intent */}
             <div className="space-y-2">
               <h5 className="text-xs font-bold uppercase tracking-wider text-slate-500">Cover Letter / Statement of Purpose</h5>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-800 whitespace-pre-line font-normal shadow-inner">
+              <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-4 text-xs leading-relaxed text-slate-800 whitespace-pre-line font-normal shadow-inner">
                 {selectedAppModal.coverLetter || 'I am writing to express my strong interest in this position. With my solid technical background from ASTU and hands-on project experience, I am ready to contribute effectively.'}
               </div>
             </div>
@@ -1649,12 +1649,12 @@ export default function JobsManagement() {
                   Open ASTU_AMS Hub Chat
                 </button>
                 {selectedAppModal.linkedIn && (
-                  <a href={getFullUrl(selectedAppModal.linkedIn)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-slate-50">
+                  <a href={getFullUrl(selectedAppModal.linkedIn)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-slate-50">
                     🔗 LinkedIn Profile
                   </a>
                 )}
                 {selectedAppModal.gitHub && (
-                  <a href={getFullUrl(selectedAppModal.gitHub)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  <a href={getFullUrl(selectedAppModal.gitHub)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
                     💻 GitHub Profile
                   </a>
                 )}
@@ -1709,7 +1709,7 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
       <div className="mb-3">
         <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
         {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}

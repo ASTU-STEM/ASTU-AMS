@@ -688,12 +688,11 @@ const RegistrarDashboard = () => {
   const handleBatchInsert = async (_records: any[]) => {
     try {
       const { registrarService } = await import('../services/registrar.service');
-      // DataIntegrationTab already imports; refresh roster only
+      // DataIntegrationTab already imports + toasts; refresh roster only
       const grads = await registrarService.getGraduates();
       setGraduates(normalizeGraduateList(grads));
-      toast.success('Graduate roster refreshed after batch import.');
     } catch (err) {
-      toast.error('Failed to refresh graduate roster');
+      toast.error('Failed to refresh graduate roster after import');
     }
   };
 
@@ -702,9 +701,10 @@ const RegistrarDashboard = () => {
       const { registrarService } = await import('../services/registrar.service');
       const apiStatus = status as 'APPROVED' | 'REJECTED';
       await registrarService.resolveVerification(String(id), apiStatus);
+      setVerifications((prev) =>
+        prev.map((v) => (String(v.id) === String(id) ? { ...v, status: apiStatus } : v))
+      );
       toast.success(`Verification ${status.toLowerCase()}`);
-      
-      // Update local state optimistically
     } catch (err) {
       toast.error('Failed to resolve verification');
     }
@@ -840,7 +840,7 @@ useEffect(() => {
 
    return (
     <>
-    <div className="app-shell min-h-screen bg-[#0B0F19] font-['Inter',sans-serif] text-[#F1F5F9] antialiased">
+    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
       <style>{`
         @keyframes float-particle {
           0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
@@ -884,11 +884,11 @@ useEffect(() => {
       )}
 
         {/* Sidebar Container */}
-        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-2xl transition-all duration-300 md:translate-x-0 bg-[#080D18] border-r border-[#2A3749] text-[#F1F5F9] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
+        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
           {/* Sidebar Logo Header */}
-          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-[#2A3749] bg-[#080D18]">
+          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-[var(--border-color)] bg-[var(--bg-sidebar)]">
             <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[#151D2B] border border-[#2A3749] p-1.5">
+              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] p-1.5">
                 <img
                   src="/images/astu-seal-logo.png"
                   alt="ASTU Official Logo"
@@ -897,8 +897,8 @@ useEffect(() => {
               </div>
               {!sidebarCollapsed && (
                 <div>
-                  <h1 className="text-sm font-extrabold text-[#F1F5F9] tracking-tight leading-tight">ASTU Registrar</h1>
-                  <p className="text-[10px] text-[#22D3EE] uppercase tracking-[0.18em] font-extrabold truncate mt-0.5">Management Hub</p>
+                  <h1 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight leading-tight">ASTU Registrar</h1>
+                  <p className="text-[10px] text-[var(--accent-cyan)] uppercase tracking-[0.18em] font-extrabold truncate mt-0.5">Management Hub</p>
                 </div>
               )}
             </div>
@@ -945,7 +945,7 @@ useEffect(() => {
               <div key={group.sectionKey}>
                 {!sidebarCollapsed && (
                   <div className="px-2.5 mb-1.5 mt-1">
-                    <p className="text-[11px] font-extrabold text-[#8493A8] uppercase tracking-[0.18em]">{group.sectionLabel}</p>
+                    <p className="text-[11px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.18em]">{group.sectionLabel}</p>
                   </div>
                 )}
                 <div className="space-y-1">
@@ -956,10 +956,10 @@ useEffect(() => {
                       title={sidebarCollapsed ? item.label : item.tooltip}
                       className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
                         ? 'bg-[#2196F3] text-white font-extrabold shadow-lg shadow-[#2196F3]/25'
-                        : 'text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B]'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'
                       }`}
                     >
-                      <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[#151D2B] border border-[#2A3749] text-[#22D3EE] group-hover:text-white group-hover:border-[#2196F3]'}`}>
+                      <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)] group-hover:text-white group-hover:border-[var(--brand-primary)]'}`}>
                         <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
                         {item.badge && sidebarCollapsed && (
                           <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-[#F87171] text-[8px] font-black text-slate-950 shadow-lg">
@@ -971,7 +971,7 @@ useEffect(() => {
                         <>
                           <span className="text-xs font-bold flex-1 truncate text-left">{item.label}</span>
                           {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-[#F87171] text-slate-950 font-black' : 'bg-[#1B2636] text-[#22D3EE] border border-[#2A3749]'}`}>
+                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-[#F87171] text-slate-950 font-black' : 'bg-[var(--bg-card-secondary)] text-[var(--accent-cyan)] border border-[var(--border-color)]'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
                           )}
@@ -988,16 +988,16 @@ useEffect(() => {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="relative z-10 p-3 border-t border-[#2A3749] bg-[#080D18] space-y-1">
+          <div className="relative z-10 p-3 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-1">
             {!sidebarCollapsed ? (
               <>
                 <button
                   onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] transition-all duration-200 text-left group gap-3.5 cursor-pointer"
+                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 text-left group gap-3.5 cursor-pointer"
                 >
-                  <span className="w-8 h-8 rounded-lg bg-[#151D2B] border border-[#2A3749] flex items-center justify-center text-[#22D3EE] group-hover:text-white material-symbols-outlined text-[18px]">help</span>
+                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] group-hover:text-white material-symbols-outlined text-[18px]">help</span>
                   <span className="text-xs font-bold">Help Center</span>
-                  <span className="ml-auto text-[9px] text-[#22D3EE] font-mono font-extrabold px-1.5 py-0.5 bg-[#1B2636] rounded border border-[#2A3749]">v2.0</span>
+                  <span className="ml-auto text-[9px] text-[var(--accent-cyan)] font-mono font-extrabold px-1.5 py-0.5 bg-[var(--bg-card-secondary)] rounded border border-[var(--border-color)]">v2.0</span>
                 </button>
                 <button
                   onClick={handleLogout}
@@ -1012,10 +1012,10 @@ useEffect(() => {
               <>
                 <button
                   onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] transition-all duration-200 group relative cursor-pointer"
+                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 group relative cursor-pointer"
                   title="Help Center"
                 >
-                  <span className="w-7 h-7 rounded-md bg-[#151D2B] border border-[#2A3749] flex items-center justify-center text-[#22D3EE] material-symbols-outlined text-[17px]">help</span>
+                  <span className="w-7 h-7 rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] material-symbols-outlined text-[17px]">help</span>
                 </button>
                 <button
                   onClick={handleLogout}
@@ -1033,12 +1033,12 @@ useEffect(() => {
       <div className={`min-h-screen flex flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
         <div>
           {/* Header bar */}
-          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[#2A3749] bg-[#101725]/95 backdrop-blur-md px-4 sm:px-6 shadow-md">
+          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-navbar)] px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 text-[var(--text-primary)]">
              <div className="flex min-w-0 items-center gap-3">
                <button
                  type="button"
                  onClick={() => setSidebarCollapsed((value) => !value)}
-                 className="hidden h-9 w-9 items-center justify-center rounded-lg text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] md:inline-flex cursor-pointer transition-colors"
+                 className="hidden h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:inline-flex cursor-pointer transition-colors"
                  title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                >
                  <Menu className="h-5 w-5" />
@@ -1049,14 +1049,14 @@ useEffect(() => {
                    setSidebarCollapsed(false);
                    setMobileSidebarOpen(true);
                  }}
-                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] md:hidden cursor-pointer"
+                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:hidden cursor-pointer"
                  aria-label="Open navigation"
                >
                  <Menu className="h-5 w-5" />
                </button>
                 <div className="min-w-0 flex items-center gap-2">
-                  <span className="text-xs text-[#8493A8] hidden sm:inline">Registrar /</span>
-                  <h1 className="truncate text-sm sm:text-base font-extrabold tracking-tight text-[#F1F5F9]">
+                  <span className="text-xs text-[var(--text-muted)] hidden sm:inline">Registrar /</span>
+                  <h1 className="truncate text-sm sm:text-base font-extrabold tracking-tight text-[var(--text-primary)]">
                     {activeTab === 'dashboard' ? 'Overview Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}
                   </h1>
                 </div>
@@ -1065,15 +1065,15 @@ useEffect(() => {
             <div className="flex items-center gap-3">
               {/* Search Bar */}
               <label
-                className="group hidden h-10 w-[380px] max-w-[32vw] items-center rounded-xl border border-[#2A3749] bg-[#151D2B] px-3 text-xs shadow-sm transition-all md:flex focus-within:border-[#2196F3] focus-within:ring-2 focus-within:ring-[#2196F3]/20"
+                className="group hidden h-10 w-[380px] max-w-[32vw] items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-xs shadow-sm transition-all md:flex focus-within:border-[var(--brand-primary)] focus-within:ring-2 focus-within:ring-[#2196F3]/20"
               >
-                <span className="mr-2 inline-flex h-4 w-4 items-center justify-center text-[#8493A8]">
+                <span className="mr-2 inline-flex h-4 w-4 items-center justify-center text-[var(--text-muted)]">
                   <Search className="h-4 w-4 flex-none" />
                 </span>
                 <input
                   type="text"
                   placeholder="Search SIS records, requests, documents..."
-                  className="w-full bg-transparent outline-none text-[#F1F5F9] placeholder:text-[#8493A8] text-xs"
+                  className="w-full bg-transparent outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -1091,7 +1091,7 @@ useEffect(() => {
                   toggleTheme();
                   toast.success(darkMode ? 'Light Theme activated!' : 'Enterprise Dark Theme active');
                 }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] border border-[#2A3749] cursor-pointer transition-colors"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] cursor-pointer transition-colors"
                 aria-label="Toggle dark mode"
               >
                 {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
@@ -1102,7 +1102,7 @@ useEffect(() => {
                 <button
                   type="button"
                   onClick={() => setShowNotifications((v) => !v)}
-                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#B0BDCE] hover:text-[#F1F5F9] hover:bg-[#151D2B] border border-[#2A3749] cursor-pointer transition-colors"
+                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] cursor-pointer transition-colors"
                 >
                   <Bell className="h-4 w-4" />
                   {unreadNotificationsCount > 0 && (
@@ -1112,12 +1112,12 @@ useEffect(() => {
                   )}
                 </button>
                 {showNotifications && (
-                  <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[#2A3749] bg-[#151D2B] shadow-2xl">
-                    <div className="border-b border-[#2A3749] px-4 py-3 bg-[#101725]">
+                  <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl">
+                    <div className="border-b border-[var(--border-color)] px-4 py-3 bg-[var(--bg-navbar)]">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-sm font-extrabold text-[#F1F5F9]">Pending Notifications</div>
-                          <div className="text-[11px] text-[#8493A8]">Recent registrar queue updates</div>
+                          <div className="text-sm font-extrabold text-[var(--text-primary)]">Pending Notifications</div>
+                          <div className="text-[11px] text-[var(--text-muted)]">Recent registrar queue updates</div>
                         </div>
                         <button
                           onClick={handleClearNotifications}
@@ -1129,20 +1129,20 @@ useEffect(() => {
                     </div>
                     <div className="space-y-1 p-2 max-h-80 overflow-y-auto">
                       {notifications.map((notif) => (
-                        <div key={notif.id} className="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-[#1B2636] transition-colors border border-transparent hover:border-[#2A3749]">
-                          <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${notif.unread ? 'bg-[#22D3EE]' : 'bg-[#8493A8]/40'}`} />
+                        <div key={notif.id} className="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-[var(--bg-card-secondary)] transition-colors border border-transparent hover:border-[var(--border-color)]">
+                          <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${notif.unread ? 'bg-[var(--accent-cyan)]' : 'bg-[var(--text-muted)]/40'}`} />
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-[#F1F5F9]">{notif.text}</p>
-                            <p className="text-[10px] text-[#8493A8] mt-0.5 font-mono">{notif.time}</p>
+                            <p className="text-xs font-semibold text-[var(--text-primary)]">{notif.text}</p>
+                            <p className="text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">{notif.time}</p>
                           </div>
                         </div>
                       ))}
                       {notifications.length === 0 && (
-                        <p className="px-2 py-6 text-center text-xs text-[#8493A8]">No new alerts.</p>
+                        <p className="px-2 py-6 text-center text-xs text-[var(--text-muted)]">No new alerts.</p>
                       )}
                     </div>
-                    <div className="border-t border-[#2A3749] px-4 py-2.5 bg-[#101725] text-center">
-                      <button type="button" onClick={() => { setShowNotifications(false); setActiveTab('verification'); }} className="text-xs font-bold text-[#22D3EE] hover:underline cursor-pointer">
+                    <div className="border-t border-[var(--border-color)] px-4 py-2.5 bg-[var(--bg-navbar)] text-center">
+                      <button type="button" onClick={() => { setShowNotifications(false); setActiveTab('verification'); }} className="text-xs font-bold text-[var(--accent-cyan)] hover:underline cursor-pointer">
                         View all pending verifications →
                       </button>
                     </div>
@@ -1155,35 +1155,35 @@ useEffect(() => {
                 <button
                   type="button"
                   onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-2.5 rounded-xl border border-[#2A3749] bg-[#151D2B] px-3 py-1.5 shadow-sm hover:border-[#2196F3]/50 transition-colors cursor-pointer"
+                  className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 shadow-sm hover:border-[var(--brand-primary)]/50 transition-colors cursor-pointer"
                 >
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#2196F3] to-[#004d99] text-xs font-extrabold text-white shadow-sm">
                     {registrarInitials}
                   </div>
                   <div className="hidden text-left sm:block">
-                    <div className="text-xs font-bold text-[#F1F5F9] truncate max-w-[130px]">{registrarName}</div>
-                    <div className="text-[10px] text-[#22D3EE] font-medium">{registrarTitle}</div>
+                    <div className="text-xs font-bold text-[var(--text-primary)] truncate max-w-[130px]">{registrarName}</div>
+                    <div className="text-[10px] text-[var(--accent-cyan)] font-medium">{registrarTitle}</div>
                   </div>
-                  <ChevronDown className="h-3.5 w-3.5 text-[#8493A8]" />
+                  <ChevronDown className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                 </button>
                 {menuOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-[#2A3749] bg-[#151D2B] p-1.5 shadow-2xl">
-                    <div className="px-3 py-2.5 bg-[#101725] rounded-lg mb-1">
-                      <div className="text-xs font-bold text-[#F1F5F9] truncate">{registrarName}</div>
+                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-1.5 shadow-2xl">
+                    <div className="px-3 py-2.5 bg-[var(--bg-navbar)] rounded-lg mb-1">
+                      <div className="text-xs font-bold text-[var(--text-primary)] truncate">{registrarName}</div>
                       <div className="mt-1">
-                        <span className="inline-flex items-center rounded-md bg-[#2196F3]/15 px-2 py-0.5 text-[10px] font-bold text-[#22D3EE] border border-[#2196F3]/30">{registrarTitle}</span>
+                        <span className="inline-flex items-center rounded-md bg-[#2196F3]/15 px-2 py-0.5 text-[10px] font-bold text-[var(--accent-cyan)] border border-[var(--brand-primary)]/30">{registrarTitle}</span>
                       </div>
                     </div>
-                    <div className="my-1 h-px bg-[#2A3749]" />
-                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('surveys'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#B0BDCE] hover:bg-[#1B2636] hover:text-[#F1F5F9] cursor-pointer">
-                      <FileText className="h-4 w-4 text-[#22D3EE]" /> Tracer Reports
+                    <div className="my-1 h-px bg-[var(--border-color)]" />
+                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('surveys'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                      <FileText className="h-4 w-4 text-[var(--accent-cyan)]" /> Tracer Reports
                     </button>
-                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('reporting'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#B0BDCE] hover:bg-[#1B2636] hover:text-[#F1F5F9] cursor-pointer">
-                      <BarChart3 className="h-4 w-4 text-[#22D3EE]" /> Reports & Analytics
+                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('reporting'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                      <BarChart3 className="h-4 w-4 text-[var(--accent-cyan)]" /> Reports & Analytics
                     </button>
-                    <div className="my-1 h-px bg-[#2A3749]" />
-                    <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[#B0BDCE] hover:bg-[#1B2636] hover:text-[#F1F5F9] cursor-pointer">
-                      <HelpCircle className="h-4 w-4 text-[#22D3EE]" /> Help Center
+                    <div className="my-1 h-px bg-[var(--border-color)]" />
+                    <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
+                      <HelpCircle className="h-4 w-4 text-[var(--accent-cyan)]" /> Help Center
                     </button>
                     <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-bold text-[#F87171] hover:bg-[#3B1A22] cursor-pointer">
                       <LogOut className="h-4 w-4 text-[#F87171]" /> Sign Out
@@ -1204,7 +1204,7 @@ useEffect(() => {
             )}
 
           {/* Dynamic tabs routing */}
-          <div className="flex-grow bg-[#0B0F19] p-4 sm:p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+          <div className="flex-grow bg-[var(--bg-page)] p-4 sm:p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'management' && (
               <section className="space-y-6">
                 {/* 1. Shared Institutional Hub Bridge across Dashboards */}
@@ -1627,7 +1627,7 @@ useEffect(() => {
                           Launch Workspace
                         </span>
                         <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                          Tab: {action.tab}
+                          Open
                         </span>
                       </div>
                     </button>
@@ -1666,8 +1666,8 @@ useEffect(() => {
                       <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400">cloud_upload</span>
                       <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">SIS Batch Sync</p>
                     </div>
-                    <p className="text-xl font-extrabold text-emerald-950 dark:text-emerald-200 mt-2">Ready for upload</p>
-                    <p className="text-xs text-emerald-700/90 dark:text-emerald-400 mt-1">Import graduate rosters from Central SIS</p>
+                    <p className="text-xl font-extrabold text-emerald-950 dark:text-emerald-200 mt-2">Open data integration</p>
+                    <p className="text-xs text-emerald-700/90 dark:text-emerald-400 mt-1">Import graduate rosters via CSV or SIS sync</p>
                   </div>
                 </div>
               </section>
@@ -1677,17 +1677,17 @@ useEffect(() => {
               <div className="space-y-6">
 
                 {/* Welcome banner */}
-                <section className="rounded-2xl border border-[#2A3749] bg-gradient-to-br from-[#101725] via-[#151D2B] to-[#16273E] p-6 text-[#F1F5F9] shadow-xl relative overflow-hidden">
+                <section className="rounded-2xl border border-[var(--border-color)] bg-gradient-to-br from-[var(--bg-navbar)] via-[var(--bg-card)] to-[var(--bg-card-secondary)] p-6 text-[var(--text-primary)] shadow-xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-72 h-72 bg-[#2196F3]/5 rounded-full blur-3xl pointer-events-none" />
                   <div className="relative z-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                     <div className="max-w-2xl space-y-2">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[#1B2636] text-[#22D3EE] border border-[#2A3749]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--bg-card-secondary)] text-[var(--accent-cyan)] border border-[var(--border-color)]">
                         ASTU SIS Integration Pipeline
                       </span>
-                      <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl text-[#F1F5F9]">
+                      <h2 className="text-2xl font-extrabold tracking-tight md:text-3xl text-[var(--text-primary)]">
                         Institutional Registrar Panel
                       </h2>
-                      <p className="text-sm leading-relaxed text-[#B0BDCE]">
+                      <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
                         Process batch records uploads, review pending alumni requests, authorize transcript releases, and export Stata-ready census datasets.
                       </p>
                     </div>
@@ -1701,17 +1701,17 @@ useEffect(() => {
                   </div>
                 </section>
 
-                <section className="rounded-2xl border border-[#2A3749] bg-[#151D2B] p-6 shadow-sm space-y-5">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[#2A3749] pb-4">
+                <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm space-y-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[var(--border-color)] pb-4">
                     <div>
-                      <h3 className="text-base font-extrabold text-[#F1F5F9]">Registrar Command Center</h3>
-                      <p className="mt-1 text-xs text-[#B0BDCE]">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
+                      <h3 className="text-base font-extrabold text-[var(--text-primary)]">Registrar Command Center</h3>
+                      <p className="mt-1 text-xs text-[var(--text-secondary)]">A clearer control layer for identity coverage, approvals, documents, exports, and SIS data quality.</p>
                     </div>
                     <button
                       onClick={() => setActiveTab('reporting')}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#1B2636] hover:bg-[#202E40] border border-[#2A3749] px-4 py-2 text-xs font-bold text-[#F1F5F9] transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[var(--bg-card-secondary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] px-4 py-2 text-xs font-bold text-[var(--text-primary)] transition-all cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-base text-[#22D3EE]">ios_share</span>
+                      <span className="material-symbols-outlined text-base text-[var(--accent-cyan)]">ios_share</span>
                       Export Reports
                     </button>
                   </div>
@@ -1722,31 +1722,31 @@ useEffect(() => {
                         <button
                           key={signal.label}
                           onClick={() => setActiveTab(signal.tab)}
-                          className="rounded-xl border border-[#2A3749] bg-[#141D2B] hover:bg-[#1B2636] p-4 text-left transition-all hover:border-[#2196F3]/50 shadow-sm cursor-pointer"
+                          className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 shadow-sm cursor-pointer"
                         >
                           <div className="flex items-center gap-2">
                             <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8493A8]">{signal.label}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{signal.label}</p>
                           </div>
-                          <p className="mt-2 text-2xl font-extrabold text-[#F1F5F9]">{signal.value}</p>
+                          <p className="mt-2 text-2xl font-extrabold text-[var(--text-primary)]">{signal.value}</p>
                         </button>
                       ))}
                     </div>
 
-                    <div className="rounded-xl border border-[#2A3749] bg-[#141D2B] p-4">
+                    <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4">
                       <div className="mb-3 flex items-center justify-between">
-                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#B0BDCE]">SIS Data Quality</h4>
+                        <h4 className="text-xs font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">SIS Data Quality</h4>
                         <span className="rounded-md bg-[#0F3323] border border-[#166534] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#4ADE80]">
                           Monitored
                         </span>
                       </div>
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                         {dataQualityPanels.map((item) => (
-                          <div key={item.label} className="rounded-lg border border-[#2A3749] bg-[#151D2B] p-3">
-                            <span className="material-symbols-outlined text-[#22D3EE]">{item.icon}</span>
-                            <p className="mt-1.5 text-lg font-extrabold text-[#F1F5F9]">{item.value}</p>
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-[#8493A8]">{item.label}</p>
-                            <p className="mt-1 text-[10px] leading-relaxed text-[#B0BDCE]">{item.helper}</p>
+                          <div key={item.label} className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] p-3">
+                            <span className="material-symbols-outlined text-[var(--accent-cyan)]">{item.icon}</span>
+                            <p className="mt-1.5 text-lg font-extrabold text-[var(--text-primary)]">{item.value}</p>
+                            <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{item.label}</p>
+                            <p className="mt-1 text-[10px] leading-relaxed text-[var(--text-secondary)]">{item.helper}</p>
                           </div>
                         ))}
                       </div>
@@ -1766,11 +1766,11 @@ useEffect(() => {
                         if (stat.id === 3) setActiveTab('verification');
                         if (stat.id === 4) setActiveTab('documents');
                       }}
-                      className={`group relative cursor-pointer overflow-hidden rounded-xl border border-[#2A3749] bg-[#151D2B] hover:bg-[#1B2636] p-5 shadow-sm transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-lg border-[#2196F3]/50' : ''}`}
+                      className={`group relative cursor-pointer overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-5 shadow-sm transition-all duration-300 ${hoveredCard === stat.id ? '-translate-y-1 shadow-lg border-[var(--brand-primary)]/50' : ''}`}
                     >
                       <div className="relative z-10 space-y-3">
                         <div className="flex items-start justify-between">
-                          <div className="p-2.5 rounded-xl bg-[#141D2B] border border-[#2A3749] text-[#22D3EE]">
+                          <div className="p-2.5 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)]">
                             <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
                           </div>
                           <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#4ADE80] bg-[#0F3323] border border-[#166534] px-2 py-0.5 rounded">
@@ -1778,10 +1778,10 @@ useEffect(() => {
                           </span>
                         </div>
                         <div>
-                          <p className="text-[11px] text-[#8493A8] font-bold uppercase tracking-wider">{stat.label}</p>
-                          <p className="text-3xl font-extrabold text-[#F1F5F9] mt-1">{stat.value}</p>
+                          <p className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-wider">{stat.label}</p>
+                          <p className="text-3xl font-extrabold text-[var(--text-primary)] mt-1">{stat.value}</p>
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-[#B0BDCE] font-semibold pt-2 border-t border-[#2A3749]">
+                        <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] font-semibold pt-2 border-t border-[var(--border-color)]">
                           <span className="material-symbols-outlined text-base font-bold text-[#4ADE80]">{stat.trendIcon}</span>
                           {stat.trend}
                         </div>
@@ -1800,24 +1800,24 @@ useEffect(() => {
                     <div
                       key={idx}
                       onClick={() => setActiveTab(act.tab)}
-                      className="group cursor-pointer rounded-xl border border-[#2A3749] bg-[#151D2B] hover:bg-[#1B2636] p-5 text-center transition-all hover:border-[#2196F3]/50 hover:shadow-lg space-y-3"
+                      className="group cursor-pointer rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-5 text-center transition-all hover:border-[var(--brand-primary)]/50 hover:shadow-lg space-y-3"
                     >
-                      <div className="mx-auto w-12 h-12 rounded-xl bg-[#141D2B] border border-[#2A3749] flex items-center justify-center group-hover:bg-[#2196F3]/20 transition-colors text-[#22D3EE] group-hover:text-white">
+                      <div className="mx-auto w-12 h-12 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center group-hover:bg-[#2196F3]/20 transition-colors text-[var(--accent-cyan)] group-hover:text-white">
                         <span className="material-symbols-outlined text-2xl font-bold">{act.icon}</span>
                       </div>
                       <div>
-                        <h3 className="font-extrabold text-[#F1F5F9] text-sm group-hover:text-[#22D3EE] transition-colors">{act.title}</h3>
-                        <p className="text-xs text-[#B0BDCE] mt-1 leading-relaxed">{act.desc}</p>
+                        <h3 className="font-extrabold text-[var(--text-primary)] text-sm group-hover:text-[var(--accent-cyan)] transition-colors">{act.title}</h3>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{act.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <section className="rounded-2xl border border-[#2A3749] bg-[#151D2B] p-6 shadow-sm space-y-5">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[#2A3749] pb-4">
+                <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm space-y-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between border-b border-[var(--border-color)] pb-4">
                     <div>
-                      <h3 className="text-base font-extrabold text-[#F1F5F9]">Registrar Feature Control</h3>
-                      <p className="mt-1 text-xs text-[#B0BDCE]">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
+                      <h3 className="text-base font-extrabold text-[var(--text-primary)]">Registrar Feature Control</h3>
+                      <p className="mt-1 text-xs text-[var(--text-secondary)]">Verification, documents, tracer monitoring, accreditation, and audit readiness.</p>
                     </div>
                     <span className="rounded-lg border border-[#166534] bg-[#0F3323] px-3 py-1 text-[11px] font-bold text-[#4ADE80]">
                       Accreditation Ready
@@ -1829,23 +1829,23 @@ useEffect(() => {
                       <button
                         key={card.title}
                         onClick={() => setActiveTab(card.tab)}
-                        className="rounded-xl border border-[#2A3749] bg-[#141D2B] hover:bg-[#1B2636] p-4 text-left transition-all hover:border-[#2196F3]/50 hover:shadow-md cursor-pointer"
+                        className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-secondary)] p-4 text-left transition-all hover:border-[var(--brand-primary)]/50 hover:shadow-md cursor-pointer"
                       >
-                        <span className="material-symbols-outlined rounded-lg bg-[#151D2B] border border-[#2A3749] p-2 text-[#22D3EE]">{card.icon}</span>
-                        <h4 className="mt-3 text-sm font-bold text-[#F1F5F9]">{card.title}</h4>
-                        <p className="mt-1 text-xs leading-relaxed text-[#B0BDCE]">{card.desc}</p>
+                        <span className="material-symbols-outlined rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] p-2 text-[var(--accent-cyan)]">{card.icon}</span>
+                        <h4 className="mt-3 text-sm font-bold text-[var(--text-primary)]">{card.title}</h4>
+                        <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">{card.desc}</p>
                       </button>
                     ))}
                   </div>
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3 pt-2">
                     {complianceSignals.map((signal) => (
-                      <div key={signal.label} className="rounded-xl border border-[#2A3749] bg-[#141D2B] p-4">
+                      <div key={signal.label} className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4">
                         <div className="flex items-center gap-2">
                           <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                          <p className="text-[11px] font-bold uppercase tracking-wider text-[#8493A8]">{signal.label}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">{signal.label}</p>
                         </div>
-                        <p className="mt-2 text-xl font-extrabold text-[#F1F5F9]">{signal.value}</p>
+                        <p className="mt-2 text-xl font-extrabold text-[var(--text-primary)]">{signal.value}</p>
                       </div>
                     ))}
                   </div>

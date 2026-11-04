@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import AdminPageHeader from '../components/AdminPageHeader';
-import { LifeBuoy, Search, Filter, Mail, CheckCircle2, Clock, AlertTriangle, Eye, Send, FileText, Check, X, ShieldAlert } from 'lucide-react';
+import AdminEmptyState from '../components/AdminEmptyState';
+import AdminSectionCard, {
+  adminFilterShellClass,
+  adminHeroGhostBtnClass,
+  adminPanelClass,
+  adminTableHeadClass,
+  adminTableRowClass,
+} from '../components/AdminSectionCard';
+import AdminStatGrid from '../components/AdminStatGrid';
+import { LifeBuoy, Search, Mail, CheckCircle2, Clock, AlertTriangle, Eye, Send, FileText, Check, X, ShieldAlert, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/api';
 
@@ -147,137 +156,112 @@ export default function SupportDeskManagement() {
     }
   };
 
+  const supportStats = [
+    { title: 'Total Tickets', value: String(tickets.length), icon: LifeBuoy, tone: 'blue' as const, description: 'All help desk requests' },
+    { title: 'Open Tickets', value: String(tickets.filter(t => t.status === 'OPEN').length), icon: AlertTriangle, tone: 'amber' as const, description: 'Awaiting first response' },
+    { title: 'In Progress', value: String(tickets.filter(t => t.status === 'IN_PROGRESS').length), icon: Clock, tone: 'purple' as const, description: 'Being worked by staff' },
+    { title: 'Resolved', value: String(tickets.filter(t => t.status === 'RESOLVED').length), icon: CheckCircle2, tone: 'green' as const, description: 'Closed successfully' },
+  ];
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        title="Support Desk & Help Tickets"
+        title="Support Desk"
         subtitle="Manage user support requests, technical issues, and OTP/verification tickets."
-        breadcrumb={[{ label: 'Admin' }, { label: 'Support Desk' }]}
+        breadcrumbs={[{ label: 'Admin' }, { label: 'Support Desk' }]}
         actions={
-          <button
-            onClick={fetchTickets}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
-          >
+          <button type="button" onClick={fetchTickets} className={adminHeroGhostBtnClass}>
+            <RefreshCw className="h-4 w-4 text-[#FFCC00]" />
             Refresh Tickets
           </button>
         }
       />
 
-      {/* Stats Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tickets</p>
-            <p className="text-2xl font-black text-slate-800 mt-1">{tickets.length}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
-            <LifeBuoy className="w-5 h-5" />
-          </div>
-        </div>
-        <div className="bg-amber-50 p-5 rounded-2xl border border-amber-200/80 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-amber-700 uppercase tracking-wider">Open Tickets</p>
-            <p className="text-2xl font-black text-amber-800 mt-1">{tickets.filter(t => t.status === 'OPEN').length}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
-            <AlertTriangle className="w-5 h-5" />
-          </div>
-        </div>
-        <div className="bg-blue-50 p-5 rounded-2xl border border-blue-200/80 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-blue-700 uppercase tracking-wider">In Progress</p>
-            <p className="text-2xl font-black text-blue-800 mt-1">{tickets.filter(t => t.status === 'IN_PROGRESS').length}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700">
-            <Clock className="w-5 h-5" />
-          </div>
-        </div>
-        <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-200/80 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Resolved</p>
-            <p className="text-2xl font-black text-emerald-800 mt-1">{tickets.filter(t => t.status === 'RESOLVED').length}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-      </div>
+      <AdminStatGrid stats={supportStats} cols={4} compact />
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input
-            type="text"
-            placeholder="Search tickets by name, email, ID..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-astu-navy focus:bg-white"
-          />
-        </div>
+      <AdminSectionCard title="Filters" subtitle="Search and segment the support queue.">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <label className={`${adminFilterShellClass} w-full md:max-w-sm`}>
+            <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+            <input
+              type="text"
+              placeholder="Search tickets by name, email, ID..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]"
+            />
+          </label>
 
-        <div className="flex flex-wrap gap-2 w-full md:w-auto">
-          {['ALL', 'OPEN', 'IN_PROGRESS', 'PENDING_ICT_ADMIN', 'RESOLVED', 'CLOSED'].map(st => (
-            <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                statusFilter === st
-                  ? 'bg-astu-navy text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
-              }`}
-            >
-              {st === 'ALL' ? 'All Tickets' : st.replace(/_/g, ' ')}
-            </button>
-          ))}
+          <div className="flex flex-wrap gap-2">
+            {['ALL', 'OPEN', 'IN_PROGRESS', 'PENDING_ICT_ADMIN', 'RESOLVED', 'CLOSED'].map(st => (
+              <button
+                key={st}
+                type="button"
+                onClick={() => setStatusFilter(st)}
+                className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                  statusFilter === st
+                    ? 'bg-[#003580] text-white shadow-sm'
+                    : 'border border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                {st === 'ALL' ? 'All Tickets' : st.replace(/_/g, ' ')}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </AdminSectionCard>
 
-      {/* Tickets Table */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <section className={`${adminPanelClass} overflow-hidden`}>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                <th className="p-4">Ticket ID</th>
-                <th className="p-4">User Details</th>
-                <th className="p-4">Category</th>
-                <th className="p-4">Message Preview</th>
-                <th className="p-4">Created Date</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 text-right">Actions</th>
+              <tr>
+                {['Ticket ID', 'User Details', 'Category', 'Message Preview', 'Created Date', 'Status', 'Actions'].map((head) => (
+                  <th key={head} className={`${adminTableHeadClass} p-4 ${head === 'Actions' ? 'text-right' : ''}`}>
+                    {head}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">Loading support tickets...</td>
+                  <td colSpan={7} className="p-8">
+                    <AdminEmptyState icon={LifeBuoy} title="Loading support tickets..." />
+                  </td>
                 </tr>
               ) : filteredTickets.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400">No support tickets match your filter criteria.</td>
+                  <td colSpan={7} className="p-8">
+                    <AdminEmptyState
+                      icon={LifeBuoy}
+                      title="No matching tickets"
+                      description="Try another status filter or clear the search query."
+                    />
+                  </td>
                 </tr>
               ) : (
                 filteredTickets.map(ticket => (
-                  <tr key={ticket.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="p-4 font-mono font-bold text-astu-navy">#{ticket.id.substring(0, 8)}</td>
+                  <tr key={ticket.id} className={adminTableRowClass}>
+                    <td className="p-4 font-mono font-bold text-[#003580]">#{ticket.id.substring(0, 8)}</td>
                     <td className="p-4">
-                      <p className="font-bold text-slate-800">{ticket.fullName}</p>
-                      <p className="text-[11px] text-slate-500">{ticket.contactEmail}</p>
-                      {ticket.studentId && <p className="text-[10px] text-slate-400 font-mono">ID: {ticket.studentId}</p>}
+                      <p className="font-bold text-[var(--text-primary)]">{ticket.fullName}</p>
+                      <p className="text-[11px] text-[var(--text-muted)]">{ticket.contactEmail}</p>
+                      {ticket.studentId && <p className="text-[10px] text-[var(--text-muted)] font-mono">ID: {ticket.studentId}</p>}
                     </td>
-                    <td className="p-4 font-semibold text-slate-700">{getCategoryLabel(ticket.category)}</td>
-                    <td className="p-4 text-slate-600 max-w-xs truncate">{ticket.message}</td>
-                    <td className="p-4 text-slate-500 whitespace-nowrap">{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                    <td className="p-4 font-semibold text-[var(--text-secondary)]">{getCategoryLabel(ticket.category)}</td>
+                    <td className="p-4 text-[var(--text-secondary)] max-w-xs truncate">{ticket.message}</td>
+                    <td className="p-4 text-[var(--text-muted)] whitespace-nowrap">{new Date(ticket.createdAt).toLocaleDateString()}</td>
                     <td className="p-4">{getStatusBadge(ticket.status)}</td>
                     <td className="p-4 text-right">
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedTicket(ticket);
                           setNewStatus(ticket.status);
                           setResponseNotes(ticket.responseNotes || '');
                         }}
-                        className="px-3 py-1.5 bg-astu-navy/10 hover:bg-astu-navy hover:text-white text-astu-navy rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ml-auto"
+                        className="ml-auto inline-flex items-center gap-1.5 rounded-xl bg-[#003580]/10 px-3 py-1.5 text-xs font-bold text-[#003580] transition-all hover:bg-[#003580] hover:text-white"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         View & Manage
@@ -289,7 +273,7 @@ export default function SupportDeskManagement() {
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
       {/* Ticket Details & Resolution Modal */}
       {selectedTicket && createPortal(

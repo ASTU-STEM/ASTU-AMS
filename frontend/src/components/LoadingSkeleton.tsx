@@ -11,13 +11,13 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   count = 1,
   className = ''
 }) => {
-  const baseClass = 'animate-pulse bg-slate-200/80 dark:bg-slate-800 rounded-lg';
+  const baseClass = 'animate-pulse bg-gray-200 rounded';
   
   const renderSkeleton = () => {
     switch (variant) {
       case 'card':
         return (
-          <div className={`p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs ${className}`}>
+          <div className={`p-6 bg-white rounded-2xl border border-gray-200 ${className}`}>
             <div className={`${baseClass} h-6 w-1/3 mb-4`} />
             <div className={`${baseClass} h-4 w-full mb-2`} />
             <div className={`${baseClass} h-4 w-2/3 mb-4`} />

@@ -1,7 +1,8 @@
 import React from 'react';
+import { dashboardPanelClass } from '../../../components/dashboard/DashboardPanel';
 
-export const adminPanelClass =
-  'rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]';
+/** Alias of the shared dashboard panel surface — keep admin pages on one chrome. */
+export const adminPanelClass = dashboardPanelClass;
 
 export const adminInputClass =
   'w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2.5 text-sm text-[var(--text-primary)] outline-none transition focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10';
@@ -33,18 +34,6 @@ export function adminTabBtnClass(active: boolean) {
   ].join(' ');
 }
 
-export interface AdminSectionCardProps {
-  title?: React.ReactNode;
-  subtitle?: React.ReactNode;
-  action?: React.ReactNode;
-  /** Alias used by NotificationCenter */
-  headerAction?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-  headerClassName?: string;
-  bodyClassName?: string;
-}
-
 export default function AdminSectionCard({
   title,
   subtitle,
@@ -52,29 +41,26 @@ export default function AdminSectionCard({
   headerAction,
   children,
   className = '',
-  headerClassName = '',
   bodyClassName = '',
-}: AdminSectionCardProps) {
+}: {
+  title?: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+  /** Alias used by NotificationCenter */
+  headerAction?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  bodyClassName?: string;
+}) {
   const trailing = action ?? headerAction;
-  const hasHeader = Boolean(title || subtitle || trailing);
 
   return (
-    <section className={`rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs transition-colors ${className}`}>
-      {hasHeader && (
-        <div className={`mb-4 flex flex-wrap items-start justify-between gap-3 ${headerClassName}`}>
+    <section className={`${adminPanelClass} p-5 ${className}`}>
+      {(title || trailing) && (
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            {typeof title === 'string' ? (
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{title}</h3>
-            ) : (
-              title
-            )}
-            {subtitle && (
-              typeof subtitle === 'string' ? (
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{subtitle}</p>
-              ) : (
-                subtitle
-              )
-            )}
+            {title && <h3 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h3>}
+            {subtitle && <p className="mt-1 text-xs text-[var(--text-secondary)]">{subtitle}</p>}
           </div>
           {trailing && <div className="shrink-0">{trailing}</div>}
         </div>

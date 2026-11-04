@@ -6,9 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { useTheme } from '../../../hooks/useTheme';
-import Modal from '../../../components/ui/Modal';
-import { alumniCardClass } from './alumniUi';
-import { AlumniSectionShell } from './AlumniSectionShell';
 
 interface SettingsTabProps {
   preferences: AlumniPreferences;
@@ -47,12 +44,10 @@ const getEffectivePrefs = (rawPrefs?: Partial<AlumniPreferences>): AlumniPrefere
 };
 
 export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePreferences }) => {
+  const { theme, setTheme } = useTheme();
   const [prefs, setPrefs] = useState<AlumniPreferences>(() => getEffectivePrefs(preferences));
   const [digest, setDigest] = useState((preferences as any)?.digestFrequency || 'instant');
   const [donationEnabled, setDonationEnabled] = useState((preferences as any)?.donationEnabled ?? true);
-  // Single source of truth for the theme. The local mirror previously applied
-  // the `dark` class without removing `light`, so the preference looked broken.
-  const { theme, setTheme } = useTheme();
   const [activeSection, setActiveSection] = useState<string>('notifications');
   const [passwords, setPasswords] = useState({
     currentPassword: '',
@@ -104,11 +99,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
       setPrefs(getEffectivePrefs(preferences));
       setDigest((preferences as any)?.digestFrequency || 'instant');
       setDonationEnabled((preferences as any)?.donationEnabled ?? true);
-      if ((preferences as any)?.theme) {
-        setTheme((preferences as any).theme);
-      }
     }
-  }, [preferences, setTheme]);
+  }, [preferences]);
 
   // Load security status
   useEffect(() => {
@@ -155,7 +147,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   };
 
   const handleThemeChange = (newTheme: 'light' | 'dark') => {
-    // useTheme applies the class and persists to localStorage.
     setTheme(newTheme);
     const updated = { ...prefs, digestFrequency: digest, donationEnabled, theme: newTheme } as any;
     setPrefs(updated);
@@ -308,17 +299,43 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
   );
 
   return (
-    <AlumniSectionShell
-      eyebrow="Account"
-      title="Settings & preferences"
-      description="Control alerts, privacy, display options, and account security in one place."
-      metrics={[
-        { value: `${Object.values(prefs).filter(Boolean).length}`, label: 'On', accent: 'gold' },
-        { value: 'Protected', label: 'Account', accent: 'green' },
-      ]}
-    >
+    <div className="space-y-6">
+      {/* Enhanced Hero Banner */}
+      <section className="relative overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-sm">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#003366] via-[#004080] to-[#1a5c3a] opacity-95"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/3"></div>
+          <div className="absolute bottom-0 left-0 w-56 h-56 bg-[#FFD700]/8 rounded-full translate-y-1/3 -translate-x-1/4"></div>
+        </div>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-2xl">
+            <span className="px-2.5 py-1 bg-white/15 text-[#FFD700] text-[10px] font-extrabold uppercase tracking-[0.2em] rounded-full backdrop-blur-sm">
+              Account Settings
+            </span>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-tight">
+              Settings & Preferences
+            </h2>
+            <p className="text-sm text-white/80 leading-relaxed max-w-xl">
+              Configure notification preferences, manage privacy controls, update security credentials, and personalize your alumni experience.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
+              <span className="material-symbols-outlined text-xl block">mail</span>
+              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">
+                {Object.values(prefs).filter(Boolean).length} Active
+              </p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
+              <span className="material-symbols-outlined text-xl block">lock</span>
+              <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-1">Secured</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <div className={`${alumniCardClass} overflow-hidden`}>
+      {/* Section Navigation Tabs */}
+      <div className="bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
         <div className="flex overflow-x-auto border-b border-[var(--border-color)]">
           {sections.map(section => (
             <button
@@ -329,7 +346,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                 : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-page)]'
                 }`}
             >
-              <span className="material-symbols-outlined text-[18px] leading-none">{section.icon}</span>
+              <span className="text-base">{section.icon}</span>
               {section.label}
             </button>
           ))}
@@ -340,18 +357,18 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
           {activeSection === 'notifications' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Notifications</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Pick which email and in-app updates you want to receive.</p>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Notification Preferences</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Choose which updates you receive via email and in-app notifications.</p>
               </div>
 
               <div className="space-y-3">
                   {[
-                    { key: 'emailJobs' as const, label: 'Job recommendations', desc: 'Alerts when openings match your skills and interests.', icon: 'work', color: '#003366' },
-                    { key: 'emailSurveys' as const, label: 'Tracer survey reminders', desc: 'Reminders when ASTU needs your tracer study response.', icon: 'assignment', color: '#003366' },
-                    { key: 'emailMentorship' as const, label: 'Mentorship updates', desc: 'Notices when a mentor accepts, declines, or reschedules.', icon: 'diversity_3', color: '#003366' },
-                    { key: 'emailEvents' as const, label: 'Events & workshops', desc: 'Career fairs, workshops, and networking invites.', icon: 'event', color: '#003366' },
-                    { key: 'emailNewsletter' as const, label: 'Alumni newsletter', desc: 'Monthly stories, campus news, and community highlights.', icon: 'newspaper', color: '#003366' },
-                    { key: 'smsNotifications' as const, label: 'SMS alerts', desc: 'Critical texts for documents ready or interview invites.', icon: 'sms', color: '#003366' },
+                    { key: 'emailJobs' as const, label: 'Job & Placement Recommendations', desc: 'Get alerted when emerging opportunities match your skill sets.', icon: 'work', color: '#003366' },
+                    { key: 'emailSurveys' as const, label: 'Tracer Survey Reminders', desc: 'Receive reminders when institutional tracer studies require submission.', icon: 'assignment', color: '#003366' },
+                    { key: 'emailMentorship' as const, label: 'Mentorship Session Updates', desc: 'Get alerts when peers or mentors accept or reschedule requests.', icon: 'diversity_3', color: '#003366' },
+                    { key: 'emailEvents' as const, label: 'Events & Workshop Notifications', desc: 'Get notified about career fairs, workshops, and networking events.', icon: 'event', color: '#003366' },
+                    { key: 'emailNewsletter' as const, label: 'ASTU Alumni Newsletter', desc: 'Receive monthly newsletters with alumni stories and university updates.', icon: 'newspaper', color: '#003366' },
+                    { key: 'smsNotifications' as const, label: 'SMS Notifications', desc: 'Receive critical alerts via SMS (e.g., document ready, interview invites).', icon: 'sms', color: '#003366' },
                   ].map(opt => (
                   <div key={opt.key} className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] hover:border-[#003366]/20 transition-all duration-200 group">
                     <div className="flex items-center gap-3.5">
@@ -360,7 +377,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[var(--text-primary)]">{opt.label}</p>
-                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{opt.desc}</p>
+                        <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">{opt.desc}</p>
                       </div>
                     </div>
                     <ToggleSwitch
@@ -375,12 +392,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
               {/* Email Digest Frequency */}
               <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center shadow-sm">
-                    <span className="material-symbols-outlined text-[#003366]">schedule</span>
+                  <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-lg shadow-sm">
+                    ⏰
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-[var(--text-primary)]">Email digest</p>
-                    <p className="text-[11px] text-[var(--text-secondary)]">How often to send a summary of updates</p>
+                    <p className="text-xs font-bold text-[var(--text-primary)]">Email Digest Frequency</p>
+                    <p className="text-[10px] text-[var(--text-secondary)]">How often to receive notification summaries</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-3">
@@ -415,51 +432,51 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
           {activeSection === 'privacy' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Privacy & visibility</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Choose who can find your profile in the alumni network and employer search.</p>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Privacy & Directory Visibility</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Control who can view your professional profile details in the ASTU alumni database.</p>
               </div>
 
               <div className="space-y-3">
                   {[
                     {
                       key: 'profileVisibleToEmployers' as const,
-                      label: 'Visible to partner employers',
-                      desc: 'Let recruiting partners discover your profile and CV.',
+                      label: 'Visible to Partner Employers',
+                      desc: 'Allow companies to search your qualifications and CV for recruitment.',
                       icon: 'business',
                       badge: 'Recommended',
                     },
                     {
                       key: 'shareCgpaToEmployers' as const,
-                      label: 'Share CGPA with employers',
-                      desc: 'Show your Registrar-verified CGPA to approved corporate partners.',
+                      label: 'Show Authenticated CGPA to Employers',
+                      desc: 'Did you want Employers to see your Authenticated CGPA? Allow verified corporate partners to view your official ASTU registrar-approved CGPA for recruitment.',
                       icon: 'workspace_premium',
                       badge: 'Recommended',
                     },
                     {
                       key: 'profileVisibleToPeers' as const,
-                      label: 'Visible to peers',
-                      desc: 'Appear for mentorship and peer networking matches.',
+                      label: 'Visible in Peer Network',
+                      desc: 'Appear in alumni directory for mentorship networking and connections.',
                       icon: 'group',
                       badge: null,
                     },
                     {
                       key: 'profileVisibleToAlumni' as const,
-                      label: 'Visible in alumni directory',
-                      desc: 'Allow fellow graduates to find and connect with you.',
+                      label: 'Visible to Alumni Directory',
+                      desc: 'Allow fellow alumni to find and connect with you in the alumni directory.',
                       icon: 'diversity_3',
                       badge: null,
                     },
                     {
                       key: 'anonymousTracerResponses' as const,
-                      label: 'Anonymous tracer responses',
-                      desc: 'Keep your identity hidden when submitting tracer surveys.',
+                      label: 'Anonymous Tracer Responses',
+                      desc: 'Submit tracer survey responses anonymously to protect your identity.',
                       icon: 'incognito',
                       badge: 'Privacy',
                     },
                     {
                       key: 'shareAchievementsPublic' as const,
-                      label: 'Share achievements publicly',
-                      desc: 'Show milestones on the community feed when you celebrate them.',
+                      label: 'Share Achievements Publicly',
+                      desc: 'Allow your achievements and milestones to appear on the alumni community feed.',
                       icon: 'celebration',
                       badge: null,
                     },
@@ -481,7 +498,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">{opt.desc}</p>
+                        <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">{opt.desc}</p>
                       </div>
                     </div>
 
@@ -499,9 +516,9 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <p className="text-xs font-bold text-blue-800">Data retention</p>
-                  <p className="text-[11px] text-blue-700 mt-0.5 leading-relaxed">
-                    Profile data is kept for up to 5 years after graduation. Contact the Registrar to request deletion.
+                  <p className="text-xs font-bold text-blue-800">Data Retention Policy</p>
+                  <p className="text-[10px] text-blue-700 mt-0.5 leading-relaxed">
+                    Your profile data is retained for 5 years after graduation. You may request deletion at any time by contacting the registrar office.
                   </p>
                 </div>
               </div>
@@ -512,8 +529,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
           {activeSection === 'preferences' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Preferences</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Tune reminders, giving prompts, and how the dashboard looks.</p>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Alumni Preferences</h3>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Customize your experience and manage alumni engagement options.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -524,8 +541,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       <span className="material-symbols-outlined text-lg">analytics</span>
                     </div>
                     <div>
-                      <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Survey reminders</h4>
-                      <p className="text-[11px] text-[var(--text-secondary)]">How often to nudge you about tracer studies</p>
+                      <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Tracer Reminder Engine</h4>
+                      <p className="text-[10px] text-[var(--text-secondary)]">Survey notification frequency</p>
                     </div>
                   </div>
                   <div className="space-y-2 mt-4">
@@ -559,8 +576,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                           <span className="text-lg">💝</span>
                         </div>
                         <div>
-                          <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Alumni giving</h4>
-                          <p className="text-[11px] text-[var(--text-secondary)]">Scholarships and department support</p>
+                          <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Alumni Giving</h4>
+                          <p className="text-[10px] text-[var(--text-secondary)]">Scholarship & department support</p>
                         </div>
                       </div>
                       <span className={`px-2 py-0.5 text-[9px] font-extrabold rounded-md uppercase tracking-wider ${
@@ -569,8 +586,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                         {donationEnabled ? 'Active' : 'Paused'}
                       </span>
                     </div>
-                    <p className="text-[11px] text-[var(--text-secondary)] mt-2 leading-relaxed">
-                      Show Telebirr-ready prompts when scholarship or department campaigns need support.
+                    <p className="text-[10px] text-[var(--text-secondary)] mt-2 leading-relaxed">
+                      Enable Telebirr-ready prompts for scholarship fund contributions and department development support initiatives.
                     </p>
                   </div>
                   <button
@@ -582,7 +599,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       }`}
                   >
                     <span className="material-symbols-outlined">{donationEnabled ? 'volunteer_activism' : 'favorite'}</span>
-                    {donationEnabled ? 'Giving prompts on' : 'Enable giving prompts'}
+                    {donationEnabled ? 'Giving Prompts Enabled' : 'Enable Giving Prompts'}
                   </button>
                 </div>
               </div>
@@ -594,8 +611,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                     <span className="material-symbols-outlined text-lg">palette</span>
                   </div>
                   <div>
-                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Display</h4>
-                    <p className="text-[11px] text-[var(--text-secondary)]">Light or dark appearance</p>
+                    <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Display Preferences</h4>
+                    <p className="text-[10px] text-[var(--text-secondary)]">Customize visual appearance</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -641,8 +658,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
           {activeSection === 'security' && (
             <div className="space-y-6">
               <div>
-                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Security</h3>
-                <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your password and review two-factor authentication options.</p>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight">Security Management</h3>
                 <p className="text-[11px] text-[var(--text-secondary)] mt-1">Update your security credentials and manage account protection.</p>
               </div>
 
@@ -654,8 +670,8 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
                       <span className="text-lg">🔑</span>
                     </div>
                     <div>
-                      <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Change password</h4>
-                      <p className="text-[11px] text-[var(--text-secondary)]">Use a strong password you do not reuse elsewhere</p>
+                      <h4 className="text-xs font-extrabold text-[var(--text-primary)]">Change Password</h4>
+                      <p className="text-[10px] text-[var(--text-secondary)]">Update your account password</p>
                     </div>
                   </div>
 
@@ -1002,6 +1018,6 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ preferences, onSavePre
           </div>
         </div>
       )}
-    </AlumniSectionShell>
+    </div>
   );
 };

@@ -2,208 +2,12 @@ import axios from 'axios';
 import { ContentCardItem } from '../components/ContentCard';
 import homepageCmsService from './homepageCms.service';
 
-const STORAGE_KEY = 'astu_ams_cms_content_items';
+/** Bumped to drop legacy browser-cached demo content rows. */
+const STORAGE_KEY = 'astu_ams_cms_content_items_v2';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const initialItems: ContentCardItem[] = [
-  {
-    id: 'C-REAL-001',
-    title: 'ASTU Hosts a Five-Day DAAD Alumni Workshop on Sustainable Water Supply & Environmental Protection',
-    type: 'announcement',
-    status: 'Published',
-    excerpt: 'Promoting the capacity of local actors for sustainable water supply, sanitation, and environmental protection measures in East Africa from August 26 to 30.',
-    content: `Adama Science and Technology University (ASTU) proudly hosted the five-day DAAD International Alumni Workshop titled “Promoting the capacity of local actors for sustainable water supply, sanitation and environmental protection measures in East Africa.”
-
-The prestigious international symposium brought together leading academic researchers, civil engineers, and environmental practitioners from Germany, Kenya, Uganda, Tanzania, and sister Ethiopian universities (including ASTU, Hawassa, Jimma, Bahir Dar, and Addis Ababa Universities), alongside representatives from relevant ministries and regional authorities.
-
-Key Workshop Focus Areas:
-• Environmental Challenges in the Horn of Africa: Evaluating regional water management frameworks and climate adaptation strategies.
-• Water Supply & Sanitation Infrastructure: Analyzing engineering innovations to protect watershed basins, curb soil erosion, and reverse land degradation.
-• Cross-Border Academic & Research Alliances: Establishing sustainable research partnerships between ASTU laboratories and German institutions.
-• Community Capacity Building: Empowering local municipalities with technical tools to preserve clean water resources and foster environmental governance.
-
-The degradation of regional ecosystems poses critical challenges to agriculture, biodiversity, and community health. Through international partnerships like the DAAD alumni collaboration, ASTU continues to drive high-impact applied research that safeguards natural resources for future generations.`,
-    image: '/images/arc.jpg',
-    author: 'ASTU International Relations & Corporate Communication Directorate (IRCCD)',
-    updatedAt: 'Mar 7, 2025',
-    publishedAt: 'Mar 7, 2025',
-    views: 0,
-    tags: ['workshop', 'daad', 'environment', 'water-supply', 'east-africa'],
-    pinned: true,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-REAL-002',
-    title: 'ASTU Alumni Association Inspires Graduating Class with Career Tips!',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'Navigating the Transition: Former graduates and industry leaders guide graduating seniors with high-impact labor market strategies ahead of the annual campus Job Expo.',
-    content: `An inspiring and transformative gathering took place at the ASTU Main Campus as distinguished former graduates from the University Alumni Association led the intensive workshop on “Navigating the Transition: Labor Market Tips for Graduating Class Students.”
-
-Held ahead of the university's flagship Job Expo, top industry specialists and seasoned alumni executives shared practical guidance to prepare final-year engineers and technology students for dynamic employment markets.
-
-Session Highlights:
-• Engineering CV & Portfolio Excellence: Structuring technical credentials and demonstrating real capstone lab experience.
-• Navigating High-Stakes Technical Interviews: Practical mock sessions conducted by alumni engineering managers.
-• Professional Networking & Mentorship: Leveraging the ASTU Alumni Management System (AMS) to connect with corporate mentors.
-• Industry Transition Mindset: Bridging academic theory with enterprise problem-solving expectations.
-
-We extend our sincere appreciation to the ASTU Alumni Association, Student Union President, International Relations & Corporate Communication Directorate (IRCCD), and the Students' Skill Development Coordination Office for making this initiative an overwhelming success!`,
-    image: '/images/gc7.jpg',
-    author: 'ASTU Alumni Association & Students Skill Development Office',
-    updatedAt: 'Mar 7, 2025',
-    publishedAt: 'Mar 7, 2025',
-    views: 0,
-    tags: ['career', 'job-expo', 'mentorship', 'graduates'],
-    pinned: true,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-REAL-003',
-    title: 'ASTU Alumni Spotlight: Yohannes Melese, Gold Medalist & Dual-Major Graduate!',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'Graduating with a dual major in Electronics & Communication Engineering and Computer Science, achieving an outstanding CGPA of 3.98 with 47 A+ grades.',
-    content: `Adama Science and Technology University proudly celebrates the exceptional academic and innovation journey of Yohannes Melese, who graduated from ASTU with a dual major degree in Electronics & Communication Engineering and Computer Science & Engineering.
-
-Over years of relentless dedication and intellectual curiosity, Yohannes focused not merely on coursework, but on mastering applied engineering concepts. His unwavering commitment culminated in an extraordinary CGPA of 3.98, accompanied by 47 A+ grades — a milestone achievement reflecting academic brilliance and perseverance.
-
-In his own words:
-“I wish to express my sincere thanks to my lecturers, classmates, family, and friends for their unwavering support and encouragement. I am looking forward to the next chapter in my career, where I will apply my knowledge and skills to real-world engineering challenges. I am particularly excited about combining my expertise in Electronics & Communication and Computer Science to contribute to the field of technology in East Africa and globally.”
-
-Yohannes is among the esteemed delegates representing ASTU at international technological forums, exemplifying the university's mission to produce world-class leaders in science and technology.`,
-    image: '/images/electriclabs.jpeg',
-    author: 'ASTU Academic Registrar & Alumni Directorate',
-    updatedAt: 'Mar 7, 2025',
-    publishedAt: 'Mar 7, 2025',
-    views: 0,
-    tags: ['alumni-spotlight', 'gold-medalist', 'engineering', 'computer-science'],
-    pinned: true,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-REAL-004',
-    title: 'ASTU Alumni Serving as Model United Nations Secretariats & Global Delegates',
-    type: 'announcement',
-    status: 'Published',
-    excerpt: 'Recognizing outstanding ASTU graduates who served as secretariats for Model United Nations and international diplomatic & tech forums.',
-    content: `Adama Science and Technology University congratulates our outstanding alumni delegates who were selected to serve as Model United Nations secretariats and committee directors.
-
-Demonstrating exemplary diplomatic acumen, critical debate skills, and technical leadership, ASTU graduates continue to prove that rigorous science and engineering education provides the analytical foundation needed for global diplomacy, technology policy, and sustainable development governance.
-
-Contact the Alumni Relations Directorate at irccd@astu.edu.et or via official Telegram @Adama_STU_Almuni to connect with global alumni delegations.`,
-    image: '/images/campus-2.jpeg',
-    author: 'ASTU Corporate Communication Directorate',
-    updatedAt: 'Jan 7, 2025',
-    publishedAt: 'Jan 7, 2025',
-    views: 0,
-    tags: ['global-impact', 'mun', 'diplomacy', 'leadership'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-002',
-    title: 'ASTU Alumni Network: Bridging Generations',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'How our alumni network connects 25,000+ graduates with opportunities, mentorship, and lifelong learning resources.',
-    content: `Adama Science and Technology University (ASTU) hereby releases this official notice for the information of alumni, students, partner employers, academic departments, and stakeholders.
-
-Connecting across industries from renewable energy to software engineering, ASTU graduates continue to drive technological breakthroughs worldwide. The ASTU Alumni Management System (AMS) bridges recent graduates with executive alumni across 14 countries.
-
-Through structured tracer surveys, regional alumni chapter meetups, and dedicated mentorship circles, the network ensures that every generation of ASTU engineers, architects, and scientists has direct access to career acceleration opportunities, research collaborations, and enterprise sponsorships.`,
-    image: '/images/astu-building.jpg',
-    author: 'Content Manager',
-    updatedAt: 'May 28, 2026',
-    publishedAt: 'May 28, 2026',
-    views: 0,
-    tags: ['alumni', 'community', 'networking'],
-    pinned: true,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-001',
-    title: 'ASTU Alumni Carnival 2026',
-    type: 'announcement',
-    status: 'Published',
-    excerpt: 'Grand Homecoming Carnival & Alumni Gathering celebrating 30 years of excellence. Mandatory alumni registration open for stadium access, networking exhibition, and award banquet.',
-    content: 'Adama Science and Technology University cordially invites all alumni, faculty, staff, and institutional partners to the ASTU Alumni Carnival 2026 on April 25-26. This landmark celebration includes high-level networking, technical symposiums, research exhibitions, and the alumni excellence banquet.',
-    image: '/images/campus-2.jpeg',
-    author: 'ASTU Directorate Notice',
-    updatedAt: 'Apr 25, 2026',
-    publishedAt: 'Apr 25, 2026',
-    views: 0,
-    tags: ['alumni', 'carnival', 'homecoming', 'networking'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-003',
-    title: 'Inter-Semester Recess: Laboratory Safety & Campus Clearance Guidelines',
-    type: 'announcement',
-    status: 'Published',
-    excerpt: 'Important safety reminders, laboratory power-down procedures, and access guidelines for the upcoming semester break.',
-    content: 'University Security Directorate issues standard campus access guidelines during the inter-semester recess. Please ensure laboratory equipment is safely powered down and dormitory clearances are logged.',
-    image: '/images/astu-building.jpg',
-    author: 'ASTU Directorate Notice',
-    updatedAt: 'Jun 7, 2026',
-    publishedAt: 'Jun 7, 2026',
-    views: 0,
-    tags: ['safety', 'campus', 'announcement'],
-    pinned: false,
-    featured: false,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-004',
-    title: 'Campus Tour 2026 Photo Album',
-    type: 'gallery',
-    status: 'Published',
-    excerpt: 'Stunning aerial and ground-level photos from the 2026 campus tour showcasing state-of-the-art facilities.',
-    content: 'Showcasing the newly opened Applied Robotics Center, high-performance computing facilities, and green amphitheater on the ASTU Main Campus.',
-    image: '/images/State-M.jpg',
-    author: 'ASTU Directorate Notice',
-    updatedAt: 'Just now',
-    publishedAt: 'Just now',
-    views: 0,
-    tags: ['gallery', 'campus', 'photos'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-  {
-    id: 'C-005',
-    title: 'ASTU Research Grant Winners 2026',
-    type: 'post',
-    status: 'Published',
-    excerpt: 'Announcing 12 applied research grants awarded to faculty and alumni engineering teams.',
-    content: 'The Office of the Vice President for Research and Technology Transfer is pleased to announce the recipients of the 2026 National Innovation Research Fund grants.',
-    image: '/images/arc.jpg',
-    author: 'ASTU Directorate Notice',
-    updatedAt: 'May 25, 2026',
-    publishedAt: 'May 25, 2026',
-    views: 0,
-    tags: ['research', 'grants', 'engineering'],
-    pinned: false,
-    featured: true,
-    language: 'EN',
-    buttonText: 'Read Full Notice',
-  },
-];
+/** No sample notices — content comes from CMS/API only. */
+const initialItems: ContentCardItem[] = [];
 
 export const contentService = {
   getItems(): ContentCardItem[] {
@@ -211,29 +15,25 @@ export const contentService = {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const hasRealNews = parsed.some(
-            (p: any) => p.id === 'C-REAL-001' || (p.title && p.title.includes('DAAD'))
+        if (Array.isArray(parsed)) {
+          // Drop legacy sample seed IDs that may still sit in older browsers.
+          const cleaned = parsed.filter(
+            (i: any) =>
+              i &&
+              i.title !== 'Homepage CMS Configuration' &&
+              !String(i.id || '').startsWith('C-REAL-') &&
+              !['C-001', 'C-002', 'C-003', 'C-004', 'C-005', 'C-006', 'C-012'].includes(String(i.id || ''))
           );
-          if (!hasRealNews) {
-            const merged = [
-              initialItems[0],
-              initialItems[1],
-              initialItems[2],
-              initialItems[3],
-              ...parsed.filter((p: any) => p.title !== 'Homepage CMS Configuration'),
-            ];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-            return merged;
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
           }
-          return parsed.filter((i) => i.title !== 'Homepage CMS Configuration');
+          return cleaned;
         }
       }
     } catch {
       /* ignore */
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialItems));
-    return initialItems;
+    return [];
   },
 
   saveItems(items: ContentCardItem[], emitEvent = true): void {
@@ -475,15 +275,10 @@ export const contentService = {
         : Array.isArray(res.data)
         ? res.data
         : [];
-      if (rawItems.length > 0) {
-        const normalized = rawItems.map((i) => this.normalizeItem(i));
-        // Merge: API items + any local items not in API
-        const apiIds = new Set(normalized.map((i) => i.id));
-        const localExtras = this.getItems().filter((i) => !apiIds.has(i.id));
-        const merged = [...normalized, ...localExtras];
-        this.saveItems(merged, false);
-        return merged;
-      }
+      // Trust the API as source of truth so legacy local sample notices cannot reappear.
+      const normalized = rawItems.map((i) => this.normalizeItem(i));
+      this.saveItems(normalized, false);
+      return normalized;
     } catch {
       /* silently fall back to local cache */
     }

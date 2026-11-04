@@ -25,16 +25,16 @@ const toneStyles: Record<
   { bg: string; icon: string; bar: string; soft: string }
 > = {
   blue: {
-    bg: 'bg-[#003580]/8 dark:bg-sky-500/15',
-    icon: 'text-[#003580] dark:text-sky-300',
-    bar: 'bg-[#003580]',
-    soft: 'hover:border-[#003580]/35 dark:hover:border-sky-400/40',
+    bg: 'bg-[var(--brand-navy)]/8 dark:bg-sky-500/15',
+    icon: 'text-[var(--brand-navy)] dark:text-sky-300',
+    bar: 'bg-[var(--brand-navy)]',
+    soft: 'hover:border-[var(--brand-navy)]/35 dark:hover:border-sky-400/40',
   },
   gold: {
-    bg: 'bg-[#E8A020]/10 dark:bg-amber-500/15',
+    bg: 'bg-[var(--brand-gold)]/15 dark:bg-amber-500/15',
     icon: 'text-[#B87900] dark:text-amber-300',
-    bar: 'bg-[#E8A020]',
-    soft: 'hover:border-[#E8A020]/40 dark:hover:border-amber-400/40',
+    bar: 'bg-[var(--brand-gold)]',
+    soft: 'hover:border-[var(--brand-gold)]/40 dark:hover:border-amber-400/40',
   },
   green: {
     bg: 'bg-emerald-50 dark:bg-emerald-500/15',
@@ -113,25 +113,24 @@ export function DashboardStatCard({
       onKeyDown={handleKeyDown}
       title={interactive ? `Open ${label}` : undefined}
       className={[
-        'group relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm transition-all duration-200',
-        'dark:border-slate-800 dark:bg-slate-900',
+        'group relative overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200',
         interactive ? `cursor-pointer hover:-translate-y-0.5 hover:shadow-md ${style.soft}` : 'hover:-translate-y-0.5 hover:shadow-md',
         compact ? 'p-4' : 'p-5',
         className,
       ].join(' ')}
     >
-      <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-slate-50 opacity-70 dark:bg-slate-800/60" />
+      <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-[var(--bg-page)] opacity-70" />
 
       <div className="relative flex items-start justify-between gap-3">
         <div className={`min-w-0 ${compact ? 'space-y-1' : 'space-y-1.5'}`}>
-          <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+          <p className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--text-secondary)]">
             {label}
           </p>
           {loading ? (
-            <div className="h-8 w-24 animate-pulse rounded-md bg-slate-100 dark:bg-slate-800" />
+            <div className="h-8 w-24 animate-pulse rounded-md bg-[var(--bg-page)]" />
           ) : (
             <p
-              className={`font-bold tracking-tight text-slate-900 dark:text-white ${
+              className={`font-bold tracking-tight text-[var(--text-primary)] ${
                 compact ? 'text-2xl' : 'text-[28px] sm:text-[32px]'
               }`}
             >
@@ -157,10 +156,10 @@ export function DashboardStatCard({
 
       {typeof progressValue === 'number' && (
         <div className="relative mt-3">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-page)]">
             <div className={`h-full rounded-full transition-all duration-500 ${style.bar}`} style={{ width: `${progressValue}%` }} />
           </div>
-          <p className="mt-1 text-[10px] font-semibold text-slate-400">{progressValue.toFixed(0)}%</p>
+          <p className="mt-1 text-[10px] font-semibold text-[var(--text-muted)]">{progressValue.toFixed(0)}%</p>
         </div>
       )}
 
@@ -173,7 +172,7 @@ export function DashboardStatCard({
             </span>
           )}
           {description && (
-            <p className="truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">{description}</p>
+            <p className="truncate text-[11px] font-medium text-[var(--text-secondary)]">{description}</p>
           )}
         </div>
       )}

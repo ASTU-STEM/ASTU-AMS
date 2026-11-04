@@ -183,6 +183,7 @@ export interface SurveyQuestion {
 
 export interface Mentor {
   id: number;
+  userId?: string | number;
   name: string;
   role: string;
   company: string;

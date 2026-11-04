@@ -1,17 +1,33 @@
 import React from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { CITY_COORDINATES } from './types';
 
-export interface LocationMapProps {
-  locations: Array<{ name: string; value: number; count: number; fill: string }>;
-  className?: string;
-}
+const CITY_COORDINATES: Record<string, [number, number]> = {
+  'addis ababa': [8.9806, 38.7578],
+  'adama': [8.5400, 39.2700],
+  'nazret': [8.5400, 39.2700],
+  'oromya/nekemte': [9.0833, 36.5500],
+  'nekemte': [9.0833, 36.5500],
+  'oromiya': [8.5400, 39.2700],
+  'hawassa': [7.0500, 38.4667],
+  'dire dawa': [9.6000, 41.8667],
+  'bahir dar': [11.5833, 37.3833],
+  'gondar': [12.6000, 37.4667],
+  'mekelle': [13.4967, 39.4769],
+  'jimma': [7.6667, 36.8333],
+  'bishoftu': [8.7500, 38.9833],
+  'ethiopian': [9.0000, 38.7500],
+  'ethiopia': [9.0000, 38.7500],
+  'remote': [8.9806, 38.7578],
+};
 
 export default function LocationMap({
   locations,
   className = 'h-full w-full min-h-[310px]',
-}: LocationMapProps) {
+}: {
+  locations: Array<{ name: string; value: number; count: number; fill: string }>;
+  className?: string;
+}) {
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstanceRef = React.useRef<L.Map | null>(null);
 
@@ -108,5 +124,7 @@ export default function LocationMap({
     };
   }, [locations]);
 
-  return <div ref={mapRef} className={`rounded-[10px] overflow-hidden border border-slate-200 dark:border-slate-800 ${className}`} />;
+  return <div ref={mapRef} className={`rounded-[10px] overflow-hidden border border-slate-200 ${className}`} />;
 }
+
+

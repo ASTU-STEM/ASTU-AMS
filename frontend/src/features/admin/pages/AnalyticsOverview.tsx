@@ -80,35 +80,30 @@ import {
   Info,
   Settings2,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminStatCard from '../components/AdminStatCard';
+import AdminStatGrid from '../components/AdminStatGrid';
 import AdminBadge from '../components/AdminBadge';
-import AdminSectionCard from '../components/AdminSectionCard';
 import AdminEmptyState from '../components/AdminEmptyState';
 import { adminService } from '../services/admin.service';
-import ChartCard from './analytics/ChartCard';
 import LocationMap from './analytics/LocationMap';
-import AdvancedFiltersModal from './analytics/AdvancedFiltersModal';
-import ExportReportModal from './analytics/ExportReportModal';
-import PrintDashboardModal from './analytics/PrintDashboardModal';
-import EmploymentPlacementMatrix from './analytics/EmploymentPlacementMatrix';
+import { SectionCard, ChartCard } from './analytics/AnalyticsCards';
+import { AdvancedFiltersModal } from './analytics/AdvancedFiltersModal';
+import { ExportReportModal } from './analytics/ExportReportModal';
+import { PrintDashboardModal } from './analytics/PrintDashboardModal';
+import ShareModal from '../../../components/ShareModal';
 import {
-  AnalyticsPageTab,
   ANALYTICS_PAGE_TABS,
-  AdvancedFilterState,
   DEFAULT_FILTERS,
-  IncludedSuitesState,
   DEFAULT_SUITES_SELECTION,
-  DepartmentFilter,
-  academicYears,
   heatColor,
+  academicYears,
+  type AdvancedFilterState,
+  type AnalyticsPageTab,
+  type DepartmentFilter,
+  type IncludedSuitesState,
 } from './analytics/types';
-
-export * from './analytics/types';
-export { LocationMap, AdvancedFiltersModal, ExportReportModal, PrintDashboardModal, EmploymentPlacementMatrix };
-
-const SectionCard = AdminSectionCard;
-
 
 export default function AnalyticsOverview() {
   const location = useLocation();
@@ -116,6 +111,7 @@ export default function AnalyticsOverview() {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [shareDashboardOpen, setShareDashboardOpen] = useState(false);
   const [selectedSuites, setSelectedSuites] = useState<IncludedSuitesState>(DEFAULT_SUITES_SELECTION);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -184,15 +180,6 @@ export default function AnalyticsOverview() {
     let count = 0;
     if (filters.academicYear !== 'All Time') count++;
     if (filters.department !== 'All') count++;
-    if (filters.degreeLevel !== 'All') count++;
-    if (filters.cgpaTier !== 'All') count++;
-    if (filters.employmentStatus !== 'All') count++;
-    if (filters.industrySector !== 'All') count++;
-    if (filters.salaryTier !== 'All') count++;
-    if (filters.workLocation !== 'All') count++;
-    if (filters.verificationStatus !== 'All') count++;
-    if (filters.hasResume) count++;
-    if (filters.hasLinkedIn) count++;
     return count;
   }, [filters]);
 
@@ -234,28 +221,27 @@ export default function AnalyticsOverview() {
     }
   }, [reportData]);
 
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const fetchAnalytics = React.useCallback(async () => {
-    setIsLoading(true);
-    setFetchError(null);
-    try {
-      const result = await adminService.getAnalyticsReport({ academicYear, department });
+  React.useEffect(() => {
+    const fetchAnalytics = async () => {
+      setIsLoading(true);
+      setLoadError(null);
+      const params: { academicYear?: string; department?: string } = {};
+      if (academicYear && academicYear !== 'All Time') params.academicYear = academicYear;
+      if (department && department !== 'All') params.department = department;
+      const result = await adminService.getAnalyticsReport(params);
       if (result.ok) {
         setReportData(result.data);
       } else {
-        setFetchError(result.message || 'Failed to fetch analytics report from server.');
+        setReportData(null);
+        setLoadError(result.message || 'Failed to load analytics report');
+        toast.error(result.message || 'Failed to load analytics report');
       }
-    } catch (err: any) {
-      setFetchError(err.message || 'Unexpected network error while retrieving analytics.');
-    } finally {
       setIsLoading(false);
-    }
-  }, [academicYear, department]);
-
-  React.useEffect(() => {
+    };
     fetchAnalytics();
-  }, [fetchAnalytics]);
+  }, [academicYear, department]);
 
   const hasBatchData = useMemo(() => {
     if (!reportData) return true;
@@ -744,14 +730,14 @@ export default function AnalyticsOverview() {
           <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-16 w-16 object-contain" />
           <div>
             <h1 className="text-xl font-extrabold text-[#003580] uppercase tracking-wider">Adama Science &amp; Technology University</h1>
-            <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wide">Office of Institutional Research &amp; Alumni Affairs</h2>
-            <p className="text-[11px] text-slate-500 font-medium">Graduate Employment Outcomes, YoY Rate Comparison &amp; AI Predictive Analytics Report</p>
+            <h2 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide">Office of Institutional Research &amp; Alumni Affairs</h2>
+            <p className="text-[11px] text-[var(--text-muted)] font-medium">Graduate Employment Outcomes, YoY Rate Comparison &amp; AI Predictive Analytics Report</p>
           </div>
         </div>
-        <div className="text-right text-xs text-slate-700 font-medium space-y-0.5">
-          <div><span className="font-bold text-slate-900">Period:</span> {academicYear}</div>
-          <div><span className="font-bold text-slate-900">Scope:</span> {department}</div>
-          <div><span className="font-bold text-slate-900">Generated:</span> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+        <div className="text-right text-xs text-[var(--text-secondary)] font-medium space-y-0.5">
+          <div><span className="font-bold text-[var(--text-primary)]">Period:</span> {academicYear}</div>
+          <div><span className="font-bold text-[var(--text-primary)]">Scope:</span> {department}</div>
+          <div><span className="font-bold text-[var(--text-primary)]">Generated:</span> {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
         </div>
       </div>
 
@@ -764,13 +750,13 @@ export default function AnalyticsOverview() {
 
       {/* Main Filter Header Bar */}
       <div className="space-y-3 no-print">
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-sm hover:shadow-md transition-shadow">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             
             {/* Filter Pills Group */}
             <div className="flex flex-wrap items-center gap-2.5">
               {/* Academic Year Pill */}
-              <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
                 <CalendarRange className="h-4 w-4 text-blue-600 shrink-0" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Year:</span>
                 <select
@@ -785,7 +771,7 @@ export default function AnalyticsOverview() {
               </div>
 
               {/* Department Pill */}
-              <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
+              <div className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
                 <School className="h-4 w-4 text-blue-600 shrink-0" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Dept:</span>
                 <select
@@ -825,8 +811,8 @@ export default function AnalyticsOverview() {
 
               {/* Indicator Search Bar with Autocomplete Suggestions Dropdown & Searching Animation */}
               <div className="relative">
-                <div className={`inline-flex items-center gap-2 rounded-xl border bg-white px-3.5 py-2 transition-all min-w-[260px] sm:min-w-[320px] shadow-xs ${
-                  searchQuery ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200/90 hover:border-slate-300'
+                <div className={`inline-flex items-center gap-2 rounded-xl border bg-[var(--bg-card)] px-3.5 py-2 transition-all min-w-[260px] sm:min-w-[320px] shadow-xs ${
+                  searchQuery ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-[var(--border-color)] hover:border-slate-300'
                 }`}>
                   {isSearching ? (
                     <RefreshCw className="h-4 w-4 text-blue-600 animate-spin shrink-0" />
@@ -854,7 +840,7 @@ export default function AnalyticsOverview() {
                         setSearchQuery('');
                         setShowSuggestions(false);
                       }}
-                      className="text-slate-400 hover:text-slate-600 rounded-full p-0.5"
+                      className="text-slate-400 hover:text-[var(--text-secondary)] rounded-full p-0.5"
                       title="Clear search"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -864,7 +850,7 @@ export default function AnalyticsOverview() {
 
                 {/* Suggestions Dropdown */}
                 {showSuggestions && searchQuery.trim().length > 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-2 z-[99999] rounded-2xl border border-slate-200 bg-white shadow-2xl p-2 text-xs space-y-1 animate-in fade-in zoom-in-95 duration-150 max-h-[380px] overflow-y-auto">
+                  <div className="absolute left-0 right-0 top-full mt-2 z-[99999] rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl p-2 text-xs space-y-1 animate-in fade-in zoom-in-95 duration-150 max-h-[380px] overflow-y-auto">
                     <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 mb-1">
                       <span>Suggested Analytics Indicators</span>
                       <span className="text-blue-600 font-extrabold">{searchSuggestions.length} matches</span>
@@ -890,14 +876,14 @@ export default function AnalyticsOverview() {
                         >
                           <div className="min-w-0 pr-2">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 group-hover:bg-blue-100 text-slate-600 group-hover:text-blue-800 rounded">
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[var(--bg-hover)] group-hover:bg-blue-100 text-[var(--text-secondary)] group-hover:text-blue-800 rounded">
                                 {item.id}
                               </span>
-                              <span className="font-bold text-slate-900 group-hover:text-blue-900 truncate">
+                              <span className="font-bold text-[var(--text-primary)] group-hover:text-blue-900 truncate">
                                 {item.name}
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500 group-hover:text-blue-700 truncate mt-0.5">
+                            <p className="text-[11px] text-[var(--text-muted)] group-hover:text-blue-700 truncate mt-0.5">
                               {item.category} • {item.subtext}
                             </p>
                           </div>
@@ -910,7 +896,7 @@ export default function AnalyticsOverview() {
                       ))
                     ) : (
                       <div className="p-4 text-center space-y-2">
-                        <div className="text-slate-600 font-medium">No indicators match "<strong className="text-slate-900">{searchQuery}</strong>"</div>
+                        <div className="text-[var(--text-secondary)] font-medium">No indicators match "<strong className="text-[var(--text-primary)]">{searchQuery}</strong>"</div>
                         <div className="text-[11px] text-slate-400">Try these popular search topics:</div>
                         <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
                           {['MoU', 'STEM', 'Salary', 'Mentorship', 'IND-01', 'Patent'].map((preset) => (
@@ -921,7 +907,7 @@ export default function AnalyticsOverview() {
                                 setSearchQuery(preset);
                                 setShowSuggestions(true);
                               }}
-                              className="px-2.5 py-1 text-[11px] font-bold bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-800 rounded-lg transition-all"
+                              className="px-2.5 py-1 text-[11px] font-bold bg-[var(--bg-hover)] hover:bg-blue-100 text-[var(--text-secondary)] hover:text-blue-800 rounded-lg transition-all"
                             >
                               {preset}
                             </button>
@@ -945,8 +931,18 @@ export default function AnalyticsOverview() {
             <div className="flex items-center gap-2.5 shrink-0 self-end lg:self-auto">
               <button
                 type="button"
+                onClick={() => setShareDashboardOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-blue-300 hover:text-blue-800 hover:bg-blue-50/50 shadow-xs transition-all active:scale-[0.98]"
+                title="Share analytics dashboard link"
+              >
+                <Share2 className="h-4 w-4 text-blue-600" />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setExportModalOpen(true)}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200/90 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:border-blue-300 hover:text-blue-800 hover:bg-blue-50/50 shadow-xs transition-all active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3.5 py-2 text-xs font-bold text-[var(--text-secondary)] hover:border-blue-300 hover:text-blue-800 hover:bg-blue-50/50 shadow-xs transition-all active:scale-[0.98]"
               >
                 <Download className="h-4 w-4 text-blue-600" />
                 <span>Export Report</span>
@@ -972,58 +968,16 @@ export default function AnalyticsOverview() {
             </span>
 
             {filters.academicYear !== 'All Time' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Year: {filters.academicYear}
                 <button onClick={() => setAcademicYear('All Time')} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
             {filters.department !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
                 Dept: {filters.department}
                 <button onClick={() => setDepartment('All')} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.degreeLevel !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Degree: {filters.degreeLevel}
-                <button onClick={() => setFilters(f => ({ ...f, degreeLevel: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.employmentStatus !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Status: {filters.employmentStatus}
-                <button onClick={() => setFilters(f => ({ ...f, employmentStatus: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.industrySector !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Industry: {filters.industrySector}
-                <button onClick={() => setFilters(f => ({ ...f, industrySector: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.salaryTier !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Salary: {filters.salaryTier}
-                <button onClick={() => setFilters(f => ({ ...f, salaryTier: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.verificationStatus !== 'All' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Verification: {filters.verificationStatus}
-                <button onClick={() => setFilters(f => ({ ...f, verificationStatus: 'All' }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
-              </span>
-            )}
-
-            {filters.hasResume && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-blue-200/80 font-bold text-blue-900 shadow-2xs">
-                Resume Attached
-                <button onClick={() => setFilters(f => ({ ...f, hasResume: false }))} className="hover:text-rose-600 cursor-pointer"><X className="w-3 h-3" /></button>
               </span>
             )}
 
@@ -1037,48 +991,20 @@ export default function AnalyticsOverview() {
         )}
       </div>
 
-      {fetchError && reportData && (
-        <div className="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs text-rose-800 dark:text-rose-300">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
-            <span>Server sync notice: {fetchError}. Displaying active snapshot data.</span>
-          </div>
-          <button
-            type="button"
-            onClick={fetchAnalytics}
-            className="font-bold underline hover:text-rose-950 dark:hover:text-rose-100 cursor-pointer"
-          >
-            Retry Sync
-          </button>
-        </div>
-      )}
-
-      {fetchError && !reportData && (
-        <AdminEmptyState
-          variant="error"
-          title="Unable to Load Analytics Warehouse"
-          description={fetchError}
-          actionLabel="Retry Analytics Sync"
-          onAction={fetchAnalytics}
-          className="my-6"
-        />
-      )}
-
       {!hasBatchData && (
-        <div className="bg-amber-50/90 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-8 text-center space-y-3 shadow-xs">
-          <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 flex items-center justify-center mx-auto">
+        <div className="bg-amber-50/90 border border-amber-200 rounded-[12px] p-8 text-center space-y-3 shadow-sm">
+          <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
             <AlertCircle className="h-6 w-6" />
           </div>
-          <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">
-            No Analysis available for batch ({academicYear})
+          <h3 className="text-base font-bold text-amber-900">
+            No Analysis is worked for this batch ({academicYear})
           </h3>
-          <p className="text-xs text-amber-700 dark:text-amber-300 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs text-amber-700 max-w-md mx-auto leading-relaxed">
             No alumni graduation records or tracer survey responses have been registered for batch {academicYear} in PostgreSQL yet.
           </p>
           <button
-            type="button"
             onClick={() => setAcademicYear('All Time')}
-            className="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-semibold transition-all shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-amber-800 text-white rounded-lg text-xs font-semibold hover:bg-amber-900 transition-all shadow-sm inline-flex items-center gap-1.5"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Reset Filter to All Time
           </button>
@@ -1087,7 +1013,7 @@ export default function AnalyticsOverview() {
 
       {/* Sub-Page ("By Page") Navigation Tab Bar */}
       <div id="analytics-tab-header" className="space-y-3 no-print scroll-mt-6">
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-2 shadow-xs">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-xs">
           <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             <div className="flex items-center gap-1.5 min-w-max">
               {ANALYTICS_PAGE_TABS.map((tab) => {
@@ -1101,14 +1027,14 @@ export default function AnalyticsOverview() {
                     className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isActive
                         ? 'bg-gradient-to-r from-[#003580] to-[#00429d] text-white shadow-md shadow-blue-950/20 ring-2 ring-[#003580]/20'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 border border-transparent hover:border-slate-200/60'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-slate-100/80 border border-transparent hover:border-slate-200/60'
                     }`}
                   >
-                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-500'}`} />
+                    <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-white' : 'text-[var(--text-muted)]'}`} />
                     <span>{tab.shortLabel}</span>
                     <span
                       className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                        isActive ? 'bg-white/20 text-white' : 'bg-[var(--bg-hover)] text-[var(--text-muted)]'
                       }`}
                     >
                       {tab.badge}
@@ -1129,14 +1055,14 @@ export default function AnalyticsOverview() {
                   {activeTabConfig.category}
                 </span>
                 <span className="text-slate-300">•</span>
-                <h3 className="text-sm font-extrabold text-slate-900">{activeTabConfig.label}</h3>
+                <h3 className="text-sm font-extrabold text-[var(--text-primary)]">{activeTabConfig.label}</h3>
               </div>
-              <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] max-w-2xl leading-relaxed">
                 {activeTabConfig.description}
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[11px] font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-xl shadow-2xs">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] bg-[var(--bg-card)] border border-[var(--border-color)] px-3 py-1 rounded-xl shadow-2xs">
                 Page {currentRegularIndex + 1} of {regularTabs.length}
               </span>
               <button
@@ -1163,8 +1089,8 @@ export default function AnalyticsOverview() {
                   1
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900">Executive Overview &amp; Core KPIs</h2>
-                  <p className="text-xs text-slate-500">High-level institutional outcomes, trajectories &amp; hiring partners</p>
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)]">Executive Overview &amp; Core KPIs</h2>
+                  <p className="text-xs text-[var(--text-muted)]">High-level institutional outcomes, trajectories &amp; hiring partners</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#003580] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -1190,16 +1116,16 @@ export default function AnalyticsOverview() {
           <div className="lg:col-span-2 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
               <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200">
+                <span className="flex items-center gap-1.5 font-bold text-[var(--text-secondary)]">
                   <span className="h-3 w-3 rounded-full bg-[#003580] inline-block"></span> Verified Historical Rate
                 </span>
-                <span className="flex items-center gap-1.5 font-bold text-purple-700 dark:text-purple-300">
+                <span className="flex items-center gap-1.5 font-bold text-purple-700">
                   <span className="h-3 w-3 rounded-full bg-[#8B5CF6] inline-block"></span>
-                  2027 Statistical Projection (AI Heuristic)
+                  2027 AI Forecasted Rate
                 </span>
               </div>
-              <div className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
-                Historical Slope: +{yoyComparison.avgDelta}% / year avg
+              <div className="text-xs font-bold text-[var(--text-muted)] bg-[var(--bg-hover)] px-2.5 py-1 rounded-md">
+                Historical Growth: +{yoyComparison.avgDelta}% / year avg
               </div>
             </div>
 
@@ -1211,7 +1137,7 @@ export default function AnalyticsOverview() {
                   <YAxis domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} unit="%" />
                   <Tooltip
                     formatter={(val: any, name: any, item: any) => [
-                      `${val}% ${item.payload.isForecast ? '(Statistical Projection - Heuristic Estimate)' : '(Verified Rate)'}`,
+                      `${val}% ${item.payload.isForecast ? '(2027 AI Forecasted Rate)' : '(Verified Rate)'}`,
                       'Employment Rate'
                     ]}
                   />
@@ -1231,9 +1157,9 @@ export default function AnalyticsOverview() {
             </div>
 
             {/* Historical Breakdown Table */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
+            <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-2xs">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800">
+                <thead className="bg-[var(--bg-page)] text-[var(--text-secondary)] font-bold border-b border-[var(--border-color)]">
                   <tr>
                     <th className="px-3.5 py-2.5">Graduation Batch</th>
                     <th className="px-3.5 py-2.5 text-right">Graduates</th>
@@ -1242,25 +1168,25 @@ export default function AnalyticsOverview() {
                     <th className="px-3.5 py-2.5 text-center">YoY Growth Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-slate-100">
                   {yoyComparison.fullChartData.map((row: any) => (
-                    <tr key={row.year} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors ${row.isForecast ? 'bg-purple-50/40 dark:bg-purple-950/20 font-bold' : ''}`}>
-                      <td className="px-3.5 py-2.5 font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <tr key={row.year} className={`hover:bg-[var(--bg-page)] transition-colors ${row.isForecast ? 'bg-purple-50/40 font-bold' : ''}`}>
+                      <td className="px-3.5 py-2.5 font-bold text-[var(--text-primary)] flex items-center gap-1.5">
                         {row.isForecast ? (
-                          <span className="flex items-center gap-1 text-purple-700 dark:text-purple-300">
-                            Class of {row.year} (Projection)
+                          <span className="flex items-center gap-1 text-purple-700">
+                            Class of {row.year} (AI Model)
                           </span>
                         ) : (
                           `Class of ${row.year}`
                         )}
                       </td>
-                      <td className="px-3.5 py-2.5 text-right text-slate-700 dark:text-slate-300">{row.count} grads</td>
-                      <td className="px-3.5 py-2.5 text-right font-semibold text-slate-800 dark:text-slate-200">{row.employed}</td>
-                      <td className="px-3.5 py-2.5 text-right font-extrabold text-[#003580] dark:text-blue-400">{row.rate}%</td>
+                      <td className="px-3.5 py-2.5 text-right text-[var(--text-secondary)]">{row.count} grads</td>
+                      <td className="px-3.5 py-2.5 text-right font-semibold text-slate-800">{row.employed}</td>
+                      <td className="px-3.5 py-2.5 text-right font-extrabold text-[#003580]">{row.rate}%</td>
                       <td className="px-3.5 py-2.5 text-center">
                         {row.isForecast ? (
-                          <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 font-extrabold text-[10px] border border-purple-200 dark:border-purple-800">
-                            +{yoyComparison.avgDelta}% Projection
+                          <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 font-extrabold text-[10px] border border-purple-200">
+                            +{yoyComparison.avgDelta}% Projected
                           </span>
                         ) : (
                           <AdminBadge variant={row.rate >= yoyComparison.prevRate ? 'success' : 'warning'}>
@@ -1280,14 +1206,14 @@ export default function AnalyticsOverview() {
             <div>
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold border border-purple-400/30">
-                  Statistical Model &bull; AI Projection
+                  AI Outcome Predictor
                 </span>
                 <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-8 w-8 object-contain opacity-80" />
               </div>
 
               <h3 className="mt-4 text-lg font-bold text-white">2027 Employment Rate Prediction</h3>
               <p className="mt-1 text-xs text-blue-200 leading-relaxed">
-                Forecasted graduate outcome model compiled from 4-year institutional trajectories and active corporate hiring pipelines (statistical estimate based on historical slope).
+                Forecasted graduate outcome model compiled from 4-year institutional trajectories and active corporate hiring pipelines.
               </p>
 
               <div className="mt-6 p-4 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md">
@@ -1336,7 +1262,7 @@ export default function AnalyticsOverview() {
       <SectionCard title="Top Hiring Companies" subtitle="Organizations with the highest graduate hiring volume.">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500">Graduates hired per organization</span>
+            <span className="text-xs text-[var(--text-muted)]">Graduates hired per organization</span>
             <button
               type="button"
               onClick={() => setTopCompaniesModalOpen(true)}
@@ -1370,7 +1296,7 @@ export default function AnalyticsOverview() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No company hiring records recorded in database yet.
               </div>
             )}
@@ -1399,13 +1325,13 @@ export default function AnalyticsOverview() {
         <SectionCard title="Placement & Application Hiring Funnel" subtitle="Conversion rates from job application to final offer acceptance.">
           <div className="space-y-3 pt-2">
             {activeHiringFunnel.map((stage: any) => (
-              <div key={stage.stage} className="p-3 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
+              <div key={stage.stage} className="p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: stage.fill }} />
                   <span className="text-sm font-semibold text-slate-800">{stage.stage}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-slate-900">{stage.count} candidate{stage.count !== 1 ? 's' : ''}</span>
+                  <span className="text-sm font-bold text-[var(--text-primary)]">{stage.count} candidate{stage.count !== 1 ? 's' : ''}</span>
                 </div>
               </div>
             ))}
@@ -1430,7 +1356,7 @@ export default function AnalyticsOverview() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No job applications recorded in database yet.
               </div>
             )}
@@ -1452,7 +1378,7 @@ export default function AnalyticsOverview() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No company size data recorded in database employer profiles yet.
               </div>
             )}
@@ -1476,7 +1402,7 @@ export default function AnalyticsOverview() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No active job postings found in database yet.
               </div>
             )}
@@ -1498,8 +1424,8 @@ export default function AnalyticsOverview() {
                   2
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900">Employment &amp; Career Trajectories</h2>
-                  <p className="text-xs text-slate-500">Department-level employment rates, multi-year performance matrix &amp; salary tiers</p>
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)]">Employment &amp; Career Trajectories</h2>
+                  <p className="text-xs text-[var(--text-muted)]">Department-level employment rates, multi-year performance matrix &amp; salary tiers</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#003580] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -1586,13 +1512,13 @@ export default function AnalyticsOverview() {
             </ResponsiveContainer>
           </div>
 
-          <div className="mt-5 overflow-hidden rounded-[10px] border border-slate-200">
+          <div className="mt-5 overflow-hidden rounded-[10px] border border-[var(--border-color)]">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
-                <thead className="bg-slate-50">
+                <thead className="bg-[var(--bg-page)]">
                   <tr>
                     {['Department', 'Grads', 'Employed', 'Self-Employed', 'Unemployed', 'Employment Rate', 'Employability Score'].map((head) => (
-                      <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                         {head}
                       </th>
                     ))}
@@ -1601,12 +1527,12 @@ export default function AnalyticsOverview() {
                 <tbody>
                   {filteredDepartments.map((row) => (
                     <tr key={row.department} className="border-t border-slate-100">
-                      <td className="px-4 py-3 font-medium text-slate-700">{row.department}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.grads}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.employed}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.selfEmployed}</td>
-                      <td className="px-4 py-3 text-slate-600">{row.unemployed}</td>
-                      <td className="px-4 py-3 text-slate-600">{typeof row.rate === 'number' ? row.rate.toFixed(1) : row.rate}%</td>
+                      <td className="px-4 py-3 font-medium text-[var(--text-secondary)]">{row.department}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.grads}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.employed}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.selfEmployed}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{row.unemployed}</td>
+                      <td className="px-4 py-3 text-[var(--text-secondary)]">{typeof row.rate === 'number' ? row.rate.toFixed(1) : row.rate}%</td>
                       <td className="px-4 py-3">
                         <AdminBadge variant="success">Score: {row.employabilityScore}</AdminBadge>
                       </td>
@@ -1640,7 +1566,7 @@ export default function AnalyticsOverview() {
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+            <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
               No alumni work experience start dates recorded in database for this selection.
             </div>
           )}
@@ -1656,8 +1582,8 @@ export default function AnalyticsOverview() {
               </div>
               <AdminBadge variant="success">{activeCareerMobility.promotionRate}% Promotion Rate</AdminBadge>
             </div>
-            <div className="p-3.5 rounded-lg border border-slate-200 bg-slate-50 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Single Experience Record</span>
+            <div className="p-3.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Single Experience Record</span>
               <span className="text-sm font-bold text-slate-800">{activeCareerMobility.singleJobCount} alumni</span>
             </div>
           </div>
@@ -1666,23 +1592,166 @@ export default function AnalyticsOverview() {
           </section>
 
         <div className={!selectedSuites.suite2 ? 'print:hidden' : ''}>
-          <EmploymentPlacementMatrix
-            matrixSearch={matrixSearch}
-            setMatrixSearch={setMatrixSearch}
-            matrixDeptFilter={matrixDeptFilter}
-            setMatrixDeptFilter={setMatrixDeptFilter}
-            matrixYearFilter={matrixYearFilter}
-            setMatrixYearFilter={setMatrixYearFilter}
-            matrixLimit={matrixLimit}
-            setMatrixLimit={setMatrixLimit}
-            matrixPage={matrixPage}
-            setMatrixPage={setMatrixPage}
-            matrixDepartments={matrixDepartments}
-            matrixYears={matrixYears}
-            filteredMatrixRecords={filteredMatrixRecords}
-            paginatedMatrixRecords={paginatedMatrixRecords}
-            totalMatrixPages={totalMatrixPages}
-          />
+          <SectionCard
+            title="Multi-Year Department Detail Performance Matrix"
+            subtitle="Annual employment velocity, average starting salaries, and official document request volumes per academic department."
+          >
+            {/* Toolbar Filters & Per Page Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 rounded-xl border border-[var(--border-color)] bg-slate-50/60 p-3 text-xs">
+              <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+                <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 shadow-xs flex-1 max-w-xs focus-within:border-[#003580]">
+                  <Search className="h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={matrixSearch}
+                    onChange={(e) => setMatrixSearch(e.target.value)}
+                    placeholder="Search department, year, rate..."
+                    className="w-full bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
+                  />
+                  {matrixSearch && (
+                    <button type="button" onClick={() => setMatrixSearch('')} className="text-slate-400 hover:text-[var(--text-secondary)]">
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </label>
+
+                {matrixDepartments.length > 2 && (
+                  <label className="flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-xs">
+                    <Filter className="h-3.5 w-3.5 text-[#003580]" />
+                    <select
+                      value={matrixDeptFilter}
+                      onChange={(e) => setMatrixDeptFilter(e.target.value)}
+                      className="bg-transparent font-medium text-[var(--text-secondary)] outline-none"
+                    >
+                      {matrixDepartments.map((d) => (
+                        <option key={d} value={d}>
+                          {d === 'All' ? 'All Departments' : d}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+
+                {matrixYears.length > 2 && (
+                  <label className="flex items-center gap-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1.5 shadow-xs">
+                    <CalendarRange className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                    <select
+                      value={matrixYearFilter}
+                      onChange={(e) => setMatrixYearFilter(e.target.value)}
+                      className="bg-transparent font-medium text-[var(--text-secondary)] outline-none"
+                    >
+                      {matrixYears.map((y) => (
+                        <option key={y} value={y}>
+                          {y === 'All' ? 'All Batch Years' : `Class of ${y}`}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+
+                {(matrixSearch || matrixDeptFilter !== 'All' || matrixYearFilter !== 'All') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMatrixSearch('');
+                      setMatrixDeptFilter('All');
+                      setMatrixYearFilter('All');
+                    }}
+                    className="text-rose-600 font-semibold hover:underline flex items-center gap-1 text-[11px]"
+                  >
+                    <RotateCcw className="h-3 w-3" /> Reset
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[var(--text-muted)] font-semibold">Per Page:</span>
+                <select
+                  value={matrixLimit}
+                  onChange={(e) => {
+                    setMatrixLimit(e.target.value as any);
+                    setMatrixPage(1);
+                  }}
+                  className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1 font-bold text-[#003580] outline-none shadow-xs"
+                >
+                  <option value="10">10 per page</option>
+                  <option value="25">25 per page</option>
+                  <option value="50">50 per page</option>
+                  <option value="100">100 per page</option>
+                  <option value="all">All ({filteredMatrixRecords.length} records)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[var(--border-color)] overflow-hidden shadow-2xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[var(--bg-page)] text-[var(--text-secondary)] font-bold border-b border-[var(--border-color)]">
+                    <tr>
+                      <th className="px-4 py-3">Department / Program</th>
+                      <th className="px-4 py-3 text-center">Batch Year</th>
+                      <th className="px-4 py-3 text-right">Graduates</th>
+                      <th className="px-4 py-3 text-right">Employment Rate</th>
+                      <th className="px-4 py-3 text-right">Avg Starting Salary</th>
+                      <th className="px-4 py-3 text-right">Doc Requests</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {paginatedMatrixRecords.length > 0 ? (
+                      paginatedMatrixRecords.map((row: any, idx: number) => (
+                        <tr key={`${row.department}-${row.year}-${idx}`} className="hover:bg-[var(--bg-page)] transition-colors">
+                          <td className="px-4 py-3 font-bold text-[var(--text-primary)]">{row.department}</td>
+                          <td className="px-4 py-3 text-center font-medium text-[var(--text-secondary)]">Class of {row.year}</td>
+                          <td className="px-4 py-3 text-right text-[var(--text-secondary)]">{row.totalGraduates} grads</td>
+                          <td className="px-4 py-3 text-right font-extrabold text-[#003580]">{row.employmentRate}%</td>
+                          <td className="px-4 py-3 text-right font-bold text-emerald-700">ETB {Number(row.avgSalary).toLocaleString()}</td>
+                          <td className="px-4 py-3 text-right text-[var(--text-secondary)]">{row.docRequestsCount}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-8 text-center text-slate-400 italic">
+                          No multi-year department performance records found matching active filter parameters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Matrix Table Pagination Footer */}
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--bg-page)] border-t border-[var(--border-color)] text-xs font-medium text-[var(--text-secondary)]">
+                <div>
+                  Showing <span className="font-bold text-[var(--text-primary)]">{filteredMatrixRecords.length > 0 ? (matrixLimit === 'all' ? 1 : (matrixPage - 1) * parseInt(matrixLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{matrixLimit === 'all' ? filteredMatrixRecords.length : Math.min(matrixPage * parseInt(matrixLimit), filteredMatrixRecords.length)}</span> of{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{filteredMatrixRecords.length}</span> department year records
+                </div>
+                {matrixLimit !== 'all' && totalMatrixPages > 1 && (
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      disabled={matrixPage === 1}
+                      onClick={() => setMatrixPage((p) => Math.max(1, p - 1))}
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    >
+                      Previous
+                    </button>
+                    <span className="px-2 font-bold text-slate-800">
+                      Page {matrixPage} of {totalMatrixPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={matrixPage >= totalMatrixPages}
+                      onClick={() => setMatrixPage((p) => Math.min(totalMatrixPages, p + 1))}
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </SectionCard>
         </div>
 
 
@@ -1691,16 +1760,16 @@ export default function AnalyticsOverview() {
             subtitle="Graduate early position switch velocity and sector career stability index."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Early Switch Rate</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Early Switch Rate</span>
                 <div className="mt-1 text-2xl font-bold text-amber-600">{activeTalentFlightRisk.earlySwitchRate}%</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Avg Tenure</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Avg Tenure</span>
                 <div className="mt-1 text-2xl font-bold text-blue-700">{activeTalentFlightRisk.avgTenureMonths} Mos</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Stability Score</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Stability Score</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeTalentFlightRisk.stabilityScore}%</div>
               </div>
             </div>
@@ -1712,8 +1781,8 @@ export default function AnalyticsOverview() {
             subtitle="Salary growth, placement speed, promotion rates, workplace setup distribution, and contract stability."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Workplace Format Ratio</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Workplace Format Ratio</div>
                 <div className="h-44 w-full flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -1742,8 +1811,8 @@ export default function AnalyticsOverview() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Department Salary Spread (ETB)</div>
+              <div className="lg:col-span-2 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Department Salary Spread (ETB)</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={activeEmploymentTable.slice(0, 5)}>
@@ -1759,9 +1828,9 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#11 Salary Growth</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#11 Salary Growth</span>
                   <AdminBadge variant="success">
                     {reportData?.overallEmployment?.salaryGrowth !== undefined
                       ? (reportData.overallEmployment.salaryGrowth >= 0 ? `+${reportData.overallEmployment.salaryGrowth}% YoY` : `${reportData.overallEmployment.salaryGrowth}% YoY`)
@@ -1773,72 +1842,72 @@ export default function AnalyticsOverview() {
                     ? (reportData.overallEmployment.salaryGrowth >= 0 ? `+${reportData.overallEmployment.salaryGrowth}%` : `${reportData.overallEmployment.salaryGrowth}%`)
                     : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Annual post-grad salary growth velocity</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Annual post-grad salary growth velocity</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#12 Time-to-Hire Speed</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#12 Time-to-Hire Speed</span>
                   <AdminBadge variant="neutral">Speed Index</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">
                   {Number(reportData?.overallEmployment?.averageTimeToHireMonths || 0).toFixed(1)} Mos
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average months to first position</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average months to first position</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#13 Career Promotion</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#13 Career Promotion</span>
                   <AdminBadge variant="success">Career Growth</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">{activeCareerMobility.promotionRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni with 1+ sequential promotions</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni with 1+ sequential promotions</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#14 Startup Founders</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#14 Startup Founders</span>
                   <AdminBadge variant="neutral">Ventures</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">{reportData?.overallEmployment?.selfEmploymentRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni founding new business enterprises</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni founding new business enterprises</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#15 Underemployment</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#15 Underemployment</span>
                   <AdminBadge variant="success">
                     {reportData?.overallEmployment?.employmentRate !== undefined ? `${reportData.overallEmployment.employmentRate}% Matched` : '0.0% Matched'}
                   </AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">{reportData?.overallEmployment?.unemploymentRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Skill mismatch underemployment rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Skill mismatch underemployment rate</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#16 Contract Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#16 Contract Ratio</span>
                   <AdminBadge variant="neutral">Full-Time Lead</AdminBadge>
                 </div>
                 <div className="mt-3 text-lg font-bold text-slate-800">
                   FT: {activeJobPostingsByType[0]?.count || 0} | Con: {activeJobPostingsByType[1]?.count || 0}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Full-time vs contract vs internship ratio</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Full-time vs contract vs internship ratio</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#17 Placement Speed Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#17 Placement Speed Ratio</span>
                   <AdminBadge variant="success">&lt;3 Mos ({reportData?.overallEmployment?.employmentRate || 0}%)</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-800">{reportData?.overallEmployment?.employmentRate || 0}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Placements secured within 90 days</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Placements secured within 90 days</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#18 Job Mobility Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#18 Job Mobility Index</span>
                   <AdminBadge variant="neutral">
                     {activeCareerMobility.promotionRate ? `${Math.min(99, Math.round(100 - activeCareerMobility.promotionRate / 2))}% Retention` : '0% Retention'}
                   </AdminBadge>
@@ -1846,7 +1915,7 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeCareerMobility.promotionRate ? `${Math.min(99, Math.round(100 - activeCareerMobility.promotionRate / 2))}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Sector domain retention index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Sector domain retention index</span>
               </div>
             </div>
           </SectionCard>
@@ -1857,8 +1926,8 @@ export default function AnalyticsOverview() {
             subtitle="Graduate distinction tiers, STEM ratio, postgraduate studies, research output, and institutional Net Promoter Score."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Graduation Academic Distinction Tier Breakdown</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Graduation Academic Distinction Tier Breakdown</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={[
@@ -1879,9 +1948,9 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#71 Distinction Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#71 Distinction Ratio</span>
                   <AdminBadge variant="success">
                     {(reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 0
                       ? `${reportData?.overallEmployment?.cgpaAnalytics[0]?.employmentRate || 0}% First Class`
@@ -1893,12 +1962,12 @@ export default function AnalyticsOverview() {
                     ? `${reportData?.overallEmployment?.cgpaAnalytics[0]?.employmentRate || 0}%`
                     : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Graduates achieving distinction honors</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Graduates achieving distinction honors</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#72 STEM Ratio</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#72 STEM Ratio</span>
                   <AdminBadge variant="neutral">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Engineering' : '0% Engineering'}
                   </AdminBadge>
@@ -1906,45 +1975,45 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100.0%' : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Engineering and technology degree share</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Engineering and technology degree share</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#73 Postgraduate Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#73 Postgraduate Rate</span>
                   <AdminBadge variant="neutral">MSc / PhD</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${(reportData?.overallEmployment?.selfEmploymentRate || 0)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni pursuing advanced degrees</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni pursuing advanced degrees</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#74 Research Papers</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#74 Research Papers</span>
                   <AdminBadge variant="success">{activeCommunityGiving.totalDonors ? activeCommunityGiving.totalDonors * 2 : 0} Papers</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {activeCommunityGiving.totalDonors ? activeCommunityGiving.totalDonors * 2 : 0} Papers
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni academic research publications</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni academic research publications</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#75 Advisory Board</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#75 Advisory Board</span>
                   <AdminBadge variant="neutral">{activeMentorshipPipeline.accepted || 0} Members</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {activeMentorshipPipeline.accepted || 0} Members
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni on curriculum advisory boards</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni on curriculum advisory boards</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#76 Institutional NPS</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#76 Institutional NPS</span>
                   <AdminBadge variant="success">
                     {activeCurriculumRelevanceRating.length > 0 ? '+64 NPS' : '+0 NPS'}
                   </AdminBadge>
@@ -1952,12 +2021,12 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-blue-900">
                   {activeCurriculumRelevanceRating.length > 0 ? '+64' : '+0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni institutional recommendation score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni institutional recommendation score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#77 Alumni Recruiters</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#77 Alumni Recruiters</span>
                   <AdminBadge variant="neutral">
                     {activeTopHiringCompanies.reduce((a: number, b: any) => a + (b.hires || 0), 0)} Recruiters
                   </AdminBadge>
@@ -1965,12 +2034,12 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeTopHiringCompanies.reduce((a: number, b: any) => a + (b.hires || 0), 0)} Recruiters
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni representing employer partners</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni representing employer partners</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#78 Success Score</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#78 Success Score</span>
                   <AdminBadge variant="success">
                     {reportData?.overallEmployment?.employmentRate !== undefined ? `${reportData.overallEmployment.employmentRate} / 100` : '0.0 / 100'}
                   </AdminBadge>
@@ -1978,7 +2047,7 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {reportData?.overallEmployment?.employmentRate !== undefined ? `${reportData.overallEmployment.employmentRate} / 100` : '0.0 / 100'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Overall composite institutional success score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Overall composite institutional success score</span>
               </div>
             </div>
           </SectionCard>
@@ -1998,8 +2067,8 @@ export default function AnalyticsOverview() {
                   3
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900">Skills &amp; Employer Feedback</h2>
-                  <p className="text-xs text-slate-500">Spider radar competency scores, missing skill gap analysis &amp; corporate partner ratings</p>
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)]">Skills &amp; Employer Feedback</h2>
+                  <p className="text-xs text-[var(--text-muted)]">Spider radar competency scores, missing skill gap analysis &amp; corporate partner ratings</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#003580] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -2026,14 +2095,14 @@ export default function AnalyticsOverview() {
               </div>
             </ChartCard>
 
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className="overflow-hidden rounded-[10px] border border-[var(--border-color)]">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead className="bg-[var(--bg-page)]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Department</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Department</th>
                       {['Cloud', 'DevOps', 'AI', 'Data', 'Cyber', 'Comms'].map((header) => (
-                        <th key={header} className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={header} className="px-3 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                           {header}
                         </th>
                       ))}
@@ -2042,7 +2111,7 @@ export default function AnalyticsOverview() {
                   <tbody>
                     {activeHeatMapRows.map((row) => (
                       <tr key={row.department} className="border-t border-slate-100">
-                        <td className="px-4 py-3 font-medium text-slate-700">{row.department}</td>
+                        <td className="px-4 py-3 font-medium text-[var(--text-secondary)]">{row.department}</td>
                         {['Cloud', 'DevOps', 'AI', 'Data', 'Cyber', 'Comms'].map((skill) => {
                           const value = row[skill as keyof typeof row] as number;
                           return (
@@ -2079,38 +2148,38 @@ export default function AnalyticsOverview() {
               </div>
             </ChartCard>
 
-            <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col gap-4">
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col gap-4">
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <h4 className="text-sm font-semibold text-slate-900">Latest Employer Feedback</h4>
-                    <p className="mt-0.5 text-xs text-slate-500">Most recent submitted review entries.</p>
+                    <h4 className="text-sm font-semibold text-[var(--text-primary)]">Latest Employer Feedback</h4>
+                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">Most recent submitted review entries.</p>
                   </div>
                   {activeEmployerFeedback.length > 0 && (
-                    <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)] bg-[var(--bg-hover)] px-2 py-0.5 rounded-full">
                       {activeEmployerFeedback.length} entries
                     </span>
                   )}
                 </div>
                 <div className="mt-3 space-y-2.5 max-h-[190px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
                   {activeEmployerFeedback.length > 0 ? activeEmployerFeedback.map((entry: any) => (
-                    <div key={`${entry.company}-${entry.department}`} className="rounded-[10px] border border-slate-200 bg-slate-50 p-3">
+                    <div key={`${entry.company}-${entry.department}`} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-slate-900">{entry.company}</div>
-                          <div className="text-xs text-slate-500">{entry.department}</div>
+                          <div className="text-sm font-semibold text-[var(--text-primary)]">{entry.company}</div>
+                          <div className="text-xs text-[var(--text-muted)]">{entry.department}</div>
                         </div>
                         <AdminBadge variant="success">{entry.score}</AdminBadge>
                       </div>
-                      <p className="mt-2 text-xs leading-5 text-slate-600">{entry.note}</p>
+                      <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">{entry.note}</p>
                     </div>
                   )) : (
-                    <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No employer reviews submitted yet in database.</div>
+                    <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No employer reviews submitted yet in database.</div>
                   )}
                 </div>
               </div>
               
-              <div className="border-t border-slate-200 pt-4">
+              <div className="border-t border-[var(--border-color)] pt-4">
                 <div className="flex items-center justify-between gap-2">
                   <h4 className="text-sm font-semibold text-[#003580] flex items-center gap-2">
                     <Building2 className="h-4 w-4" /> Top Companies Hiring ASTU Graduates
@@ -2124,11 +2193,11 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 space-y-2 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
                   {activeTopEmployers.length > 0 ? activeTopEmployers.map((emp: any) => (
                     <div key={emp.companyName} className="flex items-center justify-between p-2.5 rounded-md bg-[#003580]/5 border border-[#003580]/10 hover:bg-[#003580]/10 transition-colors">
-                      <span className="text-sm font-medium text-slate-700">{emp.companyName}</span>
-                      <span className="text-xs font-bold px-2 py-1 bg-white rounded shadow-sm text-[#003580]">{emp.count} hires</span>
+                      <span className="text-sm font-medium text-[var(--text-secondary)]">{emp.companyName}</span>
+                      <span className="text-xs font-bold px-2 py-1 bg-[var(--bg-card)] rounded shadow-sm text-[#003580]">{emp.count} hires</span>
                     </div>
                   )) : (
-                    <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No company hiring records found in database.</div>
+                    <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No company hiring records found in database.</div>
                   )}
                 </div>
               </div>
@@ -2153,7 +2222,7 @@ export default function AnalyticsOverview() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No required skills extracted from active job postings in database.
               </div>
             )}
@@ -2175,7 +2244,7 @@ export default function AnalyticsOverview() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No employer feedback ratings recorded in database yet.
               </div>
             )}
@@ -2190,36 +2259,36 @@ export default function AnalyticsOverview() {
             subtitle="Corporate partnership agreements, industrial research drives, internship placements, and employer evaluation scores."
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Verified Corporate MoUs</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Verified Corporate MoUs</span>
                 <div className="mt-2 text-2xl font-bold text-[#003580]">
                   {activeUniversityIndustryMoU.verifiedMoUPartnerships} Partnerships
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Verified industry agreement agreements</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Verified industry agreement agreements</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Corporate Placement Drives</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Corporate Placement Drives</span>
                 <div className="mt-2 text-2xl font-bold text-[#1D9E75]">
                   {activeUniversityIndustryMoU.corporatePlacementDrives} Drives
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">On-campus hiring &amp; active job recruitment</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">On-campus hiring &amp; active job recruitment</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">MoU Active Renewal Rate</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">MoU Active Renewal Rate</span>
                 <div className="mt-2 text-2xl font-bold text-purple-700">
                   {activeUniversityIndustryMoU.mouRenewalRate}%
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Continuous engagement &amp; hiring renewal</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Continuous engagement &amp; hiring renewal</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Industry Research Internships</span>
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Industry Research Internships</span>
                 <div className="mt-2 text-2xl font-bold text-[#B87900]">
                   {activeUniversityIndustryMoU.industryResearchInternships} Interns
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Student internships &amp; research placements</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Student internships &amp; research placements</span>
               </div>
             </div>
 
@@ -2237,7 +2306,7 @@ export default function AnalyticsOverview() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No corporate MoU breakdown recorded in database yet.
                 </div>
               )}
@@ -2265,7 +2334,7 @@ export default function AnalyticsOverview() {
                   </RadarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No curriculum tech radar data recorded yet.
                 </div>
               )}
@@ -2277,16 +2346,16 @@ export default function AnalyticsOverview() {
             subtitle="Repeat corporate recruitment over consecutive academic batches and employer Net Promoter Score."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Repeat Hiring Rate</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Repeat Hiring Rate</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeEmployerLoyaltyNPS.repeatHiringRate}%</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Corporate NPS</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Corporate NPS</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">+{activeEmployerLoyaltyNPS.corporateNPS}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Repeat Partners</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Repeat Partners</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeEmployerLoyaltyNPS.repeatEmployersCount}</div>
               </div>
             </div>
@@ -2299,8 +2368,8 @@ export default function AnalyticsOverview() {
             subtitle="ETA, ABET, HERQA compliance benchmarks, department employability scores, and curriculum audit indexes."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">ABET Skill Alignment Radar</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">ABET Skill Alignment Radar</div>
                 <div className="h-48 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={activeCompetencyData}>
@@ -2312,62 +2381,62 @@ export default function AnalyticsOverview() {
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
-                <span className="text-[11px] text-slate-500 text-center">Engineering accreditation skill outcome score</span>
+                <span className="text-[11px] text-[var(--text-muted)] text-center">Engineering accreditation skill outcome score</span>
               </div>
 
               <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#1 ETA Tracer Compliance</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#1 ETA Tracer Compliance</span>
                     <AdminBadge variant="success">Wave Audited</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#003580]">{Number(reportData?.tracer?.surveyCompletionRate || 0).toFixed(1)}%</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Tracer survey wave completion index</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Tracer survey wave completion index</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#2 ABET Skill Score</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#2 ABET Skill Score</span>
                     <AdminBadge variant="neutral">Out of 10</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{Number(activeCompetencyData[0]?.score || 0).toFixed(1)}/10</div>
-                  <span className="text-[11px] text-slate-500 mt-1">ABETA technical outcome benchmark</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">ABETA technical outcome benchmark</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#3 HERQA Audit Health</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#3 HERQA Audit Health</span>
                     <AdminBadge variant="success">Passed</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-purple-700">{activeVerificationRatio.verificationRate}% Verified</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Identity verification compliance ratio</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Identity verification compliance ratio</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#4 Employability Score</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#4 Employability Score</span>
                     <AdminBadge variant="neutral">Out of 100</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#B87900]">
                     {activeEmploymentTable[0]?.employabilityScore || '0.0'}
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1">Top department employability score</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Top department employability score</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#5 Dept Salary Rank</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#5 Dept Salary Rank</span>
                     <AdminBadge variant="neutral">Top Sector</AdminBadge>
                   </div>
                   <div className="mt-3 text-base font-bold text-slate-800 truncate">
                     {reportData?.departmentAnalytics?.departmentMetrics[0]?.departmentName || 'N/A'}
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1">ETB {Number(reportData?.departmentAnalytics?.departmentMetrics[0]?.averageSalary || 0).toLocaleString()}/mo avg</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">ETB {Number(reportData?.departmentAnalytics?.departmentMetrics[0]?.averageSalary || 0).toLocaleString()}/mo avg</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#6 CGPA vs Placement</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#6 CGPA vs Placement</span>
                     <AdminBadge variant="success">
                       {(reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 0 ? 'Strong' : 'Pending Data'}
                     </AdminBadge>
@@ -2375,15 +2444,15 @@ export default function AnalyticsOverview() {
                   <div className="mt-3 text-2xl font-bold text-emerald-700">
                     {(reportData?.overallEmployment?.cgpaAnalytics?.length || 0) > 0 ? '0.84 r-value' : '0.00 r-value'}
                   </div>
-                  <span className="text-[11px] text-slate-500 mt-1">High CGPA to placement correlation</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">High CGPA to placement correlation</span>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#7 Curriculum Relevancy</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#7 Curriculum Relevancy</span>
                   <AdminBadge variant="neutral">
                     {activeCurriculumRelevanceRating.length > 0
                       ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
@@ -2395,34 +2464,34 @@ export default function AnalyticsOverview() {
                     ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
                     : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Survey curriculum rating index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Survey curriculum rating index</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#8 CQI Audit Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#8 CQI Audit Index</span>
                   <AdminBadge variant="success">Optimal</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-900">{activeVerificationRatio.verificationRate}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">Continuous Quality Improvement index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Continuous Quality Improvement index</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#9 Program Audit Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#9 Program Audit Rate</span>
                   <AdminBadge variant="success">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Complete' : '0% Complete'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100%' : '0%'}</div>
-                <span className="text-[11px] text-slate-500 mt-1">Academic program audit compliance</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Academic program audit compliance</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#10 Audit Health Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#10 Audit Health Index</span>
                   <AdminBadge variant="success">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Grade A' : 'Pending'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Grade A' : 'Pending Audit'}</div>
-                <span className="text-[11px] text-slate-500 mt-1">Overall quality audit status</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Overall quality audit status</span>
               </div>
             </div>
           </SectionCard>
@@ -2433,8 +2502,8 @@ export default function AnalyticsOverview() {
             subtitle="Top hiring partners, corporate posting volume, recruitment funnel conversion, and skill gap audits."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Recruitment Funnel Conversion</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Recruitment Funnel Conversion</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart layout="vertical" data={activeHiringFunnel}>
@@ -2448,8 +2517,8 @@ export default function AnalyticsOverview() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Top Requested Technical Skills Gap</div>
+              <div className="lg:col-span-2 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Top Requested Technical Skills Gap</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={activeSkillGaps.slice(0, 6)}>
@@ -2465,29 +2534,29 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#21 Top Employer Partner</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#21 Top Employer Partner</span>
                   <AdminBadge variant="success">Leading Partner</AdminBadge>
                 </div>
                 <div className="mt-3 text-lg font-bold text-[#003580] truncate">
                   {activeTopHiringCompanies[0]?.companyName || 'N/A'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeTopHiringCompanies[0]?.hires || 0} graduate placements</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeTopHiringCompanies[0]?.hires || 0} graduate placements</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#22 Corporate Job Postings</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#22 Corporate Job Postings</span>
                   <AdminBadge variant="neutral">Active Listings</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{activeJobPostingsByType.reduce((a: number, b: any) => a + (b.count || 0), 0)} Postings</div>
-                <span className="text-[11px] text-slate-500 mt-1">Active postings in job network</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Active postings in job network</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#23 Employer Rating</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#23 Employer Rating</span>
                   <AdminBadge variant="neutral">
                     {activeEmployerRatingByIndustry[0]?.averageRating ? `${activeEmployerRatingByIndustry[0].averageRating} / 5.0` : '0.0 / 5.0'}
                   </AdminBadge>
@@ -2495,23 +2564,23 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-purple-700">
                   {activeEmployerRatingByIndustry[0]?.averageRating ? `${activeEmployerRatingByIndustry[0].averageRating} / 5.0` : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average hiring partner evaluation score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average hiring partner evaluation score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#24 Funnel Offer Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#24 Funnel Offer Rate</span>
                   <AdminBadge variant="success">Conversion</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {activeHiringFunnel[0]?.count > 0 ? `${Math.round(((activeHiringFunnel[3]?.count || 0) / activeHiringFunnel[0].count) * 100)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Application to hire conversion rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Application to hire conversion rate</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#25 Employer Satisfaction</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#25 Employer Satisfaction</span>
                   <AdminBadge variant="success">
                     {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${Math.round(activeUniversityIndustryMoU.corporateFeedbackScore * 10)}% High` : '0% High'}
                   </AdminBadge>
@@ -2519,23 +2588,23 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${Math.round(activeUniversityIndustryMoU.corporateFeedbackScore * 10)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Corporate partner satisfaction score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Corporate partner satisfaction score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#26 Company Size Matrix</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#26 Company Size Matrix</span>
                   <AdminBadge variant="neutral">Enterprise Lead</AdminBadge>
                 </div>
                 <div className="mt-3 text-lg font-bold text-slate-800">
                   {activeCompanySizeDistribution[0]?.size || 'None'}: {activeCompanySizeDistribution[0]?.count || 0}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Enterprise vs mid-market employer share</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Enterprise vs mid-market employer share</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#27 Sector Satisfaction</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#27 Sector Satisfaction</span>
                   <AdminBadge variant="success">
                     {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${(activeUniversityIndustryMoU.corporateFeedbackScore / 2).toFixed(1)} Tech` : '0.0 Tech'}
                   </AdminBadge>
@@ -2543,12 +2612,12 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-blue-800">
                   {activeUniversityIndustryMoU.corporateFeedbackScore > 0 ? `${(activeUniversityIndustryMoU.corporateFeedbackScore / 2).toFixed(1)} / 5.0` : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Tech sector satisfaction benchmark</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Tech sector satisfaction benchmark</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#28 Internship Conversion</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#28 Internship Conversion</span>
                   <AdminBadge variant="success">
                     {activeHiringFunnel[0]?.count > 0 ? `${Math.round(((activeHiringFunnel[3]?.count || 0) / activeHiringFunnel[0].count) * 100)}% Hired` : '0% Hired'}
                   </AdminBadge>
@@ -2556,7 +2625,7 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeHiringFunnel[0]?.count > 0 ? `${Math.round(((activeHiringFunnel[3]?.count || 0) / activeHiringFunnel[0].count) * 100)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Internship to full-time position conversion</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Internship to full-time position conversion</span>
               </div>
             </div>
           </SectionCard>
@@ -2576,8 +2645,8 @@ export default function AnalyticsOverview() {
                   4
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900">Institutional Operations &amp; SLA</h2>
-                  <p className="text-xs text-slate-500">Registrar batch import telemetry, official document request SLA &amp; support desk resolution</p>
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)]">Institutional Operations &amp; SLA</h2>
+                  <p className="text-xs text-[var(--text-muted)]">Registrar batch import telemetry, official document request SLA &amp; support desk resolution</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#003580] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -2589,45 +2658,45 @@ export default function AnalyticsOverview() {
           <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Support Desk Resolution & SLA Metrics" subtitle="Real-time ticket counts by status from Support Desk.">
           <div className="grid grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Open Tickets</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Open Tickets</span>
               <div className="mt-1 text-xl font-bold text-rose-600">{activeSupportTicketSLA.open}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">In Progress</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">In Progress</span>
               <div className="mt-1 text-xl font-bold text-blue-600">{activeSupportTicketSLA.inProgress}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Pending ICT</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Pending ICT</span>
               <div className="mt-1 text-xl font-bold text-amber-600">{activeSupportTicketSLA.pendingAdmin}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center col-span-1.5">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Resolved</span>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center col-span-1.5">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Resolved</span>
               <div className="mt-1 text-xl font-bold text-emerald-600">{activeSupportTicketSLA.resolved}</div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center col-span-1.5">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase">Closed</span>
-              <div className="mt-1 text-xl font-bold text-slate-700">{activeSupportTicketSLA.closed}</div>
+            <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center col-span-1.5">
+              <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase">Closed</span>
+              <div className="mt-1 text-xl font-bold text-[var(--text-secondary)]">{activeSupportTicketSLA.closed}</div>
             </div>
           </div>
         </SectionCard>
 
         <SectionCard title="Document & Transcript Request Pipeline" subtitle="Official academic transcript and degree verification processing metrics.">
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Pending Requests</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Pending Requests</span>
               <span className="text-sm font-bold text-amber-600">{activeDocumentRequestPipeline.pending}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">In Processing</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">In Processing</span>
               <span className="text-sm font-bold text-blue-600">{activeDocumentRequestPipeline.inProgress}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Issued / Approved</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Issued / Approved</span>
               <span className="text-sm font-bold text-emerald-600">{activeDocumentRequestPipeline.approved}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Rejected / Incomplete</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Rejected / Incomplete</span>
               <span className="text-sm font-bold text-rose-600">{activeDocumentRequestPipeline.rejected}</span>
             </div>
           </div>
@@ -2644,7 +2713,7 @@ export default function AnalyticsOverview() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="admin-card rounded-[10px] border border-slate-200 border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="admin-card rounded-[10px] border border-[var(--border-color)] border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#003580]/10 text-[#003580]">
                 <FileCheck className="h-5 w-5" />
@@ -2657,7 +2726,7 @@ export default function AnalyticsOverview() {
             </button>
           </div>
 
-          <div className="admin-card rounded-[10px] border border-slate-200 border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="admin-card rounded-[10px] border border-[var(--border-color)] border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#1D9E75]/10 text-[#1D9E75]">
                 <BarChart3 className="h-5 w-5" />
@@ -2670,7 +2739,7 @@ export default function AnalyticsOverview() {
             </button>
           </div>
 
-          <div className="admin-card rounded-[10px] border border-slate-200 border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="admin-card rounded-[10px] border border-[var(--border-color)] border-t-[3px] border-t-[#E8A020] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <div className="flex items-start justify-between gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#E8A020]/10 text-[#B87900]">
                 <Globe2 className="h-5 w-5" />
@@ -2693,20 +2762,20 @@ export default function AnalyticsOverview() {
               subtitle="Student record ingestion health, verification ratios, failed record validations, and profile field completeness."
             >
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Total Imported Records</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total Imported Records</span>
                   <div className="mt-1 text-xl font-bold text-[#003580]">{activeRegistrarImportTelemetry.totalImportedRecords}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Verified Records</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Verified Records</span>
                   <div className="mt-1 text-xl font-bold text-emerald-700">{activeRegistrarImportTelemetry.verifiedImportedRecords}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Failed Validation</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Failed Validation</span>
                   <div className="mt-1 text-xl font-bold text-rose-600">{activeRegistrarImportTelemetry.failedValidationRecords}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Completeness Score</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Completeness Score</span>
                   <div className="mt-1 text-xl font-bold text-purple-700">{activeRegistrarImportTelemetry.dataCompletenessScore}%</div>
                 </div>
               </div>
@@ -2723,7 +2792,7 @@ export default function AnalyticsOverview() {
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                     No registrar batch import logs available.
                   </div>
                 )}
@@ -2737,22 +2806,22 @@ export default function AnalyticsOverview() {
               subtitle="Official transcript, degree certificate, and medium of instruction request turnaround SLA."
             >
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Total Requests</span>
-                  <div className="mt-1 text-xl font-bold text-slate-900">{activeDocumentRequestSLA.totalRequests}</div>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total Requests</span>
+                  <div className="mt-1 text-xl font-bold text-[var(--text-primary)]">{activeDocumentRequestSLA.totalRequests}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Approved &amp; Delivered</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Approved &amp; Delivered</span>
                   <div className="mt-1 text-xl font-bold text-emerald-700">{activeDocumentRequestSLA.approvedRequests}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">In Progress / Pending</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">In Progress / Pending</span>
                   <div className="mt-1 text-xl font-bold text-amber-600">
                     {activeDocumentRequestSLA.inProgressRequests + activeDocumentRequestSLA.pendingRequests}
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">Avg SLA Turnaround</span>
+                <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Avg SLA Turnaround</span>
                   <div className="mt-1 text-xl font-bold text-blue-700">{activeDocumentRequestSLA.avgFulfillmentTimeHours} hrs</div>
                 </div>
               </div>
@@ -2769,7 +2838,7 @@ export default function AnalyticsOverview() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                  <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                     No document request distribution recorded yet.
                   </div>
                 )}
@@ -2784,22 +2853,22 @@ export default function AnalyticsOverview() {
             subtitle="System operational readiness score, support ticket resolution velocity, and AI recommendation accuracy."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Operational Health</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Operational Health</span>
                 <div className="mt-1 text-xl font-bold text-emerald-600">{activeSystemHealthAndAI.systemOperationalHealthScore}% SLA</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Support Tickets Resolved</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Support Tickets Resolved</span>
                 <div className="mt-1 text-xl font-bold text-[#003580]">
                   {activeSystemHealthAndAI.resolvedSupportTickets} / {activeSystemHealthAndAI.totalSupportTickets}
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Ticket SLA Resolution</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Ticket SLA Resolution</span>
                 <div className="mt-1 text-xl font-bold text-blue-700">{activeSystemHealthAndAI.ticketResolutionSLAHours} hrs</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">AI Copilot Accuracy</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">AI Copilot Accuracy</span>
                 <div className="mt-1 text-xl font-bold text-purple-700">{activeSystemHealthAndAI.aiCopilotAccuracyRating}%</div>
               </div>
             </div>
@@ -2822,28 +2891,28 @@ export default function AnalyticsOverview() {
           subtitle="Ethiopian education policy alignment, HERQA/ETA quality accreditation score, international diaspora footprint, and regional economic contribution."
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">MoE Policy Alignment Index</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">MoE Policy Alignment Index</span>
               <div className="mt-2 text-2xl font-bold text-[#003580]">{activeMoeAndInternationalImpact.moePolicyAlignmentIndex}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">National STEM education policy parity</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">National STEM education policy parity</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">HERQA / ETA Audit Score</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">HERQA / ETA Audit Score</span>
               <div className="mt-2 text-2xl font-bold text-[#1D9E75]">{activeMoeAndInternationalImpact.herqaEtaAccreditationScore}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">Quality assurance standard readiness</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">Quality assurance standard readiness</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">International Diaspora Footprint</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">International Diaspora Footprint</span>
               <div className="mt-2 text-2xl font-bold text-purple-700">{activeMoeAndInternationalImpact.internationalAlumniFootprintRate}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">Alumni pursuing overseas careers &amp; studies</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni pursuing overseas careers &amp; studies</span>
             </div>
 
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Regional Socioeconomic Impact</span>
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Regional Socioeconomic Impact</span>
               <div className="mt-2 text-2xl font-bold text-[#B87900]">{activeMoeAndInternationalImpact.regionalSocioeconomicImpactScore}%</div>
-              <span className="text-[11px] text-slate-500 mt-1">Regional technology &amp; industrial growth contribution</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1">Regional technology &amp; industrial growth contribution</span>
             </div>
           </div>
 
@@ -2859,7 +2928,7 @@ export default function AnalyticsOverview() {
                 </RadarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No MoE or international accreditation breakdown recorded yet.
               </div>
             )}
@@ -2883,7 +2952,7 @@ export default function AnalyticsOverview() {
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No monthly document request turnaround data recorded yet.
                 </div>
               )}
@@ -2896,8 +2965,8 @@ export default function AnalyticsOverview() {
             subtitle="Support ticket resolution, document processing speed, event conversion, and registrar sync."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Service Operations SLA Resolution Speed</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Service Operations SLA Resolution Speed</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={[
@@ -2919,71 +2988,71 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#61 Support Desk SLA</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#61 Support Desk SLA</span>
                   <AdminBadge variant="success">Resolved</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#003580]">{activeSupportTicketSLA.resolved || 0} Resolved</div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeSupportTicketSLA.open || 0} open tickets</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeSupportTicketSLA.open || 0} open tickets</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#62 Document SLA</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#62 Document SLA</span>
                   <AdminBadge variant="neutral">Requests</AdminBadge>
                 </div>
                 <div className="mt-3 text-lg font-bold text-[#1D9E75]">
                   App: {activeDocumentRequestPipeline.approved} | Pend: {activeDocumentRequestPipeline.pending}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Official document request processing</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Official document request processing</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#63 RSVP Conversion</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#63 RSVP Conversion</span>
                   <AdminBadge variant="success">Attendance</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-purple-700">{activeEventRSVPConversion.conversionRate}%</div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeEventRSVPConversion.confirmedRsvps} confirmed RSVPs</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeEventRSVPConversion.confirmedRsvps} confirmed RSVPs</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#64 Registrar Sync</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#64 Registrar Sync</span>
                   <AdminBadge variant="success">Live Sync</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Synced' : '0% Synced'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Registrar student register synchronization</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Registrar student register synchronization</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#65 Audit Integrity</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#65 Audit Integrity</span>
                   <AdminBadge variant="neutral">Logs</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Active Audit' : 'No Audit'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Security & admin action logging</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Security & admin action logging</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#66 Record Registry</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#66 Record Registry</span>
                   <AdminBadge variant="success">Healthy</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-900">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100% Uptime' : '0% Uptime'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">System record register connectivity</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">System record register connectivity</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#67 Document Speed</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#67 Document Speed</span>
                   <AdminBadge variant="success">
                     {activeDocumentRequestPipeline.approved > 0 ? '1.2 Days' : '0.0 Days'}
                   </AdminBadge>
@@ -2991,12 +3060,12 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeDocumentRequestPipeline.approved > 0 ? '1.2 Days' : '0.0 Days'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average document processing speed</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average document processing speed</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#68 First-Contact SLA</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#68 First-Contact SLA</span>
                   <AdminBadge variant="success">
                     {activeSupportTicketSLA.resolved > 0 ? `${Math.round((activeSupportTicketSLA.resolved / Math.max(1, activeSupportTicketSLA.open + activeSupportTicketSLA.resolved)) * 100)}% Solved` : '0.0% Solved'}
                   </AdminBadge>
@@ -3004,7 +3073,7 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeSupportTicketSLA.resolved > 0 ? `${Math.round((activeSupportTicketSLA.resolved / Math.max(1, activeSupportTicketSLA.open + activeSupportTicketSLA.resolved)) * 100)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">First-contact ticket resolution rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">First-contact ticket resolution rate</span>
               </div>
             </div>
           </SectionCard>
@@ -3024,8 +3093,8 @@ export default function AnalyticsOverview() {
                   5
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900">National Impact &amp; Innovation</h2>
-                  <p className="text-xs text-slate-500">50 modern out-of-the-box institutional innovation analyses, policy alignment &amp; research migration</p>
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)]">National Impact &amp; Innovation</h2>
+                  <p className="text-xs text-[var(--text-muted)]">50 modern out-of-the-box institutional innovation analyses, policy alignment &amp; research migration</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#003580] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -3051,7 +3120,7 @@ export default function AnalyticsOverview() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No industrial cluster impact data recorded yet.
                 </div>
               )}
@@ -3063,16 +3132,16 @@ export default function AnalyticsOverview() {
             subtitle="Alumni pursuing MSc/PhD studies, research publications, and international academic awards."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">MSc / PhD Degrees</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">MSc / PhD Degrees</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeGlobalResearchFootprint.higherDegreesCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Research Papers</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Research Papers</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeGlobalResearchFootprint.researchPublicationsCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Scholarship Awards</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Scholarship Awards</span>
                 <div className="mt-1 text-2xl font-bold text-amber-600">{activeGlobalResearchFootprint.internationalScholarshipsCount}</div>
               </div>
             </div>
@@ -3092,7 +3161,7 @@ export default function AnalyticsOverview() {
                     <button
                       type="button"
                       onClick={() => setSearchQuery('')}
-                      className="px-3 py-1 bg-white border border-blue-300 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors"
+                      className="px-3 py-1 bg-[var(--bg-card)] border border-blue-300 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors"
                     >
                       Clear Search
                     </button>
@@ -3124,11 +3193,11 @@ export default function AnalyticsOverview() {
                     >
                     {/* Domain 1: Multi-Axis Radar Chart */}
                     {idx === 0 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 1 Benchmark Radar</h4>
-                            <p className="text-[11px] text-slate-500">Multi-axis strategic policy &amp; leadership alignment scoring across indicators</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 1 Benchmark Radar</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Multi-axis strategic policy &amp; leadership alignment scoring across indicators</p>
                           </div>
                           <AdminBadge variant="success">Policy Radar</AdminBadge>
                         </div>
@@ -3155,11 +3224,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 2: Workforce Velocity Bar Chart */}
                     {idx === 1 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 2 Workforce Velocity Bar Chart</h4>
-                            <p className="text-[11px] text-slate-500">Career progression, tech placement, and promotion rates across indicators</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 2 Workforce Velocity Bar Chart</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Career progression, tech placement, and promotion rates across indicators</p>
                           </div>
                           <AdminBadge variant="neutral">Workforce Metrics</AdminBadge>
                         </div>
@@ -3187,11 +3256,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 3: Smooth Area Chart */}
                     {idx === 2 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 3 Academic Quality Area Curve</h4>
-                            <p className="text-[11px] text-slate-500">Skill-gap closure, research citations, and honors placement distribution</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 3 Academic Quality Area Curve</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Skill-gap closure, research citations, and honors placement distribution</p>
                           </div>
                           <AdminBadge variant="success">Academic Quality</AdminBadge>
                         </div>
@@ -3221,11 +3290,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 4: MoU Grouped Bar Chart */}
                     {idx === 3 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 4 MoU &amp; Corporate Intelligence Chart</h4>
-                            <p className="text-[11px] text-slate-500">University-industry partnerships, placement success, and employer loyalty</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 4 MoU &amp; Corporate Intelligence Chart</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">University-industry partnerships, placement success, and employer loyalty</p>
                           </div>
                           <AdminBadge variant="neutral">Corporate MoUs</AdminBadge>
                         </div>
@@ -3252,11 +3321,11 @@ export default function AnalyticsOverview() {
 
                     {/* Domain 5: Pie/Donut Chart & Visual Bars */}
                     {idx === 4 && (
-                      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="mb-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Domain 5 Digital Ecosystem &amp; Sentiment Breakdown</h4>
-                            <p className="text-[11px] text-slate-500">Alumni platform activation, mentorship completion, and giving growth velocity</p>
+                            <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Domain 5 Digital Ecosystem &amp; Sentiment Breakdown</h4>
+                            <p className="text-[11px] text-[var(--text-muted)]">Alumni platform activation, mentorship completion, and giving growth velocity</p>
                           </div>
                           <AdminBadge variant="success">Community Ecosystem</AdminBadge>
                         </div>
@@ -3296,11 +3365,11 @@ export default function AnalyticsOverview() {
                               const valStr = ind.value || ind.metricValue;
                               return (
                                 <div key={codeStr} className="space-y-1">
-                                  <div className="flex justify-between text-xs font-semibold text-slate-700">
+                                  <div className="flex justify-between text-xs font-semibold text-[var(--text-secondary)]">
                                     <span className="truncate max-w-[200px]" title={nameStr}>{codeStr}: {nameStr}</span>
-                                    <span className="font-bold text-slate-900">{valStr}</span>
+                                    <span className="font-bold text-[var(--text-primary)]">{valStr}</span>
                                   </div>
-                                  <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                  <div className="w-full bg-[var(--bg-hover)] rounded-full h-2 overflow-hidden">
                                     <div className={`h-full rounded-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
                                   </div>
                                 </div>
@@ -3330,17 +3399,17 @@ export default function AnalyticsOverview() {
                         const valStr = ind.value || ind.metricValue;
 
                         return (
-                          <div id={`ind-${codeStr}`} key={codeStr} className="p-4 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-white hover:border-blue-300 transition-all flex flex-col justify-between shadow-xs scroll-mt-24">
+                          <div id={`ind-${codeStr}`} key={codeStr} className="p-4 rounded-xl border border-[var(--border-color)] bg-slate-50/80 dark:bg-[var(--bg-card-secondary)] hover:bg-[var(--bg-card)] hover:border-blue-300 transition-all flex flex-col justify-between shadow-xs scroll-mt-24">
                             <div>
                               <div className="flex items-center justify-between gap-1 mb-2">
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{codeStr}</span>
+                                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">{codeStr}</span>
                                 <AdminBadge variant={statusVariant}>{ind.badge}</AdminBadge>
                               </div>
-                              <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight" title={nameStr}>{nameStr}</h4>
+                              <h4 className="text-xs font-bold text-[var(--text-primary)] line-clamp-2 leading-tight" title={nameStr}>{nameStr}</h4>
                             </div>
                             <div className="mt-3">
                               <div className={`text-xl font-extrabold ${valColor}`}>{valStr}</div>
-                              <p className="text-[11px] text-slate-500 mt-1 leading-snug">{ind.subtext}</p>
+                              <p className="text-[11px] text-[var(--text-muted)] mt-1 leading-snug">{ind.subtext}</p>
                             </div>
                           </div>
                         );
@@ -3354,11 +3423,11 @@ export default function AnalyticsOverview() {
           ) : (
             searchQuery.trim().length > 0 && (
               <div className="mt-10 p-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 text-center space-y-3 animate-in fade-in duration-200">
-                <div className="inline-flex p-3.5 rounded-full bg-slate-200/80 text-slate-500">
+                <div className="inline-flex p-3.5 rounded-full bg-slate-200/80 text-[var(--text-muted)]">
                   <Search className="h-6 w-6" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900">No Analytics Indicators Found for "{searchQuery}"</h3>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <h3 className="text-base font-bold text-[var(--text-primary)]">No Analytics Indicators Found for "{searchQuery}"</h3>
+                <p className="text-xs text-[var(--text-muted)] max-w-md mx-auto">
                   No institutional metric or out-of-the-box indicator matches your search query. Try clicking one of the popular search topics below:
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
@@ -3370,7 +3439,7 @@ export default function AnalyticsOverview() {
                         setSearchQuery(preset);
                         setShowSuggestions(true);
                       }}
-                      className="px-3 py-1.5 text-xs font-bold bg-white border border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700 hover:text-blue-800 rounded-xl shadow-2xs transition-all"
+                      className="px-3 py-1.5 text-xs font-bold bg-[var(--bg-card)] border border-[var(--border-color)] hover:border-blue-400 hover:bg-blue-50 text-[var(--text-secondary)] hover:text-blue-800 rounded-xl shadow-2xs transition-all"
                     >
                       {preset}
                     </button>
@@ -3406,8 +3475,8 @@ export default function AnalyticsOverview() {
                   6
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900">Geographic Mobility &amp; Placement Map</h2>
-                  <p className="text-xs text-slate-500">Interactive geographic placement map across Ethiopian industrial hubs and global diaspora destinations</p>
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)]">Geographic Mobility &amp; Placement Map</h2>
+                  <p className="text-xs text-[var(--text-muted)]">Interactive geographic placement map across Ethiopian industrial hubs and global diaspora destinations</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#003580] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -3418,17 +3487,17 @@ export default function AnalyticsOverview() {
 
         <SectionCard title="Geographic Distribution" subtitle="Where alumni are currently working.">
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-            <div className="rounded-[10px] border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)] p-4">
               <div className="mb-3 flex items-center justify-between gap-3 flex-wrap">
                 <div>
-                  <h4 className="text-sm font-semibold text-slate-900">Map / Location Distribution</h4>
-                  <p className="mt-1 text-xs text-slate-500">Geographic distribution of employed alumni by location.</p>
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">Map / Location Distribution</h4>
+                  <p className="mt-1 text-xs text-[var(--text-muted)]">Geographic distribution of employed alumni by location.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setGeoModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#003580] bg-white border border-[#003580]/30 hover:bg-[#003580]/10 px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#003580] bg-[var(--bg-card)] border border-[#003580]/30 hover:bg-[#003580]/10 px-3 py-1.5 rounded-lg transition-colors shadow-sm"
                   >
                     <Maximize2 className="h-3.5 w-3.5" />
                     View Detail
@@ -3436,27 +3505,27 @@ export default function AnalyticsOverview() {
                   <AdminBadge variant="success">Location Insights</AdminBadge>
                 </div>
               </div>
-              <div className="h-[310px] w-full overflow-hidden rounded-[10px] bg-white p-1">
+              <div className="h-[310px] w-full overflow-hidden rounded-[10px] bg-[var(--bg-card)] p-1">
                 <LocationMap locations={activeGeographicData} />
               </div>
             </div>
 
-            <div className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-              <h4 className="text-sm font-semibold text-slate-900">Top Locations</h4>
-              <p className="mt-1 text-xs text-slate-500">Top 5 cities / countries where alumni work.</p>
+            <div className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <h4 className="text-sm font-semibold text-[var(--text-primary)]">Top Locations</h4>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">Top 5 cities / countries where alumni work.</p>
               <div className="mt-3 space-y-2.5 max-h-[250px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-200">
                 {activeGeographicData.length > 0 ? activeGeographicData.map((item: any) => (
-                  <div key={item.name} className="rounded-[10px] border border-slate-200 p-3">
+                  <div key={item.name} className="rounded-[10px] border border-[var(--border-color)] p-3">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.fill }} />
-                        <span className="text-sm font-medium text-slate-700">{item.name}</span>
+                        <span className="text-sm font-medium text-[var(--text-secondary)]">{item.name}</span>
                       </div>
-                      <span className="text-sm font-semibold text-slate-900">{item.value}%</span>
+                      <span className="text-sm font-semibold text-[var(--text-primary)]">{item.value}%</span>
                     </div>
                   </div>
                 )) : (
-                  <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No geographic location records found in database.</div>
+                  <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No geographic location records found in database.</div>
                 )}
               </div>
             </div>
@@ -3465,14 +3534,14 @@ export default function AnalyticsOverview() {
 
 
           {/* Direct On-Page Detailed Location Breakdown Table */}
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-900">Location Distribution Breakdown</h4>
-                  <span className="text-xs text-slate-500">Sorted by highest alumni ratio</span>
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-sm">
+                <div className="border-b border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-3 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">Location Distribution Breakdown</h4>
+                  <span className="text-xs text-[var(--text-muted)]">Sorted by highest alumni ratio</span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
-                    <thead className="bg-slate-100 text-slate-600 font-medium">
+                  <table className="w-full text-left text-xs text-[var(--text-secondary)]">
+                    <thead className="bg-[var(--bg-hover)] text-[var(--text-secondary)] font-medium">
                       <tr>
                         <th className="px-4 py-3">Location / City</th>
                         <th className="px-4 py-3 text-right">Alumni Share (%)</th>
@@ -3482,15 +3551,15 @@ export default function AnalyticsOverview() {
                     </thead>
                     <tbody className="divide-y divide-slate-200">
                       {activeGeographicData.map((item: any) => (
-                        <tr key={item.name} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 font-semibold text-slate-900 flex items-center gap-2">
+                        <tr key={item.name} className="hover:bg-[var(--bg-page)] transition-colors">
+                          <td className="px-4 py-3 font-semibold text-[var(--text-primary)] flex items-center gap-2">
                             <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
                             {item.name}
                           </td>
                           <td className="px-4 py-3 text-right font-bold text-[#003580]">{item.value}%</td>
-                          <td className="px-4 py-3 text-right font-medium text-slate-600">{item.count || 1} alumni</td>
+                          <td className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">{item.count || 1} alumni</td>
                           <td className="px-4 py-3 w-1/3">
-                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div className="w-full bg-[var(--bg-hover)] rounded-full h-2 overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all duration-300"
                                 style={{ width: `${Math.min(100, item.value)}%`, backgroundColor: item.fill }}
@@ -3510,8 +3579,8 @@ export default function AnalyticsOverview() {
             subtitle="Geographic employment hubs, brain drain metrics, gender parity, and survey participation velocity."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Regional Placement Share (%)</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Regional Placement Share (%)</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={activeGeographicData}>
@@ -3527,29 +3596,29 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#31 Primary Hub</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#31 Primary Hub</span>
                   <AdminBadge variant="success">Capital Hub</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#003580]">{activeGeographicData[0]?.name || 'N/A'}</div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeGeographicData[0]?.value || 0}% of placed alumni</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeGeographicData[0]?.value || 0}% of placed alumni</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#32 Domestic Retention</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#32 Domestic Retention</span>
                   <AdminBadge variant="neutral">{(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? 'Retained' : 'No Data'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '100.0%' : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni working domestically</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni working domestically</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#33 Gender Parity</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#33 Gender Parity</span>
                   <AdminBadge variant="success">
                     Index {reportData?.overallEmployment?.genderParity?.female?.rate && reportData?.overallEmployment?.genderParity?.male?.rate
                       ? (reportData.overallEmployment.genderParity.female.rate / Math.max(1, reportData.overallEmployment.genderParity.male.rate)).toFixed(2)
@@ -3561,23 +3630,23 @@ export default function AnalyticsOverview() {
                     ? `${(reportData.overallEmployment.genderParity.female.rate / Math.max(1, reportData.overallEmployment.genderParity.male.rate)).toFixed(2)} Parity`
                     : '0.00 Parity'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Employment rate female-to-male parity</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Employment rate female-to-male parity</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#34 Response Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#34 Response Rate</span>
                   <AdminBadge variant="neutral">Participation</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">
                   {Number(reportData?.tracer?.surveyCompletionRate || 0).toFixed(1)}%
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Institutional survey completion rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Institutional survey completion rate</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#35 Career Satisfaction</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#35 Career Satisfaction</span>
                   <AdminBadge variant="success">
                     {activeCurriculumRelevanceRating.length > 0
                       ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
@@ -3589,12 +3658,12 @@ export default function AnalyticsOverview() {
                     ? `${(Math.round((activeCurriculumRelevanceRating[0]?.count || 1) / Math.max(1, activeCurriculumRelevanceRating.reduce((a: number, b: any) => a + (b.count || 0), 0)) * 50) / 10).toFixed(1)} / 5.0`
                     : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni career path fulfillment index</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni career path fulfillment index</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#36 Industrial Zones</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#36 Industrial Zones</span>
                   <AdminBadge variant="neutral">
                     {activeGeographicData[0]?.value ? `${activeGeographicData[0].value}% Placed` : '0% Placed'}
                   </AdminBadge>
@@ -3602,12 +3671,12 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeGeographicData[0]?.value ? `${activeGeographicData[0].value}%` : '0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Industrial park deployment concentration</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Industrial park deployment concentration</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#37 Survey Speed</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#37 Survey Speed</span>
                   <AdminBadge variant="success">
                     {Number(reportData?.tracer?.surveyCompletionRate || 0) > 0 ? '1.8 Days Avg' : '0.0 Days'}
                   </AdminBadge>
@@ -3615,12 +3684,12 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-blue-800">
                   {Number(reportData?.tracer?.surveyCompletionRate || 0) > 0 ? '1.8 Days' : '0.0 Days'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average time to complete survey</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average time to complete survey</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#38 Remote Earning</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#38 Remote Earning</span>
                   <AdminBadge variant="neutral">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '10.0% Remote' : '0.0% Remote'}
                   </AdminBadge>
@@ -3628,7 +3697,7 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? '10.0%' : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni earning foreign currency remotely</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni earning foreign currency remotely</span>
               </div>
             </div>
           </SectionCard>
@@ -3648,8 +3717,8 @@ export default function AnalyticsOverview() {
                   7
                 </div>
                 <div>
-                  <h2 className="text-base font-extrabold text-slate-900">Engagement, Mentorship &amp; Giving</h2>
-                  <p className="text-xs text-slate-500">Alumni community financial giving campaigns, mentorship velocity, forum sentiment &amp; profile completeness</p>
+                  <h2 className="text-base font-extrabold text-[var(--text-primary)]">Engagement, Mentorship &amp; Giving</h2>
+                  <p className="text-xs text-[var(--text-muted)]">Alumni community financial giving campaigns, mentorship velocity, forum sentiment &amp; profile completeness</p>
                 </div>
               </div>
               <span className="text-xs font-bold text-[#003580] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
@@ -3661,26 +3730,26 @@ export default function AnalyticsOverview() {
           <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Mentorship & Career Engagement" subtitle="Active mentors, mentees, and completed career guidance sessions.">
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <UserCheck className="h-4 w-4 text-[#003580]" /> Verified Mentors
               </div>
               <div className="mt-3 text-3xl font-bold text-[#003580]">{activeMentorshipMetrics.totalMentors || 0}</div>
             </div>
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <Users className="h-4 w-4 text-[#1D9E75]" /> Active Mentees
               </div>
               <div className="mt-3 text-3xl font-bold text-[#1D9E75]">{activeMentorshipMetrics.totalMentees || 0}</div>
             </div>
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <TimerReset className="h-4 w-4 text-[#E8A020]" /> Scheduled Sessions
               </div>
               <div className="mt-3 text-3xl font-bold text-[#B87900]">{activeMentorshipMetrics.activeSessions || 0}</div>
             </div>
-            <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
                 <Award className="h-4 w-4 text-[#8B5CF6]" /> Completed Sessions
               </div>
               <div className="mt-3 text-3xl font-bold text-[#8B5CF6]">{activeMentorshipMetrics.completedSessions || 0}</div>
@@ -3692,19 +3761,19 @@ export default function AnalyticsOverview() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 rounded-xl bg-[#003580]/5 border border-[#003580]/15">
               <div>
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Donated Support</span>
+                <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Donated Support</span>
                 <div className="text-2xl font-bold text-[#003580]">ETB {Number(activeCommunityGiving.totalDonated || 0).toLocaleString()}</div>
               </div>
               <AdminBadge variant="success">{activeCommunityGiving.totalDonors || 0} Donors</AdminBadge>
             </div>
             <div className="space-y-2 max-h-[160px] overflow-y-auto">
               {activeCommunityGiving.categories?.length > 0 ? activeCommunityGiving.categories.map((cat: any) => (
-                <div key={cat.category} className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-white">
-                  <span className="text-xs font-semibold text-slate-700">{cat.category}</span>
+                <div key={cat.category} className="flex items-center justify-between p-2.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)]">
+                  <span className="text-xs font-semibold text-[var(--text-secondary)]">{cat.category}</span>
                   <span className="text-xs font-bold text-[#003580]">ETB {Number(cat.amount).toLocaleString()}</span>
                 </div>
               )) : (
-                <div className="text-xs text-slate-500 p-3 text-center border border-dashed rounded-md">No donation campaign contributions recorded yet.</div>
+                <div className="text-xs text-[var(--text-muted)] p-3 text-center border border-dashed rounded-md">No donation campaign contributions recorded yet.</div>
               )}
             </div>
           </div>
@@ -3715,20 +3784,20 @@ export default function AnalyticsOverview() {
           <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Mentorship Program Pipeline Velocity" subtitle="Breakdown of mentorship requests across pipeline stages.">
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Pending Requests</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Pending Requests</span>
               <span className="text-sm font-bold text-amber-700">{activeMentorshipPipeline.pending}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Approved Matches</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Approved Matches</span>
               <span className="text-sm font-bold text-blue-700">{activeMentorshipPipeline.approved}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Scheduled Sessions</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Scheduled Sessions</span>
               <span className="text-sm font-bold text-[#003580]">{activeMentorshipPipeline.scheduled}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Completed Guidance</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Completed Guidance</span>
               <span className="text-sm font-bold text-emerald-700">{activeMentorshipPipeline.completed}</span>
             </div>
           </div>
@@ -3743,8 +3812,8 @@ export default function AnalyticsOverview() {
               </div>
               <AdminBadge variant="neutral">{activeEventRSVPConversion.confirmedRsvps} Confirmed RSVPs</AdminBadge>
             </div>
-            <div className="p-3 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-700">RSVP Attendance Rate</span>
+            <div className="p-3 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] flex items-center justify-between">
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">RSVP Attendance Rate</span>
               <span className="text-sm font-bold text-[#003580]">{activeEventRSVPConversion.conversionRate}%</span>
             </div>
           </div>
@@ -3774,20 +3843,20 @@ export default function AnalyticsOverview() {
 
         <SectionCard title="Alumni Profile Completeness Index" subtitle="Distribution of alumni profile detail completeness.">
           <div className="grid grid-cols-3 gap-4 pt-4">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
-              <span className="text-xs font-semibold text-slate-500 uppercase">Fully Complete</span>
+            <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">Fully Complete</span>
               <div className="mt-2 text-3xl font-bold text-[#003580]">{activeProfileCompleteness.complete}</div>
-              <span className="text-[11px] text-slate-500 mt-1 block">Skills, Work & Resume</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Skills, Work & Resume</span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
-              <span className="text-xs font-semibold text-slate-500 uppercase">Partially Complete</span>
+            <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">Partially Complete</span>
               <div className="mt-2 text-3xl font-bold text-[#E8A020]">{activeProfileCompleteness.partial}</div>
-              <span className="text-[11px] text-slate-500 mt-1 block">1-2 Sections Added</span>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">1-2 Sections Added</span>
             </div>
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-center">
-              <span className="text-xs font-semibold text-slate-500 uppercase">Basic Profile</span>
-              <div className="mt-2 text-3xl font-bold text-slate-700">{activeProfileCompleteness.basic}</div>
-              <span className="text-[11px] text-slate-500 mt-1 block">Account Only</span>
+            <div className="p-4 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+              <span className="text-xs font-semibold text-[var(--text-muted)] uppercase">Basic Profile</span>
+              <div className="mt-2 text-3xl font-bold text-[var(--text-secondary)]">{activeProfileCompleteness.basic}</div>
+              <span className="text-[11px] text-[var(--text-muted)] mt-1 block">Account Only</span>
             </div>
           </div>
         </SectionCard>
@@ -3797,20 +3866,20 @@ export default function AnalyticsOverview() {
           <section className="grid gap-4 xl:grid-cols-2">
         <SectionCard title="Professional Network & Resume Link Ratios" subtitle="Alumni with verified LinkedIn, GitHub, Portfolio, and Resumes in database.">
           <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">LinkedIn Profiles</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">LinkedIn Profiles</span>
               <span className="text-sm font-bold text-blue-700">{activeProfessionalLinksRatio.linkedin}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">GitHub Profiles</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">GitHub Profiles</span>
               <span className="text-sm font-bold text-slate-800">{activeProfessionalLinksRatio.github}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Portfolio Websites</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Portfolio Websites</span>
               <span className="text-sm font-bold text-purple-700">{activeProfessionalLinksRatio.portfolio}</span>
             </div>
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-medium text-slate-600">Uploaded Resumes</span>
+            <div className="p-3.5 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] flex justify-between items-center">
+              <span className="text-xs font-medium text-[var(--text-secondary)]">Uploaded Resumes</span>
               <span className="text-sm font-bold text-emerald-700">{activeProfessionalLinksRatio.resume}</span>
             </div>
           </div>
@@ -3831,7 +3900,7 @@ export default function AnalyticsOverview() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+              <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                 No language skills populated in database alumni profiles yet.
               </div>
             )}
@@ -3845,20 +3914,20 @@ export default function AnalyticsOverview() {
             subtitle="Daily active logins, monthly active users, total account distribution, and verification status."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Total User Accounts</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total User Accounts</span>
                 <div className="mt-1 text-xl font-bold text-[#003580]">{activePlatformUserEngagement.totalPlatformAccounts}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Daily Active Logins</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Daily Active Logins</span>
                 <div className="mt-1 text-xl font-bold text-emerald-700">{activePlatformUserEngagement.dailyActiveLogins} logins</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Monthly Active Users</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Monthly Active Users</span>
                 <div className="mt-1 text-xl font-bold text-purple-700">{activePlatformUserEngagement.monthlyActiveUsers} MAU</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Active Accounts</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Active Accounts</span>
                 <div className="mt-1 text-xl font-bold text-blue-700">{activePlatformUserEngagement.activeAccounts} Active</div>
               </div>
             </div>
@@ -3887,7 +3956,7 @@ export default function AnalyticsOverview() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center border border-dashed rounded-lg text-xs text-[var(--text-muted)]">
                   No account status records available.
                 </div>
               )}
@@ -3900,20 +3969,20 @@ export default function AnalyticsOverview() {
             subtitle="Alumni digital portfolio readiness: LinkedIn, GitHub, portfolio websites, and resume attachments."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Readiness Index</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Readiness Index</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeDigitalFootprintIndex.readinessScore}%</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">LinkedIn Networks</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">LinkedIn Networks</span>
                 <div className="mt-1 text-2xl font-bold text-blue-700">{activeDigitalFootprintIndex.linkedinCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">GitHub Code Repos</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">GitHub Code Repos</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeDigitalFootprintIndex.githubCount}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Resumes Uploaded</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Resumes Uploaded</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeDigitalFootprintIndex.resumeCount}</div>
               </div>
             </div>
@@ -3926,12 +3995,12 @@ export default function AnalyticsOverview() {
             subtitle="Senior alumni mentorship sessions completed and primary guidance topics."
           >
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Completed Sessions</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Completed Sessions</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeMentorshipVelocity.totalSessionsCompleted} Sessions</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Mentorship Rating</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Mentorship Rating</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeMentorshipVelocity.avgRating} / 5.0</div>
               </div>
             </div>
@@ -3942,16 +4011,16 @@ export default function AnalyticsOverview() {
             subtitle="Community discussion velocity, peer comments, and post sentiment ratings."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Community Posts</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Community Posts</span>
                 <div className="mt-1 text-2xl font-bold text-[#003580]">{activeForumCommunitySentiment.totalPosts}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Peer Comments</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Peer Comments</span>
                 <div className="mt-1 text-2xl font-bold text-blue-700">{activeForumCommunitySentiment.totalComments}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Positive Sentiment</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Positive Sentiment</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeForumCommunitySentiment.positiveSentimentRate}%</div>
               </div>
             </div>
@@ -3964,16 +4033,16 @@ export default function AnalyticsOverview() {
             subtitle="Financial donations raised versus student scholarships funded and career outcomes."
           >
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Total Donated ETB</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Total Donated ETB</span>
                 <div className="mt-1 text-lg font-bold text-[#003580]">ETB {Number(activeGivingROIMultiplier.totalDonatedETB).toLocaleString()}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Scholarships Funded</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Scholarships Funded</span>
                 <div className="mt-1 text-2xl font-bold text-emerald-700">{activeGivingROIMultiplier.scholarshipsFunded}</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-center">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Students Impacted</span>
+              <div className="p-3 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)] text-center">
+                <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">Students Impacted</span>
                 <div className="mt-1 text-2xl font-bold text-purple-700">{activeGivingROIMultiplier.studentImpactCount}</div>
               </div>
             </div>
@@ -3985,23 +4054,23 @@ export default function AnalyticsOverview() {
             subtitle="Alumni network engagement, mentorship program pipeline, donor contributions, and student aid impact."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-3 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mentorship Program Pipeline Progress</div>
+              <div className="lg:col-span-3 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Mentorship Program Pipeline Progress</div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Active Mentors</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Active Mentors</div>
                     <div className="text-xl font-bold text-[#003580]">{activeMentorshipPipeline.accepted}</div>
                   </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Pending Requests</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Pending Requests</div>
                     <div className="text-xl font-bold text-amber-600">{activeMentorshipPipeline.pending}</div>
                   </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Completed Sessions</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Completed Sessions</div>
                     <div className="text-xl font-bold text-emerald-600">{activeMentorshipPipeline.completed}</div>
                   </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-[10px] uppercase text-slate-500 font-semibold">Mentor-Mentee Ratio</div>
+                  <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)]">
+                    <div className="text-[10px] uppercase text-[var(--text-muted)] font-semibold">Mentor-Mentee Ratio</div>
                     <div className="text-xl font-bold text-purple-700">
                       1 : {activeMentorshipPipeline.accepted > 0 ? Math.max(1, Math.round(activeMentorshipPipeline.completed / activeMentorshipPipeline.accepted)) : 0}
                     </div>
@@ -4011,9 +4080,9 @@ export default function AnalyticsOverview() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#41 Network Score</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#41 Network Score</span>
                   <AdminBadge variant="success">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${Math.min(100, Math.round((activeMentorshipPipeline.accepted * 10) + (reportData?.overallEmployment?.employmentRate || 0)))} / 100` : '0.0 / 100'}
                   </AdminBadge>
@@ -4021,50 +4090,50 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-[#003580]">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${Math.min(100, Math.round((activeMentorshipPipeline.accepted * 10) + (reportData?.overallEmployment?.employmentRate || 0)))} / 100` : '0.0 / 100'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni network engagement score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni network engagement score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#42 Active Mentors</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#42 Active Mentors</span>
                   <AdminBadge variant="neutral">Verified</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{activeMentorshipPipeline.accepted} Mentors</div>
-                <span className="text-[11px] text-slate-500 mt-1">Active verified alumni mentors</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Active verified alumni mentors</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#43 Donated Support</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#43 Donated Support</span>
                   <AdminBadge variant="success">ETB Total</AdminBadge>
                 </div>
                 <div className="mt-3 text-xl font-bold text-purple-700">
                   ETB {Number(activeCommunityGiving.totalDonated || 0).toLocaleString()}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">{activeCommunityGiving.totalDonors || 0} active alumni donors</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeCommunityGiving.totalDonors || 0} active alumni donors</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#44 Speaker Network</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#44 Speaker Network</span>
                   <AdminBadge variant="neutral">Volunteers</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-[#B87900]">{activeMentorshipPipeline.accepted || 0} Speakers</div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni guest speakers & lecturers</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni guest speakers & lecturers</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#45 Financial Aid</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#45 Financial Aid</span>
                   <AdminBadge variant="success">{activeCommunityGiving.totalDonors || 0} Aided</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">{activeCommunityGiving.totalDonors || 0} Aid Grants</div>
-                <span className="text-[11px] text-slate-500 mt-1">Students supported by alumni giving</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Students supported by alumni giving</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#46 Mentorship Rating</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#46 Mentorship Rating</span>
                   <AdminBadge variant="success">
                     {activeMentorshipPipeline.completed > 0 ? '5.0 / 5.0' : '0.0 / 5.0'}
                   </AdminBadge>
@@ -4072,23 +4141,23 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeMentorshipPipeline.completed > 0 ? '5.0 / 5.0' : '0.0 / 5.0'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Mentorship session satisfaction score</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Mentorship session satisfaction score</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#47 Guidance Topic</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#47 Guidance Topic</span>
                   <AdminBadge variant="neutral">Top Department</AdminBadge>
                 </div>
                 <div className="mt-3 text-base font-bold text-blue-800 truncate">
                   {reportData?.departmentAnalytics?.departmentMetrics[0]?.departmentName || 'N/A'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Top requested career topic</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Top requested career topic</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#48 Giving Engagement</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#48 Giving Engagement</span>
                   <AdminBadge variant="neutral">
                     {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${((activeCommunityGiving.totalDonors / Math.max(1, reportData.overallEmployment.totalAlumni)) * 100).toFixed(1)}% Rate` : '0.0% Rate'}
                   </AdminBadge>
@@ -4096,7 +4165,7 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {(reportData?.overallEmployment?.totalAlumni || 0) > 0 ? `${((activeCommunityGiving.totalDonors / Math.max(1, reportData.overallEmployment.totalAlumni)) * 100).toFixed(1)}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Alumni campaign participation rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni campaign participation rate</span>
               </div>
             </div>
           </SectionCard>
@@ -4107,8 +4176,8 @@ export default function AnalyticsOverview() {
             subtitle="Account verification status, profile completeness index, professional network links, and resume uploads."
           >
             <div className="grid gap-6 mb-6 lg:grid-cols-3">
-              <div className="lg:col-span-1 p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
-                <div className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Professional Linkage Share</div>
+              <div className="lg:col-span-1 p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
+                <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Professional Linkage Share</div>
                 <div className="h-44 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -4140,81 +4209,81 @@ export default function AnalyticsOverview() {
               </div>
 
               <div className="lg:col-span-2 grid gap-4 sm:grid-cols-2">
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#51 Verification Rate</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#51 Verification Rate</span>
                     <AdminBadge variant="success">Verified</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#003580]">{activeVerificationRatio.verificationRate}%</div>
-                  <span className="text-[11px] text-slate-500 mt-1">{activeVerificationRatio.verified} verified alumni accounts</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeVerificationRatio.verified} verified alumni accounts</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#52 Completeness Index</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#52 Completeness Index</span>
                     <AdminBadge variant="neutral">Profiles</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#1D9E75]">{activeProfileCompleteness.complete} Full</div>
-                  <span className="text-[11px] text-slate-500 mt-1">{activeProfileCompleteness.partial} partial profiles</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">{activeProfileCompleteness.partial} partial profiles</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#53 LinkedIn Ratio</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#53 LinkedIn Ratio</span>
                     <AdminBadge variant="success">Connected</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-purple-700">{activeProfessionalLinksRatio.linkedin || 0} Accounts</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Alumni with verified LinkedIn links</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni with verified LinkedIn links</span>
                 </div>
 
-                <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col justify-between shadow-xs">
+                <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] flex flex-col justify-between shadow-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">#54 Resume Uploads</span>
+                    <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#54 Resume Uploads</span>
                     <AdminBadge variant="neutral">CV On File</AdminBadge>
                   </div>
                   <div className="mt-3 text-2xl font-bold text-[#B87900]">{activeProfessionalLinksRatio.resume || 0} Resumes</div>
-                  <span className="text-[11px] text-slate-500 mt-1">Alumni with active CV uploaded</span>
+                  <span className="text-[11px] text-[var(--text-muted)] mt-1">Alumni with active CV uploaded</span>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#55 Language Index</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#55 Language Index</span>
                   <AdminBadge variant="neutral">Multilingual</AdminBadge>
                 </div>
                 <div className="mt-3 text-lg font-bold text-slate-800">
                   {activeLanguageProficiency[0]?.language || 'N/A'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Primary spoken language distribution</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Primary spoken language distribution</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#56 Certification Badges</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#56 Certification Badges</span>
                   <AdminBadge variant="success">Verified</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-emerald-700">
                   {activeProfessionalLinksRatio.resume ? activeProfessionalLinksRatio.resume * 10 : 0} Badges
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Earned professional skill badges</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Earned professional skill badges</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#57 Audit Velocity</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#57 Audit Velocity</span>
                   <AdminBadge variant="success">{activeVerificationRatio.verified > 0 ? '<24 Hours' : '0 Hours'}</AdminBadge>
                 </div>
                 <div className="mt-3 text-2xl font-bold text-blue-800">
                   {activeVerificationRatio.verified > 0 ? '<24 Hours' : '0 Hours'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Average alumni verification speed</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Average alumni verification speed</span>
               </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col justify-between">
+              <div className="p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase">#58 Profile Refresh Rate</span>
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase">#58 Profile Refresh Rate</span>
                   <AdminBadge variant="neutral">
                     {activeProfileCompleteness.complete > 0 ? `${activeVerificationRatio.verificationRate}% Active` : '0.0% Active'}
                   </AdminBadge>
@@ -4222,7 +4291,7 @@ export default function AnalyticsOverview() {
                 <div className="mt-3 text-2xl font-bold text-slate-800">
                   {activeProfileCompleteness.complete > 0 ? `${activeVerificationRatio.verificationRate}%` : '0.0%'}
                 </div>
-                <span className="text-[11px] text-slate-500 mt-1">Annual profile refresh rate</span>
+                <span className="text-[11px] text-[var(--text-muted)] mt-1">Annual profile refresh rate</span>
               </div>
             </div>
           </SectionCard>
@@ -4232,25 +4301,25 @@ export default function AnalyticsOverview() {
 
       {/* Bottom Page Navigation Traversal Footer */}
       {activePageTab !== 'all' && (
-        <div className="mt-8 pt-6 border-t border-slate-200/90 no-print flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-8 pt-6 border-t border-[var(--border-color)] no-print flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             {prevTab && (
               <button
                 type="button"
                 onClick={() => handleTabChange(prevTab.id)}
-                className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300 text-xs font-bold shadow-xs transition-all cursor-pointer group"
+                className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)] text-[var(--text-secondary)] hover:border-slate-300 text-xs font-bold shadow-xs transition-all cursor-pointer group"
               >
                 <ChevronLeft className="h-4 w-4 text-slate-400 group-hover:text-blue-700 transition-colors" />
                 <div className="text-left">
                   <div className="text-[10px] uppercase font-bold text-slate-400">Previous Page</div>
-                  <div className="text-slate-900 group-hover:text-blue-700 font-bold">{prevTab.label}</div>
+                  <div className="text-[var(--text-primary)] group-hover:text-blue-700 font-bold">{prevTab.label}</div>
                 </div>
               </button>
             )}
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-xs text-[var(--text-muted)] font-medium">
               Page <strong className="text-slate-800">{currentRegularIndex + 1}</strong> of <strong className="text-slate-800">{regularTabs.length}</strong>
             </span>
             <span className="text-slate-300">•</span>
@@ -4283,16 +4352,16 @@ export default function AnalyticsOverview() {
       {/* Top Hiring Companies Modal */}
       {topCompaniesModalOpen && createPortal(
         <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="relative w-full max-w-4xl rounded-xl bg-white shadow-2xl border border-slate-200 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-4xl rounded-xl bg-[var(--bg-card)] shadow-2xl border border-[var(--border-color)] flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/90 shrink-0">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4 bg-slate-50/90 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
                   <Building2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">All Top Hiring Companies</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">All Top Hiring Companies</h3>
+                  <p className="text-xs text-[var(--text-muted)]">
                     Comprehensive list of partner organizations employing ASTU graduates
                   </p>
                 </div>
@@ -4300,7 +4369,7 @@ export default function AnalyticsOverview() {
               <button
                 type="button"
                 onClick={() => setTopCompaniesModalOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-[var(--text-secondary)] transition-colors"
                 title="Close"
               >
                 <X className="h-5 w-5" />
@@ -4309,9 +4378,9 @@ export default function AnalyticsOverview() {
 
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto space-y-4">
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <table className="w-full text-left text-xs text-slate-700">
-                  <thead className="bg-slate-100 text-slate-600 font-medium">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-sm">
+                <table className="w-full text-left text-xs text-[var(--text-secondary)]">
+                  <thead className="bg-[var(--bg-hover)] text-[var(--text-secondary)] font-medium">
                     <tr>
                       <th className="px-4 py-3">Company / Organization</th>
                       <th className="px-4 py-3 text-right">Graduate Hires</th>
@@ -4320,8 +4389,8 @@ export default function AnalyticsOverview() {
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {activeTopHiringCompanies.map((c: any) => (
-                      <tr key={c.companyName} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-semibold text-slate-900 flex items-center gap-2">
+                      <tr key={c.companyName} className="hover:bg-[var(--bg-page)] transition-colors">
+                        <td className="px-4 py-3 font-semibold text-[var(--text-primary)] flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-[#003580]" />
                           {c.companyName}
                         </td>
@@ -4339,11 +4408,11 @@ export default function AnalyticsOverview() {
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-slate-200 px-6 py-3 bg-slate-50/90 flex justify-end shrink-0">
+            <div className="border-t border-[var(--border-color)] px-6 py-3 bg-slate-50/90 flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setTopCompaniesModalOpen(false)}
-                className="px-5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
+                className="px-5 py-2 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-slate-300 rounded-lg hover:bg-[var(--bg-hover)] transition-colors shadow-sm"
               >
                 Close View
               </button>
@@ -4356,16 +4425,16 @@ export default function AnalyticsOverview() {
       {/* Geographic Distribution Large Detail Modal */}
       {geoModalOpen && createPortal(
         <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
-          <div className="relative w-full max-w-6xl rounded-xl bg-white shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-6xl rounded-xl bg-[var(--bg-card)] shadow-2xl border border-[var(--border-color)] flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50/90 shrink-0">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4 bg-slate-50/90 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#003580]/10 text-[#003580]">
                   <Globe2 className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Detailed Geographic Distribution</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">Detailed Geographic Distribution</h3>
+                  <p className="text-xs text-[var(--text-muted)]">
                     Interactive OpenStreetMap & Satellite Location Breakdown of Employed Alumni
                   </p>
                 </div>
@@ -4373,7 +4442,7 @@ export default function AnalyticsOverview() {
               <button
                 type="button"
                 onClick={() => setGeoModalOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-200 hover:text-[var(--text-secondary)] transition-colors"
                 title="Close detail view"
               >
                 <X className="h-5 w-5" />
@@ -4384,40 +4453,40 @@ export default function AnalyticsOverview() {
             <div className="p-6 overflow-y-auto space-y-6">
               {/* Stat Summary Row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Tracked Cities</div>
-                  <div className="mt-1 text-2xl font-bold text-slate-900">{activeGeographicData.length}</div>
+                <div className="p-4 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Total Tracked Cities</div>
+                  <div className="mt-1 text-2xl font-bold text-[var(--text-primary)]">{activeGeographicData.length}</div>
                 </div>
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Primary Alumni Hub</div>
+                <div className="p-4 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Primary Alumni Hub</div>
                   <div className="mt-1 text-2xl font-bold text-[#003580]">
                     {activeGeographicData[0]?.name || 'N/A'} ({activeGeographicData[0]?.value || 0}%)
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Geographic Scope</div>
+                <div className="p-4 rounded-lg bg-[var(--bg-page)] border border-[var(--border-color)]">
+                  <div className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Geographic Scope</div>
                   <div className="mt-1 text-2xl font-bold text-emerald-700">National & Regional</div>
                 </div>
               </div>
 
               {/* Large Map Container */}
-              <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-sm">
                 <div className="mb-2 flex items-center justify-between px-1">
-                  <span className="text-xs font-semibold text-slate-700">Interactive Map View (Street & Satellite)</span>
-                  <span className="text-[11px] text-slate-500">Hover top-right map layer icon to switch to Satellite View</span>
+                  <span className="text-xs font-semibold text-[var(--text-secondary)]">Interactive Map View (Street & Satellite)</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">Hover top-right map layer icon to switch to Satellite View</span>
                 </div>
                 <LocationMap locations={activeGeographicData} className="h-[460px] w-full min-h-[400px]" />
               </div>
 
               {/* Location Breakdown Table */}
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-900">Location Distribution Breakdown</h4>
-                  <span className="text-xs text-slate-500">Sorted by highest alumni ratio</span>
+              <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-sm">
+                <div className="border-b border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-3 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-[var(--text-primary)]">Location Distribution Breakdown</h4>
+                  <span className="text-xs text-[var(--text-muted)]">Sorted by highest alumni ratio</span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs text-slate-700">
-                    <thead className="bg-slate-100 text-slate-600 font-medium">
+                  <table className="w-full text-left text-xs text-[var(--text-secondary)]">
+                    <thead className="bg-[var(--bg-hover)] text-[var(--text-secondary)] font-medium">
                       <tr>
                         <th className="px-4 py-3">Location / City</th>
                         <th className="px-4 py-3 text-right">Alumni Share (%)</th>
@@ -4427,15 +4496,15 @@ export default function AnalyticsOverview() {
                     </thead>
                     <tbody className="divide-y divide-slate-200">
                       {activeGeographicData.map((item: any) => (
-                        <tr key={item.name} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-4 py-3 font-semibold text-slate-900 flex items-center gap-2">
+                        <tr key={item.name} className="hover:bg-[var(--bg-page)] transition-colors">
+                          <td className="px-4 py-3 font-semibold text-[var(--text-primary)] flex items-center gap-2">
                             <span className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
                             {item.name}
                           </td>
                           <td className="px-4 py-3 text-right font-bold text-[#003580]">{item.value}%</td>
-                          <td className="px-4 py-3 text-right font-medium text-slate-600">{item.count || 1} alumni</td>
+                          <td className="px-4 py-3 text-right font-medium text-[var(--text-secondary)]">{item.count || 1} alumni</td>
                           <td className="px-4 py-3 w-1/3">
-                            <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div className="w-full bg-[var(--bg-hover)] rounded-full h-2 overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all duration-300"
                                 style={{ width: `${Math.min(100, item.value)}%`, backgroundColor: item.fill }}
@@ -4451,11 +4520,11 @@ export default function AnalyticsOverview() {
             </div>
 
             {/* Modal Footer */}
-            <div className="border-t border-slate-200 px-6 py-3 bg-slate-50/90 flex justify-end shrink-0">
+            <div className="border-t border-[var(--border-color)] px-6 py-3 bg-slate-50/90 flex justify-end shrink-0">
               <button
                 type="button"
                 onClick={() => setGeoModalOpen(false)}
-                className="px-5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors shadow-sm"
+                className="px-5 py-2 text-xs font-semibold text-[var(--text-secondary)] bg-[var(--bg-card)] border border-slate-300 rounded-lg hover:bg-[var(--bg-hover)] transition-colors shadow-sm"
               >
                 Close View
               </button>
@@ -4494,6 +4563,19 @@ export default function AnalyticsOverview() {
         department={department}
         selectedSuites={selectedSuites}
         setSelectedSuites={setSelectedSuites}
+      />
+
+      <ShareModal
+        isOpen={shareDashboardOpen}
+        onClose={() => setShareDashboardOpen(false)}
+        item={{
+          title: 'ASTU Institutional Analytics Dashboard',
+          subtitle: `${academicYear} · ${department === 'All' ? 'All Departments' : department}`,
+          text: 'Verified ASTU alumni outcomes, employment, and institutional analytics dashboard.',
+          url: typeof window !== 'undefined' ? window.location.href : '/admin/analytics',
+          badge: 'Analytics',
+          type: 'page',
+        }}
       />
     </div>
   );

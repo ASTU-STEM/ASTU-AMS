@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone, ForumPost, DonationCampaign } from '../types/alumni.types';
-import toast from 'react-hot-toast';
-import { AnalyticsChart } from '../../../components/AnalyticsChart';
+import { JobMatch, AlumniProfile, TracerSurvey, CareerMilestone, ForumPost, DonationCampaign, DocumentRequest } from '../types/alumni.types';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
 import { alumniService } from '../services/alumni.service';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
+import { DashboardWelcomeBanner, DashboardStatGrid, DashboardQuickNav } from '../../../components/dashboard';
 
 interface DashboardOverviewProps {
   profile: AlumniProfile;
@@ -21,11 +21,21 @@ interface DashboardOverviewProps {
   }>;
   recentJobs: JobMatch[];
   surveys: TracerSurvey[];
+  documents?: DocumentRequest[];
+  statsData?: {
+    appliedJobs?: number;
+    savedJobs?: number;
+    openJobMatches?: number;
+    upcomingEvents?: number;
+    networkConnections?: number;
+    documentRequests?: number;
+  } | null;
   onTabChange: (tab: string) => void;
   onViewJob: (job: JobMatch) => void;
   setHoveredCard: (id: number | null) => void;
   hoveredCard: number | null;
   onUpdateEmploymentStatus: (role: string, company: string, salary: string) => void;
+  onDonate?: (campaignId: string, campaign?: DonationCampaign) => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
@@ -34,16 +44,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   stats,
   recentJobs,
   surveys,
+  documents = [],
+  statsData,
   onTabChange,
   onViewJob,
-  setHoveredCard,
-  hoveredCard,
+  setHoveredCard: _setHoveredCard,
+  hoveredCard: _hoveredCard,
   onUpdateEmploymentStatus,
+  onDonate,
 }) => {
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [tempRole, setTempRole] = useState(profile.currentRole);
   const [tempCompany, setTempCompany] = useState(profile.company);
-  const [tempSalary, setTempSalary] = useState(profile.salaryRange || '30,001 - 60,000 ETB');
+  const [tempSalary, setTempSalary] = useState(profile.salaryRange || '—');
   const [timelineFilter, setTimelineFilter] = useState<'ALL' | 'PENDING' | 'COMPLETED'>('ALL');
 
   const [forumPosts, setForumPosts] = useState<ForumPost[]>([]);
@@ -63,73 +76,34 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     }).catch(console.error);
   }, []);
 
-  // Dynamic career milestones from genuine user profile
-  const milestones: CareerMilestone[] = React.useMemo(() => {
-    const list: CareerMilestone[] = [];
-    if (profile.currentRole || profile.company) {
-      list.push({
-        id: 1,
-        year: 'Current',
-        title: profile.currentRole || 'Employed',
-        company: profile.company || 'Organization',
-        description: profile.salaryRange ? `Salary bracket: ${profile.salaryRange}` : 'Employment record verified on ASTU Alumni portal.',
-        type: 'professional',
-      });
-    }
-    if (profile.department || profile.graduationYear) {
-      list.push({
-        id: 2,
-        year: profile.graduationYear ? String(profile.graduationYear) : 'Graduation',
-        title: profile.department ? `BSc in ${profile.department}` : 'ASTU Degree Graduate',
-        company: 'Adama Science and Technology University',
-        description: profile.cgpa ? `Graduated with Cumulative GPA: ${profile.cgpa}` : 'Adama Science and Technology University degree completion record.',
-        type: 'academic',
-      });
-    }
-    return list;
-  }, [profile]);
-
-  const skillsData = React.useMemo(() => {
-    if (Array.isArray(profile.skills) && profile.skills.length > 0) {
-      return profile.skills.map((skill) => ({
-        name: skill,
-        value: 1,
-      }));
-    }
-    return [];
-  }, [profile.skills]);
-
-  const dynamicActivities: ActivityEntry[] = React.useMemo(() => {
-    const list: ActivityEntry[] = [];
-    let actId = 1;
-    surveys.forEach((s) => {
-      list.push({
-        id: actId++,
-        type: 'survey',
-        title: s.title,
-        description: s.status === 'PENDING' ? 'Tracer survey pending completion.' : 'Tracer survey submitted.',
-        timestamp: 'Active',
-        unread: s.status === 'PENDING',
-      });
-    });
-    recentJobs.slice(0, 3).forEach((j) => {
-      list.push({
-        id: actId++,
-        type: 'job',
-        title: `Matched: ${j.title}`,
-        description: `${j.company} • ${j.location || 'Ethiopia'}`,
-        timestamp: 'Recent',
-        unread: !j.applied,
-      });
-    });
-    return list;
-  }, [surveys, recentJobs]);
+  const deptLabel = typeof profile.department === 'object'
+    ? (profile.department as { name?: string })?.name
+    : profile.department;
+  const milestones: CareerMilestone[] = [
+    {
+      id: 1,
+      year: 'Present',
+      title: profile.currentRole || 'Update your current role',
+      company: profile.company || 'Add your employer',
+      description: profile.bio
+        ? profile.bio.slice(0, 140)
+        : 'Keep your employment details current so recruiters and ASTU officers see accurate placement data.',
+      type: 'professional'
+    },
+    {
+      id: 2,
+      year: String(profile.graduationYear || profile.batch || 'Graduation'),
+      title: deptLabel ? `Graduate — ${deptLabel}` : 'ASTU Graduate',
+      company: 'Adama Science and Technology University',
+      description: `Academic record on file${profile.cgpa ? ` (CGPA: ${profile.cgpa})` : ''}. Complete tracer surveys to keep outcomes updated.`,
+      type: 'academic'
+    },
+  ];
 
   const handleStatusSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdateEmploymentStatus(tempRole, tempCompany, tempSalary);
     setIsEditingStatus(false);
-    toast.success('Employment status updated successfully!');
   };
 
   const intelligenceCards = [
@@ -140,8 +114,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   ];
 
   const pendingSurveyCount = surveys.filter((survey) => survey.status === 'PENDING').length;
-  const appliedJobsCount = recentJobs.filter((job) => job.applied).length;
-  const savedJobsCount = recentJobs.filter((job) => job.saved).length;
+  const completedSurveyCount = surveys.filter((survey) => survey.status === 'COMPLETED').length;
+  const totalSurveyCount = surveys.length;
+  const tracerCompliance = totalSurveyCount > 0 ? Math.round((completedSurveyCount / totalSurveyCount) * 100) : 0;
+
+  const approvedDocsCount = documents.filter((d) => d.status === 'Approved' || d.status === 'Dispatched').length;
+  const documentReadiness = documents.length > 0 ? Math.round((approvedDocsCount / documents.length) * 100) : 0;
+
+  // Prefer server-counted values; fall back to the already-loaded lists so the
+  // dashboard never renders invented figures.
+  const appliedJobsCount = statsData?.appliedJobs ?? recentJobs.filter((job) => job.applied).length;
+  const savedJobsCount = statsData?.savedJobs ?? recentJobs.filter((job) => job.saved).length;
+  const openJobMatchesCount = statsData?.openJobMatches ?? recentJobs.filter((job) => !job.applied).length;
 
   const commandSignals = [
     { label: 'Employer visibility', value: completion >= 90 ? 'High' : 'Improve', icon: 'visibility', tone: completion >= 90 ? 'text-astu-green' : 'text-astu-red' },
@@ -151,81 +135,96 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   ];
 
   const profileReadiness = [
-    { label: 'Public profile', value: `${completion}%`, width: completion, icon: 'badge' },
-    { label: 'Career evidence', value: `${Math.min(100, completion + 8)}%`, width: Math.min(100, completion + 8), icon: 'fact_check' },
-    { label: 'Recruiter match', value: `${Math.min(98, completion + 14)}%`, width: Math.min(98, completion + 14), icon: 'target' },
+    {
+      label: 'Public profile',
+      value: `${completion}%`,
+      width: completion,
+      icon: 'badge',
+      hint: 'Visible to verified employers',
+    },
+    {
+      label: 'Tracer compliance',
+      value: totalSurveyCount > 0 ? `${tracerCompliance}%` : 'No surveys',
+      width: tracerCompliance,
+      icon: 'fact_check',
+      hint: totalSurveyCount > 0 ? `${completedSurveyCount} of ${totalSurveyCount} completed` : 'Awaiting assignment',
+    },
+    {
+      label: 'Document readiness',
+      value: documents.length > 0 ? `${documentReadiness}%` : 'No requests',
+      width: documentReadiness,
+      icon: 'description',
+      hint: documents.length > 0 ? `${approvedDocsCount} of ${documents.length} approved` : 'Request when needed',
+    },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Welcome Banner with animated gradient */}
-      <style>{`
-        @keyframes dash-gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .dash-glow {
-          animation: dash-gradient 8s ease infinite;
-          background-size: 200% 200%;
-        }
-      `}</style>
-      <section className="relative overflow-hidden rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1d9e75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6 dash-glow">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-5 left-[10%] w-2 h-2 rounded-full bg-white/20 animate-float" />
-          <div className="absolute top-20 right-[30%] w-1.5 h-1.5 rounded-full bg-[#FFD700]/30 animate-float" style={{ animationDelay: '2s' }} />
-          <div className="absolute bottom-10 left-[40%] w-2.5 h-2.5 rounded-full bg-emerald-300/20 animate-float" style={{ animationDelay: '4s' }} />
-        </div>
-        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-          <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">Alumni command center</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">Welcome back, {profile.fullName}</h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/85">
-              {completion === 100 
-                ? 'Your profile is fully complete! Your credentials are fully visible to corporate employers.'
-                : 'Your profile is nearly complete. Boost visibility with employers by finishing your profile.'}
-            </p>
+      <DashboardBroadcastHero actorRole="ALUMNI" className="mb-2" />
 
-            <div className="mt-4 space-y-2">
-              <p className="text-xs font-semibold text-white/90">Profile Completion: {completion}%</p>
-              <div className="h-2.5 w-56 overflow-hidden rounded-full bg-white/20">
-                <div 
-                  className="h-full rounded-full bg-[#E8A020] transition-all duration-500"
-                  style={{ width: `${completion}%` }}
-                ></div>
-              </div>
+      <DashboardWelcomeBanner
+        eyebrow="Alumni Command Center"
+        title={`Welcome back, ${profile.fullName}`}
+        description={
+          completion === 100
+            ? 'Your profile is fully complete! Your credentials are fully visible to corporate employers.'
+            : 'Your profile is nearly complete. Boost visibility with employers by finishing your profile.'
+        }
+        meta={
+          <span className="rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/90">
+            Profile {completion}%
+          </span>
+        }
+        actions={
+          completion < 100
+            ? [
+                {
+                  label: 'Complete Profile',
+                  onClick: () => onTabChange('profile'),
+                  variant: 'primary',
+                },
+              ]
+            : [
+                {
+                  label: 'Browse Jobs',
+                  onClick: () => onTabChange('jobs'),
+                  variant: 'primary',
+                },
+              ]
+        }
+      >
+        <div className="space-y-4">
+          <div className="max-w-xs space-y-2">
+            <p className="text-xs font-semibold text-white/90">Profile completion</p>
+            <div className="h-2.5 overflow-hidden rounded-full bg-white/20">
+              <div
+                className="h-full rounded-full bg-[#E8A020] transition-all duration-500"
+                style={{ width: `${completion}%` }}
+              />
             </div>
           </div>
-          {completion < 100 && (
-            <button 
-              onClick={() => onTabChange('profile')}
-              className="flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-xs font-bold text-astu-navy shadow-sm transition-all hover:bg-white/90"
-            >
-              <span className="material-symbols-outlined">check</span>
-              Complete Profile
-            </button>
-          )}
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {commandSignals.map((signal) => (
+              <button
+                key={signal.label}
+                type="button"
+                onClick={() => {
+                  if (signal.label.includes('Employer')) onTabChange('profile');
+                  if (signal.label.includes('Applications') || signal.label.includes('Saved')) onTabChange('jobs');
+                  if (signal.label.includes('Tracer')) onTabChange('surveys');
+                }}
+                className="rounded-xl border border-white/15 bg-white/10 p-3 text-left backdrop-blur transition-all hover:bg-white/15"
+              >
+                <div className="flex items-center gap-2">
+                  <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-white/65">{signal.label}</p>
+                </div>
+                <p className="mt-2 text-xl font-extrabold text-white">{signal.value}</p>
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {commandSignals.map((signal) => (
-            <button
-              key={signal.label}
-              onClick={() => {
-                if (signal.label.includes('Employer')) onTabChange('profile');
-                if (signal.label.includes('Applications') || signal.label.includes('Saved')) onTabChange('jobs');
-                if (signal.label.includes('Tracer')) onTabChange('surveys');
-              }}
-              className="rounded-[10px] border border-white/15 bg-white/10 p-3 text-left backdrop-blur transition-all hover:bg-white/15"
-            >
-              <div className="flex items-center gap-2">
-                <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                <p className="text-[10px] font-bold uppercase tracking-wide text-white/65">{signal.label}</p>
-              </div>
-              <p className="mt-2 text-xl font-extrabold text-white">{signal.value}</p>
-            </button>
-          ))}
-        </div>
-      </section>
+      </DashboardWelcomeBanner>
 
       <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.2fr_0.8fr]">
@@ -252,8 +251,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   </div>
                   <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
                   <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
-                    <div className="h-full rounded-full bg-astu-green transition-all duration-500" style={{ width: `${item.width}%` }}></div>
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        item.width >= 90 ? 'bg-astu-green' : item.width >= 50 ? 'bg-[#E8A020]' : 'bg-astu-red'
+                      }`}
+                      style={{ width: `${item.width}%` }}
+                    />
                   </div>
+                  <p className="mt-1.5 text-[10px] font-medium text-gray-400">{item.hint}</p>
                 </div>
               ))}
             </div>
@@ -467,68 +472,50 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
       </div>
 
-      {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.id}
-            onMouseEnter={() => setHoveredCard(stat.id)}
-            onMouseLeave={() => setHoveredCard(null)}
-            className={`group relative cursor-pointer overflow-hidden rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-md ${hoveredCard === stat.id ? 'translate-y-[-4px]' : ''}`}
-            onClick={() => {
-              if (stat.label.includes('Profile')) onTabChange('profile');
-              if (stat.label.includes('Job')) onTabChange('jobs');
-              if (stat.label.includes('Surveys')) onTabChange('surveys');
-              if (stat.label.includes('Network')) onTabChange('mentorship');
-            }}
-          >
-            {/* Background gradient */}
-            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br ${stat.bgGradient}`}></div>
+      <DashboardStatGrid
+        stats={stats.map((stat) => ({
+          label: stat.label,
+          value: stat.value,
+          materialIcon: stat.icon,
+          trend: stat.trend,
+          tone:
+            stat.color === 'astu-green'
+              ? 'green'
+              : stat.color === 'astu-red'
+                ? 'red'
+                : stat.color === 'purple-600'
+                  ? 'purple'
+                  : 'blue',
+          trendDirection: stat.trendColor === 'astu-red' ? 'down' : 'up',
+          onClick: () => {
+            if (stat.label.includes('Profile')) onTabChange('profile');
+            if (stat.label.includes('Job')) onTabChange('jobs');
+            if (stat.label.includes('Surveys')) onTabChange('surveys');
+            if (stat.label.includes('Network')) onTabChange('mentorship');
+          },
+        }))}
+      />
 
-            <div className="relative z-10">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-xl bg-gradient-to-br from-${stat.color}/20 to-${stat.color}/10`}>
-                  <span className={`material-symbols-outlined text-2xl text-${stat.color}`}>{stat.icon}</span>
-                </div>
-              </div>
-
-              <p className="text-sm text-gray-600 font-medium mb-2">{stat.label}</p>
-              <p className={`text-4xl font-bold text-${stat.color} mb-3`}>{stat.value}</p>
-
-              <div className="flex items-center gap-1 text-astu-green text-sm font-medium">
-                <span className="material-symbols-outlined text-lg">{stat.trendIcon}</span>
-                {stat.trend}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Main Grid: Job Matches (left) and Career Progression Timeline (right) */}
-      <section className="rounded-[10px] border border-gray-200/60 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900">World-Class Alumni Features</h3>
-            <p className="mt-1 text-xs text-gray-500">Everything from the brief, wired into the current dashboard modules.</p>
-          </div>
-          <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
-            Profile + tracer + career ready
-          </span>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {intelligenceCards.map((card) => (
-            <button
-              key={card.title}
-              onClick={() => onTabChange(card.tab)}
-              className="group rounded-[10px] border border-gray-200 bg-gray-50 p-4 text-left transition-all hover:border-astu-navy/30 hover:bg-white hover:shadow-sm"
-            >
-              <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
-              <h4 className="mt-3 text-sm font-bold text-gray-900">{card.title}</h4>
-              <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
-            </button>
-          ))}
-        </div>
-      </section>
+      <DashboardQuickNav
+        title="Alumni feature control"
+        subtitle="Career coaching, events, community, and verified documents in one place."
+        columns={4}
+        items={intelligenceCards.map((card) => ({
+          id: card.tab + card.title,
+          title: card.title,
+          description: card.desc,
+          materialIcon: card.icon,
+          onClick: () => onTabChange(card.tab),
+          tone:
+            card.tab === 'career'
+              ? 'violet'
+              : card.tab === 'messages'
+                ? 'green'
+                : card.tab === 'documents'
+                  ? 'amber'
+                  : 'navy',
+        }))}
+      />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         
@@ -560,7 +547,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-lg font-bold text-gray-900 group-hover:text-astu-navy transition-colors">{job.title}</h4>
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${job.applied ? 'bg-blue-100 text-blue-800' : 'bg-astu-green/15 text-astu-green'}`}>
-                          {job.applied ? 'Applied' : `${job.match} Match`}
+                          {job.applied ? 'Applied' : (job.match ? `${job.match} Match` : 'Recommended')}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 font-medium mb-2">{job.company}</p>
@@ -610,60 +597,46 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             {/* Vertical timeline structure */}
             <div className="relative pl-6 border-l-2 border-gray-150 space-y-6 py-1">
-              {milestones.length === 0 ? (
-                <div className="py-6 text-center text-xs text-gray-400">
-                  No career or graduation milestones logged yet. Update your employment status to populate your career timeline.
-                </div>
-              ) : (
-                milestones.map((milestone) => (
-                  <div key={milestone.id} className="relative">
-                    {/* Bullet */}
-                    <span className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white shadow flex items-center justify-center ${
-                      milestone.type === 'academic' ? 'bg-astu-navy' : 'bg-astu-green'
-                    }`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-                    </span>
-                    
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-extrabold uppercase text-gray-400">{milestone.year}</span>
-                      <h4 className="text-sm font-bold text-gray-900 leading-snug">{milestone.title}</h4>
-                      <p className="text-xs font-bold text-astu-navy">{milestone.company}</p>
-                      <p className="text-[11px] text-gray-500 leading-normal">{milestone.description}</p>
-                    </div>
+              {milestones.map((milestone) => (
+                <div key={milestone.id} className="relative">
+                  {/* Bullet */}
+                  <span className={`absolute -left-[31px] top-1 w-4 h-4 rounded-full border-2 border-white shadow flex items-center justify-center ${
+                    milestone.type === 'academic' ? 'bg-astu-navy' : 'bg-astu-green'
+                  }`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                  </span>
+                  
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-extrabold uppercase text-gray-400">{milestone.year}</span>
+                    <h4 className="text-sm font-bold text-gray-900 leading-snug">{milestone.title}</h4>
+                    <p className="text-xs font-bold text-astu-navy">{milestone.company}</p>
+                    <p className="text-[11px] text-gray-500 leading-normal">{milestone.description}</p>
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
           </section>
         </div>
 
       </div>
 
-      {/* Analytics Charts Row */}
+      {/* Analytics Charts Row — only render when real series are available */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <AnalyticsChart
-          type="area"
-          title="Employment Rate Trend"
-          subtitle="Graduate employment rates across institutional cohorts"
-          data={[]}
-          xKey="year"
-          series={[{ key: 'rate', label: 'Employment %' }]}
-          height={220}
-        />
-        <AnalyticsChart
-          type="pie"
-          title="Skills Profile Breakdown"
-          subtitle="Verified skills documented on your alumni profile"
-          data={skillsData}
-          xKey="name"
-          series={[{ key: 'value', label: 'Skill Weight' }]}
-          height={220}
-        />
+        <div className="rounded-[10px] border border-gray-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <h3 className="text-sm font-semibold text-gray-900">Employment Rate Trend</h3>
+          <p className="mt-1 text-xs text-gray-500">No employment analytics available yet for your cohort.</p>
+          <p className="mt-8 text-center text-sm text-gray-400">—</p>
+        </div>
+        <div className="rounded-[10px] border border-gray-200/60 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <h3 className="text-sm font-semibold text-gray-900">Skills Distribution</h3>
+          <p className="mt-1 text-xs text-gray-500">Skills insights will appear once alumni skill data is collected.</p>
+          <p className="mt-8 text-center text-sm text-gray-400">—</p>
+        </div>
       </div>
 
       {/* Activity Timeline */}
       <ActivityTimeline
-        activities={dynamicActivities}
+        activities={[] as ActivityEntry[]}
         onViewAll={() => onTabChange('messages')}
       />
 
@@ -768,28 +741,37 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {donationCampaigns.slice(0, 3).map((campaign) => {
-            const progress = Math.round((campaign.raised / campaign.goal) * 100);
+            const raisedNum = typeof campaign.raised === 'object' && campaign.raised ? Number((campaign.raised as any).increment || 0) : Number(campaign.raised || 0);
+            const goalNum = typeof campaign.goal === 'object' && campaign.goal ? Number((campaign.goal as any).increment || 0) : Number(campaign.goal || 1);
+            const donorCountNum = typeof campaign.donorCount === 'object' && campaign.donorCount ? Number((campaign.donorCount as any).increment || 0) : Number(campaign.donorCount || 0);
+            const progress = Math.round((raisedNum / Math.max(1, goalNum)) * 100);
             return (
               <div key={campaign.id} className="rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[9px] font-bold rounded-full uppercase">
                     {campaign.category}
                   </span>
-                  <span className="text-[10px] text-gray-400">{campaign.donorCount} donors</span>
+                  <span className="text-[10px] text-gray-400">{donorCountNum} donors</span>
                 </div>
                 <h4 className="text-sm font-bold text-gray-900 mb-1">{campaign.title}</h4>
                 <p className="text-[11px] text-gray-500 leading-relaxed mb-3 line-clamp-2">{campaign.description}</p>
                 <div className="mb-2">
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-bold text-astu-navy">{campaign.raised.toLocaleString()} ETB</span>
-                    <span className="text-gray-400">of {campaign.goal.toLocaleString()} ETB</span>
+                    <span className="font-bold text-astu-navy">{raisedNum.toLocaleString()} ETB</span>
+                    <span className="text-gray-400">of {goalNum.toLocaleString()} ETB</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full rounded-full bg-gradient-to-r from-astu-navy to-astu-green transition-all" style={{ width: `${Math.min(progress, 100)}%` }}></div>
                   </div>
                 </div>
                 <button
-                  onClick={() => toast.success(`Thank you for donating to "${campaign.title}"!`)}
+                  onClick={() => {
+                    if (onDonate) {
+                      onDonate(String(campaign.id), campaign);
+                      return;
+                    }
+                    onTabChange('donations');
+                  }}
                   className="w-full py-2 bg-gradient-to-r from-astu-navy to-[#004d99] text-white rounded-xl text-[11px] font-bold hover:shadow-lg transition-all"
                 >
                   Donate Now

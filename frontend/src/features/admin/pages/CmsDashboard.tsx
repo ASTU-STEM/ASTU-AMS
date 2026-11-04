@@ -74,10 +74,12 @@ import homepageCmsService, {
 import storiesService, { AlumniStory } from '../services/stories.service';
 import registrationService, { AlumniRegistration } from '../services/registration.service';
 import AdminModal from '../components/AdminModal';
+import AdminStatGrid from '../components/AdminStatGrid';
 import { ContentCardItem, ContentStatus, ContentType } from '../components/ContentCard';
 import { useAuth } from '../../../contexts/AuthContext';
 import { usePublicMetrics, triggerMetricsRefresh } from '../../../services/publicMetrics.service';
 import api from '../../../services/api';
+import type { AdminStatCardData } from '../types/admin.types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -85,33 +87,8 @@ const DEFAULT_HOMEPAGE_CONFIG: HomepageCmsConfig = {
   welcomeMessage: 'The ASTU Alumni Management System connects graduates, employers, and departments in one platform.',
   welcomeEnabled: true,
   heroBadge: 'Quality Assurance & Accreditation',
-  heroSlides: [
-    {
-      id: 'HS-1',
-      image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80',
-      tagline: 'Quality Assurance & Accreditation',
-      title: 'Connecting ASTU’s Excellence to the Global Industry',
-      description: 'A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University.',
-      active: true,
-    },
-    {
-      id: 'HS-2',
-      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1800&q=80',
-      tagline: 'Enterprise Networking & Placement',
-      title: 'Empowering ASTU Graduates in Modern Workspaces',
-      description: 'Discover corporate partners, publish practical career openings, and track your employment outcomes.',
-      active: true,
-    },
-  ],
-  impactStats: [
-    { id: 'IS-1', label: 'Registered Alumni Members', value: '1,238', suffix: '+', detail: 'Across 6 specialized colleges', icon: 'Users', active: true },
-    { id: 'IS-2', label: 'Partner Organizations', value: '500', suffix: '+', detail: 'Hiring, internships, and feedback', icon: 'Building2', active: true },
-    { id: 'IS-3', label: 'Employment Rate', value: '87', suffix: '%', detail: 'Graduate employment rate tracked', icon: 'LineChart', active: true },
-    { id: 'IS-4', label: 'Digital Requests', value: '6K', suffix: '+', detail: 'Transcript & certificate requests', icon: 'FileCheck2', active: true },
-    
-    { id: 'IS-5', label: 'Tracer Survey Responses', value: '2,450', suffix: '+', detail: 'Classes of 2020-2024 surveyed', icon: 'ClipboardCheck', active: true },
-    { id: 'IS-6', label: 'Career Placements', value: '890', suffix: '+', detail: 'Graduates hired through AMS', icon: 'Briefcase', active: true },
-  ],
+  heroSlides: [],
+  impactStats: [],
   portalsHeaders: {
     eyebrow: 'How It Works',
     title: 'Your Journey Starts Here',
@@ -119,158 +96,29 @@ const DEFAULT_HOMEPAGE_CONFIG: HomepageCmsConfig = {
     ctaText: 'Get Started Today',
     ctaLink: '/login',
   },
-  portals: [
-    {
-      id: 'P-1',
-      title: 'Create Your Profile',
-      icon: 'UserRoundCheck',
-      points: ['Sign up and build your professional profile', 'Add graduation details and skills', 'Showcase work experience'],
-      cta: 'Start Now',
-      route: '/register',
-      active: true,
-      description: 'Sign up and build your professional profile. Add your graduation details, skills, work experience, and career interests to get started.',
-      color: 'from-astu-navy to-[#1a4f8a]',
-      iconBg: 'bg-astu-navy/10 text-astu-navy',
-      step: 1,
-    },
-    {
-      id: 'P-2',
-      title: 'Discover Opportunities',
-      icon: 'Search',
-      points: ['Browse verified job listings', 'Find internship postings', 'Explore mentorship programs'],
-      cta: 'Explore Jobs',
-      route: '/jobs',
-      active: true,
-      description: 'Browse verified job listings, internship postings, and mentorship programs tailored to your expertise and career goals.',
-      color: 'from-astu-red to-[#c0392b]',
-      iconBg: 'bg-astu-red/10 text-astu-red',
-      step: 2,
-    },
-    {
-      id: 'P-3',
-      title: 'Connect & Collaborate',
-      icon: 'Handshake',
-      points: ['Network with fellow alumni', 'Engage with employers', 'Participate in community events'],
-      cta: 'Join Network',
-      route: '/community',
-      active: true,
-      description: 'Network with fellow alumni, engage with employers, and participate in community events that advance your professional journey.',
-      color: 'from-astu-green to-[#1e8449]',
-      iconBg: 'bg-astu-green/10 text-astu-green',
-      step: 3,
-    },
-    {
-      id: 'P-4',
-      title: 'Grow & Give Back',
-      icon: 'LineChart',
-      points: ['Complete tracer surveys', 'Mentor current students', 'Contribute to curriculum development'],
-      cta: 'Make Impact',
-      route: '/mentorship',
-      active: true,
-      description: 'Complete tracer surveys, mentor current students, and contribute to curriculum development that shapes the next generation.',
-      color: 'from-violet-600 to-violet-800',
-      iconBg: 'bg-violet-100 text-violet-700',
-      step: 4,
-    },
-  ],
+  portals: [],
   campusLifeHeaders: {
     eyebrow: 'Campus Life',
     title: 'Experience ASTU',
     description: 'Explore our vibrant campus facilities and activities',
   },
-  campusLife: [
-    {
-      id: 'CL-1',
-      title: 'Events and Activities',
-      campus: 'Main Campus',
-      description: 'Career expos, alumni reunions, workshops, chapter meetings, and community programs.',
-      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80',
-      action: 'View Events',
-      link: '/events',
-      active: true,
-    },
-    {
-      id: 'CL-2',
-      title: 'Facilities',
-      campus: 'Innovation Spaces',
-      description: 'Laboratories, research centers, libraries, student services, and employer interview rooms.',
-      image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
-      action: 'Explore Facilities',
-      link: '/facilities',
-      active: true,
-    },
-    {
-      id: 'CL-3',
-      title: 'ASTU Museums & Gallery',
-      campus: 'Campus Gallery',
-      description: 'Research showcases, graduation moments, campus photography, and public video archives.',
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-      action: 'View Gallery',
-      link: '/gallery',
-      active: true,
-    },
-  ],
-  campuses: [
-    {
-      id: 'C-1',
-      name: 'Main Campus',
-      description: 'Central hub for alumni services, registrar workflows, and institutional engagement.',
-      image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80',
-      active: true,
-    },
-    {
-      id: 'C-2',
-      name: 'Engineering Labs',
-      description: 'Applied research, workshops, innovation programs, and industry-linked training.',
-      image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
-      active: true,
-    },
-    {
-      id: 'C-3',
-      name: 'Graduation & Events Hall',
-      description: 'Ceremonies, career fairs, alumni awards, and university achievement programs.',
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-      active: true,
-    },
-    {
-      id: 'C-4',
-      name: 'Research Collaboration Center',
-      description: 'Research publications, industry projects, and department KPI evidence.',
-      image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80',
-      active: true,
-    },
-  ],
-  gallery: [
-    { id: 'G-1', title: 'ASTU Main Campus', src: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80', active: true },
-    { id: 'G-2', title: 'Innovation and Collaboration', src: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80', active: true },
-    { id: 'G-3', title: 'ASTU Alumni Identity', src: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80', active: true },
-  ],
+  campusLife: [],
+  campuses: [],
+  gallery: [],
   videos: [],
   eventsHeaders: {
-    eyebrow: 'Upcoming Events',
-    title: 'Join Our Community Events',
-    description: 'Stay connected with reunions, workshops, and networking opportunities',
-    viewAllText: 'See All Events →',
+    eyebrow: 'Events & Workshops',
+    title: 'Gatherings & Training',
+    description: 'Join campus career expos, technical workshops, and alumni reunions.',
+    viewAllText: 'See All Events',
     viewAllLink: '/events',
   },
-  events: [
-    {
-      id: 'E-1',
-      title: 'ASTU Alumni Carnival 2026',
-      date: 'April 25-26, 2026',
-      location: 'ASTU Main Campus',
-      image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80',
-      active: true,
-    },
-  ],
-  workshops: [
-    { id: 'W-1', title: 'AI for Engineering Research', date: 'June 14, 2026', seats: '120 seats', focus: 'Research & Innovation', active: true },
-    { id: 'W-2', title: 'CV Builder and Interview Lab', date: 'June 20, 2026', seats: '80 seats', focus: 'Career Readiness', active: true },
-    { id: 'W-3', title: 'Startup Finance for Alumni', date: 'July 4, 2026', seats: '60 seats', focus: 'Entrepreneurship', active: true },
-  ],
+  events: [],
+  workshops: [],
   newsHeaders: {
-    eyebrow: 'Latest News',
-    title: 'Stay Updated',
+    eyebrow: 'Campus News',
+    title: 'Latest ASTU Highlights',
+    description: 'University notices, academic bulletins, and alumni community circulars.',
   },
   newsItems: [],
   announcementsHeaders: {
@@ -279,83 +127,29 @@ const DEFAULT_HOMEPAGE_CONFIG: HomepageCmsConfig = {
     subscribeTitle: 'Subscribe to Updates',
     subscribeDesc: 'Get the latest announcements delivered to your inbox',
   },
-  announcements: [
-    { id: 'A-1', title: 'ASTU Alumni Association Inspires Graduating Class with Career Tips!', date: 'March 7, 2025', type: 'Alumni Announcement', active: true },
-    { id: 'A-2', title: 'ASTU hosts a five-day DAAD Alumni workshop', date: 'March 7, 2025', type: 'Employer Announcement', active: true },
-    { id: 'A-3', title: 'ASTU alumni serve as model United Nations secretariats!', date: 'January 7, 2025', type: 'Alumni Achievement', active: true },
-    { id: 'A-4', title: 'Call for employer partners: campus recruitment week', date: 'May 28, 2026', type: 'Employer Announcement', active: true },
-  ],
+  announcements: [],
   storiesHeaders: {
     eyebrow: 'Success Stories',
     title: 'Alumni Achievements',
     description: 'Inspiring stories from our graduates making an impact worldwide',
   },
-  stories: [
-    { id: 'SS-1', name: 'Dr. Ruth Alemu', role: 'AI Research Scientist', text: 'Published 18 applied AI papers and mentors ASTU research teams.', image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80', active: true },
-    { id: 'SS-2', name: 'Yonas Bekele', role: 'Founder, GreenGrid Labs', text: 'Built a renewable-energy startup serving industrial campuses.', image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80', active: true },
-    { id: 'SS-3', name: 'Kalkidan Tadesse', role: 'Cloud Platform Lead', text: 'Leads enterprise cloud migration programs for regional partners.', image: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=800&q=80', active: true },
-  ],
+  stories: [],
   partnersHeaders: {
     eyebrow: 'Our Partners',
     title: 'Trusted Organizations',
     description: 'Industry leaders partnering with ASTU for excellence',
   },
-  partners: [
-    { id: 'PT-1', name: 'Ethio Telecom', active: true },
-    { id: 'PT-2', name: 'INSA', active: true },
-    { id: 'PT-3', name: 'Ethiopian Airlines', active: true },
-    { id: 'PT-4', name: 'Safaricom Ethiopia', active: true },
-    { id: 'PT-5', name: 'Huawei', active: true },
-    { id: 'PT-6', name: 'Commercial Bank of Ethiopia', active: true },
-  ],
-  featuredEmployers: [
-    { id: 'FE-1', name: 'Ethio Telecom', area: 'Telecom & Cloud', openings: '14 graduate roles', active: true },
-    { id: 'FE-2', name: 'Ethiopian Airlines', area: 'Aviation Technology', openings: '8 internship tracks', active: true },
-    { id: 'FE-3', name: 'INSA', area: 'Cybersecurity', openings: '6 research placements', active: true },
-    { id: 'FE-4', name: 'Huawei Ethiopia', area: 'Network Engineering', openings: '11 certification paths', active: true },
-  ],
+  partners: [],
+  featuredEmployers: [],
   testimonials: [],
   faqHeaders: {
     eyebrow: 'FAQ',
     title: 'Frequently Asked Questions',
     description: 'Common questions about ASTU-AMS',
   },
-  faq: [
-    { id: 'FAQ-1', question: 'Who can use ASTU-AMS?', answer: 'Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services.', active: true },
-    { id: 'FAQ-2', question: 'How are tracer studies used?', answer: 'Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence.', active: true },
-    { id: 'FAQ-3', question: 'Can employers register events?', answer: 'Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports.', active: true },
-  ],
-  navSections: [
-    { label: 'Home', id: 'home', active: true },
-    { label: 'Impact Numbers', id: 'impact-numbers', active: true },
-    { label: 'Impact', id: 'impact', active: true },
-    { label: 'How It Works', id: 'how-it-works', active: true },
-    { label: 'Campus Life', id: 'campus-life', active: true },
-    { label: 'Events', id: 'events', active: true },
-    { label: 'Announcements', id: 'announcements', active: true },
-    { label: 'News', id: 'news', active: true },
-    { label: 'Success Stories', id: 'success-stories', active: true },
-    { label: 'Partners', id: 'partners', active: true },
-    { label: 'FAQ', id: 'faq', active: true },
-    { label: 'Contact', id: 'contact', active: true },
-  ],
-  communityPosts: [
-    {
-      name: 'Abebe Yosef',
-      role: 'Software Engineer',
-      company: 'Safaricom Ethiopia',
-      message: 'The ASTU-AMS platform helped me connect with mentors and land my dream job. Highly recommend!',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
-      active: true,
-    },
-    {
-      name: 'Helen Mekonnen',
-      role: 'Data Analyst',
-      company: 'Ethiopian Airlines',
-      message: 'Great initiative! The tracer survey process was smooth and the results are valuable for curriculum improvement.',
-      active: true,
-    },
-  ],
+  faq: [],
+  navSections: [],
+  communityPosts: [],
 };
 
 
@@ -623,12 +417,13 @@ export default function CmsDashboard() {
     }
 
     const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
-    const totalAlumni = metrics?.registeredAlumniFormatted || metrics?.registeredAlumni?.toLocaleString() || '1,215';
-    const verifiedAlumni = metrics?.verifiedAlumniFormatted || metrics?.verifiedAlumni?.toLocaleString() || '1,211';
-    const employmentRate = `${metrics?.employmentRate || 90.3}%`;
-    const pendingDocs = metrics?.documentRequestsPending || 420;
+    const totalAlumni = metrics?.registeredAlumniFormatted || (metrics?.registeredAlumni ? metrics.registeredAlumni.toLocaleString() : '—');
+    const verifiedAlumni = metrics?.verifiedAlumniFormatted || (metrics?.verifiedAlumni ? metrics.verifiedAlumni.toLocaleString() : '—');
+    const employmentRate = metrics?.employmentRate ? `${metrics.employmentRate}%` : '—';
+    const pendingDocs = metrics?.documentRequestsPending ?? 0;
+    const totalDocsPdf = metrics?.documentRequestsTotal || metrics?.digitalRequests || 0;
     const activeNotices = items.filter((i) => i.status === 'Published').length;
-    const totalEvents = events.length || 4;
+    const totalEvents = events.length;
     const timestamp = new Date().toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
@@ -688,17 +483,17 @@ export default function CmsDashboard() {
             <div class="kpi-card">
               <div class="kpi-label">Verified Alumni</div>
               <div class="kpi-value">${verifiedAlumni} / ${totalAlumni}</div>
-              <div class="kpi-sub">${metrics?.verificationRate || '99.7'}% Verified (${metrics?.pendingAlumniVerification ?? 4} pending)</div>
+              <div class="kpi-sub">${metrics?.verificationRate ? `${metrics.verificationRate}% Verified` : 'Verification pending'} (${metrics?.pendingAlumniVerification ?? 0} pending)</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-label">Graduate Employability</div>
               <div class="kpi-value">${employmentRate}</div>
-              <div class="kpi-sub">${metrics?.employedAlumni?.toLocaleString() || '1,097'} employed across 8 departments</div>
+              <div class="kpi-sub">${metrics?.employedAlumni ? `${metrics.employedAlumni.toLocaleString()} employed` : 'Employability metrics unavailable'}</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-label">Pending Document Requests</div>
-              <div class="kpi-value">${pendingDocs} / 2,100</div>
-              <div class="kpi-sub">Registrar SIS Queue Synced</div>
+              <div class="kpi-value">${pendingDocs}${totalDocsPdf ? ` / ${totalDocsPdf.toLocaleString()}` : ''}</div>
+              <div class="kpi-sub">${totalDocsPdf ? 'Registrar SIS Queue Synced' : 'No SIS queue metrics yet'}</div>
             </div>
             <div class="kpi-card">
               <div class="kpi-label">Active Notices & Events</div>
@@ -864,7 +659,12 @@ export default function CmsDashboard() {
                 <div className="flex items-center gap-1.5">
                   <Users className="h-3.5 w-3.5 text-emerald-600" />
                   <span className="font-bold text-slate-800 dark:text-slate-200">
-                    {activeEvent.rsvps?.length || (typeof activeEvent.rsvps === 'number' ? activeEvent.rsvps : 98)} / {activeEvent.capacity || 120} Attendees
+                    {Array.isArray(activeEvent.rsvps)
+                      ? activeEvent.rsvps.length
+                      : typeof activeEvent.rsvps === 'number'
+                        ? activeEvent.rsvps
+                        : 0}{' '}
+                    / {activeEvent.capacity || '—'} Attendees
                   </span>
                 </div>
                 {(activeEvent as any).organizer && (
@@ -921,207 +721,172 @@ export default function CmsDashboard() {
         </div>
       ) : null}
 
-      {/* ── 4 STREAMLINED EXECUTIVE KPI CARDS (100% Database-Driven) ─────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Card 1: Verified Alumni */}
-        <div
-          onClick={() => navigate('/cms/alumni-directory')}
-          className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-[#003366]/40 transition-all cursor-pointer group"
-          title="Click to view full Alumni Directory"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-[#003366] dark:group-hover:text-[#FFCC00] transition-colors">
-              Verified Alumni
-            </span>
-            <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 flex items-center justify-center">
-              <GraduationCap className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {metrics.verifiedAlumni > 0
-                ? `${metrics.verifiedAlumniFormatted} / ${metrics.registeredAlumniFormatted}`
-                : `${metrics.registeredAlumniFormatted || '1,215'}`}
-            </span>
-            <span className="text-[11px] font-bold text-emerald-600">
-              {metrics.verificationRate > 0 ? `${metrics.verificationRate}% Verified` : '99.7% Verified'}
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-            {metrics.pendingAlumniVerification !== undefined
-              ? `${metrics.pendingAlumniVerification} pending verification · ${metrics.fieldsOfStudy || 8} fields`
-              : 'Across 8 engineering fields'}
-          </p>
-        </div>
+      {/* ── EXECUTIVE KPI CARDS ─────────────────────────────────────────────── */}
+      {(() => {
+        const verifiedLabel =
+          metrics.registeredAlumni > 0
+            ? `${metrics.verifiedAlumniFormatted} / ${metrics.registeredAlumniFormatted}`
+            : '—';
+        const employmentLabel =
+          metrics.employmentRate > 0
+            ? `${metrics.etaComplianceRateFormatted || '—'} / ${metrics.employmentRate}%`
+            : metrics.etaComplianceRateFormatted || '—';
+        const rsvpCount = metrics.eventRsvpsCount ?? 0;
+        const activeSlides = homepageConfig.heroSlides?.filter((s) => s.active).length ?? 0;
+        const pendingDocs = metrics.documentRequestsPending ?? 0;
+        const totalDocs = metrics.documentRequestsTotal || metrics.digitalRequests || 0;
+        const deskPendingPct =
+          totalDocs > 0 ? Math.min(100, Math.round((pendingDocs / totalDocs) * 1000) / 10) : 0;
 
-        {/* Card 2: ETA Tracer & Employability */}
-        <div
-          onClick={() => navigate('/cms/surveys')}
-          className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-emerald-500/50 transition-all cursor-pointer group"
-          title="Click to view tracer study compliance and surveys"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-emerald-600 transition-colors">
-              ETA Tracer & Employability
-            </span>
-            <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {metrics.etaComplianceRateFormatted || '—'} / {metrics.employmentRate}%
-            </span>
-            <span className="text-[11px] font-bold text-emerald-600">
-              {metrics.hasActiveSurveyWave ? 'Survey Active' : 'Tracer Standby'}
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-            {metrics.hasActiveSurveyWave
-              ? `ETA Compliance Rate tracked · ${metrics.employedAlumni?.toLocaleString() || '1,097'} employed`
-              : `No survey assignments yet · ${metrics.employedAlumni?.toLocaleString() || '1,097'} employed`}
-          </p>
-        </div>
+        const executiveStats: AdminStatCardData[] = [
+          {
+            title: 'Verified Alumni',
+            value: verifiedLabel,
+            icon: GraduationCap,
+            tone: 'blue',
+            trend:
+              metrics.verificationRate > 0
+                ? `${metrics.verificationRate}% verified`
+                : metrics.registeredAlumni > 0
+                  ? 'Directory online'
+                  : 'Awaiting metrics',
+            trendDirection: metrics.verificationRate >= 80 ? 'up' : metrics.registeredAlumni > 0 ? 'flat' : 'flat',
+            description:
+              metrics.pendingAlumniVerification !== undefined
+                ? `${metrics.pendingAlumniVerification} pending · ${metrics.fieldsOfStudy || '—'} fields`
+                : 'Alumni directory verification',
+            progress: metrics.verificationRate || undefined,
+            to: '/cms/alumni-directory',
+          },
+          {
+            title: 'ETA Tracer & Employability',
+            value: employmentLabel,
+            icon: ShieldCheck,
+            tone: 'green',
+            trend: metrics.hasActiveSurveyWave ? 'Survey active' : 'Tracer standby',
+            trendDirection: metrics.hasActiveSurveyWave ? 'up' : 'flat',
+            description:
+              (metrics.employedAlumni ?? 0) > 0
+                ? `${(metrics.employedAlumni ?? 0).toLocaleString()} employed alumni tracked`
+                : 'No employability cohort loaded yet',
+            progress: metrics.hasActiveSurveyWave ? (metrics.etaComplianceRate ?? undefined) : undefined,
+            to: '/cms/surveys',
+          },
+          {
+            title: 'Notice Registrations',
+            value: rsvpCount > 0 ? `${rsvpCount.toLocaleString()} RSVPs` : '—',
+            icon: ClipboardCheck,
+            tone: 'amber',
+            trend: rsvpCount > 0 ? 'Live roster' : 'No RSVPs yet',
+            trendDirection: rsvpCount > 0 ? 'up' : 'flat',
+            description: `${events.length} scheduled events · ${items.length} bulletins`,
+            to: '/cms/registrations',
+          },
+          {
+            title: 'Homepage Studio',
+            value: `${activeSlides} Slides`,
+            icon: Globe,
+            tone: 'purple',
+            trend: 'Live CMS',
+            trendDirection: 'up',
+            description: `${metrics.corporatePartners > 0 ? metrics.corporatePartnersFormatted : '—'} partners · ${
+              metrics.activeJobs > 0 ? metrics.activeJobs : '—'
+            } open roles`,
+            to: '/cms/homepage',
+          },
+        ];
 
-        {/* Card 3: Notice Registrations & Events */}
-        <div
-          onClick={() => navigate('/cms/registrations')}
-          className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-amber-500/50 transition-all cursor-pointer group"
-          title="Click to view registrant and attendee roster"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-amber-600 transition-colors">
-              Notice Registrations
-            </span>
-            <div className="h-8 w-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 flex items-center justify-center">
-              <ClipboardCheck className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {metrics.eventRsvpsCount || 98} RSVPs
-            </span>
-            <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400">Live Roster</span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-            {events.length || 4} scheduled events · {items.length} bulletins
-          </p>
-        </div>
+        const gauges = [
+          {
+            label: 'Directory Verification',
+            valueLabel:
+              (metrics.verificationRate ?? 0) > 0 ? `${metrics.verificationRate}%` : '—',
+            pct: metrics.verificationRate || 0,
+            bar: 'bg-emerald-500',
+            valueClass: 'text-emerald-600',
+            left: `${metrics.verifiedAlumniFormatted || '—'} / ${metrics.registeredAlumniFormatted || '—'} profiles`,
+            right: `${metrics.pendingAlumniVerification ?? 0} pending`,
+            rightClass: 'text-amber-600 font-semibold',
+          },
+          {
+            label: 'Graduate Employability',
+            valueLabel: metrics.employmentRate > 0 ? `${metrics.employmentRate}%` : '—',
+            pct: metrics.employmentRate || 0,
+            bar: 'bg-blue-600',
+            valueClass: 'text-blue-600',
+            left: `${(metrics.employedAlumni ?? 0) > 0 ? (metrics.employedAlumni ?? 0).toLocaleString() : '—'} employed`,
+            right: `${metrics.unemployedAlumni ?? 0} seeking/study`,
+            rightClass: 'text-slate-500',
+          },
+          {
+            label: 'ETA Tracer Study',
+            valueLabel: metrics.hasActiveSurveyWave ? `${metrics.etaComplianceRate ?? 0}%` : 'Standby (—)',
+            pct: metrics.hasActiveSurveyWave ? metrics.etaComplianceRate || 0 : 0,
+            bar: metrics.hasActiveSurveyWave ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600',
+            valueClass: 'text-slate-500 dark:text-slate-400',
+            left: metrics.hasActiveSurveyWave ? 'Survey wave active' : 'No active survey cohort',
+            right: metrics.hasActiveSurveyWave ? 'Compliance tracked' : 'Awaiting launch',
+            rightClass: 'text-slate-400',
+          },
+          {
+            label: 'Desk & SIS Workload',
+            valueLabel: totalDocs > 0 ? `${deskPendingPct}% pending` : inquiries.length > 0 ? `${inquiries.length} tickets` : '—',
+            pct: totalDocs > 0 ? deskPendingPct : 0,
+            bar: 'bg-amber-500',
+            valueClass: 'text-amber-600',
+            left:
+              totalDocs > 0
+                ? `${pendingDocs.toLocaleString()} / ${totalDocs.toLocaleString()} requests`
+                : 'No SIS queue metrics',
+            right: `${inquiries.length} open tickets`,
+            rightClass: 'text-emerald-600 font-semibold',
+          },
+        ];
 
-        {/* Card 4: Public Homepage CMS */}
-        <div
-          onClick={() => navigate('/cms/homepage')}
-          className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-xs hover:border-indigo-500/50 transition-all cursor-pointer group"
-          title="Click to open live Homepage Studio"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">
-              Homepage Studio
-            </span>
-            <div className="h-8 w-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 flex items-center justify-center">
-              <Globe className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {homepageConfig.heroSlides ? homepageConfig.heroSlides.filter((s) => s.active).length : 3} Slides
-            </span>
-            <span className="text-[11px] font-bold text-indigo-600">Live</span>
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-            {metrics.corporatePartners || 500} employer partners · {metrics.activeJobs || 162} roles
-          </p>
-        </div>
-      </div>
+        return (
+          <>
+            <AdminStatGrid stats={executiveStats} cols={4} compact />
 
-      {/* ── OPERATIONAL PROGRESS & WORKLOAD GAUGES ──────────────────────────── */}
-      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-xs">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Alumni Affairs Key Performance & Compliance Gauges</h3>
-          </div>
-          <span className="text-xs text-slate-400 font-medium">Real-Time Operational Audit</span>
-        </div>
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-[#003366] dark:text-[#FFCC00]" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Alumni Affairs Key Performance & Compliance Gauges
+                  </h3>
+                </div>
+                <span className="text-xs font-medium text-slate-400">
+                  {lastSyncTime ? `Synced ${lastSyncTime}` : 'Live operational audit'}
+                </span>
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Gauge 1: Directory Verification */}
-          <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-slate-600 dark:text-slate-300">Directory Verification</span>
-              <span className="font-black text-emerald-600">{metrics.verificationRate || 99.7}%</span>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {gauges.map((g) => (
+                  <div
+                    key={g.label}
+                    className="rounded-xl border border-slate-100 bg-slate-50/80 p-3.5 dark:border-slate-800 dark:bg-slate-800/40"
+                  >
+                    <div className="mb-1.5 flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-600 dark:text-slate-300">{g.label}</span>
+                      <span className={`font-black ${g.valueClass}`}>{g.valueLabel}</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-500 ${g.bar}`}
+                        style={{ width: `${Math.min(100, g.pct)}%` }}
+                      />
+                    </div>
+                    <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-500">
+                      <span>{g.left}</span>
+                      <span className={g.rightClass}>{g.right}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, metrics.verificationRate || 99.7)}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1.5">
-              <span>{metrics.verifiedAlumniFormatted || '1,211'} / {metrics.registeredAlumniFormatted || '1,215'} profiles</span>
-              <span className="text-amber-600 font-semibold">{metrics.pendingAlumniVerification ?? 4} pending</span>
-            </div>
-          </div>
-
-          {/* Gauge 2: Graduate Employability */}
-          <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-slate-600 dark:text-slate-300">Graduate Employability</span>
-              <span className="font-black text-blue-600">{metrics.employmentRate || 90.3}%</span>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, metrics.employmentRate || 90.3)}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1.5">
-              <span>{metrics.employedAlumni?.toLocaleString() || '1,097'} employed</span>
-              <span>{metrics.unemployedAlumni ?? 108} seeking/study</span>
-            </div>
-          </div>
-
-          {/* Gauge 3: ETA Tracer Compliance */}
-          <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-slate-600 dark:text-slate-300">ETA Tracer Study</span>
-              <span className="font-bold text-slate-500 dark:text-slate-400">
-                {metrics.hasActiveSurveyWave ? `${metrics.etaComplianceRate}%` : 'Standby (—)'}
-              </span>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-              <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  metrics.hasActiveSurveyWave ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'
-                }`}
-                style={{ width: metrics.hasActiveSurveyWave ? `${metrics.etaComplianceRate}%` : '0%' }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1.5">
-              <span>{metrics.hasActiveSurveyWave ? 'Survey Wave Active' : 'No active survey cohort'}</span>
-              <span className="text-slate-400">0 / 0 submitted</span>
-            </div>
-          </div>
-
-          {/* Gauge 4: Open Desk Workload */}
-          <div className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-semibold text-slate-600 dark:text-slate-300">Desk & SIS Workload</span>
-              <span className="font-black text-amber-600">20.0% Pending</span>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-amber-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: '20%' }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1.5">
-              <span>{metrics.documentRequestsPending || 420} / {metrics.digitalRequests?.toLocaleString() || '2,100'} requests</span>
-              <span className="text-emerald-600 font-semibold">{inquiries.length} tickets</span>
-            </div>
-          </div>
-        </div>
-      </div>
+          </>
+        );
+      })()}
 
       {/* ── DEPARTMENT EMPLOYABILITY & ENROLLMENT ANALYTICS (Recharts) ──────── */}
       {metrics.departmentDistribution && metrics.departmentDistribution.length > 0 && (

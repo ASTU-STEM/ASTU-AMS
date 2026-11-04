@@ -30,6 +30,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminStatGrid from '../components/AdminStatGrid';
 import approvalService, {
   WorkflowItem,
   WorkflowStatus,
@@ -263,32 +264,49 @@ export default function ApprovalWorkflow() {
         }
       />
 
-      {/* ── KPI METRIC CARDS ── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {[
-          { label: 'Awaiting Review', value: counts['Pending Review'] ?? 0, icon: Clock, color: '#E8A020', border: 'border-amber-200' },
-          { label: 'In Review Stages', value: counts['In Review'] ?? 0, icon: Eye, color: '#003366', border: 'border-blue-200' },
-          { label: 'Changes Requested', value: counts['Changes Requested'] ?? 0, icon: AlertTriangle, color: '#F97316', border: 'border-orange-200' },
-          { label: 'Approved Today', value: (counts['Approved'] ?? 0) + (counts['Published'] ?? 0), icon: CheckCircle2, color: '#1D9E75', border: 'border-emerald-200' },
-          { label: 'Rejected / Archived', value: counts['Rejected'] ?? 0, icon: ThumbsDown, color: '#E24B4A', border: 'border-rose-200' },
-        ].map((s) => {
-          const Icon = s.icon;
-          return (
-            <div
-              key={s.label}
-              className={`rounded-2xl border ${s.border} bg-white p-4 shadow-xs flex items-center gap-3.5 dark:border-slate-800 dark:bg-slate-900`}
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">{s.label}</p>
-                <p className="text-xl font-extrabold text-slate-900 dark:text-white">{s.value}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <AdminStatGrid
+        cols={5}
+        compact
+        stats={[
+          {
+            title: 'Awaiting Review',
+            value: String(counts['Pending Review'] ?? 0),
+            icon: Clock,
+            tone: 'amber',
+            trend: (counts['Pending Review'] ?? 0) > 0 ? 'Action needed' : 'Clear',
+            trendDirection: (counts['Pending Review'] ?? 0) > 0 ? 'flat' : 'up',
+          },
+          {
+            title: 'In Review Stages',
+            value: String(counts['In Review'] ?? 0),
+            icon: Eye,
+            tone: 'blue',
+            description: 'Multi-stage pipeline',
+          },
+          {
+            title: 'Changes Requested',
+            value: String(counts['Changes Requested'] ?? 0),
+            icon: AlertTriangle,
+            tone: 'gold',
+            description: 'Returned to authors',
+          },
+          {
+            title: 'Approved / Published',
+            value: String((counts['Approved'] ?? 0) + (counts['Published'] ?? 0)),
+            icon: CheckCircle2,
+            tone: 'green',
+            trend: 'Cleared for live',
+            trendDirection: 'up',
+          },
+          {
+            title: 'Rejected / Archived',
+            value: String(counts['Rejected'] ?? 0),
+            icon: ThumbsDown,
+            tone: 'red',
+            description: 'Not proceeding',
+          },
+        ]}
+      />
 
       {/* ── FILTER & SEARCH BAR ── */}
       <div className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">

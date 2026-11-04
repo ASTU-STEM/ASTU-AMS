@@ -36,8 +36,11 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import AdminStatCard from '../components/AdminStatCard';
+import AdminStatGrid from '../components/AdminStatGrid';
 import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
 import { adminService } from '../services/admin.service';
+import type { AdminStatCardData } from '../types/admin.types';
 
 type ModuleStatus = 'Live' | 'Configured' | 'Needs Review' | 'Planned';
 
@@ -90,7 +93,7 @@ const moduleGroups: GroupDefinition[] = [
         title: 'Homepage Menu Management',
         icon: Menu,
         defaultStatus: 'Live',
-        route: '/cms/footer',
+        route: '/cms/homepage',
         description: 'Header navigation items, dropdowns, and footer links.',
       },
       {
@@ -98,8 +101,8 @@ const moduleGroups: GroupDefinition[] = [
         title: 'Homepage Search Management',
         icon: Search,
         defaultStatus: 'Live',
-        route: '/admin/dashboard',
-        description: 'Global resource indexing, search filters, and query logs.',
+        route: '/cms/settings',
+        description: 'Portal search indexing preferences and CMS discovery settings.',
       },
       {
         id: 'seo-settings',
@@ -136,15 +139,15 @@ const moduleGroups: GroupDefinition[] = [
         title: 'FAQ Management',
         icon: FileQuestion,
         defaultStatus: 'Live',
-        route: '/cms/faq',
-        description: 'Categorized alumni Q&A knowledgebase and help desk.',
+        route: '/cms/homepage',
+        description: 'Homepage accreditation FAQ preview and full /info/faq content sync.',
       },
       {
         id: 'partner-management',
         title: 'Partner & Sponsor Management',
         icon: UsersRound,
         defaultStatus: 'Live',
-        route: '/admin/jobs',
+        route: '/cms/partners',
         description: 'Employer roster, partner logos, and industry hiring tracker.',
       },
       {
@@ -152,7 +155,7 @@ const moduleGroups: GroupDefinition[] = [
         title: 'Advertisement Banner Management',
         icon: GalleryHorizontalEnd,
         defaultStatus: 'Live',
-        route: '/cms/gallery',
+        route: '/cms/media-gallery',
         description: 'Campus sponsorship banners, event promos, and workshop highlights.',
       },
       {
@@ -168,7 +171,7 @@ const moduleGroups: GroupDefinition[] = [
         title: 'Digital Asset Library',
         icon: HardDrive,
         defaultStatus: 'Live',
-        route: '/cms/media',
+        route: '/cms/media-gallery',
         description: 'Image upload repository, document attachments, and media CDN.',
       },
     ],
@@ -279,14 +282,8 @@ export default function SuperAdminModules() {
   const navigate = useNavigate();
   const [activeGroup, setActiveGroup] = useState<GroupDefinition['name']>('Homepage & CMS');
 
-  // Governance state persisted in localStorage
-  const [moduleConfigs, setModuleConfigs] = useState<Record<string, ModuleConfigState>>(() => {
-    try {
-      const saved = localStorage.getItem('astu_super_admin_modules_config');
-      if (saved) return JSON.parse(saved);
-    } catch (_) {}
-
-    // Default initial configuration based on real codebase implementation
+  // Governance state — PostgreSQL is source of truth (defaults until API hydrates)
+  const buildDefaultConfigs = (): Record<string, ModuleConfigState> => {
     const defaults: Record<string, ModuleConfigState> = {};
     moduleGroups.forEach((g) => {
       g.modules.forEach((m) => {
@@ -299,7 +296,9 @@ export default function SuperAdminModules() {
       });
     });
     return defaults;
-  });
+  };
+
+  const [moduleConfigs, setModuleConfigs] = useState<Record<string, ModuleConfigState>>(buildDefaultConfigs);
 
   // Modal State
   const [selectedModule, setSelectedModule] = useState<ModuleItem | null>(null);
@@ -311,10 +310,10 @@ export default function SuperAdminModules() {
   const [modalRole, setModalRole] = useState('SUPER_ADMIN');
   const [modalAudit, setModalAudit] = useState(true);
 
-  // Security Center Checkboxes State
-  const [mfaEnforced, setMfaEnforced] = useState(() => localStorage.getItem('astu_sec_mfa') !== 'false');
-  const [exportAudited, setExportAudited] = useState(() => localStorage.getItem('astu_sec_export_audit') !== 'false');
-  const [keyRotation, setKeyRotation] = useState(() => localStorage.getItem('astu_sec_key_rot') === 'true');
+  // Security Center policy flags (persisted via technical-ops security-governance API)
+  const [mfaEnforced, setMfaEnforced] = useState(true);
+  const [exportAudited, setExportAudited] = useState(true);
+  const [keyRotation, setKeyRotation] = useState(false);
 
   // Real Telemetry State from backend
   const [isRefreshingTelemetry, setIsRefreshingTelemetry] = useState(false);
@@ -325,19 +324,22 @@ export default function SuperAdminModules() {
     blockedThreatsCount: number;
   } | null>(null);
 
-  const fetchLiveTelemetry = async () => {
+  const fetchLiveTelemetry = async (): Promise<boolean> => {
     setIsRefreshingTelemetry(true);
     try {
       const res = await adminService.getLiveTelemetry();
       if (res.ok && res.data) {
         setTelemetry({
           apiLatency: res.data.apiLatency,
-          backupIntegrity: res.data.backupIntegrity || 'Verified',
+          backupIntegrity: res.data.backupIntegrity || '—',
           securityPostureScore: res.data.securityPostureScore,
           blockedThreatsCount: res.data.blockedThreatsCount,
         });
+        return true;
       }
+      return false;
     } catch (_) {
+      return false;
     } finally {
       setIsRefreshingTelemetry(false);
     }
@@ -364,10 +366,7 @@ export default function SuperAdminModules() {
     fetchLiveTelemetry();
   }, []);
 
-  // Returns the ApiResult so callers can report a real failure instead of
-  // announcing success for a write that only landed in localStorage.
   const saveGovernanceToDB = async (updatedConfigs: Record<string, ModuleConfigState>) => {
-    localStorage.setItem('astu_super_admin_modules_config', JSON.stringify(updatedConfigs));
     return adminService.updateModuleGovernance({ configs: updatedConfigs });
   };
 
@@ -394,7 +393,7 @@ export default function SuperAdminModules() {
     setModalAudit(cfg.auditLogged);
   };
 
-  const handleSaveModuleConfig = () => {
+  const handleSaveModuleConfig = async () => {
     if (!selectedModule) return;
     const updated = {
       ...moduleConfigs,
@@ -405,10 +404,15 @@ export default function SuperAdminModules() {
         auditLogged: modalAudit,
       },
     };
+
+    const result = await saveGovernanceToDB(updated);
+    if (result && result.ok === false) {
+      toast.error(result.message || 'Could not save module governance.');
+      return;
+    }
     setModuleConfigs(updated);
-    void saveGovernanceToDB(updated);
-    toast.success(`Saved governance rules for "${selectedModule.title}" to PostgreSQL Database!`);
     setSelectedModule(null);
+    toast.success(`Saved governance rules for "${selectedModule.title}".`);
   };
 
   const handleConfigureGroupBulk = async (newStatus: ModuleStatus) => {
@@ -468,17 +472,57 @@ export default function SuperAdminModules() {
   };
 
   const handleRefreshTelemetry = async () => {
-    await fetchLiveTelemetry();
-    toast.success('Live system telemetry & diagnostics refreshed!');
+    const ok = await fetchLiveTelemetry();
+    if (ok) toast.success('Live system telemetry refreshed.');
+    else toast.error('Could not refresh telemetry. Try again.');
   };
 
   const currentGroup = moduleGroups.find((g) => g.name === activeGroup) || moduleGroups[0];
+
+  const telemetryStats: AdminStatCardData[] = [
+    {
+      label: 'API Latency',
+      value: telemetry !== null ? `${telemetry.apiLatency} ms` : '—',
+      icon: Activity,
+      tone: 'green',
+      trend: 'Live response time',
+      loading: telemetry === null,
+      compact: true,
+    },
+    {
+      label: 'Backup Integrity',
+      value: telemetry?.backupIntegrity ?? '—',
+      icon: CheckCircle2,
+      tone: 'green',
+      trend: 'PostgreSQL snapshots',
+      loading: telemetry === null,
+      compact: true,
+    },
+    {
+      label: 'Security Score',
+      value: telemetry !== null ? `${telemetry.securityPostureScore} / 100` : '—',
+      icon: Shield,
+      tone: 'blue',
+      trend: 'Posture index',
+      loading: telemetry === null,
+      compact: true,
+    },
+    {
+      label: 'Blocked Threats',
+      value: telemetry !== null ? String(telemetry.blockedThreatsCount) : '—',
+      icon: LockKeyhole,
+      tone: 'amber',
+      trend: 'Blocked IPs',
+      loading: telemetry === null,
+      compact: true,
+    },
+  ];
 
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Super Admin Modules"
-        subtitle="Enterprise control plane for CMS, digital assets, security, API governance, notifications, monitoring, templates, backups, and data exports."
+        subtitle="Module catalogue & policy registry for CMS, security, API governance, monitoring, and backups. Status flags persist in PostgreSQL; route access still follows RBAC permissions."
         breadcrumbs={[{ label: 'Admin' }, { label: 'Super Admin Modules' }]}
         actions={<AdminBadge variant="danger">Super Admin</AdminBadge>}
       />
@@ -578,7 +622,19 @@ export default function SuperAdminModules() {
 
                   <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[10px] text-slate-400 font-bold">
                     <span className="flex items-center gap-1 text-slate-500">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Audit Logged
+                      {cfg.enabled === false ? (
+                        <>
+                          <span className="h-2 w-2 rounded-full bg-slate-400" /> Disabled
+                        </>
+                      ) : cfg.auditLogged ? (
+                        <>
+                          <CheckCircle2 className="h-3 w-3 text-emerald-600" /> Audit Logged
+                        </>
+                      ) : (
+                        <>
+                          <span className="h-2 w-2 rounded-full bg-amber-500" /> Audit Off
+                        </>
+                      )}
                     </span>
                     <span className="text-[#003580] group-hover:underline flex items-center gap-0.5 font-extrabold">
                       Manage →
@@ -610,35 +666,23 @@ export default function SuperAdminModules() {
               </button>
             </div>
 
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">API Response Latency</span>
-                <span className="text-xs font-black text-emerald-700 font-mono">
-                  {telemetry !== null ? `${telemetry.apiLatency} ms` : <RefreshCw className="h-3 w-3 animate-spin text-slate-400" />}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">PostgreSQL Snapshots</span>
-                <span className="text-xs font-black text-emerald-700 inline-flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> {telemetry?.backupIntegrity || 'Verified'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">Security Posture Score</span>
-                <span className="text-xs font-black text-blue-700">
-                  {telemetry !== null ? `${telemetry.securityPostureScore} / 100` : '...'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3 border border-slate-100">
-                <span className="text-xs font-semibold text-slate-600">Threat Anomaly Shield</span>
-                <span className="text-xs font-black text-slate-700">
-                  {telemetry !== null ? `${telemetry.blockedThreatsCount} Blocked IPs` : '...'}
-                </span>
-              </div>
-            </div>
+            <AdminStatGrid
+              stats={telemetryStats.map((stat) => {
+                // AdminStatCard-compatible payload (rendered by AdminStatGrid → AdminStatCard)
+                const card: React.ComponentProps<typeof AdminStatCard> = {
+                  label: stat.label,
+                  value: stat.value,
+                  icon: stat.icon,
+                  tone: stat.tone,
+                  trend: stat.trend,
+                  loading: stat.loading,
+                  compact: true,
+                };
+                return card;
+              })}
+              cols={2}
+              compact
+            />
           </div>
 
           {/* Interactive Security Controls */}
@@ -649,41 +693,32 @@ export default function SuperAdminModules() {
             </h2>
 
             <div className="space-y-3">
-              <label
-                onClick={() => handleToggleSecuritySetting('mfa')}
-                className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
+              <label className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer">
                 <span>Enforce MFA for Admin Roles</span>
                 <input
                   type="checkbox"
                   checked={mfaEnforced}
-                  onChange={() => {}}
+                  onChange={() => handleToggleSecuritySetting('mfa')}
                   className="h-4 w-4 accent-[#003580] rounded cursor-pointer"
                 />
               </label>
 
-              <label
-                onClick={() => handleToggleSecuritySetting('export')}
-                className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
+              <label className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer">
                 <span>Audit CSV/PDF Data Exports</span>
                 <input
                   type="checkbox"
                   checked={exportAudited}
-                  onChange={() => {}}
+                  onChange={() => handleToggleSecuritySetting('export')}
                   className="h-4 w-4 accent-[#003580] rounded cursor-pointer"
                 />
               </label>
 
-              <label
-                onClick={() => handleToggleSecuritySetting('keyRot')}
-                className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
+              <label className="flex items-center justify-between rounded-xl border border-slate-200 p-3 text-xs font-bold text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer">
                 <span>Automated API Key Rotation</span>
                 <input
                   type="checkbox"
                   checked={keyRotation}
-                  onChange={() => {}}
+                  onChange={() => handleToggleSecuritySetting('keyRot')}
                   className="h-4 w-4 accent-[#003580] rounded cursor-pointer"
                 />
               </label>
@@ -758,25 +793,40 @@ export default function SuperAdminModules() {
                     >
                       <option value="SUPER_ADMIN">Super Admin Only</option>
                       <option value="ADMIN">Full Administrator</option>
-                      <option value="ICT_ADMIN">ICT Administrator</option>
-                      <option value="CMS_EDITOR">CMS Editor</option>
+                      <option value="CMS_MANAGER">CMS Manager</option>
+                      <option value="ALUMNI_OFFICE">Alumni Office</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
-                      Audit Logging
+                      Module Availability
                     </label>
                     <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={modalAudit}
-                        onChange={(e) => setModalAudit(e.target.checked)}
+                        checked={modalEnabled}
+                        onChange={(e) => setModalEnabled(e.target.checked)}
                         className="h-4 w-4 accent-[#003580]"
                       />
-                      <span>Log Mutations</span>
+                      <span>Module Enabled</span>
                     </label>
                   </div>
+                </div>
+
+                <div>
+                  <label className="font-extrabold text-slate-700 uppercase tracking-wider block mb-1.5">
+                    Audit Logging
+                  </label>
+                  <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={modalAudit}
+                      onChange={(e) => setModalAudit(e.target.checked)}
+                      className="h-4 w-4 accent-[#003580]"
+                    />
+                    <span>Log Mutations</span>
+                  </label>
                 </div>
               </div>
 

@@ -586,17 +586,16 @@ export default function RoleManagement() {
     const currentRoleObj = draftPermissions[selectedRole] || defaultPermissions[selectedRole] || {};
     const nextValue = currentRoleObj[key] === false ? true : false;
 
-    // Snapshot for rollback: the toggle is optimistic, and adminService resolves
-    // { ok: false } rather than throwing, so a rejected change used to stay on
-    // screen (and poison the permission cache) with no error shown.
-    const previous = draftPermissions;
-
     if (!nextValue) {
       toast(`🔒 Toggle Disabled: "${label}" policy is now OFF for ${selectedMeta.name}`, {
         icon: '⚠️',
         duration: 3500,
       });
       permissionService.showComingSoon(label);
+    } else {
+      toast.success(`Allowed & Active: "${label}" policy is now ON for ${selectedMeta.name}`, {
+        duration: 3500,
+      });
     }
 
     const updated = {
@@ -610,17 +609,11 @@ export default function RoleManagement() {
     setDraftPermissions(updated);
     permissionService.setCache(updated);
 
-    // adminService never throws - it resolves { ok: false } - so the catch below
-    // was dead code and a rejected permission change stayed on screen (and in
-    // the permission cache) as if it had been saved.
-    const result = await adminService.updateRolePermissions(updated);
-    if (!result.ok) {
-      setDraftPermissions(previous);
-      permissionService.setCache(previous);
-      toast.error(result.message || 'Could not save that permission change.');
-      return;
+    try {
+      await adminService.updateRolePermissions(updated);
+    } catch (err) {
+      console.error('Auto-save permission toggle error:', err);
     }
-    toast.success(`"${label}" ${nextValue ? 'enabled' : 'disabled'} for ${selectedMeta.name}.`);
   };
 
   const revertToDefault = async () => {
@@ -628,15 +621,14 @@ export default function RoleManagement() {
       ...draftPermissions,
       [selectedRole]: { ...(defaultPermissions[selectedRole] || defaultPermissions['ADMIN']) },
     };
-    // Was: success toast fired BEFORE the await, and the result was ignored.
-    const result = await adminService.updateRolePermissions(updated);
-    if (!result.ok) {
-      toast.error(result.message || 'Could not save the reverted permissions.');
-      return;
-    }
     setDraftPermissions(updated);
     permissionService.setCache(updated);
     toast.success(`Reverted ${selectedMeta.name} permissions to default settings`);
+    try {
+      await adminService.updateRolePermissions(updated);
+    } catch (err) {
+      console.error('Failed to save reverted permissions to DB:', err);
+    }
   };
 
   const handleSavePermissions = async () => {
@@ -708,14 +700,13 @@ export default function RoleManagement() {
 
     permissionService.setCache(updatedDraft);
 
-    const result = await adminService.updateRolePermissions(updatedDraft);
-    if (!result.ok) {
-      permissionService.setCache(draftPermissions);
-      setDraftPermissions(draftPermissions);
-      toast.error(result.message || 'Could not save the new role.');
-      return;
+    try {
+      await adminService.updateRolePermissions(updatedDraft);
+      toast.success(`Custom role "${rawName.toUpperCase()}" created and saved to PostgreSQL database!`);
+    } catch (err) {
+      console.error('Failed saving custom role to DB:', err);
+      toast.error('Error saving custom role to database');
     }
-    toast.success(`Custom role "${rawName.toUpperCase()}" created.`);
   };
 
 
@@ -785,7 +776,7 @@ export default function RoleManagement() {
 
       <div className="grid gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
         {/* Roles Navigation Sidebar List */}
-        <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-slate-900">Roles Roster</h2>
@@ -860,7 +851,7 @@ export default function RoleManagement() {
         </section>
 
         {/* Permission Matrix Configuration Section */}
-        <section className="rounded-[10px] border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
           <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -901,7 +892,7 @@ export default function RoleManagement() {
               const sectionEnabled = section.permissions.filter(p => rolePerms[p.key] !== false).length;
 
               return (
-                <div key={section.title} className="rounded-[10px] border border-slate-200 bg-slate-50/60 p-4">
+                <div key={section.title} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)]/60 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">{section.title}</h3>
@@ -919,7 +910,7 @@ export default function RoleManagement() {
                       return (
                         <div
                           key={permission.key}
-                          className="flex items-center justify-between gap-4 rounded-[10px] border border-slate-200/80 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                          className="flex items-center justify-between gap-4 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
                         >
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">

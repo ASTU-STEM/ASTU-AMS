@@ -20,6 +20,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminStatGrid from '../components/AdminStatGrid';
 import contentService from '../services/content.service';
 
 export type SeoStatus = 'Excellent' | 'Good' | 'Needs Work' | 'Critical';
@@ -336,28 +337,43 @@ ${xmlUrls}
         }
       />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {[
-          { label: 'Average SEO Score', value: seoItems.length ? `${aggregateScore}/100` : '—', icon: Sparkles, color: '#003580' },
-          { label: 'Tracked Page Views', value: totalTraffic > 0 ? totalTraffic.toLocaleString() : '—', icon: TrendingUp, color: '#1D9E75' },
-          { label: 'Managed URLs', value: seoItems.length, icon: FileSearch, color: '#E8A020' },
-          { label: 'Identified Issues', value: totalIssues, icon: XCircle, color: totalIssues > 5 ? '#E24B4A' : '#1D9E75' },
-        ].map((s) => {
-          const Icon = s.icon;
-          return (
-            <div key={s.label} className="rounded-[10px] border border-slate-200 bg-white p-4 shadow-xs flex items-center gap-3 dark:border-slate-800 dark:bg-slate-900">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">{s.label}</p>
-                <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">{s.value}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <AdminStatGrid
+        cols={4}
+        compact
+        stats={[
+          {
+            title: 'Average SEO Score',
+            value: seoItems.length ? `${aggregateScore}/100` : '—',
+            icon: Sparkles,
+            tone: 'blue',
+            progress: seoItems.length ? aggregateScore : undefined,
+            description: 'Title · description · keywords',
+          },
+          {
+            title: 'Tracked Page Views',
+            value: totalTraffic > 0 ? totalTraffic.toLocaleString() : '—',
+            icon: TrendingUp,
+            tone: 'green',
+            trend: totalTraffic > 0 ? 'Workspace traffic' : 'No traffic yet',
+            trendDirection: totalTraffic > 0 ? 'up' : 'flat',
+          },
+          {
+            title: 'Managed URLs',
+            value: String(seoItems.length),
+            icon: FileSearch,
+            tone: 'amber',
+            description: 'Public portal routes audited',
+          },
+          {
+            title: 'Identified Issues',
+            value: String(totalIssues),
+            icon: XCircle,
+            tone: totalIssues > 5 ? 'red' : 'green',
+            trend: totalIssues > 5 ? 'Needs remediation' : 'Healthy',
+            trendDirection: totalIssues > 5 ? 'down' : 'up',
+          },
+        ]}
+      />
 
       {/* Search & Audit Bar */}
       <div className="flex flex-col gap-3 rounded-[12px] border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">

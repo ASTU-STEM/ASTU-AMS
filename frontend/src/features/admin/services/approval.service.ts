@@ -73,285 +73,40 @@ export const defaultStageConfigs: WorkflowStageConfig[] = [
   },
 ];
 
-export const defaultWorkflowItems: WorkflowItem[] = [
-  {
-    id: 'w-pub-carnival',
-    title: 'ASTU Alumni Carnival & Grand Homecoming 2026',
-    type: 'Event',
-    author: 'Alumni Relations Officer',
-    department: 'Alumni Relations Directorate',
-    content: `Celebrating three decades of ASTU engineering heritage! Taking place on April 25 and 26, 2026 at the ASTU Main Campus in Adama.
-A flagship homecoming uniting graduates, university leadership, academic researchers, and 500+ enterprise corporate partners.
-Key activities:
-• Keynote addresses from distinguished alumni and industry leaders
-• Enterprise Career Expo with 80+ companies
-• Research & Startup Innovation Showcase
-• Regional Chapter Networking Dinner`,
-    excerpt: 'Celebrating three decades of ASTU heritage! Flagship celebration on April 25-26, 2026 at ASTU Main Campus uniting 1,200+ attendees.',
-    submittedAt: '1 day ago',
-    status: 'Published',
-    priority: 'High',
-    reviewer: 'Alumni Relations Officer',
-    approvedByOfficer: 'Alumni Relations Officer',
-    publishedAt: 'Today',
-    eventDate: 'April 25-26, 2026',
-    eventLocation: 'ASTU Main Campus, Adama',
-    targetAudience: 'All Actors',
-    isBroadcast: true,
-    stage: 3,
-    totalStages: 3,
-    comments: [
-      {
-        id: 'c-pub-1',
-        author: 'Alumni Relations Officer',
-        text: 'Approved and published to live website and all actor dashboard hero portals.',
-        createdAt: 'Just now',
-        type: 'published',
-      },
-    ],
-    dueDate: 'Apr 25, 2026',
-  },
-  {
-    id: 'w-pub-career',
-    title: 'Annual Enterprise Career Fair & Internship Expo 2026',
-    type: 'Event',
-    author: 'Career & Placement Center',
-    department: 'Career & Placement Center',
-    content: `ASTU Annual Career & Internship Fair 2026 will bring 80+ enterprise employers directly to campus.
-Dates: May 14, 2026.
-Target audience: Graduating engineering seniors and alumni seeking employment.
-Early registration ensures guaranteed interview slots with leading tech and industrial partners.`,
-    excerpt: 'Over 80 enterprise partners visiting ASTU campus for graduate recruitment, guaranteed interview slots, and technical hiring.',
-    submittedAt: '2 days ago',
-    status: 'Published',
-    priority: 'Urgent',
-    reviewer: 'Alumni Relations Officer',
-    approvedByOfficer: 'Alumni Relations Officer',
-    publishedAt: 'Yesterday',
-    eventDate: 'May 14, 2026',
-    eventLocation: 'ASTU Innovation Complex, Hall B',
-    targetAudience: 'All Actors',
-    isBroadcast: true,
-    stage: 3,
-    totalStages: 3,
-    comments: [
-      {
-        id: 'c-pub-2',
-        author: 'Alumni Relations Officer',
-        text: 'Approved for global campus broadcast.',
-        createdAt: 'Yesterday',
-        type: 'published',
-      },
-    ],
-    dueDate: 'May 14, 2026',
-  },
-  {
-    id: 'w-reg-1',
-    title: 'Official Academic Senate Degree Clearance Notice 2026',
-    type: 'Announcement',
-    author: 'Office of the Registrar',
-    department: 'Office of the Registrar',
-    content: `Official administrative directive from the Office of the Registrar regarding degree audit clearance, transcript issuance windows, and accreditation verifications.
-All graduating candidates and department heads must finalize clearance protocols by May 10, 2026.
-Alumni requiring certified digital transcripts for multinational employment verification must submit requests via the digital document portal.`,
-    excerpt: 'Mandatory degree audit clearance, transcript issuance windows, and accreditation verification schedule for 2026 graduating batches.',
-    submittedAt: '30 min ago',
-    status: 'Pending Review',
-    priority: 'Urgent',
-    reviewer: 'Alumni Relations Officer',
-    targetAudience: 'All Actors',
-    stage: 1,
-    totalStages: 2,
-    comments: [
-      {
-        id: 'c-reg-1',
-        author: 'Office of the Registrar',
-        text: 'Submitted by Office of the Registrar for Alumni Officer review and cross-dashboard publication.',
-        createdAt: '30 min ago',
-        type: 'comment',
-      },
-    ],
-    dueDate: 'Today, 5 PM',
-  },
-  {
-    id: 'w-2',
-    title: 'Campus Tour 2026 Photo Album',
-    type: 'Gallery',
-    author: 'Dept Head',
-    department: 'Mechanical Engineering',
-    content: '18 high-resolution photo submissions capturing students and international guests exploring the new mechatronics lab.',
-    excerpt: 'Mechatronics laboratory visit photo series for the ASTU alumni public gallery.',
-    submittedAt: '3 days ago',
-    status: 'In Review',
-    priority: 'Normal',
-    reviewer: 'Sarah Mengistu',
-    stage: 2,
-    totalStages: 3,
-    comments: [
-      {
-        id: 'c-2',
-        author: 'Content Manager',
-        text: 'Initial review passed. Sent to communications specialist for brand guidelines check.',
-        createdAt: '1 day ago',
-        type: 'approval',
-      },
-      {
-        id: 'c-3',
-        author: 'Sarah Mengistu',
-        text: 'Please confirm release consent for photo #4 featuring visiting delegates.',
-        createdAt: '5 hours ago',
-        type: 'change_request',
-      },
-    ],
-    dueDate: 'Tomorrow',
-  },
-  {
-    id: 'w-3',
-    title: 'Tracer Survey Wave 3 Banner & Directives',
-    type: 'Page',
-    author: 'Content Manager',
-    department: 'Institutional Research & Quality Assurance',
-    content: 'National tracer survey campaign banner and questions targeting the 2024 and 2025 graduating engineering cohorts.',
-    excerpt: 'Tracer survey cohort instructions for ETA accreditation compliance.',
-    submittedAt: '5 hours ago',
-    status: 'Changes Requested',
-    priority: 'Normal',
-    reviewer: 'Marketing Lead',
-    stage: 1,
-    totalStages: 2,
-    comments: [
-      {
-        id: 'c-4',
-        author: 'Marketing Lead',
-        text: 'The QR code destination link needs to point to the secure registrar tracer endpoint instead of the public overview page.',
-        createdAt: '3 hours ago',
-        type: 'change_request',
-      },
-    ],
-    dueDate: 'Jun 12',
-  },
-  {
-    id: 'w-4',
-    title: 'Alumni Spotlight: Solomon Bekele, Chief Robotics Engineer',
-    type: 'Post',
-    author: 'Content Manager',
-    department: 'Alumni Relations Directorate',
-    content: `Celebrating Solomon Bekele (Class of 2019, Electromechanical Engineering). Solomon recently led the deployment of automated smart grid systems across regional power facilities.
-His inspirational interview covers practical capstone preparation and advice for graduating seniors.`,
-    excerpt: 'Class of 2019 electromechanical engineering alumnus spearheads automated smart grid engineering.',
-    submittedAt: '1 day ago',
-    status: 'Approved',
-    priority: 'High',
-    reviewer: 'Editor in Chief',
-    stage: 3,
-    totalStages: 3,
-    comments: [
-      {
-        id: 'c-5',
-        author: 'Editor in Chief',
-        text: 'Verified credentials and quote permissions. Approved for official publication.',
-        createdAt: '2 hours ago',
-        type: 'approval',
-      },
-    ],
-    dueDate: '—',
-  },
-  {
-    id: 'w-5',
-    title: 'Applied Engineering Lab Safety Guidelines 2026',
-    type: 'Page',
-    author: 'Research Directorate',
-    department: 'Applied Sciences',
-    content: 'Mandatory workplace protocol updates for chemical and high-voltage laboratories across campus.',
-    excerpt: 'Updated safety protocols for graduate researchers and visiting corporate lab partners.',
-    submittedAt: '4 days ago',
-    status: 'Pending Review',
-    priority: 'Urgent',
-    reviewer: 'Public Relations',
-    stage: 1,
-    totalStages: 2,
-    comments: [],
-    dueDate: 'Today',
-  },
-  {
-    id: 'w-6',
-    title: 'Enterprise Partnership Summit Report & MoUs',
-    type: 'Post',
-    author: 'Industry Liaison',
-    department: 'Corporate Relations Directorate',
-    content: 'Executive summary detailing agreements signed with Ethio Telecom, Ethiopian Airlines, and INSA regarding graduate internships.',
-    excerpt: 'Official signing summary of tri-party graduate recruitment agreements.',
-    submittedAt: '6 hours ago',
-    status: 'In Review',
-    priority: 'Normal',
-    reviewer: 'Content Manager',
-    stage: 1,
-    totalStages: 3,
-    comments: [
-      {
-        id: 'c-6',
-        author: 'Content Manager',
-        text: 'Under review by institutional legal counsel.',
-        createdAt: '4 hours ago',
-        type: 'comment',
-      },
-    ],
-    dueDate: 'Jun 13',
-  },
-  {
-    id: 'w-7',
-    title: 'Outdated Department Procurement Policy Notice',
-    type: 'Page',
-    author: 'HR Office',
-    department: 'Administrative Services',
-    content: 'Proposed modifications to equipment procurement guidelines for senior student project teams.',
-    excerpt: 'Procurement policy update superseded by academic senate decree.',
-    submittedAt: '2 weeks ago',
-    status: 'Rejected',
-    priority: 'Low',
-    reviewer: 'Legal',
-    stage: 2,
-    totalStages: 2,
-    comments: [
-      {
-        id: 'c-7',
-        author: 'Legal',
-        text: 'Superseded by Academic Senate Circular #2026/04. Submission rejected.',
-        createdAt: '1 week ago',
-        type: 'rejection',
-      },
-    ],
-    dueDate: '—',
-  },
-  {
-    id: 'w-8',
-    title: 'New Homepage Hero Banner Campaign',
-    type: 'Page',
-    author: 'Content Manager',
-    department: 'Communications & Web Team',
-    content: 'Updated high-resolution photography and revised tagline: "Connecting ASTU Excellence to the Global Industry".',
-    excerpt: 'Proposed imagery and button copy revisions for the flagship public homepage carousel.',
-    submittedAt: '30 min ago',
-    status: 'Pending Review',
-    priority: 'Urgent',
-    reviewer: 'Marketing Lead',
-    stage: 1,
-    totalStages: 3,
-    comments: [],
-    dueDate: 'Today',
-  },
-];
+/** Legacy demo seed IDs — stripped once from localStorage so officers see a real queue. */
+const LEGACY_DEMO_ITEM_IDS = new Set([
+  'w-pub-carnival',
+  'w-pub-career',
+  'w-reg-1',
+  'w-2',
+  'w-3',
+  'w-4',
+  'w-5',
+  'w-6',
+  'w-7',
+  'w-8',
+]);
+
+/** Kept empty — prefer a real empty approval queue over fabricated Carnival/demo items. */
+export const defaultWorkflowItems: WorkflowItem[] = [];
 
 export const approvalService = {
   getItems(): WorkflowItem[] {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter((i: WorkflowItem) => !LEGACY_DEMO_ITEM_IDS.has(i.id));
+          if (cleaned.length !== parsed.length) {
+            this.saveItems(cleaned);
+            return cleaned;
+          }
+          return parsed;
+        }
       }
     } catch {}
-    this.saveItems(defaultWorkflowItems);
-    return defaultWorkflowItems;
+    return [];
   },
 
   saveItems(items: WorkflowItem[]): void {
@@ -596,10 +351,16 @@ export const approvalService = {
     return false;
   },
 
+  /** Clears the queue. Demo reseeding is disabled — officers start from an empty pipeline. */
   resetDefaults(): WorkflowItem[] {
-    this.saveItems(defaultWorkflowItems);
+    this.saveItems([]);
     this.saveStageConfigs(defaultStageConfigs);
-    return defaultWorkflowItems;
+    return [];
+  },
+
+  clearQueue(): WorkflowItem[] {
+    this.saveItems([]);
+    return [];
   },
 };
 

@@ -14,39 +14,14 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-interface AdminSession {
-  id: string;
-  user: string;
-  ip: string;
-  device: string;
-  status: string;
-}
-
 export default function IctPoliciesSessionsPage() {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [activeBroadcast, setActiveBroadcast] = useState<string | null>(null);
 
-  const [sessions, setSessions] = useState<AdminSession[]>(() => {
-    try {
-      const stored = localStorage.getItem('user');
-      if (stored) {
-        const u = JSON.parse(stored);
-        return [
-          {
-            id: 'sess-current',
-            user: `${u.fullName || u.email || 'Current Administrator'} (${u.role || 'ADMIN'})`,
-            ip: 'Current Connection',
-            device: typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox') ? 'Firefox Browser' : 'Chrome / Web Client',
-            status: 'Active Now (Current Session)',
-          },
-        ];
-      }
-    } catch {
-      // ignore
-    }
-    return [];
-  });
+  const [sessions, setSessions] = useState<
+    { id: string; user: string; ip: string; device: string; status: string }[]
+  >([]);
 
   const handlePublishBroadcast = (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,8 +157,11 @@ export default function IctPoliciesSessionsPage() {
 
         <div className="space-y-3">
           {sessions.length === 0 ? (
-            <div className="py-8 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 text-xs">
-              No active concurrent administrative sessions recorded.
+            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-10 text-center dark:border-slate-700 dark:bg-slate-800/40">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No active administrative sessions</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Live sessions will list here when session instrumentation is available. Emergency revoke still works as a control action.
+              </p>
             </div>
           ) : (
             sessions.map((sess) => (

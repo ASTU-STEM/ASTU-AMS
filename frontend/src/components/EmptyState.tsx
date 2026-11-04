@@ -16,23 +16,19 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   action,
   className = ''
 }) => {
-  const defaultIcon = <Inbox className="h-10 w-10 text-slate-400 dark:text-slate-500" />;
+  const defaultIcon = <Inbox className="h-12 w-12 text-gray-400" />;
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={`flex flex-col items-center justify-center p-8 sm:p-12 text-center ${className}`}
-    >
-      <div className="mb-4 inline-flex items-center justify-center p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-2xs ring-1 ring-slate-200/60 dark:ring-slate-700/60">
+    <div className={`flex flex-col items-center justify-center p-12 text-center ${className}`}>
+      <div className="mb-4">
         {icon || defaultIcon}
       </div>
-      <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1.5 tracking-tight">{title}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
       {description && (
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-md leading-relaxed">{description}</p>
+        <p className="text-sm text-gray-600 mb-6 max-w-md">{description}</p>
       )}
       {action && (
-        <div className="mt-2">
+        <div className="mt-4">
           {action}
         </div>
       )}

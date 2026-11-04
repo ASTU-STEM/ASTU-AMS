@@ -25,6 +25,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Clock3,
+  LifeBuoy,
 } from 'lucide-react';
 import type { AdminPageHeaderProps } from '../types/admin.types';
 import AdminStatGrid from './AdminStatGrid';
@@ -32,6 +33,7 @@ import AdminStatGrid from './AdminStatGrid';
 const getHeaderIcon = (title: string) => {
   const t = title.toLowerCase();
   if (t.includes('dashboard')) return BarChart3;
+  if (t.includes('support') || t.includes('ticket') || t.includes('help desk')) return LifeBuoy;
   if (t.includes('module')) return Layers;
   if (t.includes('report')) return FileBarChart2;
   if (t.includes('user') || t.includes('member')) return UserCog;

@@ -25,69 +25,24 @@ export interface ExportReportOptions {
   reportType?: 'accreditation' | 'employment-analytics' | 'tracer-reports' | 'employer-feedback' | 'skill-gap' | 'curriculum';
 }
 
-export interface DepartmentStats {
+export interface DepartmentStatsSummary {
   totalAlumni: number;
   employedAlumni: number;
-  selfEmployedAlumni: number;
-  unemployedAlumni: number;
   employmentRate: number;
-  averageSalary: number | null;
 }
 
 export interface DepartmentAlumniRecord {
   id: string;
   userId: string | null;
-  studentId: string;
   fullName: string;
-  email: string | null;
-  phone: string | null;
   graduationYear: number;
   employmentStatus: string;
-  salary: number | null;
-  skills: string[];
-  company: string | null;
-  jobTitle: string | null;
-  industry: string | null;
-  location: string | null;
-  isVerified: boolean;
 }
 
 export interface DepartmentProfile {
   id: string;
   code: string;
   name: string;
-}
-
-export interface DepartmentAnalytics {
-  totalAlumni: number;
-  employed: number;
-  unemployed: number;
-  selfEmployed: number;
-  unspecified?: number;
-  employmentRate: number;
-  unemploymentRate: number;
-  selfEmploymentRate: number;
-  employmentTrend?: Array<{
-    year: string;
-    graduates: number;
-    employed: number;
-    employmentRate: number;
-  }>;
-  employmentStatusDistribution?: Array<{
-    status: string;
-    count: number;
-    percentage: number;
-  }>;
-  topCompanies?: Array<{ name: string; count: number; percentage: number }>;
-  topIndustries?: Array<{ name: string; count: number; percentage: number }>;
-  topSkills?: Array<{ name: string; count: number; percentage: number }>;
-  locations?: Array<{ name: string; count: number; percentage: number }>;
-  averageSalary: number | null;
-  medianSalary?: number | null;
-  salaryCount: number;
-  salaryCoverage?: number;
-  verifiedCount: number;
-  unverifiedCount: number;
 }
 
 export const departmentService = {
@@ -99,7 +54,7 @@ export const departmentService = {
   },
 
   // Department-scoped stats for the authenticated department head (my-stats)
-  async getDepartmentStats(departmentId?: string): Promise<DepartmentStats> {
+  async getDepartmentStats(departmentId?: string): Promise<DepartmentStatsSummary> {
     const url = departmentId ? `/departments/${departmentId}/stats` : '/departments/my-stats';
     const response = await api.get(url);
     return response.data?.data || response.data;
@@ -113,19 +68,12 @@ export const departmentService = {
   },
 
   // Department analytics
-  async getDepartmentAnalytics(departmentId?: string): Promise<DepartmentAnalytics> {
+  async getDepartmentAnalytics(departmentId?: string): Promise<any> {
     const url = departmentId ? `/departments/${departmentId}/analytics` : '/departments/my-analytics';
     const response = await api.get(url);
     return response.data?.data || response.data;
   },
 
-  // Dispatch a survey template instantly to the department's eligible alumni
-  async dispatchSurveyInstantly(
-    templateId: string
-  ): Promise<{ surveyId: string; dispatchedCount: number; totalTargeted: number }> {
-    const response = await api.post(`/surveys/templates/${templateId}/send-instantly`);
-    return response.data?.data || response.data;
-  },
   // Overview metrics from real backend endpoint
   async getOverview(filters?: Record<string, string>): Promise<any> {
     const response = await api.get('/department/overview', { params: filters });
@@ -1801,6 +1749,4 @@ export const departmentService = {
     }
   }
 };
-
-export default departmentService;
 

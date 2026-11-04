@@ -55,7 +55,31 @@ export default function IctSupportTicketsPage() {
       const res = await apiClient.get<any>('/support/tickets');
       const dataList = res?.data?.data || res?.data || [];
       if (Array.isArray(dataList)) {
-        setTickets(dataList);
+        setTickets(
+          dataList
+            .filter((t: unknown) => t && typeof t === 'object')
+            .map((t: any, idx: number) => ({
+              id: String(t.id || `ticket-${idx}`),
+              category: String(t.category || 'general'),
+              studentId: t.studentId ? String(t.studentId) : undefined,
+              fullName: String(t.fullName || t.name || 'Unknown User'),
+              graduationYear: t.graduationYear ? String(t.graduationYear) : undefined,
+              contactEmail: String(t.contactEmail || t.email || '—'),
+              phone: t.phone ? String(t.phone) : undefined,
+              message: String(t.message || ''),
+              attachments: Array.isArray(t.attachments) ? t.attachments : [],
+              status: (t.status || 'OPEN') as SupportTicket['status'],
+              route: t.route ? String(t.route) : undefined,
+              lastErrorCode: t.lastErrorCode ? String(t.lastErrorCode) : undefined,
+              sessionId: t.sessionId ? String(t.sessionId) : undefined,
+              responseNotes: t.responseNotes ? String(t.responseNotes) : undefined,
+              escalationNotes: t.escalationNotes ? String(t.escalationNotes) : undefined,
+              assignedToRole: t.assignedToRole ? String(t.assignedToRole) : undefined,
+              resolvedByRole: t.resolvedByRole ? String(t.resolvedByRole) : undefined,
+              createdAt: String(t.createdAt || new Date().toISOString()),
+              updatedAt: String(t.updatedAt || t.createdAt || new Date().toISOString()),
+            }))
+        );
       }
     } catch (err) {
       console.error('Failed to fetch ICT support tickets:', err);
@@ -346,12 +370,13 @@ export default function IctSupportTicketsPage() {
               <div className="p-6 bg-gradient-to-r from-blue-950 via-slate-900 to-blue-950 text-white flex justify-between items-start border-b border-slate-700">
                 <div className="flex items-start gap-3.5">
                   <div className="w-12 h-12 rounded-2xl bg-blue-900/60 border border-blue-700 flex items-center justify-center font-bold text-base text-blue-300 shadow-inner">
-                    {selectedTicket.fullName
-                      .split(' ')
+                    {String(selectedTicket.fullName || 'U')
+                      .split(/\s+/)
+                      .filter(Boolean)
                       .map(n => n[0])
                       .join('')
                       .substring(0, 2)
-                      .toUpperCase()}
+                      .toUpperCase() || 'U'}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
