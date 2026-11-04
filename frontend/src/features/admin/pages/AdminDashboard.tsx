@@ -55,11 +55,18 @@ import {
 } from 'recharts';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
+import AdminStatGrid from '../components/AdminStatGrid';
+import AdminEmptyState from '../components/AdminEmptyState';
+import AdminSectionCard, {
+  adminPanelClass,
+  adminTableHeadClass,
+  adminTableRowClass,
+} from '../components/AdminSectionCard';
 import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
 import { adminService } from '../services/admin.service';
 import { useAuth } from '../../../contexts/AuthContext';
+import type { AdminStatCardData } from '../types/admin.types';
 
-type TrendTone = 'success' | 'warning';
 type TimeRange = '7d' | '30d' | '90d' | '1y';
 
 const quickActions = [
@@ -71,22 +78,6 @@ const quickActions = [
   { label: 'Analytics', icon: Activity, path: '/admin/analytics', accent: '#0284C7' },
 ];
 
-const statToneClasses: Record<string, { circle: string; label: string; border: string }> = {
-  '#003580': { circle: 'bg-[#003580]/10 text-[#003580]', label: 'text-[#003580]', border: 'border-[#003580]' },
-  '#E8A020': { circle: 'bg-[#E8A020]/10 text-[#B87900]', label: 'text-[#B87900]', border: 'border-[#E8A020]' },
-  '#1D9E75': { circle: 'bg-[#1D9E75]/10 text-[#1D9E75]', label: 'text-[#1D9E75]', border: 'border-[#1D9E75]' },
-  '#7C3AED': { circle: 'bg-violet-500/10 text-violet-600', label: 'text-violet-600', border: 'border-violet-500' },
-};
-
-function TrendChip({ text, tone }: { text: string; tone: TrendTone }) {
-  const classes =
-    tone === 'success'
-      ? 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15'
-      : 'bg-[#EF9F27]/10 text-[#B86D00] border-[#EF9F27]/15';
-
-  return <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold ${classes}`}>{text}</span>;
-}
-
 function StatusDot({ status }: { status: string }) {
   const classes: Record<string, string> = {
     healthy: 'bg-emerald-500',
@@ -95,34 +86,9 @@ function StatusDot({ status }: { status: string }) {
   };
   return (
     <span
-      className={`inline-block h-2 w-2 shrink-0 rounded-full ${classes[status] || 'bg-slate-400'}`}
+      className={`inline-block h-2 w-2 shrink-0 rounded-full ${classes[status] || 'bg-[var(--text-muted)]'}`}
       aria-hidden="true"
     />
-  );
-}
-
-function ChartCard({
-  title,
-  subtitle,
-  children,
-  action,
-}: {
-  title: string;
-  subtitle: string;
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="admin-card rounded-[10px] border border-slate-200 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-[var(--text-primary)]">{title}</h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-[#8493A8]">{subtitle}</p>
-        </div>
-        {action}
-      </div>
-      <div className="mt-4">{children}</div>
-    </div>
   );
 }
 
@@ -209,42 +175,50 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
 
   // Derived state from metrics — real data only, no fallbacks to mock
-  const activeStatCards = [
+  const kpiStats: AdminStatCardData[] = [
     {
-      label: 'Total Alumni',
+      title: 'Total Alumni',
       value: metrics?.kpis?.totalAlumni?.toString() || '0',
-      trend: 'From database',
+      description: 'From database',
       icon: GraduationCap,
-      accent: '#003580',
-      chip: 'success' as TrendTone,
-      path: '/admin/users?role=ALUMNI',
+      tone: 'blue',
+      trend: loading ? 'Loading' : metrics ? 'Live' : 'No data',
+      trendDirection: 'flat',
+      loading,
+      onClick: () => navigate('/admin/users?role=ALUMNI'),
     },
     {
-      label: 'Total Employers',
+      title: 'Total Employers',
       value: metrics?.kpis?.totalEmployers?.toString() || '0',
-      trend: 'From database',
+      description: 'From database',
       icon: Building2,
-      accent: '#E8A020',
-      chip: 'success' as TrendTone,
-      path: '/admin/users?role=EMPLOYER',
+      tone: 'gold',
+      trend: loading ? 'Loading' : metrics ? 'Live' : 'No data',
+      trendDirection: 'flat',
+      loading,
+      onClick: () => navigate('/admin/users?role=EMPLOYER'),
     },
     {
-      label: 'Survey Completion',
+      title: 'Survey Completion',
       value: metrics?.kpis?.surveyCompletion || '0%',
-      trend: 'Current rate',
+      description: 'Current rate',
       icon: ClipboardCheck,
-      accent: '#1D9E75',
-      chip: 'success' as TrendTone,
-      path: '/admin/surveys',
+      tone: 'green',
+      trend: loading ? 'Loading' : metrics ? 'Live' : 'No data',
+      trendDirection: 'flat',
+      loading,
+      onClick: () => navigate('/admin/surveys'),
     },
     {
-      label: 'Active Jobs',
+      title: 'Active Jobs',
       value: metrics?.kpis?.activeJobs?.toString() || '0',
-      trend: 'Currently posted',
+      description: 'Currently posted',
       icon: Briefcase,
-      accent: '#7C3AED',
-      chip: 'warning' as TrendTone,
-      path: '/admin/jobs',
+      tone: 'purple',
+      trend: loading ? 'Loading' : metrics ? 'Live' : 'No data',
+      trendDirection: 'flat',
+      loading,
+      onClick: () => navigate('/admin/jobs'),
     },
   ];
 
@@ -398,68 +372,60 @@ export default function AdminDashboard() {
         </div>
       </AdminPageHeader>
 
-      {/* Cross-Directorate Multi-Hub Bridge */}
-      <InstitutionalHubBridge currentHub="admin" className="mb-6" />
+      <InstitutionalHubBridge currentHub="admin" />
 
       {/* Executive Directorate Institutional Gateway & Health Strip — live metrics only */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm dark:bg-[var(--bg-card)] dark:border-[var(--border-color)] mb-6">
+      <section className={`${adminPanelClass} p-4`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-[#003580] dark:text-[#22D3EE] flex items-center justify-center shrink-0">
+            <div className="h-10 w-10 rounded-xl bg-[#003580]/10 text-[#003580] dark:bg-[#15294A] dark:text-[#22D3EE] flex items-center justify-center shrink-0">
               <Globe className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Executive Directorate Institutional Gateway</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-semibold text-[var(--text-primary)]">Executive Directorate Institutional Gateway</span>
                 {(() => {
                   const hubsOnline = metrics?.gatewayStrip?.hubsOnline;
                   const hubsTotal = metrics?.gatewayStrip?.hubsTotal ?? 4;
                   const allUp = typeof hubsOnline === 'number' && hubsOnline === hubsTotal;
                   return (
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
-                      loading || hubsOnline == null
-                        ? 'bg-slate-100 text-slate-500 dark:bg-[var(--bg-card-secondary)] dark:text-[#8493A8]'
-                        : allUp
-                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                          : 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
-                    }`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${allUp ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                    <AdminBadge variant={loading || hubsOnline == null ? 'neutral' : allUp ? 'success' : 'warning'}>
                       {loading
                         ? 'Checking hubs…'
                         : metrics?.gatewayStrip?.hubsLabel || `${hubsOnline ?? 0} of ${hubsTotal} core hubs online`}
-                    </span>
+                    </AdminBadge>
                   );
                 })()}
               </div>
-              <p className="text-xs text-slate-500 dark:text-[#8493A8] mt-0.5">
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                 Live status for Registrar SIS, Fayda National ID (Didit), Chapa payment rail, and document SLA — from settings and database counts.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap shrink-0">
-            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[var(--border-color)] dark:bg-[var(--bg-card-secondary)]">
-              <ShieldCheck className={`w-4 h-4 ${metrics?.gatewayStrip?.fayda?.healthy ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
+            <div className="flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2">
+              <ShieldCheck className={`w-4 h-4 ${metrics?.gatewayStrip?.fayda?.healthy ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--text-muted)]'}`} />
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">Fayda ID Gateway</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[var(--text-primary)]">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Fayda ID Gateway</div>
+                <div className="text-xs font-bold text-[var(--text-primary)]">
                   {loading ? '…' : metrics?.gatewayStrip?.fayda?.status || 'Not configured'}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[var(--border-color)] dark:bg-[var(--bg-card-secondary)]">
-              <Database className={`w-4 h-4 ${metrics?.gatewayStrip?.sis?.healthy ? 'text-[#003580] dark:text-[#22D3EE]' : 'text-slate-400'}`} />
+            <div className="flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2">
+              <Database className={`w-4 h-4 ${metrics?.gatewayStrip?.sis?.healthy ? 'text-[#003580] dark:text-[#22D3EE]' : 'text-[var(--text-muted)]'}`} />
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">SIS Roster Sync</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[var(--text-primary)]">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">SIS Roster Sync</div>
+                <div className="text-xs font-bold text-[var(--text-primary)]">
                   {loading ? '…' : metrics?.gatewayStrip?.sis?.status || '0 records'}
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-[var(--border-color)] dark:bg-[var(--bg-card-secondary)]">
-              <Zap className={`w-4 h-4 ${metrics?.gatewayStrip?.systemSLA?.healthy ? 'text-amber-500' : 'text-slate-400'}`} />
+            <div className="flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2">
+              <Zap className={`w-4 h-4 ${metrics?.gatewayStrip?.systemSLA?.healthy ? 'text-amber-500' : 'text-[var(--text-muted)]'}`} />
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8493A8]">Document SLA</div>
-                <div className="text-xs font-extrabold text-slate-800 dark:text-[var(--text-primary)]">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Document SLA</div>
+                <div className="text-xs font-bold text-[var(--text-primary)]">
                   {loading ? '…' : metrics?.gatewayStrip?.systemSLA?.status || metrics?.commandCenter?.systemSLA || 'No requests yet'}
                 </div>
               </div>
@@ -469,17 +435,10 @@ export default function AdminDashboard() {
       </section>
 
       {/* Admin Command Center */}
-      <section className="rounded-2xl border border-slate-200/80 bg-white dark:bg-[var(--bg-card)] dark:border-[var(--border-color)] p-6 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 mb-5 border-b border-slate-100 dark:border-[var(--border-color)]">
-          <div>
-            <h2 className="text-base font-extrabold text-slate-900 dark:text-[var(--text-primary)] tracking-tight flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[#003580] dark:text-[#22D3EE]" />
-              Admin Command Center
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-[#8493A8] mt-0.5">
-              Unified governance layer for system health, user approvals, active jobs, and database sync status.
-            </p>
-          </div>
+      <AdminSectionCard
+        title="Admin Command Center"
+        subtitle="Unified governance layer for system health, user approvals, active jobs, and database sync status."
+        action={
           <button
             type="button"
             onClick={() => {
@@ -513,100 +472,62 @@ export default function AdminDashboard() {
             <FileSpreadsheet className="w-4 h-4" />
             Export System Report
           </button>
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-7 grid grid-cols-2 gap-3.5">
+        }
+      >
+        <div className="grid gap-4 lg:grid-cols-12">
+          <div className="lg:col-span-7 grid grid-cols-2 gap-3">
             {[
               { label: 'IDENTITY COVERAGE', value: metrics?.commandCenter?.identityCoverage || '0%', icon: CheckCircle2, tone: 'text-emerald-600 bg-emerald-50 dark:bg-[#163828] border-emerald-100 dark:border-[#22C55E]/30' },
               { label: 'APPROVAL QUEUE', value: (metrics?.commandCenter?.approvalQueueCount ?? 0).toString(), icon: AlertTriangle, tone: 'text-amber-600 bg-amber-50 dark:bg-[#382B14] border-amber-100 dark:border-[#F59E0B]/30' },
               { label: 'DOCUMENT SLA', value: metrics?.commandCenter?.systemSLA || 'No requests yet', icon: Clock3, tone: 'text-emerald-600 bg-emerald-50 dark:bg-[#163828] border-emerald-100 dark:border-[#22C55E]/30' },
-              { label: 'EXPORT STATUS', value: metrics?.commandCenter?.exportStatus || 'No Data', icon: FileSpreadsheet, tone: 'text-[#003580] dark:text-[#22D3EE] bg-blue-50 dark:bg-[#15294A] border-blue-100 dark:border-[#22D3EE]/30' },
+              { label: 'EXPORT STATUS', value: metrics?.commandCenter?.exportStatus || 'No Data', icon: FileSpreadsheet, tone: 'text-[#003580] dark:text-[#22D3EE] bg-[#003580]/8 dark:bg-[#15294A] border-[#003580]/15 dark:border-[#22D3EE]/30' },
             ].map((sig) => {
               const Icon = sig.icon;
               return (
-                <div key={sig.label} className="rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/60 dark:bg-[var(--bg-card-secondary)] p-4 transition-all hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[var(--bg-hover)] hover:shadow-sm">
+                <div key={sig.label} className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-all hover:bg-[var(--bg-card)] hover:shadow-sm">
                   <div className="flex items-center gap-2">
                     <span className={`p-1.5 rounded-lg border text-sm ${sig.tone}`}>
                       <Icon className="w-4 h-4" />
                     </span>
-                    <span className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400 dark:text-[#8493A8]">{sig.label}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">{sig.label}</span>
                   </div>
-                  <p className="mt-3 text-2xl font-extrabold text-slate-900 dark:text-[var(--text-primary)] tracking-tight">{sig.value}</p>
+                  <p className="mt-3 text-2xl font-bold text-[var(--text-primary)] tracking-tight">{sig.value}</p>
                 </div>
               );
             })}
           </div>
 
-          <div className="lg:col-span-5 rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/60 dark:bg-[var(--bg-card-secondary)] p-4 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-800 dark:text-[var(--text-primary)] uppercase tracking-wider">System Data Quality</span>
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 dark:bg-[#163828] text-emerald-700 dark:text-[#22C55E] border border-emerald-200 dark:border-[#22C55E]/30">
-                MONITORED
-              </span>
+          <div className="lg:col-span-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 flex flex-col justify-between">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">System Data Quality</span>
+              <AdminBadge variant="success">Monitored</AdminBadge>
             </div>
 
             <div className="grid grid-cols-3 gap-2 my-3">
-              <div className="p-3 rounded-lg bg-white dark:bg-[var(--bg-card)] border border-slate-100 dark:border-[var(--border-color)] text-center">
-                <p className="text-lg font-extrabold text-slate-900 dark:text-[var(--text-primary)]">{metrics?.commandCenter?.duplicateScan || '0 open'}</p>
-                <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">DUPLICATE SCAN</p>
+              <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-center">
+                <p className="text-lg font-bold text-[var(--text-primary)]">{metrics?.commandCenter?.duplicateScan || '0 open'}</p>
+                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">Duplicate Scan</p>
               </div>
-              <div className="p-3 rounded-lg bg-white dark:bg-[var(--bg-card)] border border-slate-100 dark:border-[var(--border-color)] text-center">
-                <p className="text-lg font-extrabold text-slate-900 dark:text-[var(--text-primary)]">{metrics?.commandCenter?.completeness || '0%'}</p>
-                <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">COMPLETENESS</p>
+              <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-center">
+                <p className="text-lg font-bold text-[var(--text-primary)]">{metrics?.commandCenter?.completeness || '0%'}</p>
+                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">Completeness</p>
               </div>
-              <div className="p-3 rounded-lg bg-white dark:bg-[var(--bg-card)] border border-slate-100 dark:border-[var(--border-color)] text-center">
-                <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">{metrics?.commandCenter?.auditTrail || '0 Logged'}</p>
-                <p className="text-[9px] font-bold text-slate-400 dark:text-[#8493A8] uppercase mt-0.5">AUDIT TRAIL</p>
+              <div className="p-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-center">
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{metrics?.commandCenter?.auditTrail || '0 Logged'}</p>
+                <p className="text-[9px] font-bold text-[var(--text-muted)] uppercase mt-0.5">Audit Trail</p>
               </div>
             </div>
 
-            <p className="text-[11px] text-slate-500 dark:text-[var(--text-secondary)] font-medium">
+            <p className="text-[11px] text-[var(--text-secondary)] font-medium">
               {metrics?.commandCenter?.healthStatusText || (loading ? 'Loading database health…' : 'No health summary yet — metrics will appear once the database responds.')}
             </p>
           </div>
         </div>
-      </section>
+      </AdminSectionCard>
 
-      {/* KPI Stats Cards */}
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {activeStatCards.map((card) => {
-          const Icon = card.icon;
-          const styles = statToneClasses[card.accent];
+      <AdminStatGrid stats={kpiStats} cols={4} compact />
 
-          return (
-            <div
-              key={card.label}
-              onClick={() => navigate(card.path)}
-              className={`admin-card relative group rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${styles.circle} transition-transform duration-300 group-hover:scale-105`}>
-                  <Icon className={`h-5 w-5 ${styles.label}`} />
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 dark:bg-[#163828] text-emerald-600 dark:text-[#22C55E] border border-emerald-100 dark:border-[#22C55E]/30">
-                  {loading ? 'LOADING' : metrics ? 'LIVE DATA' : 'NO DATA'}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-[#8493A8]">{card.label}</p>
-                <p className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-[var(--text-primary)]">{card.value}</p>
-              </div>
-              <p className="mt-3 pt-3 border-t border-slate-100 dark:border-[var(--border-color)] text-xs text-slate-500 dark:text-[#8493A8] font-medium flex items-center justify-between">
-                <span>{card.trend}</span>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-[#8493A8]" />
-              </p>
-            </div>
-          );
-        })}
-      </section>
-
-      {/* Quick Actions Bar */}
-      <section className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-5 shadow-xs">
-        <div className="flex items-center gap-2 mb-4">
-          <Zap className="w-4 h-4 text-amber-500" />
-          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-[#8493A8]">Quick Actions</span>
-        </div>
+      <AdminSectionCard title="Quick Actions" subtitle="Jump to common administrative workflows.">
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {quickActions.map((action) => {
             const Icon = action.icon;
@@ -615,20 +536,20 @@ export default function AdminDashboard() {
                 key={action.label}
                 type="button"
                 onClick={() => navigate(action.path)}
-                className="group flex flex-col items-center gap-2 rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/50 dark:bg-[var(--bg-card-secondary)] p-3.5 text-center transition-all duration-200 hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[var(--bg-hover)] hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+                className="group flex flex-col items-center gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-3.5 text-center transition-all duration-200 hover:bg-[var(--bg-card)] hover:shadow-sm hover:-translate-y-0.5 cursor-pointer"
               >
                 <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110 shadow-xs"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110"
                   style={{ backgroundColor: `${action.accent}14`, color: action.accent }}
                 >
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-semibold text-slate-700 dark:text-[var(--text-secondary)] group-hover:text-slate-900 dark:group-hover:text-[var(--text-primary)]">{action.label}</span>
+                <span className="text-xs font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">{action.label}</span>
               </button>
             );
           })}
         </div>
-      </section>
+      </AdminSectionCard>
 
       {/* Charts Row */}
       <section className="grid gap-4 xl:grid-cols-5">
