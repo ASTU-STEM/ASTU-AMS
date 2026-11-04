@@ -1085,73 +1085,48 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
         {/* Tab 2: Public Donations Page CMS & Content Editor */}
         {activeTab === 'page-content' && (
           <div className="space-y-6 animate-fade-in">
-            {/* Top Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 border border-blue-100">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="p-1.5 rounded-lg bg-[#003580] text-white">
-                    <SlidersHorizontal className="h-4 w-4" />
-                  </span>
-                  <h2 className="text-base font-black text-slate-900">
-                    Public Donations &amp; Giving Page CMS
-                  </h2>
-                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                    Live Portal Controls
-                  </span>
+            <AdminSectionCard
+              title="Public Donations & Giving Page CMS"
+              subtitle="Customize the public Giving Portal (/donations) hero, mission, CTAs, and foundation pillars."
+              action={
+                <div className="flex items-center gap-2.5">
+                  <a
+                    href="/donations"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-page)] text-[var(--text-secondary)] text-xs font-bold transition-all flex items-center gap-1.5"
+                    title="Open public donations page in a new window"
+                  >
+                    <Globe className="h-3.5 w-3.5 text-[var(--text-muted)]" />
+                    <span>Preview Page</span>
+                    <ExternalLink className="h-3 w-3 text-[var(--text-muted)]" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleSaveGivingPageContent()}
+                    disabled={isSavingPageContent}
+                    className="px-5 py-2.5 rounded-xl bg-[#003580] hover:bg-[#002866] text-white text-xs font-bold shadow-sm transition-all flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Save className={`h-4 w-4 ${isSavingPageContent ? 'animate-spin' : ''}`} />
+                    <span>{isSavingPageContent ? 'Saving & Publishing...' : 'Save & Publish Changes'}</span>
+                  </button>
                 </div>
-                <p className="text-xs text-slate-600 max-w-2xl">
-                  Customize the public Giving Portal (<code className="text-blue-700 font-bold">/donations</code>) hero headline, mission statement, action buttons, and foundation commitment pillars.
-                </p>
-              </div>
+              }
+            >
+              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-800">
+                Live Portal Controls
+              </span>
+            </AdminSectionCard>
 
-              <div className="flex items-center gap-2.5">
-                <a
-                  href="/donations"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
-                  title="Open public donations page in a new window"
-                >
-                  <Globe className="h-3.5 w-3.5 text-slate-500" />
-                  <span>Preview Page</span>
-                  <ExternalLink className="h-3 w-3 text-slate-400" />
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => handleSaveGivingPageContent()}
-                  disabled={isSavingPageContent}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#003580] to-blue-700 hover:from-[#002866] hover:to-blue-800 text-white text-xs font-black shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 hover:scale-[1.01]"
-                >
-                  <Save className={`h-4 w-4 ${isSavingPageContent ? 'animate-spin' : ''}`} />
-                  <span>{isSavingPageContent ? 'Saving & Publishing...' : 'Save & Publish Changes'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Main Content Grid: Editor (Left 7) vs Live Interactive Preview (Right 5) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column: Form Controls */}
               <form onSubmit={handleSaveGivingPageContent} className="lg:col-span-7 space-y-6">
-                {/* Section 1: Hero Banner & Primary CTAs */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm space-y-4">
-                  <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                    <div className="w-8 h-8 rounded-xl bg-blue-100 text-[#003580] flex items-center justify-center font-bold">
-                      1
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-extrabold text-slate-900">
-                        Hero Banner Headline &amp; Call-to-Actions
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Top banner displayed to all visitors, alumni donors, and partners on <code className="text-blue-700">/donations</code>.
-                      </p>
-                    </div>
-                  </div>
-
+                <AdminSectionCard
+                  title="1 · Hero Banner Headline & Call-to-Actions"
+                  subtitle="Top banner displayed to visitors, alumni donors, and partners on /donations."
+                >
                   <div className="space-y-3.5">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                         Hero Headline Title <span className="text-rose-500">*</span>
                       </label>
                       <input
@@ -1159,13 +1134,13 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                         value={bannerTitle}
                         onChange={(e) => setBannerTitle(e.target.value)}
                         placeholder="e.g. Invest in the Next Generation of ASTU Engineers & Leaders"
-                        className="w-full text-xs font-bold text-slate-900 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-[#003580] focus:ring-2 focus:ring-blue-100 transition-all"
+                        className={adminInputClass}
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                         Hero Subtitle / Mission Statement
                       </label>
                       <textarea
@@ -1173,13 +1148,13 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                         value={bannerSubtitle}
                         onChange={(e) => setBannerSubtitle(e.target.value)}
                         placeholder="Explain ASTU's endowment purpose, tax-deductibility, and verified gateways..."
-                        className="w-full text-xs text-slate-800 px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-[#003580] focus:ring-2 focus:ring-blue-100 transition-all leading-relaxed"
+                        className={`${adminInputClass} leading-relaxed`}
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                        <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                           Primary Button Label
                         </label>
                         <input
@@ -1187,13 +1162,13 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                           value={bannerButtonText}
                           onChange={(e) => setBannerButtonText(e.target.value)}
                           placeholder="Explore All Causes"
-                          className="w-full text-xs font-bold text-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-[#003580]"
+                          className={adminInputClass}
                         />
-                        <span className="text-[10px] text-slate-400 mt-0.5 block">Scrolls down to active campaign causes</span>
+                        <span className="text-[10px] text-[var(--text-muted)] mt-0.5 block">Scrolls down to active campaign causes</span>
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                        <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                           Secondary Button Label
                         </label>
                         <input
@@ -1201,34 +1176,22 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                           value={bannerSecondaryButtonText}
                           onChange={(e) => setBannerSecondaryButtonText(e.target.value)}
                           placeholder="Alumni Donor Dashboard"
-                          className="w-full text-xs font-bold text-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-[#003580]"
+                          className={adminInputClass}
                         />
-                        <span className="text-[10px] text-slate-400 mt-0.5 block">Routes to Alumni donor portal with sign-in flow</span>
+                        <span className="text-[10px] text-[var(--text-muted)] mt-0.5 block">Routes to Alumni donor portal with sign-in flow</span>
                       </div>
                     </div>
                   </div>
-                </div>
+                </AdminSectionCard>
 
-                {/* Section 2: "Why Give / Our Commitment" Section Header */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm space-y-4">
-                  <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
-                      2
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-extrabold text-slate-900">
-                        "Why Give" Section Header
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Introductory copy for the foundation impact and accountability section.
-                      </p>
-                    </div>
-                  </div>
-
+                <AdminSectionCard
+                  title='2 · "Why Give" Section Header'
+                  subtitle="Introductory copy for the foundation impact and accountability section."
+                >
                   <div className="space-y-3.5">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                        <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                           Eyebrow Badge
                         </label>
                         <input
@@ -1236,11 +1199,11 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                           value={commitmentEyebrow}
                           onChange={(e) => setCommitmentEyebrow(e.target.value)}
                           placeholder="Our Commitment"
-                          className="w-full text-xs font-bold text-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-[#003580]"
+                          className={adminInputClass}
                         />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                        <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                           Commitment Headline
                         </label>
                         <input
@@ -1248,13 +1211,13 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                           value={commitmentTitle}
                           onChange={(e) => setCommitmentTitle(e.target.value)}
                           placeholder="Why Give Through the ASTU Alumni Foundation?"
-                          className="w-full text-xs font-bold text-slate-900 px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-[#003580]"
+                          className={adminInputClass}
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                      <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1">
                         Commitment Subtitle / Description
                       </label>
                       <textarea
@@ -1262,32 +1225,19 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                         value={commitmentSubtitle}
                         onChange={(e) => setCommitmentSubtitle(e.target.value)}
                         placeholder="Transparent, measurable, and university-directed philanthropy designed to accelerate national technology excellence."
-                        className="w-full text-xs text-slate-800 px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-[#003580]"
+                        className={adminInputClass}
                       />
                     </div>
                   </div>
-                </div>
+                </AdminSectionCard>
 
-                {/* Section 3: The 3 Foundation Benefit Pillars */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm space-y-4">
-                  <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                    <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
-                      3
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-extrabold text-slate-900">
-                        The 3 Foundation Benefit Pillars
-                      </h3>
-                      <p className="text-[11px] text-slate-500">
-                        Feature cards explaining trust, scholarships, and verifiable audit records.
-                      </p>
-                    </div>
-                  </div>
-
+                <AdminSectionCard
+                  title="3 · The 3 Foundation Benefit Pillars"
+                  subtitle="Feature cards explaining trust, scholarships, and verifiable audit records."
+                >
                   <div className="space-y-4">
-                    {/* Pillar 1 */}
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                      <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-extrabold text-[var(--text-primary)]">
                         <ShieldCheck className="h-4 w-4 text-[#003580]" />
                         <span>Pillar 1 (Direct Impact)</span>
                       </div>
@@ -1296,20 +1246,19 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                         value={commitmentCard1Title}
                         onChange={(e) => setCommitmentCard1Title(e.target.value)}
                         placeholder="100% Directed Impact"
-                        className="w-full text-xs font-bold text-slate-900 px-3 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#003580]"
+                        className={adminInputClass}
                       />
                       <textarea
                         rows={2}
                         value={commitmentCard1Desc}
                         onChange={(e) => setCommitmentCard1Desc(e.target.value)}
                         placeholder="Description of direct fund allocation..."
-                        className="w-full text-xs text-slate-700 px-3 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#003580]"
+                        className={adminInputClass}
                       />
                     </div>
 
-                    {/* Pillar 2 */}
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                      <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-extrabold text-[var(--text-primary)]">
                         <GraduationCap className="h-4 w-4 text-emerald-600" />
                         <span>Pillar 2 (Student Scholarships)</span>
                       </div>
@@ -1318,20 +1267,19 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                         value={commitmentCard2Title}
                         onChange={(e) => setCommitmentCard2Title(e.target.value)}
                         placeholder="Merit & Equity Scholarships"
-                        className="w-full text-xs font-bold text-slate-900 px-3 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#003580]"
+                        className={adminInputClass}
                       />
                       <textarea
                         rows={2}
                         value={commitmentCard2Desc}
                         onChange={(e) => setCommitmentCard2Desc(e.target.value)}
                         placeholder="Description of undergraduate stipends and scholarship grants..."
-                        className="w-full text-xs text-slate-700 px-3 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#003580]"
+                        className={adminInputClass}
                       />
                     </div>
 
-                    {/* Pillar 3 */}
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                      <div className="flex items-center gap-2 text-xs font-extrabold text-slate-800">
+                    <div className="p-3.5 rounded-xl bg-[var(--bg-page)] border border-[var(--border-color)] space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-extrabold text-[var(--text-primary)]">
                         <TrendingUp className="h-4 w-4 text-amber-600" />
                         <span>Pillar 3 (Audit & Transparency)</span>
                       </div>
@@ -1340,21 +1288,20 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                         value={commitmentCard3Title}
                         onChange={(e) => setCommitmentCard3Title(e.target.value)}
                         placeholder="Verifiable Audit Reports"
-                        className="w-full text-xs font-bold text-slate-900 px-3 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#003580]"
+                        className={adminInputClass}
                       />
                       <textarea
                         rows={2}
                         value={commitmentCard3Desc}
                         onChange={(e) => setCommitmentCard3Desc(e.target.value)}
                         placeholder="Description of Chapa receipts and annual financial audits..."
-                        className="w-full text-xs text-slate-700 px-3 py-2 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-[#003580]"
+                        className={adminInputClass}
                       />
                     </div>
                   </div>
-                </div>
+                </AdminSectionCard>
 
-                {/* Bottom Actions */}
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                <div className="flex items-center justify-between p-4 bg-[var(--bg-page)] rounded-2xl border border-[var(--border-color)]">
                   <button
                     type="button"
                     onClick={() => {
@@ -1383,7 +1330,7 @@ const parseSafeNumber = (val: any, fallback = 0): number => {
                       );
                       toast('Reset fields to standard defaults. Click Save to persist.');
                     }}
-                    className="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
+                    className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                   >
                     Reset to ASTU Defaults
                   </button>

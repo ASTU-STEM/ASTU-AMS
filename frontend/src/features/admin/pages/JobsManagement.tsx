@@ -911,10 +911,24 @@ export default function JobsManagement() {
 
       {activeTab === 'applications' && (
         <div className="space-y-4">
-          {/* Modern Source Segment Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1.5">
+          <AdminSectionCard
+            title="Filters"
+            subtitle="Segment applicant reviews by job owner, status, and search."
+            action={
+              hasActiveAppFilters ? (
+                <button
+                  type="button"
+                  onClick={resetAppFilters}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#E24B4A] hover:bg-[#E24B4A]/5 px-2.5 py-1.5 rounded-lg transition-colors"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset Filters
+                </button>
+              ) : undefined
+            }
+          >
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mr-1 flex items-center gap-1.5">
                 <SlidersHorizontal className="h-3.5 w-3.5 text-[#003580]" /> Filter By Job Owner:
               </span>
               <button
@@ -923,11 +937,11 @@ export default function JobsManagement() {
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                   selectedSource === 'All'
                     ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                 }`}
               >
                 <span>All Applications</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'}`}>
                   {appSourceCounts.all}
                 </span>
               </button>
@@ -951,49 +965,35 @@ export default function JobsManagement() {
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
                   selectedSource === 'EXTERNAL'
                     ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)]'
                 }`}
               >
                 <span>🏢 External Employer Jobs</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'}`}>
                   {appSourceCounts.external}
                 </span>
               </button>
             </div>
 
-            {hasActiveAppFilters && (
-              <button
-                type="button"
-                onClick={resetAppFilters}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                Reset Filters
-              </button>
-            )}
-          </div>
-
-          {/* Detailed Applications Filter Controls Toolbar */}
-          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-5 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
-                <Search className="h-4 w-4 text-slate-400" />
+              <label className={`${adminFilterShellClass} xl:col-span-5`}>
+                <Search className="h-4 w-4 text-[var(--text-muted)]" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search alumni name, job title, or company..."
-                  className="w-full bg-transparent outline-none placeholder:text-slate-400 text-slate-800"
+                  className="w-full bg-transparent outline-none placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
                 />
                 {query && (
-                  <button type="button" onClick={() => setQuery('')} className="text-slate-400 hover:text-slate-600">
+                  <button type="button" onClick={() => setQuery('')} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </label>
 
-              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <Filter className="h-4 w-4 text-slate-400" />
-                <select value={selectedApplicantStatus} onChange={(event) => setSelectedApplicantStatus(event.target.value as typeof selectedApplicantStatus)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
+              <label className={`${adminFilterShellClass} xl:col-span-3`}>
+                <Filter className="h-4 w-4 text-[var(--text-muted)]" />
+                <select value={selectedApplicantStatus} onChange={(event) => setSelectedApplicantStatus(event.target.value as typeof selectedApplicantStatus)} className="w-full bg-transparent outline-none text-[var(--text-secondary)] font-medium">
                   <option value="All">All Candidate Statuses</option>
                   {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((status) => (
                     <option key={status} value={status}>
@@ -1003,15 +1003,15 @@ export default function JobsManagement() {
                 </select>
               </label>
 
-              <div className="xl:col-span-4 flex flex-wrap items-center justify-between gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-                <span className="text-xs font-semibold text-slate-500 px-2">
+              <div className="xl:col-span-4 flex flex-wrap items-center justify-between gap-2 bg-[var(--bg-page)] p-1.5 rounded-lg border border-[var(--border-color)]">
+                <span className="text-xs font-semibold text-[var(--text-muted)] px-2">
                   {selectedApplications.length} selected
                 </span>
                 <div className="flex items-center gap-1.5">
                   <select
                     value={bulkStatus}
                     onChange={(event) => setBulkStatus(event.target.value as ApplicationStatus)}
-                    className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 outline-none"
+                    className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1 text-xs font-semibold text-[var(--text-secondary)] outline-none"
                   >
                     {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((status) => (
                       <option key={status} value={status}>
@@ -1027,10 +1027,9 @@ export default function JobsManagement() {
               </div>
             </div>
 
-            {/* Active Filter Tags */}
             {hasActiveAppFilters && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-                <span className="text-slate-400 font-medium">Active filters:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-3 mt-3 border-t border-[var(--border-color)] text-xs">
+                <span className="text-[var(--text-muted)] font-medium">Active filters:</span>
                 {selectedSource !== 'All' && (
                   <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-semibold text-[#003580] border border-blue-100">
                     Owner: {selectedSource === 'ASTU_ADMIN' ? '🎓 ASTU / Admin Jobs' : '🏢 External Jobs'}
@@ -1044,23 +1043,23 @@ export default function JobsManagement() {
                   </span>
                 )}
                 {query && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700 border border-slate-200">
+                  <span className="inline-flex items-center gap-1 rounded-md bg-[var(--bg-page)] px-2 py-1 font-semibold text-[var(--text-secondary)] border border-[var(--border-color)]">
                     Search: "{query}"
                     <button type="button" onClick={() => setQuery('')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
                   </span>
                 )}
               </div>
             )}
-          </section>
+          </AdminSectionCard>
 
           <AdminSectionCard title="Applications" subtitle={`Showing ${filteredApplications.length} of ${applicationRows.length} applicant reviews.`}>
             <div className="flex items-center justify-between mb-3 text-xs">
-              <div className="text-slate-500 font-medium">
+              <div className="text-[var(--text-muted)] font-medium">
                 Showing {filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0} to{' '}
                 {appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)} of {filteredApplications.length} applications
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-500 font-semibold">Per Page:</span>
+                <span className="text-[var(--text-muted)] font-semibold">Per Page:</span>
                 <select
                   value={appsLimit}
                   onChange={(e) => {
@@ -1078,31 +1077,31 @@ export default function JobsManagement() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className={`${adminPanelClass} overflow-hidden !shadow-none border border-[var(--border-color)]`}>
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead>
                     <tr>
-                      <th className="w-12 px-4 py-3 text-left">
+                      <th className={`${adminTableHeadClass} w-12 px-4 py-3`}>
                         <input
                           type="checkbox"
                           checked={selectableApplications.length > 0 && selectedApplications.length === selectableApplications.length}
                           onChange={toggleSelectAllApplications}
-                          className="h-4 w-4 rounded border-slate-300 text-[#003580]"
+                          className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580]"
                         />
                       </th>
                       {['Applicant (alumni)', 'Job Title', 'Employer & Source', 'Applied Date', 'Status', 'Actions'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={head} className={`${adminTableHeadClass} px-4 py-3`}>
                           {head}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {paginatedApplications.map((application) => {
                       const selfPosted = isAppSelfPosted(application);
                       return (
-                        <tr key={application.id} className="hover:bg-slate-50/70">
+                        <tr key={application.id} className={adminTableRowClass}>
                           <td className="px-4 py-4">
                             <input
                               type="checkbox"
@@ -1110,7 +1109,7 @@ export default function JobsManagement() {
                               title={selfPosted ? 'Select for bulk update' : 'Only ASTU / Super Admin job applications can be bulk updated by admin'}
                               checked={selectedApplications.includes(application.id)}
                               onChange={() => toggleApplication(application.id)}
-                              className="h-4 w-4 rounded border-slate-300 text-[#003580] disabled:opacity-40 disabled:cursor-not-allowed"
+                              className="h-4 w-4 rounded border-[var(--border-color)] text-[#003580] disabled:opacity-40 disabled:cursor-not-allowed"
                             />
                           </td>
                           <td className="px-4 py-4">
@@ -1121,22 +1120,22 @@ export default function JobsManagement() {
                             >
                               {application.applicant}
                             </button>
-                            <span className="text-[10px] text-slate-400 block font-mono">{application.email || 'alumni@astu.edu.et'}</span>
+                            <span className="text-[10px] text-[var(--text-muted)] block font-mono">{application.email || 'alumni@astu.edu.et'}</span>
                           </td>
-                          <td className="px-4 py-4 text-slate-700 font-semibold">{application.jobTitle}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)] font-semibold">{application.jobTitle}</td>
                           <td className="px-4 py-4">
-                            <div className="font-semibold text-slate-800">{application.employer}</div>
+                            <div className="font-semibold text-[var(--text-primary)]">{application.employer}</div>
                             {selfPosted ? (
                               <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded border border-blue-100 mt-1">
                                 🎓 ASTU Official
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 mt-1">
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-page)] px-2 py-0.5 rounded border border-[var(--border-color)] mt-1">
                                 🏢 External Partner
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-4 text-slate-600">{formatDate(application.appliedDate)}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)]">{formatDate(application.appliedDate)}</td>
                           <td className="px-4 py-4">
                             <AdminBadge variant="default" className={statusClass(application.status)}>
                               {application.status}
@@ -1148,7 +1147,7 @@ export default function JobsManagement() {
                                 type="button"
                                 title="View Application Details & Cover Letter"
                                 onClick={() => setSelectedAppModal(application)}
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] text-slate-600 hover:bg-slate-100 hover:text-[#003580] shadow-sm transition-colors"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[#003580] shadow-sm transition-colors"
                               >
                                 <Eye className="h-4 w-4" />
                               </button>
@@ -1164,7 +1163,7 @@ export default function JobsManagement() {
                                 <select
                                   value={application.status}
                                   onChange={(e) => handleSingleAppStatusChange(application.id, e.target.value as ApplicationStatus)}
-                                  className="rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-[#003580]"
+                                  className="rounded-[6px] border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1 text-xs font-semibold text-[var(--text-secondary)] shadow-sm hover:border-[var(--border-color)] focus:outline-none focus:ring-1 focus:ring-[#003580]"
                                 >
                                   {['PENDING', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW_SCHEDULED', 'OFFERED', 'HIRED', 'REJECTED', 'ACCEPTED', 'WITHDRAWN'].map((st) => (
                                     <option key={st} value={st}>
@@ -1173,7 +1172,7 @@ export default function JobsManagement() {
                                   ))}
                                 </select>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-xs text-slate-400 font-medium italic">
+                                <span className="inline-flex items-center gap-1 text-xs text-[var(--text-muted)] font-medium italic">
                                   Employer Managed
                                 </span>
                               )}
@@ -1184,19 +1183,18 @@ export default function JobsManagement() {
                     })}
                     {filteredApplications.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="py-12 text-center text-slate-400 italic">No application records found matching active filter options.</td>
+                        <td colSpan={7} className="py-12 text-center text-[var(--text-muted)] italic">No application records found matching active filter options.</td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
 
-              {/* Applications Table Pagination Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-[var(--bg-page)] border-t border-[var(--border-color)] text-xs font-medium text-[var(--text-secondary)]">
                 <div>
-                  Showing <span className="font-bold text-slate-900">{filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0}</span> to{' '}
-                  <span className="font-bold text-slate-900">{appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)}</span> of{' '}
-                  <span className="font-bold text-slate-900">{filteredApplications.length}</span> applications
+                  Showing <span className="font-bold text-[var(--text-primary)]">{filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{appsLimit === 'all' ? filteredApplications.length : Math.min(appsPage * parseInt(appsLimit), filteredApplications.length)}</span> of{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{filteredApplications.length}</span> applications
                 </div>
                 {appsLimit !== 'all' && totalAppPages > 1 && (
                   <div className="flex items-center gap-1.5">
@@ -1204,18 +1202,18 @@ export default function JobsManagement() {
                       type="button"
                       disabled={appsPage === 1}
                       onClick={() => setAppsPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Previous
                     </button>
-                    <span className="px-2 font-bold text-slate-800">
+                    <span className="px-2 font-bold text-[var(--text-primary)]">
                       Page {appsPage} of {totalAppPages}
                     </span>
                     <button
                       type="button"
                       disabled={appsPage >= totalAppPages}
                       onClick={() => setAppsPage((p) => Math.min(totalAppPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     >
                       Next
                     </button>
