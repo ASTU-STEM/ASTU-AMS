@@ -88,7 +88,7 @@ const searchSuggestions = [
   { label: 'Moderate jobs & career listings', path: '/cms/jobs' },
   { label: 'Fundraising campaigns & donors', path: '/cms/donations' },
   { label: 'Manage homepage content', path: '/cms/homepage' },
-  { label: 'Create announcement', path: '/cms/content' },
+  { label: 'Create announcement / broadcast notice', path: '/cms/content?action=broadcast' },
   { label: 'Manage events & workshops', path: '/cms/events' },
   { label: 'Manage community content', path: '/cms/community' },
   { label: 'Manage gallery images', path: '/cms/gallery' },
@@ -397,8 +397,8 @@ export default function CmsLayout() {
             <div className="flex items-center gap-2 shrink-0">
 
               {/* Quick Create */}
-              <button type="button" onClick={() => navigate('/cms/content')}
-                className="hidden sm:inline-flex h-10 items-center gap-1.5 rounded-xl bg-[#003366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#002a55] transition-all shadow-sm">
+              <button type="button" onClick={() => navigate('/cms/content?action=broadcast')}
+                className="hidden sm:inline-flex h-10 items-center gap-1.5 rounded-xl bg-[#003366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#002a55] transition-all shadow-sm cursor-pointer">
                 <Plus className="h-4 w-4" /> Create
               </button>
 

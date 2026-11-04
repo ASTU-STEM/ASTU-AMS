@@ -292,7 +292,7 @@ export default function UnifiedSidebar({ onLogout, isOpen = false, onNavigate, c
 
         {!collapsed && isCms && (
           <NavLink
-            to="/cms/content"
+            to="/cms/content?action=broadcast"
             className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#003366] hover:bg-[#002855] px-4 py-2.5 text-xs font-semibold text-white transition-all shadow-sm shadow-[#003366]/15 group cursor-pointer"
           >
             <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" aria-hidden="true" />

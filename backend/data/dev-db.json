@@ -42138,6 +42138,38 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1793785199261",
       "createdAt": "2026-11-04T09:39:59.261Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786213149",
+      "createdAt": "2026-11-04T09:56:53.149Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786218889",
+      "createdAt": "2026-11-04T09:56:58.889Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786289600",
+      "createdAt": "2026-11-04T09:58:09.600Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786293741",
+      "createdAt": "2026-11-04T09:58:13.741Z"
     }
   ],
   "notifications": [
@@ -64786,8 +64818,8 @@
           ]
         }
       },
-      "updatedAt": "2026-11-04T09:35:44.011Z",
-      "updatedBy": "depthead.swe@astu.edu.et"
+      "updatedAt": "2026-11-04T09:56:59.765Z",
+      "updatedBy": "alumnioffice@astu.edu.et"
     }
   ],
   "contentItems": [

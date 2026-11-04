@@ -10,6 +10,16 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminStatGrid from '../components/AdminStatGrid';
+import AdminEmptyState from '../components/AdminEmptyState';
+import AdminSectionCard, {
+  adminFilterShellClass,
+  adminHeroGhostBtnClass,
+  adminPanelClass,
+  adminTabBtnClass,
+  adminTabRailClass,
+  adminTableHeadClass,
+  adminTableRowClass,
+} from '../components/AdminSectionCard';
 import { surveyService } from '../../surveys/services/survey.service';
 import toast from 'react-hot-toast';
 import {
@@ -25,6 +35,45 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
+
+const MILESTONE_TYPES = new Set(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH']);
+
+function countSurveyQuestions(survey: any): number {
+  const sectionQs = survey.sections?.reduce((a: number, sec: any) => a + (sec.questions?.length || 0), 0) || 0;
+  const directQs = (survey.questions || []).filter((q: any) => !q.sectionId).length;
+  // Prefer section-scoped count; never sum both (create used to dual-write).
+  return Math.max(sectionQs, directQs);
+}
+
+/** One row per milestone type (prefer official / earliest) + all customs. */
+function dedupeSurveyTemplates(list: any[]): any[] {
+  const byType = new Map<string, any>();
+  const customs: any[] = [];
+
+  for (const survey of list) {
+    if (!MILESTONE_TYPES.has(survey.type)) {
+      customs.push(survey);
+      continue;
+    }
+    const existing = byType.get(survey.type);
+    if (!existing) {
+      byType.set(survey.type, survey);
+      continue;
+    }
+    const existingScore = (existing._count?.responses || 0) * 10 + (existing._count?.assignments || 0);
+    const nextScore = (survey._count?.responses || 0) * 10 + (survey._count?.assignments || 0);
+    const existingCreated = new Date(existing.createdAt || 0).getTime();
+    const nextCreated = new Date(survey.createdAt || 0).getTime();
+    if (nextScore > existingScore || (nextScore === existingScore && nextCreated < existingCreated)) {
+      byType.set(survey.type, survey);
+    }
+  }
+
+  const milestones = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH']
+    .map((t) => byType.get(t))
+    .filter(Boolean);
+  return [...milestones, ...customs.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())];
+}
 
 
 type SurveyType = 'SIX_MONTH' | 'TWELVE_MONTH' | 'EIGHTEEN_MONTH' | 'TWENTY_FOUR_MONTH' | 'CUSTOM';
@@ -194,6 +243,10 @@ export default function SurveyManagement() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [typeFilter, setTypeFilter] = useState<string>('ALL');
+  const [listSearchQuery, setListSearchQuery] = useState('');
+  const [listStatusFilter, setListStatusFilter] = useState<string>('ALL');
+  const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [batchFilter, setBatchFilter] = useState<string>('ALL');
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
@@ -248,7 +301,15 @@ export default function SurveyManagement() {
     if (activeTab === 'waves') {
       fetchAssignments();
     }
+    setOpenActionMenuId(null);
   }, [activeTab, batchFilter]);
+
+  useEffect(() => {
+    if (!openActionMenuId) return;
+    const onPointerDown = () => setOpenActionMenuId(null);
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [openActionMenuId]);
 
   const fetchSurveys = async () => {
     setLoading(true);
@@ -382,23 +443,16 @@ export default function SurveyManagement() {
     
     setIsSubmitting(true);
     try {
-      const flatQuestions = sections.flatMap((s, sIdx) =>
-        (s.questions || []).map((q, qIdx) => ({
-          questionText: q.questionText,
-          questionType: q.questionType,
-          required: q.required,
-          options: q.options || [],
-          order: sIdx * 100 + qIdx
-        }))
-      );
-
+      // Sections only — repository writes section questions once (no dual root+section write).
+      // New surveys are always CUSTOM so milestone types never multiply via the builder.
       const payload = {
         title,
         description,
-        type,
+        type: editId ? type : ('CUSTOM' as SurveyType),
         targetAudience,
-        milestoneMonths: type === 'SIX_MONTH' ? 6 : type === 'TWELVE_MONTH' ? 12 : type === 'EIGHTEEN_MONTH' ? 18 : type === 'TWENTY_FOUR_MONTH' ? 24 : undefined,
-        questions: flatQuestions,
+        milestoneMonths: editId && MILESTONE_TYPES.has(type)
+          ? (type === 'SIX_MONTH' ? 6 : type === 'TWELVE_MONTH' ? 12 : type === 'EIGHTEEN_MONTH' ? 18 : 24)
+          : undefined,
         sections: sections.map(s => ({
           title: s.title,
           description: s.description,
@@ -461,17 +515,27 @@ export default function SurveyManagement() {
     }
   };
 
-  // Compute aggregate stats from loaded surveys
-  const totalSurveys = surveys.length;
-  const pendingSurveys = surveys.filter(s => s.isActive && !s.isArchived).length;
-  const completedSurveys = surveys.filter(s => s.isArchived).length;
-  const totalResponses = surveys.reduce((acc, s) => acc + (s._count?.responses || 0), 0);
-  const totalSent = surveys.reduce((acc, s) => acc + (s._count?.assignments || 0), 0);
-  const totalQuestions = surveys.reduce((acc, s) => {
-    const sectionQs = s.sections?.reduce((a: number, sec: any) => a + (sec.questions?.length || 0), 0) || 0;
-    const directQs = s.questions?.length || 0;
-    return acc + sectionQs + directQs;
-  }, 0);
+  const uniqueSurveys = dedupeSurveyTemplates(surveys);
+  const filteredSurveys = uniqueSurveys.filter((s) => {
+    const q = listSearchQuery.trim().toLowerCase();
+    const matchesSearch = !q || `${s.title} ${s.description || ''} ${s.type}`.toLowerCase().includes(q);
+    const matchesType = typeFilter === 'ALL'
+      || (typeFilter === 'MILESTONE' && MILESTONE_TYPES.has(s.type))
+      || (typeFilter === 'CUSTOM' && s.type === 'CUSTOM')
+      || s.type === typeFilter;
+    const matchesStatus = listStatusFilter === 'ALL'
+      || (listStatusFilter === 'ACTIVE' && s.isActive && !s.isArchived)
+      || (listStatusFilter === 'INACTIVE' && !s.isActive && !s.isArchived)
+      || (listStatusFilter === 'ARCHIVED' && s.isArchived);
+    return matchesSearch && matchesType && matchesStatus;
+  });
+
+  const totalSurveys = uniqueSurveys.length;
+  const pendingSurveys = uniqueSurveys.filter(s => s.isActive && !s.isArchived).length;
+  const completedSurveys = uniqueSurveys.filter(s => s.isArchived).length;
+  const totalResponses = uniqueSurveys.reduce((acc, s) => acc + (s._count?.responses || 0), 0);
+  const totalSent = uniqueSurveys.reduce((acc, s) => acc + (s._count?.assignments || 0), 0);
+  const totalQuestions = uniqueSurveys.reduce((acc, s) => acc + countSurveyQuestions(s), 0);
 
   return (
     <div className="space-y-6">
@@ -482,7 +546,7 @@ export default function SurveyManagement() {
         actions={
           <button
             onClick={() => { resetBuilder(); setActiveTab('create'); }}
-            className="inline-flex items-center gap-2 rounded-[8px] bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition-all shadow-inner backdrop-blur-sm whitespace-nowrap"
+            className={adminHeroGhostBtnClass}
           >
             <Plus className="h-4 w-4 text-[#FFCC00]" /> Create Survey
           </button>
@@ -498,30 +562,27 @@ export default function SurveyManagement() {
             value: String(totalSurveys),
             icon: ClipboardList,
             tone: 'blue',
-            description: 'All tracer instruments',
+            description: 'Unique templates',
           },
           {
-            title: 'Active / Pending',
+            title: 'Active',
             value: String(pendingSurveys),
             icon: Clock,
             tone: 'amber',
-            trend: pendingSurveys > 0 ? 'Awaiting launch' : 'None pending',
-            trendDirection: pendingSurveys > 0 ? 'flat' : 'up',
+            description: 'Live instruments',
           },
           {
             title: 'Archived',
             value: String(completedSurveys),
             icon: CheckCircle,
             tone: 'green',
-            trend: 'Responses closed',
-            trendDirection: 'up',
+            description: 'Closed templates',
           },
           {
             title: 'Responses',
             value: totalResponses.toLocaleString(),
             icon: Users,
             tone: 'green',
-            progress: totalSent > 0 ? Math.min(100, Math.round((totalResponses / totalSent) * 100)) : undefined,
             description: `${totalSent.toLocaleString()} assignments sent`,
           },
           {
@@ -529,106 +590,242 @@ export default function SurveyManagement() {
             value: String(totalQuestions),
             icon: Sparkles,
             tone: 'purple',
-            description: 'Across all surveys',
+            description: 'Across unique surveys',
           },
         ]}
       />
 
-      {/* Tab Bar */}
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        {['all', 'create', 'analytics', 'waves'].map(tab => (
+      <div className={adminTabRailClass}>
+        {(['all', 'create', 'analytics', 'waves'] as const).map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab as any)}
-            className={`rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors ${activeTab === tab || (activeTab === 'edit' && tab === 'create') || (activeTab === 'details' && tab === 'all') ? 'bg-[#003580] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            onClick={() => setActiveTab(tab)}
+            className={adminTabBtnClass(
+              activeTab === tab || (activeTab === 'edit' && tab === 'create') || (activeTab === 'details' && tab === 'all')
+            )}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)} Surveys
+            {tab === 'all' ? 'All Surveys' : tab === 'create' ? 'Create' : tab === 'analytics' ? 'Analytics' : 'Waves'}
           </button>
         ))}
       </div>
 
       {activeTab === 'all' && (
-        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          {loading ? (
-            <div className="p-8 text-center text-slate-500">Loading surveys...</div>
-          ) : (
+        <div className="space-y-4">
+          <AdminSectionCard title="Filters" subtitle="Search templates and narrow by type or status.">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <label className={`${adminFilterShellClass} w-full lg:max-w-sm`}>
+                <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+                <input
+                  type="text"
+                  placeholder="Search by title, description, or type..."
+                  value={listSearchQuery}
+                  onChange={(e) => setListSearchQuery(e.target.value)}
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]"
+                />
+              </label>
+
+              <div className="flex flex-wrap gap-2">
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)] outline-none focus:border-[#003580]"
+                >
+                  <option value="ALL">All types</option>
+                  <option value="MILESTONE">Milestones</option>
+                  <option value="CUSTOM">Custom</option>
+                  <option value="SIX_MONTH">6-Month</option>
+                  <option value="TWELVE_MONTH">12-Month</option>
+                  <option value="EIGHTEEN_MONTH">18-Month</option>
+                  <option value="TWENTY_FOUR_MONTH">24-Month</option>
+                </select>
+
+                {(['ALL', 'ACTIVE', 'INACTIVE', 'ARCHIVED'] as const).map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => setListStatusFilter(st)}
+                    className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                      listStatusFilter === st
+                        ? 'bg-[#003580] text-white shadow-sm'
+                        : 'border border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    {st === 'ALL' ? 'All status' : st.charAt(0) + st.slice(1).toLowerCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </AdminSectionCard>
+
+          <section className={`${adminPanelClass} overflow-hidden`}>
             <div className="overflow-x-auto">
-              <table className="min-w-full border-separate border-spacing-0 text-sm">
-                <thead className="bg-slate-50">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead>
                   <tr>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Survey Title</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Type</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Milestone</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Status</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Questions</th>
-                    <th className="border-b border-slate-200 px-4 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Actions</th>
+                    {['Survey', 'Type', 'Status', 'Questions', 'Sent', 'Responses', 'Actions'].map((head) => (
+                      <th
+                        key={head}
+                        className={`${adminTableHeadClass} p-4 ${head === 'Actions' ? 'text-right' : ''}`}
+                      >
+                        {head}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {surveys.map(s => {
-                    const isFixed = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(s.type);
-                    const qCount = (s.sections?.reduce((acc: number, sec: any) => acc + (sec.questions?.length || 0), 0) || 0) + (s.questions?.length || 0);
-                    return (
-                      <tr key={s.id} onClick={() => viewDetails(s)} className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer">
-                        <td className="px-4 py-4 font-semibold text-slate-900">{s.title}</td>
-                        <td className="px-4 py-4 text-slate-600">{s.type}</td>
-                        <td className="px-4 py-4 text-slate-600">{s.milestoneMonths ? `${s.milestoneMonths} Months` : 'Custom'}</td>
-                        <td className="px-4 py-4">
-                          <AdminBadge variant={s.isActive ? 'success' : 'neutral'}>{s.isActive ? 'Active' : 'Inactive'}</AdminBadge>
-                        </td>
-                        <td className="px-4 py-4 text-slate-600">{qCount}</td>
-                        <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                          <div className="inline-flex flex-wrap items-center justify-center gap-1.5">
-                            <button
-                              onClick={(e) => handleCloneSurvey(e, s)}
-                              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm transition-all"
-                              title="Clone survey"
-                            >
-                              <Copy className="h-3.5 w-3.5" /> Clone
-                            </button>
-                            {s.isActive ? (
-                              <button
-                                onClick={(e) => handleDeactivateSurvey(e, s)}
-                                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-50 border border-amber-200 shadow-sm transition-all"
-                                title="Deactivate survey"
-                              >
-                                <PauseCircle className="h-3.5 w-3.5" /> Pause
-                              </button>
-                            ) : (
-                              <button
-                                onClick={(e) => handleActivateSurveyNow(e, s)}
-                                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200 shadow-sm transition-all"
-                                title="Activate survey"
-                              >
-                                <Play className="h-3.5 w-3.5" /> Activate
-                              </button>
-                            )}
-                            {!isFixed ? (
-                              <button
-                                onClick={(e) => handleDeleteSurvey(e, s)}
-                                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-rose-200 shadow-sm transition-all"
-                                title="Delete custom survey"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" /> Delete
-                              </button>
-                            ) : (
-                              <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                                Fixed
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="p-8">
+                        <AdminEmptyState icon={ClipboardList} title="Loading survey templates..." />
+                      </td>
+                    </tr>
+                  ) : filteredSurveys.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8">
+                        <AdminEmptyState
+                          icon={ClipboardList}
+                          title="No matching surveys"
+                          description={
+                            uniqueSurveys.length === 0
+                              ? 'Create a custom survey or wait for milestone templates to seed.'
+                              : 'Try another type/status filter or clear the search.'
+                          }
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSurveys.map((s) => {
+                      const isFixed = MILESTONE_TYPES.has(s.type);
+                      const qCount = countSurveyQuestions(s);
+                      const menuOpen = openActionMenuId === s.id;
+                      const statusLabel = s.isArchived ? 'Archived' : s.isActive ? 'Active' : 'Inactive';
+                      const statusVariant = s.isArchived ? 'neutral' : s.isActive ? 'success' : 'warning';
+
+                      return (
+                        <tr
+                          key={s.id}
+                          onClick={() => viewDetails(s)}
+                          className={`${adminTableRowClass} cursor-pointer`}
+                        >
+                          <td className="p-4">
+                            <p className="font-semibold text-[var(--text-primary)]">{s.title}</p>
+                            <p className="mt-0.5 line-clamp-1 text-[11px] text-[var(--text-muted)]">
+                              {s.milestoneMonths
+                                ? `${s.milestoneMonths}-month tracer milestone`
+                                : s.description || 'Custom instrument'}
+                            </p>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                                {isFixed ? `${s.milestoneMonths || '—'} mo` : 'Custom'}
                               </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {surveys.length === 0 && (
-                    <tr><td colSpan={6} className="p-8 text-center text-slate-500">No survey templates found. Create one!</td></tr>
+                              {isFixed && <AdminBadge variant="warning">Fixed</AdminBadge>}
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <AdminBadge variant={statusVariant as any}>{statusLabel}</AdminBadge>
+                          </td>
+                          <td className="p-4 font-semibold text-[var(--text-primary)]">{qCount}</td>
+                          <td className="p-4 text-[var(--text-secondary)]">
+                            {(s._count?.assignments || 0).toLocaleString()}
+                          </td>
+                          <td className="p-4 text-[var(--text-secondary)]">
+                            {(s._count?.responses || 0).toLocaleString()}
+                          </td>
+                          <td
+                            className="relative p-4 text-right"
+                            onClick={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
+                          >
+                            <div className="inline-flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => viewDetails(s)}
+                                className="inline-flex items-center gap-1 rounded-xl bg-[#003580]/10 px-2.5 py-1.5 text-xs font-bold text-[#003580] transition hover:bg-[#003580] hover:text-white"
+                              >
+                                <Eye className="h-3.5 w-3.5" /> View
+                              </button>
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  aria-label="More actions"
+                                  onClick={() => setOpenActionMenuId(menuOpen ? null : s.id)}
+                                  className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] transition hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </button>
+                                {menuOpen && (
+                                  <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] py-1 shadow-lg">
+                                    <button
+                                      type="button"
+                                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
+                                      onClick={(e) => {
+                                        setOpenActionMenuId(null);
+                                        handleCloneSurvey(e, s);
+                                      }}
+                                    >
+                                      <Copy className="h-3.5 w-3.5" /> Clone
+                                    </button>
+                                    {s.isActive ? (
+                                      <button
+                                        type="button"
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-amber-700 hover:bg-amber-50"
+                                        onClick={(e) => {
+                                          setOpenActionMenuId(null);
+                                          handleDeactivateSurvey(e, s);
+                                        }}
+                                      >
+                                        <PauseCircle className="h-3.5 w-3.5" /> Pause
+                                      </button>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                                        onClick={(e) => {
+                                          setOpenActionMenuId(null);
+                                          handleActivateSurveyNow(e, s);
+                                        }}
+                                      >
+                                        <Play className="h-3.5 w-3.5" /> Activate
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-page)]"
+                                      onClick={(e) => {
+                                        setOpenActionMenuId(null);
+                                        handleSendInstantly(e, s);
+                                      }}
+                                    >
+                                      <Send className="h-3.5 w-3.5" /> Send now
+                                    </button>
+                                    {!isFixed && (
+                                      <button
+                                        type="button"
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                                        onClick={(e) => {
+                                          setOpenActionMenuId(null);
+                                          handleDeleteSurvey(e, s);
+                                        }}
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
             </div>
-          )}
-        </section>
+          </section>
+        </div>
       )}
 
       {activeTab === 'analytics' && (

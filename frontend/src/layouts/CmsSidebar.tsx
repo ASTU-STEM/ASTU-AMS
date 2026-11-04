@@ -134,7 +134,7 @@ export default function CmsSidebar({
       >
         {!collapsed ? (
           <NavLink
-            to="/cms/content"
+            to="/cms/content?action=broadcast"
             onClick={onNavigate}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#003580] px-3 py-2.5 text-xs font-semibold text-white shadow-sm shadow-[#003580]/20 transition-colors hover:bg-[#002866] cursor-pointer"
           >
@@ -143,7 +143,7 @@ export default function CmsSidebar({
           </NavLink>
         ) : (
           <NavLink
-            to="/cms/content"
+            to="/cms/content?action=broadcast"
             onClick={onNavigate}
             title="Broadcast Notice"
             className="mt-3 mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-[#003580] text-white shadow-sm shadow-[#003580]/20 transition-colors hover:bg-[#002866] cursor-pointer"

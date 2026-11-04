@@ -1,8 +1,12 @@
 import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import process from 'process';
+import { MILESTONE_TEMPLATES } from '../src/modules/surveys/config/milestoneQuestions';
 
 const prisma = new PrismaClient();
+
+const sixMonthTemplate = MILESTONE_TEMPLATES.find((t) => t.type === 'SIX_MONTH')!;
+const twelveMonthTemplate = MILESTONE_TEMPLATES.find((t) => t.type === 'TWELVE_MONTH')!;
 
 type SeedResponse = {
   alumniId: string;
@@ -275,22 +279,25 @@ async function main() {
     });
   }
 
-  // 4. Create Survey Templates
+  // 4. Create Survey Templates (lookup by type; titles match MILESTONE_TEMPLATES)
   console.log('Creating Tracer Study Survey templates...');
   
   const sixMonthSurveyData = {
-    description: 'Required by Quality Assurance & Education Training Authority (ETA) to assess early career outcomes.',
+    title: sixMonthTemplate.title,
+    description: sixMonthTemplate.description,
     type: 'SIX_MONTH' as const,
+    milestoneMonths: sixMonthTemplate.milestoneMonths,
     isActive: true,
+    isArchived: false,
   };
   const existingSurvey6m = await prisma.survey.findFirst({
-    where: { title: '6-Month Graduate Tracer Study' },
+    where: { type: 'SIX_MONTH' },
     orderBy: { createdAt: 'asc' },
   });
   const survey6m = existingSurvey6m
     ? await prisma.survey.update({ where: { id: existingSurvey6m.id }, data: sixMonthSurveyData })
     : await prisma.survey.create({
-      data: { title: '6-Month Graduate Tracer Study', ...sixMonthSurveyData },
+      data: sixMonthSurveyData,
     });
 
   const sixMonthQuestions = [
@@ -325,18 +332,21 @@ async function main() {
   }
 
   const twelveMonthSurveyData = {
-    description: 'Measures alignment of academic curriculum with your professional role in the industry.',
+    title: twelveMonthTemplate.title,
+    description: twelveMonthTemplate.description,
     type: 'TWELVE_MONTH' as const,
+    milestoneMonths: twelveMonthTemplate.milestoneMonths,
     isActive: true,
+    isArchived: false,
   };
   const existingSurvey12m = await prisma.survey.findFirst({
-    where: { title: '12-Month Longitudinal Tracer Study' },
+    where: { type: 'TWELVE_MONTH' },
     orderBy: { createdAt: 'asc' },
   });
   const survey12m = existingSurvey12m
     ? await prisma.survey.update({ where: { id: existingSurvey12m.id }, data: twelveMonthSurveyData })
     : await prisma.survey.create({
-      data: { title: '12-Month Longitudinal Tracer Study', ...twelveMonthSurveyData },
+      data: twelveMonthSurveyData,
     });
 
   const twelveMonthQuestions = [
