@@ -55,6 +55,16 @@ import {
 } from 'recharts';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import AdminStatGrid from '../components/AdminStatGrid';
+import AdminSectionCard, {
+  adminFilterShellClass,
+  adminHeroGhostBtnClass,
+  adminHeroPrimaryBtnClass,
+  adminInputClass,
+  adminPanelClass,
+  adminTabBtnClass,
+  adminTabRailClass,
+} from '../components/AdminSectionCard';
 import { adminService } from '../services/admin.service';
 
 export type DepartmentRecord = {
@@ -118,22 +128,6 @@ function getSchoolForCode(code: string): string {
   return 'School of Electrical Engineering & Computing (SEEC)';
 }
 
-function StatCard({ label, value, icon: Icon, hint }: { label: string; value: string; icon: React.ComponentType<{ className?: string }>; hint: string }) {
-  return (
-    <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-sm hover:shadow-md transition-all">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
-          <p className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">{value}</p>
-        </div>
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#003580]/10 text-[#003580]">
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-      <p className="mt-4 text-xs font-medium text-slate-500">{hint}</p>
-    </div>
-  );
-}
 
 // Color palette for charts
 const PIE_COLORS = ['#003580', '#10B981', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6'];
@@ -806,11 +800,11 @@ export default function DepartmentManagement() {
         subtitle="Configure department reporting, evaluate skill gaps, and track alumni hiring performance across ASTU academic units."
         breadcrumbs={[{ label: 'Admin' }, { label: 'Department Management' }]}
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={openAddModal}
-              className="inline-flex items-center gap-2 rounded-lg bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#002866] transition-colors shadow-sm"
+              className={adminHeroPrimaryBtnClass}
             >
               <Plus className="h-4 w-4" />
               Add Department
@@ -818,25 +812,21 @@ export default function DepartmentManagement() {
             <button
               type="button"
               onClick={() => setExportModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg border border-[#003580]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#003580] hover:bg-[#003580]/5 transition-colors shadow-sm"
+              className={adminHeroGhostBtnClass}
             >
-              <Download className="h-4 w-4" />
+              <Download className="h-4 w-4 text-[#FFCC00]" />
               Export
             </button>
-          </>
+          </div>
         }
       />
 
       {/* Top Tab Bar: Directory vs Analytics */}
-      <div className="flex border-b border-slate-200 bg-white px-4 pt-2 rounded-xl shadow-xs">
+      <div className={adminTabRailClass}>
         <button
           type="button"
           onClick={() => setActiveTab('directory')}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-bold transition-all ${
-            activeTab === 'directory'
-              ? 'border-[#003580] text-[#003580]'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
+          className={adminTabBtnClass(activeTab === 'directory')}
         >
           <Building2 className="h-4 w-4" />
           Department Directory ({departments.length})
@@ -845,17 +835,10 @@ export default function DepartmentManagement() {
         <button
           type="button"
           onClick={() => setActiveTab('analytics')}
-          className={`flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-bold transition-all ${
-            activeTab === 'analytics'
-              ? 'border-[#003580] text-[#003580]'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
+          className={adminTabBtnClass(activeTab === 'analytics')}
         >
           <BarChart3 className="h-4 w-4" />
           Department Analysis & Intelligence
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800">
-            Live Metrics
-          </span>
         </button>
       </div>
 
@@ -865,29 +848,29 @@ export default function DepartmentManagement() {
       {activeTab === 'directory' && (
         <>
           {/* Filter & Search Toolbar */}
-          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-sm">
+          <AdminSectionCard title="Directory Filters" subtitle="Filter and search academic departments across ASTU colleges.">
             <div className="grid gap-3 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-6 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <Search className="h-4 w-4 text-slate-400" />
+              <label className={`${adminFilterShellClass} xl:col-span-6`}>
+                <Search className="h-4 w-4 text-[var(--text-muted)] shrink-0" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search by department name, code (SWE, CSE), or head..."
-                  className="w-full bg-transparent outline-none placeholder:text-slate-400 text-slate-800"
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
                 />
                 {query && (
-                  <button type="button" onClick={() => setQuery('')} className="text-slate-400 hover:text-slate-600">
+                  <button type="button" onClick={() => setQuery('')} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
                     <X className="h-4 w-4" />
                   </button>
                 )}
               </label>
 
               <div className="flex items-center gap-2 xl:col-span-4">
-                <Filter className="h-4 w-4 text-slate-400 shrink-0" />
+                <Filter className="h-4 w-4 text-[var(--text-muted)] shrink-0" />
                 <select
                   value={selectedSchoolFilter}
                   onChange={(e) => setSelectedSchoolFilter(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#003580]"
+                  className={adminInputClass}
                 >
                   <option value="All">All ASTU Schools & Colleges</option>
                   {allAvailableSchools.map((school) => (
@@ -902,47 +885,51 @@ export default function DepartmentManagement() {
                 type="button"
                 onClick={handleSyncColleges}
                 disabled={syncing}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white xl:col-span-2 hover:bg-[#002866] transition-colors disabled:opacity-50 shadow-sm"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#003580] px-4 py-2 text-xs font-semibold text-white xl:col-span-2 hover:bg-[#002866] transition-colors disabled:opacity-50 shadow-sm"
               >
                 <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
                 {syncing ? 'Syncing...' : 'Sync Colleges'}
               </button>
             </div>
-          </section>
+          </AdminSectionCard>
 
           {/* Top Stat Cards */}
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <StatCard
-              label="Total Departments"
-              value={`${query || selectedSchoolFilter !== 'All' ? filteredDepartments.length : (dbStats.totalDepartments || departments.length)}`}
-              icon={Building2}
-              hint={
-                query || selectedSchoolFilter !== 'All'
-                  ? `Filtered ${filteredDepartments.length} out of ${departments.length} departments`
-                  : `Out of ${departments.length} total registered academic units in database`
-              }
-            />
-            <StatCard
-              label="Total Registered Alumni"
-              value={`${
-                query || selectedSchoolFilter !== 'All'
-                  ? filteredDepartments.reduce((acc, d) => acc + (d.alumniCount || 0), 0)
-                  : (dbStats.totalAlumni || departments.reduce((acc, d) => acc + (d.alumniCount || 0), 0))
-              }`}
-              icon={Users}
-              hint={
-                query || selectedSchoolFilter !== 'All'
-                  ? "Combined alumni across filtered departments"
-                  : "Combined alumni count across all university departments in database"
-              }
-            />
-            <StatCard
-              label="System Sync Status"
-              value={dbStats.syncStatus}
-              icon={ShieldCheck}
-              hint={dbStats.syncHint}
-            />
-          </section>
+          <AdminStatGrid
+            cols={3}
+            stats={[
+              {
+                title: 'Total Departments',
+                value: `${query || selectedSchoolFilter !== 'All' ? filteredDepartments.length : (dbStats.totalDepartments || departments.length)}`,
+                icon: Building2,
+                tone: 'blue',
+                description:
+                  query || selectedSchoolFilter !== 'All'
+                    ? `Filtered ${filteredDepartments.length} of ${departments.length} departments`
+                    : `Out of ${departments.length} total registered academic units`,
+              },
+              {
+                title: 'Total Registered Alumni',
+                value: `${
+                  query || selectedSchoolFilter !== 'All'
+                    ? filteredDepartments.reduce((acc, d) => acc + (d.alumniCount || 0), 0)
+                    : (dbStats.totalAlumni || departments.reduce((acc, d) => acc + (d.alumniCount || 0), 0))
+                }`,
+                icon: Users,
+                tone: 'green',
+                description:
+                  query || selectedSchoolFilter !== 'All'
+                    ? 'Combined alumni across filtered departments'
+                    : 'Combined alumni count across all university departments',
+              },
+              {
+                title: 'System Sync Status',
+                value: dbStats.syncStatus,
+                icon: ShieldCheck,
+                tone: 'purple',
+                description: dbStats.syncHint,
+              },
+            ]}
+          />
 
           {/* Department Cards Grid */}
           <section className="space-y-4">

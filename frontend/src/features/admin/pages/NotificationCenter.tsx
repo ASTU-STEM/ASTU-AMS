@@ -28,6 +28,7 @@ import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
 import AdminEmptyState from '../components/AdminEmptyState';
 import AdminSectionCard, {
+  adminFilterShellClass,
   adminHeroGhostBtnClass,
   adminHeroPrimaryBtnClass,
   adminInputClass,
@@ -1160,8 +1161,8 @@ export default function NotificationCenter() {
         >
           <div className="space-y-3">
             <div className="grid gap-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-2.5 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-[var(--text-muted)]" />
+              <label className={`${adminFilterShellClass} bg-[var(--bg-card)]`}>
+                <Search className="h-3.5 w-3.5 shrink-0 text-[var(--text-muted)]" />
                 <input
                   type="text"
                   value={historySearch}
@@ -1170,41 +1171,47 @@ export default function NotificationCenter() {
                     setHistoryPage(1);
                   }}
                   placeholder="Search subject or audience…"
-                  className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] py-1.5 pl-8 pr-2.5 text-xs outline-none focus:border-[#003580]"
+                  className="w-full bg-transparent text-xs outline-none placeholder:text-[var(--text-muted)]"
                 />
-              </div>
-              <select
-                value={historyTypeFilter}
-                onChange={(e) => { setHistoryTypeFilter(e.target.value); setHistoryPage(1); }}
-                className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1.5 text-xs outline-none"
-              >
-                <option value="All">All channels</option>
-                <option value="In-App">In-App</option>
-                <option value="Email">Email</option>
-                <option value="Both">Both</option>
-              </select>
-              <select
-                value={historyStatusFilter}
-                onChange={(e) => { setHistoryStatusFilter(e.target.value); setHistoryPage(1); }}
-                className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1.5 text-xs outline-none"
-              >
-                <option value="All">All statuses</option>
-                <option value="Sent">Sent</option>
-                <option value="Scheduled">Scheduled</option>
-                <option value="Draft">Draft</option>
-                <option value="Failed">Failed</option>
-              </select>
-              <select
-                value={historyPriorityFilter}
-                onChange={(e) => { setHistoryPriorityFilter(e.target.value); setHistoryPage(1); }}
-                className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1.5 text-xs outline-none"
-              >
-                <option value="All">All priorities</option>
-                <option value="Low">Low</option>
-                <option value="Normal">Normal</option>
-                <option value="High">High</option>
-                <option value="Urgent">Urgent</option>
-              </select>
+              </label>
+              <label className={`${adminFilterShellClass} bg-[var(--bg-card)]`}>
+                <select
+                  value={historyTypeFilter}
+                  onChange={(e) => { setHistoryTypeFilter(e.target.value); setHistoryPage(1); }}
+                  className="w-full bg-transparent text-xs outline-none"
+                >
+                  <option value="All">All channels</option>
+                  <option value="In-App">In-App</option>
+                  <option value="Email">Email</option>
+                  <option value="Both">Both</option>
+                </select>
+              </label>
+              <label className={`${adminFilterShellClass} bg-[var(--bg-card)]`}>
+                <select
+                  value={historyStatusFilter}
+                  onChange={(e) => { setHistoryStatusFilter(e.target.value); setHistoryPage(1); }}
+                  className="w-full bg-transparent text-xs outline-none"
+                >
+                  <option value="All">All statuses</option>
+                  <option value="Sent">Sent</option>
+                  <option value="Scheduled">Scheduled</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Failed">Failed</option>
+                </select>
+              </label>
+              <label className={`${adminFilterShellClass} bg-[var(--bg-card)]`}>
+                <select
+                  value={historyPriorityFilter}
+                  onChange={(e) => { setHistoryPriorityFilter(e.target.value); setHistoryPage(1); }}
+                  className="w-full bg-transparent text-xs outline-none"
+                >
+                  <option value="All">All priorities</option>
+                  <option value="Low">Low</option>
+                  <option value="Normal">Normal</option>
+                  <option value="High">High</option>
+                  <option value="Urgent">Urgent</option>
+                </select>
+              </label>
             </div>
 
             {historyError ? (

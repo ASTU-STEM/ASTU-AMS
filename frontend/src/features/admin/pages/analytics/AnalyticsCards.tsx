@@ -1,4 +1,5 @@
 import React from 'react';
+import AdminSectionCard, { adminPanelClass } from '../../components/AdminSectionCard';
 
 export function SectionCard({
   title,
@@ -10,13 +11,9 @@ export function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="admin-card rounded-[10px] border border-slate-200 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
-      </div>
+    <AdminSectionCard title={title} subtitle={subtitle}>
       {children}
-    </section>
+    </AdminSectionCard>
   );
 }
 
@@ -30,10 +27,10 @@ export function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-card rounded-[10px] border border-slate-200 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div className={`${adminPanelClass} p-4`}>
       <div className="mb-3">
-        <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h4>
+        {subtitle && <p className="mt-1 text-xs text-[var(--text-secondary)]">{subtitle}</p>}
       </div>
       {children}
     </div>
