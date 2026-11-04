@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminEmptyState from '../components/AdminEmptyState';
 import AdminSectionCard, {
@@ -10,7 +11,7 @@ import AdminSectionCard, {
   adminTableRowClass,
 } from '../components/AdminSectionCard';
 import AdminStatGrid from '../components/AdminStatGrid';
-import { LifeBuoy, Search, Mail, CheckCircle2, Clock, AlertTriangle, Eye, Send, FileText, Check, X, ShieldAlert, RefreshCw } from 'lucide-react';
+import { LifeBuoy, Search, CheckCircle2, Clock, AlertTriangle, Eye, Send, FileText, X, ShieldAlert, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import apiClient from '../../../services/api';
 
@@ -142,17 +143,21 @@ export default function SupportDeskManagement() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'PENDING_ICT_ADMIN':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1"><ShieldAlert className="w-3 h-3 text-amber-700" /> PENDING ICT ADMIN</span>;
+        return (
+          <AdminBadge variant="warning">
+            <ShieldAlert className="h-3 w-3" /> PENDING ICT ADMIN
+          </AdminBadge>
+        );
       case 'OPEN':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">OPEN</span>;
+        return <AdminBadge variant="amber">OPEN</AdminBadge>;
       case 'IN_PROGRESS':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">IN PROGRESS</span>;
+        return <AdminBadge variant="info">IN PROGRESS</AdminBadge>;
       case 'RESOLVED':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">RESOLVED</span>;
+        return <AdminBadge variant="success">RESOLVED</AdminBadge>;
       case 'CLOSED':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">CLOSED</span>;
+        return <AdminBadge variant="neutral">CLOSED</AdminBadge>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">{status}</span>;
+        return <AdminBadge variant="neutral">{status}</AdminBadge>;
     }
   };
 
@@ -277,28 +282,28 @@ export default function SupportDeskManagement() {
 
       {/* Ticket Details & Resolution Modal */}
       {selectedTicket && createPortal(
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-          <div className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-slate-200 my-auto">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[99999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-[var(--bg-card)] rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-[var(--border-color)] my-auto text-[var(--text-primary)]">
             {/* Header */}
-            <div className="p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white flex justify-between items-start border-b border-slate-700">
+            <div className="p-6 bg-gradient-to-r from-[#001F4D] via-[#003580] to-[#001F4D] text-white flex justify-between items-start border-b border-white/10">
               <div className="flex items-start gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-base text-cyan-400 shadow-inner">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-base text-[#FFCC00] shadow-inner">
                   {selectedTicket.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-300 bg-cyan-950/80 px-2.5 py-0.5 rounded-full border border-cyan-800/80">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#FFCC00] bg-white/10 px-2.5 py-0.5 rounded-full border border-white/20">
                       TICKET #{selectedTicket.id.substring(0, 8)}
                     </span>
-                    <span className="text-[10px] text-slate-400">• {new Date(selectedTicket.createdAt).toLocaleString()}</span>
+                    <span className="text-[10px] text-white/60">• {new Date(selectedTicket.createdAt).toLocaleString()}</span>
                   </div>
                   <h3 className="text-xl font-extrabold text-white mt-1">{selectedTicket.fullName}</h3>
-                  <p className="text-xs text-slate-300 font-medium">{selectedTicket.contactEmail} • {selectedTicket.phone || 'No phone'}</p>
+                  <p className="text-xs text-white/70 font-medium">{selectedTicket.contactEmail} • {selectedTicket.phone || 'No phone'}</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedTicket(null)}
-                className="p-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 rounded-xl transition-all border border-slate-700 hover:text-white"
+                className="p-2 bg-white/10 hover:bg-white/20 text-white/70 rounded-xl transition-all border border-white/20 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -306,21 +311,21 @@ export default function SupportDeskManagement() {
 
             <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
               {/* Contextual Metadata Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50/90 p-4 rounded-2xl border border-slate-200/90">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-[var(--bg-page)] p-4 rounded-2xl border border-[var(--border-color)]">
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</span>
-                  <p className="font-extrabold text-slate-800 text-xs">{getCategoryLabel(selectedTicket.category)}</p>
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Category</span>
+                  <p className="font-extrabold text-[var(--text-primary)] text-xs">{getCategoryLabel(selectedTicket.category)}</p>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Student ID</span>
-                  <p className="font-extrabold text-slate-800 font-mono text-xs">{selectedTicket.studentId || 'N/A'}</p>
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Student ID</span>
+                  <p className="font-extrabold text-[var(--text-primary)] font-mono text-xs">{selectedTicket.studentId || 'N/A'}</p>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Last Route</span>
-                  <p className="font-bold text-slate-700 font-mono text-xs truncate" title={selectedTicket.route}>{selectedTicket.route || '/'}</p>
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Last Route</span>
+                  <p className="font-bold text-[var(--text-secondary)] font-mono text-xs truncate" title={selectedTicket.route}>{selectedTicket.route || '/'}</p>
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Error Code</span>
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Error Code</span>
                   <span className="inline-block px-2 py-0.5 bg-red-50 text-red-700 font-mono font-extrabold text-[11px] rounded border border-red-200/80">
                     {selectedTicket.lastErrorCode || 'NONE'}
                   </span>
@@ -329,11 +334,11 @@ export default function SupportDeskManagement() {
 
               {/* High-Contrast User Issue Description Box */}
               <div>
-                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <FileText className="w-4 h-4 text-astu-navy" />
+                <h4 className="font-bold text-[var(--text-primary)] text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <FileText className="w-4 h-4 text-[#003580]" />
                   User Issue Description
                 </h4>
-                <div className="p-4 bg-slate-50 border-l-4 border-l-astu-navy border-slate-200 rounded-r-2xl text-slate-900 text-xs md:text-sm font-medium leading-relaxed font-sans shadow-xs">
+                <div className="p-4 bg-[var(--bg-page)] border-l-4 border-l-[#003580] border border-[var(--border-color)] rounded-r-2xl text-[var(--text-primary)] text-xs md:text-sm font-medium leading-relaxed font-sans shadow-xs">
                   {selectedTicket.message}
                 </div>
               </div>
@@ -341,7 +346,7 @@ export default function SupportDeskManagement() {
               {/* Attachments */}
               {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
                 <div>
-                  <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-2">Attached Screenshots / Files</h4>
+                  <h4 className="font-bold text-[var(--text-primary)] text-xs uppercase tracking-wider mb-2">Attached Screenshots / Files</h4>
                   <div className="flex flex-wrap gap-2.5">
                     {selectedTicket.attachments.map((att, i) => (
                       <a
@@ -349,9 +354,9 @@ export default function SupportDeskManagement() {
                         href={`http://localhost:5000/uploads/Support/${att}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-800 rounded-xl text-xs font-bold border border-slate-250 shadow-2xs transition-all flex items-center gap-2 hover:border-astu-navy"
+                        className="px-3.5 py-2 bg-[var(--bg-card)] hover:bg-[var(--bg-page)] text-[var(--text-primary)] rounded-xl text-xs font-bold border border-[var(--border-color)] shadow-2xs transition-all flex items-center gap-2 hover:border-[#003580]"
                       >
-                        <span className="text-astu-navy">📎 View Attachment {i + 1}</span>
+                        <span className="text-[#003580]">📎 View Attachment {i + 1}</span>
                       </a>
                     ))}
                   </div>
@@ -360,16 +365,14 @@ export default function SupportDeskManagement() {
 
               {/* Escalation to ICT Admin Section */}
               <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <ShieldAlert className="w-4.5 h-4.5 text-amber-700" />
                     <h4 className="font-extrabold text-amber-950 text-xs uppercase tracking-wider">Cannot resolve directly? Transfer to ICT Admin</h4>
                   </div>
-                  <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-300">
-                    Notifies ICT via Email & In-App
-                  </span>
+                  <AdminBadge variant="warning">Notifies ICT via Email & In-App</AdminBadge>
                 </div>
-                <p className="text-[11px] text-slate-600 font-medium leading-relaxed">
+                <p className="text-[11px] text-[var(--text-secondary)] font-medium leading-relaxed">
                   If this issue requires technical database fixes, system backend debugging, or SIS sync intervention, transfer it to the ICT Operations team for technical review.
                 </p>
                 <textarea
@@ -377,7 +380,7 @@ export default function SupportDeskManagement() {
                   placeholder="Provide technical notes for the ICT Admin team (e.g., Didit API failure on verification, transcript grade mismatch)..."
                   value={escalationNotes}
                   onChange={e => setEscalationNotes(e.target.value)}
-                  className="w-full text-xs p-3 border border-amber-300 bg-white rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-amber-600 shadow-xs"
+                  className="w-full text-xs p-3 border border-amber-300 bg-[var(--bg-card)] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-amber-600 shadow-xs"
                 />
                 <div className="flex justify-end">
                   <button
@@ -393,19 +396,19 @@ export default function SupportDeskManagement() {
               </div>
 
               {/* Resolution Form */}
-              <form onSubmit={handleUpdateStatus} className="space-y-4 pt-5 border-t border-slate-200">
+              <form onSubmit={handleUpdateStatus} className="space-y-4 pt-5 border-t border-[var(--border-color)]">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-extrabold text-slate-900 text-sm">Update Status & Respond to User</h4>
-                  <span className="text-[10px] font-semibold text-slate-500">Sends Email Notification</span>
+                  <h4 className="font-extrabold text-[var(--text-primary)] text-sm">Update Status & Respond to User</h4>
+                  <span className="text-[10px] font-semibold text-[var(--text-muted)]">Sends Email Notification</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase">Set Ticket Status</label>
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] mb-1.5 uppercase">Set Ticket Status</label>
                     <select
                       value={newStatus}
                       onChange={e => setNewStatus(e.target.value as any)}
-                      className="w-full text-xs p-3 border border-slate-300 bg-white rounded-xl font-bold text-slate-900 focus:outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10 shadow-xs"
+                      className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl font-bold text-[var(--text-primary)] focus:outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 shadow-xs"
                     >
                       <option value="OPEN">OPEN (Awaiting Review)</option>
                       <option value="IN_PROGRESS">IN PROGRESS (Under Investigation)</option>
@@ -418,19 +421,19 @@ export default function SupportDeskManagement() {
                 {/* Quick Presets */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-bold text-slate-700 uppercase">Response Notes (Emailed to User)</label>
+                    <label className="block text-xs font-bold text-[var(--text-secondary)] uppercase">Response Notes (Emailed to User)</label>
                     <div className="flex gap-1.5">
                       <button
                         type="button"
                         onClick={() => setResponseNotes(`Hello ${selectedTicket.fullName},\n\nYour issue regarding ${getCategoryLabel(selectedTicket.category)} has been resolved. You can now log in or continue your session.`)}
-                        className="px-2 py-0.5 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all"
+                        className="px-2 py-0.5 text-[10px] font-bold bg-[var(--bg-page)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all"
                       >
                         + Resolved Template
                       </button>
                       <button
                         type="button"
                         onClick={() => setResponseNotes(`Hello ${selectedTicket.fullName},\n\nWe need additional information to resolve your ticket. Please reply with your correct Student ID or National ID.`)}
-                        className="px-2 py-0.5 text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all"
+                        className="px-2 py-0.5 text-[10px] font-bold bg-[var(--bg-page)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-lg transition-all"
                       >
                         + Need Info Template
                       </button>
@@ -441,22 +444,22 @@ export default function SupportDeskManagement() {
                     placeholder="Provide response details emailed directly to the user..."
                     value={responseNotes}
                     onChange={e => setResponseNotes(e.target.value)}
-                    className="w-full text-xs p-3 border border-slate-300 bg-white rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-astu-navy focus:ring-2 focus:ring-astu-navy/10 shadow-xs leading-relaxed"
+                    className="w-full text-xs p-3 border border-[var(--border-color)] bg-[var(--bg-page)] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10 shadow-xs leading-relaxed"
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-3 border-t border-[var(--border-color)]">
                   <button
                     type="button"
                     onClick={() => setSelectedTicket(null)}
-                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                    className="px-4 py-2.5 bg-[var(--bg-page)] hover:bg-[var(--border-color)] text-[var(--text-secondary)] rounded-xl text-xs font-bold transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isUpdating}
-                    className="px-6 py-2.5 bg-astu-navy hover:bg-astu-navy/90 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2 hover:scale-[1.01]"
+                    className="px-6 py-2.5 bg-[#003580] hover:bg-[#002866] text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2 hover:scale-[1.01]"
                   >
                     <Send className="w-3.5 h-3.5" />
                     {isUpdating ? 'Updating & Sending Email...' : 'Update Ticket & Email User'}

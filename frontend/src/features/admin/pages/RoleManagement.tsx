@@ -15,14 +15,16 @@ import {
   RotateCcw,
   X,
   CheckCircle2,
-  Monitor,
-  Check,
-  AlertCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
-import AdminStatCard from '../components/AdminStatCard';
+import AdminStatGrid from '../components/AdminStatGrid';
+import AdminSectionCard, {
+  adminInputClass,
+  adminTabBtnClass,
+  adminTabRailClass,
+} from '../components/AdminSectionCard';
 import { adminService } from '../services/admin.service';
 import { permissionService } from '../../../services/permissionService';
 
@@ -439,14 +441,16 @@ function Toggle({
       type="button"
       onClick={onChange}
       className={[
-        'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors cursor-pointer',
-        checked ? 'border-[#1D9E75] bg-[#1D9E75]' : 'border-slate-300 bg-slate-200',
+        'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border transition-colors',
+        checked
+          ? 'border-[#1D9E75] bg-[#1D9E75]'
+          : 'border-[var(--border-color)] bg-[var(--bg-page)]',
       ].join(' ')}
       aria-pressed={checked}
     >
       <span
         className={[
-          'inline-block h-4 w-4 translate-x-1 rounded-full bg-white shadow-sm transition-transform',
+          'inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform',
           checked ? 'translate-x-6' : 'translate-x-1',
         ].join(' ')}
       />
@@ -557,28 +561,28 @@ export default function RoleManagement() {
       value: `${customRolesList.length}`,
       icon: Users,
       tone: 'blue' as const,
-      trend: 'Core access groups',
+      description: 'Core access groups',
     },
     {
       title: 'Total Users',
       value: totalUsers.toLocaleString(),
       icon: Building2,
       tone: 'green' as const,
-      trend: 'System-wide',
+      description: 'System-wide',
     },
     {
       title: 'Permissions Enabled',
       value: `${permissionCount}`,
       icon: SlidersHorizontal,
       tone: 'gold' as const,
-      trend: 'Active matrix scope',
+      description: `${totalPossiblePermissions} in active matrix`,
     },
     {
       title: 'Admin Coverage',
       value: `${adminCoveragePercentage}%`,
       icon: ShieldCheck,
       tone: 'purple' as const,
-      trend: 'Full control enabled',
+      description: 'Staff / governance roles',
     },
   ];
 
@@ -718,36 +722,15 @@ export default function RoleManagement() {
         breadcrumbs={[{ label: 'Admin' }, { label: 'Role Management' }]}
       />
 
-      {/* Dynamic Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {roleSummaryCards.map(card => (
-          <AdminStatCard
-            key={card.title}
-            title={card.title}
-            value={card.value}
-            icon={card.icon}
-            tone={card.tone}
-            trend={card.trend}
-          />
-        ))}
-      </div>
+      <AdminStatGrid stats={roleSummaryCards} cols={4} compact />
 
-      {/* Per-Portal Permission Matrix View Selector */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Monitor className="w-4 h-4 text-blue-900" />
-            <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-wider">
-              Select Specific Portal Permission Matrix
-            </h3>
-          </div>
-          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
-            Direct Database Policy Binding
-          </span>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {portalMatrices.map(pm => {
+      <AdminSectionCard
+        title="Portal Permission Matrix"
+        subtitle="Select a portal scope to bind database policy rules."
+        action={<AdminBadge variant="neutral">Direct Database Policy Binding</AdminBadge>}
+      >
+        <div className={adminTabRailClass}>
+          {portalMatrices.map((pm) => {
             const Icon = pm.icon;
             const isSelected = selectedPortalMatrix === pm.key;
             return (
@@ -760,33 +743,24 @@ export default function RoleManagement() {
                     setSelectedRole(pm.role);
                   }
                 }}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                  isSelected
-                    ? 'bg-blue-900 text-white shadow-sm ring-2 ring-blue-950/20'
-                    : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200'
-                }`}
+                className={adminTabBtnClass(isSelected)}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="h-3.5 w-3.5" />
                 {pm.name}
               </button>
             );
           })}
         </div>
-      </div>
+      </AdminSectionCard>
 
       <div className="grid gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
-        {/* Roles Navigation Sidebar List */}
-        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-900">Roles Roster</h2>
-              <p className="mt-1 text-xs text-slate-500">Select a system role to edit its permissions.</p>
-            </div>
-            <AdminBadge variant="neutral">{customRolesList.length} roles</AdminBadge>
-          </div>
-
-          <div className="mt-5 space-y-3">
-            {customRolesList.map(roleKey => {
+        <AdminSectionCard
+          title="Roles Roster"
+          subtitle="Select a system role to edit its permissions."
+          action={<AdminBadge variant="neutral">{customRolesList.length} roles</AdminBadge>}
+        >
+          <div className="space-y-3">
+            {customRolesList.map((roleKey) => {
               const meta = dynamicRoleMeta[roleKey] || {
                 name: roleKey,
                 description: `Custom policy rules for ${roleKey}`,
@@ -801,36 +775,40 @@ export default function RoleManagement() {
                   type="button"
                   onClick={() => setSelectedRole(roleKey)}
                   className={[
-                    'w-full rounded-[10px] border p-4 text-left transition-all cursor-pointer',
+                    'w-full cursor-pointer rounded-xl border p-4 text-left transition-all',
                     isActive
                       ? 'border-[#003580]/30 bg-[#003580]/5 shadow-[0_2px_4px_rgba(0,53,128,0.08)] ring-1 ring-[#003580]/20'
-                      : 'border-slate-200 hover:border-[#003580]/20 hover:bg-slate-50',
+                      : 'border-[var(--border-color)] hover:border-[#003580]/20 hover:bg-[var(--bg-page)]',
                   ].join(' ')}
                 >
                   <div className="flex items-start gap-3">
                     <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-full shrink-0 ${
-                        isActive ? 'bg-[#003580] text-white shadow-xs' : 'bg-[#003580]/10 text-[#003580]'
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                        isActive ? 'bg-[#003580] text-white shadow-sm' : 'bg-[#003580]/10 text-[#003580]'
                       }`}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-xs font-extrabold text-slate-900 tracking-tight">{meta.name}</h3>
+                        <h3 className="text-xs font-extrabold tracking-tight text-[var(--text-primary)]">
+                          {meta.name}
+                        </h3>
                         <AdminBadge variant={isActive ? 'default' : 'neutral'}>
                           {(roleStats[roleKey] || 0).toLocaleString()} users
                         </AdminBadge>
                       </div>
-                      <p className="mt-1 text-[11px] leading-relaxed text-slate-500 line-clamp-2">{meta.description}</p>
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-[var(--text-secondary)]">
+                        {meta.description}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-3.5 flex items-center justify-between gap-3 pt-3 border-t border-slate-100">
-                    <span className="text-[11px] font-semibold text-slate-500">
+                  <div className="mt-3.5 flex items-center justify-between gap-3 border-t border-[var(--border-color)] pt-3">
+                    <span className="text-[11px] font-semibold text-[var(--text-muted)]">
                       {meta.name} Role Policy
                     </span>
-                    <span className="text-xs font-bold text-[#003580] flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-xs font-bold text-[#003580]">
                       Configure &rarr;
                     </span>
                   </div>
@@ -839,64 +817,59 @@ export default function RoleManagement() {
             })}
           </div>
 
-
           <button
             type="button"
             onClick={() => setIsAddRoleOpen(true)}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[8px] border border-dashed border-[#003580]/30 px-4 py-3 text-sm font-semibold text-[#003580] hover:bg-[#003580]/5 transition-all cursor-pointer"
+            className="mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#003580]/30 px-4 py-3 text-sm font-semibold text-[#003580] transition-all hover:bg-[#003580]/5"
           >
             <Plus className="h-4 w-4" />
             Add Custom Role
           </button>
-        </section>
+        </AdminSectionCard>
 
-        {/* Permission Matrix Configuration Section */}
-        <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-slate-900">
-                  {activePortalMatrix.name}
-                </h2>
-                <AdminBadge variant="default">{selectedMeta.name}</AdminBadge>
-              </div>
-              <p className="mt-1 max-w-2xl text-xs text-slate-500">
-                Toggle functional capability rules for <strong>{selectedMeta.name}</strong>. Turning OFF a toggle restricts the feature both on the frontend portal UI and backend API middleware.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={revertToDefault}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-all cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                Revert to Default
-              </button>
-              <button
-                type="button"
-                onClick={handleSavePermissions}
-                disabled={isSaving}
-                className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#003580] hover:bg-[#003580]/90 px-4 py-2 text-xs font-bold text-white shadow-md transition-all cursor-pointer hover:scale-[1.01]"
-              >
-                <Save className="w-3.5 h-3.5" />
-                {isSaving ? 'Saving to Database...' : 'Save Permissions'}
-              </button>
-            </div>
+        <AdminSectionCard
+          title={activePortalMatrix.name}
+          subtitle={`Toggle capability rules for ${selectedMeta.name}. Off toggles restrict both portal UI and API middleware.`}
+          action={<AdminBadge variant="default">{selectedMeta.name}</AdminBadge>}
+        >
+          <div className="mb-5 flex flex-wrap items-center gap-3 border-b border-[var(--border-color)] pb-5">
+            <button
+              type="button"
+              onClick={revertToDefault}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs font-bold text-[var(--text-secondary)] transition-all hover:text-[var(--text-primary)]"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Revert to Default
+            </button>
+            <button
+              type="button"
+              onClick={handleSavePermissions}
+              disabled={isSaving}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#003580] px-4 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#002a66] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Save className="h-3.5 w-3.5" />
+              {isSaving ? 'Saving to Database...' : 'Save Permissions'}
+            </button>
           </div>
 
-          <div className="mt-5 space-y-5">
-            {activeSections.map(section => {
+          <div className="space-y-5">
+            {activeSections.map((section) => {
               const rolePerms = draftPermissions[selectedRole] || defaultPermissions[selectedRole];
-              const sectionEnabled = section.permissions.filter(p => rolePerms[p.key] !== false).length;
+              const sectionEnabled = section.permissions.filter((p) => rolePerms[p.key] !== false).length;
 
               return (
-                <div key={section.title} className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-page)]/60 p-4">
+                <div
+                  key={section.title}
+                  className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]/60 p-4"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">{section.title}</h3>
-                      <p className="mt-0.5 text-[11px] text-slate-500">Functional access controls for this section.</p>
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
+                        {section.title}
+                      </h3>
+                      <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
+                        Functional access controls for this section.
+                      </p>
                     </div>
                     <AdminBadge variant={sectionEnabled === section.permissions.length ? 'success' : 'neutral'}>
                       {sectionEnabled} / {section.permissions.length} Enabled
@@ -904,26 +877,33 @@ export default function RoleManagement() {
                   </div>
 
                   <div className="mt-3.5 grid gap-2.5">
-                    {section.permissions.map(permission => {
+                    {section.permissions.map((permission) => {
                       const checked = rolePerms[permission.key] !== false;
 
                       return (
                         <div
                           key={permission.key}
-                          className="flex items-center justify-between gap-4 rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                          className="flex items-center justify-between gap-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
                         >
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold text-slate-800">{permission.label}</span>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs font-bold text-[var(--text-primary)]">
+                                {permission.label}
+                              </span>
                               {checked ? (
                                 <AdminBadge variant="success">Allowed & Active</AdminBadge>
                               ) : (
                                 <AdminBadge variant="neutral">Restricted (OFF)</AdminBadge>
                               )}
                             </div>
-                            <p className="mt-0.5 text-[11px] text-slate-500">{permission.description}</p>
+                            <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
+                              {permission.description}
+                            </p>
                           </div>
-                          <Toggle checked={checked} onChange={() => togglePermission(permission.key, permission.label)} />
+                          <Toggle
+                            checked={checked}
+                            onChange={() => togglePermission(permission.key, permission.label)}
+                          />
                         </div>
                       );
                     })}
@@ -932,64 +912,68 @@ export default function RoleManagement() {
               );
             })}
           </div>
-        </section>
+        </AdminSectionCard>
       </div>
 
-      {/* Add Custom Role Modal */}
       {isAddRoleOpen &&
         createPortal(
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-200">
-              <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl">
+              <div className="flex items-center justify-between bg-gradient-to-r from-[#001F4D] via-[#003580] to-[#001F4D] p-6 text-white">
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-cyan-400" />
-                  <h3 className="font-extrabold text-white text-base">Add Custom Role Policy</h3>
+                  <ShieldCheck className="h-5 w-5 text-[#FFCC00]" />
+                  <h3 className="text-base font-extrabold text-white">Add Custom Role Policy</h3>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setIsAddRoleOpen(false)}
-                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-all"
+                  className="rounded-xl bg-white/10 p-1.5 text-white/80 transition-all hover:bg-white/20"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleAddCustomRole} className="p-6 space-y-4 text-xs">
+              <form onSubmit={handleAddCustomRole} className="space-y-4 p-6 text-xs">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Role Name</label>
+                  <label className="mb-1 block text-xs font-bold uppercase text-[var(--text-secondary)]">
+                    Role Name
+                  </label>
                   <input
                     type="text"
                     placeholder="e.g. AUDITOR, ACADEMIC_DEAN"
                     value={customRoleName}
-                    onChange={e => setCustomRoleName(e.target.value)}
-                    className="w-full text-xs p-3 border border-slate-300 rounded-xl font-mono uppercase font-bold text-slate-900 focus:outline-none focus:border-astu-navy shadow-xs"
+                    onChange={(e) => setCustomRoleName(e.target.value)}
+                    className={`${adminInputClass} font-mono font-bold uppercase`}
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Role Description</label>
+                  <label className="mb-1 block text-xs font-bold uppercase text-[var(--text-secondary)]">
+                    Role Description
+                  </label>
                   <textarea
                     rows={3}
                     placeholder="Describe the access scope and responsibility for this custom role..."
                     value={customRoleDesc}
-                    onChange={e => setCustomRoleDesc(e.target.value)}
-                    className="w-full text-xs p-3 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:border-astu-navy shadow-xs"
+                    onChange={(e) => setCustomRoleDesc(e.target.value)}
+                    className={adminInputClass}
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <div className="flex justify-end gap-3 border-t border-[var(--border-color)] pt-3">
                   <button
                     type="button"
                     onClick={() => setIsAddRoleOpen(false)}
-                    className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                    className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-2.5 text-xs font-bold text-[var(--text-secondary)] transition-all hover:text-[var(--text-primary)]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2.5 bg-astu-navy hover:bg-astu-navy/90 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2"
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#003580] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#002a66]"
                   >
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="h-4 w-4" />
                     Create Custom Role
                   </button>
                 </div>

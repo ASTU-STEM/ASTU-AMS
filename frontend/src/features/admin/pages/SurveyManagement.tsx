@@ -38,19 +38,38 @@ import {
 
 const MILESTONE_TYPES = new Set(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH']);
 
+function getSurveyQuestionsList(survey: any): any[] {
+  if (!survey) return [];
+  if (Array.isArray(survey.questions)) return survey.questions;
+  if (survey.questions && typeof survey.questions === 'object') {
+    if (Array.isArray(survey.questions.create)) return survey.questions.create;
+    const arrayVal = Object.values(survey.questions).find((v) => Array.isArray(v));
+    if (Array.isArray(arrayVal)) return arrayVal;
+  }
+  return [];
+}
+
 function countSurveyQuestions(survey: any): number {
-  const sectionQs = survey.sections?.reduce((a: number, sec: any) => a + (sec.questions?.length || 0), 0) || 0;
-  const directQs = (survey.questions || []).filter((q: any) => !q.sectionId).length;
+  if (!survey) return 0;
+  const sections = Array.isArray(survey.sections) ? survey.sections : [];
+  const sectionQs = sections.reduce((a: number, sec: any) => {
+    const sQuestions = Array.isArray(sec?.questions) ? sec.questions : [];
+    return a + sQuestions.length;
+  }, 0);
+  const qList = getSurveyQuestionsList(survey);
+  const directQs = qList.filter((q: any) => !q?.sectionId).length;
   // Prefer section-scoped count; never sum both (create used to dual-write).
   return Math.max(sectionQs, directQs);
 }
 
 /** One row per milestone type (prefer official / earliest) + all customs. */
 function dedupeSurveyTemplates(list: any[]): any[] {
+  if (!Array.isArray(list)) return [];
   const byType = new Map<string, any>();
   const customs: any[] = [];
 
   for (const survey of list) {
+    if (!survey || typeof survey !== 'object') continue;
     if (!MILESTONE_TYPES.has(survey.type)) {
       customs.push(survey);
       continue;
@@ -315,9 +334,15 @@ export default function SurveyManagement() {
     setLoading(true);
     try {
       const data = await surveyService.getSurveys();
-      setSurveys(data);
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray((data as any)?.surveys)
+          ? (data as any).surveys
+          : [];
+      setSurveys(list);
     } catch (err) {
       console.error(err);
+      setSurveys([]);
     } finally {
       setLoading(false);
     }
@@ -352,7 +377,12 @@ export default function SurveyManagement() {
     setAssignmentsLoading(true);
     try {
       const data = await surveyService.getSurveyAssignments();
-      setAssignments(data || []);
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray((data as any)?.assignments)
+          ? (data as any).assignments
+          : [];
+      setAssignments(list);
     } catch (err) {
       console.error(err);
       setAssignments([]);
@@ -402,9 +432,9 @@ export default function SurveyManagement() {
     })) || [];
     
     // If section questions are empty, but direct questions exist on survey object, populate them into the section!
-    const totalSectionQs = mappedSections.reduce((sum: number, s: any) => sum + s.questions.length, 0);
-    if (totalSectionQs === 0 && survey.questions && survey.questions.length > 0) {
-      const formattedQuestions = survey.questions.map((q: any, i: number) => ({
+    const qList = getSurveyQuestionsList(survey);
+    if (totalSectionQs === 0 && qList.length > 0) {
+      const formattedQuestions = qList.map((q: any, i: number) => ({
         id: q.id,
         questionText: q.questionText,
         questionType: q.questionType,
@@ -516,9 +546,11 @@ export default function SurveyManagement() {
   };
 
   const uniqueSurveys = dedupeSurveyTemplates(surveys);
-  const filteredSurveys = uniqueSurveys.filter((s) => {
+  const safeUniqueSurveys = Array.isArray(uniqueSurveys) ? uniqueSurveys : [];
+  const filteredSurveys = safeUniqueSurveys.filter((s) => {
+    if (!s) return false;
     const q = listSearchQuery.trim().toLowerCase();
-    const matchesSearch = !q || `${s.title} ${s.description || ''} ${s.type}`.toLowerCase().includes(q);
+    const matchesSearch = !q || `${s.title || ''} ${s.description || ''} ${s.type || ''}`.toLowerCase().includes(q);
     const matchesType = typeFilter === 'ALL'
       || (typeFilter === 'MILESTONE' && MILESTONE_TYPES.has(s.type))
       || (typeFilter === 'CUSTOM' && s.type === 'CUSTOM')
@@ -530,12 +562,12 @@ export default function SurveyManagement() {
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const totalSurveys = uniqueSurveys.length;
-  const pendingSurveys = uniqueSurveys.filter(s => s.isActive && !s.isArchived).length;
-  const completedSurveys = uniqueSurveys.filter(s => s.isArchived).length;
-  const totalResponses = uniqueSurveys.reduce((acc, s) => acc + (s._count?.responses || 0), 0);
-  const totalSent = uniqueSurveys.reduce((acc, s) => acc + (s._count?.assignments || 0), 0);
-  const totalQuestions = uniqueSurveys.reduce((acc, s) => acc + countSurveyQuestions(s), 0);
+  const totalSurveys = safeUniqueSurveys.length;
+  const pendingSurveys = safeUniqueSurveys.filter(s => s && s.isActive && !s.isArchived).length;
+  const completedSurveys = safeUniqueSurveys.filter(s => s && s.isArchived).length;
+  const totalResponses = safeUniqueSurveys.reduce((acc, s) => acc + (s?._count?.responses || 0), 0);
+  const totalSent = safeUniqueSurveys.reduce((acc, s) => acc + (s?._count?.assignments || 0), 0);
+  const totalQuestions = safeUniqueSurveys.reduce((acc, s) => acc + countSurveyQuestions(s), 0);
 
   return (
     <div className="space-y-6">
@@ -1073,7 +1105,8 @@ export default function SurveyManagement() {
                 <div className="p-6">
                   {(() => {
                     // Group assignments by surveyId
-                    const grouped = assignments.reduce((acc: Record<string, any>, item) => {
+                    const safeAssignments = Array.isArray(assignments) ? assignments : [];
+                    const grouped = safeAssignments.reduce((acc: Record<string, any>, item) => {
                       const sId = item.surveyId || 'unknown';
                       if (!acc[sId]) {
                         acc[sId] = {
@@ -1200,7 +1233,8 @@ export default function SurveyManagement() {
                     <button
                       type="button"
                       onClick={() => {
-                        const filtered = assignments.filter((item) => {
+                        const safeAssignments = Array.isArray(assignments) ? assignments : [];
+                        const filtered = safeAssignments.filter((item) => {
                           const name = item.alumni?.fullName || '';
                           const email = item.alumni?.email || '';
                           const studentId = item.alumni?.studentId || '';
@@ -1238,7 +1272,8 @@ export default function SurveyManagement() {
                     </thead>
                     <tbody>
                       {(() => {
-                        const filtered = assignments.filter((item) => {
+                        const safeAssignments = Array.isArray(assignments) ? assignments : [];
+                        const filtered = safeAssignments.filter((item) => {
                           const name = item.alumni?.fullName || '';
                           const email = item.alumni?.email || '';
                           const studentId = item.alumni?.studentId || '';
@@ -1337,7 +1372,8 @@ export default function SurveyManagement() {
 
                 {/* High-Volume Pagination Footer for Assignments */}
                 {(() => {
-                  const filtered = assignments.filter((item) => {
+                  const safeAssignments = Array.isArray(assignments) ? assignments : [];
+                  const filtered = safeAssignments.filter((item) => {
                     const name = item.alumni?.fullName || '';
                     const email = item.alumni?.email || '';
                     const studentId = item.alumni?.studentId || '';
@@ -1526,7 +1562,9 @@ export default function SurveyManagement() {
 
             {/* Stats Cards */}
             {(() => {
-              const totalQuestions = (selectedSurvey.sections?.reduce((acc: number, sec: any) => acc + (sec.questions?.length || 0), 0) || 0) + (selectedSurvey.questions?.length || 0);
+              const directList = getSurveyQuestionsList(selectedSurvey);
+              const sectionsList = Array.isArray(selectedSurvey.sections) ? selectedSurvey.sections : [];
+              const totalQuestions = sectionsList.reduce((acc: number, sec: any) => acc + (Array.isArray(sec?.questions) ? sec.questions.length : 0), 0) + directList.length;
               const sent = selectedSurvey._count?.assignments || 0;
               const responses = selectedSurvey._count?.responses || 0;
               const rate = sent > 0 ? Math.round((responses / sent) * 100) : 0;
@@ -1566,8 +1604,9 @@ export default function SurveyManagement() {
 
             {/* Sub-Tabs: Questions vs Submitted Responses */}
             {(() => {
-              const directQs = selectedSurvey.questions || [];
-              const sectionQs = selectedSurvey.sections?.flatMap((s: any) => s.questions || []) || [];
+              const directQs = getSurveyQuestionsList(selectedSurvey);
+              const sectionsList = Array.isArray(selectedSurvey.sections) ? selectedSurvey.sections : [];
+              const sectionQs = sectionsList.flatMap((s: any) => Array.isArray(s?.questions) ? s.questions : []);
               const allQs = directQs.length > 0 ? directQs : sectionQs;
 
               return (

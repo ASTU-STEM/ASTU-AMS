@@ -42170,6 +42170,70 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1793786293741",
       "createdAt": "2026-11-04T09:58:13.741Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793787151293",
+      "createdAt": "2026-11-04T10:12:31.293Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793788169044",
+      "createdAt": "2026-11-04T10:29:29.044Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793789320012",
+      "createdAt": "2026-11-04T10:48:40.012Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793789324692",
+      "createdAt": "2026-11-04T10:48:44.692Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789436412",
+      "createdAt": "2026-11-04T10:50:36.412Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789440084",
+      "createdAt": "2026-11-04T10:50:40.084Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789450631",
+      "createdAt": "2026-11-04T10:50:50.631Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789454381",
+      "createdAt": "2026-11-04T10:50:54.381Z"
     }
   ],
   "notifications": [
@@ -64818,7 +64882,7 @@
           ]
         }
       },
-      "updatedAt": "2026-11-04T09:56:59.765Z",
+      "updatedAt": "2026-11-04T10:50:41.015Z",
       "updatedBy": "alumnioffice@astu.edu.et"
     }
   ],

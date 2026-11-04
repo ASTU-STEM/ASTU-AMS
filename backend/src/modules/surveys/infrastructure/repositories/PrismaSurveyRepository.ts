@@ -10,6 +10,23 @@ const milestoneTypeMap: Record<string, number> = {
   CUSTOM: 0,
 };
 
+function normalizeSurvey(survey: any): any {
+  if (!survey) return survey;
+  let questions = survey.questions;
+  if (questions && typeof questions === 'object' && !Array.isArray(questions)) {
+    questions = Array.isArray(questions.create) ? questions.create : [];
+  }
+  let sections = survey.sections;
+  if (sections && typeof sections === 'object' && !Array.isArray(sections)) {
+    sections = Array.isArray(sections.create) ? sections.create : [];
+  }
+  return {
+    ...survey,
+    questions: Array.isArray(questions) ? questions : [],
+    sections: Array.isArray(sections) ? sections : [],
+  };
+}
+
 export class PrismaSurveyRepository implements ISurveyRepository {
   async findById(id: string): Promise<Survey | null> {
     const survey = await prisma.survey.findUnique({
@@ -21,7 +38,7 @@ export class PrismaSurveyRepository implements ISurveyRepository {
       }
     });
     if (!survey) return null;
-    return survey as any as Survey;
+    return normalizeSurvey(survey) as any as Survey;
   }
 
   async findAll(activeOnly = false, includeArchived = false): Promise<Survey[]> {
@@ -38,7 +55,7 @@ export class PrismaSurveyRepository implements ISurveyRepository {
       },
       orderBy: { createdAt: 'desc' }
     });
-    return surveys as any as Survey[];
+    return (surveys || []).map((s) => normalizeSurvey(s)) as any as Survey[];
   }
 
   async create(data: Omit<Survey, 'id'>): Promise<Survey> {

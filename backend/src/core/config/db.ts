@@ -1393,6 +1393,14 @@ function sanitizePrismaCreate(data: any): any {
   for (const [key, val] of Object.entries(data)) {
     if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
       const v = val as any;
+      if ('create' in v) {
+        res[key] = Array.isArray(v.create) ? v.create : [v.create];
+        continue;
+      }
+      if ('createMany' in v && v.createMany?.data) {
+        res[key] = Array.isArray(v.createMany.data) ? v.createMany.data : [v.createMany.data];
+        continue;
+      }
       if ('increment' in v) {
         res[key] = Number(v.increment) || 0;
         continue;
@@ -1416,7 +1424,11 @@ function sanitizeItemForRead(item: any): any {
   for (const key of Object.keys(item)) {
     const val = item[key];
     if (val !== null && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
-      if ('increment' in val) {
+      if ('create' in val) {
+        item[key] = Array.isArray(val.create) ? val.create : [val.create];
+      } else if ('createMany' in val && val.createMany?.data) {
+        item[key] = Array.isArray(val.createMany.data) ? val.createMany.data : [val.createMany.data];
+      } else if ('increment' in val) {
         item[key] = Number(val.increment) || 0;
       } else if ('decrement' in val) {
         item[key] = -(Number(val.decrement) || 0);

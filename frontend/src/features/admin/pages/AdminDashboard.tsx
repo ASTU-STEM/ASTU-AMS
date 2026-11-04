@@ -2,19 +2,15 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowUpRight,
   Building2,
   Briefcase,
   ClipboardCheck,
   GraduationCap,
   Clock3,
-  ShieldAlert,
   FileSpreadsheet,
   UserPlus,
-  MessageSquareText,
   CheckCircle2,
   AlertTriangle,
-  CircleDashed,
   Search,
   Users,
   Zap,
@@ -23,16 +19,9 @@ import {
   ExternalLink,
   ChevronRight,
   Database,
-  Bell,
-  Settings,
-  Lock,
   Globe,
   X,
-  Award,
-  TrendingUp,
   ShieldCheck,
-  Heart,
-  FileCheck,
   Layers,
 } from 'lucide-react';
 import {
@@ -41,15 +30,12 @@ import {
   CartesianGrid,
   Cell,
   Label,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  Area,
   Legend,
   LabelList,
 } from 'recharts';
@@ -302,23 +288,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <style>{`
-        @keyframes fade-slide-up {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .admin-card {
-          animation: fade-slide-up 0.4s ease-out both;
-        }
-        .admin-card:nth-child(2) { animation-delay: 0.05s; }
-        .admin-card:nth-child(3) { animation-delay: 0.1s; }
-        .admin-card:nth-child(4) { animation-delay: 0.15s; }
-        .admin-card:nth-child(5) { animation-delay: 0.2s; }
-        .admin-card:nth-child(6) { animation-delay: 0.25s; }
-        .admin-card:nth-child(7) { animation-delay: 0.3s; }
-        .admin-card:nth-child(8) { animation-delay: 0.35s; }
-      `}</style>
-
       <AdminPageHeader
         title={`${greeting}, ${user ? user.firstName : 'System Administrator'}`}
         subtitle="Welcome back to the ASTU Alumni Management System control panel."
@@ -553,8 +522,8 @@ export default function AdminDashboard() {
 
       {/* Charts Row */}
       <section className="grid gap-4 xl:grid-cols-5">
-        <div className="xl:col-span-3 admin-card">
-          <ChartCard
+        <div className="xl:col-span-3">
+          <AdminSectionCard
             title="Employment Rate by Department"
             subtitle="Percentage of alumni employed within each department group."
             action={
@@ -567,15 +536,18 @@ export default function AdminDashboard() {
               </button>
             }
           >
-            <div className="h-[340px]">
+            <div className="h-[320px]">
               {activeEmploymentData.length === 0 ? (
-                <div className="flex h-full items-center justify-center text-sm text-slate-400 dark:text-[#8493A8] text-center px-6">
-                  {loading ? 'Loading employment rates…' : 'No department employment data yet. Rates appear when alumni profiles include employment status.'}
-                </div>
+                <AdminEmptyState
+                  icon={Briefcase}
+                  title={loading ? 'Loading employment rates…' : 'No employment data yet'}
+                  description="Rates appear when alumni profiles include employment status."
+                  className="h-full border-0 bg-transparent py-8"
+                />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={activeEmploymentData} margin={{ top: 20, right: 10, left: -10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                     <XAxis dataKey="department" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
                     <YAxis
                       tick={{ fill: '#64748B', fontSize: 12 }}
@@ -588,7 +560,8 @@ export default function AdminDashboard() {
                       formatter={(value) => [`${value}%`, 'Employment Rate']}
                       contentStyle={{
                         borderRadius: 12,
-                        border: '1px solid #E8EDF5',
+                        border: '1px solid var(--border-color)',
+                        background: 'var(--bg-card)',
                         boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                       }}
                     />
@@ -602,11 +575,11 @@ export default function AdminDashboard() {
                 </ResponsiveContainer>
               )}
             </div>
-          </ChartCard>
+          </AdminSectionCard>
         </div>
 
-        <div className="xl:col-span-2 admin-card">
-          <ChartCard
+        <div className="xl:col-span-2">
+          <AdminSectionCard
             title="Survey Completion Rate"
             subtitle="Current tracer survey response distribution."
             action={
@@ -619,7 +592,7 @@ export default function AdminDashboard() {
               </button>
             }
           >
-            <div className="h-[340px]">
+            <div className="h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -648,7 +621,8 @@ export default function AdminDashboard() {
                   <Tooltip
                     contentStyle={{
                       borderRadius: 12,
-                      border: '1px solid #E8EDF5',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-card)',
                       boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     }}
                   />
@@ -660,21 +634,21 @@ export default function AdminDashboard() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          </ChartCard>
+          </AdminSectionCard>
         </div>
       </section>
 
-      {/* System Status */}
-      <section className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs">
-        <div className="flex items-center gap-2 mb-4">
-          <Activity className="w-4 h-4 text-emerald-500" />
-          <span className="text-xs font-extrabold uppercase tracking-[0.16em] text-slate-400 dark:text-[#8493A8]">System Health</span>
-          <span className="ml-auto flex items-center gap-1.5 text-xs font-bold" style={{ color: systemStatus.status === 'healthy' ? '#059669' : systemStatus.status === 'warning' ? '#d97706' : '#dc2626' }}>
+      <AdminSectionCard
+        title="System Health"
+        subtitle="Live latency, database, and completeness signals."
+        action={
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold" style={{ color: systemStatus.status === 'healthy' ? '#059669' : systemStatus.status === 'warning' ? '#d97706' : '#dc2626' }}>
             <StatusDot status={systemStatus.status} />
             {systemStatus.label}
           </span>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        }
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             {
               label: 'API Response Time',
@@ -701,77 +675,86 @@ export default function AdminDashboard() {
               trend: 'Accounts in database',
             },
           ].map((metric) => (
-            <div key={metric.label} className="rounded-xl border border-slate-100 dark:border-[var(--border-color)] bg-slate-50/60 dark:bg-[var(--bg-card-secondary)] p-4 transition-all duration-200 hover:border-slate-200 dark:hover:border-[#2196F3]/40 hover:bg-white dark:hover:bg-[var(--bg-hover)] hover:shadow-sm">
+            <div key={metric.label} className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-4 transition-all duration-200 hover:bg-[var(--bg-card)] hover:shadow-sm">
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-extrabold uppercase tracking-[0.14em] text-slate-400 dark:text-[#8493A8]`}>{metric.label}</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">{metric.label}</span>
                 <StatusDot status={metric.status} />
               </div>
-              <p className="mt-2 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-[var(--text-primary)]">{metric.value}</p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-[var(--text-secondary)] font-medium">{metric.trend}</p>
+              <p className="mt-2 text-2xl font-bold tracking-tight text-[var(--text-primary)]">{metric.value}</p>
+              <p className="mt-1 text-xs text-[var(--text-secondary)] font-medium">{metric.trend}</p>
             </div>
           ))}
         </div>
-      </section>
+      </AdminSectionCard>
 
       {/* Bottom Row */}
       <section className="grid gap-4 xl:grid-cols-3">
-        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Recent System Activity</h3>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8493A8]">Latest administrative actions and sync events.</p>
-            </div>
-            <AdminBadge variant="neutral">Live Feed</AdminBadge>
-          </div>
-
-          <div className="mt-5 space-y-4">
+        <AdminSectionCard
+          title="Recent System Activity"
+          subtitle="Latest administrative actions and sync events."
+          action={<AdminBadge variant="neutral">Live Feed</AdminBadge>}
+        >
+          <div className="space-y-3">
             {activeSystemActivities.length === 0 ? (
-              <p className="text-sm text-slate-400 dark:text-[#8493A8] py-6 text-center">
-                {loading ? 'Loading activity…' : 'No audit events yet. Administrative actions will appear here as they are logged.'}
-              </p>
+              <AdminEmptyState
+                icon={Activity}
+                title={loading ? 'Loading activity…' : 'No audit events yet'}
+                description="Administrative actions will appear here as they are logged."
+                className="py-8 border-0 bg-transparent"
+              />
             ) : (
               activeSystemActivities.map((entry: any, index: number) => {
                 const Icon = entry.icon;
                 return (
                   <div key={index} className="flex gap-3 group">
-                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-[var(--bg-card-secondary)] group-hover:bg-blue-50 dark:group-hover:bg-[var(--bg-hover)] transition-colors">
-                      <Icon className="h-4.5 w-4.5" style={{ color: entry.tone }} />
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--bg-page)] group-hover:bg-[#003580]/8 dark:group-hover:bg-[var(--bg-hover)] transition-colors">
+                      <Icon className="h-4 w-4" style={{ color: entry.tone }} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-slate-800 dark:text-[var(--text-primary)]">{entry.text}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-400 dark:text-[#8493A8] font-medium">{entry.time}</p>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">{entry.text}</p>
+                      <p className="mt-0.5 text-[11px] text-[var(--text-muted)] font-medium">{entry.time}</p>
                     </div>
                   </div>
                 );
               })
             )}
           </div>
-        </div>
+        </AdminSectionCard>
 
-        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Pending Actions</h3>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8493A8]">Tasks waiting for administrative review.</p>
-          </div>
-
-          <div className="mt-5 space-y-3">
+        <AdminSectionCard
+          title="Pending Actions"
+          subtitle="Tasks waiting for administrative review."
+          action={
+            <button
+              type="button"
+              onClick={() => navigate('/admin/users')}
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#003580] dark:text-[#22D3EE] hover:underline cursor-pointer"
+            >
+              View All <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          }
+        >
+          <div className="space-y-3">
             {activePendingActions.length === 0 ? (
-              <p className="text-sm text-slate-400 dark:text-[#8493A8] py-6 text-center">
-                {loading ? 'Checking queue…' : 'No pending verifications, employer approvals, draft jobs, or document requests.'}
-              </p>
+              <AdminEmptyState
+                icon={ClipboardCheck}
+                title={loading ? 'Checking queue…' : 'Queue clear'}
+                description="No pending verifications, employer approvals, draft jobs, or document requests."
+                className="py-8 border-0 bg-transparent"
+              />
             ) : (
               activePendingActions.map((task: any, index: number) => (
                 <div
                   key={index}
-                  className="group rounded-xl border border-slate-200 dark:border-[var(--border-color)] border-l-4 bg-white dark:bg-[var(--bg-card-secondary)] p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+                  className="group rounded-xl border border-[var(--border-color)] border-l-4 bg-[var(--bg-page)] p-3.5 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5"
                   style={{ borderLeftColor: task.tone }}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-[var(--text-primary)]">{task.label}</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">{task.label}</p>
                     <button
                       type="button"
                       onClick={() => navigate(task.path || '/admin/users')}
-                      className="rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 hover:shadow-md cursor-pointer"
+                      className="rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-all hover:brightness-110 cursor-pointer"
                       style={{ backgroundColor: task.tone }}
                     >
                       {task.action} →
@@ -781,48 +764,39 @@ export default function AdminDashboard() {
               ))
             )}
           </div>
+        </AdminSectionCard>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-[var(--border-color)]">
-            <button
-              type="button"
-              onClick={() => navigate('/admin/users')}
-              className="flex items-center gap-1 text-xs font-bold text-[#003580] dark:text-[#22D3EE] hover:underline cursor-pointer"
-            >
-              View All Tasks <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="admin-card rounded-2xl border border-slate-200/80 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-6 shadow-xs transition-all duration-300 hover:shadow-md">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-[var(--text-primary)]">Skill Gap Alert</h3>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8493A8]">Top Missing Skills Reported by Employers</p>
-            </div>
-            <AdminBadge variant="warning">Curriculum Input</AdminBadge>
-          </div>
-
-          <div className="mt-5 space-y-4">
+        <AdminSectionCard
+          title="Skill Gap Alert"
+          subtitle="Top missing skills reported by employers."
+          action={<AdminBadge variant="warning">Curriculum Input</AdminBadge>}
+        >
+          <div className="space-y-3">
             {activeSkillGaps.length > 0 ? activeSkillGaps.map((item) => (
               <div key={item.skill} className="space-y-2">
                 <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-semibold text-slate-700 dark:text-[var(--text-primary)]">{item.skill}</span>
-                  <span className="font-bold text-slate-500 dark:text-[var(--text-secondary)]">{item.value}%</span>
+                  <span className="font-semibold text-[var(--text-primary)]">{item.skill}</span>
+                  <span className="font-bold text-[var(--text-secondary)]">{item.value}%</span>
                 </div>
-                <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-[var(--bg-card-secondary)]">
-                  <div className="relative h-full rounded-full bg-gradient-to-r from-[#003580] via-[#5B7FB8] to-[#E8A020] transition-all duration-500"
-                    style={{ width: `${item.value}%` }}>
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-                  </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-[var(--bg-page)]">
+                  <div
+                    className="relative h-full rounded-full bg-gradient-to-r from-[#003580] via-[#5B7FB8] to-[#E8A020] transition-all duration-500"
+                    style={{ width: `${item.value}%` }}
+                  />
                 </div>
               </div>
             )) : (
-              <p className="text-sm text-slate-400 dark:text-[#8493A8] py-6 text-center">Skill gap data will appear as employer feedback is collected.</p>
+              <AdminEmptyState
+                icon={Layers}
+                title="No skill gap data yet"
+                description="Skill gaps will appear as employer feedback is collected."
+                className="py-8 border-0 bg-transparent"
+              />
             )}
           </div>
 
-          <div className="mt-5 border-t border-slate-200 dark:border-[var(--border-color)] pt-4 flex items-center justify-between text-xs font-medium">
-            <span className="text-slate-500 dark:text-[#8493A8]">Based on employer feedback submissions</span>
+          <div className="mt-4 border-t border-[var(--border-color)] pt-3 flex items-center justify-between text-xs font-medium">
+            <span className="text-[var(--text-muted)]">Based on employer feedback</span>
             <button
               type="button"
               onClick={() => navigate('/admin/analytics')}
@@ -831,29 +805,27 @@ export default function AdminDashboard() {
               View Details
             </button>
           </div>
-        </div>
+        </AdminSectionCard>
       </section>
 
-      {/* Top Hiring Companies */}
-      <section className="admin-card">
-        <ChartCard
-          title="Top Hiring Companies"
-          subtitle="Organizations with the highest graduate hiring volume."
-          action={
-            <button
-              type="button"
-              onClick={() => setIsHiringModalOpen(true)}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#003580] hover:underline cursor-pointer"
-            >
-              View All <ExternalLink className="w-3 h-3" />
-            </button>
-          }
-        >
-          <div className="h-[300px] cursor-pointer" onClick={() => setIsHiringModalOpen(true)}>
+      <AdminSectionCard
+        title="Top Hiring Companies"
+        subtitle="Organizations with the highest graduate hiring volume."
+        action={
+          <button
+            type="button"
+            onClick={() => setIsHiringModalOpen(true)}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[#003580] hover:underline cursor-pointer"
+          >
+            View All <ExternalLink className="w-3 h-3" />
+          </button>
+        }
+      >
+        <div className="h-[280px] cursor-pointer" onClick={() => setIsHiringModalOpen(true)}>
+          {activeHiringCompanies.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              {activeHiringCompanies.length > 0 ? (
               <BarChart data={activeHiringCompanies} layout="vertical" margin={{ top: 12, right: 24, left: 12, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E8EDF5" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" horizontal={false} />
                 <XAxis type="number" tick={{ fill: '#64748B', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis
                   type="category"
@@ -867,7 +839,8 @@ export default function AdminDashboard() {
                   formatter={(value) => [value, 'Hires']}
                   contentStyle={{
                     borderRadius: 10,
-                    border: '1px solid #E8EDF5',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                   }}
                 />
@@ -875,13 +848,17 @@ export default function AdminDashboard() {
                   <LabelList dataKey="hires" position="right" fill="#334155" fontSize={12} />
                 </Bar>
               </BarChart>
-              ) : (
-                <text x="50%" y="50%" textAnchor="middle" fill="#94a3b8" fontSize={14}>Hiring data will appear as employers submit records.</text>
-              )}
             </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      </section>
+          ) : (
+            <AdminEmptyState
+              icon={Building2}
+              title="No hiring data yet"
+              description="Hiring volume appears as employers submit placement records."
+              className="h-full border-0 bg-transparent py-8"
+            />
+          )}
+        </div>
+      </AdminSectionCard>
 
       {/* Top Hiring Companies Detailed Modal */}
       {isHiringModalOpen && createPortal(
@@ -891,22 +868,20 @@ export default function AdminDashboard() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-[95vw] lg:max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200 dark:border-[var(--border-color)] text-slate-800 dark:text-[var(--text-primary)]"
+            className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-[95vw] lg:max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-[var(--border-color)] text-[var(--text-primary)]"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[var(--border-color)] bg-slate-50/80 dark:bg-[var(--bg-card-secondary)] shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-page)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#003580]/10 dark:bg-[#15294A] flex items-center justify-center text-[#003580] dark:text-[#22D3EE]">
                   <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-[var(--text-primary)] flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] flex flex-wrap items-center gap-2">
                     Top Hiring Companies &amp; Employer Market Analytics
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-[#163828] text-emerald-800 dark:text-[#22C55E] font-semibold border border-emerald-200 dark:border-[#22C55E]/30">
-                      Verified Placement Analytics
-                    </span>
+                    <AdminBadge variant="success">Verified Placement Analytics</AdminBadge>
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-[#8493A8]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Comprehensive graduate hiring statistics, market percentage share, and active job postings across registered organizations.
                   </p>
                 </div>
@@ -914,7 +889,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setIsHiringModalOpen(false)}
-                className="p-2 text-slate-400 dark:text-[#8493A8] hover:text-slate-600 dark:hover:text-[var(--text-primary)] rounded-lg hover:bg-slate-100 dark:hover:bg-[var(--bg-card)] transition-colors"
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-card)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -969,25 +944,25 @@ export default function AdminDashboard() {
               </div>
 
               {/* Table of Companies */}
-              <div className="border border-slate-200 dark:border-[var(--border-color)] rounded-xl overflow-x-auto shadow-sm">
+              <div className={`${adminPanelClass} overflow-x-auto !shadow-none`}>
                 <table className="w-full min-w-[920px] text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 dark:bg-[var(--bg-card-secondary)] border-b border-slate-200 dark:border-[var(--border-color)] text-slate-600 dark:text-[var(--text-secondary)] font-bold">
-                      <th className="py-3 px-4 w-14">Rank</th>
-                      <th className="py-3 px-4">Organization Name</th>
-                      <th className="py-3 px-4">Industry / Sector</th>
-                      <th className="py-3 px-4 text-center">Hired Alumni Placements (Click to view)</th>
-                      <th className="py-3 px-4 w-40">Hiring Share (%)</th>
-                      <th className="py-3 px-4 text-center">Active Jobs</th>
-                      <th className="py-3 px-4 text-center">Action</th>
+                    <tr>
+                      <th className={`${adminTableHeadClass} py-3 px-4 w-14`}>Rank</th>
+                      <th className={`${adminTableHeadClass} py-3 px-4`}>Organization Name</th>
+                      <th className={`${adminTableHeadClass} py-3 px-4`}>Industry / Sector</th>
+                      <th className={`${adminTableHeadClass} py-3 px-4 text-center`}>Hired Alumni Placements</th>
+                      <th className={`${adminTableHeadClass} py-3 px-4 w-40`}>Hiring Share (%)</th>
+                      <th className={`${adminTableHeadClass} py-3 px-4 text-center`}>Active Jobs</th>
+                      <th className={`${adminTableHeadClass} py-3 px-4 text-center`}>Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-[var(--border-color)]">
+                  <tbody>
                     {filteredHiringCompanies.map((comp, idx) => (
                       <tr
                         key={comp.id || idx}
                         onClick={() => setSelectedCompanyForAlumni(comp)}
-                        className="hover:bg-blue-50/80 dark:hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                        className={`${adminTableRowClass} cursor-pointer`}
                       >
                         <td className="py-3 px-4 font-bold text-slate-500 dark:text-[#8493A8]">
                           {idx === 0 ? '🥇 #1' : idx === 1 ? '🥈 #2' : idx === 2 ? '🥉 #3' : `#${idx + 1}`}
@@ -1060,12 +1035,12 @@ export default function AdminDashboard() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-between px-6 py-3 border-t border-slate-100 dark:border-[var(--border-color)] bg-slate-50 dark:bg-[var(--bg-card-secondary)] text-xs text-slate-500 dark:text-[#8493A8]">
+            <div className="flex items-center justify-between gap-4 px-6 py-3 border-t border-[var(--border-color)] bg-[var(--bg-page)] text-xs text-[var(--text-muted)]">
               <div>* Placement percentages and market analytics are aggregated from official graduate employment reports and verified partner records.</div>
               <button
                 type="button"
                 onClick={() => setIsHiringModalOpen(false)}
-                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-semibold transition-colors cursor-pointer"
+                className="shrink-0 px-4 py-1.5 bg-[#003580] hover:bg-[#002866] text-white rounded-lg font-semibold transition-colors cursor-pointer"
               >
                 Close Window
               </button>
@@ -1083,22 +1058,22 @@ export default function AdminDashboard() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white dark:bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-200 dark:border-[var(--border-color)] text-slate-800 dark:text-[var(--text-primary)]"
+            className="bg-[var(--bg-card)] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-[var(--border-color)] text-[var(--text-primary)]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-[var(--border-color)] bg-slate-50/90 dark:bg-[var(--bg-card-secondary)] shrink-0">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)] bg-[var(--bg-page)] shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-700 dark:text-[#22C55E] font-bold">
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-[var(--text-primary)] flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                     Hired Alumni at {selectedCompanyForAlumni.name}
                     {selectedCompanyForAlumni.isVerified && (
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 inline-block" />
                     )}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-[#8493A8]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     {selectedCompanyForAlumni.industry} • {selectedCompanyForAlumni.location} • {selectedCompanyForAlumni.hires} total placed graduates
                   </p>
                 </div>
@@ -1106,7 +1081,7 @@ export default function AdminDashboard() {
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}
-                className="p-2 text-slate-400 dark:text-[#8493A8] hover:text-slate-600 dark:hover:text-[var(--text-primary)] rounded-lg hover:bg-slate-100 dark:hover:bg-[var(--bg-card)] transition-colors"
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-card)] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1173,18 +1148,21 @@ export default function AdminDashboard() {
               </div>
 
               {(!selectedCompanyForAlumni.alumniList || selectedCompanyForAlumni.alumniList.length === 0) && (
-                <div className="text-center py-12 text-slate-400 dark:text-[#8493A8] text-xs">
-                  No individual alumnus profiles recorded for this company entry yet.
-                </div>
+                <AdminEmptyState
+                  icon={GraduationCap}
+                  title="No alumni profiles recorded"
+                  description="Individual placement profiles for this company will appear here when available."
+                  className="py-10"
+                />
               )}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end px-6 py-3 border-t border-slate-100 dark:border-[var(--border-color)] bg-slate-50 dark:bg-[var(--bg-card-secondary)]">
+            <div className="flex items-center justify-end px-6 py-3 border-t border-[var(--border-color)] bg-[var(--bg-page)]">
               <button
                 type="button"
                 onClick={() => setSelectedCompanyForAlumni(null)}
-                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                className="px-4 py-1.5 bg-[#003580] hover:bg-[#002866] text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer"
               >
                 Close Breakdown
               </button>
