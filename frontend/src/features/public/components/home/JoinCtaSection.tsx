@@ -24,7 +24,7 @@ export default function JoinCtaSection({ userName, cta, onNavigate }: JoinCtaSec
       className="relative isolate z-0 w-full overflow-x-clip border-b border-slate-200/60 bg-[var(--bg-page)] dark:border-slate-800/80"
     >
       <div className="mx-auto max-w-[1440px] px-4 py-16 md:px-8 md:py-20 lg:py-24">
-        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#003366] via-[#0759a6] to-slate-900 px-6 py-12 text-white shadow-2xl md:px-12 md:py-16 lg:px-16">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0B1428] via-[#0759a6] to-slate-900 px-6 py-12 text-white shadow-2xl md:px-12 md:py-16 lg:px-16">
           <div
             className="pointer-events-none absolute -right-16 top-0 h-64 w-64 rounded-full bg-astu-red/25 blur-3xl"
             aria-hidden="true"
@@ -38,10 +38,9 @@ export default function JoinCtaSection({ userName, cta, onNavigate }: JoinCtaSec
             aria-hidden="true"
           />
           <div className="relative max-w-3xl space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-400/15 px-4 py-1.5 text-xs font-black uppercase tracking-[0.2em] text-amber-300">
-              <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-              <span>ASTU</span>
-            </div>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-amber-300">
+              Adama Science and Technology University
+            </p>
             <h2 className="text-3xl font-black tracking-tight md:text-4xl lg:text-5xl">
               {userName
                 ? `Welcome back, ${userName}`

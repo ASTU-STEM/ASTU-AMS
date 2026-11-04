@@ -1,5 +1,5 @@
 import React from "react";
-import { Quote } from "lucide-react";
+import { ArrowRight, Quote } from "lucide-react";
 import {
   HOME_PREVIEW_COUNT,
   resolveMedia,
@@ -55,10 +55,10 @@ export default function StoriesSection({ stories, headers, onNavigate }: Stories
             key={`${story.id}-${page}`}
             type="button"
             onClick={() => onNavigate(`/stories/${story.id}`)}
-            className="group rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 dark:focus-visible:ring-sky-400/50 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
             <div className="mb-5 flex items-center gap-3.5">
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-2 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-2 ring-slate-100 transition group-hover:ring-astu-navy/30 dark:bg-slate-800 dark:ring-slate-700">
                 {story.image ? (
                   <img
                     src={resolveMedia(story.image)}
@@ -88,11 +88,18 @@ export default function StoriesSection({ stories, headers, onNavigate }: Stories
               </div>
             </div>
             {story.quote || story.text ? (
-              <p className="line-clamp-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-[0.95rem]">
+              <p className="line-clamp-4 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300 md:text-[0.95rem]">
                 <Quote className="mb-0.5 mr-1 inline h-4 w-4 text-astu-red" aria-hidden="true" />
                 {story.quote || story.text}
               </p>
             ) : null}
+            <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-astu-navy dark:text-sky-300">
+              Read story
+              <ArrowRight
+                className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                aria-hidden="true"
+              />
+            </span>
           </button>
         ))}
       </div>

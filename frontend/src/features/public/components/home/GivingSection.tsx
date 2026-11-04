@@ -65,7 +65,7 @@ export default function GivingSection({
           return (
             <div
               key={`${campaign.id}-${page}`}
-              className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/25 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/25 hover:shadow-xl focus-within:ring-2 focus-within:ring-astu-navy/25 dark:border-slate-700 dark:bg-slate-900/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <div className="aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img

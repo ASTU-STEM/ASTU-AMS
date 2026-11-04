@@ -63,31 +63,33 @@ export default function NewsSection({ items, headers, onNavigate }: NewsSectionP
             key={item.id || `news-${page}-${idx}`}
             type="button"
             onClick={() => onNavigate(item.id ? `/announcements/${item.id}` : "/announcements")}
-            className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 dark:focus-visible:ring-sky-400/50 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
-            <div className="mb-4 flex items-center gap-2 text-astu-red">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-astu-red/10">
-                <Bell className="h-4 w-4" aria-hidden="true" />
-              </span>
-              <span className="text-xs font-bold uppercase tracking-wider">
-                {item.type || "Notice"}
-              </span>
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-astu-red">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-astu-red/10">
+                  <Bell className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  {item.type || "Notice"}
+                </span>
+              </div>
+              {item.date ? (
+                <time className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {formatNewsDate(item.date)}
+                </time>
+              ) : null}
             </div>
-            <h3 className="line-clamp-2 text-lg font-bold text-slate-900 dark:text-white md:text-xl">
+            <h3 className="line-clamp-2 text-lg font-bold text-slate-900 transition group-hover:text-astu-navy dark:text-white dark:group-hover:text-sky-300 md:text-xl">
               {item.title}
             </h3>
-            {item.date ? (
-              <p className="mt-2.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                {formatNewsDate(item.date)}
-              </p>
-            ) : null}
             {item.excerpt ? (
               <p className="mt-3 line-clamp-3 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 {item.excerpt}
               </p>
             ) : null}
             <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-astu-navy dark:text-sky-300">
-              Read more
+              Read notice
               <ArrowRight
                 className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
                 aria-hidden="true"

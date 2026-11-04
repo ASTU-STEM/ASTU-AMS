@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -86,7 +86,11 @@ export const SectionPager = ({
 }) => {
   if (totalPages <= 1) return null;
   return (
-    <div className="mt-10 flex items-center justify-center gap-3">
+    <div
+      className="mt-10 flex items-center justify-center gap-3"
+      role="navigation"
+      aria-label={`${label} pagination`}
+    >
       <button
         type="button"
         onClick={onPrev}
@@ -110,6 +114,36 @@ export const SectionPager = ({
   );
 };
 
+function useSectionReveal<T extends HTMLElement>() {
+  const ref = useRef<T | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setVisible(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, visible };
+}
+
 export const SectionShell = ({
   id,
   eyebrow,
@@ -129,6 +163,7 @@ export const SectionShell = ({
   className?: string;
   tone?: "plain" | "muted" | "band";
 }) => {
+  const { ref, visible } = useSectionReveal<HTMLElement>();
   const toneClass =
     tone === "muted"
       ? "bg-slate-50 dark:bg-slate-950/50"
@@ -138,10 +173,15 @@ export const SectionShell = ({
 
   return (
     <section
+      ref={ref}
       id={id}
       className={`relative isolate z-0 clear-both w-full overflow-x-clip border-b border-slate-200/60 dark:border-slate-800/80 ${toneClass} ${className}`}
     >
-      <div className="relative z-0 mx-auto w-full max-w-[1440px] px-4 py-16 md:px-8 md:py-20 lg:py-24">
+      <div
+        className={`relative z-0 mx-auto w-full max-w-[1440px] px-4 py-16 transition duration-700 ease-out md:px-8 md:py-20 lg:py-24 motion-reduce:transition-none ${
+          visible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+        }`}
+      >
         <div className="mb-10 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl space-y-3">
             {eyebrow ? (

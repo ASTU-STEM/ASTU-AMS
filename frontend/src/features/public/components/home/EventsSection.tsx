@@ -1,5 +1,5 @@
 import React from "react";
-import { CalendarDays, MapPin } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 import {
   HOME_PREVIEW_COUNT,
   resolveMedia,
@@ -57,13 +57,13 @@ export default function EventsSection({ items, headers, onNavigate }: EventsSect
             key={`${event.id}-${page}`}
             type="button"
             onClick={() => onNavigate(`/events/${event.id}`)}
-            className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:focus-visible:ring-sky-400/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
           >
             <div className="aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
               <img
                 src={resolveMedia(event.image)}
                 alt=""
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105 motion-reduce:transition-none"
                 loading="lazy"
               />
             </div>
@@ -73,7 +73,7 @@ export default function EventsSection({ items, headers, onNavigate }: EventsSect
                   {event.kind}
                 </span>
               ) : null}
-              <h3 className="line-clamp-2 text-lg font-bold text-slate-900 dark:text-white">
+              <h3 className="line-clamp-2 text-lg font-bold text-slate-900 transition group-hover:text-astu-navy dark:text-white dark:group-hover:text-sky-300">
                 {event.title}
               </h3>
               <p className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
@@ -86,6 +86,13 @@ export default function EventsSection({ items, headers, onNavigate }: EventsSect
                   <span className="truncate">{event.location}</span>
                 </p>
               ) : null}
+              <span className="mt-1 inline-flex items-center gap-1.5 text-sm font-bold text-astu-navy dark:text-sky-300">
+                View details
+                <ArrowRight
+                  className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </span>
             </div>
           </button>
         ))}

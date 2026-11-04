@@ -141,7 +141,7 @@ export default function HowItWorksSection({
           return (
             <article
               key={`${item.id}-${page}`}
-              className="group flex h-full flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="group flex h-full flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-within:ring-2 focus-within:ring-astu-navy/25 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <div>
                 <div className="mb-5 flex items-center justify-between gap-2">

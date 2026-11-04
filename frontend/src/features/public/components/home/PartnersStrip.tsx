@@ -32,7 +32,7 @@ function PartnerLogoItem({
     <button
       type="button"
       onClick={onNavigate}
-      className="group flex h-[5.25rem] w-[180px] shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white px-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-lg dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-sky-500/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group flex h-[5.25rem] w-[180px] shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white px-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-sky-500/40 dark:focus-visible:ring-sky-400/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       aria-label={`View ${partner.name}`}
       title={partner.name}
     >

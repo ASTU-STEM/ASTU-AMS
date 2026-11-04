@@ -82,20 +82,23 @@ export default function GallerySection({ images, headers, onNavigate }: GalleryS
               key={item.id || `gallery-${page}-${idx}`}
               type="button"
               onClick={() => onNavigate(viewAllLink)}
-              className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-slate-100 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-slate-800 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-slate-100 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-sky-400/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
               <img
                 src={src}
                 alt={caption || "Campus photo"}
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105 motion-reduce:transition-none"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-90 transition duration-300 group-hover:opacity-100" />
-              {caption ? (
-                <div className="absolute inset-x-0 bottom-0 p-5">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent opacity-90 transition duration-300 group-hover:opacity-100" />
+              <div className="absolute inset-x-0 bottom-0 p-5">
+                {caption ? (
                   <p className="truncate text-base font-semibold text-white">{caption}</p>
-                </div>
-              ) : null}
+                ) : null}
+                <span className="mt-1 inline-flex text-xs font-bold uppercase tracking-wider text-amber-300 opacity-0 transition group-hover:opacity-100">
+                  Open gallery
+                </span>
+              </div>
             </button>
           );
         })}
