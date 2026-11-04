@@ -44,7 +44,17 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
-import AdminStatCard from '../components/AdminStatCard';
+import AdminStatGrid from '../components/AdminStatGrid';
+import AdminSectionCard, {
+  adminFilterShellClass,
+  adminHeroPrimaryBtnClass,
+  adminInputClass,
+  adminPanelClass,
+  adminTabBtnClass,
+  adminTabRailClass,
+  adminTableHeadClass,
+  adminTableRowClass,
+} from '../components/AdminSectionCard';
 import { adminService } from '../services/admin.service';
 import toast from 'react-hot-toast';
 
@@ -148,26 +158,6 @@ function typeClass(type: JobType | string) {
     default:
       return 'bg-slate-100 text-slate-600 border-slate-200';
   }
-}
-
-function SectionCard({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="mt-1 text-xs text-slate-500">{subtitle}</p>}
-      </div>
-      {children}
-    </section>
-  );
 }
 
 export default function JobsManagement() {
@@ -591,19 +581,6 @@ export default function JobsManagement() {
     { title: 'Total Hired Alumni', value: `${hiredAnalytics.totalHired}`, icon: UserCheck, tone: 'purple' as const, trend: `${hiredAnalytics.jobBoardHired} Job Board • ${hiredAnalytics.nonJobBoardHired} External` },
   ];
 
-  const statusButton = (label: string, isActive: boolean, onClick: () => void) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        'rounded-[8px] px-4 py-2 text-sm font-semibold transition-colors',
-        isActive ? 'bg-[#003580] text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]' : 'text-slate-600 hover:bg-slate-100',
-      ].join(' ')}
-    >
-      {label}
-    </button>
-  );
-
   return (
     <div className="space-y-6">
       <AdminPageHeader
@@ -611,201 +588,193 @@ export default function JobsManagement() {
         subtitle="Track employer posts, applications, and hiring outcomes."
         breadcrumbs={isCms ? [{ label: 'Alumni Office' }, { label: 'Jobs & Careers' }] : [{ label: 'Admin' }, { label: 'Jobs Management' }]}
         actions={
-          <button
-            type="button"
-            onClick={openCreateJob}
-            className="inline-flex items-center gap-2 rounded-[8px] bg-[#003580] px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110"
-          >
+          <button type="button" onClick={openCreateJob} className={adminHeroPrimaryBtnClass}>
             <Plus className="h-4 w-4" />
             Add Job
           </button>
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {jobSummaryCards.map((card) => (
-          <AdminStatCard
-            key={card.title}
-            title={card.title}
-            value={card.value}
-            icon={card.icon}
-            tone={card.tone}
-            trend={card.trend}
-          />
-        ))}
-      </div>
+      <AdminStatGrid stats={jobSummaryCards} cols={4} compact />
 
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-        {statusButton('All Jobs', activeTab === 'jobs', () => setActiveTab('jobs'))}
-        {statusButton('Applications', activeTab === 'applications', () => setActiveTab('applications'))}
-        {statusButton('Analytics', activeTab === 'analytics', () => setActiveTab('analytics'))}
+      <div className={adminTabRailClass}>
+        <button type="button" onClick={() => setActiveTab('jobs')} className={adminTabBtnClass(activeTab === 'jobs')}>
+          All Jobs
+        </button>
+        <button type="button" onClick={() => setActiveTab('applications')} className={adminTabBtnClass(activeTab === 'applications')}>
+          Applications
+        </button>
+        <button type="button" onClick={() => setActiveTab('analytics')} className={adminTabBtnClass(activeTab === 'analytics')}>
+          Analytics
+        </button>
       </div>
 
       {activeTab === 'jobs' && (
         <div className="space-y-4">
-          {/* Modern Source Segment Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1.5">
-                <SlidersHorizontal className="h-3.5 w-3.5 text-[#003580]" /> Filter By Source:
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedSource('All')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  selectedSource === 'All'
-                    ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                <span>All Listings</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                  {jobSourceCounts.all}
+          <AdminSectionCard
+            title="Filters"
+            subtitle="Search and segment job listings by source, status, employer, or type."
+            action={
+              hasActiveJobFilters ? (
+                <button
+                  type="button"
+                  onClick={resetJobFilters}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset Filters
+                </button>
+              ) : undefined
+            }
+          >
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="mr-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-[#003580]" /> Filter By Source:
                 </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedSource('ASTU_ADMIN')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  selectedSource === 'ASTU_ADMIN'
-                    ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-blue-50 text-[#003580] hover:bg-blue-100 border border-blue-200'
-                }`}
-              >
-                <span>🎓 ASTU / Super Admin</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'ASTU_ADMIN' ? 'bg-white/20 text-white' : 'bg-blue-200 text-[#003580]'}`}>
-                  {jobSourceCounts.astu}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setSelectedSource('EXTERNAL')}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                  selectedSource === 'EXTERNAL'
-                    ? 'bg-[#003580] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                }`}
-              >
-                <span>🏢 External Employers</span>
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                  {jobSourceCounts.external}
-                </span>
-              </button>
-            </div>
-
-            {hasActiveJobFilters && (
-              <button
-                type="button"
-                onClick={resetJobFilters}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                Reset Filters
-              </button>
-            )}
-          </div>
-
-          {/* Detailed Filters Controls Toolbar */}
-          <section className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
-              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-4 focus-within:border-[#003580] focus-within:bg-white transition-all shadow-inner">
-                <Search className="h-4 w-4 text-slate-400" />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search job title, description, or company..."
-                  className="w-full bg-transparent outline-none placeholder:text-slate-400 text-slate-800"
-                />
-                {query && (
-                  <button type="button" onClick={() => setQuery('')} className="text-slate-400 hover:text-slate-600">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </label>
-
-              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-2 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <ShieldCheck className="h-4 w-4 text-[#003580]" />
-                <select value={selectedJobStatus} onChange={(event) => setSelectedJobStatus(event.target.value as typeof selectedJobStatus)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
-                  {jobStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status === 'All' ? 'All Statuses' : status}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <Building2 className="h-4 w-4 text-slate-500" />
-                <select value={selectedEmployer} onChange={(event) => setSelectedEmployer(event.target.value)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
-                  {employers.map((employer) => (
-                    <option key={employer} value={employer}>
-                      {employer === 'All' ? 'All Employers' : employer}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)]/50 px-3 py-2 text-sm xl:col-span-3 focus-within:border-[#003580] focus-within:bg-white transition-all">
-                <Briefcase className="h-4 w-4 text-slate-500" />
-                <select value={selectedJobType} onChange={(event) => setSelectedJobType(event.target.value as typeof selectedJobType)} className="w-full bg-transparent outline-none text-slate-700 font-medium">
-                  {jobTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type === 'All' ? 'All Job Types' : type}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            {/* Active Filter Tags */}
-            {hasActiveJobFilters && (
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-                <span className="text-slate-400 font-medium">Active filters:</span>
-                {selectedSource !== 'All' && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-semibold text-[#003580] border border-blue-100">
-                    Source: {selectedSource === 'ASTU_ADMIN' ? '🎓 ASTU / Admin' : '🏢 External'}
-                    <button type="button" onClick={() => setSelectedSource('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSource('All')}
+                  className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    selectedSource === 'All'
+                      ? 'bg-[#003580] text-white shadow-sm'
+                      : 'border border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <span>All Listings</span>
+                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] ${selectedSource === 'All' ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'}`}>
+                    {jobSourceCounts.all}
                   </span>
-                )}
-                {selectedJobStatus !== 'All' && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 font-semibold text-amber-800 border border-amber-200">
-                    Status: {selectedJobStatus}
-                    <button type="button" onClick={() => setSelectedJobStatus('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSource('ASTU_ADMIN')}
+                  className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    selectedSource === 'ASTU_ADMIN'
+                      ? 'bg-[#003580] text-white shadow-sm'
+                      : 'border border-blue-200 bg-blue-50 text-[#003580] hover:bg-blue-100'
+                  }`}
+                >
+                  <span>🎓 ASTU / Super Admin</span>
+                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] ${selectedSource === 'ASTU_ADMIN' ? 'bg-white/20 text-white' : 'bg-blue-200 text-[#003580]'}`}>
+                    {jobSourceCounts.astu}
                   </span>
-                )}
-                {selectedEmployer !== 'All' && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 font-semibold text-slate-700 border border-slate-200">
-                    Employer: {selectedEmployer}
-                    <button type="button" onClick={() => setSelectedEmployer('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSource('EXTERNAL')}
+                  className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                    selectedSource === 'EXTERNAL'
+                      ? 'bg-[#003580] text-white shadow-sm'
+                      : 'border border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <span>🏢 External Employers</span>
+                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] ${selectedSource === 'EXTERNAL' ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] text-[var(--text-secondary)]'}`}>
+                    {jobSourceCounts.external}
                   </span>
-                )}
-                {selectedJobType !== 'All' && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 font-semibold text-emerald-800 border border-emerald-200">
-                    Type: {selectedJobType}
-                    <button type="button" onClick={() => setSelectedJobType('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
-                  </span>
-                )}
-                {query && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-1 font-semibold text-indigo-700 border border-indigo-100">
-                    Search: "{query}"
-                    <button type="button" onClick={() => setQuery('')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
-                  </span>
-                )}
+                </button>
               </div>
-            )}
-          </section>
 
-          <SectionCard
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
+                <label className={`${adminFilterShellClass} xl:col-span-4`}>
+                  <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search job title, description, or company..."
+                    className="w-full bg-transparent outline-none placeholder:text-[var(--text-muted)]"
+                  />
+                  {query && (
+                    <button type="button" onClick={() => setQuery('')} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </label>
+
+                <label className={`${adminFilterShellClass} xl:col-span-2`}>
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-[#003580]" />
+                  <select value={selectedJobStatus} onChange={(event) => setSelectedJobStatus(event.target.value as typeof selectedJobStatus)} className="w-full bg-transparent font-medium outline-none text-[var(--text-primary)]">
+                    {jobStatuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status === 'All' ? 'All Statuses' : status}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className={`${adminFilterShellClass} xl:col-span-3`}>
+                  <Building2 className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+                  <select value={selectedEmployer} onChange={(event) => setSelectedEmployer(event.target.value)} className="w-full bg-transparent font-medium outline-none text-[var(--text-primary)]">
+                    {employers.map((employer) => (
+                      <option key={employer} value={employer}>
+                        {employer === 'All' ? 'All Employers' : employer}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className={`${adminFilterShellClass} xl:col-span-3`}>
+                  <Briefcase className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+                  <select value={selectedJobType} onChange={(event) => setSelectedJobType(event.target.value as typeof selectedJobType)} className="w-full bg-transparent font-medium outline-none text-[var(--text-primary)]">
+                    {jobTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type === 'All' ? 'All Job Types' : type}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              {hasActiveJobFilters && (
+                <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border-color)] pt-2 text-xs">
+                  <span className="font-medium text-[var(--text-muted)]">Active filters:</span>
+                  {selectedSource !== 'All' && (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 font-semibold text-[#003580]">
+                      Source: {selectedSource === 'ASTU_ADMIN' ? '🎓 ASTU / Admin' : '🏢 External'}
+                      <button type="button" onClick={() => setSelectedSource('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                    </span>
+                  )}
+                  {selectedJobStatus !== 'All' && (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 font-semibold text-amber-800">
+                      Status: {selectedJobStatus}
+                      <button type="button" onClick={() => setSelectedJobStatus('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                    </span>
+                  )}
+                  {selectedEmployer !== 'All' && (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-page)] px-2 py-1 font-semibold text-[var(--text-secondary)]">
+                      Employer: {selectedEmployer}
+                      <button type="button" onClick={() => setSelectedEmployer('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                    </span>
+                  )}
+                  {selectedJobType !== 'All' && (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 font-semibold text-emerald-800">
+                      Type: {selectedJobType}
+                      <button type="button" onClick={() => setSelectedJobType('All')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                    </span>
+                  )}
+                  {query && (
+                    <span className="inline-flex items-center gap-1 rounded-md border border-indigo-100 bg-indigo-50 px-2 py-1 font-semibold text-indigo-700">
+                      Search: "{query}"
+                      <button type="button" onClick={() => setQuery('')} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </AdminSectionCard>
+
+          <AdminSectionCard
             title="All Jobs"
             subtitle={`Showing ${filteredJobs.length} of ${jobs.length} employer job listings.`}
           >
-            <div className="flex items-center justify-between mb-3 text-xs">
-              <div className="text-slate-500 font-medium">
+            <div className="mb-3 flex items-center justify-between text-xs">
+              <div className="font-medium text-[var(--text-secondary)]">
                 Showing {filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0} to{' '}
                 {jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)} of {filteredJobs.length} jobs
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-slate-500 font-semibold">Per Page:</span>
+                <span className="font-semibold text-[var(--text-secondary)]">Per Page:</span>
                 <select
                   value={jobsLimit}
                   onChange={(e) => {
@@ -823,40 +792,40 @@ export default function JobsManagement() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[10px] border border-slate-200">
+            <div className={`${adminPanelClass} overflow-hidden`}>
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-slate-50">
+                  <thead>
                     <tr>
                       {['Job Title', 'Employer & Source', 'Type', 'Posted Date', 'Deadline', 'Applicants', 'Status', 'Actions'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <th key={head} className={`${adminTableHeadClass} px-4 py-3`}>
                           {head}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {paginatedJobs.map((job) => {
                       const selfPosted = isEmployerSelfPosted(job.employer);
                       return (
-                        <tr key={job.id} className="hover:bg-slate-50/70">
+                        <tr key={job.id} className={adminTableRowClass}>
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2">
                               {job.featured && <Pin className="h-4 w-4 text-[#E8A020]" />}
                               <div>
-                                <div className="font-semibold text-slate-900">{job.title}</div>
-                                <div className="text-xs text-slate-500 font-mono">{job.id.substring(0, 8)}...</div>
+                                <div className="font-semibold text-[var(--text-primary)]">{job.title}</div>
+                                <div className="font-mono text-xs text-[var(--text-muted)]">{job.id.substring(0, 8)}...</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-4 py-4">
-                            <div className="font-semibold text-slate-900">{job.employer}</div>
+                            <div className="font-semibold text-[var(--text-primary)]">{job.employer}</div>
                             {selfPosted ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#003580] bg-blue-50 px-2 py-0.5 rounded border border-blue-100 mt-1">
+                              <span className="mt-1 inline-flex items-center gap-1 rounded border border-blue-100 bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-[#003580]">
                                 🎓 ASTU Admin
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 mt-1">
+                              <span className="mt-1 inline-flex items-center gap-1 rounded border border-[var(--border-color)] bg-[var(--bg-page)] px-2 py-0.5 text-[10px] font-semibold text-[var(--text-secondary)]">
                                 🏢 External Partner
                               </span>
                             )}
@@ -866,9 +835,9 @@ export default function JobsManagement() {
                               {job.type}
                             </AdminBadge>
                           </td>
-                          <td className="px-4 py-4 text-slate-600">{formatDate(job.postedDate)}</td>
-                          <td className="px-4 py-4 text-slate-600">{formatDate(job.deadline)}</td>
-                          <td className="px-4 py-4 font-bold text-slate-800">{job.applicants}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)]">{formatDate(job.postedDate)}</td>
+                          <td className="px-4 py-4 text-[var(--text-secondary)]">{formatDate(job.deadline)}</td>
+                          <td className="px-4 py-4 font-bold text-[var(--text-primary)]">{job.applicants}</td>
                           <td className="px-4 py-4">
                             <AdminBadge variant="success" className={statusClass(job.status)}>
                               {job.status}
@@ -876,11 +845,11 @@ export default function JobsManagement() {
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2">
-                              <button title="Edit Job" type="button" onClick={() => openEditJob(job)} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
+                              <button title="Edit Job" type="button" onClick={() => openEditJob(job)} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-muted)] hover:bg-[var(--bg-page)]">
                                 <PencilLine className="h-4 w-4" />
                               </button>
                               {job.status === 'PUBLISHED' ? (
-                                <button title="Close Job Listing" type="button" onClick={() => handleUpdateStatus(job.id, 'CLOSED')} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-slate-500 hover:bg-slate-100">
+                                <button title="Close Job Listing" type="button" onClick={() => handleUpdateStatus(job.id, 'CLOSED')} className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-muted)] hover:bg-[var(--bg-page)]">
                                   <ShieldX className="h-4 w-4" />
                                 </button>
                               ) : (
@@ -898,19 +867,18 @@ export default function JobsManagement() {
                     })}
                     {paginatedJobs.length === 0 && (
                       <tr>
-                        <td colSpan={8} className="py-12 text-center text-slate-400 italic">No job listings found matching active filter options.</td>
+                        <td colSpan={8} className="py-12 text-center italic text-[var(--text-muted)]">No job listings found matching active filter options.</td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
 
-              {/* Jobs Table Pagination Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-50 border-t border-slate-200 text-xs font-medium text-slate-600">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-3 text-xs font-medium text-[var(--text-secondary)]">
                 <div>
-                  Showing <span className="font-bold text-slate-900">{filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0}</span> to{' '}
-                  <span className="font-bold text-slate-900">{jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)}</span> of{' '}
-                  <span className="font-bold text-slate-900">{filteredJobs.length}</span> listings
+                  Showing <span className="font-bold text-[var(--text-primary)]">{filteredJobs.length > 0 ? (jobsLimit === 'all' ? 1 : (jobsPage - 1) * parseInt(jobsLimit) + 1) : 0}</span> to{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{jobsLimit === 'all' ? filteredJobs.length : Math.min(jobsPage * parseInt(jobsLimit), filteredJobs.length)}</span> of{' '}
+                  <span className="font-bold text-[var(--text-primary)]">{filteredJobs.length}</span> listings
                 </div>
                 {jobsLimit !== 'all' && totalJobPages > 1 && (
                   <div className="flex items-center gap-1.5">
@@ -918,18 +886,18 @@ export default function JobsManagement() {
                       type="button"
                       disabled={jobsPage === 1}
                       onClick={() => setJobsPage((p) => Math.max(1, p - 1))}
-                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1 font-semibold text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-page)] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Previous
                     </button>
-                    <span className="px-2 font-bold text-slate-800">
+                    <span className="px-2 font-bold text-[var(--text-primary)]">
                       Page {jobsPage} of {totalJobPages}
                     </span>
                     <button
                       type="button"
                       disabled={jobsPage >= totalJobPages}
                       onClick={() => setJobsPage((p) => Math.min(totalJobPages, p + 1))}
-                      className="px-2.5 py-1 rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                      className="rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] px-2.5 py-1 font-semibold text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-page)] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Next
                     </button>
@@ -937,7 +905,7 @@ export default function JobsManagement() {
                 )}
               </div>
             </div>
-          </SectionCard>
+          </AdminSectionCard>
         </div>
       )}
 
@@ -1085,7 +1053,7 @@ export default function JobsManagement() {
             )}
           </section>
 
-          <SectionCard title="Applications" subtitle={`Showing ${filteredApplications.length} of ${applicationRows.length} applicant reviews.`}>
+          <AdminSectionCard title="Applications" subtitle={`Showing ${filteredApplications.length} of ${applicationRows.length} applicant reviews.`}>
             <div className="flex items-center justify-between mb-3 text-xs">
               <div className="text-slate-500 font-medium">
                 Showing {filteredApplications.length > 0 ? (appsLimit === 'all' ? 1 : (appsPage - 1) * parseInt(appsLimit) + 1) : 0} to{' '}
@@ -1255,7 +1223,7 @@ export default function JobsManagement() {
                 )}
               </div>
             </div>
-          </SectionCard>
+          </AdminSectionCard>
         </div>
       )}
 

@@ -1022,132 +1022,150 @@ export default function SystemSettings() {
             </button>
           }
         >
-          <div className="space-y-6">
-            <div>
-              <IntegrationItem
-                title="OpenRouter AI Engine"
-                description="Powers ASTU AI, Tracer Study analytics, and predictive outcomes."
-                status={openRouterToggle ? 'Connected' : 'Disconnected'}
-                toggleActive={openRouterToggle}
-                testing={testingType === 'openrouter'}
-                onToggle={() => setOpenRouterToggle((c) => !c)}
-                onTest={() => handleTestIntegration('openrouter', { openRouterApiKey, openRouterModel })}
-              />
-              <div className="mt-3 grid gap-4 md:grid-cols-2">
-                <InputLabel label="OpenRouter API key">
-                  <input type="password" placeholder="sk-or-v1-…" value={openRouterApiKey} onChange={(e) => setOpenRouterApiKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
-                </InputLabel>
-                <InputLabel label="AI model">
-                  <input placeholder="deepseek/deepseek-r1:free" value={openRouterModel} onChange={(e) => setOpenRouterModel(e.target.value)} className={adminInputClass} />
-                </InputLabel>
+          <div className="space-y-8">
+            <section className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold text-[var(--text-primary)]">AI & payments</h4>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">Model inference and payment gateway credentials.</p>
               </div>
-            </div>
-
-            <div>
-              <IntegrationItem
-                title="Chapa Payment Gateway"
-                description="Accept online donations, alumni membership dues, and event fees."
-                status={chapaToggle ? 'Connected' : 'Disconnected'}
-                toggleActive={chapaToggle}
-                testing={testingType === 'chapa'}
-                onToggle={() => setChapaToggle((c) => !c)}
-                onTest={() => handleTestIntegration('chapa', { chapaSecretKey, chapaPublicKey })}
-              />
-              <div className="mt-3 grid gap-4 md:grid-cols-2">
-                <InputLabel label="Chapa secret key">
-                  <input type="password" placeholder="Enter Chapa secret key" value={chapaSecretKey} onChange={(e) => setChapaSecretKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
-                </InputLabel>
-                <InputLabel label="Chapa public key">
-                  <input placeholder="Enter Chapa public key" value={chapaPublicKey} onChange={(e) => setChapaPublicKey(e.target.value)} className={adminInputClass} />
-                </InputLabel>
+              <div className="space-y-4">
+                <div>
+                  <IntegrationItem
+                    title="OpenRouter AI Engine"
+                    description="Powers ASTU AI, Tracer Study analytics, and predictive outcomes."
+                    status={openRouterToggle ? 'Connected' : 'Disconnected'}
+                    toggleActive={openRouterToggle}
+                    testing={testingType === 'openrouter'}
+                    onToggle={() => setOpenRouterToggle((c) => !c)}
+                    onTest={() => handleTestIntegration('openrouter', { openRouterApiKey, openRouterModel })}
+                  />
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
+                    <InputLabel label="OpenRouter API key">
+                      <input type="password" placeholder="sk-or-v1-…" value={openRouterApiKey} onChange={(e) => setOpenRouterApiKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
+                    </InputLabel>
+                    <InputLabel label="AI model">
+                      <input placeholder="deepseek/deepseek-r1:free" value={openRouterModel} onChange={(e) => setOpenRouterModel(e.target.value)} className={adminInputClass} />
+                    </InputLabel>
+                  </div>
+                </div>
+                <div>
+                  <IntegrationItem
+                    title="Chapa Payment Gateway"
+                    description="Accept online donations, alumni membership dues, and event fees."
+                    status={chapaToggle ? 'Connected' : 'Disconnected'}
+                    toggleActive={chapaToggle}
+                    testing={testingType === 'chapa'}
+                    onToggle={() => setChapaToggle((c) => !c)}
+                    onTest={() => handleTestIntegration('chapa', { chapaSecretKey, chapaPublicKey })}
+                  />
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
+                    <InputLabel label="Chapa secret key">
+                      <input type="password" placeholder="Enter Chapa secret key" value={chapaSecretKey} onChange={(e) => setChapaSecretKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
+                    </InputLabel>
+                    <InputLabel label="Chapa public key">
+                      <input placeholder="Enter Chapa public key" value={chapaPublicKey} onChange={(e) => setChapaPublicKey(e.target.value)} className={adminInputClass} />
+                    </InputLabel>
+                  </div>
+                </div>
               </div>
-            </div>
+            </section>
 
-            <div>
-              <IntegrationItem
-                title="Didit Biometric & Identity Verification"
-                description="Verify alumni identities via official ID document scanning."
-                status={diditToggle ? 'Connected' : 'Disconnected'}
-                toggleActive={diditToggle}
-                testing={testingType === 'didit'}
-                onToggle={() => setDiditToggle((c) => !c)}
-                onTest={() => handleTestIntegration('didit', { diditApiKey })}
-              />
-              <div className="mt-3">
-                <InputLabel label="Didit API key">
-                  <input type="password" placeholder="Enter Didit API key" value={diditApiKey} onChange={(e) => setDiditApiKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
-                </InputLabel>
+            <section className="space-y-4 border-t border-[var(--border-color)] pt-6">
+              <div>
+                <h4 className="text-sm font-semibold text-[var(--text-primary)]">Campus systems</h4>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">Registrar sync and SMS gateway access.</p>
               </div>
-            </div>
-
-            <div>
-              <IntegrationItem
-                title="Registrar / ERP API"
-                description="Synchronize student and alumni records."
-                status={regApiToggle ? 'Connected' : 'Disconnected'}
-                toggleActive={regApiToggle}
-                testing={testingType === 'registrar'}
-                onToggle={() => setRegApiToggle((c) => !c)}
-                onTest={() => handleTestIntegration('registrar', { regApiEndpoint, regApiKey })}
-              />
-              <div className="mt-3 grid gap-4 md:grid-cols-2">
-                <InputLabel label="API endpoint">
-                  <input value={regApiEndpoint} onChange={(e) => setRegApiEndpoint(e.target.value)} className={adminInputClass} />
-                </InputLabel>
-                <InputLabel label="API key">
-                  <input value={regApiKey} onChange={(e) => setRegApiKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
-                </InputLabel>
+              <div className="space-y-4">
+                <div>
+                  <IntegrationItem
+                    title="Registrar / ERP API"
+                    description="Synchronize student and alumni records."
+                    status={regApiToggle ? 'Connected' : 'Disconnected'}
+                    toggleActive={regApiToggle}
+                    testing={testingType === 'registrar'}
+                    onToggle={() => setRegApiToggle((c) => !c)}
+                    onTest={() => handleTestIntegration('registrar', { regApiEndpoint, regApiKey })}
+                  />
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
+                    <InputLabel label="API endpoint">
+                      <input value={regApiEndpoint} onChange={(e) => setRegApiEndpoint(e.target.value)} className={adminInputClass} />
+                    </InputLabel>
+                    <InputLabel label="API key">
+                      <input value={regApiKey} onChange={(e) => setRegApiKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
+                    </InputLabel>
+                  </div>
+                </div>
+                <div>
+                  <IntegrationItem
+                    title="SMS Gateway (Afro Message)"
+                    description="Send SMS notifications to alumni and staff."
+                    status={smsToggle ? 'Connected' : 'Disconnected'}
+                    toggleActive={smsToggle}
+                    testing={testingType === 'sms'}
+                    onToggle={() => setSmsToggle((c) => !c)}
+                    onTest={() => handleTestIntegration('sms', { smsGatewayUser, smsGatewayPass })}
+                  />
+                  <div className="mt-3 grid gap-4 md:grid-cols-2">
+                    <InputLabel label="Gateway username">
+                      <input value={smsGatewayUser} onChange={(e) => setSmsGatewayUser(e.target.value)} className={adminInputClass} />
+                    </InputLabel>
+                    <InputLabel label="Gateway password">
+                      <input value={smsGatewayPass} onChange={(e) => setSmsGatewayPass(e.target.value)} type="password" className={adminInputClass} autoComplete="new-password" />
+                    </InputLabel>
+                  </div>
+                </div>
               </div>
-            </div>
+            </section>
 
-            <div>
-              <IntegrationItem
-                title="SMS Gateway (Afro Message)"
-                description="Send SMS notifications to alumni and staff."
-                status={smsToggle ? 'Connected' : 'Disconnected'}
-                toggleActive={smsToggle}
-                testing={testingType === 'sms'}
-                onToggle={() => setSmsToggle((c) => !c)}
-                onTest={() => handleTestIntegration('sms', { smsGatewayUser, smsGatewayPass })}
-              />
-              <div className="mt-3 grid gap-4 md:grid-cols-2">
-                <InputLabel label="Gateway username">
-                  <input value={smsGatewayUser} onChange={(e) => setSmsGatewayUser(e.target.value)} className={adminInputClass} />
-                </InputLabel>
-                <InputLabel label="Gateway password">
-                  <input value={smsGatewayPass} onChange={(e) => setSmsGatewayPass(e.target.value)} type="password" className={adminInputClass} autoComplete="new-password" />
-                </InputLabel>
+            <section className="space-y-4 border-t border-[var(--border-color)] pt-6">
+              <div>
+                <h4 className="text-sm font-semibold text-[var(--text-primary)]">Identity & social</h4>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">Verification and OAuth providers.</p>
               </div>
-            </div>
-
-            <div>
-              <IntegrationItem
-                title="Google OAuth"
-                description="Allow Google-based sign-in."
-                status={googleToggle ? 'Active' : 'Inactive'}
-                toggleActive={googleToggle}
-                testing={testingType === 'google'}
-                onToggle={() => setGoogleToggle((c) => !c)}
-                onTest={() => handleTestIntegration('google', { googleClientId })}
-              />
-              <div className="mt-3">
-                <InputLabel label="Client ID">
-                  <input value={googleClientId} onChange={(e) => setGoogleClientId(e.target.value)} className={adminInputClass} />
-                </InputLabel>
+              <div className="space-y-4">
+                <div>
+                  <IntegrationItem
+                    title="Didit Biometric & Identity Verification"
+                    description="Verify alumni identities via official ID document scanning."
+                    status={diditToggle ? 'Connected' : 'Disconnected'}
+                    toggleActive={diditToggle}
+                    testing={testingType === 'didit'}
+                    onToggle={() => setDiditToggle((c) => !c)}
+                    onTest={() => handleTestIntegration('didit', { diditApiKey })}
+                  />
+                  <div className="mt-3">
+                    <InputLabel label="Didit API key">
+                      <input type="password" placeholder="Enter Didit API key" value={diditApiKey} onChange={(e) => setDiditApiKey(e.target.value)} className={adminInputClass} autoComplete="new-password" />
+                    </InputLabel>
+                  </div>
+                </div>
+                <div>
+                  <IntegrationItem
+                    title="Google OAuth"
+                    description="Allow Google-based sign-in."
+                    status={googleToggle ? 'Active' : 'Inactive'}
+                    toggleActive={googleToggle}
+                    testing={testingType === 'google'}
+                    onToggle={() => setGoogleToggle((c) => !c)}
+                    onTest={() => handleTestIntegration('google', { googleClientId })}
+                  />
+                  <div className="mt-3">
+                    <InputLabel label="Client ID">
+                      <input value={googleClientId} onChange={(e) => setGoogleClientId(e.target.value)} className={adminInputClass} />
+                    </InputLabel>
+                  </div>
+                </div>
+                <IntegrationItem
+                  title="LinkedIn API"
+                  description="Import professional profile and career data."
+                  status={linkedinToggle ? 'Connected' : 'Disconnected'}
+                  toggleActive={linkedinToggle}
+                  testing={testingType === 'linkedin'}
+                  onToggle={() => setLinkedinToggle((c) => !c)}
+                  onTest={() => handleTestIntegration('linkedin', {})}
+                />
               </div>
-            </div>
-
-            <div>
-              <IntegrationItem
-                title="LinkedIn API"
-                description="Import professional profile and career data."
-                status={linkedinToggle ? 'Connected' : 'Disconnected'}
-                toggleActive={linkedinToggle}
-                testing={testingType === 'linkedin'}
-                onToggle={() => setLinkedinToggle((c) => !c)}
-                onTest={() => handleTestIntegration('linkedin', {})}
-              />
-            </div>
+            </section>
           </div>
         </AdminSectionCard>
       )}

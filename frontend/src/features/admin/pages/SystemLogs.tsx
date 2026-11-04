@@ -123,7 +123,7 @@ function actionBadge(action: string) {
   if (lower.includes('login')) return 'bg-[#003580]/10 text-[#003580] border-[#003580]/15';
   if (lower.includes('import') || lower.includes('sync')) return 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20';
   if (lower.includes('error') || lower.includes('fail')) return 'bg-[#E24B4A]/10 text-[#E24B4A] border-[#E24B4A]/15';
-  if (lower.includes('api')) return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-white/10 dark:text-slate-300 dark:border-white/10';
+  if (lower.includes('api')) return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
   if (lower.includes('system')) return 'bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-500/10 dark:text-violet-300 dark:border-violet-500/20';
   return 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15';
 }

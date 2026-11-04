@@ -16,7 +16,11 @@ import AdminModal from '../components/AdminModal';
 import AdminPagination from '../components/AdminPagination';
 import AdminEmptyState from '../components/AdminEmptyState';
 import AdminStatGrid from '../components/AdminStatGrid';
-import AdminSectionCard, { adminInputClass } from '../components/AdminSectionCard';
+import AdminSectionCard, {
+  adminInputClass,
+  adminTableHeadClass,
+  adminTableRowClass,
+} from '../components/AdminSectionCard';
 import { toast } from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
 
@@ -54,14 +58,14 @@ function backupStatusClass(status: BackupStatus) {
     case 'In Progress':
       return 'bg-[#E8A020]/10 text-[#B87900] border-[#E8A020]/20';
     default:
-      return 'bg-slate-100 text-[var(--text-secondary)] border-slate-200';
+      return 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
   }
 }
 
 function apiStatusClass(status: ApiKeyRecord['status']) {
   return status === 'Active'
     ? 'bg-[#1D9E75]/10 text-[#1D9E75] border-[#1D9E75]/15'
-    : 'bg-slate-100 text-[var(--text-secondary)] border-slate-200';
+    : 'bg-[var(--bg-page)] text-[var(--text-secondary)] border-[var(--border-color)]';
 }
 
 const SectionCard = AdminSectionCard;
@@ -397,10 +401,10 @@ export default function BackupSecurity() {
             <div className="overflow-hidden rounded-2xl border border-[var(--border-color)]">
               <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="sticky top-0 bg-[var(--bg-page)] shadow-sm">
+                  <thead>
                     <tr>
                       {['Date', 'Size', 'Status', 'Download', 'Restore'].map((head) => (
-                        <th key={head} className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                        <th key={head} className={`${adminTableHeadClass} px-4 py-3`}>
                           {head}
                         </th>
                       ))}
@@ -415,9 +419,9 @@ export default function BackupSecurity() {
                       </tr>
                     ) : (
                       paginatedBackups.map((backup) => (
-                        <tr key={backup.file} className="border-t border-[var(--border-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]">
-                          <td className="px-4 py-3 text-[var(--text-secondary)] whitespace-nowrap">{backup.date}</td>
-                          <td className="px-4 py-3 text-[var(--text-secondary)] whitespace-nowrap">{backup.size}</td>
+                        <tr key={backup.file} className={adminTableRowClass}>
+                          <td className="px-4 py-3 whitespace-nowrap">{backup.date}</td>
+                          <td className="px-4 py-3 whitespace-nowrap">{backup.size}</td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             <AdminBadge variant="success" className={backupStatusClass(backup.status)}>
                               {backup.status}
@@ -483,7 +487,7 @@ export default function BackupSecurity() {
                 <button
                   type="button"
                   onClick={() => setRevokeAllOpen(true)}
-                  className="rounded-xl border border-[#E24B4A]/20 px-3 py-1.5 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50"
+                  className="rounded-xl border border-[#E24B4A]/20 px-3 py-1.5 text-xs font-semibold text-[#E24B4A] hover:bg-[#E24B4A]/5"
                 >
                   Revoke All Sessions
                 </button>
@@ -491,10 +495,10 @@ export default function BackupSecurity() {
               <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--border-color)]">
                 <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="sticky top-0 bg-[var(--bg-page)] shadow-sm">
+                    <thead>
                       <tr>
                         {['User', 'IP', 'Role', 'Location', 'Last Activity', ''].map((head) => (
-                          <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                          <th key={head || 'actions'} className={`${adminTableHeadClass} px-3 py-3`}>
                             {head}
                           </th>
                         ))}
@@ -509,21 +513,21 @@ export default function BackupSecurity() {
                         </tr>
                       ) : (
                         paginatedSessions.map((session) => (
-                          <tr key={`${session.user}-${session.ip}`} className="border-t border-[var(--border-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]">
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap max-w-[180px] truncate" title={session.user}>
+                          <tr key={`${session.user}-${session.ip}`} className={adminTableRowClass}>
+                            <td className="px-3 py-3 whitespace-nowrap max-w-[180px] truncate" title={session.user}>
                               {session.user}
                             </td>
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{session.ip}</td>
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap max-w-[150px] truncate" title={session.device}>
+                            <td className="px-3 py-3 whitespace-nowrap">{session.ip}</td>
+                            <td className="px-3 py-3 whitespace-nowrap max-w-[150px] truncate" title={session.device}>
                               {session.device}
                             </td>
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{session.location}</td>
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{session.loginTime}</td>
+                            <td className="px-3 py-3 whitespace-nowrap">{session.location}</td>
+                            <td className="px-3 py-3 whitespace-nowrap">{session.loginTime}</td>
                             <td className="px-3 py-3 whitespace-nowrap text-right">
                               <button
                                 type="button"
                                 onClick={() => revokeSession(session.user)}
-                                className="rounded-xl border border-[#E24B4A]/20 px-2.5 py-1 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50"
+                                className="rounded-xl border border-[#E24B4A]/20 px-2.5 py-1 text-xs font-semibold text-[#E24B4A] hover:bg-[#E24B4A]/5"
                               >
                                 Revoke
                               </button>
@@ -559,10 +563,10 @@ export default function BackupSecurity() {
               <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--border-color)]">
                 <div className="max-h-[320px] overflow-x-auto overflow-y-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="sticky top-0 bg-[var(--bg-page)] shadow-sm">
+                    <thead>
                       <tr>
                         {['Key Name', 'Created', 'Last Used', 'Status', ''].map((head) => (
-                          <th key={head} className="px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                          <th key={head || 'actions'} className={`${adminTableHeadClass} px-3 py-3`}>
                             {head}
                           </th>
                         ))}
@@ -577,10 +581,10 @@ export default function BackupSecurity() {
                         </tr>
                       ) : (
                         paginatedApiKeys.map((key) => (
-                          <tr key={key.name} className="border-t border-[var(--border-color)] hover:bg-black/[0.03] dark:hover:bg-white/[0.04]">
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{key.name}</td>
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{key.created}</td>
-                            <td className="px-3 py-3 text-[var(--text-secondary)] whitespace-nowrap">{key.lastUsed}</td>
+                          <tr key={key.name} className={adminTableRowClass}>
+                            <td className="px-3 py-3 whitespace-nowrap">{key.name}</td>
+                            <td className="px-3 py-3 whitespace-nowrap">{key.created}</td>
+                            <td className="px-3 py-3 whitespace-nowrap">{key.lastUsed}</td>
                             <td className="px-3 py-3 whitespace-nowrap">
                               <AdminBadge variant="success" className={apiStatusClass(key.status)}>
                                 {key.status}
@@ -590,7 +594,7 @@ export default function BackupSecurity() {
                               <button
                                 type="button"
                                 onClick={() => revokeApiKey(key.name)}
-                                className="rounded-xl border border-[#E24B4A]/20 px-2.5 py-1 text-xs font-semibold text-[#E24B4A] hover:bg-rose-50"
+                                className="rounded-xl border border-[#E24B4A]/20 px-2.5 py-1 text-xs font-semibold text-[#E24B4A] hover:bg-[#E24B4A]/5"
                               >
                                 Revoke
                               </button>
@@ -652,7 +656,7 @@ export default function BackupSecurity() {
                 </div>
                 <div className="mt-3 max-h-[140px] overflow-y-auto flex flex-wrap gap-2 pr-1">
                   {whitelist.length === 0 ? (
-                    <p className="text-xs text-slate-400 py-1">No IP addresses whitelisted.</p>
+                    <p className="text-xs text-[var(--text-muted)] py-1">No IP addresses whitelisted.</p>
                   ) : (
                     whitelist.map((ip) => (
                       <button
