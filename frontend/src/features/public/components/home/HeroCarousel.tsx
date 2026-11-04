@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { ArrowLeft, ArrowRight, Building2, ChevronDown, GraduationCap } from "lucide-react";
 import { DEFAULT_HERO_IMAGE } from "./homeShared";
 
@@ -49,6 +49,11 @@ export default function HeroCarousel({
       ? liveHeroBadge.trim()
       : "Adama Science and Technology University";
 
+  const onPrevRef = useRef(onPrevSlide);
+  const onNextRef = useRef(onNextSlide);
+  onPrevRef.current = onPrevSlide;
+  onNextRef.current = onNextSlide;
+
   useEffect(() => {
     if (displaySlides.length <= 1) return;
     const onKey = (e: KeyboardEvent) => {
@@ -58,16 +63,16 @@ export default function HeroCarousel({
       }
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        onPrevSlide();
+        onPrevRef.current();
       }
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        onNextSlide();
+        onNextRef.current();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [displaySlides.length, onPrevSlide, onNextSlide]);
+  }, [displaySlides.length]);
 
   return (
     <section

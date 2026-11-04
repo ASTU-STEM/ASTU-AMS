@@ -484,9 +484,13 @@ export default function HomePage() {
   return (
     <div className="app-shell min-h-screen bg-[var(--bg-page)] text-slate-900 dark:text-slate-100">
       <div
-        className="fixed left-0 top-0 z-[70] h-[3px] bg-astu-red transition-[width] duration-150"
+        className="fixed left-0 top-0 z-[70] h-[3px] bg-gradient-to-r from-astu-red via-amber-400 to-astu-navy transition-[width] duration-150"
         style={{ width: `${scrollProgress}%` }}
-        aria-hidden="true"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(scrollProgress)}
+        aria-label="Page scroll progress"
       />
       <Navbar />
 
