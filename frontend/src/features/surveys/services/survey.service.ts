@@ -1,5 +1,9 @@
 const getApiBaseUrl = () => {
-  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const base =
+    import.meta.env.VITE_API_BASE_URL ||
+    import.meta.env.VITE_API_URL ||
+    'http://localhost:5000/api';
+  return String(base).replace(/\/$/, '');
 };
 
 const getHeaders = () => {

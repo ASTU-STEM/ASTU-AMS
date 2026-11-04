@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
-  EmptySection,
   HOME_PREVIEW_COUNT,
   resolveMedia,
+  SectionPager,
   SectionShell,
+  useSectionPager,
   ViewAllButton,
 } from "./homeShared";
 
@@ -14,6 +15,10 @@ export interface HomeGalleryItem {
   url?: string;
   title?: string;
   album?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  date?: string;
+  uploadedAt?: string;
 }
 
 interface GallerySectionProps {
@@ -29,58 +34,82 @@ interface GallerySectionProps {
 }
 
 export default function GallerySection({ images, headers, onNavigate }: GallerySectionProps) {
-  const preview = images.slice(0, HOME_PREVIEW_COUNT);
+  const ranked = useMemo(
+    () =>
+      [...images].sort((a, b) => {
+        const aTime = Date.parse(a?.createdAt || a?.updatedAt || a?.date || a?.uploadedAt || "");
+        const bTime = Date.parse(b?.createdAt || b?.updatedAt || b?.date || b?.uploadedAt || "");
+        const aValid = !Number.isNaN(aTime);
+        const bValid = !Number.isNaN(bTime);
+        if (aValid || bValid) return (bValid ? bTime : 0) - (aValid ? aTime : 0);
+        return 0;
+      }),
+    [images]
+  );
+
+  const { pageItems, page, totalPages, goPrev, goNext } = useSectionPager(
+    ranked,
+    HOME_PREVIEW_COUNT
+  );
   const viewAllLink = headers?.buttonLink || "/gallery";
+
+  if (!pageItems.length) return null;
 
   return (
     <SectionShell
       id="gallery"
       tone="band"
-      eyebrow={headers?.eyebrow || "Campus Moments"}
-      title={headers?.title || "Photo Gallery"}
+      eyebrow={headers?.eyebrow || "Campus Gallery"}
+      title={headers?.title || "Campus Life & Moments"}
       description={
         headers?.subtitle ||
-        "Graduation stages, research exhibitions, and campus life at ASTU."
+        "A glimpse of life at ASTU — research, innovation, graduation ceremonies, and alumni milestones."
       }
       action={
         <ViewAllButton
-          label={headers?.buttonText || "View Full Gallery"}
+          label={headers?.buttonText || "View All"}
           visible={images.length > 0}
           onClick={() => onNavigate(viewAllLink)}
         />
       }
     >
-      {!preview.length ? (
-        <EmptySection message="Gallery photos will appear here once published in the media library." />
-      ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {preview.map((item, idx) => {
-            const src = resolveMedia(item.src || item.image || item.url);
-            return (
-              <button
-                key={item.id || `gallery-${idx}`}
-                type="button"
-                onClick={() => onNavigate(viewAllLink)}
-                className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-100 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-slate-800 motion-reduce:transform-none"
-              >
-                <img
-                  src={src}
-                  alt={item.title || item.album || "Campus photo"}
-                  className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-                  loading="lazy"
-                />
-                {(item.title || item.album) && (
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 via-slate-950/20 to-transparent p-3">
-                    <p className="truncate text-xs font-semibold text-white">
-                      {item.title || item.album}
-                    </p>
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-6">
+        {pageItems.map((item, idx) => {
+          const src = resolveMedia(item.src || item.image || item.url);
+          const caption = item.title || item.album;
+          return (
+            <button
+              key={item.id || `gallery-${page}-${idx}`}
+              type="button"
+              onClick={() => onNavigate(viewAllLink)}
+              className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-slate-100 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-sky-400/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            >
+              <img
+                src={src}
+                alt={caption || "Campus photo"}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105 motion-reduce:transition-none"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent opacity-90 transition duration-300 group-hover:opacity-100" />
+              <div className="absolute inset-x-0 bottom-0 p-5">
+                {caption ? (
+                  <p className="truncate text-base font-semibold text-white">{caption}</p>
+                ) : null}
+                <span className="mt-1 inline-flex text-xs font-bold uppercase tracking-wider text-amber-300 opacity-0 transition group-hover:opacity-100">
+                  Open gallery
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      <SectionPager
+        page={page}
+        totalPages={totalPages}
+        onPrev={goPrev}
+        onNext={goNext}
+        label="photos"
+      />
     </SectionShell>
   );
 }

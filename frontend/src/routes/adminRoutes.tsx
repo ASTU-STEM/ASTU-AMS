@@ -22,14 +22,21 @@ const AdminChatPage = lazy(() => import('../features/admin/pages/AdminChatPage')
 const SupportDeskManagement = lazy(() => import('../features/admin/pages/SupportDeskManagement'));
 const IctAdminDashboard = lazy(() => import('../features/admin/pages/IctAdminDashboard'));
 const KnowledgeBaseManagement = lazy(() => import('../features/admin/pages/KnowledgeBaseManagement'));
-const PortalMenuControls = lazy(() => import('../features/admin/pages/PortalMenuControls'));
+
+function AdminRouteFallback() {
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center text-sm font-semibold text-slate-500">
+      Loading admin module…
+    </div>
+  );
+}
 
 export default function AdminRoutes() {
   const { user } = useAuth();
   const defaultTab = user?.role === 'ADMIN' ? 'ict-portal' : 'dashboard';
 
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-500">Loading workspace...</div>}>
+    <Suspense fallback={<AdminRouteFallback />}>
       <Routes>
         <Route element={<AdminLayout />}>
           <Route index element={<Navigate to={defaultTab} replace />} />
@@ -52,8 +59,6 @@ export default function AdminRoutes() {
           <Route path="notifications" element={<NotificationCenter />} />
           <Route path="logs" element={<SystemLogs />} />
           <Route path="backup" element={<BackupSecurity />} />
-          <Route path="menu-controls" element={<PortalMenuControls />} />
-          <Route path="portal-controls" element={<PortalMenuControls />} />
           <Route path="settings" element={<SystemSettings />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>

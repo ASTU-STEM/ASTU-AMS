@@ -98,14 +98,13 @@ export default function VerifyOtpPage() {
   };
 
   const handleResend = async () => {
-    const studentId = registrationDetails?.studentId;
-    if (cooldown > 0 || !studentId || !registrationDetails?.email || errorType === 'LOCKOUT') return;
+    if (cooldown > 0 || !registrationDetails?.email || errorType === 'LOCKOUT') return;
     setIsLoading(true);
     setErrorMsg(null);
     setErrorType(null);
 
     try {
-      const result = await authService.resendOtp(studentId);
+      const result = await authService.resendOtp(registrationDetails.email);
       if (result.ok) {
         toast.success('A new 6-digit OTP code has been sent to your email.');
         const targetTime = Date.now() + 30000; // 30-second cooldown

@@ -13,7 +13,6 @@ const DedicatedRegistrationsPage = lazy(() => import('../features/admin/pages/De
 const HomepageManagement = lazy(() => import('../features/admin/pages/HomepageManagement'));
 const CmsChatPage = lazy(() => import('../features/admin/pages/CmsChatPage'));
 const NotificationCenter = lazy(() => import('../features/admin/pages/NotificationCenter'));
-const CommunityMembersManagement = lazy(() => import('../features/admin/pages/CommunityMembersManagement'));
 const CommunityManagement = lazy(() => import('../features/admin/pages/CommunityManagement'));
 const PartnersManagement = lazy(() => import('../features/admin/pages/PartnersManagement'));
 const MediaGalleryHub = lazy(() => import('../features/admin/pages/MediaGalleryHub'));
@@ -28,6 +27,7 @@ const ReportsCenter = lazy(() => import('../features/admin/pages/ReportsCenter')
 const AnalyticsOverview = lazy(() => import('../features/admin/pages/AnalyticsOverview'));
 const UserManagement = lazy(() => import('../features/admin/pages/UserManagement'));
 const AdminProfile = lazy(() => import('../features/admin/pages/AdminProfile'));
+const KnowledgeBaseManagement = lazy(() => import('../features/admin/pages/KnowledgeBaseManagement'));
 
 export default function CmsRoutes() {
   return (
@@ -42,27 +42,30 @@ export default function CmsRoutes() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<CmsDashboard />} />
         <Route path="surveys" element={<SurveyManagement />} />
-        <Route path="tracer-studies" element={<SurveyManagement />} />
+        <Route path="tracer-studies" element={<Navigate to="/cms/surveys" replace />} />
         <Route path="analytics" element={<AnalyticsOverview />} />
         <Route path="reports" element={<ReportsCenter />} />
         <Route path="alumni-directory" element={<UserManagement />} />
-        <Route path="users" element={<UserManagement />} />
+        <Route path="users" element={<Navigate to="/cms/alumni-directory" replace />} />
         <Route path="registrations" element={<AnnouncementRegistrations />} />
         <Route path="events" element={<EventWorkshopManagement />} />
         <Route path="jobs" element={<JobsManagement />} />
-        <Route path="careers" element={<JobsManagement />} />
+        <Route path="careers" element={<Navigate to="/cms/jobs" replace />} />
         <Route path="donations" element={<DonationsManagement />} />
         <Route path="homepage" element={<HomepageManagement />} />
         <Route path="content" element={<ContentList />} />
-        <Route path="announcements" element={<ContentList />} />
+        <Route path="announcements" element={<Navigate to="/cms/content" replace />} />
         <Route path="partners" element={<PartnersManagement />} />
-        <Route path="employers" element={<PartnersManagement />} />
+        <Route path="employers" element={<Navigate to="/cms/partners" replace />} />
         <Route path="institutional-pages" element={<HomepageManagement initialCategory="detail-pages" />} />
         <Route path="community" element={<CommunityManagement />} />
-        <Route path="community-members" element={<CommunityMembersManagement />} />
+        <Route path="knowledge-hub" element={<KnowledgeBaseManagement />} />
+        <Route path="rag-knowledge" element={<KnowledgeBaseManagement />} />
+        {/* Merged into Community (members tab) — keep redirects for old bookmarks */}
+        <Route path="community-members" element={<Navigate to="/cms/community?tab=members" replace />} />
         <Route path="media-gallery" element={<MediaGalleryHub />} />
-        <Route path="media" element={<MediaGalleryHub />} />
-        <Route path="gallery" element={<MediaGalleryHub />} />
+        <Route path="media" element={<Navigate to="/cms/media-gallery" replace />} />
+        <Route path="gallery" element={<Navigate to="/cms/media-gallery" replace />} />
         <Route path="seo" element={<SEOManagement />} />
         <Route path="approvals" element={<ApprovalWorkflow />} />
         <Route path="templates" element={<ContentTemplates />} />

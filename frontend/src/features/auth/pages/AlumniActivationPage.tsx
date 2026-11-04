@@ -45,7 +45,7 @@ export default function AlumniActivationPage() {
     setIsLoading(true);
     try {
       const token = searchParams.get('token') || '';
-      const response = await authService.activateAlumni({ token, password: values.password });
+      const response = await authService.activateAlumni(token, values.password);
 
       if (response.ok) {
         setIsSuccess(true);

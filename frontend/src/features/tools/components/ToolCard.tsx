@@ -18,48 +18,28 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   const getTypeBadge = () => {
     switch (tool.toolType) {
       case 'FRONTEND_UTILITY':
-        return {
-          label: 'Instant Utility',
-          icon: <Zap className="w-3 h-3 text-amber-500 dark:text-amber-400" />,
-          bg: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
-        };
+        return { label: 'Instant Utility', icon: <Zap className="w-3 h-3 text-amber-500" />, bg: 'bg-amber-50 text-amber-700 border-amber-200' };
       case 'DATA_DRIVEN':
-        return {
-          label: 'Portal Data',
-          icon: <CheckCircle className="w-3 h-3 text-blue-500 dark:text-blue-400" />,
-          bg: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60',
-        };
+        return { label: 'ASTU Portal Data', icon: <CheckCircle className="w-3 h-3 text-blue-500" />, bg: 'bg-blue-50 text-blue-700 border-blue-200' };
       case 'AI_ASSISTED':
-        return {
-          label: 'AI Generator',
-          icon: <Cpu className="w-3 h-3 text-purple-500 dark:text-purple-400" />,
-          bg: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/60',
-        };
+        return { label: 'AI Generator', icon: <Cpu className="w-3 h-3 text-purple-500" />, bg: 'bg-purple-50 text-purple-700 border-purple-200' };
       case 'GUIDED_WORKFLOW':
-        return {
-          label: 'Interactive Checklist',
-          icon: <ListChecks className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />,
-          bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
-        };
+        return { label: 'Interactive Checklist', icon: <ListChecks className="w-3 h-3 text-emerald-500" />, bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
       case 'VERIFIED_RESOURCE':
       default:
-        return {
-          label: 'Verified Guide',
-          icon: <Info className="w-3 h-3 text-cyan-500 dark:text-cyan-400" />,
-          bg: 'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-800/60',
-        };
+        return { label: 'Verified Resource', icon: <Info className="w-3 h-3 text-cyan-500" />, bg: 'bg-cyan-50 text-cyan-700 border-cyan-200' };
     }
   };
 
   const badgeInfo = getTypeBadge();
 
   return (
-    <div className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-[#003366]/40 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900/90 dark:hover:border-blue-500/50 dark:hover:shadow-blue-500/5 backdrop-blur-sm">
+    <div className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-[#003366]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
       {/* Top Header Row */}
       <div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#003366] transition-transform group-hover:scale-105 group-hover:bg-[#003366] group-hover:text-white dark:bg-slate-800 dark:text-blue-400 dark:group-hover:bg-blue-600 dark:group-hover:text-white shadow-xs">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[#003366] transition-transform group-hover:scale-105 group-hover:bg-[#003366] group-hover:text-white dark:bg-slate-800 dark:text-blue-400">
               <span className="material-symbols-outlined text-2xl">{tool.icon}</span>
             </div>
             <div>
@@ -69,7 +49,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                   {badgeInfo.label}
                 </span>
                 {tool.isFeatured && (
-                  <span className="rounded-full bg-amber-100 dark:bg-amber-950/50 px-2 py-0.5 text-[10px] font-extrabold text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-extrabold text-amber-800 border border-amber-200">
                     ⭐ Featured
                   </span>
                 )}
@@ -85,8 +65,8 @@ export const ToolCard: React.FC<ToolCardProps> = ({
             }}
             className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
               isFavorite
-                ? 'bg-amber-50 text-amber-500 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-400'
-                : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:text-slate-500 dark:hover:text-slate-300'
+                ? 'bg-amber-50 text-amber-500 hover:bg-amber-100 dark:bg-amber-950/40'
+                : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800'
             }`}
             title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           >
@@ -95,7 +75,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         </div>
 
         {/* Title and Description */}
-        <h3 className="mt-3 text-sm sm:text-base font-bold tracking-tight text-slate-900 group-hover:text-[#003366] transition-colors dark:text-white dark:group-hover:text-blue-400 line-clamp-1">
+        <h3 className="mt-3 text-base font-bold tracking-tight text-slate-900 group-hover:text-[#003366] transition-colors dark:text-white dark:group-hover:text-blue-400">
           {tool.name}
         </h3>
         <p className="mt-1.5 text-xs text-slate-600 leading-relaxed line-clamp-2 dark:text-slate-300">
@@ -104,14 +84,14 @@ export const ToolCard: React.FC<ToolCardProps> = ({
       </div>
 
       {/* Footer Row */}
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
         <div className="flex items-center justify-between gap-2">
           {/* Tags */}
           <div className="flex items-center gap-1 overflow-hidden">
             {tool.tags.slice(0, 2).map((tag, idx) => (
               <span
                 key={idx}
-                className="rounded-md bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:text-slate-400 border dark:border-slate-700/60 truncate"
+                className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400 truncate"
               >
                 #{tag}
               </span>
@@ -125,10 +105,10 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           <button
             type="button"
             onClick={() => onOpenTool(tool)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-[#003366] hover:bg-[#002244] dark:bg-blue-600 dark:hover:bg-blue-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-all hover:shadow-sm active:scale-95 shrink-0"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#003366] px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs transition-all hover:bg-[#002244] hover:shadow-sm active:scale-95 shrink-0"
           >
             <span>Open Tool</span>
-            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>

@@ -2,13 +2,7 @@ import React, { useMemo, useState } from "react";
 import type { Partner } from "../../../admin/services/homepageCms.service";
 import { getPartnerLogoSrc } from "../../../../components/PartnerLogos";
 import config from "../../../../config";
-import {
-  EmptySection,
-  HOME_PREVIEW_COUNT,
-  partnerMonogram,
-  SectionShell,
-  ViewAllButton,
-} from "./homeShared";
+import { partnerMonogram, SectionShell, ViewAllButton } from "./homeShared";
 
 const { mediaUrl } = config;
 
@@ -38,19 +32,19 @@ function PartnerLogoItem({
     <button
       type="button"
       onClick={onNavigate}
-      className="group flex h-16 w-[160px] shrink-0 items-center justify-center bg-transparent px-3"
-      aria-label={partner.name}
+      className="group flex h-[5.25rem] w-[180px] shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white px-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/60 dark:hover:border-sky-500/40 dark:focus-visible:ring-sky-400/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      aria-label={`View ${partner.name}`}
       title={partner.name}
     >
       {showMonogram ? (
-        <span className="text-sm font-black tracking-wide text-astu-navy/80 transition group-hover:text-astu-navy dark:text-sky-300/90">
+        <span className="text-sm font-black tracking-wide text-astu-navy dark:text-sky-300">
           {partnerMonogram(partner.name)}
         </span>
       ) : (
         <img
           src={logo}
-          alt={partner.name}
-          className="partner-logo-img max-h-12 max-w-[140px] object-contain opacity-85 transition duration-300 group-hover:scale-105 group-hover:opacity-100"
+          alt=""
+          className="max-h-11 max-w-[128px] object-contain opacity-85 transition duration-300 group-hover:opacity-100"
           loading="lazy"
           onError={onFail}
         />
@@ -66,16 +60,20 @@ export default function PartnersStrip({
   onNavigate,
 }: PartnersStripProps) {
   const [failed, setFailed] = useState<Set<string>>(() => new Set());
-  const preview = useMemo(() => partners.slice(0, HOME_PREVIEW_COUNT), [partners]);
-  // Duplicate for a seamless CSS marquee loop (translate -50%).
-  const loop = useMemo(() => [...preview, ...preview], [preview]);
+  const active = useMemo(
+    () => partners.filter((p) => p && p.active !== false && p.name),
+    [partners]
+  );
+  const loop = useMemo(() => (active.length ? [...active, ...active] : []), [active]);
+
+  if (!loading && !active.length) return null;
 
   return (
     <SectionShell
       id="partners"
-      tone="muted"
+      tone="plain"
       eyebrow={headers?.eyebrow || "Our Partners"}
-      title={headers?.title || "Industry Partners"}
+      title={headers?.title || "Partner Companies"}
       description={
         headers?.description ||
         "Institutional partners supporting employability, internships, and research collaboration."
@@ -83,40 +81,47 @@ export default function PartnersStrip({
       action={
         <ViewAllButton
           label="View All Partners"
-          visible={partners.length > 0 || !loading}
+          visible={active.length > 0}
           onClick={() => onNavigate("/partners")}
         />
       }
     >
       {loading ? (
-        <div className="flex h-16 items-center justify-center gap-10">
-          {Array.from({ length: HOME_PREVIEW_COUNT }).map((_, i) => (
-            <div key={i} className="h-10 w-28 animate-pulse rounded bg-slate-200/80 dark:bg-slate-800" />
+        <div className="flex h-16 items-center justify-center gap-6">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-14 w-36 animate-pulse rounded-2xl bg-slate-200/70 dark:bg-slate-800"
+            />
           ))}
         </div>
-      ) : !preview.length ? (
-        <EmptySection message="Published partners will appear here once added by the Alumni Office." />
       ) : (
         <div className="partners-marquee relative overflow-hidden py-2">
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-slate-50 to-transparent dark:from-slate-950/50"
+            className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-[var(--bg-page)] to-transparent sm:w-24"
             aria-hidden="true"
           />
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-slate-50 to-transparent dark:from-slate-950/50"
+            className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-[var(--bg-page)] to-transparent sm:w-24"
             aria-hidden="true"
           />
           <div
-            className={`flex w-max items-center gap-10 ${preview.length > 1 ? "animate-scroll" : "mx-auto justify-center"}`}
+            className={`flex w-max items-center gap-5 sm:gap-8 ${
+              active.length > 2 ? "animate-scroll" : "mx-auto justify-center"
+            }`}
             role="list"
             aria-label="Partner logos"
           >
             {loop.map((partner, idx) => (
-              <div key={`${partner.id}-${idx}`} role="listitem" className="bg-transparent">
+              <div key={`${partner.id}-${idx}`} role="listitem">
                 <PartnerLogoItem
                   partner={partner}
                   failed={failed.has(partner.id)}
-                  onNavigate={() => onNavigate("/partners")}
+                  onNavigate={() =>
+                    onNavigate(
+                      `/partners?partner=${encodeURIComponent(partner.id || partner.name)}`
+                    )
+                  }
                   onFail={() =>
                     setFailed((prev) => {
                       const next = new Set(prev);
@@ -128,14 +133,6 @@ export default function PartnersStrip({
               </div>
             ))}
           </div>
-          {partners.length > HOME_PREVIEW_COUNT ? (
-            <div className="mt-6 flex justify-center md:hidden">
-              <ViewAllButton
-                label="View All Partners"
-                onClick={() => onNavigate("/partners")}
-              />
-            </div>
-          ) : null}
         </div>
       )}
     </SectionShell>

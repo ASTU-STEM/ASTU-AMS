@@ -10,6 +10,7 @@ import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
 import { notificationService } from '../features/notifications/services/notification.service';
 import { useTheme } from '../hooks/useTheme';
+import { SHELL_TOPBAR_CLASS } from './sidebarShared';
 
 class AdminRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -47,9 +48,11 @@ class AdminRouteBoundary extends React.Component<
 const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem[] }> = {
   '/admin/dashboard': { title: 'Dashboard', breadcrumb: [{ label: 'Admin' }, { label: 'Dashboard' }] },
   '/admin/ict-portal': { title: 'ICT Technical Portal', breadcrumb: [{ label: 'Admin' }, { label: 'ICT Portal' }] },
-  '/admin/messages': { title: 'ASTU_AMS Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Messages' }] },
+  '/admin/messages': { title: 'Messages', breadcrumb: [{ label: 'Admin' }, { label: 'Messages' }] },
   '/admin/support-tickets': { title: 'Support Desk', breadcrumb: [{ label: 'Admin' }, { label: 'Support Desk' }] },
   '/admin/modules': { title: 'Super Admin Modules', breadcrumb: [{ label: 'Admin' }, { label: 'Modules' }] },
+  '/admin/knowledge-hub': { title: 'Knowledge Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Knowledge Hub' }] },
+  '/admin/rag-knowledge': { title: 'Knowledge Hub', breadcrumb: [{ label: 'Admin' }, { label: 'Knowledge Hub' }] },
   '/admin/reports': { title: 'Reports Center', breadcrumb: [{ label: 'Admin' }, { label: 'Reports' }] },
   '/admin/users': { title: 'User Management', breadcrumb: [{ label: 'Admin' }, { label: 'Users' }] },
   '/admin/roles': { title: 'Role Management', breadcrumb: [{ label: 'Admin' }, { label: 'Roles' }] },
@@ -58,10 +61,10 @@ const routeMeta: Record<string, { title: string; breadcrumb: AdminBreadcrumbItem
   '/admin/jobs': { title: 'Jobs Management', breadcrumb: [{ label: 'Admin' }, { label: 'Jobs' }] },
   '/admin/departments': { title: 'Departments', breadcrumb: [{ label: 'Admin' }, { label: 'Departments' }] },
   '/admin/donations': { title: 'Donations & Giving', breadcrumb: [{ label: 'Admin' }, { label: 'Donations' }] },
-  '/admin/notifications': { title: 'Notifications', breadcrumb: [{ label: 'Admin' }, { label: 'Notifications' }] },
-  '/admin/logs': { title: 'System Logs', breadcrumb: [{ label: 'Admin' }, { label: 'Logs' }] },
+  '/admin/notifications': { title: 'Notification Center', breadcrumb: [{ label: 'Admin' }, { label: 'Configuration' }, { label: 'Notification Center' }] },
+  '/admin/logs': { title: 'System Logs', breadcrumb: [{ label: 'Admin' }, { label: 'Configuration' }, { label: 'System Logs' }] },
   '/admin/backup': { title: 'Backup & Security', breadcrumb: [{ label: 'Admin' }, { label: 'Backup' }] },
-  '/admin/settings': { title: 'Settings', breadcrumb: [{ label: 'Admin' }, { label: 'Settings' }] },
+  '/admin/settings': { title: 'System Settings', breadcrumb: [{ label: 'Admin' }, { label: 'Configuration' }, { label: 'System Settings' }] },
   '/admin/profile': { title: 'My Profile', breadcrumb: [{ label: 'Admin' }, { label: 'Profile' }] },
 };
 
@@ -213,7 +216,7 @@ export default function AdminLayout() {
       <NavLink
         to="/admin/profile"
         onClick={() => setMenuOpen(false)}
-        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#1B2636] hover:text-[var(--text-primary)]"
+        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)]"
       >
         <User className="h-4 w-4" />
         My Profile
@@ -221,7 +224,7 @@ export default function AdminLayout() {
       <NavLink
         to="/admin/settings"
         onClick={() => setMenuOpen(false)}
-        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#1B2636] hover:text-[var(--text-primary)]"
+        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)]"
       >
         <Settings className="h-4 w-4" />
         Settings
@@ -232,7 +235,7 @@ export default function AdminLayout() {
           setMenuOpen(false);
           setHelpOpen(true);
         }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#1B2636] hover:text-[var(--text-primary)]"
+        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)]"
       >
         <HelpCircle className="h-4 w-4" />
         Help
@@ -283,13 +286,7 @@ export default function AdminLayout() {
        <div
          className={`min-h-screen transition-[margin-left] duration-[250ms] ease-in-out ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}
        >
-        <header
-          className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
-          style={{
-            background: 'var(--bg-navbar)',
-            borderColor: 'var(--border-color)',
-          }}
-        >
+        <header className={`${SHELL_TOPBAR_CLASS} px-4 sm:px-6`}>
           <div className="flex min-w-0 items-center gap-3">
             {/* Desktop Hamburger / Collapse Toggle */}
             <button
@@ -318,22 +315,22 @@ export default function AdminLayout() {
 
           <div className="flex items-center gap-3">
             <label
-              className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#2196F3] focus-within:ring-2 focus-within:ring-[#2196F3]/15 dark:bg-[#151D2B] dark:border-[#2A3749]"
+              className="group hidden h-11 w-[420px] max-w-[36vw] items-center rounded-full border bg-[#F3F5FA] px-3 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 md:flex focus-within:border-[#2196F3] focus-within:ring-2 focus-within:ring-[#2196F3]/15 dark:bg-[var(--bg-card)] dark:border-[var(--border-color)]"
             >
-              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-slate-400 dark:text-[#8493A8]">
+              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-slate-400 dark:text-[var(--text-muted)]">
                 <Search className="h-4.5 w-4.5 flex-none" />
               </span>
               <input
                 type="text"
                 placeholder="Search resources..."
-                className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-[#8493A8] text-slate-900 dark:text-[#F1F5F9]"
+                className="w-full bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-[var(--text-muted)] text-slate-900 dark:text-[var(--text-primary)]"
               />
             </label>
 
             <button
               type="button"
               onClick={toggleTheme}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#151D2B]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[var(--bg-card)]"
               aria-label="Toggle dark mode"
             >
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -343,7 +340,7 @@ export default function AdminLayout() {
               <button
                 type="button"
                 onClick={handleToggleNotifications}
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[#151D2B]"
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-[var(--bg-card)]"
                 title={unreadCount > 0 ? `${unreadCount} unread notifications` : "Notifications"}
               >
                 <Bell className="h-4 w-4" />
@@ -354,11 +351,11 @@ export default function AdminLayout() {
                 )}
               </button>
               {notificationOpen && (
-                <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 dark:border-[#2A3749] bg-white dark:bg-[#151D2B] p-2 shadow-xl">
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#2A3749] px-3 py-2.5">
+                <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 dark:border-[var(--border-color)] bg-white dark:bg-[var(--bg-card)] p-2 shadow-xl">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-[var(--border-color)] px-3 py-2.5">
                     <div>
-                      <div className="text-sm font-extrabold text-slate-900 dark:text-[#F1F5F9]">Notifications</div>
-                      <div className="text-[11px] font-medium text-slate-500 dark:text-[#8493A8]">{unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}</div>
+                      <div className="text-sm font-extrabold text-slate-900 dark:text-[var(--text-primary)]">Notifications</div>
+                      <div className="text-[11px] font-medium text-slate-500 dark:text-[var(--text-muted)]">{unreadCount > 0 ? `${unreadCount} unread updates` : 'All caught up'}</div>
                     </div>
                     {unreadCount > 0 && (
                       <button
@@ -372,7 +369,7 @@ export default function AdminLayout() {
                   </div>
                   <div className="max-h-72 overflow-y-auto space-y-1 p-1">
                     {displayNotifications.length === 0 ? (
-                      <div className="py-8 text-center text-xs text-slate-400 dark:text-[#8493A8]">
+                      <div className="py-8 text-center text-xs text-slate-400 dark:text-[var(--text-muted)]">
                         No new notifications
                       </div>
                     ) : (
@@ -386,16 +383,16 @@ export default function AdminLayout() {
                               setRealNotifications((prev) => prev.map((n) => n.id === item.id ? { ...n, isRead: true, read: true } : n));
                               setUnreadCount((prev) => Math.max(0, prev - 1));
                             }}
-                            className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50 dark:bg-[#1B2636] dark:hover:bg-[#202E40]' : 'hover:bg-slate-50 dark:hover:bg-[#1B2636]'}`}
+                            className={`flex items-start gap-3 rounded-xl p-2.5 transition-colors cursor-pointer ${isUnread ? 'bg-blue-50/60 hover:bg-blue-50 dark:bg-[var(--bg-card-secondary)] dark:hover:bg-[var(--bg-hover)]' : 'hover:bg-slate-50 dark:hover:bg-[var(--bg-card-secondary)]'}`}
                           >
                             <span
                               className="mt-1 h-2.5 w-2.5 rounded-full shrink-0"
                               style={{ backgroundColor: item.tone || (isUnread ? '#2196F3' : '#8493A8') }}
                             />
                             <div className="min-w-0 flex-1">
-                              {item.title && <p className="text-xs font-extrabold text-slate-900 dark:text-[#F1F5F9]">{item.title}</p>}
-                              <p className="text-xs font-medium text-slate-700 dark:text-[#B0BDCE] leading-snug">{item.message || item.text || item.content}</p>
-                              <p className="mt-1 text-[10px] font-semibold text-slate-400 dark:text-[#8493A8]">
+                              {item.title && <p className="text-xs font-extrabold text-slate-900 dark:text-[var(--text-primary)]">{item.title}</p>}
+                              <p className="text-xs font-medium text-slate-700 dark:text-[var(--text-secondary)] leading-snug">{item.message || item.text || item.content}</p>
+                              <p className="mt-1 text-[10px] font-semibold text-slate-400 dark:text-[var(--text-muted)]">
                                 {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : item.time || 'Recently'}
                               </p>
                             </div>
@@ -405,7 +402,7 @@ export default function AdminLayout() {
                       })
                     )}
                   </div>
-                  <div className="border-t border-slate-100 dark:border-[#2A3749] px-3 py-2.5 text-center">
+                  <div className="border-t border-slate-100 dark:border-[var(--border-color)] px-3 py-2.5 text-center">
                     <button
                       type="button"
                       onClick={() => {
@@ -435,14 +432,14 @@ export default function AdminLayout() {
                   <div className="text-sm font-medium text-[var(--text-primary)]">{user ? `${user.firstName} ${user.lastName}` : 'System Administrator'}</div>
                   <div className="text-[11px] text-[var(--text-secondary)]">{user?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'ICT Administrator'}</div>
                 </div>
-                <ChevronDown className="h-4 w-4 text-slate-400 dark:text-[#8493A8]" />
+                <ChevronDown className="h-4 w-4 text-slate-400 dark:text-[var(--text-muted)]" />
               </button>
               {menuOpen && menu}
             </div>
           </div>
         </header>
 
-        <main id="main-content" tabIndex={-1} className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 dark:bg-[#0B0F19] p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+        <main id="main-content" tabIndex={-1} className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-[var(--bg-page)] p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
             <Outlet />
           </AdminRouteBoundary>

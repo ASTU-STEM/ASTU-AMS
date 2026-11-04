@@ -608,7 +608,7 @@ export default function CmsDashboard() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => navigate('/cms/content')}
+                  onClick={() => navigate('/cms/content?action=broadcast')}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FFCC00] hover:bg-yellow-300 text-[#003366] text-xs font-extrabold transition-all shadow-xs cursor-pointer"
                 >
                   <Plus className="h-4 w-4" />
@@ -984,7 +984,7 @@ export default function CmsDashboard() {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => navigate('/cms/content')}
+                  onClick={() => navigate('/cms/content?action=broadcast')}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <Newspaper className="h-5 w-5 text-[#003366] dark:text-[#FFCC00]" />

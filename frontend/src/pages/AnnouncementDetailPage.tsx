@@ -14,11 +14,10 @@ import {
   Tag,
   User,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ChatBot from '../components/ChatBot';
-import ShareModal from '../components/ShareModal';
+import ShareModal, { ShareItem } from '../components/ShareModal';
 import contentService from '../features/admin/services/content.service';
 import { ContentCardItem } from '../features/admin/components/ContentCard';
 
@@ -27,7 +26,8 @@ export default function AnnouncementDetailPage() {
   const navigate = useNavigate();
   const [item, setItem] = useState<ContentCardItem | null>(null);
   const [related, setRelated] = useState<ContentCardItem[]>([]);
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -70,8 +70,20 @@ export default function AnnouncementDetailPage() {
   }, [id]);
 
   const handleShare = () => {
-    setIsShareModalOpen(true);
+    if (!item) return;
+    setShareItem({
+      id: item.id,
+      title: item.title,
+      subtitle: `${item.type || 'Official'} Notice · ASTU Directorate`,
+      text: item.excerpt || item.title,
+      url: `/announcements/${slugifiedId(item.title)}`,
+      badge: item.type,
+      type: 'announcement',
+    });
+    setShareOpen(true);
   };
+
+  const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   if (!item) {
     return (
@@ -82,15 +94,13 @@ export default function AnnouncementDetailPage() {
     );
   }
 
-  const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-
   return (
     <div className="app-shell min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-100 flex flex-col transition-colors duration-200">
       <Navbar />
 
       {/* Header Breadcrumbs */}
       <div className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors">
-        <div className="mx-auto max-w-[1440px] px-4 py-3.5 sm:px-6">
+        <div className="mx-auto max-w-[1240px] px-4 py-3.5 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
             <nav className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
               <Link to="/" className="hover:text-[#003580] dark:hover:text-blue-300 transition-colors">
@@ -117,7 +127,7 @@ export default function AnnouncementDetailPage() {
       </div>
 
       {/* Main Container */}
-      <main className="mx-auto max-w-[1440px] flex-1 px-4 py-8 sm:px-6 md:py-12">
+      <main className="mx-auto max-w-[1240px] flex-1 px-4 py-8 sm:px-6 md:py-12">
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
           {/* Main Article Content */}
           <article className="space-y-6">
@@ -156,10 +166,12 @@ export default function AnnouncementDetailPage() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleShare}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-200 hover:text-blue-800 transition-colors"
+                  title="Share notice via Telegram, LinkedIn, WhatsApp, or copy link"
                 >
-                  <Share2 className="h-3.5 w-3.5" />
+                  <Share2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                   Share
                 </button>
               </div>
@@ -290,28 +302,9 @@ export default function AnnouncementDetailPage() {
         </div>
       </main>
 
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} item={shareItem} />
       <Footer />
       <ChatBot />
-
-      {/* Universal Share Modal */}
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-        item={
-          item
-            ? {
-                id: item.id,
-                title: item.title,
-                subtitle: `${item.publishedAt || item.updatedAt || 'Recent'} · By ${item.author || 'ASTU Administration'}`,
-                text: item.excerpt,
-                image: (item as any).coverImage || (item as any).image,
-                badge: item.tags?.[0] || 'Announcement',
-                type: 'announcement',
-                url: window.location.pathname,
-              }
-            : null
-        }
-      />
     </div>
   );
 }

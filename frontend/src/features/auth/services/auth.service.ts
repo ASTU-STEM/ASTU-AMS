@@ -31,7 +31,6 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Token expired or unauthorized
       localStorage.removeItem('authToken');
-      localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       localStorage.removeItem('astu_ams_user_role');
@@ -126,7 +125,6 @@ export const authService = {
       if (data.success && (data.data?.token || (data.data as any)?.requires2FA)) {
         if (data.data?.token) {
           localStorage.setItem('authToken', data.data.token);
-          localStorage.setItem('token', data.data.token);
           if (data.data.refreshToken) {
             localStorage.setItem('refreshToken', data.data.refreshToken);
           }
@@ -152,53 +150,6 @@ export const authService = {
           const resData = error.response.data as any;
           message = resData.message || resData.error || message;
           errorCode = resData.errorCode || errorCode;
-        } else if (error.code === 'ERR_NETWORK' || !error.response) {
-          message = 'Unable to reach backend server (http://localhost:5000). Please ensure the backend server is running.';
-        }
-      }
-      return { ok: false, errorCode, message };
-    }
-  },
-
-  /**
-   * Employer login. Uses the dedicated /auth/employer/login endpoint, which
-   * the backend applies `isEmployerLoginFlow` to. This must never be faked:
-   * the employer portal is gated on a real EMPLOYER role, so a simulated
-   * success would hand every visitor an authenticated session.
-   */
-  async employerLogin(credentials: { email: string; password: string }): Promise<ApiResult<AuthResponse['data']>> {
-    try {
-      const response = await apiClient.post<AuthResponse>('/auth/employer/login', {
-        emailOrStudentId: credentials.email,
-        password: credentials.password,
-      });
-      const { data } = response;
-
-      if (data.success && data.data?.token) {
-        localStorage.setItem('authToken', data.data.token);
-        if (data.data.refreshToken) {
-          localStorage.setItem('refreshToken', data.data.refreshToken);
-        }
-        if (data.data.user) {
-          localStorage.setItem('user', JSON.stringify(data.data.user));
-          localStorage.setItem('astu_ams_user_role', data.data.user.role);
-        }
-        window.dispatchEvent(new Event('astu-auth-changed'));
-        return { ok: true, data: data.data };
-      }
-
-      return {
-        ok: false,
-        errorCode: 'INVALID_CREDENTIALS',
-        message: data.message || 'Login failed. Please check your credentials.',
-      };
-    } catch (error) {
-      let message = 'Login failed. Please check your email and password.';
-      const errorCode = 'SERVER_ERROR';
-      if (axios.isAxiosError(error)) {
-        if (error.response?.data) {
-          const resData = error.response.data as any;
-          message = resData.message || resData.error || message;
         } else if (error.code === 'ERR_NETWORK' || !error.response) {
           message = 'Unable to reach backend server (http://localhost:5000). Please ensure the backend server is running.';
         }
@@ -279,16 +230,12 @@ export const authService = {
   // ==================== LOGOUT ====================
   async logout(): Promise<void> {
     try {
-      // Send the refresh token so the server can revoke it too; clearing it
-      // client-side alone would still let it mint a fresh access token.
-      const refreshToken = localStorage.getItem('refreshToken');
-      await apiClient.post('/auth/logout', refreshToken ? { refreshToken } : {});
+      await apiClient.post('/auth/logout');
     } catch (error) {
       console.warn('Logout API call failed, proceeding with local cleanup:', error);
     } finally {
       // Always clear local data
       localStorage.removeItem('authToken');
-      localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       localStorage.removeItem('astu_ams_user_role');
@@ -322,6 +269,23 @@ export const authService = {
       localStorage.removeItem('astu_ams_user_role');
       window.dispatchEvent(new Event('astu-auth-changed'));
       return { ok: false, errorCode: 'REFRESH_ERROR', message: 'Session expired. Please login again.' };
+    }
+  },
+
+  // ==================== GET CURRENT USER ====================
+  async getCurrentUser(): Promise<ApiResult<AuthResponse['data']>> {
+    try {
+      const response = await apiClient.get<AuthResponse>('/auth/me');
+      if (response.data.success && response.data.data) {
+        return { ok: true, data: response.data.data };
+      }
+      return { ok: false, errorCode: 'GET_USER_FAILED', message: 'Failed to fetch user profile.' };
+    } catch (error) {
+      return {
+        ok: false,
+        errorCode: 'GET_USER_ERROR',
+        message: error instanceof Error ? error.message : 'An unexpected error occurred.'
+      };
     }
   },
 
@@ -361,20 +325,22 @@ export const authService = {
     }
   },
 
-  // ==================== ALUMNI ACCOUNT ACTIVATION ====================
-  async activateAlumni(data: { token: string; password: string }): Promise<ApiResult<{ success: boolean; message: string }>> {
+  async activateAlumni(token: string, password: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/activate-alumni', data);
+      const response = await apiClient.post<AuthResponse>('/auth/activate-alumni', {
+        token,
+        password,
+      });
       if (response.data.success) {
-        return { ok: true, data: { success: true, message: response.data.message || 'Account activated successfully!' } };
+        return { ok: true, data: { success: true, message: response.data.message || 'Account activated successfully.' } };
       }
-      return { ok: false, errorCode: 'ACTIVATION_FAILED', message: response.data.message || 'Failed to activate account.' };
+      return { ok: false, errorCode: 'ACTIVATE_ALUMNI_FAILED', message: response.data.message || 'Failed to activate account.' };
     } catch (error) {
-      let message = 'An unexpected error occurred during activation.';
+      let message = 'An unexpected error occurred.';
       if (axios.isAxiosError(error) && error.response?.data) {
         message = (error.response.data as any).message || message;
       }
-      return { ok: false, errorCode: 'ACTIVATION_ERROR', message };
+      return { ok: false, errorCode: 'ACTIVATE_ALUMNI_ERROR', message };
     }
   },
 
@@ -398,9 +364,9 @@ export const authService = {
     }
   },
 
-  async resendOtp(studentId: string): Promise<ApiResult<{ success: boolean; message: string }>> {
+  async resendOtp(email: string): Promise<ApiResult<{ success: boolean; message: string }>> {
     try {
-      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/resend-otp', { studentId });
+      const response = await apiClient.post<{ success: boolean; message: string }>('/auth/resend-otp', { email });
       if (response.data.success) {
         return { ok: true, data: response.data };
       }

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
   Archive,
@@ -579,6 +580,7 @@ const COLOR_PRESETS = [
 ];
 
 export default function ContentList() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'content' | 'page-customizer' | 'stories'>('content');
   const [items, setItems] = useState<ContentCardItem[]>(() => contentService.getItems());
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -597,6 +599,16 @@ export default function ContentList() {
 
   // Create Modal State
   const [createOpen, setCreateOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'broadcast') {
+      setActiveTab('content');
+      setCreateOpen(true);
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('action');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const [newTitle, setNewTitle] = useState('');
   const [newType, setNewType] = useState<string>('Official Announcement');
   const [newExcerpt, setNewExcerpt] = useState('');

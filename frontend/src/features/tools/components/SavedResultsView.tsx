@@ -14,15 +14,10 @@ export const SavedResultsView: React.FC<SavedResultsViewProps> = ({
   onDeleteResult,
   onClearAll,
 }) => {
-  const handleCopy = async (res: SavedToolResult) => {
+  const handleCopy = (res: SavedToolResult) => {
     const text = `${res.title} (${res.timestamp})\n${res.resultSummary || ''}\n${JSON.stringify(res.data, null, 2)}`;
-    try {
-      if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
-      await navigator.clipboard.writeText(text);
-      toast.success('Result summary copied to clipboard!');
-    } catch {
-      toast.error('Could not copy — your browser blocked clipboard access.');
-    }
+    navigator.clipboard.writeText(text);
+    toast.success('Result summary copied to clipboard!');
   };
 
   if (savedResults.length === 0) {

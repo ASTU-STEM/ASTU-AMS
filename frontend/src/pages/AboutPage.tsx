@@ -26,11 +26,9 @@ import {
   Server,
   FileText,
   Calendar,
-  Share2,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import ShareModal, { ShareItem } from '../components/ShareModal';
 import { useTheme } from '../hooks/useTheme';
 
 export default function AboutPage() {
@@ -38,8 +36,6 @@ export default function AboutPage() {
   const { darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<'overview' | 'portals' | 'schools' | 'accreditation' | 'campus'>('overview');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
-  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const stats = [
     { label: 'Founded in', value: '1993', detail: 'Over 30 Years of Academic Excellence' },
@@ -198,12 +194,12 @@ export default function AboutPage() {
         <div className="absolute -top-32 -right-32 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
         <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl" />
 
-        <div className="relative mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7">
               <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold uppercase tracking-wider text-astu-gold mb-6">
-                <img src="/images/astu-seal-logo.png" alt="ASTU Seal" className="w-4 h-4 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                Flagship Science &amp; Technology University
+                <Sparkles className="w-4 h-4 text-astu-gold" />
+                Flagship Science & Technology University
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
@@ -232,26 +228,6 @@ export default function AboutPage() {
                 >
                   <Briefcase className="w-4 h-4 text-blue-300" />
                   Employer Partnerships
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShareItem({
-                      title: 'About Adama Science and Technology University (ASTU)',
-                      subtitle: 'Flagship Science & Technology University in Ethiopia',
-                      text: 'Learn about ASTU mission, academic excellence, schools, research centers, and over 35,000 alumni worldwide.',
-                      url: '/about',
-                      badge: 'About ASTU',
-                      type: 'page',
-                    });
-                    setIsShareOpen(true);
-                  }}
-                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-sm transition-all hover:scale-[1.02] cursor-pointer"
-                  title="Share About ASTU"
-                >
-                  <Share2 className="w-4 h-4 text-emerald-400" />
-                  <span>Share</span>
                 </button>
               </div>
             </div>
@@ -295,7 +271,7 @@ export default function AboutPage() {
 
       {/* Section Navigation Tabs */}
       <section className="sticky top-16 z-30 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md transition-colors">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex overflow-x-auto space-x-2 py-3 no-scrollbar">
             {[
               { id: 'overview', label: 'Institutional Overview', icon: BookOpen },
@@ -326,7 +302,7 @@ export default function AboutPage() {
       </section>
 
       {/* Main Content Area */}
-      <main className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-16">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
         {/* TAB 1: OVERVIEW & PILLARS */}
         {activeTab === 'overview' && (
           <div className="space-y-16">
@@ -737,13 +713,6 @@ export default function AboutPage() {
           </div>
         </div>
       </main>
-
-      {/* ── MODAL: Universal Share Modal ── */}
-      <ShareModal
-        isOpen={isShareOpen}
-        onClose={() => setIsShareOpen(false)}
-        item={shareItem}
-      />
 
       <Footer />
     </div>

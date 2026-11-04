@@ -256,9 +256,9 @@ export default function AlumniRegistrationPage() {
           return (
             <Form className="space-y-6">
               {/* Step indicator */}
-              <div className="flex justify-between items-center text-xs text-on-surface-variant dark:text-slate-300 font-medium bg-slate-50 dark:bg-slate-800/60 p-3 rounded-lg border border-outline-variant dark:border-slate-700">
+              <div className="flex justify-between items-center text-xs text-on-surface-variant font-medium bg-slate-50 p-3 rounded-lg border border-outline-variant">
                 <span>Step 1 of 3: Enter profile details</span>
-                <span className="bg-astu-navy/10 text-astu-navy dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full text-[10px] font-semibold">Registration</span>
+                <span className="bg-astu-navy/10 text-astu-navy px-2 py-0.5 rounded-full text-[10px]">Registration</span>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -295,7 +295,7 @@ export default function AlumniRegistrationPage() {
                   />
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-on-surface-variant dark:text-slate-300 mb-1">Phone Number *</label>
+                    <label className="block text-sm font-medium text-on-surface-variant mb-1">Phone Number *</label>
                     <PhoneInput
                       international
                       defaultCountry="ET"
@@ -311,12 +311,12 @@ export default function AlumniRegistrationPage() {
 
                   {/* Toggle Checkbox: I don't have ASTU email */}
                   <div>
-                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-outline-variant dark:border-slate-700">
+                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-slate-50 border border-outline-variant">
                       <input
                         id="hasNoAstuEmail"
                         name="hasNoAstuEmail"
                         type="checkbox"
-                        className="h-4.5 w-4.5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy dark:border-slate-700 dark:bg-slate-800"
+                        className="h-4.5 w-4.5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy"
                         checked={values.hasNoAstuEmail}
                         onChange={(e) => {
                           const checked = e.target.checked;
@@ -327,7 +327,7 @@ export default function AlumniRegistrationPage() {
                         }}
                         disabled={isLoading}
                       />
-                      <label htmlFor="hasNoAstuEmail" className="text-xs font-semibold text-astu-navy dark:text-blue-300 select-none cursor-pointer">
+                      <label htmlFor="hasNoAstuEmail" className="text-xs font-semibold text-astu-navy select-none cursor-pointer">
                         I don't know / don't have my ASTU email
                       </label>
                     </div>
@@ -452,21 +452,21 @@ export default function AlumniRegistrationPage() {
                         <span className="text-on-surface-variant font-medium">Strength:</span>
                         <span className="font-bold text-on-surface">{strength.label}</span>
                       </div>
-                      <div className="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden">
                         <div 
                           className={`h-full ${strength.color} transition-all duration-300`} 
                           style={{ width: `${(strength.score / 5) * 100}%` }}
                         />
                       </div>
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 text-[10px] text-on-surface-variant dark:text-slate-400 pl-0 list-none">
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 text-[10px] text-on-surface-variant pl-0 list-none">
                         {passwordRules.map((rule, idx) => (
                           <li key={idx} className="flex items-center gap-1">
                             {rule.met ? (
-                              <Check className="h-3 w-3 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                              <Check className="h-3 w-3 text-emerald-600 flex-shrink-0" />
                             ) : (
-                              <X className="h-3 w-3 text-red-400 dark:text-red-400 flex-shrink-0" />
+                              <X className="h-3 w-3 text-red-400 flex-shrink-0" />
                             )}
-                            <span className={rule.met ? 'text-on-surface dark:text-slate-200 font-medium' : ''}>{rule.label}</span>
+                            <span className={rule.met ? 'text-on-surface font-medium' : ''}>{rule.label}</span>
                           </li>
                         ))}
                       </ul>
@@ -492,8 +492,7 @@ export default function AlumniRegistrationPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-[38px] text-on-surface-variant hover:text-astu-navy dark:text-slate-400 dark:hover:text-blue-300 transition-all p-1"
-                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                      className="absolute right-3 top-[38px] text-on-surface-variant hover:text-astu-navy transition-all animate-none"
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -502,16 +501,16 @@ export default function AlumniRegistrationPage() {
               </div>
 
               {/* Confirmation Checkbox */}
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-astu-navy/5 dark:bg-blue-950/20 border border-astu-navy/10 dark:border-blue-900/30">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-astu-navy/5 border border-astu-navy/10">
                 <Field
                   name="confirmation"
                   type="checkbox"
-                  className="mt-1 h-5 w-5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy dark:border-slate-700 dark:bg-slate-800"
+                  className="mt-1 h-5 w-5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy"
                   checked={values.confirmation}
                   onChange={handleChange}
                   disabled={isLoading}
                 />
-                <label htmlFor="confirmation" className="text-xs text-on-surface dark:text-slate-300 leading-relaxed cursor-pointer select-none">
+                <label htmlFor="confirmation" className="text-xs text-on-surface leading-relaxed">
                   I confirm that the information I have entered is accurate and correct. I consent to my student ID data being matched against the ASTU registrar database for identity verification.
                 </label>
               </div>

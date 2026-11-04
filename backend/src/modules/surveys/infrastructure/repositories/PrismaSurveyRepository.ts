@@ -55,23 +55,11 @@ export class PrismaSurveyRepository implements ISurveyRepository {
         }
       });
 
-      if (data.questions && data.questions.length > 0) {
-        const directQuestions = data.questions.map((q: any) => ({
-          surveyId: survey.id,
-          questionText: q.questionText,
-          questionType: q.questionType,
-          required: q.required ?? false,
-          placeholder: q.placeholder,
-          helpText: q.helpText,
-          validationRules: q.validationRules ?? null,
-          options: q.options || [],
-          order: q.order,
-        }));
-        await tx.surveyQuestion.createMany({ data: directQuestions });
-      }
+      const hasSections = Boolean(data.sections && data.sections.length > 0);
 
-      if (data.sections && data.sections.length > 0) {
-        for (const sectionData of data.sections) {
+      // Prefer section-scoped questions; only write root questions when no sections are provided.
+      if (hasSections) {
+        for (const sectionData of data.sections!) {
           const section = await tx.surveySection.create({
             data: {
               surveyId: survey.id,
@@ -97,6 +85,19 @@ export class PrismaSurveyRepository implements ISurveyRepository {
             await tx.surveyQuestion.createMany({ data: sectionQuestions });
           }
         }
+      } else if (data.questions && data.questions.length > 0) {
+        const directQuestions = data.questions.map((q: any) => ({
+          surveyId: survey.id,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          required: q.required ?? false,
+          placeholder: q.placeholder,
+          helpText: q.helpText,
+          validationRules: q.validationRules ?? null,
+          options: q.options || [],
+          order: q.order,
+        }));
+        await tx.surveyQuestion.createMany({ data: directQuestions });
       }
 
       const fullSurvey = await tx.survey.findUnique({
@@ -135,23 +136,10 @@ export class PrismaSurveyRepository implements ISurveyRepository {
         }
       });
 
-      if (data.questions && data.questions.length > 0) {
-        const directQuestions = data.questions.map((q: any) => ({
-          surveyId: id,
-          questionText: q.questionText,
-          questionType: q.questionType,
-          required: q.required ?? false,
-          placeholder: q.placeholder,
-          helpText: q.helpText,
-          validationRules: q.validationRules ?? null,
-          options: q.options || [],
-          order: q.order,
-        }));
-        await tx.surveyQuestion.createMany({ data: directQuestions });
-      }
+      const hasSections = Boolean(data.sections && data.sections.length > 0);
 
-      if (data.sections && data.sections.length > 0) {
-        for (const sectionData of data.sections) {
+      if (hasSections) {
+        for (const sectionData of data.sections!) {
           const section = await tx.surveySection.create({
             data: {
               surveyId: id,
@@ -177,6 +165,19 @@ export class PrismaSurveyRepository implements ISurveyRepository {
             await tx.surveyQuestion.createMany({ data: sectionQuestions });
           }
         }
+      } else if (data.questions && data.questions.length > 0) {
+        const directQuestions = data.questions.map((q: any) => ({
+          surveyId: id,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          required: q.required ?? false,
+          placeholder: q.placeholder,
+          helpText: q.helpText,
+          validationRules: q.validationRules ?? null,
+          options: q.options || [],
+          order: q.order,
+        }));
+        await tx.surveyQuestion.createMany({ data: directQuestions });
       }
 
       const fullSurvey = await tx.survey.findUnique({
@@ -214,35 +215,26 @@ export class PrismaSurveyRepository implements ISurveyRepository {
     });
     if (!source) throw new Error('Survey template not found');
 
+    const milestoneTypes = new Set(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH']);
+    const cloneAsCustom = milestoneTypes.has(source.type);
+
     return await prisma.$transaction(async (tx: any) => {
       const clone = await tx.survey.create({
         data: {
           title: `Copy of ${source.title}`,
           description: source.description,
-          type: source.type,
-          milestoneMonths: source.milestoneMonths,
-          scheduledAt: source.scheduledAt,
+          // Clones of fixed milestones become CUSTOM so they never multiply milestone keepers.
+          type: cloneAsCustom ? 'CUSTOM' : source.type,
+          milestoneMonths: cloneAsCustom ? null : source.milestoneMonths,
+          scheduledAt: null,
           isActive: false,
           isArchived: false,
         }
       });
 
-      if (source.questions && source.questions.length > 0) {
-        const directQuestions = source.questions.map((question: any) => ({
-          surveyId: clone.id,
-          questionText: question.questionText,
-          questionType: question.questionType,
-          required: question.required,
-          placeholder: question.placeholder,
-          helpText: question.helpText,
-          validationRules: question.validationRules,
-          options: question.options,
-          order: question.order,
-        }));
-        await tx.surveyQuestion.createMany({ data: directQuestions });
-      }
+      const hasSections = Boolean(source.sections && source.sections.length > 0);
 
-      if (source.sections && source.sections.length > 0) {
+      if (hasSections) {
         for (const section of source.sections) {
           const newSection = await tx.surveySection.create({
             data: {
@@ -268,6 +260,22 @@ export class PrismaSurveyRepository implements ISurveyRepository {
             }));
             await tx.surveyQuestion.createMany({ data: sectionQuestions });
           }
+        }
+      } else if (source.questions && source.questions.length > 0) {
+        const rootOnly = source.questions.filter((q: any) => !q.sectionId);
+        if (rootOnly.length > 0) {
+          const directQuestions = rootOnly.map((question: any) => ({
+            surveyId: clone.id,
+            questionText: question.questionText,
+            questionType: question.questionType,
+            required: question.required,
+            placeholder: question.placeholder,
+            helpText: question.helpText,
+            validationRules: question.validationRules,
+            options: question.options,
+            order: question.order,
+          }));
+          await tx.surveyQuestion.createMany({ data: directQuestions });
         }
       }
 

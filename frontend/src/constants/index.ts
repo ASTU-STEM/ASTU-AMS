@@ -15,6 +15,7 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',
   REGISTER: '/register',
+  ACTIVATE_ACCOUNT: '/activate-alumni',
   ALUMNI_DASHBOARD: '/alumni/dashboard',
   EMPLOYER_DASHBOARD: '/employer/dashboard',
   REGISTRAR_DASHBOARD: '/registrar/dashboard',

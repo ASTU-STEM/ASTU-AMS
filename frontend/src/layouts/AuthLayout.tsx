@@ -118,7 +118,7 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
                   alt="ASTU Logo" 
                   className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 object-contain"
                   onError={(e) => {
-                    e.currentTarget.src = "/images/astu-seal-logo.png";
+                    e.currentTarget.style.display = 'none';
                   }}
                 />
               </div>

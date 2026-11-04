@@ -1,6 +1,12 @@
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { EmptySection, HOME_PREVIEW_COUNT, SectionShell, ViewAllButton } from "./homeShared";
+import React, { useEffect, useState } from "react";
+import { ChevronDown, MessageCircleQuestion } from "lucide-react";
+import {
+  HOME_PREVIEW_COUNT,
+  SectionPager,
+  SectionShell,
+  useSectionPager,
+  ViewAllButton,
+} from "./homeShared";
 
 export interface HomeFaqItem {
   id?: string;
@@ -16,7 +22,16 @@ interface FaqSectionProps {
 
 export default function FaqSection({ items, headers, onNavigate }: FaqSectionProps) {
   const [openId, setOpenId] = useState<string | null>(null);
-  const preview = items.slice(0, HOME_PREVIEW_COUNT);
+  const { pageItems, page, totalPages, goPrev, goNext } = useSectionPager(
+    items,
+    HOME_PREVIEW_COUNT
+  );
+
+  useEffect(() => {
+    setOpenId(null);
+  }, [page]);
+
+  if (!pageItems.length) return null;
 
   return (
     <SectionShell
@@ -30,48 +45,76 @@ export default function FaqSection({ items, headers, onNavigate }: FaqSectionPro
       }
       action={
         <ViewAllButton
-          label="View All FAQs"
+          label="View All"
           visible={items.length > 0}
           onClick={() => onNavigate("/info/faq")}
         />
       }
     >
-      {!preview.length ? (
-        <EmptySection message="FAQ entries will appear here once published." />
-      ) : (
-        <div className="mx-auto max-w-3xl space-y-2">
-          {preview.map((item, idx) => {
-            const id = item.id || `faq-${idx}`;
-            const open = openId === id;
-            return (
-              <div
-                key={id}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-astu-navy/25 dark:border-slate-700 dark:bg-slate-900/50"
+      <div className="mx-auto max-w-3xl space-y-3">
+        {pageItems.map((item, idx) => {
+          const id = item.id || `faq-${page}-${idx}`;
+          const open = openId === id;
+          const panelId = `${id}-panel`;
+          return (
+            <div
+              key={id}
+              className={`overflow-hidden rounded-2xl border bg-white transition duration-300 dark:bg-slate-900/50 ${
+                open
+                  ? "border-astu-navy/35 shadow-md dark:border-sky-500/40"
+                  : "border-slate-200/80 shadow-sm hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600"
+              }`}
+            >
+              <button
+                type="button"
+                className="flex min-h-14 w-full items-center justify-between gap-4 px-5 py-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-astu-navy/40 dark:focus-visible:ring-sky-400/40 md:px-6"
+                onClick={() => setOpenId(open ? null : id)}
+                aria-expanded={open}
+                aria-controls={panelId}
               >
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
-                  onClick={() => setOpenId(open ? null : id)}
-                  aria-expanded={open}
-                >
-                  <span className="font-semibold text-slate-900 dark:text-white">
-                    {item.question}
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-slate-500 transition duration-300 ${open ? "rotate-180 text-astu-red" : ""}`}
+                <span className="flex items-start gap-3">
+                  <MessageCircleQuestion
+                    className={`mt-0.5 h-5 w-5 shrink-0 transition ${
+                      open ? "text-astu-red" : "text-slate-400 dark:text-slate-500"
+                    }`}
                     aria-hidden="true"
                   />
-                </button>
-                {open ? (
-                  <div className="border-t border-slate-100 px-4 py-3 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-300">
+                  <span className="text-base font-semibold text-slate-900 dark:text-white">
+                    {item.question}
+                  </span>
+                </span>
+                <ChevronDown
+                  className={`h-5 w-5 shrink-0 text-slate-500 transition duration-300 ${
+                    open ? "rotate-180 text-astu-red" : ""
+                  }`}
+                  aria-hidden="true"
+                />
+              </button>
+              <div
+                id={panelId}
+                role="region"
+                aria-labelledby={id}
+                className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
+                  open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="border-t border-slate-100 px-5 pb-5 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-300 md:px-6 md:pl-14 md:text-base">
                     {item.answer}
                   </div>
-                ) : null}
+                </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          );
+        })}
+      </div>
+      <SectionPager
+        page={page}
+        totalPages={totalPages}
+        onPrev={goPrev}
+        onNext={goNext}
+        label="questions"
+      />
     </SectionShell>
   );
 }

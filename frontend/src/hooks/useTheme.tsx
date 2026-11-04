@@ -10,33 +10,30 @@ import React, {
 export type Theme = 'light' | 'dark';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
-const STORAGE_KEY = 'theme';
-const MODE_STORAGE_KEY = 'theme_mode';
+const THEME_KEY = 'theme';
+const MODE_KEY = 'themeMode';
 
-export function getSystemTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark';
-  }
-  return 'light';
+function systemPrefersDark(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
-export function readStoredThemeMode(): ThemeMode {
-  if (typeof window === 'undefined') return 'system';
-  const storedMode = window.localStorage.getItem(MODE_STORAGE_KEY) as ThemeMode | null;
-  if (storedMode === 'dark' || storedMode === 'light' || storedMode === 'system') {
-    return storedMode;
-  }
-  const legacyStored = window.localStorage.getItem(STORAGE_KEY);
-  if (legacyStored === 'dark' || legacyStored === 'light') {
-    return legacyStored;
-  }
+function resolveTheme(mode: ThemeMode): Theme {
+  if (mode === 'system') return systemPrefersDark() ? 'dark' : 'light';
+  return mode;
+}
+
+function readStoredMode(): ThemeMode {
+  if (typeof window === 'undefined') return 'light';
+  const mode = window.localStorage.getItem(MODE_KEY);
+  if (mode === 'light' || mode === 'dark' || mode === 'system') return mode;
+  const legacy = window.localStorage.getItem(THEME_KEY);
+  if (legacy === 'dark' || legacy === 'light') return legacy;
   return 'system';
 }
 
 export function readStoredTheme(): Theme {
-  const mode = readStoredThemeMode();
-  return mode === 'system' ? getSystemTheme() : mode;
+  return resolveTheme(readStoredMode());
 }
 
 export function applyTheme(theme: Theme): void {
@@ -54,104 +51,84 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void;
   setThemeMode: (mode: ThemeMode) => void;
   toggleTheme: () => void;
-  cycleThemeMode: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 /**
- * Single source of truth for light / dark / system across public pages and dashboards.
- * Supports OS preferences and dynamic cross-tab synchronization.
+ * Single source of truth for light/dark across public pages and every dashboard.
+ * Supports explicit light/dark plus system preference (used by System Settings).
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [themeMode, setThemeModeState] = useState<ThemeMode>(() => readStoredThemeMode());
-  const [systemTheme, setSystemTheme] = useState<Theme>(() => getSystemTheme());
-
-  const effectiveTheme: Theme = themeMode === 'system' ? systemTheme : themeMode;
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(() => readStoredMode());
+  const [theme, setThemeState] = useState<Theme>(() => resolveTheme(readStoredMode()));
 
   useEffect(() => {
-    applyTheme(effectiveTheme);
-    window.localStorage.setItem(STORAGE_KEY, effectiveTheme);
-    window.localStorage.setItem(MODE_STORAGE_KEY, themeMode);
-  }, [effectiveTheme, themeMode]);
+    const resolved = resolveTheme(themeMode);
+    setThemeState(resolved);
+    applyTheme(resolved);
+    window.localStorage.setItem(MODE_KEY, themeMode);
+    window.localStorage.setItem(THEME_KEY, resolved);
+  }, [themeMode]);
 
-  // Listen to OS system color scheme changes when in system mode
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e: MediaQueryListEvent) => {
-      setSystemTheme(e.matches ? 'dark' : 'light');
+    if (themeMode !== 'system') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      const resolved = resolveTheme('system');
+      setThemeState(resolved);
+      applyTheme(resolved);
+      window.localStorage.setItem(THEME_KEY, resolved);
     };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [themeMode]);
 
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handler);
-    } else {
-      mediaQuery.addListener(handler);
-    }
-
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handler);
-      } else {
-        mediaQuery.removeListener(handler);
-      }
-    };
-  }, []);
-
-  // Listen to changes across tabs
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === MODE_STORAGE_KEY) {
-        const nextMode = e.newValue as ThemeMode | null;
-        if (nextMode === 'light' || nextMode === 'dark' || nextMode === 'system') {
-          setThemeModeState(nextMode);
-        }
-      } else if (e.key === STORAGE_KEY && !window.localStorage.getItem(MODE_STORAGE_KEY)) {
-        if (e.newValue === 'dark' || e.newValue === 'light') {
-          setThemeModeState(e.newValue);
-        }
+      if (e.key === MODE_KEY) {
+        const next =
+          e.newValue === 'dark' || e.newValue === 'light' || e.newValue === 'system'
+            ? e.newValue
+            : 'light';
+        setThemeModeState(next);
+        return;
+      }
+      if (e.key === THEME_KEY && e.newValue === 'dark') {
+        setThemeModeState('dark');
+      } else if (e.key === THEME_KEY && e.newValue === 'light') {
+        setThemeModeState('light');
       }
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  const setTheme = useCallback((next: Theme) => {
-    setThemeModeState(next);
-  }, []);
-
   const setThemeMode = useCallback((mode: ThemeMode) => {
     setThemeModeState(mode);
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setThemeModeState((prev) => {
-      if (prev === 'system') {
-        return getSystemTheme() === 'dark' ? 'light' : 'dark';
-      }
-      return prev === 'dark' ? 'light' : 'dark';
-    });
+  const setTheme = useCallback((next: Theme) => {
+    setThemeModeState(next);
   }, []);
 
-  const cycleThemeMode = useCallback(() => {
+  const toggleTheme = useCallback(() => {
     setThemeModeState((prev) => {
-      if (prev === 'light') return 'dark';
-      if (prev === 'dark') return 'system';
-      return 'light';
+      const current = resolveTheme(prev);
+      return current === 'dark' ? 'light' : 'dark';
     });
   }, []);
 
   const value = useMemo(
     () => ({
-      theme: effectiveTheme,
+      theme,
       themeMode,
-      darkMode: effectiveTheme === 'dark',
+      darkMode: theme === 'dark',
       setTheme,
       setThemeMode,
       toggleTheme,
-      cycleThemeMode,
     }),
-    [effectiveTheme, themeMode, setTheme, setThemeMode, toggleTheme, cycleThemeMode]
+    [theme, themeMode, setTheme, setThemeMode, toggleTheme]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

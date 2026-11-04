@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import type { User, UserRole } from '../types';
 import { authService } from '../features/auth/services/auth.service';
-import config from '../config';
 
 interface AuthContextType {
   user: User | null;
@@ -28,68 +27,10 @@ const normalizeRole = (role?: string | null): UserRole | null => {
   }
 };
 
-/**
- * Read the `exp` claim from a JWT without verifying it.
- *
- * The access token lives 60 minutes (backend/.env JWT_ACCESS_EXPIRY). The old
- * restore path only checked that a token *existed*, so after an hour the user
- * still appeared signed in while every authenticated request returned 401.
- */
-const isTokenExpired = (token: string, skewSeconds = 15): boolean => {
-  try {
-    const payload = token.split('.')[1];
-    if (!payload) return true;
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
-    const claims = JSON.parse(atob(padded));
-    if (typeof claims.exp !== 'number') return false;
-    return claims.exp * 1000 - skewSeconds * 1000 <= Date.now();
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Exchange the refresh token for a new access token.
- *
- * Returns true when localStorage now holds a fresh access token. Used on boot
- * so an expired access token self-heals instead of blanking the dashboard.
- */
-const refreshAccessToken = async (): Promise<boolean> => {
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) return false;
-  try {
-    const response = await fetch(`${config.apiUrl}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!response.ok) return false;
-    const body = await response.json();
-    const token = body?.data?.accessToken ?? body?.data?.token;
-    if (!token) return false;
-    localStorage.setItem('authToken', token);
-    if (body.data.refreshToken) localStorage.setItem('refreshToken', body.data.refreshToken);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const clearAuthStorage = () => {
-  localStorage.removeItem('user');
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('astu_ams_user_role');
-};
-
 const readStoredUser = (): User | null => {
-  const token = localStorage.getItem('authToken');
-  // Reject legacy demo sessions that never came from the real auth API
-  if (!token || token.startsWith('mock-jwt-token-')) {
-    if (token?.startsWith('mock-jwt-token-')) clearAuthStorage();
-    return null;
-  }
+  // Authentication may only be restored from a successful backend login.  In
+  // particular, never infer a user or role from a browser-only preference.
+  if (!localStorage.getItem('authToken')) return null;
 
   const storedUser = localStorage.getItem('user');
   if (!storedUser) return null;
@@ -97,34 +38,24 @@ const readStoredUser = (): User | null => {
   try {
     const parsed = JSON.parse(storedUser);
     const role = normalizeRole(parsed.role);
-    if (!role) return null;
+    const rawName = typeof parsed.name === 'string' ? parsed.name : (typeof parsed.fullName === 'string' ? parsed.fullName : '');
+    const nameParts = rawName.trim().split(/\s+/).filter(Boolean);
+    const firstName = typeof parsed.firstName === 'string' && parsed.firstName.trim() ? parsed.firstName.trim() : nameParts[0];
+    const lastName = typeof parsed.lastName === 'string' && parsed.lastName.trim() ? parsed.lastName.trim() : nameParts.slice(1).join(' ');
 
-    const rawName = String(parsed.name || parsed.fullName || '').trim();
-    const firstName =
-      parsed.firstName !== undefined && parsed.firstName !== ''
-        ? String(parsed.firstName)
-        : rawName
-          ? rawName.split(' ')[0]
-          : '';
-    const lastName =
-      parsed.lastName !== undefined && parsed.lastName !== ''
-        ? String(parsed.lastName)
-        : rawName
-          ? rawName.split(' ').slice(1).join(' ')
-          : '';
-
-    if (!parsed.id || !parsed.email) return null;
+    if (!role || !parsed.id || !parsed.email || !firstName || !lastName) return null;
 
     return {
       id: String(parsed.id),
       email: String(parsed.email),
       firstName,
       lastName,
-      name: rawName || `${firstName} ${lastName}`.trim(),
+      name: rawName || `${firstName} ${lastName}`,
+      department: typeof parsed.department === 'string' ? parsed.department : undefined,
       role,
       isActive: parsed.isActive !== false,
-      createdAt: parsed.createdAt ?? new Date().toISOString(),
-      updatedAt: parsed.updatedAt ?? new Date().toISOString(),
+      createdAt: typeof parsed.createdAt === 'string' ? parsed.createdAt : '',
+      updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : '',
     };
   } catch {
     console.warn('Failed to restore stored auth user');
@@ -137,26 +68,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // A stale access token used to be accepted as a valid session, which left
-    // the user "signed in" with every authenticated API call returning 401 and
-    // the dashboard showing "couldn't load" for each panel. Try to renew it
-    // before deciding the session is dead.
-    const boot = async () => {
-      const token = localStorage.getItem('authToken');
-      if (token && isTokenExpired(token)) {
-        const renewed = await refreshAccessToken();
-        if (!renewed) {
-          clearAuthStorage();
-          setUser(null);
-          setIsLoading(false);
-          return;
-        }
-      }
-      setUser(readStoredUser());
-      setIsLoading(false);
-    };
-
-    void boot();
+    setUser(readStoredUser());
+    setIsLoading(false);
 
     const syncStoredUser = () => {
       setUser(readStoredUser());
@@ -177,7 +90,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (e) {
       console.error('Logout error', e);
     } finally {
-      clearAuthStorage();
       setUser(null);
     }
   }, []);

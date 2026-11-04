@@ -26,9 +26,9 @@ import VerifyOtpPage from "./features/auth/pages/VerifyOtpPage";
 import VerifyManualPage from "./features/auth/pages/VerifyManualPage";
 import ForgotPasswordPage from "./features/auth/pages/ForgotPasswordPage";
 import ResetPasswordPage from "./features/auth/pages/ResetPasswordPage";
+import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
 import Verify2FAPage from "./features/auth/pages/Verify2FAPage";
 import ContactRegistrarPage from "./features/auth/pages/ContactRegistrarPage";
-import AlumniActivationPage from "./features/auth/pages/AlumniActivationPage";
 import SupportPage from "./features/support/pages/SupportPage";
 import AlumniDashboard from "./features/alumni/pages/AlumniDashboard";
 import EmployerDashboard from "./features/employers/pages/EmployerDashboard";
@@ -68,11 +68,12 @@ function AppContent() {
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/activate-alumni" element={<AlumniActivationPage />} />
+        <Route path="/activate" element={<Navigate to="/activate-alumni" replace />} />
+        <Route path="/activate-account" element={<Navigate to="/activate-alumni" replace />} />
         <Route path="/verify-2fa" element={<Verify2FAPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
-        <Route path="/activate-alumni" element={<AlumniActivationPage />} />
-        <Route path="/activate" element={<Navigate to="/activate-alumni" replace />} />
 
         {/* Verification routes protected by VerificationRouteGuard */}
         <Route element={<VerificationRouteGuard />}>
@@ -82,13 +83,23 @@ function AppContent() {
           <Route path="/verify-national-id/callback" element={<VerifyNationalIdCallbackPage />} />
         </Route>
 
-        {/* Role-protected routes */}
+        {/* Role base redirects — short paths used in emails/nav must land on dashboards */}
+        <Route path="/alumni" element={<Navigate to="/alumni/dashboard" replace />} />
+        <Route path="/employer" element={<Navigate to="/employer/dashboard" replace />} />
+        <Route path="/employers/portal" element={<Navigate to="/employer/dashboard" replace />} />
+        <Route path="/registrar" element={<Navigate to="/registrar/dashboard" replace />} />
+        <Route path="/department" element={<Navigate to="/department/dashboard" replace />} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/cms" element={<Navigate to="/cms/dashboard" replace />} />
+        <Route path="/ict" element={<Navigate to="/ict/dashboard" replace />} />
+
+        {/* Role-protected routes — SUPER_ADMIN can open every institutional hub via the Hub Bridge */}
         <Route
           path="/alumni/dashboard"
           element={
             <ProtectedRoute
               element={<AlumniDashboard />}
-              allowedRoles={["ALUMNI"]}
+              allowedRoles={["ALUMNI", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -97,7 +108,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<AlumniDashboard defaultTab="tools" />}
-              allowedRoles={["ALUMNI"]}
+              allowedRoles={["ALUMNI", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -106,7 +117,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<AlumniDashboard defaultTab="jobs" />}
-              allowedRoles={["ALUMNI"]}
+              allowedRoles={["ALUMNI", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -115,7 +126,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<EmployerDashboard />}
-              allowedRoles={["EMPLOYER"]}
+              allowedRoles={["EMPLOYER", "SUPER_ADMIN", "ADMIN"]}
             />
           }
         />
@@ -124,20 +135,16 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<RegistrarDashboard />}
-              allowedRoles={["REGISTRAR"]}
+              allowedRoles={["REGISTRAR", "SUPER_ADMIN", "ADMIN"]}
             />
           }
-        />
-        <Route
-          path="/department"
-          element={<Navigate to="/department/dashboard" replace />}
         />
         <Route
           path="/department/dashboard"
           element={
             <ProtectedRoute
               element={<DepartmentDashboard />}
-              allowedRoles={["DEPARTMENT_HEAD", "ADMIN"]}
+              allowedRoles={["DEPARTMENT_HEAD", "ADMIN", "SUPER_ADMIN"]}
             />
           }
         />
@@ -164,7 +171,7 @@ function AppContent() {
           element={
             <ProtectedRoute
               element={<CmsRoutes />}
-              allowedRoles={["ADMIN", "CMS_MANAGER", "ALUMNI_OFFICE"]}
+              allowedRoles={["ADMIN", "CMS_MANAGER", "ALUMNI_OFFICE", "SUPER_ADMIN"]}
             />
           }
         />

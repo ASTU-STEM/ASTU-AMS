@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import ShareModal, { ShareItem } from '../components/ShareModal';
 import eventsService, { ApiEvent } from '../features/admin/services/events.service';
 import astuBuildingImg from '../assets/imgs/astu-building.jpg';
@@ -291,8 +290,7 @@ export default function EventsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // URL Query Sync
-  const catParam = searchParams.get('category') || searchParams.get('type') || searchParams.get('kind');
-  const initialCategory = (catParam?.toUpperCase() as CategoryFilter) || 'ALL';
+  const initialCategory = (searchParams.get('category')?.toUpperCase() as CategoryFilter) || 'ALL';
   const initialDateFilter = (searchParams.get('date')?.toUpperCase() as DateFilter) || 'ALL';
   const initialSearch = searchParams.get('q') || '';
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
@@ -305,8 +303,6 @@ export default function EventsPage() {
     ['UPCOMING', 'PAST', 'ALL'].includes(initialDateFilter) ? initialDateFilter : 'ALL'
   );
   const [currentPage, setCurrentPage] = useState(isNaN(initialPage) || initialPage < 1 ? 1 : initialPage);
-  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
-  const [isShareOpen, setIsShareOpen] = useState(false);
 
   // Data states
   const [rawEvents, setRawEvents] = useState<DisplayEvent[]>([]);
@@ -322,6 +318,8 @@ export default function EventsPage() {
   const [regAffiliation, setRegAffiliation] = useState('ASTU School of Engineering');
   const [regRole, setRegRole] = useState('Alumni');
   const [showQrModal, setShowQrModal] = useState<DisplayEvent | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareItem, setShareItem] = useState<ShareItem | null>(null);
 
   // Sync registered events from localStorage
   const refreshRegisteredEvents = useCallback(() => {
@@ -657,7 +655,7 @@ export default function EventsPage() {
             </h1>
 
             <p className="max-w-3xl text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              <span className="font-semibold text-white">Gatherings & training</span> · Connect with fellow ASTU engineers, industry leaders, and researchers across upcoming career summits, hands-on bootcamps, and academic symposiums hosted across our Adama campus.
+              Connect with fellow ASTU engineers, industry leaders, and researchers. Explore upcoming career summits, hands-on bootcamps, and academic symposiums hosted across our Adama campus.
             </p>
           </div>
 
@@ -950,9 +948,10 @@ export default function EventsPage() {
                       </p>
                     </div>
 
-                    {/* Action Bar: Register | View Details (Requirement 10 & 11) */}
+                    {/* Action Bar: Register | Share | View Details */}
                     <div className="mt-5 flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
                       <button
+                        type="button"
                         onClick={() => openRegisterModal(event)}
                         className={`flex-1 rounded-xl py-2.5 px-3 text-xs font-bold transition-all duration-200 shadow-sm active:scale-95 ${
                           isRegistered
@@ -966,31 +965,33 @@ export default function EventsPage() {
                       </button>
 
                       <button
-                        onClick={() => navigate(`/events/${event.id}`)}
-                        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                      >
-                        Details
-                      </button>
-
-                      <button
                         type="button"
                         onClick={() => {
                           setShareItem({
                             id: event.id,
                             title: event.title,
-                            subtitle: `${formatEventDate(event.date)} · ${event.location}`,
-                            text: `${event.title} - ${event.kind} organized by ASTU. Scheduled on ${formatEventDate(event.date)} at ${event.location}.`,
+                            subtitle: `${event.kind} · ${event.location}`,
+                            text: event.description,
                             url: `/events/${event.id}`,
                             image: event.image,
                             badge: event.kind,
                             type: 'event',
                           });
-                          setIsShareOpen(true);
+                          setShareOpen(true);
                         }}
-                        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                        className="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2.5 text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-200 hover:text-blue-700 transition-colors"
                         title="Share event"
+                        aria-label={`Share ${event.title}`}
                       >
-                        <Share2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <Share2 className="h-4 w-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/events/${event.id}`)}
+                        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        Details
                       </button>
                     </div>
                   </div>
@@ -1252,14 +1253,7 @@ export default function EventsPage() {
         </div>
       )}
 
-      {/* ── MODAL: Universal Share Modal ── */}
-      <ShareModal
-        isOpen={isShareOpen}
-        onClose={() => setIsShareOpen(false)}
-        item={shareItem}
-      />
-
-      <Footer />
+      <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} item={shareItem} />
     </div>
   );
 }

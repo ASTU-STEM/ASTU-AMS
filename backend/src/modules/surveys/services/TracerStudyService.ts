@@ -25,23 +25,22 @@ export class TracerStudyService {
   private smsService = new SmsService();
 
   /**
-   * Ensures the 4 default fixed milestone templates (6, 12, 18, 24-month) exist with 20 questions each.
+   * Ensures exactly one active template per milestone type (6/12/18/24-month),
+   * collapses duplicates, and syncs keeper metadata + 20 questions.
    */
   async ensureDefaultMilestoneTemplates() {
-    // 1. Ensure all 4 official milestone templates exist with 20 questions each
     for (const tDef of MILESTONE_TEMPLATES) {
       try {
-        let existing = await prisma.survey.findFirst({
-          where: {
-            OR: [
-              { title: tDef.title },
-              { type: tDef.type as any }
-            ]
+        const sameType = await prisma.survey.findMany({
+          where: { type: tDef.type as any },
+          include: {
+            questions: true,
+            _count: { select: { assignments: true, responses: true } },
           },
-          include: { questions: true }
+          orderBy: { createdAt: 'asc' },
         });
 
-        if (!existing) {
+        if (sameType.length === 0) {
           Logger.info(`Seeding milestone survey template: ${tDef.title}`);
           await prisma.survey.create({
             data: {
@@ -58,70 +57,94 @@ export class TracerStudyService {
                   required: q.required,
                   options: q.options || [],
                   order: q.order,
-                }))
+                })),
+              },
+            },
+          });
+          continue;
+        }
+
+        // Prefer the row with the most engagement; fall back to oldest.
+        const keeper = [...sameType].sort((a, b) => {
+          const scoreA = (a._count?.responses || 0) * 10 + (a._count?.assignments || 0);
+          const scoreB = (b._count?.responses || 0) * 10 + (b._count?.assignments || 0);
+          if (scoreB !== scoreA) return scoreB - scoreA;
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        })[0];
+
+        const duplicates = sameType.filter((s) => s.id !== keeper.id);
+
+        for (const dup of duplicates) {
+          try {
+            Logger.info(`Merging duplicate milestone survey (${tDef.type}): ${dup.title} → ${keeper.id}`);
+
+            const keeperAssignments = await prisma.surveyAssignment.findMany({
+              where: { surveyId: keeper.id },
+              select: { alumniId: true },
+            });
+            const keeperAlumniIds = new Set(keeperAssignments.map((a) => a.alumniId));
+
+            const dupAssignments = await prisma.surveyAssignment.findMany({
+              where: { surveyId: dup.id },
+              select: { id: true, alumniId: true },
+            });
+
+            for (const assignment of dupAssignments) {
+              if (!keeperAlumniIds.has(assignment.alumniId)) {
+                await prisma.surveyAssignment.update({
+                  where: { id: assignment.id },
+                  data: { surveyId: keeper.id },
+                });
+                keeperAlumniIds.add(assignment.alumniId);
+              } else {
+                await prisma.tracerNotification.deleteMany({ where: { assignmentId: assignment.id } }).catch(() => {});
+                await prisma.surveyResponse.deleteMany({ where: { assignmentId: assignment.id } }).catch(() => {});
+                await prisma.surveyAssignment.delete({ where: { id: assignment.id } });
               }
             }
-          });
-        } else {
-          // Update title, description, milestoneMonths, and ensure 20 questions exist
-          await prisma.survey.update({
-            where: { id: existing.id },
-            data: {
-              title: tDef.title,
-              description: tDef.description,
-              milestoneMonths: tDef.milestoneMonths,
-              isActive: true,
-              isArchived: false,
-            }
-          });
 
-          if ((existing.questions?.length || 0) < 20) {
-            Logger.info(`Updating milestone survey questions for: ${tDef.title}`);
-            await prisma.surveyQuestion.deleteMany({ where: { surveyId: existing.id } });
-            await prisma.surveyQuestion.createMany({
-              data: tDef.questions.map((q) => ({
-                surveyId: existing.id,
-                questionText: q.questionText,
-                questionType: q.questionType as any,
-                required: q.required,
-                options: q.options || [],
-                order: q.order,
-              }))
-            });
+            // Responses without a surviving assignment cannot be remapped (question IDs differ) — drop them.
+            await prisma.surveyAnswer.deleteMany({
+              where: { response: { surveyId: dup.id } },
+            }).catch(() => {});
+            await prisma.surveyResponse.deleteMany({ where: { surveyId: dup.id } });
+            await prisma.surveyQuestion.deleteMany({ where: { surveyId: dup.id } });
+            await prisma.surveySection.deleteMany({ where: { surveyId: dup.id } });
+            await prisma.survey.delete({ where: { id: dup.id } });
+          } catch (e: any) {
+            Logger.warn(`Duplicate survey merge skipped for ${dup.title}: ${e.message}`);
           }
         }
+
+        await prisma.survey.update({
+          where: { id: keeper.id },
+          data: {
+            title: tDef.title,
+            description: tDef.description,
+            milestoneMonths: tDef.milestoneMonths,
+            isActive: true,
+            isArchived: false,
+          },
+        });
+
+        const questionCount = await prisma.surveyQuestion.count({ where: { surveyId: keeper.id } });
+        if (questionCount < 20) {
+          Logger.info(`Updating milestone survey questions for: ${tDef.title}`);
+          await prisma.surveyQuestion.deleteMany({ where: { surveyId: keeper.id } });
+          await prisma.surveyQuestion.createMany({
+            data: tDef.questions.map((q) => ({
+              surveyId: keeper.id,
+              questionText: q.questionText,
+              questionType: q.questionType as any,
+              required: q.required,
+              options: q.options || [],
+              order: q.order,
+            })),
+          });
+        }
       } catch (err: any) {
-        Logger.warn(`Failed to seed milestone template ${tDef.title}: ${err.message}`);
+        Logger.warn(`Failed to ensure milestone template ${tDef.title}: ${err.message}`);
       }
-    }
-
-    // 2. Safely clean up duplicate legacy mock surveys keeping official templates
-    try {
-      const officialSurveys = await prisma.survey.findMany({
-        where: { title: { in: MILESTONE_TEMPLATES.map(t => t.title) } }
-      });
-      const officialIds = officialSurveys.map(s => s.id);
-
-      const duplicateMilestoneSurveys = await prisma.survey.findMany({
-        where: {
-          type: { in: ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'] as any[] },
-          id: { notIn: officialIds }
-        }
-      });
-
-      for (const dup of duplicateMilestoneSurveys) {
-        try {
-          Logger.info(`Cleaning up duplicate milestone survey: ${dup.title}`);
-          await prisma.surveyResponse.deleteMany({ where: { surveyId: dup.id } });
-          await prisma.surveyAssignment.deleteMany({ where: { surveyId: dup.id } });
-          await prisma.surveyQuestion.deleteMany({ where: { surveyId: dup.id } });
-          await prisma.survey.delete({ where: { id: dup.id } });
-        } catch (e: any) {
-          Logger.warn(`Duplicate survey deletion skipped for ${dup.title}: ${e.message}`);
-        }
-      }
-    } catch (e: any) {
-      Logger.warn(`Legacy milestone cleanup warning: ${e.message}`);
     }
   }
 

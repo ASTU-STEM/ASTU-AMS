@@ -81,15 +81,24 @@ export const DEFAULT_FRONTEND_SETTINGS: SystemSettingsState = {
   appearance: {
     primaryColor: '#003580',
     accentColor: '#E8A020',
+    // Root-absolute path: relative `images/...` breaks on nested routes
+    // (e.g. /info/campuses → /info/images/...).
     logoUrl: DEFAULT_LOGO_PATH,
   },
+};
+
+type DeepPartialSettings = {
+  general?: Partial<SystemSettingsState['general']>;
+  email?: Partial<SystemSettingsState['email']>;
+  integrations?: Partial<SystemSettingsState['integrations']>;
+  appearance?: Partial<SystemSettingsState['appearance']>;
 };
 
 interface SystemSettingsContextType {
   settings: SystemSettingsState;
   loading: boolean;
   refreshSettings: () => Promise<void>;
-  updateSettingsState: (newSettings: Partial<SystemSettingsState>) => void;
+  updateSettingsState: (newSettings: DeepPartialSettings) => void;
 }
 
 const SystemSettingsContext = createContext<SystemSettingsContextType>({
@@ -158,7 +167,7 @@ export const SystemSettingsProvider: React.FC<{ children: React.ReactNode }> = (
     }
   }, [settings]);
 
-  const updateSettingsState = (newSettings: Partial<SystemSettingsState>) => {
+  const updateSettingsState = (newSettings: DeepPartialSettings) => {
     setSettings((prev) => {
       const merged = { ...prev };
       if (newSettings.general) merged.general = { ...prev.general, ...newSettings.general };
