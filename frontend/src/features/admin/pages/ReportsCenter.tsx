@@ -61,6 +61,12 @@ import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminStatGrid from '../components/AdminStatGrid';
+import AdminSectionCard, {
+  adminFilterShellClass,
+  adminHeroGhostBtnClass,
+  adminInputClass,
+  adminPanelClass,
+} from '../components/AdminSectionCard';
 import { adminService } from '../services/admin.service';
 import { generateAndDownloadReport } from '../utils/reportPdfGenerator';
 
@@ -355,12 +361,13 @@ export default function ReportsCenter() {
         actions={
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={fetchMetrics}
               disabled={metricsLoading}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 hover:bg-white/20 px-3 py-2 text-xs font-semibold text-white transition-colors disabled:opacity-60"
+              className={`${adminHeroGhostBtnClass} disabled:cursor-not-allowed disabled:opacity-60`}
               title="Refresh Metrics"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${metricsLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 text-[#FFCC00] ${metricsLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <AdminBadge variant="success">Export Center ({reports.length})</AdminBadge>
@@ -431,8 +438,8 @@ export default function ReportsCenter() {
       {/* Main Report Library Grid */}
       <section className="grid gap-6 xl:grid-cols-[300px_1fr]">
         {/* Category Switcher Sidebar */}
-        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-[var(--bg-card)] p-3 shadow-sm h-fit space-y-1 lg:sticky lg:top-4">
-          <p className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-2">
+        <aside className={`${adminPanelClass} h-fit space-y-1 p-3 lg:sticky lg:top-4`}>
+          <p className="mb-2 border-b border-[var(--border-color)] px-3 py-2 text-[10px] font-black uppercase tracking-wider text-[var(--text-muted)]">
             Report Domains ({reports.length})
           </p>
           {areas.map((item) => {
@@ -443,16 +450,18 @@ export default function ReportsCenter() {
                 key={item}
                 type="button"
                 onClick={() => setArea(item)}
-                className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-left text-xs font-extrabold transition-all cursor-pointer ${
+                className={`flex w-full cursor-pointer items-center justify-between rounded-xl px-3.5 py-3 text-left text-xs font-extrabold transition-all ${
                   area === item
-                    ? 'bg-astu-navy dark:bg-sky-600 text-white shadow-md dark:shadow-sky-950/50'
-                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-[#003580] text-white shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 <span>{item}</span>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                    area === item ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
+                    area === item
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[var(--bg-page)] text-[var(--text-muted)]'
                   }`}
                 >
                   {count}
@@ -460,58 +469,52 @@ export default function ReportsCenter() {
               </button>
             );
           })}
-        </div>
+        </aside>
 
         {/* Selected Domain Report Library */}
-        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-[var(--bg-card)] p-6 shadow-sm space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div>
-              <h2 className="text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
-                <span>{area} Report Library</span>
-                <span className="text-xs font-normal text-slate-400 dark:text-slate-400">({filteredReports.length} Packages)</span>
-              </h2>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                Filter, generate, download, and audit official accreditation report packages in PDF format.
-              </p>
-            </div>
-
+        <AdminSectionCard
+          title={`${area} Report Library`}
+          subtitle={`Filter, generate, download, and audit official accreditation report packages (${filteredReports.length} packages).`}
+          action={
             <button
+              type="button"
               onClick={() => setShowBuildModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-astu-navy hover:bg-blue-900 dark:bg-sky-600 dark:hover:bg-sky-500 px-4 py-2.5 text-xs font-extrabold text-white shadow-md dark:shadow-sky-950/50 transition-all shrink-0 hover:scale-[1.01] cursor-pointer"
+              className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl bg-[#003580] px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#001F4D]"
             >
               <LineChart className="h-4 w-4" />
               <span>Build Report</span>
             </button>
-          </div>
-
+          }
+          bodyClassName="space-y-5"
+        >
           {/* Quick Filter & Search Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <label className={`${adminFilterShellClass} relative flex-1`}>
+              <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search reports by title, owner, or cadence..."
-                className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20 focus:border-astu-navy dark:focus:border-sky-500 transition-all"
+                className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="shrink-0 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
-            </div>
+            </label>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <Filter className="h-4 w-4 text-slate-400 dark:text-slate-500 hidden sm:block" />
+            <div className="flex shrink-0 items-center gap-2">
+              <Filter className="hidden h-4 w-4 text-[var(--text-muted)] sm:block" />
               <select
                 value={cadenceFilter}
                 onChange={(e) => setCadenceFilter(e.target.value)}
-                className="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-astu-navy/20 dark:focus:ring-sky-500/20 cursor-pointer"
+                className={`${adminInputClass} w-auto cursor-pointer font-bold`}
               >
                 <option value="ALL">All Cadences</option>
                 <option value="Monthly">Monthly</option>
@@ -526,14 +529,20 @@ export default function ReportsCenter() {
 
           {/* Cards */}
           {filteredReports.length === 0 ? (
-            <div className="py-12 text-center border border-dashed border-[var(--border-color)] rounded-2xl p-8">
-              <FileSpreadsheet className="h-10 w-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">No reports matching your filter</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try adjusting your search terms or clearing the cadence filter.</p>
+            <div className="rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-page)] py-12 text-center p-8">
+              <FileSpreadsheet className="mx-auto mb-3 h-10 w-10 text-[var(--text-muted)]" />
+              <p className="text-sm font-bold text-[var(--text-primary)]">No reports matching your filter</p>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                Try adjusting your search terms or clearing the cadence filter.
+              </p>
               <button
                 type="button"
-                onClick={() => { setSearchQuery(''); setCadenceFilter('ALL'); setArea('All Domains'); }}
-                className="mt-4 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-extrabold text-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+                onClick={() => {
+                  setSearchQuery('');
+                  setCadenceFilter('ALL');
+                  setArea('All Domains');
+                }}
+                className="mt-4 cursor-pointer rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-4 py-2 text-xs font-extrabold text-[var(--text-primary)] transition hover:bg-[var(--bg-page)]"
               >
                 Reset Filters
               </button>
@@ -547,36 +556,48 @@ export default function ReportsCenter() {
                 return (
                   <article
                     key={report.title}
-                    className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-800/70 p-5 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:shadow-lg dark:hover:shadow-sky-950/40 transition-all flex flex-col justify-between space-y-4 group"
+                    className="group flex flex-col justify-between space-y-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-page)] p-5 transition-all hover:border-[#003580]/40 hover:shadow-md"
                   >
                     <div>
                       <div className="flex items-start justify-between gap-3">
-                        <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/60 text-astu-navy dark:text-sky-300 ring-1 ring-blue-500/10 dark:ring-blue-500/20 group-hover:bg-astu-navy dark:group-hover:bg-sky-600 group-hover:text-white dark:group-hover:text-white transition-all">
+                        <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#003580]/10 text-[#003580] ring-1 ring-[#003580]/10 transition-all group-hover:bg-[#003580] group-hover:text-white">
                           <Icon className="h-5 w-5" />
                         </span>
                         <button
+                          type="button"
                           onClick={() => handleDownloadSinglePdf(report)}
                           disabled={isDownloading}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:text-astu-navy dark:hover:text-sky-300 hover:border-astu-navy/40 dark:hover:border-sky-500/40 hover:bg-white dark:hover:bg-slate-700 hover:shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                          className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] transition-all hover:border-[#003580]/40 hover:text-[#003580] disabled:opacity-50"
                           title={`Download Official PDF for ${report.title}`}
                         >
-                          {isDownloading ? <RefreshCw className="h-4 w-4 animate-spin text-astu-navy dark:text-sky-300" /> : <Download className="h-4 w-4" />}
+                          {isDownloading ? (
+                            <RefreshCw className="h-4 w-4 animate-spin text-[#003580]" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
 
-                      <h3 className="mt-3 text-sm font-black text-slate-900 dark:text-white group-hover:text-astu-navy dark:group-hover:text-sky-300 transition-colors">{report.title}</h3>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                        {report.owner} · <span className="inline-block px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700/80 text-slate-700 dark:text-slate-300 font-bold text-[11px]">{report.cadence}</span>
+                      <h3 className="mt-3 text-sm font-black text-[var(--text-primary)] transition-colors group-hover:text-[#003580]">
+                        {report.title}
+                      </h3>
+                      <p className="mt-1 text-xs font-medium text-[var(--text-secondary)]">
+                        {report.owner} ·{' '}
+                        <span className="inline-block rounded bg-[var(--bg-card)] px-1.5 py-0.5 text-[11px] font-bold text-[var(--text-secondary)] ring-1 ring-[var(--border-color)]">
+                          {report.cadence}
+                        </span>
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-[10px] font-extrabold text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between border-t border-[var(--border-color)] pt-3 text-[10px] font-extrabold text-[var(--text-muted)]">
                       <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" /> ABET / HERQA Audit Ready
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" /> ABET /
+                        HERQA Audit Ready
                       </span>
                       <button
+                        type="button"
                         onClick={() => handleDownloadSinglePdf(report)}
-                        className="text-astu-navy dark:text-sky-400 hover:text-blue-800 dark:hover:text-sky-300 hover:underline font-black flex items-center gap-0.5 cursor-pointer"
+                        className="flex cursor-pointer items-center gap-0.5 font-black text-[#003580] hover:underline"
                       >
                         Export PDF →
                       </button>
@@ -586,7 +607,7 @@ export default function ReportsCenter() {
               })}
             </div>
           )}
-        </div>
+        </AdminSectionCard>
       </section>
 
       {/* Build Report Modal Drawer */}
@@ -598,23 +619,24 @@ export default function ReportsCenter() {
               if (e.target === e.currentTarget) setShowBuildModal(false);
             }}
           >
-            <div className="bg-[var(--bg-card)] rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 dark:border-slate-800 space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="w-full max-w-xl space-y-6 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-2xl animate-in zoom-in-95 duration-200 sm:p-7">
               {/* Header */}
-              <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-start justify-between border-b border-[var(--border-color)] pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-11 w-11 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-astu-navy dark:text-sky-300 flex items-center justify-center border border-blue-200/60 dark:border-blue-800/60 font-bold shadow-xs">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#003580]/20 bg-[#003580]/10 font-bold text-[#003580] shadow-xs">
                     <SlidersHorizontal className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-astu-navy dark:text-sky-400 block">
+                    <span className="block text-[10px] font-black uppercase tracking-wider text-[#003580]">
                       Custom Report Builder
                     </span>
-                    <h3 className="text-lg font-black text-slate-900 dark:text-white">Compile Institutional Report</h3>
+                    <h3 className="text-lg font-black text-[var(--text-primary)]">Compile Institutional Report</h3>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowBuildModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
+                  className="cursor-pointer rounded-full p-1.5 text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-page)] hover:text-[var(--text-primary)]"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -623,35 +645,35 @@ export default function ReportsCenter() {
               {/* Form */}
               <form onSubmit={handleGenerateCustomReport} className="space-y-4 text-xs">
                 <div>
-                  <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                  <label className="mb-1.5 block font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
                     Select Report Package ({reports.length} Total Options)
                   </label>
                   <select
                     value={selectedReportType}
                     onChange={(e) => setSelectedReportType(e.target.value)}
-                    className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-extrabold text-slate-800 dark:text-slate-100 focus:border-astu-navy dark:focus:border-sky-500 focus:outline-none"
+                    className={`${adminInputClass} font-extrabold`}
                   >
                     {reports.map((r) => (
-                      <option key={r.title} value={r.title} className="dark:bg-slate-800 dark:text-slate-100">
+                      <option key={r.title} value={r.title}>
                         {r.title} ({r.area} Domain)
                       </option>
                     ))}
                   </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                    <label className="mb-1.5 block font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
                       Department / Scope Filter
                     </label>
                     <select
                       value={selectedDepartment}
                       onChange={(e) => setSelectedDepartment(e.target.value)}
-                      className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-100 focus:border-astu-navy dark:focus:border-sky-500 focus:outline-none"
+                      className={`${adminInputClass} font-bold`}
                     >
-                      <option value="ALL" className="dark:bg-slate-800 dark:text-slate-100">All Departments (Institutional Wide)</option>
+                      <option value="ALL">All Departments (Institutional Wide)</option>
                       {departmentsList.map((d) => (
-                        <option key={d.id} value={d.id} className="dark:bg-slate-800 dark:text-slate-100">
+                        <option key={d.id} value={d.id}>
                           {d.name}
                         </option>
                       ))}
@@ -659,24 +681,24 @@ export default function ReportsCenter() {
                   </div>
 
                   <div>
-                    <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                    <label className="mb-1.5 block font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
                       Reporting Timeframe
                     </label>
                     <select
                       value={selectedTimeframe}
                       onChange={(e) => setSelectedTimeframe(e.target.value)}
-                      className="w-full text-xs p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-100 focus:border-astu-navy dark:focus:border-sky-500 focus:outline-none"
+                      className={`${adminInputClass} font-bold`}
                     >
-                      <option value="Monthly" className="dark:bg-slate-800 dark:text-slate-100">Monthly Cycle</option>
-                      <option value="Quarterly" className="dark:bg-slate-800 dark:text-slate-100">Quarterly Audit</option>
-                      <option value="Biannual" className="dark:bg-slate-800 dark:text-slate-100">Biannual Review</option>
-                      <option value="Annual" className="dark:bg-slate-800 dark:text-slate-100">Annual Quality Accreditation</option>
+                      <option value="Monthly">Monthly Cycle</option>
+                      <option value="Quarterly">Quarterly Audit</option>
+                      <option value="Biannual">Biannual Review</option>
+                      <option value="Annual">Annual Quality Accreditation</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="font-extrabold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                  <label className="mb-1.5 block font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
                     Output File Format
                   </label>
                   <div className="grid grid-cols-3 gap-3">
@@ -689,40 +711,40 @@ export default function ReportsCenter() {
                         key={fmt.id}
                         type="button"
                         onClick={() => setSelectedFormat(fmt.id as any)}
-                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        className={`cursor-pointer rounded-xl border p-3 text-left transition-all ${
                           selectedFormat === fmt.id
-                            ? 'border-astu-navy dark:border-sky-500 bg-blue-50/60 dark:bg-sky-950/50 text-astu-navy dark:text-sky-300 font-black ring-1 ring-astu-navy/30 dark:ring-sky-500/30'
-                            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                            ? 'border-[#003580] bg-[#003580]/10 font-black text-[#003580] ring-1 ring-[#003580]/30'
+                            : 'border-[var(--border-color)] bg-[var(--bg-page)] text-[var(--text-secondary)] hover:border-[#003580]/30'
                         }`}
                       >
                         <p className="text-xs font-black">{fmt.label}</p>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400">{fmt.desc}</p>
+                        <p className="text-[10px] text-[var(--text-muted)]">{fmt.desc}</p>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Audit Disclaimer */}
-                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed font-semibold flex items-start gap-2">
-                  <FileText className="h-4 w-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-[11px] font-semibold leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+                  <FileText className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
                   <span>
                     Generating this report will record a permanent entry in the Official System Audit Log and increment your monthly institutional export quota.
                   </span>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-3 border-t border-[var(--border-color)] pt-3">
                   <button
                     type="button"
                     onClick={() => setShowBuildModal(false)}
-                    className="flex-1 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="flex-1 cursor-pointer rounded-xl border border-[var(--border-color)] py-3 text-xs font-bold text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-page)]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isBuildingReport}
-                    className="flex-1 py-3 rounded-xl bg-astu-navy hover:bg-blue-900 dark:bg-sky-600 dark:hover:bg-sky-500 text-white text-xs font-extrabold shadow-md dark:shadow-sky-950/50 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#003580] py-3 text-xs font-extrabold text-white shadow-sm transition-all hover:bg-[#001F4D] disabled:opacity-50"
                   >
                     {isBuildingReport ? (
                       <RefreshCw className="h-4 w-4 animate-spin" />

@@ -1,6 +1,10 @@
 import React from 'react';
-import { Search, Filter, RotateCcw, Download, Plus } from 'lucide-react';
+import { Search, RotateCcw, Download, Plus } from 'lucide-react';
 import { UserFilters } from './userManagement.types';
+import {
+  adminFilterShellClass,
+  adminInputClass,
+} from '../../components/AdminSectionCard';
 
 interface UserFilterBarProps {
   filters: UserFilters;
@@ -34,58 +38,55 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
   batches,
 }) => {
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-4 rounded-xl space-y-3">
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3 top-2.5" />
+    <div className="space-y-3">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <label className={`${adminFilterShellClass} w-full md:max-w-sm`}>
+          <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
           <input
             type="text"
             value={filters.query}
             onChange={(e) => onFilterChange('query', e.target.value)}
             placeholder="Search by name, email, student ID..."
-            className="w-full pl-9 pr-3 py-2 bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--brand-primary)]"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]"
           />
-        </div>
+        </label>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onReset}
-            className="px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
             title="Reset Filters"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Reset</span>
           </button>
 
           <button
             type="button"
             onClick={onExport}
-            className="px-3 py-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-input)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-3 py-2 text-xs font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="h-3.5 w-3.5" />
             <span>Export</span>
           </button>
 
           <button
             type="button"
             onClick={onAddUser}
-            className="px-3.5 py-2 rounded-lg bg-[#2196F3] hover:bg-[#1976D2] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#003580] px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#002a66]"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="h-3.5 w-3.5" />
             <span>New User</span>
           </button>
         </div>
       </div>
 
-      {/* Select Dropdown Filters */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[var(--border-color)]">
+      <div className="grid grid-cols-2 gap-2 border-t border-[var(--border-color)] pt-3 sm:grid-cols-4">
         <select
           value={filters.role}
           onChange={(e) => onFilterChange('role', e.target.value)}
-          className="bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
+          className={adminInputClass}
         >
           <option value="All">All Roles</option>
           {ROLES.filter((r) => r !== 'All').map((r) => (
@@ -98,7 +99,7 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
         <select
           value={filters.status}
           onChange={(e) => onFilterChange('status', e.target.value)}
-          className="bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
+          className={adminInputClass}
         >
           <option value="All">All Statuses</option>
           {STATUSES.filter((s) => s !== 'All').map((s) => (
@@ -111,7 +112,7 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
         <select
           value={filters.department}
           onChange={(e) => onFilterChange('department', e.target.value)}
-          className="bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
+          className={adminInputClass}
         >
           <option value="All">All Departments</option>
           {departments.map((d) => (
@@ -124,7 +125,7 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
         <select
           value={filters.batch}
           onChange={(e) => onFilterChange('batch', e.target.value)}
-          className="bg-[var(--bg-input)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
+          className={adminInputClass}
         >
           <option value="All">All Batches</option>
           {batches.map((b) => (

@@ -274,39 +274,34 @@ export default function EmployerRegistrationPage() {
               autoComplete="new-password"
             />
 
-            <div className="rounded-lg bg-astu-navy/5 p-4">
-              <p className="text-xs text-on-surface-variant">
+            <div className="rounded-xl border border-astu-navy/10 bg-astu-navy/5 p-4 dark:border-sky-500/15 dark:bg-sky-500/10">
+              <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                 <strong>Note:</strong> Your TIN will be verified against government records.
-                Your registration will be reviewed by the university administration.
-                You will receive an email once your account is approved.
+                University administration reviews each registration, and you will receive an email once approved.
               </p>
             </div>
 
-            <AuthButton
-              type="submit"
-              loading={isLoading}
-              disabled={isLoading}
-            >
+            <AuthButton type="submit" loading={isLoading} disabled={isLoading}>
               Register
             </AuthButton>
 
             <AuthFooterLink
               text="Already have an employer account?"
               linkText="Sign in"
-              to="/Login"
+              to="/login"
             />
           </Form>
         )}
       </Formik>
 
-      <div className="mt-6 pt-6 border-t border-outline-variant">
-        <div className="flex items-center gap-3 rounded-lg border border-outline-variant bg-white p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-astu-navy/10">
-            <Building2 className="h-5 w-5 text-astu-navy" />
+      <div className="mt-6 border-t border-slate-100 pt-6 dark:border-slate-800">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/50">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-astu-navy/10 dark:bg-sky-500/15">
+            <Building2 className="h-5 w-5 text-astu-navy dark:text-sky-300" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-astu-navy">Partner with ASTU</h3>
-            <p className="text-xs text-on-surface-variant">
+            <h3 className="text-sm font-semibold text-astu-navy dark:text-sky-300">Partner with ASTU</h3>
+            <p className="text-xs text-slate-600 dark:text-slate-400">
               Access verified alumni talent for your recruitment needs
             </p>
           </div>

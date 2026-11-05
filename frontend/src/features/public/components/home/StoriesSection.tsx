@@ -55,7 +55,7 @@ export default function StoriesSection({ stories, headers, onNavigate }: Stories
             key={`${story.id}-${page}`}
             type="button"
             onClick={() => onNavigate(`/stories/${story.id}`)}
-            className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 dark:focus-visible:ring-sky-400/50 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="home-surface group flex h-full flex-col p-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:focus-visible:ring-sky-400/50 md:p-7 motion-reduce:hover:translate-y-0"
           >
             <div className="mb-5 flex items-center gap-3.5">
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-2 ring-slate-100 transition group-hover:ring-astu-navy/30 dark:bg-slate-800 dark:ring-slate-700">

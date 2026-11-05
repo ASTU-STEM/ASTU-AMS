@@ -18,6 +18,17 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
+import AdminEmptyState from '../components/AdminEmptyState';
+import AdminStatGrid from '../components/AdminStatGrid';
+import AdminSectionCard, {
+  adminFilterShellClass,
+  adminHeroGhostBtnClass,
+  adminHeroPrimaryBtnClass,
+  adminInputClass,
+  adminPanelClass,
+  adminTableHeadClass,
+  adminTableRowClass,
+} from '../components/AdminSectionCard';
 import {
   knowledgeService,
   KnowledgeDocItem,
@@ -228,183 +239,182 @@ export default function KnowledgeBaseManagement() {
     return { totalDocs, totalChunks, published, drafts };
   }, [documents]);
 
+  const knowledgeStats = [
+    {
+      title: 'Total Knowledge Sources',
+      value: String(stats.totalDocs),
+      icon: BookOpen,
+      tone: 'blue' as const,
+      description: 'Manuals, guides & FAQs',
+    },
+    {
+      title: 'Indexed Knowledge Chunks',
+      value: String(stats.totalChunks),
+      icon: Sparkles,
+      tone: 'purple' as const,
+      description: 'Searchable semantic passages',
+    },
+    {
+      title: 'Active on Homepage',
+      value: String(stats.published),
+      icon: CheckCircle2,
+      tone: 'green' as const,
+      description: 'Published public documents',
+    },
+    {
+      title: 'Drafts & Review',
+      value: String(stats.drafts),
+      icon: Clock,
+      tone: 'amber' as const,
+      description: 'Pending admin publication',
+    },
+  ];
+
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Header */}
+    <div className="space-y-6">
       <AdminPageHeader
         title="RAG Knowledge Hub"
         subtitle="Manage official ASTU policies, registrar guides, and FAQs that power the public homepage AI chatbot."
-      >
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => setShowTestPlayground(true)}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors"
-          >
-            <Sparkles className="w-4 h-4 text-indigo-600" />
-            Test Chatbot
-          </button>
-          <button
-            onClick={() => setShowFaqModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-100 text-slate-800 hover:bg-slate-200 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New FAQ / Policy
-          </button>
-          <button
-            onClick={() => setShowUploadModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition-colors"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Document (PDF/Text)
-          </button>
-        </div>
-      </AdminPageHeader>
-
-      {/* Analytics KPI Tiles */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
-            <BookOpen className="w-4 h-4 text-blue-600" />
-            Total Knowledge Sources
-          </div>
-          <div className="text-2xl font-bold text-slate-900 mt-2">{stats.totalDocs}</div>
-          <div className="text-xs text-slate-400 mt-1">Manuals, guides & FAQs</div>
-        </div>
-        <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
-            <Sparkles className="w-4 h-4 text-indigo-600" />
-            Indexed Knowledge Chunks
-          </div>
-          <div className="text-2xl font-bold text-indigo-900 mt-2">{stats.totalChunks}</div>
-          <div className="text-xs text-slate-400 mt-1">Searchable semantic passages</div>
-        </div>
-        <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            Active on Homepage
-          </div>
-          <div className="text-2xl font-bold text-emerald-700 mt-2">{stats.published}</div>
-          <div className="text-xs text-slate-400 mt-1">Published public documents</div>
-        </div>
-        <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
-            <Clock className="w-4 h-4 text-amber-600" />
-            Drafts & Review
-          </div>
-          <div className="text-2xl font-bold text-amber-700 mt-2">{stats.drafts}</div>
-          <div className="text-xs text-slate-400 mt-1">Pending admin publication</div>
-        </div>
-      </div>
-
-      {/* Search & Filter Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 justify-between items-center">
-        <form onSubmit={handleSearchSubmit} className="relative w-full md:w-96">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search documents by title or topic..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50"
-          />
-        </form>
-
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-          <select
-            value={selectedCat}
-            onChange={(e) => setSelectedCat(e.target.value)}
-            className="px-3 py-2 text-xs rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                Category: {c}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-3 py-2 text-xs rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="All">All Statuses</option>
-            <option value="PUBLISHED">Published</option>
-            <option value="DRAFT">Draft</option>
-            <option value="DEACTIVATED">Deactivated</option>
-          </select>
-
-          <button
-            onClick={fetchDocuments}
-            className="p-2 text-slate-500 hover:text-slate-700 rounded-lg border border-slate-200 hover:bg-slate-50"
-            title="Refresh"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* Documents Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="py-16 text-center text-slate-400 text-sm flex flex-col items-center gap-2">
-            <RefreshCw className="w-6 h-6 animate-spin text-blue-600" />
-            Loading knowledge repository...
-          </div>
-        ) : documents.length === 0 ? (
-          <div className="py-16 text-center text-slate-500 text-sm flex flex-col items-center gap-3">
-            <FolderOpen className="w-10 h-10 text-slate-300" />
-            <div>No knowledge documents found matching your filter criteria.</div>
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="text-xs text-blue-600 font-semibold hover:underline"
-            >
-              Upload your first policy document
+        breadcrumbs={[{ label: 'Admin' }, { label: 'Knowledge Base' }]}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setShowTestPlayground(true)} className={adminHeroGhostBtnClass}>
+              <Sparkles className="h-4 w-4 text-[#FFCC00]" />
+              Test Chatbot
+            </button>
+            <button type="button" onClick={() => setShowFaqModal(true)} className={adminHeroGhostBtnClass}>
+              <Plus className="h-4 w-4" />
+              New FAQ / Policy
+            </button>
+            <button type="button" onClick={() => setShowUploadModal(true)} className={adminHeroPrimaryBtnClass}>
+              <Upload className="h-4 w-4" />
+              Upload Document (PDF/Text)
             </button>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+        }
+      />
+
+      <AdminStatGrid stats={knowledgeStats} cols={4} compact />
+
+      <AdminSectionCard title="Filters" subtitle="Search and segment the knowledge repository.">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <form onSubmit={handleSearchSubmit} className={`${adminFilterShellClass} w-full md:max-w-sm`}>
+            <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search documents by title or topic..."
+              className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-muted)]"
+            />
+          </form>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={selectedCat}
+              onChange={(e) => setSelectedCat(e.target.value)}
+              className={`${adminInputClass} w-auto min-w-[10rem]`}
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  Category: {c}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className={`${adminInputClass} w-auto min-w-[9rem]`}
+            >
+              <option value="All">All Statuses</option>
+              <option value="PUBLISHED">Published</option>
+              <option value="DRAFT">Draft</option>
+              <option value="DEACTIVATED">Deactivated</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={fetchDocuments}
+              className="inline-flex items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-2.5 text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+              title="Refresh"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </AdminSectionCard>
+
+      <section className={`${adminPanelClass} overflow-hidden`}>
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="flex flex-col items-center gap-2 py-16 text-sm text-[var(--text-muted)]">
+              <RefreshCw className="h-6 w-6 animate-spin text-[#003580]" />
+              Loading knowledge repository...
+            </div>
+          ) : documents.length === 0 ? (
+            <div className="p-6">
+              <AdminEmptyState
+                icon={FolderOpen}
+                title="No knowledge documents found"
+                description="No documents match your filter criteria. Upload a policy or clear filters to continue."
+                action={
+                  <button
+                    type="button"
+                    onClick={() => setShowUploadModal(true)}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#003580] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#001F4D]"
+                  >
+                    <Upload className="h-3.5 w-3.5" />
+                    Upload your first policy document
+                  </button>
+                }
+              />
+            </div>
+          ) : (
+            <table className="w-full text-left text-sm border-collapse">
+              <thead>
                 <tr>
-                  <th className="py-3 px-4">Document Title</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4">Indexed Chunks</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Access</th>
-                  <th className="py-3 px-4">Uploaded By</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  {['Document Title', 'Category', 'Indexed Chunks', 'Status', 'Access', 'Uploaded By', 'Actions'].map(
+                    (head) => (
+                      <th
+                        key={head}
+                        className={`${adminTableHeadClass} p-4 ${head === 'Actions' ? 'text-right' : ''}`}
+                      >
+                        {head}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {documents.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-4 font-medium text-slate-900 max-w-xs">
+                  <tr key={doc.id} className={adminTableRowClass}>
+                    <td className="p-4 max-w-xs">
                       <div className="flex items-start gap-2.5">
-                        <FileText className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[#003580]" />
                         <div>
-                          <div className="font-semibold text-slate-900">{doc.title}</div>
+                          <div className="font-semibold text-[var(--text-primary)]">{doc.title}</div>
                           {doc.fileName && (
-                            <div className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                            <div className="mt-0.5 flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
                               <span>File: {doc.fileName}</span>
-                              {doc.fileSize && (
-                                <span>• {(doc.fileSize / 1024).toFixed(1)} KB</span>
-                              )}
+                              {doc.fileSize && <span>• {(doc.fileSize / 1024).toFixed(1)} KB</span>}
                             </div>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-block px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                    <td className="p-4">
+                      <span className="inline-block rounded-full border border-[#003580]/15 bg-[#003580]/10 px-2 py-0.5 text-[11px] font-medium text-[#003580]">
                         {doc.category}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span className="font-semibold text-slate-700">{doc.chunkCount}</span>
-                      <span className="text-slate-400 text-[11px]"> passages</span>
+                    <td className="p-4">
+                      <span className="font-semibold text-[var(--text-primary)]">{doc.chunkCount}</span>
+                      <span className="text-[11px] text-[var(--text-muted)]"> passages</span>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="p-4">
                       <button
+                        type="button"
                         onClick={() => handleToggleStatus(doc)}
                         className="cursor-pointer"
                         title="Click to toggle publish status"
@@ -414,56 +424,51 @@ export default function KnowledgeBaseManagement() {
                             doc.status === 'PUBLISHED'
                               ? 'success'
                               : doc.status === 'DRAFT'
-                              ? 'warning'
-                              : 'neutral'
+                                ? 'warning'
+                                : 'neutral'
                           }
                         >
                           {doc.status}
                         </AdminBadge>
                       </button>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`text-[11px] font-medium px-2 py-0.5 rounded ${
-                          doc.accessLevel === 'PUBLIC'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-purple-50 text-purple-700'
-                        }`}
-                      >
+                    <td className="p-4">
+                      <AdminBadge variant={doc.accessLevel === 'PUBLIC' ? 'success' : 'info'}>
                         {doc.accessLevel}
-                      </span>
+                      </AdminBadge>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 text-[11px]">
+                    <td className="p-4 text-[11px] text-[var(--text-secondary)]">
                       <div>{doc.uploadedBy || 'Admin'}</div>
-                      <div className="text-slate-400">
-                        {new Date(doc.createdAt).toLocaleDateString()}
-                      </div>
+                      <div className="text-[var(--text-muted)]">{new Date(doc.createdAt).toLocaleDateString()}</div>
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
+                          type="button"
                           onClick={() => openPreview(doc)}
-                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded"
+                          className="rounded-lg p-1.5 text-[var(--text-muted)] transition hover:bg-[#003580]/10 hover:text-[#003580]"
                           title="Preview Extracted Chunks"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="h-4 w-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => {
                             setTargetDocId(doc.id);
                             setShowTestPlayground(true);
                           }}
-                          className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded"
+                          className="rounded-lg p-1.5 text-[var(--text-muted)] transition hover:bg-[#003580]/10 hover:text-[#003580]"
                           title="Test In AI Playground"
                         >
-                          <Sparkles className="w-4 h-4" />
+                          <Sparkles className="h-4 w-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(doc.id, doc.title)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                          className="rounded-lg p-1.5 text-[var(--text-muted)] transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40"
                           title="Delete from knowledge base"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
@@ -471,49 +476,48 @@ export default function KnowledgeBaseManagement() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </section>
 
       {/* Upload Document Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-6 space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Upload className="w-4 h-4 text-blue-600" />
+          <div className="w-full max-w-lg space-y-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+              <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
+                <Upload className="h-4 w-4 text-[#003580]" />
                 Upload Knowledge Document (PDF / Text)
               </h3>
               <button
+                type="button"
                 onClick={() => setShowUploadModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleUploadSubmit} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
-                  Document Title *
-                </label>
+                <label className="mb-1 block font-semibold text-[var(--text-secondary)]">Document Title *</label>
                 <input
                   type="text"
                   required
                   value={uploadTitle}
                   onChange={(e) => setUploadTitle(e.target.value)}
                   placeholder="e.g. Official Degree Verification & Transcript Policy 2026"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={adminInputClass}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Category</label>
+                  <label className="mb-1 block font-semibold text-[var(--text-secondary)]">Category</label>
                   <select
                     value={uploadCat}
                     onChange={(e) => setUploadCat(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white"
+                    className={adminInputClass}
                   >
                     {CATEGORIES.filter((c) => c !== 'All').map((c) => (
                       <option key={c} value={c}>
@@ -524,11 +528,11 @@ export default function KnowledgeBaseManagement() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-700 font-semibold mb-1">Initial Status</label>
+                  <label className="mb-1 block font-semibold text-[var(--text-secondary)]">Initial Status</label>
                   <select
                     value={uploadStatus}
                     onChange={(e) => setUploadStatus(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white"
+                    className={adminInputClass}
                   >
                     <option value="PUBLISHED">Published (Immediate)</option>
                     <option value="DRAFT">Draft (Test first)</option>
@@ -537,18 +541,18 @@ export default function KnowledgeBaseManagement() {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Description (Optional)</label>
+                <label className="mb-1 block font-semibold text-[var(--text-secondary)]">Description (Optional)</label>
                 <input
                   type="text"
                   value={uploadDesc}
                   onChange={(e) => setUploadDesc(e.target.value)}
                   placeholder="e.g. Official Registrar document SLAs and issuance steps"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={adminInputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="mb-1 block font-semibold text-[var(--text-secondary)]">
                   File Attachment (.pdf, .txt, .md) *
                 </label>
                 <input
@@ -556,29 +560,29 @@ export default function KnowledgeBaseManagement() {
                   required
                   accept=".pdf,.txt,.md"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                  className="w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                  className="w-full cursor-pointer text-[var(--text-secondary)] file:mr-4 file:rounded-lg file:border-0 file:bg-[#003580]/10 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-[#003580] hover:file:bg-[#003580]/15"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">
+                <p className="mt-1 text-[11px] text-[var(--text-muted)]">
                   The document will be parsed, segmented into semantic chunks, and indexed automatically.
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 border-t border-[var(--border-color)] pt-3">
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  className="rounded-xl border border-[var(--border-color)] px-4 py-2 text-[var(--text-secondary)] transition hover:bg-[var(--bg-page)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isUploading}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1.5"
+                  className="flex items-center gap-1.5 rounded-xl bg-[#003580] px-4 py-2 font-semibold text-white transition hover:bg-[#001F4D] disabled:opacity-50"
                 >
                   {isUploading ? (
                     <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                       Parsing & Indexing...
                     </>
                   ) : (
@@ -594,23 +598,24 @@ export default function KnowledgeBaseManagement() {
       {/* Manual FAQ Modal */}
       {showFaqModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-6 space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Plus className="w-4 h-4 text-blue-600" />
+          <div className="w-full max-w-lg space-y-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xl">
+            <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2">
+              <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
+                <Plus className="h-4 w-4 text-[#003580]" />
                 Add Direct FAQ / Institutional Guideline
               </h3>
               <button
+                type="button"
                 onClick={() => setShowFaqModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleFaqSubmit} className="space-y-3.5 text-xs">
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="mb-1 block font-semibold text-[var(--text-secondary)]">
                   Question / Policy Topic *
                 </label>
                 <input
@@ -619,17 +624,13 @@ export default function KnowledgeBaseManagement() {
                   value={faqQuestion}
                   onChange={(e) => setFaqQuestion(e.target.value)}
                   placeholder="e.g. What is the fee for an English medium of instruction certificate?"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={adminInputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">Category</label>
-                <select
-                  value={faqCat}
-                  onChange={(e) => setFaqCat(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white"
-                >
+                <label className="mb-1 block font-semibold text-[var(--text-secondary)]">Category</label>
+                <select value={faqCat} onChange={(e) => setFaqCat(e.target.value)} className={adminInputClass}>
                   {CATEGORIES.filter((c) => c !== 'All').map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -639,7 +640,7 @@ export default function KnowledgeBaseManagement() {
               </div>
 
               <div>
-                <label className="block text-slate-700 font-semibold mb-1">
+                <label className="mb-1 block font-semibold text-[var(--text-secondary)]">
                   Detailed Answer / Guidance *
                 </label>
                 <textarea
@@ -648,22 +649,22 @@ export default function KnowledgeBaseManagement() {
                   value={faqAnswer}
                   onChange={(e) => setFaqAnswer(e.target.value)}
                   placeholder="Provide clear step-by-step instructions or policy terms..."
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={adminInputClass}
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <div className="flex justify-end gap-2 border-t border-[var(--border-color)] pt-3">
                 <button
                   type="button"
                   onClick={() => setShowFaqModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  className="rounded-xl border border-[var(--border-color)] px-4 py-2 text-[var(--text-secondary)] transition hover:bg-[var(--bg-page)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingFaq}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
+                  className="rounded-xl bg-[#003580] px-4 py-2 font-semibold text-white transition hover:bg-[#001F4D] disabled:opacity-50"
                 >
                   {isSubmittingFaq ? 'Indexing...' : 'Save & Publish to RAG'}
                 </button>
@@ -676,43 +677,44 @@ export default function KnowledgeBaseManagement() {
       {/* Preview Chunks Modal */}
       {showPreviewModal && previewDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-2xl w-full p-6 space-y-4 max-h-[85vh] flex flex-col">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100 flex-shrink-0">
+          <div className="flex max-h-[85vh] w-full max-w-2xl flex-col space-y-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border-color)] pb-2">
               <div>
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-blue-600" />
+                <h3 className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
+                  <Eye className="h-4 w-4 text-[#003580]" />
                   Chunk Inspection: {previewDoc.title}
                 </h3>
-                <div className="text-[11px] text-slate-400 mt-0.5">
+                <div className="mt-0.5 text-[11px] text-[var(--text-muted)]">
                   {previewChunks.length} semantic chunks generated for vector retrieval
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setShowPreviewModal(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="overflow-y-auto space-y-3 flex-1 pr-1 text-xs">
+            <div className="flex-1 space-y-3 overflow-y-auto pr-1 text-xs">
               {loadingPreview ? (
-                <div className="py-12 text-center text-slate-400">Loading chunks...</div>
+                <div className="py-12 text-center text-[var(--text-muted)]">Loading chunks...</div>
               ) : previewChunks.length === 0 ? (
-                <div className="py-12 text-center text-slate-400">No chunks generated yet.</div>
+                <div className="py-12 text-center text-[var(--text-muted)]">No chunks generated yet.</div>
               ) : (
                 previewChunks.map((chunk, idx) => (
                   <div
                     key={chunk.id || idx}
-                    className="p-3.5 rounded-lg border border-slate-200 bg-slate-50 space-y-1.5"
+                    className="space-y-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-page)] p-3.5"
                   >
-                    <div className="flex justify-between items-center text-[11px] font-semibold text-blue-700">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-[#003580]">
                       <span>
                         Chunk #{idx + 1} — {chunk.section || 'General'}
                       </span>
-                      <span className="text-slate-400">~{chunk.tokenCount} words</span>
+                      <span className="text-[var(--text-muted)]">~{chunk.tokenCount} words</span>
                     </div>
-                    <div className="text-slate-700 text-xs leading-relaxed whitespace-pre-wrap">
+                    <div className="whitespace-pre-wrap text-xs leading-relaxed text-[var(--text-secondary)]">
                       {chunk.content}
                     </div>
                   </div>
@@ -720,10 +722,11 @@ export default function KnowledgeBaseManagement() {
               )}
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-slate-100 flex-shrink-0">
+            <div className="flex shrink-0 justify-end border-t border-[var(--border-color)] pt-2">
               <button
+                type="button"
                 onClick={() => setShowPreviewModal(false)}
-                className="px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold text-xs hover:bg-slate-200"
+                className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
               >
                 Close Preview
               </button>
@@ -735,32 +738,33 @@ export default function KnowledgeBaseManagement() {
       {/* Admin Test Playground Modal */}
       {showTestPlayground && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100 flex-shrink-0">
+          <div className="flex max-h-[90vh] w-full max-w-xl flex-col space-y-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-[var(--border-color)] pb-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-indigo-600" />
+                <Sparkles className="h-5 w-5 text-[#003580]" />
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">RAG Chatbot Verification Playground</h3>
-                  <p className="text-[11px] text-slate-400">
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">RAG Chatbot Verification Playground</h3>
+                  <p className="text-[11px] text-[var(--text-muted)]">
                     Test how the chatbot retrieves and answers from your uploaded documents
                   </p>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setShowTestPlayground(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="space-y-3 flex-1 overflow-y-auto pr-1 text-xs">
+            <div className="flex-1 space-y-3 overflow-y-auto pr-1 text-xs">
               <div className="flex items-center gap-2">
-                <label className="text-[11px] font-semibold text-slate-600">Target Document:</label>
+                <label className="text-[11px] font-semibold text-[var(--text-secondary)]">Target Document:</label>
                 <select
                   value={targetDocId}
                   onChange={(e) => setTargetDocId(e.target.value)}
-                  className="flex-1 px-2.5 py-1.5 text-xs rounded border border-slate-200 bg-white"
+                  className={`${adminInputClass} flex-1 py-1.5`}
                 >
                   <option value="all">All Published & Draft Documents</option>
                   {documents.map((d) => (
@@ -777,43 +781,39 @@ export default function KnowledgeBaseManagement() {
                   value={testQuery}
                   onChange={(e) => setTestQuery(e.target.value)}
                   placeholder="e.g. How do I request an official transcript?"
-                  className="flex-1 px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs"
+                  className={`${adminInputClass} flex-1`}
                 />
                 <button
                   type="submit"
                   disabled={testing || !testQuery.trim()}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1.5"
+                  className="flex items-center gap-1.5 rounded-xl bg-[#003580] px-4 py-2 font-semibold text-white transition hover:bg-[#001F4D] disabled:opacity-50"
                 >
-                  {testing ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Send className="w-3.5 h-3.5" />
-                  )}
+                  {testing ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                   Query
                 </button>
               </form>
 
               {testResult && (
-                <div className="mt-4 p-4 rounded-xl border border-indigo-100 bg-indigo-50/50 space-y-3">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-indigo-900 border-b border-indigo-100 pb-2">
+                <div className="mt-4 space-y-3 rounded-xl border border-[#003580]/20 bg-[#003580]/5 p-4">
+                  <div className="flex items-center justify-between border-b border-[#003580]/15 pb-2 text-[11px] font-semibold text-[#003580]">
                     <span>Generated RAG Answer</span>
-                    <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    <span className="rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
                       ✓ {testResult.retrievedChunksCount} Chunks Retrieved
                     </span>
                   </div>
 
-                  <div className="text-slate-800 text-xs leading-relaxed whitespace-pre-wrap font-sans">
+                  <div className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-[var(--text-primary)]">
                     {testResult.response}
                   </div>
 
                   {testResult.citations && testResult.citations.length > 0 && (
-                    <div className="pt-2 border-t border-indigo-100 space-y-1">
-                      <div className="text-[11px] font-bold text-slate-700">Verified Citations:</div>
+                    <div className="space-y-1 border-t border-[#003580]/15 pt-2">
+                      <div className="text-[11px] font-bold text-[var(--text-secondary)]">Verified Citations:</div>
                       <div className="flex flex-wrap gap-1.5">
                         {testResult.citations.map((c, i) => (
                           <span
                             key={i}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-white text-indigo-700 border border-indigo-200 shadow-2xs"
+                            className="inline-flex items-center gap-1 rounded-full border border-[#003580]/20 bg-[var(--bg-card)] px-2 py-0.5 text-[10px] font-medium text-[#003580] shadow-sm"
                           >
                             📚 {c.title} {c.section ? `(${c.section})` : ''}
                           </span>
@@ -823,11 +823,11 @@ export default function KnowledgeBaseManagement() {
                   )}
 
                   {testResult.actions && testResult.actions.length > 0 && (
-                    <div className="pt-1 flex gap-2">
+                    <div className="flex gap-2 pt-1">
                       {testResult.actions.map((act, i) => (
                         <span
                           key={i}
-                          className="px-2.5 py-1 rounded text-[11px] font-semibold bg-indigo-600 text-white"
+                          className="rounded px-2.5 py-1 text-[11px] font-semibold bg-[#003580] text-white"
                         >
                           Action: {act.label} ({act.route})
                         </span>
@@ -838,10 +838,11 @@ export default function KnowledgeBaseManagement() {
               )}
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-slate-100 flex-shrink-0">
+            <div className="flex shrink-0 justify-end border-t border-[var(--border-color)] pt-2">
               <button
+                type="button"
                 onClick={() => setShowTestPlayground(false)}
-                className="px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 font-semibold text-xs hover:bg-slate-200"
+                className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] px-4 py-1.5 text-xs font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
               >
                 Close Playground
               </button>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { MessageSquareText } from 'lucide-react';
 import { TelegramChat } from '../../../components/TelegramChat';
@@ -9,6 +9,15 @@ import AdminSectionCard from '../components/AdminSectionCard';
 export default function AdminChatPage() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   const stateTarget = location.state?.target;
   const paramName = searchParams.get('name');
@@ -47,8 +56,8 @@ export default function AdminChatPage() {
         subtitle="Continue conversations, hand off leads, and keep institutional messaging in one place."
         bodyClassName="-mx-1"
       >
-        <div className="overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)]">
-          <TelegramChat darkMode={false} initialTarget={initialTarget} />
+        <div className="overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]">
+          <TelegramChat darkMode={isDark} initialTarget={initialTarget} />
         </div>
       </AdminSectionCard>
     </div>

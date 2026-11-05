@@ -82,10 +82,15 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
-import AdminStatCard from '../components/AdminStatCard';
 import AdminStatGrid from '../components/AdminStatGrid';
 import AdminBadge from '../components/AdminBadge';
 import AdminEmptyState from '../components/AdminEmptyState';
+import {
+  adminFilterShellClass,
+  adminPanelClass,
+  adminTabBtnClass,
+  adminTabRailClass,
+} from '../components/AdminSectionCard';
 import { adminService } from '../services/admin.service';
 import LocationMap from './analytics/LocationMap';
 import { SectionCard, ChartCard } from './analytics/AnalyticsCards';
@@ -748,43 +753,38 @@ export default function AnalyticsOverview() {
         actions={<AdminBadge variant="success">Insights Live</AdminBadge>}
       />
 
-      {/* Main Filter Header Bar */}
       <div className="space-y-3 no-print">
-        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-3.5 shadow-sm hover:shadow-md transition-shadow">
+        <div className={`${adminPanelClass} p-3.5`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            
-            {/* Filter Pills Group */}
             <div className="flex flex-wrap items-center gap-2.5">
-              {/* Academic Year Pill */}
-              <div className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
-                <CalendarRange className="h-4 w-4 text-blue-600 shrink-0" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Year:</span>
+              <label className={`${adminFilterShellClass} bg-[var(--bg-page)]`}>
+                <CalendarRange className="h-4 w-4 text-[#003580] shrink-0" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Year:</span>
                 <select
                   value={academicYear}
                   onChange={(e) => setAcademicYear(e.target.value)}
-                  className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer pr-1"
+                  className="bg-transparent text-xs font-bold text-[var(--text-primary)] outline-none cursor-pointer pr-1"
                 >
                   {academicYears.map((year) => (
                     <option key={year} value={year}>{year}</option>
                   ))}
                 </select>
-              </div>
+              </label>
 
-              {/* Department Pill */}
-              <div className="inline-flex items-center gap-2 rounded-xl border border-[var(--border-color)] bg-slate-50/70 px-3.5 py-2 hover:bg-slate-100/70 hover:border-slate-300 transition-all">
-                <School className="h-4 w-4 text-blue-600 shrink-0" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Dept:</span>
+              <label className={`${adminFilterShellClass} bg-[var(--bg-page)]`}>
+                <School className="h-4 w-4 text-[#003580] shrink-0" />
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Dept:</span>
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value as DepartmentFilter)}
-                  className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer pr-1 max-w-[180px] sm:max-w-none truncate"
+                  className="bg-transparent text-xs font-bold text-[var(--text-primary)] outline-none cursor-pointer pr-1 max-w-[180px] sm:max-w-none truncate"
                 >
                   <option value="All">All Departments</option>
                   {dbDepartments.map((item) => (
                     <option key={item} value={item}>{item}</option>
                   ))}
                 </select>
-              </div>
+              </label>
 
               {/* Advanced Filter Matrix Button */}
               <button
@@ -809,15 +809,14 @@ export default function AnalyticsOverview() {
                 )}
               </button>
 
-              {/* Indicator Search Bar with Autocomplete Suggestions Dropdown & Searching Animation */}
               <div className="relative">
-                <div className={`inline-flex items-center gap-2 rounded-xl border bg-[var(--bg-card)] px-3.5 py-2 transition-all min-w-[260px] sm:min-w-[320px] shadow-xs ${
-                  searchQuery ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-[var(--border-color)] hover:border-slate-300'
+                <div className={`${adminFilterShellClass} min-w-[260px] sm:min-w-[320px] bg-[var(--bg-card)] ${
+                  searchQuery ? 'border-blue-500 ring-2 ring-blue-500/20' : ''
                 }`}>
                   {isSearching ? (
-                    <RefreshCw className="h-4 w-4 text-blue-600 animate-spin shrink-0" />
+                    <RefreshCw className="h-4 w-4 text-[#003580] animate-spin shrink-0" />
                   ) : (
-                    <Search className="h-4 w-4 text-slate-400 shrink-0" />
+                    <Search className="h-4 w-4 text-[var(--text-muted)] shrink-0" />
                   )}
                   <input
                     type="text"
@@ -831,7 +830,7 @@ export default function AnalyticsOverview() {
                     onKeyDown={(e) => {
                       if (e.key === 'Escape') setShowSuggestions(false);
                     }}
-                    className="bg-transparent text-xs font-semibold text-slate-800 outline-none w-full placeholder:text-slate-400"
+                    className="bg-transparent text-xs font-semibold text-[var(--text-primary)] outline-none w-full placeholder:text-[var(--text-muted)]"
                   />
                   {searchQuery && (
                     <button
@@ -840,7 +839,7 @@ export default function AnalyticsOverview() {
                         setSearchQuery('');
                         setShowSuggestions(false);
                       }}
-                      className="text-slate-400 hover:text-[var(--text-secondary)] rounded-full p-0.5"
+                      className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] rounded-full p-0.5"
                       title="Clear search"
                     >
                       <X className="h-3.5 w-3.5" />
@@ -848,12 +847,11 @@ export default function AnalyticsOverview() {
                   )}
                 </div>
 
-                {/* Suggestions Dropdown */}
                 {showSuggestions && searchQuery.trim().length > 0 && (
                   <div className="absolute left-0 right-0 top-full mt-2 z-[99999] rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl p-2 text-xs space-y-1 animate-in fade-in zoom-in-95 duration-150 max-h-[380px] overflow-y-auto">
-                    <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-slate-100 mb-1">
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider flex items-center justify-between border-b border-[var(--border-color)] mb-1">
                       <span>Suggested Analytics Indicators</span>
-                      <span className="text-blue-600 font-extrabold">{searchSuggestions.length} matches</span>
+                      <span className="text-[#003580] font-extrabold">{searchSuggestions.length} matches</span>
                     </div>
 
                     {searchSuggestions.length > 0 ? (
@@ -897,7 +895,7 @@ export default function AnalyticsOverview() {
                     ) : (
                       <div className="p-4 text-center space-y-2">
                         <div className="text-[var(--text-secondary)] font-medium">No indicators match "<strong className="text-[var(--text-primary)]">{searchQuery}</strong>"</div>
-                        <div className="text-[11px] text-slate-400">Try these popular search topics:</div>
+                        <div className="text-[11px] text-[var(--text-muted)]">Try these popular search topics:</div>
                         <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
                           {['MoU', 'STEM', 'Salary', 'Mentorship', 'IND-01', 'Patent'].map((preset) => (
                             <button
@@ -1011,9 +1009,8 @@ export default function AnalyticsOverview() {
         </div>
       )}
 
-      {/* Sub-Page ("By Page") Navigation Tab Bar */}
       <div id="analytics-tab-header" className="space-y-3 no-print scroll-mt-6">
-        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 shadow-xs">
+        <div className={adminTabRailClass}>
           <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             <div className="flex items-center gap-1.5 min-w-max">
               {ANALYTICS_PAGE_TABS.map((tab) => {
@@ -1024,11 +1021,7 @@ export default function AnalyticsOverview() {
                     key={tab.id}
                     type="button"
                     onClick={() => handleTabChange(tab.id)}
-                    className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#003580] to-[#00429d] text-white shadow-md shadow-blue-950/20 ring-2 ring-[#003580]/20'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-slate-100/80 border border-transparent hover:border-slate-200/60'
-                    }`}
+                    className={`${adminTabBtnClass(isActive)} text-xs cursor-pointer`}
                   >
                     <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-white' : 'text-[var(--text-muted)]'}`} />
                     <span>{tab.shortLabel}</span>
@@ -1099,11 +1092,9 @@ export default function AnalyticsOverview() {
             </div>
           )}
 
-      <section className={`grid gap-4 md:grid-cols-2 xl:grid-cols-4 ${!selectedSuites.kpi ? 'print:hidden' : ''}`}>
-        {activeStatCards.map((stat) => (
-          <AdminStatCard key={stat.label} {...stat} />
-        ))}
-      </section>
+      <div className={!selectedSuites.kpi ? 'print:hidden' : ''}>
+        <AdminStatGrid stats={activeStatCards} cols={4} compact />
+      </div>
 
 
       <div className={!selectedSuites.yoyForecast ? 'print:hidden' : ''}>
@@ -1597,19 +1588,19 @@ export default function AnalyticsOverview() {
             subtitle="Annual employment velocity, average starting salaries, and official document request volumes per academic department."
           >
             {/* Toolbar Filters & Per Page Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 rounded-xl border border-[var(--border-color)] bg-slate-50/60 p-3 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-page)] p-3 text-xs">
               <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
-                <label className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 shadow-xs flex-1 max-w-xs focus-within:border-[#003580]">
-                  <Search className="h-3.5 w-3.5 text-slate-400" />
+                <label className={`${adminFilterShellClass} bg-[var(--bg-card)] flex-1 max-w-xs py-1.5`}>
+                  <Search className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                   <input
                     type="text"
                     value={matrixSearch}
                     onChange={(e) => setMatrixSearch(e.target.value)}
                     placeholder="Search department, year, rate..."
-                    className="w-full bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
+                    className="w-full bg-transparent outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                   />
                   {matrixSearch && (
-                    <button type="button" onClick={() => setMatrixSearch('')} className="text-slate-400 hover:text-[var(--text-secondary)]">
+                    <button type="button" onClick={() => setMatrixSearch('')} className="text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
                       <X className="h-3 w-3" />
                     </button>
                   )}

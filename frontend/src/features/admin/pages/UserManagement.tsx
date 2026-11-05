@@ -1,13 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { Users, UserCheck, Shield, Clock } from 'lucide-react';
-import { UserRow, Role, Status, UserFilters } from './users/userManagement.types';
+import { Users, UserCheck, Shield, Clock, Plus, Download, RefreshCw } from 'lucide-react';
+import { UserRow, UserFilters } from './users/userManagement.types';
 import { UserFilterBar } from './users/UserFilterBar';
 import { UserTable } from './users/UserTable';
 import { UserDetailsModal } from './users/UserDetailsModal';
 import { EditUserModal } from './users/EditUserModal';
 import { RoleAssignmentModal } from './users/RoleAssignmentModal';
 import { adminService } from '../services/admin.service';
+import AdminPageHeader from '../components/AdminPageHeader';
+import AdminStatGrid from '../components/AdminStatGrid';
+import AdminSectionCard, {
+  adminHeroGhostBtnClass,
+  adminHeroPrimaryBtnClass,
+  adminPanelClass,
+  adminTabBtnClass,
+  adminTabRailClass,
+} from '../components/AdminSectionCard';
 
 const INITIAL_USERS: UserRow[] = [
   {
@@ -83,6 +92,8 @@ const INITIAL_USERS: UserRow[] = [
   },
 ];
 
+const STATUS_TABS = ['All', 'Active', 'Pending Verification', 'Suspended', 'Inactive'] as const;
+
 export default function UserManagement() {
   const [users, setUsers] = useState<UserRow[]>(INITIAL_USERS);
   const [filters, setFilters] = useState<UserFilters>({
@@ -101,14 +112,20 @@ export default function UserManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
 
-  useEffect(() => {
-    adminService.getUsers()
-      .then((data: any) => {
+  const fetchUsers = () => {
+    adminService
+      .getUsers({})
+      .then((res: any) => {
+        const data = res?.data?.users ?? res?.data ?? res;
         if (Array.isArray(data) && data.length > 0) {
           setUsers(data);
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   const departments = useMemo(() => {
@@ -174,75 +191,144 @@ export default function UserManagement() {
     }
   };
 
+  const openAddUser = () => {
+    setEditingUser(null);
+    setIsEditModalOpen(true);
+  };
+
+  const userStats = [
+    {
+      title: 'Total Accounts',
+      value: String(users.length),
+      icon: Users,
+      tone: 'blue' as const,
+      description: 'Across all portals',
+    },
+    {
+      title: 'Active Users',
+      value: String(users.filter((u) => u.status === 'Active').length),
+      icon: UserCheck,
+      tone: 'green' as const,
+      description: 'Verified credentials',
+    },
+    {
+      title: 'Pending Verification',
+      value: String(users.filter((u) => u.status === 'Pending Verification').length),
+      icon: Clock,
+      tone: 'amber' as const,
+      description: 'Awaiting review',
+    },
+    {
+      title: 'Administrators',
+      value: String(users.filter((u) => String(u.role).includes('Admin')).length),
+      icon: Shield,
+      tone: 'purple' as const,
+      description: 'Security clearance',
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Metric Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-4 rounded-xl">
-          <div className="text-xs uppercase text-[var(--text-secondary)] font-semibold">Total Accounts</div>
-          <div className="text-2xl font-bold text-[var(--text-primary)] mt-1">{users.length}</div>
-          <div className="text-xs text-[#22D3EE] mt-0.5">Across all 6 portals</div>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-4 rounded-xl">
-          <div className="text-xs uppercase text-[var(--text-secondary)] font-semibold">Active Users</div>
-          <div className="text-2xl font-bold text-emerald-400 mt-1">
-            {users.filter((u) => u.status === 'Active').length}
-          </div>
-          <div className="text-xs text-emerald-500 mt-0.5">Verified credentials</div>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-4 rounded-xl">
-          <div className="text-xs uppercase text-[var(--text-secondary)] font-semibold">Alumni Cohort</div>
-          <div className="text-2xl font-bold text-[#2196F3] mt-1">
-            {users.filter((u) => u.role === 'Alumni').length}
-          </div>
-          <div className="text-xs text-[var(--text-secondary)] mt-0.5">Registered graduates</div>
-        </div>
-        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-4 rounded-xl">
-          <div className="text-xs uppercase text-[var(--text-secondary)] font-semibold">Administrators</div>
-          <div className="text-2xl font-bold text-purple-400 mt-1">
-            {users.filter((u) => u.role.includes('Admin')).length}
-          </div>
-          <div className="text-xs text-[var(--text-secondary)] mt-0.5">Security clearance</div>
-        </div>
+      <AdminPageHeader
+        title="User Management"
+        subtitle="Manage accounts, verification status, roles, and directory access across ASTU portals."
+        breadcrumbs={[{ label: 'Admin' }, { label: 'User Management' }]}
+        actions={
+          <>
+            <button type="button" onClick={fetchUsers} className={adminHeroGhostBtnClass}>
+              <RefreshCw className="h-4 w-4 text-[#FFCC00]" />
+              Refresh
+            </button>
+            <button
+              type="button"
+              onClick={() => toast.success('Exporting filtered user roster to CSV/Excel...')}
+              className={adminHeroGhostBtnClass}
+            >
+              <Download className="h-4 w-4 text-[#FFCC00]" />
+              Export
+            </button>
+            <button type="button" onClick={openAddUser} className={adminHeroPrimaryBtnClass}>
+              <Plus className="h-4 w-4" />
+              New User
+            </button>
+          </>
+        }
+      />
+
+      <AdminStatGrid stats={userStats} cols={4} compact />
+
+      <div className={adminTabRailClass}>
+        {STATUS_TABS.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => handleFilterChange('status', tab)}
+            className={adminTabBtnClass(filters.status === tab)}
+          >
+            {tab}
+            <span
+              className={`rounded-lg px-1.5 py-0.5 text-[10px] font-bold ${
+                filters.status === tab
+                  ? 'bg-white/20 text-white'
+                  : 'bg-[var(--bg-page)] text-[var(--text-muted)]'
+              }`}
+            >
+              {tab === 'All'
+                ? users.length
+                : users.filter((u) => u.status === tab).length}
+            </span>
+          </button>
+        ))}
       </div>
 
-      {/* Filter Bar */}
-      <UserFilterBar
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onReset={() => setFilters({ query: '', role: 'All', status: 'All', department: 'All', batch: 'All' })}
-        onExport={() => toast.success('Exporting filtered user roster to CSV/Excel...')}
-        onAddUser={() => {
-          setEditingUser(null);
-          setIsEditModalOpen(true);
-        }}
-        departments={departments}
-        batches={batches}
-      />
+      <AdminSectionCard title="Filters" subtitle="Search and segment the user directory.">
+        <UserFilterBar
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onReset={() => {
+            setFilters({ query: '', role: 'All', status: 'All', department: 'All', batch: 'All' });
+            setCurrentPage(1);
+          }}
+          onExport={() => toast.success('Exporting filtered user roster to CSV/Excel...')}
+          onAddUser={openAddUser}
+          departments={departments}
+          batches={batches}
+        />
+      </AdminSectionCard>
 
-      {/* User Table */}
-      <UserTable
-        users={paginatedUsers}
-        selectedUserIds={selectedUserIds}
-        onToggleSelect={(id) =>
-          setSelectedUserIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
-        }
-        onToggleSelectAll={() =>
-          setSelectedUserIds(selectedUserIds.length === paginatedUsers.length ? [] : paginatedUsers.map((u) => u.id))
-        }
-        onViewUser={setViewingUser}
-        onEditUser={(u) => {
-          setEditingUser(u);
-          setIsEditModalOpen(true);
-        }}
-        onChangeRole={setRoleModalUser}
-        onDeleteUser={handleDeleteUser}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      <section className={`${adminPanelClass} overflow-hidden`}>
+        <div className="flex items-center justify-between gap-3 border-b border-[var(--border-color)] px-5 py-3">
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">User Directory</h3>
+            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+              Showing {paginatedUsers.length} of {filteredUsers.length} matching accounts
+            </p>
+          </div>
+        </div>
+        <UserTable
+          users={paginatedUsers}
+          selectedUserIds={selectedUserIds}
+          onToggleSelect={(id) =>
+            setSelectedUserIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+          }
+          onToggleSelectAll={() =>
+            setSelectedUserIds(
+              selectedUserIds.length === paginatedUsers.length ? [] : paginatedUsers.map((u) => u.id)
+            )
+          }
+          onViewUser={setViewingUser}
+          onEditUser={(u) => {
+            setEditingUser(u);
+            setIsEditModalOpen(true);
+          }}
+          onChangeRole={setRoleModalUser}
+          onDeleteUser={handleDeleteUser}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </section>
 
-      {/* Modals */}
       <UserDetailsModal user={viewingUser} onClose={() => setViewingUser(null)} />
 
       <EditUserModal

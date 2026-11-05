@@ -199,9 +199,9 @@ export default function SignupPage() {
               autoComplete="off"
             />
 
-            <div className="rounded-lg bg-astu-navy/5 p-4">
-              <p className="text-xs text-on-surface-variant">
-                <strong>Note:</strong> Your account will be verified against registrar records. 
+            <div className="rounded-xl border border-astu-navy/10 bg-astu-navy/5 p-4 dark:border-sky-500/15 dark:bg-sky-500/10">
+              <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                <strong>Note:</strong> Your account will be verified against registrar records.
                 You may receive an email confirmation once your account is approved.
               </p>
             </div>

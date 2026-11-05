@@ -141,7 +141,7 @@ export default function HowItWorksSection({
           return (
             <article
               key={`${item.id}-${page}`}
-              className="group flex h-full flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-within:ring-2 focus-within:ring-astu-navy/25 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="home-surface group flex h-full flex-col justify-between p-6 focus-within:ring-2 focus-within:ring-astu-navy/25 md:p-7 motion-reduce:hover:translate-y-0"
             >
               <div>
                 <div className="mb-5 flex items-center justify-between gap-2">
@@ -149,7 +149,7 @@ export default function HowItWorksSection({
                     {stepNum}
                   </span>
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconBg} transition duration-300 group-hover:scale-105`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconBg} transition duration-300 group-hover:scale-105 motion-reduce:group-hover:scale-100`}
                   >
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </div>
@@ -166,13 +166,10 @@ export default function HowItWorksSection({
               <button
                 type="button"
                 onClick={() => onNavigate(item.route)}
-                className="group/btn mt-6 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold text-astu-navy transition-all duration-300 hover:border-astu-navy hover:bg-astu-navy hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 dark:border-slate-600 dark:bg-slate-800/60 dark:text-sky-300 dark:hover:border-sky-500 dark:hover:bg-sky-600 dark:hover:text-white"
+                className="home-btn home-btn--outline home-btn--sm group/btn mt-6 w-full"
               >
                 <span>{item.cta}</span>
-                <ArrowRight
-                  className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover/btn:translate-x-1"
-                  aria-hidden="true"
-                />
+                <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
               </button>
             </article>
           );

@@ -58,20 +58,22 @@ export default function ForgotPasswordPage() {
         subtitle="Check your inbox or messages to reset your password"
         showLogo={true}
       >
-        <div className="flex justify-center mb-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100 p-1">
-            <ShieldCheck className="h-8 w-8 text-emerald-600 animate-pulse" />
+        <div className="mb-6 flex justify-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-100 bg-emerald-50 p-1 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+            <ShieldCheck className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-lg bg-emerald-50/50 p-4 border border-emerald-150 text-xs text-emerald-800">
-            <p className="font-bold mb-1">Reset Instructions Dispatched</p>
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 text-xs text-emerald-900 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100">
+            <p className="mb-1 font-bold">Reset instructions sent</p>
             <p>
-              We have sent a verification code / password reset link to <span className="font-semibold text-astu-navy">{targetVal}</span>.
+              We sent a verification code / password reset link to{' '}
+              <span className="font-semibold text-astu-navy dark:text-sky-300">{targetVal}</span>.
             </p>
             <p className="mt-1">
-              Please follow the instructions in the message to set up your new password. The link will expire in <span className="font-medium">15 minutes</span>.
+              Follow the message to set a new password. The link expires in{' '}
+              <span className="font-medium">15 minutes</span>.
             </p>
           </div>
 
@@ -79,11 +81,11 @@ export default function ForgotPasswordPage() {
             Go to Login
           </PrimaryButton>
 
-          <div className="text-center pt-2">
+          <div className="pt-2 text-center">
             <button
               type="button"
               onClick={() => setIsSuccess(false)}
-              className="text-xs text-on-surface-variant hover:text-astu-navy font-semibold hover:underline"
+              className="text-xs font-semibold text-slate-500 transition hover:text-astu-navy hover:underline dark:text-slate-400 dark:hover:text-sky-300"
             >
               Didn't receive the code? Request again
             </button>
@@ -99,19 +101,17 @@ export default function ForgotPasswordPage() {
       subtitle="Retrieve access to your ASTU alumni account"
       showLogo={true}
     >
-      {/* Introductory description */}
-      <p className="text-sm text-on-surface-variant mb-4 max-w-md mx-auto">
-        Enter the email address associated with your ASTU alumni account (or phone number) and we will send you a secure link or verification code to reset your password. The link expires after 15 minutes for your safety.
+      <p className="mx-auto mb-4 max-w-md text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        Enter the email or phone on your ASTU alumni account and we will send a secure reset link or code. Links expire after 15 minutes.
       </p>
-      {/* Recovery Method Toggle Tabs */}
-      <div className="flex bg-slate-100 p-1 rounded-lg mb-6">
+      <div className="mb-6 flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
         <button
           type="button"
           onClick={() => setMethod('email')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-semibold transition-all ${
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
             method === 'email'
-              ? 'bg-white text-astu-navy shadow-sm'
-              : 'text-on-surface-variant hover:text-on-surface'
+              ? 'bg-white text-astu-navy shadow-sm dark:bg-slate-950 dark:text-sky-300'
+              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           <Mail className="h-3.5 w-3.5" />
@@ -120,10 +120,10 @@ export default function ForgotPasswordPage() {
         <button
           type="button"
           onClick={() => setMethod('phone')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-semibold transition-all ${
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
             method === 'phone'
-              ? 'bg-white text-astu-navy shadow-sm'
-              : 'text-on-surface-variant hover:text-on-surface'
+              ? 'bg-white text-astu-navy shadow-sm dark:bg-slate-950 dark:text-sky-300'
+              : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
           }`}
         >
           <Phone className="h-3.5 w-3.5" />
@@ -175,17 +175,13 @@ export default function ForgotPasswordPage() {
               Send Recovery Instructions
             </PrimaryButton>
 
-            {/* Support Link */}
-            <div className="pt-2 border-t border-outline-variant flex flex-col items-center gap-3">
-              <SupportLink 
-                lastErrorCode="FORGOT_PASSWORD"
-                label="Having issues? Contact support"
-              />
-              
+            <div className="flex flex-col items-center gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+              <SupportLink lastErrorCode="FORGOT_PASSWORD" label="Having issues? Contact support" />
+
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="text-xs text-on-surface-variant hover:text-astu-navy font-semibold inline-flex items-center gap-1.5 mt-1"
+                className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-astu-navy dark:text-slate-400 dark:hover:text-sky-300"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Back to sign in

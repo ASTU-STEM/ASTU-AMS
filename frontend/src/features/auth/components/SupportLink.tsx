@@ -28,7 +28,7 @@ export default function SupportLink({
         lastErrorCode,
         sessionId
       }}
-      className={`text-xs text-on-surface-variant hover:text-astu-navy font-semibold inline-flex items-center gap-1.5 hover:underline transition-all ${className}`}
+      className={`inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-astu-navy hover:underline dark:text-slate-400 dark:hover:text-sky-300 ${className}`}
     >
       <HelpCircle className="h-3.5 w-3.5 flex-shrink-0" />
       <span>{label}</span>

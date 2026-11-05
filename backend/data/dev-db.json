@@ -100,22 +100,13 @@
       "updatedAt": "2026-11-02T14:50:37.306Z"
     },
     {
-      "id": "test-alumni-user-uuid",
-      "email": "bob@alumni.com",
-      "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
-      "role": "ALUMNI",
-      "isActive": true,
-      "createdAt": "2026-11-02T14:50:37.306Z",
-      "updatedAt": "2026-11-02T14:50:37.306Z"
-    },
-    {
       "id": "alice-alumni-user",
       "email": "alice@alumni.com",
       "password": "$2a$10$KSr6wSGuoErBn0bOpNnwFuJRpPMk1.TwdINdOJjN1Srh84qvAjPnO",
       "role": "ALUMNI",
       "isActive": true,
-      "createdAt": "2026-11-03T11:56:50.763Z",
-      "updatedAt": "2026-11-03T11:56:50.763Z"
+      "createdAt": "2026-11-03T11:56:50.728Z",
+      "updatedAt": "2026-11-03T11:56:50.729Z"
     }
   ],
   "alumniProfiles": [
@@ -142,31 +133,6 @@
       "preferences": {
         "company": "Safaricom Ethiopia",
         "currentRole": "Mechanical Design Associate"
-      }
-    },
-    {
-      "userId": "test-alumni-user-uuid",
-      "studentId": "ASTU/SWE/001",
-      "fullName": "Bob Marley",
-      "email": "bob@alumni.com",
-      "cgpa": 3.9,
-      "graduationYear": 2024,
-      "gender": "Male",
-      "departmentId": "dev-department-1787763781949",
-      "status": "ACTIVE",
-      "skills": [
-        "TypeScript",
-        "Node.js",
-        "React"
-      ],
-      "id": "dev-alumni-1787763782058",
-      "createdAt": "2026-08-26T17:03:02.058Z",
-      "updatedAt": "2026-10-20T15:38:20.150Z",
-      "employmentStatus": "EMPLOYED",
-      "salary": 25000,
-      "preferences": {
-        "company": "Google East Africa",
-        "currentRole": "Fullstack Engineer"
       }
     },
     {
@@ -34034,6 +34000,111 @@
       "verificationChannel": "NATIONAL_ID"
     },
     {
+      "studentId": "ASTU/SWE/24/012",
+      "fullName": "Abebe Kebede Tessema",
+      "email": "abebe.kebede.2024@astu.edu.et",
+      "phone": "+251911223344",
+      "cgpa": 3.88,
+      "graduationYear": 2024,
+      "gender": "UNKNOWN",
+      "departmentId": "dev-dept-1793706939627",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "id": "dev-alumni-1793706939653",
+      "createdAt": "2026-11-03T11:55:39.653Z",
+      "updatedAt": "2026-11-03T11:58:24.755Z"
+    },
+    {
+      "studentId": "ASTU/CSE/24/045",
+      "fullName": "Bethlehem Demisse Haile",
+      "email": "bethlehem.demisse.2024@astu.edu.et",
+      "phone": "+251912445566",
+      "cgpa": 3.75,
+      "graduationYear": 2024,
+      "gender": "UNKNOWN",
+      "departmentId": "dev-dept-1793706939697",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "id": "dev-alumni-1793706939723",
+      "createdAt": "2026-11-03T11:55:39.723Z",
+      "updatedAt": "2026-11-03T11:58:24.806Z"
+    },
+    {
+      "studentId": "ASTU/ECE/24/108",
+      "fullName": "Dawit Solomon Worku",
+      "email": "dawit.solomon.2024@astu.edu.et",
+      "phone": "+251913667788",
+      "cgpa": 3.92,
+      "graduationYear": 2024,
+      "gender": "UNKNOWN",
+      "departmentId": "dev-dept-1793706939766",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "id": "dev-alumni-1793706939791",
+      "createdAt": "2026-11-03T11:55:39.791Z",
+      "updatedAt": "2026-11-03T11:58:24.857Z"
+    },
+    {
+      "studentId": "ASTU/MEG/24/204",
+      "fullName": "Tigist Assefa Girma",
+      "email": "tigist.assefa.2024@astu.edu.et",
+      "phone": "+251914889900",
+      "cgpa": 3.65,
+      "graduationYear": 2024,
+      "gender": "UNKNOWN",
+      "departmentId": "dev-dept-1793706939835",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "id": "dev-alumni-1793706939860",
+      "createdAt": "2026-11-03T11:55:39.860Z",
+      "updatedAt": "2026-11-03T11:58:24.908Z"
+    },
+    {
+      "studentId": "ASTU/CIV/24/156",
+      "fullName": "Yared Bekele Desta",
+      "email": "yared.bekele.2024@astu.edu.et",
+      "phone": "+251915001122",
+      "cgpa": 3.58,
+      "graduationYear": 2024,
+      "gender": "UNKNOWN",
+      "departmentId": "dev-dept-1793706939904",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "id": "dev-alumni-1793706939930",
+      "createdAt": "2026-11-03T11:55:39.930Z",
+      "updatedAt": "2026-11-03T11:58:24.961Z"
+    },
+    {
+      "studentId": "ASTU/CHE/24/089",
+      "fullName": "Helina Mengistu Shimelis",
+      "email": "helina.mengistu.2024@astu.edu.et",
+      "phone": "+251916223344",
+      "cgpa": 3.7,
+      "graduationYear": 2024,
+      "gender": "UNKNOWN",
+      "departmentId": "dev-dept-1793706939972",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "id": "dev-alumni-1793706939998",
+      "createdAt": "2026-11-03T11:55:39.998Z",
+      "updatedAt": "2026-11-03T11:58:25.012Z"
+    },
+    {
+      "studentId": "ASTU/SWE/24/092",
+      "fullName": "Kaleb Kassahun Alemu",
+      "email": "kaleb.kassahun.2024@astu.edu.et",
+      "phone": "+251917334455",
+      "cgpa": 3.82,
+      "graduationYear": 2024,
+      "gender": "UNKNOWN",
+      "departmentId": "dev-dept-1793706940043",
+      "status": "INACTIVE",
+      "isVerified": false,
+      "id": "dev-alumni-1793706940068",
+      "createdAt": "2026-11-03T11:55:40.068Z",
+      "updatedAt": "2026-11-03T11:58:25.063Z"
+    },
+    {
       "userId": "alice-alumni-user",
       "studentId": "ASTU/SWE/001/20",
       "fullName": "Alice Johnson",
@@ -34051,8 +34122,8 @@
         "Docker"
       ],
       "id": "dev-alumni-alice",
-      "createdAt": "2026-11-03T11:56:50.763Z",
-      "updatedAt": "2026-11-03T11:56:50.763Z",
+      "createdAt": "2026-11-03T11:56:50.729Z",
+      "updatedAt": "2026-11-03T11:56:50.729Z",
       "employmentStatus": "EMPLOYED",
       "salary": 28000,
       "preferences": {
@@ -41110,6 +41181,41 @@
       "name": "Applied Natural Sciences & Technology",
       "code": "ANS",
       "createdAt": "2026-10-02T12:05:14.556Z"
+    },
+    {
+      "code": "SWE",
+      "name": "Software Engineering",
+      "id": "dev-dept-1793706939627"
+    },
+    {
+      "code": "CSE",
+      "name": "Computer Science and Engineering",
+      "id": "dev-dept-1793706939697"
+    },
+    {
+      "code": "ECE",
+      "name": "Electrical and Computer Engineering",
+      "id": "dev-dept-1793706939766"
+    },
+    {
+      "code": "MEG",
+      "name": "Mechanical Engineering",
+      "id": "dev-dept-1793706939835"
+    },
+    {
+      "code": "CIV",
+      "name": "Civil Engineering",
+      "id": "dev-dept-1793706939904"
+    },
+    {
+      "code": "CHE",
+      "name": "Chemical Engineering",
+      "id": "dev-dept-1793706939972"
+    },
+    {
+      "code": "SWE",
+      "name": "Software Engineering",
+      "id": "dev-dept-1793706940043"
     }
   ],
   "registrarStudents": [
@@ -41140,6 +41246,111 @@
       "status": "GRADUATED",
       "createdAt": "2026-09-04T00:00:00.000Z",
       "updatedAt": "2026-09-04T00:00:00.000Z"
+    },
+    {
+      "studentId": "ASTU/SWE/24/012",
+      "fullName": "Abebe Kebede Tessema",
+      "department": "Software Engineering",
+      "departmentCode": "SWE",
+      "cgpa": 3.88,
+      "graduationYear": 2024,
+      "email": "abebe.kebede.2024@astu.edu.et",
+      "phone": "+251911223344",
+      "graduationDate": "2024-07-10T00:00:00.000Z",
+      "source": "SIS_API_SYNC",
+      "id": "dev-registrar-1793706939597",
+      "importedAt": "2026-11-03T11:55:39.597Z",
+      "updatedAt": "2026-11-03T11:58:24.727Z"
+    },
+    {
+      "studentId": "ASTU/CSE/24/045",
+      "fullName": "Bethlehem Demisse Haile",
+      "department": "Computer Science and Engineering",
+      "departmentCode": "CSE",
+      "cgpa": 3.75,
+      "graduationYear": 2024,
+      "email": "bethlehem.demisse.2024@astu.edu.et",
+      "phone": "+251912445566",
+      "graduationDate": "2024-07-10T00:00:00.000Z",
+      "source": "SIS_API_SYNC",
+      "id": "dev-registrar-1793706939671",
+      "importedAt": "2026-11-03T11:55:39.671Z",
+      "updatedAt": "2026-11-03T11:58:24.780Z"
+    },
+    {
+      "studentId": "ASTU/ECE/24/108",
+      "fullName": "Dawit Solomon Worku",
+      "department": "Electrical and Computer Engineering",
+      "departmentCode": "ECE",
+      "cgpa": 3.92,
+      "graduationYear": 2024,
+      "email": "dawit.solomon.2024@astu.edu.et",
+      "phone": "+251913667788",
+      "graduationDate": "2024-07-10T00:00:00.000Z",
+      "source": "SIS_API_SYNC",
+      "id": "dev-registrar-1793706939739",
+      "importedAt": "2026-11-03T11:55:39.739Z",
+      "updatedAt": "2026-11-03T11:58:24.831Z"
+    },
+    {
+      "studentId": "ASTU/MEG/24/204",
+      "fullName": "Tigist Assefa Girma",
+      "department": "Mechanical Engineering",
+      "departmentCode": "MEG",
+      "cgpa": 3.65,
+      "graduationYear": 2024,
+      "email": "tigist.assefa.2024@astu.edu.et",
+      "phone": "+251914889900",
+      "graduationDate": "2024-07-10T00:00:00.000Z",
+      "source": "SIS_API_SYNC",
+      "id": "dev-registrar-1793706939808",
+      "importedAt": "2026-11-03T11:55:39.808Z",
+      "updatedAt": "2026-11-03T11:58:24.881Z"
+    },
+    {
+      "studentId": "ASTU/CIV/24/156",
+      "fullName": "Yared Bekele Desta",
+      "department": "Civil Engineering",
+      "departmentCode": "CIV",
+      "cgpa": 3.58,
+      "graduationYear": 2024,
+      "email": "yared.bekele.2024@astu.edu.et",
+      "phone": "+251915001122",
+      "graduationDate": "2024-07-10T00:00:00.000Z",
+      "source": "SIS_API_SYNC",
+      "id": "dev-registrar-1793706939877",
+      "importedAt": "2026-11-03T11:55:39.877Z",
+      "updatedAt": "2026-11-03T11:58:24.933Z"
+    },
+    {
+      "studentId": "ASTU/CHE/24/089",
+      "fullName": "Helina Mengistu Shimelis",
+      "department": "Chemical Engineering",
+      "departmentCode": "CHE",
+      "cgpa": 3.7,
+      "graduationYear": 2024,
+      "email": "helina.mengistu.2024@astu.edu.et",
+      "phone": "+251916223344",
+      "graduationDate": "2024-07-10T00:00:00.000Z",
+      "source": "SIS_API_SYNC",
+      "id": "dev-registrar-1793706939946",
+      "importedAt": "2026-11-03T11:55:39.946Z",
+      "updatedAt": "2026-11-03T11:58:24.985Z"
+    },
+    {
+      "studentId": "ASTU/SWE/24/092",
+      "fullName": "Kaleb Kassahun Alemu",
+      "department": "Software Engineering",
+      "departmentCode": "SWE",
+      "cgpa": 3.82,
+      "graduationYear": 2024,
+      "email": "kaleb.kassahun.2024@astu.edu.et",
+      "phone": "+251917334455",
+      "graduationDate": "2024-07-10T00:00:00.000Z",
+      "source": "SIS_API_SYNC",
+      "id": "dev-registrar-1793706940016",
+      "importedAt": "2026-11-03T11:55:40.016Z",
+      "updatedAt": "2026-11-03T11:58:25.037Z"
     }
   ],
   "registrarSyncLogs": [],
@@ -41231,6 +41442,878 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1792511414811",
       "createdAt": "2026-10-20T15:50:14.811Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631379876",
+      "createdAt": "2026-11-02T14:56:19.876Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631395291",
+      "createdAt": "2026-11-02T14:56:35.291Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631424405",
+      "createdAt": "2026-11-02T14:57:04.405Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631479910",
+      "createdAt": "2026-11-02T14:57:59.910Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631510662",
+      "createdAt": "2026-11-02T14:58:30.662Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631514819",
+      "createdAt": "2026-11-02T14:58:34.819Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631555025",
+      "createdAt": "2026-11-02T14:59:15.025Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631558531",
+      "createdAt": "2026-11-02T14:59:18.531Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631564895",
+      "createdAt": "2026-11-02T14:59:24.895Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631569450",
+      "createdAt": "2026-11-02T14:59:29.450Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631583555",
+      "createdAt": "2026-11-02T14:59:43.555Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631588109",
+      "createdAt": "2026-11-02T14:59:48.109Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631593343",
+      "createdAt": "2026-11-02T14:59:53.343Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631596032",
+      "createdAt": "2026-11-02T14:59:56.032Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631606362",
+      "createdAt": "2026-11-02T15:00:06.362Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793631654166",
+      "createdAt": "2026-11-02T15:00:54.166Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793632239952",
+      "createdAt": "2026-11-02T15:10:39.952Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793632269384",
+      "createdAt": "2026-11-02T15:11:09.384Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793634302130",
+      "createdAt": "2026-11-02T15:45:02.130Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793634369159",
+      "createdAt": "2026-11-02T15:46:09.159Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793634397856",
+      "createdAt": "2026-11-02T15:46:37.856Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793634514197",
+      "createdAt": "2026-11-02T15:48:34.197Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793634519499",
+      "createdAt": "2026-11-02T15:48:39.499Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793635579713",
+      "createdAt": "2026-11-02T16:06:19.713Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793635586099",
+      "createdAt": "2026-11-02T16:06:26.099Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793635591471",
+      "createdAt": "2026-11-02T16:06:31.471Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793635665344",
+      "createdAt": "2026-11-02T16:07:45.344Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793635668682",
+      "createdAt": "2026-11-02T16:07:48.682Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793701489427",
+      "createdAt": "2026-11-03T10:24:49.427Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793701572274",
+      "createdAt": "2026-11-03T10:26:12.274Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793701891534",
+      "createdAt": "2026-11-03T10:31:31.534Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793702830422",
+      "createdAt": "2026-11-03T10:47:10.422Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793704660342",
+      "createdAt": "2026-11-03T11:17:40.342Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793705525882",
+      "createdAt": "2026-11-03T11:32:05.882Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793705529727",
+      "createdAt": "2026-11-03T11:32:09.727Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793705886758",
+      "createdAt": "2026-11-03T11:38:06.758Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793705889564",
+      "createdAt": "2026-11-03T11:38:09.564Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793705894995",
+      "createdAt": "2026-11-03T11:38:14.995Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793705898669",
+      "createdAt": "2026-11-03T11:38:18.669Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793706628331",
+      "createdAt": "2026-11-03T11:50:28.331Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793706762193",
+      "createdAt": "2026-11-03T11:52:42.193Z"
+    },
+    {
+      "userId": "test-alumni-user-uuid",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793706771745",
+      "createdAt": "2026-11-03T11:52:51.745Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793706775165",
+      "createdAt": "2026-11-03T11:52:55.165Z"
+    },
+    {
+      "userId": "test-employer-user-uuid",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793706795114",
+      "createdAt": "2026-11-03T11:53:15.114Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793706957444",
+      "createdAt": "2026-11-03T11:55:57.444Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793706981783",
+      "createdAt": "2026-11-03T11:56:21.783Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707022002",
+      "createdAt": "2026-11-03T11:57:02.002Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707067981",
+      "createdAt": "2026-11-03T11:57:47.981Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707075036",
+      "createdAt": "2026-11-03T11:57:55.036Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707081871",
+      "createdAt": "2026-11-03T11:58:01.871Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707087332",
+      "createdAt": "2026-11-03T11:58:07.332Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707095941",
+      "createdAt": "2026-11-03T11:58:15.941Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707111590",
+      "createdAt": "2026-11-03T11:58:31.590Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707117219",
+      "createdAt": "2026-11-03T11:58:37.219Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707124202",
+      "createdAt": "2026-11-03T11:58:44.202Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793707185250",
+      "createdAt": "2026-11-03T11:59:45.250Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793707226895",
+      "createdAt": "2026-11-03T12:00:26.895Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793707248646",
+      "createdAt": "2026-11-03T12:00:48.646Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793721190796",
+      "createdAt": "2026-11-03T15:53:10.796Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793721658073",
+      "createdAt": "2026-11-03T16:00:58.073Z"
+    },
+    {
+      "userId": "e2e-alumni-user",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793722382719",
+      "createdAt": "2026-11-03T16:13:02.719Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793722386277",
+      "createdAt": "2026-11-03T16:13:06.277Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793722531684",
+      "createdAt": "2026-11-03T16:15:31.684Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793722580285",
+      "createdAt": "2026-11-03T16:16:20.285Z"
+    },
+    {
+      "userId": "alice-alumni-user",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793723789362",
+      "createdAt": "2026-11-03T16:36:29.362Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793723798470",
+      "createdAt": "2026-11-03T16:36:38.470Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793723817566",
+      "createdAt": "2026-11-03T16:36:57.566Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793723820885",
+      "createdAt": "2026-11-03T16:37:00.885Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793724355702",
+      "createdAt": "2026-11-03T16:45:55.702Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793724490045",
+      "createdAt": "2026-11-03T16:48:10.045Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793727115045",
+      "createdAt": "2026-11-03T17:31:55.045Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793728633744",
+      "createdAt": "2026-11-03T17:57:13.744Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729272691",
+      "createdAt": "2026-11-03T18:07:52.691Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729276018",
+      "createdAt": "2026-11-03T18:07:56.018Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729849656",
+      "createdAt": "2026-11-03T18:17:29.656Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729852763",
+      "createdAt": "2026-11-03T18:17:32.763Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729877222",
+      "createdAt": "2026-11-03T18:17:57.222Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793729881311",
+      "createdAt": "2026-11-03T18:18:01.311Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793779252314",
+      "createdAt": "2026-11-04T08:00:52.314Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793779319538",
+      "createdAt": "2026-11-04T08:01:59.538Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784284506",
+      "createdAt": "2026-11-04T09:24:44.506Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784918596",
+      "createdAt": "2026-11-04T09:35:18.596Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784923097",
+      "createdAt": "2026-11-04T09:35:23.097Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784945332",
+      "createdAt": "2026-11-04T09:35:45.332Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793784949180",
+      "createdAt": "2026-11-04T09:35:49.180Z"
+    },
+    {
+      "userId": "user-registrar-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793785193948",
+      "createdAt": "2026-11-04T09:39:53.948Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793785199261",
+      "createdAt": "2026-11-04T09:39:59.261Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786213149",
+      "createdAt": "2026-11-04T09:56:53.149Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786218889",
+      "createdAt": "2026-11-04T09:56:58.889Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786289600",
+      "createdAt": "2026-11-04T09:58:09.600Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793786293741",
+      "createdAt": "2026-11-04T09:58:13.741Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793787151293",
+      "createdAt": "2026-11-04T10:12:31.293Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793788169044",
+      "createdAt": "2026-11-04T10:29:29.044Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793789320012",
+      "createdAt": "2026-11-04T10:48:40.012Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::1",
+      "id": "dev-log-1793789324692",
+      "createdAt": "2026-11-04T10:48:44.692Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789436412",
+      "createdAt": "2026-11-04T10:50:36.412Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789440084",
+      "createdAt": "2026-11-04T10:50:40.084Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789450631",
+      "createdAt": "2026-11-04T10:50:50.631Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793789454381",
+      "createdAt": "2026-11-04T10:50:54.381Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793794911260",
+      "createdAt": "2026-11-04T12:21:51.260Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793794946052",
+      "createdAt": "2026-11-04T12:22:26.052Z"
+    },
+    {
+      "userId": "user-super-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793795064288",
+      "createdAt": "2026-11-04T12:24:24.288Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793811703111",
+      "createdAt": "2026-11-04T17:01:43.111Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812353492",
+      "createdAt": "2026-11-04T17:12:33.492Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812357691",
+      "createdAt": "2026-11-04T17:12:37.691Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812481930",
+      "createdAt": "2026-11-04T17:14:41.930Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812488384",
+      "createdAt": "2026-11-04T17:14:48.384Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812494165",
+      "createdAt": "2026-11-04T17:14:54.165Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812498575",
+      "createdAt": "2026-11-04T17:14:58.575Z"
     }
   ],
   "notifications": [
@@ -62860,46 +63943,8 @@
       "id": "hc-main",
       "key": "main",
       "data": {
-        "events": [
-          {
-            "id": "E-REAL-001",
-            "title": "EthiopiaLics International Conference 2025",
-            "date": "2025-06-13",
-            "location": "ASTU Main Campus Auditorium",
-            "image": "https://www.astu.edu.et/images/slidephoto/summit1.jpg",
-            "description": "Adama Science and Technology University hosts the 1st EthiopiaLics International Conference on “Fostering Innovation Ecosystem for Knowledge Economy Transition and Sustainable Development.”",
-            "active": true
-          },
-          {
-            "id": "E-002",
-            "title": "ASTU Alumni Career & Innovation Summit",
-            "date": "2026-12-05",
-            "location": "Senate Hall, ASTU Main Campus",
-            "image": "/images/astu-building.jpg",
-            "description": "Annual career acceleration gathering connecting final-year students with high-achieving alumni executives and industry partners.",
-            "active": true
-          }
-        ],
-        "workshops": [
-          {
-            "id": "WS-001",
-            "title": "Data Science & Machine Learning Bootcamp",
-            "date": "2026-11-20",
-            "location": "Engineering Lab Block B",
-            "seats": "120 Seats Registered",
-            "focus": "Technical Training & Labs",
-            "active": true
-          },
-          {
-            "id": "WS-002",
-            "title": "Cloud Architecture & DevOps Masterclass",
-            "date": "2026-12-15",
-            "location": "Innovation Hall C",
-            "seats": "80 Seats Registered",
-            "focus": "Technical Training & Labs",
-            "active": true
-          }
-        ],
+        "events": [],
+        "workshops": [],
         "eventsHeaders": {
           "eyebrow": "Events & Workshops",
           "title": "Gatherings & Technical Training",
@@ -62914,1107 +63959,267 @@
           "overview": {
             "slug": "overview",
             "title": "ASTU-AMS Overview",
-            "subtitle": "An integrated Alumni Management System connecting graduates, employers, and departments. Developed in-house by ASTU to enable longitudinal employment tracking and accreditation compliance.",
+            "subtitle": "",
             "iconName": "Trophy",
-            "image": "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "OV-1",
-                "heading": "What is ASTU-AMS?",
-                "body": "ASTU-AMS is a comprehensive alumni management platform designed to bridge the gap between Adama Science and Technology University graduates, employers, and academic departments. With nearly three decades since ASTU's establishment, the platform boasts 1,238+ alumni members across 5 fields of study succeeding in business ventures, national and international companies, research institutes, and leadership positions.",
-                "active": true
-              },
-              {
-                "id": "OV-2",
-                "heading": "Background & Rationale",
-                "body": "ASTU previously lacked a centralized, automated system to track graduate career trajectories. Graduate data was fragmented across departments and the Registrar's office. Without a unified digital ecosystem, the university remained unable to perform meaningful longitudinal analysis or maintain continuous relationships with its alumni network. The ASTU-AMS solves this by providing a centralized alumni database integrated with the Registrar and ERP systems.",
-                "active": true
-              },
-              {
-                "id": "OV-3",
-                "heading": "Core Mission",
-                "body": "To foster professional growth, streamline talent acquisition, and drive academic innovation through data-driven insights and seamless connectivity between all stakeholders. The system provides verified tracer study data required by the Education and Training Authority (ETA) and international accreditation bodies.",
-                "active": true
-              },
-              {
-                "id": "OV-4",
-                "heading": "Key Modules",
-                "body": "Alumni Registration & Verification, Profile Management, Automated Tracer Engine & Survey Logic, Event Calendar & RSVP, Mentorship & Job Board, Employer Portal & Analytics Dashboards, Messaging & Notifications, and Document Request Services.",
-                "active": true
-              },
-              {
-                "id": "OV-5",
-                "heading": "Technical Architecture",
-                "body": "Built with React.js frontend and Node.js/PostgreSQL backend with RESTful APIs. Integrated with Google Sheets API, Telebirr, and institutional Email/SMS APIs. Analytics dashboards power accreditation readiness. Hosted on secure university servers with role-based access and data security protocols.",
-                "active": true
-              },
-              {
-                "id": "OV-6",
-                "heading": "Our Legacy",
-                "body": "ASTU alumni are the university's lasting legacy and strongest voice. The Alumni Association works to build an engaged membership base, giving alumni ways to reconnect, give back to ASTU, and serve as a springboard for further involvement.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "impact-numbers": {
             "slug": "impact-numbers",
             "title": "Impact Numbers",
-            "subtitle": "Key statistics demonstrating ASTU-AMS reach, graduate employment success, and institutional effectiveness.",
+            "subtitle": "",
             "iconName": "LineChart",
-            "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "IN-1",
-                "heading": "1,238+ Alumni Members",
-                "body": "Registered alumni actively connected through the platform, spanning diverse industries and leadership positions worldwide.",
-                "active": true
-              },
-              {
-                "id": "IN-2",
-                "heading": "5 Fields of Study",
-                "body": "Comprehensive coverage across Applied Engineering, Natural Sciences, Technology, Business, and Specialized Research programs.",
-                "active": true
-              },
-              {
-                "id": "IN-3",
-                "heading": "500+ Partner Organizations",
-                "body": "Employers and institutions partnering with ASTU for talent acquisition, internships, and applied industry-research collaboration.",
-                "active": true
-              },
-              {
-                "id": "IN-4",
-                "heading": "24,000+ Global Alumni",
-                "body": "A thriving network of ASTU graduates spread across government agencies, multinational enterprises, and startups worldwide.",
-                "active": true
-              },
-              {
-                "id": "IN-5",
-                "heading": "87% Employment Rate",
-                "body": "Graduate employment rate tracked through comprehensive tracer studies and employer feedback at 6, 12, and 24-month intervals.",
-                "active": true
-              },
-              {
-                "id": "IN-6",
-                "heading": "6,000+ Digital Requests",
-                "body": "Annual transcript, degree certificate, and credential validation requests processed digitally through the registrar portal.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "accreditation": {
             "slug": "accreditation",
             "title": "Accreditation & Quality Assurance",
-            "subtitle": "Data-driven quality assurance framework ensuring academic excellence and global industry alignment.",
+            "subtitle": "",
             "iconName": "ShieldCheck",
-            "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "AC-1",
-                "heading": "Data-Driven Accreditation",
-                "body": "ASTU-AMS provides verified tracer data, employment analytics, and employer feedback essential for ETA accreditation and university leadership audits.",
-                "active": true
-              },
-              {
-                "id": "AC-2",
-                "heading": "Global Standards",
-                "body": "Build transparent, audited institutional reports that meet international engineering accreditation criteria (ABET/ETA standards).",
-                "active": true
-              },
-              {
-                "id": "AC-3",
-                "heading": "Curriculum Alignment",
-                "body": "Employer competency feedback and graduate outcome metrics feed directly into biennial curriculum modernization across all engineering schools.",
-                "active": true
-              },
-              {
-                "id": "AC-4",
-                "heading": "Longitudinal Tracer Surveys",
-                "body": "Automated survey distribution at 6-month, 1-year, and 3-year milestones gives departments empirical insight into career progression.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "achievements": {
             "slug": "achievements",
             "title": "University Achievements",
-            "subtitle": "Awards, recognitions, innovations, and institutional milestones of Adama Science and Technology University.",
+            "subtitle": "",
             "iconName": "Award",
-            "image": "https://images.unsplash.com/photo-1523050854058-8df90110c7f1?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "AV-1",
-                "heading": "Research Excellence",
-                "body": "1,240+ research publications and 38 startup showcases demonstrating ASTU's commitment to innovation and applied science.",
-                "active": true
-              },
-              {
-                "id": "AV-2",
-                "heading": "Industry Partnerships",
-                "body": "72 active industry projects and 80+ enterprise partners collaborating on research, student internships, and practical labs.",
-                "active": true
-              },
-              {
-                "id": "AV-3",
-                "heading": "National Recognition",
-                "body": "ASTU consistently ranks among Ethiopia's premier science and technology institutions, with multiple national innovation trophies.",
-                "active": true
-              },
-              {
-                "id": "AV-4",
-                "heading": "High-Fidelity Tracking",
-                "body": "Over 90% accuracy rate in tracking graduate geographic distribution, time-to-hire metrics, and industry salary benchmarks.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "campus-life": {
             "slug": "campus-life",
             "title": "Campus Life at ASTU",
-            "subtitle": "Experience a vibrant university community with modern engineering labs, research centers, student innovation, and recreation.",
+            "subtitle": "",
             "iconName": "Star",
-            "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "CL-1",
-                "heading": "Modern Laboratories & Research Arc",
-                "body": "ASTU features 12+ specialized research centers and modern engineering laboratories, providing hands-on training from robotics and embedded systems to software engineering and biotechnology.",
-                "active": true
-              },
-              {
-                "id": "CL-2",
-                "heading": "Student Clubs & Innovation Teams",
-                "body": "Join vibrant student chapters including IEEE, Google Developer Student Club (GDSC), robotics teams, and coding hackathons that foster leadership and real-world problem solving.",
-                "active": true
-              },
-              {
-                "id": "CL-3",
-                "heading": "Sports & Recreational Facilities",
-                "body": "Comprehensive athletics facilities including Olympic-standard tracks, basketball and volleyball courts, football grounds, and student lounges to balance rigorous academics with healthy campus life.",
-                "active": true
-              },
-              {
-                "id": "CL-4",
-                "heading": "Housing, Digital Libraries & Dining",
-                "body": "Fully managed student dormitories, high-speed digital library access with 24/7 research repositories, campus dining halls, and health centers serving the ASTU university community.",
-                "active": true
-              },
-              {
-                "id": "CL-5",
-                "heading": "Alumni & Industry Connections",
-                "body": "Annual alumni reunions, engineering symposiums, industry visits, and mentorship sessions bridging campus learning directly to international careers.",
-                "active": true
-              }
-            ]
+            "image": "/images/campus-2.jpeg",
+            "badge": "ASTU Student Life & Campus Culture",
+            "primaryCtaText": "Explore Media Gallery",
+            "primaryCtaLink": "/gallery",
+            "secondaryCtaText": "Campus Events & Activities",
+            "secondaryCtaLink": "/events",
+            "sections": []
           },
           "facilities": {
             "slug": "facilities",
             "title": "University Facilities & Infrastructure",
-            "subtitle": "State-of-the-art engineering laboratories, research arcs, libraries, student services, and employer interview suites.",
+            "subtitle": "",
             "iconName": "Building2",
-            "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "FC-1",
-                "heading": "Modern Laboratories & Research Arc",
-                "body": "Over 12 specialized research centers and engineering laboratories equipped for robotics, embedded systems, biotechnology, materials science, and civil infrastructure testing.",
-                "active": true
-              },
-              {
-                "id": "FC-2",
-                "heading": "Innovation Hubs & Incubation Spaces",
-                "body": "High-tech maker spaces, computing clusters, and student startup incubation suites designed for interdisciplinary innovation, hackathons, and software engineering.",
-                "active": true
-              },
-              {
-                "id": "FC-3",
-                "heading": "Digital Libraries & Knowledge Repositories",
-                "body": "24/7 access to international academic journals, digital archives, quiet study spaces, and high-speed campus fiber networking.",
-                "active": true
-              },
-              {
-                "id": "FC-4",
-                "heading": "Employer Interview Suites & Conference Rooms",
-                "body": "Dedicated professional meeting spaces and seminar halls tailored for corporate recruitment, employer interviews, tracer focus groups, and executive presentations.",
-                "active": true
-              },
-              {
-                "id": "FC-5",
-                "heading": "Sports, Athletics & Recreation Complexes",
-                "body": "Olympic-standard sports facilities including running tracks, indoor gyms, basketball and tennis courts, and university recreation centers.",
-                "active": true
-              },
-              {
-                "id": "FC-6",
-                "heading": "Student Housing, Health Center & Services",
-                "body": "Comprehensive residential dormitories, campus dining halls, university healthcare center, and student welfare offices serving the ASTU community.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "events": {
             "slug": "events",
             "title": "Events & Activities",
-            "subtitle": "Stay informed about upcoming ASTU events, alumni reunions, career fairs, hackathons, and campus activities.",
+            "subtitle": "",
             "iconName": "CalendarDays",
-            "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "EV-1",
-                "heading": "ASTU Alumni Carnival 2026",
-                "body": "April 25–26, 2026 — Main Campus. A homecoming event uniting graduates, academic staff, current students, and stakeholders to celebrate ASTU's legacy and achievements.",
-                "active": true
-              },
-              {
-                "id": "EV-2",
-                "heading": "Career Fairs & Recruitment Days",
-                "body": "Bi-annual career fairs bringing 50+ employer partners on campus for direct recruitment, internship placements, and graduate trainee programs.",
-                "active": true
-              },
-              {
-                "id": "EV-3",
-                "heading": "DAAD Alumni Workshop",
-                "body": "March 2026 — ASTU Research Center. A five-day workshop hosted in collaboration with the German Academic Exchange Service (DAAD) for research and academic networking.",
-                "active": true
-              },
-              {
-                "id": "EV-4",
-                "heading": "Student Hackathons & Innovation Challenges",
-                "body": "Competitive coding challenges, hardware hackathons, and design sprints where student teams solve real-world engineering problems in 24–48 hours.",
-                "active": true
-              },
-              {
-                "id": "EV-5",
-                "heading": "Cultural & Sports Events",
-                "body": "Inter-university sports competitions, cultural festivals, ASTU talent shows, and graduation ceremonies celebrating academic milestones.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "gallery": {
             "slug": "gallery",
             "title": "ASTU Museums & Photo Gallery",
             "subtitle": "A visual journey through ASTU's campus life, research achievements, events, and vibrant student community.",
             "iconName": "GalleryHorizontal",
-            "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "GL-1",
-                "heading": "Campus Architecture & Landmarks",
-                "body": "Stunning aerial and ground-level photography showcasing ASTU's modern campus infrastructure, iconic buildings, green spaces, and research arcs.",
-                "active": true
-              },
-              {
-                "id": "GL-2",
-                "heading": "Graduation & Award Ceremonies",
-                "body": "Memorable moments from ASTU graduation events, award presentations, and recognition ceremonies celebrating student and faculty achievements.",
-                "active": true
-              },
-              {
-                "id": "GL-3",
-                "heading": "Research & Laboratory Snapshots",
-                "body": "Behind-the-scenes photography from ASTU's world-class research labs, engineering workshops, and innovation centers in action.",
-                "active": true
-              },
-              {
-                "id": "GL-4",
-                "heading": "Campus Life & Student Activities",
-                "body": "Candid photos of student clubs, sports events, cultural festivals, volunteering, and the everyday vibrancy of ASTU campus life.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "video-gallery": {
             "slug": "video-gallery",
             "title": "Video Gallery",
-            "subtitle": "Research presentations, event recordings, innovation demos, and university video highlights.",
+            "subtitle": "",
             "iconName": "PlayCircle",
-            "image": "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "VG-1",
-                "heading": "Research Showcases",
-                "body": "Watch applied engineering research presentations, robotics demonstrations, and faculty interviews.",
-                "active": true
-              },
-              {
-                "id": "VG-2",
-                "heading": "Event Recordings",
-                "body": "Access recordings of career expos, alumni carnivals, graduation ceremonies, and guest lectures.",
-                "active": true
-              },
-              {
-                "id": "VG-3",
-                "heading": "Campus Virtual Tours",
-                "body": "Virtual tours of ASTU campuses, engineering workshops, laboratories, and student incubation centers.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "mentorship": {
             "slug": "mentorship",
             "title": "Mentorship Program",
-            "subtitle": "Connect with experienced alumni mentors across industry leaders to guide your career journey.",
+            "subtitle": "",
             "iconName": "GraduationCap",
-            "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "MT-1",
-                "heading": "Find a Mentor",
-                "body": "Browse available mentors by industry, department, graduation year, or technical skill. Send direct connection requests.",
-                "active": true
-              },
-              {
-                "id": "MT-2",
-                "heading": "Become a Mentor",
-                "body": "Experienced alumni can sign up to guide current students and recent graduates, sharing insights into industry workplace dynamics.",
-                "active": true
-              },
-              {
-                "id": "MT-3",
-                "heading": "Mentorship Benefits",
-                "body": "Mentees gain personalized career advice, resume reviews, technical interview prep, and professional referrals.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "career-fair": {
             "slug": "career-fair",
             "title": "Career Fair & Placement",
-            "subtitle": "Job opportunities, employer networking, and direct recruitment events for ASTU alumni and students.",
+            "subtitle": "",
             "iconName": "Briefcase",
-            "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "CF-1",
-                "heading": "Annual Career Expo",
-                "body": "Meet 50+ enterprise employers, participate in on-the-spot interviews, and discover graduate trainee tracks.",
-                "active": true
-              },
-              {
-                "id": "CF-2",
-                "heading": "On-Campus Recruitment",
-                "body": "Top employers conduct screening tests and information sessions throughout the academic calendar.",
-                "active": true
-              },
-              {
-                "id": "CF-3",
-                "heading": "Smart Job Matching",
-                "body": "The AMS platform automatically matches candidate profiles and skills with verified employer job openings.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "alumni-portal": {
             "slug": "alumni-portal",
             "title": "Alumni Portal",
-            "subtitle": "Career tracking, networking, mentorship, and tracer survey participation for ASTU graduates.",
+            "subtitle": "",
             "iconName": "GraduationCap",
-            "image": "https://images.unsplash.com/photo-1523240795612-9a054b0d6440?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "AP-1",
-                "heading": "Professional Profile",
-                "body": "Create and maintain a verified digital profile showcasing degree credentials, work experience, skills, and portfolio projects.",
-                "active": true
-              },
-              {
-                "id": "AP-2",
-                "heading": "Job & Internship Board",
-                "body": "Access exclusive job postings from ASTU corporate partners curated specifically for university graduates.",
-                "active": true
-              },
-              {
-                "id": "AP-3",
-                "heading": "Tracer Survey Engine",
-                "body": "Participate in accredited tracer surveys to help the university improve engineering curricula and retain international standards.",
-                "active": true
-              },
-              {
-                "id": "AP-4",
-                "heading": "Alumni Directory",
-                "body": "Search and connect with fellow graduates across different graduation years, industries, and countries.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "employer-portal": {
             "slug": "employer-portal",
             "title": "Employer Portal",
-            "subtitle": "Talent recruitment, job posting, and competency feedback tools for enterprise partner companies.",
+            "subtitle": "",
             "iconName": "Briefcase",
-            "image": "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1800&q=80",
+            "image": "",
             "badge": "Enterprise Talent Sourcing",
             "primaryCtaText": "Register as Employer",
             "primaryCtaLink": "/employers/register",
             "secondaryCtaText": "Employer Login",
             "secondaryCtaLink": "/login",
-            "stats": [
-              {
-                "id": "EPS-1",
-                "value": "500+",
-                "label": "Partner Enterprises",
-                "desc": "Active recruiters on AMS"
-              },
-              {
-                "id": "EPS-2",
-                "value": "1,238+",
-                "label": "Verified Candidates",
-                "desc": "Engineers & scientists"
-              },
-              {
-                "id": "EPS-3",
-                "value": "87%",
-                "label": "Employment Rate",
-                "desc": "Tracked across cohorts"
-              },
-              {
-                "id": "EPS-4",
-                "value": "48 hrs",
-                "label": "Average Verification",
-                "desc": "Fast institutional review"
-              }
-            ],
-            "sections": [
-              {
-                "id": "EP-1",
-                "heading": "Post Opportunities",
-                "body": "Publish job vacancies, internships, and graduate development programs directly to thousands of verified graduates.",
-                "badge": "Hiring Pipeline",
-                "active": true
-              },
-              {
-                "id": "EP-2",
-                "heading": "Alumni Talent Search",
-                "body": "Filter verified candidates by GPA, graduation year, engineering department, and technical skills.",
-                "badge": "Candidate Match",
-                "active": true
-              },
-              {
-                "id": "EP-3",
-                "heading": "Competency Feedback",
-                "body": "Submit structured employer feedback regarding graduate competencies to directly influence ASTU curriculum development.",
-                "badge": "ETA Alignment",
-                "active": true
-              },
-              {
-                "id": "EP-4",
-                "heading": "On-Campus Recruitment Drives",
-                "body": "Coordinate interview suites, campus recruitment expos, and graduate tech talk days directly with ASTU leadership.",
-                "badge": "Direct Engagement",
-                "active": true
-              }
-            ],
-            "faqs": [
-              {
-                "id": "EPF-1",
-                "question": "How can our company register on the ASTU Employer Portal?",
-                "answer": "Click \"Register as Employer\", submit your corporate details and TIN verification. The ASTU Corporate Relations office approves verified accounts within 24–48 hours."
-              },
-              {
-                "id": "EPF-2",
-                "question": "Are candidate degrees and graduation records verified?",
-                "answer": "Yes, all alumni profiles on ASTU-AMS are directly cross-referenced against official university registrar records."
-              },
-              {
-                "id": "EPF-3",
-                "question": "Can employers participate in curriculum reviews?",
-                "answer": "Absolutely. Registered partners provide biennial competency feedback surveys that directly influence curriculum updates across all 5 engineering schools."
-              }
-            ]
+            "stats": [],
+            "sections": [],
+            "faqs": []
           },
           "registrar-portal": {
             "slug": "registrar-portal",
             "title": "Registrar Portal",
-            "subtitle": "Document verification, transcript processing, and graduate academic records management.",
+            "subtitle": "",
             "iconName": "FileText",
-            "image": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "RP-1",
-                "heading": "Credential Verification",
-                "body": "Verify student graduation status and authenticate official degree documents seamlessly with SIS integration.",
-                "active": true
-              },
-              {
-                "id": "RP-2",
-                "heading": "Digital Document Processing",
-                "body": "Process official transcript requests, certificate re-issuances, and medium of instruction letters online.",
-                "active": true
-              },
-              {
-                "id": "RP-3",
-                "heading": "Tracer Study Compliance",
-                "body": "Track graduate response rates and export verified cohort records for quality assurance deans.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "department-portal": {
             "slug": "department-portal",
             "title": "Department Portal",
-            "subtitle": "Program analytics, graduate outcome metrics, and accreditation readiness for department heads.",
+            "subtitle": "",
             "iconName": "BarChart3",
-            "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "DP-1",
-                "heading": "Graduate Outcomes Tracking",
-                "body": "Monitor employment rates, top hiring sectors, and average starting salaries for your department graduates.",
-                "active": true
-              },
-              {
-                "id": "DP-2",
-                "heading": "Accreditation Evidence Repository",
-                "body": "Instantly generate audit-ready tracer study evidence packages required for university accreditation.",
-                "active": true
-              },
-              {
-                "id": "DP-3",
-                "heading": "Industry Competency Gaps",
-                "body": "Analyze real-time employer survey responses to pinpoint emerging technological skill requirements in curricula.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "featured-employers": {
             "slug": "featured-employers",
             "title": "Featured Employers",
-            "subtitle": "Verified partner companies actively recruiting, providing internships, and collaborating with ASTU.",
+            "subtitle": "",
             "iconName": "Building2",
-            "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80",
+            "image": "",
             "badge": "Verified Corporate Alliances",
             "primaryCtaText": "Register as Corporate Employer",
             "primaryCtaLink": "/employers/register",
             "secondaryCtaText": "Explore Partner Hub",
             "secondaryCtaLink": "/partners",
-            "stats": [
-              {
-                "id": "FES-1",
-                "value": "500+",
-                "label": "Partner Companies",
-                "desc": "In Ethiopia & internationally"
-              },
-              {
-                "id": "FES-2",
-                "value": "14+",
-                "label": "Annual Campus Drives",
-                "desc": "On-site & virtual fairs"
-              },
-              {
-                "id": "FES-3",
-                "value": "87%",
-                "label": "Placement Rate",
-                "desc": "Graduate tracer benchmark"
-              },
-              {
-                "id": "FES-4",
-                "value": "100%",
-                "label": "Verified Credentials",
-                "desc": "Official SIS validation"
-              }
-            ],
-            "sections": [
-              {
-                "id": "FE-1",
-                "heading": "Ethio Telecom Strategic Pipeline",
-                "body": "Telecom, Cloud Infrastructure, and Fintech — Over 14 annual graduate and engineering specialist tracks.",
-                "badge": "Strategic Partner",
-                "active": true
-              },
-              {
-                "id": "FE-2",
-                "heading": "Ethiopian Airlines Aviation Technology",
-                "body": "Aviation Technology, Systems Engineering, and Avionics — Dedicated internship and cadet programs.",
-                "badge": "Aviation & Systems",
-                "active": true
-              },
-              {
-                "id": "FE-3",
-                "heading": "INSA Advanced Cybersecurity Labs",
-                "body": "Cybersecurity, Cryptography, and Software Engineering research placements for advanced graduates.",
-                "badge": "National Security",
-                "active": true
-              },
-              {
-                "id": "FE-4",
-                "heading": "Huawei Technologies Ethiopia ICT Academy",
-                "body": "Telecommunications, 5G Networks, and ICT Academy certification pipelines for top engineering students.",
-                "badge": "Global Technology",
-                "active": true
-              }
-            ],
-            "faqs": [
-              {
-                "id": "FEF-1",
-                "question": "How are featured employers chosen?",
-                "answer": "Featured employers are vetted enterprise institutions maintaining active hiring agreements, internship pipelines, or joint research with ASTU."
-              },
-              {
-                "id": "FEF-2",
-                "question": "Can our enterprise become a featured employer?",
-                "answer": "Yes! Registered employers who post verified openings and engage in university campus days are featured across the platform and student portal."
-              },
-              {
-                "id": "FEF-3",
-                "question": "How do students apply to these employers?",
-                "answer": "ASTU students and alumni apply directly via the AMS job board with authenticated digital credential portfolios."
-              }
-            ]
+            "stats": [],
+            "sections": [],
+            "faqs": []
           },
           "announcements": {
             "slug": "announcements",
             "title": "Official Announcements",
-            "subtitle": "Latest university notices, academic calendars, registrar alerts, and institutional communications.",
+            "subtitle": "",
             "iconName": "Bell",
-            "image": "https://images.unsplash.com/photo-1523240795612-9a054b0d6440?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "AN-1",
-                "heading": "Institutional Notices",
-                "body": "Official communications from ASTU President Directorate, Academic VP Office, and Registrar regarding semester schedules.",
-                "active": true
-              },
-              {
-                "id": "AN-2",
-                "heading": "Tracer Survey Windows",
-                "body": "Deadlines and participation details for graduate outcome surveys and accreditation quality assurance reporting.",
-                "active": true
-              },
-              {
-                "id": "AN-3",
-                "heading": "Career & Partnership Updates",
-                "body": "Announcements regarding upcoming corporate recruitment drives, internships, and research grants.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "faq": {
             "slug": "faq",
             "title": "Frequently Asked Questions",
-            "subtitle": "Common questions for alumni, employers, registrar services, and department coordinators.",
+            "subtitle": "",
             "iconName": "HelpCircle",
-            "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "FQ-1",
-                "heading": "Who can use ASTU-AMS?",
-                "body": "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services through dedicated portals.",
-                "active": true
-              },
-              {
-                "id": "FQ-2",
-                "heading": "How are tracer studies used?",
-                "body": "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence collection.",
-                "active": true
-              },
-              {
-                "id": "FQ-3",
-                "heading": "Can employers register events?",
-                "body": "Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports.",
-                "active": true
-              },
-              {
-                "id": "FQ-4",
-                "heading": "How do I update my profile?",
-                "body": "Go to your Dashboard and navigate to the Profile tab to update education, work experience, and skills.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "badge": "Integrated with Homepage CMS FAQ",
+            "faqs": [],
+            "sections": []
           },
           "contact": {
             "slug": "contact",
             "title": "Contact Us",
-            "subtitle": "Reach ASTU alumni relations, registrar support, and employer partnership teams.",
+            "subtitle": "",
             "iconName": "Building2",
-            "image": "https://images.unsplash.com/photo-1423666639041-f56000c27a9a?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "CT-1",
-                "heading": "Main Address",
-                "body": "Adama Science and Technology University, Adama, Oromia, Ethiopia",
-                "active": true
-              },
-              {
-                "id": "CT-2",
-                "heading": "Postal Box",
-                "body": "P.O. Box 1888, Adama, Ethiopia",
-                "active": true
-              },
-              {
-                "id": "CT-3",
-                "heading": "Phone & Support Lines",
-                "body": "+251-221-110000 / +251-221-110400",
-                "active": true
-              },
-              {
-                "id": "CT-4",
-                "heading": "Official Email",
-                "body": "irccd@astu.edu.et / alumni@astu.edu.et",
-                "active": true
-              },
-              {
-                "id": "CT-5",
-                "heading": "Office Hours",
-                "body": "Monday to Friday, 8:00 AM – 5:00 PM (East Africa Time)",
-                "active": true
-              },
-              {
-                "id": "CT-6",
-                "heading": "Social Media Channels",
-                "body": "Facebook: /adamaastu | Telegram: @Adama_STU_Almuni",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "community-feed": {
             "slug": "community-feed",
             "title": "Community Feed",
-            "subtitle": "Stay connected with alumni discussions, stories, employer announcements, and networking updates.",
+            "subtitle": "",
             "iconName": "Users",
-            "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "CFE-1",
-                "heading": "Alumni Discussions & Updates",
-                "body": "Engage with fellow alumni, share career milestones, and stay informed about university developments.",
-                "active": true
-              },
-              {
-                "id": "CFE-2",
-                "heading": "Employer Announcements",
-                "body": "Partner companies post job openings, internship opportunities, and recruitment event notifications.",
-                "active": true
-              },
-              {
-                "id": "CFE-3",
-                "heading": "Networking & Peer Advice",
-                "body": "Exchange industry advice, mentorship connections, and collaborate on technological initiatives.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "research": {
             "slug": "research",
             "title": "Research Publications",
-            "subtitle": "Academic research outputs, patent filings, and applied science highlights from ASTU faculties.",
+            "subtitle": "",
             "iconName": "BookOpen",
-            "image": "https://images.unsplash.com/photo-1504711434969-e33886168d6c?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "RS-1",
-                "heading": "Research Database",
-                "body": "Browse 1,240+ research publications across engineering, natural sciences, and computational technology.",
-                "active": true
-              },
-              {
-                "id": "RS-2",
-                "heading": "Applied Engineering Projects",
-                "body": "Explore 72 industry projects and applied laboratory outcomes solving regional infrastructure challenges.",
-                "active": true
-              },
-              {
-                "id": "RS-3",
-                "heading": "Joint Innovation Grants",
-                "body": "Opportunities for alumni researchers and international institutions to co-publish and apply for research grants.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "innovation": {
             "slug": "innovation",
             "title": "Innovation Hub & Startups",
-            "subtitle": "Student and faculty technology ventures driving Ethiopian industrialization and digital growth.",
+            "subtitle": "",
             "iconName": "Lightbulb",
-            "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "IH-1",
-                "heading": "Startup Incubation",
-                "body": "ASTU provides seed prototyping, mentorship, and workspace for student and alumni entrepreneurs.",
-                "active": true
-              },
-              {
-                "id": "IH-2",
-                "heading": "Specialized Centers",
-                "body": "12+ dedicated research centers covering Artificial Intelligence, Renewable Energy, and Smart Manufacturing.",
-                "active": true
-              },
-              {
-                "id": "IH-3",
-                "heading": "Technology Transfer",
-                "body": "Connecting academic patent discoveries directly to local industrial manufacturers and startups.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "alumni-stories": {
             "slug": "alumni-stories",
             "title": "Alumni Success Stories",
-            "subtitle": "Inspiring career journeys and achievements of Adama Science and Technology University graduates making global impact.",
+            "subtitle": "",
             "iconName": "Trophy",
-            "image": "https://images.unsplash.com/photo-1523240795612-9a054b0d6440?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "AS-1",
-                "heading": "Celebrating Nearly Three Decades of Excellence",
-                "body": "With its establishment spanning nearly three decades, ASTU boasts a proud tradition of graduates excelling in high-impact ventures, multinational technology corporations, leading research institutes, and executive leadership positions worldwide.",
-                "active": true
-              },
-              {
-                "id": "AS-2",
-                "heading": "Dr. Ruth Alemu — AI Research Scientist",
-                "body": "Graduating from ASTU Computer Science, Dr. Ruth joined a premier AI research lab, publishing 18 applied machine learning papers. She continues to actively mentor current ASTU engineering scholars through the AMS mentorship portal.",
-                "active": true
-              },
-              {
-                "id": "AS-3",
-                "heading": "Yonas Bekele — Founder of GreenGrid Labs",
-                "body": "Inspired by ASTU renewable energy laboratories, Yonas launched GreenGrid Labs — now delivering clean, decentralized energy infrastructure to over 12 industrial parks in East Africa, employing over 200 skilled engineers.",
-                "active": true
-              },
-              {
-                "id": "AS-4",
-                "heading": "Kalkidan Tadesse — Cloud Engineering Lead, Ethio Telecom",
-                "body": "Kalkidan credits ASTU's rigorous hands-on laboratory curriculum for her rapid career trajectory. She now spearheads enterprise cloud migration projects across regional public and private entities.",
-                "active": true
-              },
-              {
-                "id": "AS-5",
-                "heading": "Share Your Story",
-                "body": "Are you an ASTU graduate with an achievement or milestone to share? Reach out to the Alumni Relations Directorate at irccd@astu.edu.et or submit your story through the AMS alumni portal.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "community": {
             "slug": "community",
             "title": "ASTU Alumni Community",
-            "subtitle": "Your networks around the world — connecting graduates, faculty, and industry leaders across all disciplines.",
+            "subtitle": "",
             "iconName": "Users",
-            "image": "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "CM-1",
-                "heading": "A Global Network of Graduates",
-                "body": "The ASTU Alumni Community unites 1,238+ active registered alumni across 5 major fields of study, building regional chapters and professional circles across Ethiopia, East Africa, North America, Europe, and Asia.",
-                "active": true
-              },
-              {
-                "id": "CM-2",
-                "heading": "Distinguished Global Alumni Leaders",
-                "body": "Our graduates hold influential leadership roles worldwide, including Samson Arega Bekele (Group Vice President Customer Experience, Ethiopian Airlines Group), Zenebe Mideksa Abebe (Supply Chain Specialist, The Boeing Company), Dr. Tadesse G. Wakjira (Adjunct Faculty, Idaho State University, USA), and Melaku Assefa (Global Operational Excellence Director, High-Tech Startup Germany).",
-                "active": true
-              },
-              {
-                "id": "CM-3",
-                "heading": "National Leadership & Public Service",
-                "body": "ASTU alumni drive key public and engineering institutions, including Aderajew Shumet Tamirat, PhD (Senior Advisor to the State Minister, Ministry of Finance), Tibebu Tegegne Bekele (Deputy Team Leader, Niras Germany / KfW), and Eng. Assefa Dida (General Manager, Assefa Dida General & Water Work Contractor).",
-                "active": true
-              },
-              {
-                "id": "CM-4",
-                "heading": "Academic & Technological Innovation at ASTU",
-                "body": "Many distinguished alumni continue their impact within ASTU faculty and research centers, such as Dr. Tafesse Asrat Abera (College of Electrical Engineering & Computing, Gold Medalist 2001), Dr. Habtamu Beri (Manufacturing Technology), Alemayehu Wakjira, PhD (Automotive Engineering), and Mr. Niguse Assefa.",
-                "active": true
-              },
-              {
-                "id": "CM-5",
-                "heading": "Annual Alumni Carnival",
-                "body": "In celebration of university heritage, ASTU hosts the flagship Alumni Carnival on April 25 and 26. This gathering serves as a vibrant homecoming platform uniting former graduates, faculty, current students, and industrial partners.",
-                "active": true
-              },
-              {
-                "id": "CM-6",
-                "heading": "Mentorship, Giving Back & Knowledge Transfer",
-                "body": "Senior alumni return to lead masterclasses, resume reviews, and career readiness workshops, ensuring current students transition smoothly into modern engineering and tech careers.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "news": {
             "slug": "news",
             "title": "ASTU Alumni News & Updates",
-            "subtitle": "The latest developments, partnerships, workshops, and achievements from the ASTU Alumni Association.",
+            "subtitle": "",
             "iconName": "FileText",
-            "image": "https://images.unsplash.com/photo-1504711434969-e33886168d6c?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "NW-1",
-                "heading": "Alumni Association Inspires Graduating Class with Career Tips",
-                "body": "Former ASTU graduates and industry specialists conducted intensive workshops on Navigating the Transition: Labor Market Tips, preparing final-year students ahead of the annual campus Job Expo.",
-                "active": true
-              },
-              {
-                "id": "NW-2",
-                "heading": "Five-Day DAAD Alumni Workshop on Sustainable Water & Environmental Protection",
-                "body": "ASTU hosted delegates from Germany, Kenya, Uganda, Tanzania, and sister Ethiopian universities in an international symposium advancing capacity for sustainable East African water infrastructure.",
-                "active": true
-              },
-              {
-                "id": "NW-3",
-                "heading": "ASTU Alumni Serving at International Fora",
-                "body": "Recognizing ASTU alumni serving as secretariats for Model United Nations and international engineering symposiums, demonstrating global leadership.",
-                "active": true
-              },
-              {
-                "id": "NW-4",
-                "heading": "Upcoming Career Expos & Industry Days",
-                "body": "Join partner organizations including Ethio Telecom, Ethiopian Airlines, INSA, and Huawei for on-campus talent recruitment drives throughout the academic calendar.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "stakeholders": {
             "slug": "stakeholders",
             "title": "Stakeholders & Industry Collaborators",
-            "subtitle": "Strategic enterprise, governmental, and academic alliances driving innovation, talent placement, and technological advancement.",
+            "subtitle": "",
             "iconName": "Building2",
-            "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=80",
+            "image": "",
             "badge": "Industry & Government Alliances",
             "primaryCtaText": "Initiate Corporate Partnership",
             "primaryCtaLink": "/employers/register",
             "secondaryCtaText": "Contact Relations Directorate",
             "secondaryCtaLink": "/info/contact",
-            "stats": [
-              {
-                "id": "SHS-1",
-                "value": "500+",
-                "label": "Enterprise Allies",
-                "desc": "MoU signed & active partners"
-              },
-              {
-                "id": "SHS-2",
-                "value": "72+",
-                "label": "Joint Industry Projects",
-                "desc": "Applied R&D initiatives"
-              },
-              {
-                "id": "SHS-3",
-                "value": "12+",
-                "label": "Specialized Tech Labs",
-                "desc": "Jointly equipped facilities"
-              },
-              {
-                "id": "SHS-4",
-                "value": "5",
-                "label": "Biennial Advisory Boards",
-                "desc": "Curriculum development"
-              }
-            ],
-            "sections": [
-              {
-                "id": "SH-1",
-                "heading": "Enterprise & Corporate Partners",
-                "body": "Over 500 partner organizations, including Ethio Telecom, Ethiopian Airlines, INSA, Huawei Technologies, Safaricom Ethiopia, and Commercial Bank of Ethiopia, collaborate with ASTU on talent pipelines and applied technology initiatives.",
-                "badge": "Corporate Tier",
-                "active": true
-              },
-              {
-                "id": "SH-2",
-                "heading": "Academic & Research Consortia",
-                "body": "Partnering with German Academic Exchange Service (DAAD), regional universities, and national research institutes on applied engineering projects, faculty development, and international grants.",
-                "badge": "International Consortia",
-                "active": true
-              },
-              {
-                "id": "SH-3",
-                "heading": "Curriculum & Competency Alignment",
-                "body": "Stakeholder advisory boards meet regularly to evaluate industry skill trends, feeding data from graduate tracer surveys directly into university curriculum reforms.",
-                "badge": "Accreditation Readiness",
-                "active": true
-              },
-              {
-                "id": "SH-4",
-                "heading": "Partner With ASTU",
-                "body": "Organizations interested in recruitment partnerships, research sponsorships, or technology transfer can contact the Corporate Relations Office at irccd@astu.edu.et.",
-                "badge": "Collaboration Gateway",
-                "active": true
-              }
-            ],
-            "faqs": [
-              {
-                "id": "SHF-1",
-                "question": "How do organizations establish an institutional MoU with ASTU?",
-                "answer": "Contact the Industry Relations and Corporate Communications Directorate (IRCCD) via irccd@astu.edu.et or register your organization via the Employer Portal to initiate formal cooperation agreements."
-              },
-              {
-                "id": "SHF-2",
-                "question": "What areas of joint research are available?",
-                "answer": "ASTU has 12 specialized research arcs spanning AI, robotics, renewable energy systems, biotechnology, materials science, and civil infrastructure."
-              },
-              {
-                "id": "SHF-3",
-                "question": "Can international institutions collaborate with ASTU?",
-                "answer": "Yes. ASTU hosts active collaborative programs with international entities including DAAD Germany, JAICA, and regional African science bodies."
-              }
-            ]
+            "stats": [],
+            "sections": [],
+            "faqs": []
           },
           "campuses": {
             "slug": "campuses",
             "title": "ASTU Campuses & Facilities",
-            "subtitle": "Explore the modern academic, research, and residential infrastructure of Adama Science and Technology University.",
+            "subtitle": "",
             "iconName": "Building2",
-            "image": "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "CP-1",
-                "heading": "Main Campus — Adama",
-                "body": "Located in the vibrant industrial corridor of Adama, Oromia, Ethiopia, the ASTU main campus encompasses state-of-the-art academic complexes, modern auditoriums, athletics centers, and residential quarters.",
-                "active": true
-              },
-              {
-                "id": "CP-2",
-                "heading": "Advanced Research Arc & Specialized Labs",
-                "body": "12+ dedicated research centers equipped for robotics, renewable energy systems, materials testing, biotechnology, and advanced software computing.",
-                "active": true
-              },
-              {
-                "id": "CP-3",
-                "heading": "Digital Knowledge Centers & Incubation Hubs",
-                "body": "High-speed campus fiber networking, digital repositories, and startup incubation suites providing students and alumni with resources to prototype and commercialize innovations.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           },
           "career-opportunities": {
             "slug": "career-opportunities",
             "title": "Career Opportunities & Talent Placement",
-            "subtitle": "Connecting qualified ASTU graduates with top employers, internships, and graduate trainee positions.",
+            "subtitle": "",
             "iconName": "Briefcase",
-            "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1800&q=80",
-            "sections": [
-              {
-                "id": "CO-1",
-                "heading": "Direct Graduate Trainee Tracks",
-                "body": "Access verified job openings curated specifically for ASTU engineering, technology, and applied science graduates from over 500 partner employers.",
-                "active": true
-              },
-              {
-                "id": "CO-2",
-                "heading": "Internships & Practical Training",
-                "body": "Undergraduate and recent graduate internship placements designed to provide real-world industry experience before and immediately following graduation.",
-                "active": true
-              },
-              {
-                "id": "CO-3",
-                "heading": "Skill Matching & Automated Tracer Engine",
-                "body": "Our intelligent AMS platform matches candidate skills and degree credentials with partner employer requirements for streamlined hiring.",
-                "active": true
-              }
-            ]
+            "image": "",
+            "sections": []
           }
         },
         "sectionLinks": {
           "tickerLinkText": "Details",
           "tickerLinkTarget": "/announcements",
           "impactDefaultLinkText": "View Details",
-          "impactDefaultLinkTarget": "/info/impact-numbers",
+          "impactDefaultLinkTarget": "/about",
           "portalsGetStartedText": "Get Started Today",
-          "portalsGetStartedLink": "/login",
+          "portalsGetStartedLink": "/register",
           "campusLifeViewAllText": "Explore All",
-          "campusLifeViewAllLink": "/info/campus-life",
+          "campusLifeViewAllLink": "/gallery",
           "industryBridgeButtonText": "Explore Campus Life",
-          "industryBridgeButtonLink": "/info/campus-life",
+          "industryBridgeButtonLink": "/gallery",
           "eventsViewAllText": "See All Events →",
           "eventsViewAllLink": "/events",
           "eventsCardDetailsText": "View Details",
@@ -64024,28 +64229,28 @@
           "announcementsViewAllLink": "/announcements",
           "announcementItemLinkBase": "/announcements",
           "partnersViewAllText": "View All Partners",
-          "partnersViewAllLink": "/info/featured-employers",
+          "partnersViewAllLink": "/partners",
           "faqViewAllText": "View All FAQs",
           "faqViewAllLink": "/info/faq",
           "storiesReadMoreText": "Read More",
           "storiesViewAllText": "View All Stories",
-          "storiesViewAllLink": "/info/community-feed",
+          "storiesViewAllLink": "/community",
           "accreditationButtonText": "View Impact Numbers",
-          "accreditationButtonLink": "/info/impact-numbers",
+          "accreditationButtonLink": "/about",
           "footerCareerPortalText": "Career Placement Portal",
-          "footerCareerPortalLink": "/info/overview",
+          "footerCareerPortalLink": "/alumni/jobs",
           "footerTracerHubText": "Tracer Survey Hub",
-          "footerTracerHubLink": "/info/overview",
+          "footerTracerHubLink": "/login",
           "footerMentorshipText": "Mentorship Scheduling",
-          "footerMentorshipLink": "/info/mentorship",
+          "footerMentorshipLink": "/community",
           "footerStudentPortalText": "Student Portal",
           "footerStudentPortalLink": "https://estudent.astu.edu.et/",
           "footerQualityAssuranceText": "Quality Assurance Deans",
-          "footerQualityAssuranceLink": "/info/accreditation",
+          "footerQualityAssuranceLink": "/about",
           "footerAccreditationOutcomesText": "Accreditation Outcomes",
-          "footerAccreditationOutcomesLink": "/info/impact-numbers",
+          "footerAccreditationOutcomesLink": "/about",
           "footerInstitutionalResearchText": "Institutional Research",
-          "footerInstitutionalResearchLink": "/info/overview"
+          "footerInstitutionalResearchLink": "/about"
         },
         "partnersPage": {
           "heroBadge": "Employer & Industry Partnerships",
@@ -64059,48 +64264,24 @@
           "heroBackgroundImage": "",
           "benefitsEyebrow": "MUTUAL VALUE & TALENT ACCESS",
           "benefitsTitle": "Why Partner with ASTU?",
-          "benefitsSubtitle": "Join 500+ leading industry enterprises, public institutions, and research consortia actively recruiting and collaborating with ASTU.",
+          "benefitsSubtitle": "Join leading industry enterprises, public institutions, and research consortia actively recruiting and collaborating with ASTU.",
           "benefits": [
             {
-              "id": "B-1",
-              "icon": "Users",
-              "title": "Hire Talented Graduates",
-              "description": "Access a vetted pool of ASTU graduates equipped with rigorous practical training in applied engineering, software, technology, and sciences.",
+              "id": "PB-1",
+              "title": "Verified Talent Access",
+              "description": "Reach credential-verified ASTU graduates across engineering, applied science, and technology programs.",
               "active": true
             },
             {
-              "id": "B-2",
-              "icon": "Briefcase",
-              "title": "Post Job Opportunities",
-              "description": "Publish employment openings, graduate trainee tracks, and internship positions directly to thousands of verified alumni.",
+              "id": "PB-2",
+              "title": "Campus Recruitment Support",
+              "description": "Coordinate career fairs, info sessions, and targeted hiring campaigns with Alumni Office support.",
               "active": true
             },
             {
-              "id": "B-3",
-              "icon": "MessageSquare",
-              "title": "Give Industry Feedback",
-              "description": "Directly influence biennial curriculum revisions and ensure graduate competency alignment through structured employer surveys.",
-              "active": true
-            },
-            {
-              "id": "B-4",
-              "icon": "Search",
-              "title": "Verified Student Information",
-              "description": "Search alumni profiles by department, GPA, verified degree credentials, technical skills, and graduation cohort.",
-              "active": true
-            },
-            {
-              "id": "B-5",
-              "icon": "TrendingUp",
-              "title": "Track Recruitment Analytics",
-              "description": "Monitor application pipelines, tracer study response trends, and longitudinal employment metrics in real time.",
-              "active": true
-            },
-            {
-              "id": "B-6",
-              "icon": "Handshake",
-              "title": "Build Strategic Partnerships",
-              "description": "Form long-term ties for joint research initiatives, faculty-industry exchange, campus hackathons, and corporate sponsorships.",
+              "id": "PB-3",
+              "title": "Research & Internship Collaboration",
+              "description": "Co-design internships, applied research placements, and skills partnerships with academic departments.",
               "active": true
             }
           ],
@@ -64109,182 +64290,130 @@
           "featuresEyebrow": "ENTERPRISE ECOSYSTEM",
           "featuresTitle": "Comprehensive Partner Benefits",
           "featuresSubtitle": "Our dedicated employer platform provides institutions with robust tools to streamline talent sourcing and collaborate on institutional excellence.",
-          "features": [
-            "TIN-verified enterprise employer accounts with high trust scores",
-            "Direct access to 1,238+ verified ASTU alumni and graduating seniors",
-            "Curriculum-aligned technical skill matching and automated recommendations",
-            "Accreditation-ready reporting and longitudinal tracer feedback loops",
-            "Priority coordination for campus recruitment days and tech expos",
-            "Direct engagement with academic departments and senior faculty"
-          ],
+          "features": [],
           "ctaCardTitle": "Accelerate Your Hiring Pipeline",
           "ctaCardDescription": "Register your organization today to gain immediate access to verified graduate profiles and dedicated recruitment assistance.",
           "ctaCardButtonText": "Register as Partner",
           "ctaCardButtonLink": "/employers/register",
-          "stats": [
-            {
-              "id": "S-1",
-              "value": "1,238+",
-              "label": "Verified Alumni"
-            },
-            {
-              "id": "S-2",
-              "value": "500+",
-              "label": "Partner Organizations"
-            },
-            {
-              "id": "S-3",
-              "value": "87%",
-              "label": "Employment Rate"
-            },
-            {
-              "id": "S-4",
-              "value": "5",
-              "label": "Engineering & Science Schools"
-            }
-          ],
+          "stats": [],
           "bottomCtaTitle": "Start Building Your High-Impact Talent Pipeline Today",
           "bottomCtaDescription": "Join ASTU's corporate partner network and connect directly with Ethiopia's premier engineering, applied science, and technology graduates.",
           "bottomCtaButtonText": "Register Your Organization",
           "bottomCtaButtonLink": "/employers/register",
           "stakeholdersTitle": "Strategic Alliances & Industry Consortia",
           "stakeholdersSubtitle": "Active cooperation frameworks with government agencies, multinational tech enterprises, and international research organizations.",
-          "stakeholderTracks": [
-            {
-              "id": "ST-1",
-              "title": "Enterprise & Corporate Alliances",
-              "desc": "Over 500 enterprise partners collaborating with ASTU on talent pipelines, industrial internships, and technology initiatives.",
-              "badge": "Corporate Tier",
-              "active": true
-            },
-            {
-              "id": "ST-2",
-              "title": "Academic & Research Consortia",
-              "desc": "Partnering with German Academic Exchange Service (DAAD), regional universities, and national research institutes on applied engineering grants.",
-              "badge": "International Consortia",
-              "active": true
-            },
-            {
-              "id": "ST-3",
-              "title": "Curriculum & ETA Competency Alignment",
-              "desc": "Stakeholder advisory boards meet regularly to evaluate industry skill trends, feeding data from graduate tracer surveys directly into university curriculum reforms.",
-              "badge": "Accreditation Readiness",
-              "active": true
-            },
-            {
-              "id": "ST-4",
-              "title": "Applied Laboratories & Joint Innovation",
-              "desc": "12+ specialized engineering laboratories and research centers equipped to prototype and test regional solutions alongside enterprise sponsors.",
-              "badge": "Innovation Hub",
-              "active": true
-            }
-          ],
+          "stakeholderTracks": [],
           "recruitmentTitle": "Recruitment Framework & Talent Engine",
           "recruitmentSubtitle": "Accelerate graduate hiring and evaluate verified competency metrics through the AMS platform.",
-          "recruitmentTracks": [
-            {
-              "id": "RT-1",
-              "title": "Direct Opportunity Publishing",
-              "desc": "Publish vacancies, internships, and graduate trainee programs directly to verified graduates across 5 fields of study.",
-              "badge": "Job Board",
-              "active": true
-            },
-            {
-              "id": "RT-2",
-              "title": "Smart Candidate Search & Filters",
-              "desc": "Filter verified candidates by GPA, graduation year, engineering department, and technical skills.",
-              "badge": "Candidate Match",
-              "active": true
-            },
-            {
-              "id": "RT-3",
-              "title": "Employer Competency Feedback",
-              "desc": "Submit structured employer feedback regarding graduate competencies to directly influence ASTU curriculum development.",
-              "badge": "Quality Loop",
-              "active": true
-            },
-            {
-              "id": "RT-4",
-              "title": "On-Campus Career Expos & Interviews",
-              "desc": "Coordinate interview suites, campus recruitment expos, and graduate tech talk days directly with ASTU leadership.",
-              "badge": "Campus Days",
-              "active": true
-            }
-          ],
-          "faqs": [
-            {
-              "id": "PF-1",
-              "question": "How can our enterprise register as an official partner on ASTU-AMS?",
-              "answer": "Click \"Register as Employer\", submit your corporate details and TIN verification. The ASTU Corporate Relations office approves verified accounts within 24–48 hours."
-            },
-            {
-              "id": "PF-2",
-              "question": "Are candidate degrees and graduation records verified?",
-              "answer": "Yes, all alumni profiles on ASTU-AMS are directly cross-referenced against official university registrar records."
-            },
-            {
-              "id": "PF-3",
-              "question": "Can our organization conduct on-campus recruitment and interview suites?",
-              "answer": "Yes! Partner organizations receive priority scheduling for campus career fairs, departmental interview rooms, and guest lecture symposiums."
-            },
-            {
-              "id": "PF-4",
-              "question": "How do employer surveys influence ASTU engineering curricula?",
-              "answer": "Every 2 years, feedback from corporate employers is compiled into tracer study reports submitted to the Academic Vice President and ETA accreditation auditors."
-            }
-          ],
+          "recruitmentTracks": [],
+          "faqs": [],
           "contactEmail": "irccd@astu.edu.et",
           "contactPhone": "+251-221-110000",
           "contactAddress": "Adama Science and Technology University, Adama, Oromia, Ethiopia"
         },
         "partners": [
           {
-            "id": "PT-1",
+            "id": "P-ETHIOTEL",
             "name": "Ethio Telecom",
-            "category": "Telecommunications",
-            "active": true
+            "logo": "/images/partners/ethio-telecom.png",
+            "website": "https://www.ethiotelecom.et",
+            "industry": "Telecom & Cloud",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Graduate & internship tracks",
+            "partnershipType": "Strategic",
+            "description": "Strategic telecom partner collaborating with ASTU on graduate hiring, digital skills, and campus engagement.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Telecom",
+              "Cloud",
+              "Recruitment"
+            ]
           },
           {
-            "id": "PT-2",
-            "name": "INSA",
-            "category": "Cybersecurity & Tech",
-            "active": true
-          },
-          {
-            "id": "PT-3",
+            "id": "P-EAL",
             "name": "Ethiopian Airlines",
-            "category": "Aviation & Engineering",
-            "active": true
+            "logo": "/images/partners/ethiopian-airlines.svg",
+            "website": "https://www.ethiopianairlines.com",
+            "industry": "Aviation Technology",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Engineering internship tracks",
+            "partnershipType": "Recruitment",
+            "description": "Industry partner supporting aviation technology talent pipelines and applied engineering placements.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Aviation",
+              "Engineering"
+            ]
           },
           {
-            "id": "PT-4",
-            "name": "Safaricom Ethiopia",
-            "category": "Telecommunications",
-            "active": true
+            "id": "P-INSA",
+            "name": "INSA",
+            "logo": "/images/partners/insa.png",
+            "website": "https://www.insa.gov.et",
+            "industry": "Cybersecurity",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Research & security placements",
+            "partnershipType": "Research",
+            "description": "National cybersecurity partner collaborating on research placements and applied security talent development.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Cybersecurity",
+              "Research"
+            ]
           },
           {
-            "id": "PT-5",
+            "id": "P-HUAWEI",
             "name": "Huawei Ethiopia",
-            "category": "Hardware & Networking",
-            "active": true
+            "logo": "/images/partners/huawei.svg",
+            "website": "https://www.huawei.com",
+            "industry": "Network Engineering",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Certification & network engineering paths",
+            "partnershipType": "Technology",
+            "description": "Technology partner supporting network engineering skills, certifications, and campus collaboration.",
+            "featured": true,
+            "active": true,
+            "tags": [
+              "Networking",
+              "Technology"
+            ]
           },
           {
-            "id": "PT-6",
+            "id": "P-SAFARICOM",
+            "name": "Safaricom Ethiopia",
+            "logo": "/images/partners/safaricom.png",
+            "website": "https://www.safaricom.et",
+            "industry": "Telecom & Digital Services",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "Digital & software graduate roles",
+            "partnershipType": "Recruitment",
+            "description": "Digital services partner engaging ASTU graduates across software, networks, and customer technology roles.",
+            "featured": false,
+            "active": true,
+            "tags": [
+              "Telecom",
+              "Software"
+            ]
+          },
+          {
+            "id": "P-CBE",
             "name": "Commercial Bank of Ethiopia",
-            "category": "FinTech & Banking",
-            "active": true
-          },
-          {
-            "id": "PT-7",
-            "name": "Ministry of Innovation & Technology (MInT)",
-            "category": "Government & Research",
-            "active": true
-          },
-          {
-            "id": "PT-8",
-            "name": "Artificial Intelligence Institute",
-            "category": "AI & Applied Research",
-            "active": true
+            "logo": "/images/partners/cbe.png",
+            "website": "https://www.combanketh.et",
+            "industry": "Banking & FinTech",
+            "location": "Addis Ababa, Ethiopia",
+            "openings": "IT & graduate analyst roles",
+            "partnershipType": "Internship",
+            "description": "Financial sector partner collaborating on IT internships and graduate analyst opportunities.",
+            "featured": false,
+            "active": true,
+            "tags": [
+              "Banking",
+              "FinTech"
+            ]
           }
         ],
         "announcements": [
@@ -64296,112 +64425,15 @@
             "active": true,
             "pinned": true,
             "author": "Content Manager"
-          },
-          {
-            "id": "C-004",
-            "title": "Semester Break: Campus Safety Notice",
-            "date": "6/7/2026",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": true,
-            "author": "System Admin"
-          },
-          {
-            "id": "C-001",
-            "title": "ASTU Alumni Network: Bridging Generations",
-            "date": "5/28/2026",
-            "type": "post",
-            "active": true,
-            "pinned": true,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-REAL-001",
-            "title": "ASTU Hosts a Five-Day DAAD Alumni Workshop on Sustainable Water Supply & Environmental Protection",
-            "date": "Mar 7, 2025",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": true,
-            "author": "ASTU International Relations & Corporate Communication Directorate (IRCCD)"
-          },
-          {
-            "id": "C-REAL-002",
-            "title": "ASTU Alumni Association Inspires Graduating Class with Career Tips!",
-            "date": "Mar 7, 2025",
-            "type": "post",
-            "active": true,
-            "pinned": true,
-            "author": "ASTU Alumni Association & Students Skill Development Office"
-          },
-          {
-            "id": "C-REAL-003",
-            "title": "ASTU Alumni Spotlight: Yohannes Melese, Gold Medalist & Dual-Major Graduate!",
-            "date": "Mar 7, 2025",
-            "type": "post",
-            "active": true,
-            "pinned": true,
-            "author": "ASTU Academic Registrar & Alumni Directorate"
-          },
-          {
-            "id": "C-012",
-            "title": "Semester Break: Campus Safety Notice",
-            "date": "8/26/2026",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": false,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-002",
-            "title": "Industry Partnership Week 2026",
-            "date": "8/26/2026",
-            "type": "page",
-            "active": true,
-            "pinned": false,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-006",
-            "title": "ASTU Research Grant Winners 2026",
-            "date": "5/25/2026",
-            "type": "post",
-            "active": true,
-            "pinned": false,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-REAL-004",
-            "title": "ASTU Alumni Serving as Model United Nations Secretariats & Global Delegates",
-            "date": "Jan 7, 2025",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": false,
-            "author": "ASTU Corporate Communication Directorate"
           }
         ],
         "heroSlides": [
           {
-            "id": "HS-1",
-            "image": "/images/astu-building.jpg",
-            "tagline": "Quality Assurance & Accreditation",
-            "title": "Connecting ASTU's Excellence to the Global Industry",
-            "description": "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University.",
-            "active": true
-          },
-          {
-            "id": "HS-2",
-            "image": "/images/campus-2.jpeg",
-            "tagline": "Enterprise Networking & Placement",
-            "title": "Empowering ASTU Graduates in Modern Workspaces",
-            "description": "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement.",
-            "active": true
-          },
-          {
-            "id": "HS-3",
-            "image": "/images/arc.jpg",
-            "tagline": "Academic Innovation & Tracer Feedback",
-            "title": "Coordinating Strategic Tracer Studies & Skill Gaps",
-            "description": "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, securing university accreditation outcomes.",
+            "id": "HS-1793779280398",
+            "image": "/uploads/cms/astuget-1793779312662-924966.jpg",
+            "tagline": "ASTU Innovation & Excellence",
+            "title": "Empowering the Next Generation of Engineers & Leaders",
+            "description": "Connecting university research, verified graduate outcomes, and premier industrial partnerships.",
             "active": true
           }
         ],
@@ -64526,7 +64558,7 @@
             "duration": "04:28",
             "category": "Campus Virtual Tours",
             "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "active": true
+            "active": false
           },
           {
             "id": "VI-2",
@@ -64536,7 +64568,7 @@
             "duration": "06:15",
             "category": "Research Showcases",
             "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "active": true
+            "active": false
           },
           {
             "id": "VI-3",
@@ -64546,47 +64578,22 @@
             "duration": "08:42",
             "category": "Event Recordings",
             "link": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "active": true
+            "active": false
           }
         ],
-        "stories": [
-          {
-            "id": "SS-1",
-            "name": "Eng. Dawit Alemu",
-            "role": "Lead Systems Architect · Safaricom Ethiopia",
-            "text": "The rigorous engineering foundations and mentorship at ASTU shaped my entire professional journey. ASTU-AMS now connects us directly to graduating engineers ready for enterprise impact.",
-            "image": "/images/State-M.jpg",
-            "active": true
-          },
-          {
-            "id": "SS-2",
-            "name": "Dr. Bethlehem Tadesse",
-            "role": "AI Research Lead & Assistant Professor",
-            "text": "ASTU instilled in me a passion for applied technological research. Through this network, we continue to bridge academic projects with real-world innovation in Ethiopia.",
-            "image": "/images/gc7.jpg",
-            "active": true
-          },
-          {
-            "id": "SS-3",
-            "name": "Eng. Samuel Tesfaye",
-            "role": "Hardware Systems Engineer · Ethiopian Airlines",
-            "text": "From classroom lab experiments to maintaining avionics systems, ASTU-AMS helped me find mentorship and verify credentials with zero friction.",
-            "image": "/images/arc.jpg",
-            "active": true
-          }
-        ],
+        "stories": [],
         "stats": {
           "graduates": "45,000+",
           "chapters": "12"
         },
-        "heroBadge": "ASTU Alumni Management System",
-        "welcomeMessage": "Welcome to the ASTU Alumni Management System — Connecting graduates, employers, and departments for longitudinal career tracking and institutional excellence.",
+        "heroBadge": "ASTU",
+        "welcomeMessage": "Connecting graduates, employers, and departments for longitudinal career tracking and university engagement.",
         "welcomeEnabled": true,
         "heroButtons": {
           "primaryText": "Alumni Portal",
-          "primaryLink": "/info/alumni-portal",
+          "primaryLink": "/register",
           "secondaryText": "Employer Partnership",
-          "secondaryLink": "/info/employer-portal"
+          "secondaryLink": "/employers"
         },
         "impactHeaders": {
           "eyebrow": "ASTU IMPACT AT A GLANCE",
@@ -64612,7 +64619,7 @@
               "Mentor current students and connect with peers."
             ],
             "cta": "Access Alumni Portal",
-            "route": "/info/alumni-portal",
+            "route": "/register",
             "active": true
           },
           {
@@ -64625,7 +64632,7 @@
               "Provide feedback to enhance curriculum relevance."
             ],
             "cta": "Partner With ASTU",
-            "route": "/info/employer-portal",
+            "route": "/employers",
             "active": true
           },
           {
@@ -64638,7 +64645,7 @@
               "Generate accreditation-ready reports."
             ],
             "cta": "View Department Analytics",
-            "route": "/info/department-portal",
+            "route": "/login",
             "active": true
           },
           {
@@ -64651,7 +64658,7 @@
               "Send tracer study reminders and audit notifications."
             ],
             "cta": "Open Registrar Portal",
-            "route": "/info/registrar-portal",
+            "route": "/login",
             "active": true
           },
           {
@@ -64664,7 +64671,7 @@
               "Oversee institutional analytics and accreditation reports."
             ],
             "cta": "Admin Console",
-            "route": "/admin",
+            "route": "/admin/dashboard",
             "active": true
           }
         ],
@@ -64678,70 +64685,9 @@
           "title": "News & Announcements",
           "description": "University notices, academic bulletins, and alumni community circulars."
         },
-        "newsItems": [
-          {
-            "id": "NW-1",
-            "title": "ASTU Engineering Innovation Summit 2026",
-            "date": "Sep 9, 2026",
-            "active": true
-          },
-          {
-            "id": "NW-2",
-            "title": "ASTU Research Grant Winners Announced",
-            "date": "May 28, 2026",
-            "active": true
-          },
-          {
-            "id": "NW-3",
-            "title": "ASTU Alumni Network: Bridging Generations",
-            "date": "May 25, 2026",
-            "active": true
-          }
-        ],
-        "testimonials": [
-          {
-            "id": "TT-1",
-            "by": "Eng. Dawit Alemu",
-            "role": "Lead Systems Architect",
-            "company": "Safaricom Ethiopia",
-            "quote": "ASTU-AMS provides an unprecedented direct link between university research labs and industry engineering teams.",
-            "active": true
-          },
-          {
-            "id": "TT-2",
-            "by": "Dr. Bethlehem Tadesse",
-            "role": "Research Fellow",
-            "company": "ASTU AI Center",
-            "quote": "The tracer study analytics give our curriculum committees real data to keep engineering standards globally accredited.",
-            "active": true
-          },
-          {
-            "id": "TT-3",
-            "by": "Eng. Samuel Tesfaye",
-            "role": "Aviation Systems Engineer",
-            "company": "Ethiopian Airlines",
-            "quote": "I connected with mentors and verified my degree transcripts through the digital portal in minutes.",
-            "active": true
-          }
-        ],
-        "communityPosts": [
-          {
-            "id": "CP-1",
-            "name": "Eng. Dawit Alemu",
-            "role": "Lead Architect",
-            "company": "Safaricom",
-            "message": "Proud to see the ASTU engineering community expanding worldwide. Keep pushing boundaries!",
-            "active": true
-          },
-          {
-            "id": "CP-2",
-            "name": "Dr. Bethlehem Tadesse",
-            "role": "AI Specialist",
-            "company": "Tech Institute",
-            "message": "Our latest research paper on sustainable microgrids was co-authored with fellow ASTU alumni.",
-            "active": true
-          }
-        ],
+        "newsItems": [],
+        "testimonials": [],
+        "communityPosts": [],
         "liveCommunitySection": {
           "title": "ASTU Alumni Community",
           "subtitle": "Connect with graduates worldwide, share opportunities, and help grow the Adama Science and Technology University alumni network."
@@ -64811,62 +64757,16 @@
           "title": "Ready to Join the ASTU Network?",
           "description": "Connect with fellow alumni, discover career opportunities, and contribute to university excellence.",
           "primaryCtaText": "Alumni Portal",
-          "primaryCtaLink": "/login",
+          "primaryCtaLink": "/register",
           "secondaryCtaText": "Employer Partnership",
-          "secondaryCtaLink": "/login"
+          "secondaryCtaLink": "/employers"
         },
         "newsHeaders": {
           "eyebrow": "Campus News",
           "title": "Latest ASTU Highlights",
           "description": "University notices, academic bulletins, and alumni community circulars."
         },
-        "impactStats": [
-          {
-            "id": "IS-1",
-            "label": "Registered Alumni Members",
-            "value": "1,239",
-            "suffix": "+",
-            "detail": "Registered in the alumni network",
-            "icon": "Users",
-            "active": true
-          },
-          {
-            "id": "IS-2",
-            "label": "Partner Organizations",
-            "value": "500",
-            "suffix": "+",
-            "detail": "Hiring, internships, and feedback",
-            "icon": "Building2",
-            "active": true
-          },
-          {
-            "id": "IS-3",
-            "label": "Employment Rate",
-            "value": "87",
-            "suffix": "%",
-            "detail": "Graduate employment rate",
-            "icon": "LineChart",
-            "active": true
-          },
-          {
-            "id": "IS-4",
-            "label": "Digital Requests",
-            "value": "6K",
-            "suffix": "+",
-            "detail": "Transcript and certificate requests",
-            "icon": "FileCheck2",
-            "active": true
-          },
-          {
-            "id": "IS-5",
-            "label": "Engagement Hub",
-            "value": "24/7",
-            "suffix": "",
-            "detail": "Always-on alumni engagement",
-            "icon": "MessageSquareText",
-            "active": true
-          }
-        ],
+        "impactStats": [],
         "tracerSpotlight": {
           "enabled": true,
           "title": "Tracer Study 2026",
@@ -64920,36 +64820,7 @@
           "title": "Alumni & Partner Stories",
           "description": "Hear from our graduates making regional impact and enterprise employers building the future."
         },
-        "featuredEmployers": [
-          {
-            "id": "FE-1",
-            "name": "Ethio Telecom",
-            "area": "Telecom & Cloud",
-            "openings": "14 graduate roles",
-            "active": true
-          },
-          {
-            "id": "FE-2",
-            "name": "Ethiopian Airlines",
-            "area": "Aviation Technology",
-            "openings": "8 internship tracks",
-            "active": true
-          },
-          {
-            "id": "FE-3",
-            "name": "INSA",
-            "area": "Cybersecurity",
-            "openings": "6 research placements",
-            "active": true
-          },
-          {
-            "id": "FE-4",
-            "name": "Huawei Ethiopia",
-            "area": "Network Engineering",
-            "openings": "11 certification paths",
-            "active": true
-          }
-        ],
+        "featuredEmployers": [],
         "bottomCta": {
           "enabled": true,
           "title": "Ready to Join the ASTU Network?",
@@ -64972,32 +64843,7 @@
           "socialLinkedin": "#",
           "copyrightText": "Adama Science and Technology University. All rights reserved."
         },
-        "liveCommunityPosts": [
-          {
-            "id": "CP-1",
-            "name": "Abebe Yosef",
-            "role": "Software Engineer",
-            "text": "I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.",
-            "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-            "active": true
-          },
-          {
-            "id": "CP-2",
-            "name": "Bekele Kebede",
-            "role": "Employer Partner",
-            "text": "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.",
-            "image": "/uploads/cms/photo_2026-06-25_21-27-10-1793183781308-460665.jpg",
-            "active": true
-          },
-          {
-            "id": "CP-3",
-            "name": "Helina Sileshi",
-            "role": "Mentor & Alumni",
-            "text": "Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!",
-            "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
-            "active": true
-          }
-        ],
+        "liveCommunityPosts": [],
         "campusLifePage": {
           "slug": "campus-life",
           "title": "Campus Life at ASTU",
@@ -65116,7 +64962,7 @@
           ]
         }
       },
-      "updatedAt": "2026-10-28T18:26:56.461Z",
+      "updatedAt": "2026-11-05T12:08:28.379Z",
       "updatedBy": "CMS Admin"
     }
   ],
@@ -68504,6 +68350,19 @@
   "communityMembers": [],
   "mediaAssets": [
     {
+      "filename": "astuget-1793779312662-924966.jpg",
+      "originalName": "astuget.jpg",
+      "mimeType": "image/jpeg",
+      "size": 1764540,
+      "url": "/uploads/cms/astuget-1793779312662-924966.jpg",
+      "album": "General",
+      "altText": "astuget.jpg",
+      "uploaderId": null,
+      "id": "media-1793779312691",
+      "createdAt": "2026-11-04T08:01:52.691Z",
+      "updatedAt": "2026-11-04T08:01:52.691Z"
+    },
+    {
       "id": "M-001",
       "filename": "astu-building.jpg",
       "url": "/images/astu-building.jpg",
@@ -68637,7 +68496,7 @@
       "donorCount": 349,
       "status": "ACTIVE",
       "createdAt": "2026-01-15T08:00:00.000Z",
-      "updatedAt": "2026-10-27T12:00:00.000Z"
+      "updatedAt": "2026-11-02T15:10:37.080Z"
     },
     {
       "id": "camp-002",
@@ -68909,5 +68768,7 @@
       "createdAt": "2026-02-15T17:00:00.000Z",
       "updatedAt": "2026-10-28T18:22:55.601Z"
     }
-  ]
+  ],
+  "knowledgeDocuments": [],
+  "knowledgeChunks": []
 }

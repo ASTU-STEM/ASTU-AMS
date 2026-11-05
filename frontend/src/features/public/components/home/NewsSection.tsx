@@ -42,7 +42,7 @@ export default function NewsSection({ items, headers, onNavigate }: NewsSectionP
   return (
     <SectionShell
       id="news"
-      tone="muted"
+      tone="band"
       eyebrow={headers?.eyebrow || "Campus News"}
       title={headers?.title || "Latest ASTU Highlights"}
       description={
@@ -63,7 +63,7 @@ export default function NewsSection({ items, headers, onNavigate }: NewsSectionP
             key={item.id || `news-${page}-${idx}`}
             type="button"
             onClick={() => onNavigate(item.id ? `/announcements/${item.id}` : "/announcements")}
-            className="group flex h-full flex-col rounded-3xl border border-slate-200/80 bg-white p-6 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:hover:bg-slate-900 dark:focus-visible:ring-sky-400/50 md:p-7 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="home-surface group flex h-full flex-col p-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:focus-visible:ring-sky-400/50 md:p-7 motion-reduce:hover:translate-y-0"
           >
             <div className="mb-4 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-astu-red">

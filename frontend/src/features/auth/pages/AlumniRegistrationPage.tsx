@@ -219,19 +219,19 @@ export default function AlumniRegistrationPage() {
 
   return (
     <AuthLayout
-      title="Register Here"
-      subtitle="Create your alumni account"
+      title="Alumni Registration"
+      subtitle="Create your verified ASTU alumni account"
       showLogo={true}
       maxWidth="max-w-5xl"
       rightWidth="lg:w-1/2"
     >
       <div className="mb-6 text-center">
-        <p className="text-sm text-on-surface-variant">
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           Already have an account?{' '}
           <button
             type="button"
             onClick={() => navigate('/login')}
-            className="font-semibold text-astu-navy hover:underline"
+            className="font-bold text-astu-navy hover:underline dark:text-sky-300"
           >
             Sign In
           </button>
@@ -255,10 +255,11 @@ export default function AlumniRegistrationPage() {
 
           return (
             <Form className="space-y-6">
-              {/* Step indicator */}
-              <div className="flex justify-between items-center text-xs text-on-surface-variant font-medium bg-slate-50 p-3 rounded-lg border border-outline-variant">
+              <div className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-slate-50 p-3 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-950/50 dark:text-slate-300">
                 <span>Step 1 of 3: Enter profile details</span>
-                <span className="bg-astu-navy/10 text-astu-navy px-2 py-0.5 rounded-full text-[10px]">Registration</span>
+                <span className="rounded-full bg-astu-navy/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-astu-navy dark:bg-sky-500/15 dark:text-sky-300">
+                  Registration
+                </span>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -294,8 +295,10 @@ export default function AlumniRegistrationPage() {
                     autoComplete="family-name"
                   />
 
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-on-surface-variant mb-1">Phone Number *</label>
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      Phone Number <span className="ml-1 text-astu-red">*</span>
+                    </label>
                     <PhoneInput
                       international
                       defaultCountry="ET"
@@ -304,33 +307,33 @@ export default function AlumniRegistrationPage() {
                       placeholder="+251 911 123 456"
                       disabled={isLoading}
                     />
-                    {touched.phone && errors.phone && (
-                      <p className="text-xs text-astu-red">{errors.phone as string}</p>
-                    )}
+                    {touched.phone && errors.phone ? (
+                      <p className="text-xs font-medium text-astu-red">{errors.phone as string}</p>
+                    ) : null}
                   </div>
 
-                  {/* Toggle Checkbox: I don't have ASTU email */}
-                  <div>
-                    <div className="flex items-center gap-2.5 p-3 rounded-lg bg-slate-50 border border-outline-variant">
-                      <input
-                        id="hasNoAstuEmail"
-                        name="hasNoAstuEmail"
-                        type="checkbox"
-                        className="h-4.5 w-4.5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy"
-                        checked={values.hasNoAstuEmail}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          setFieldValue('hasNoAstuEmail', checked);
-                          if (checked) {
-                            setFieldValue('email', '');
-                          }
-                        }}
-                        disabled={isLoading}
-                      />
-                      <label htmlFor="hasNoAstuEmail" className="text-xs font-semibold text-astu-navy select-none cursor-pointer">
-                        I don't know / don't have my ASTU email
-                      </label>
-                    </div>
+                  <div className="flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950/50">
+                    <input
+                      id="hasNoAstuEmail"
+                      name="hasNoAstuEmail"
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-slate-300 text-astu-navy focus:ring-astu-navy dark:border-slate-600 dark:bg-slate-900"
+                      checked={values.hasNoAstuEmail}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFieldValue('hasNoAstuEmail', checked);
+                        if (checked) {
+                          setFieldValue('email', '');
+                        }
+                      }}
+                      disabled={isLoading}
+                    />
+                    <label
+                      htmlFor="hasNoAstuEmail"
+                      className="cursor-pointer select-none text-xs font-semibold text-astu-navy dark:text-sky-300"
+                    >
+                      I don't know / don't have my ASTU email
+                    </label>
                   </div>
 
                   {/* ASTU Email Form Field (conditionally rendered) */}
@@ -439,39 +442,41 @@ export default function AlumniRegistrationPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-[38px] text-on-surface-variant hover:text-astu-navy transition-all animate-none"
+                      className="absolute right-3 top-[38px] text-slate-400 transition-colors hover:text-astu-navy dark:hover:text-sky-300"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
 
-                  {/* Password strength checker box */}
-                  {values.password && (
-                    <div className="space-y-2 p-3 bg-slate-50 rounded-lg border border-outline-variant">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-on-surface-variant font-medium">Strength:</span>
-                        <span className="font-bold text-on-surface">{strength.label}</span>
+                  {values.password ? (
+                    <div className="space-y-2 rounded-xl border border-slate-200/80 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-950/50">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-medium text-slate-500 dark:text-slate-400">Strength:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-100">{strength.label}</span>
                       </div>
-                      <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${strength.color} transition-all duration-300`} 
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                        <div
+                          className={`h-full ${strength.color} transition-all duration-300`}
                           style={{ width: `${(strength.score / 5) * 100}%` }}
                         />
                       </div>
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1 text-[10px] text-on-surface-variant pl-0 list-none">
-                        {passwordRules.map((rule, idx) => (
-                          <li key={idx} className="flex items-center gap-1">
+                      <ul className="grid list-none grid-cols-1 gap-1 pl-0 pt-1 text-[10px] text-slate-500 dark:text-slate-400 sm:grid-cols-2">
+                        {passwordRules.map((rule) => (
+                          <li key={rule.label} className="flex items-center gap-1">
                             {rule.met ? (
-                              <Check className="h-3 w-3 text-emerald-600 flex-shrink-0" />
+                              <Check className="h-3 w-3 flex-shrink-0 text-emerald-600" />
                             ) : (
-                              <X className="h-3 w-3 text-red-400 flex-shrink-0" />
+                              <X className="h-3 w-3 flex-shrink-0 text-red-400" />
                             )}
-                            <span className={rule.met ? 'text-on-surface font-medium' : ''}>{rule.label}</span>
+                            <span className={rule.met ? 'font-medium text-slate-700 dark:text-slate-200' : ''}>
+                              {rule.label}
+                            </span>
                           </li>
                         ))}
                       </ul>
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Confirm Password */}
                   <div className="relative">
@@ -492,7 +497,8 @@ export default function AlumniRegistrationPage() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-[38px] text-on-surface-variant hover:text-astu-navy transition-all animate-none"
+                      className="absolute right-3 top-[38px] text-slate-400 transition-colors hover:text-astu-navy dark:hover:text-sky-300"
+                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -500,47 +506,40 @@ export default function AlumniRegistrationPage() {
                 </div>
               </div>
 
-              {/* Confirmation Checkbox */}
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-astu-navy/5 border border-astu-navy/10">
+              <div className="flex items-start gap-3 rounded-xl border border-astu-navy/15 bg-astu-navy/5 p-4 dark:border-sky-500/20 dark:bg-sky-500/10">
                 <Field
                   name="confirmation"
                   type="checkbox"
-                  className="mt-1 h-5 w-5 rounded border-outline-variant text-astu-navy focus:ring-astu-navy"
+                  id="confirmation"
+                  className="mt-0.5 h-5 w-5 rounded border-slate-300 text-astu-navy focus:ring-astu-navy dark:border-slate-600"
                   checked={values.confirmation}
                   onChange={handleChange}
                   disabled={isLoading}
                 />
-                <label htmlFor="confirmation" className="text-xs text-on-surface leading-relaxed">
+                <label htmlFor="confirmation" className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
                   I confirm that the information I have entered is accurate and correct. I consent to my student ID data being matched against the ASTU registrar database for identity verification.
                 </label>
               </div>
-              {errors.confirmation && touched.confirmation && (
-                <p className="mt-1 text-xs text-astu-red font-medium">{errors.confirmation}</p>
-              )}
+              {errors.confirmation && touched.confirmation ? (
+                <p className="mt-1 text-xs font-medium text-astu-red">{errors.confirmation}</p>
+              ) : null}
 
-              {/* Sign Up Button */}
-              <PrimaryButton
-                type="submit"
-                loading={isLoading}
-                disabled={isLoading}
-                className="py-4 text-base"
-              >
+              <PrimaryButton type="submit" loading={isLoading} disabled={isLoading} className="py-4 text-base">
                 Sign Up
               </PrimaryButton>
 
-              {/* Support Links in Footer */}
-              <div className="pt-2 border-t border-outline-variant flex flex-col items-center gap-3">
-                <SupportLink 
+              <div className="flex flex-col items-center gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                <SupportLink
                   lastErrorCode="REGISTRATION_PAGE"
                   label="Need help with registration? Contact support"
                 />
               </div>
 
-              <div className="rounded-lg bg-astu-teal/5 p-4 border border-astu-teal/10">
+              <div className="rounded-xl border border-astu-navy/10 bg-astu-navy/5 p-4 dark:border-sky-500/15 dark:bg-sky-500/10">
                 <div className="flex items-start gap-3">
-                  <Mail className="h-5 w-5 text-astu-teal mt-0.5" />
-                  <p className="text-xs text-on-surface leading-relaxed">
-                    <strong>Information:</strong> Your registration profile is cross-verified in real time against ASTU registrar records. Upon successful lookup, an OTP verification code is dispatched to your student email.
+                  <Mail className="mt-0.5 h-5 w-5 shrink-0 text-astu-navy dark:text-sky-300" />
+                  <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                    <strong>Verification:</strong> Your profile is matched against ASTU registrar records. After a successful lookup, an OTP is sent to your student email.
                   </p>
                 </div>
               </div>

@@ -1,7 +1,8 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 
-interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> {
+interface FormFieldProps
+  extends React.InputHTMLAttributes<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> {
   label: string;
   name: string;
   as?: 'input' | 'select' | 'textarea';
@@ -31,27 +32,26 @@ export default function FormField({
   const helpId = `${fieldId}-help`;
 
   const inputClasses = `
-    w-full rounded-lg border px-4 py-3 text-sm
-    transition-all duration-200 bg-white text-on-surface
-    placeholder:text-on-surface-variant/40
+    w-full rounded-xl border px-4 py-3 text-sm text-slate-900
+    transition-all duration-200 bg-white
+    placeholder:text-slate-400
     focus:outline-none focus:ring-2
     disabled:cursor-not-allowed disabled:opacity-50
-    ${hasError
-      ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5'
-      : 'border-outline-variant focus:border-astu-navy focus:ring-astu-navy/20 hover:border-outline-variant/80'
+    dark:bg-slate-950/60 dark:text-slate-100 dark:placeholder:text-slate-500
+    ${
+      hasError
+        ? 'border-astu-red focus:border-astu-red focus:ring-astu-red/20 bg-astu-red/5 dark:bg-rose-500/10'
+        : 'border-slate-200 hover:border-slate-300 focus:border-astu-navy focus:ring-astu-navy/20 dark:border-slate-600 dark:hover:border-slate-500 dark:focus:border-sky-400 dark:focus:ring-sky-400/20'
     }
   `;
 
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <label 
-        htmlFor={fieldId} 
-        className="block text-sm font-semibold text-on-surface-variant"
-      >
+      <label htmlFor={fieldId} className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
         {label}
-        {required && <span className="text-astu-red ml-1">*</span>}
+        {required ? <span className="ml-1 text-astu-red">*</span> : null}
       </label>
-      
+
       <div className="relative">
         {as === 'select' ? (
           <select
@@ -88,18 +88,22 @@ export default function FormField({
         )}
       </div>
 
-      {helpText && !hasError && (
-        <p id={helpId} className="text-[11px] text-on-surface-variant/85 leading-normal">
+      {helpText && !hasError ? (
+        <p id={helpId} className="text-[11px] leading-normal text-slate-500 dark:text-slate-400">
           {helpText}
         </p>
-      )}
+      ) : null}
 
-      {hasError && (
-        <div id={errorId} className="flex items-center gap-1.5 text-xs text-astu-red font-medium" role="alert">
+      {hasError ? (
+        <div
+          id={errorId}
+          className="flex items-center gap-1.5 text-xs font-medium text-astu-red"
+          role="alert"
+        >
           <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

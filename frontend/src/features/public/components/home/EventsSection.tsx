@@ -57,7 +57,7 @@ export default function EventsSection({ items, headers, onNavigate }: EventsSect
             key={`${event.id}-${page}`}
             type="button"
             onClick={() => onNavigate(`/events/${event.id}`)}
-            className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/30 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900/50 dark:hover:border-sky-500/40 dark:focus-visible:ring-sky-400/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            className="home-surface group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:focus-visible:ring-sky-400/50 motion-reduce:hover:translate-y-0"
           >
             <div className="aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
               <img
