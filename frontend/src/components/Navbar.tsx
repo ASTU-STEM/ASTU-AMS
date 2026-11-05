@@ -390,12 +390,6 @@ export default function Navbar() {
           </button>
 
           <Link
-            to="/login"
-            className="hidden sm:inline-flex items-center rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-bold text-astu-navy transition-all duration-200 hover:border-astu-navy hover:bg-slate-50 dark:border-slate-700 dark:text-sky-300 dark:hover:bg-slate-800"
-          >
-            Login
-          </Link>
-          <Link
             to="/register"
             className="hidden sm:inline-flex items-center rounded-lg bg-astu-navy px-5 py-2.5 text-sm font-bold text-white shadow-[0_8px_18px_-10px_rgba(7,89,166,0.65)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-astu-navy/90 hover:shadow-lg"
           >

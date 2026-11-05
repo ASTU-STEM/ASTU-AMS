@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
-import toast, { Toaster } from 'react-hot-toast';
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, Briefcase, Sparkles, ArrowRight, UserCheck, Calendar } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Search, Settings, User, Briefcase, Sparkles, ArrowRight, UserCheck, Calendar } from 'lucide-react';
 import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
-import HelpCenter from '../../../components/HelpCenter';
+import { DashboardShell } from '../../../layouts/DashboardShell';
+import type { SidebarNavSection } from '../../../layouts/AppSidebar';
 
 // Types
 import {
@@ -33,21 +34,12 @@ import { PartnerMoUDirectory } from '../components/tabs/PartnerMoUDirectory';
 import { useTheme } from '../../../hooks/useTheme';
 
 const EmployerDashboard = () => {
-  const { darkMode, toggleTheme } = useTheme();
+  const { darkMode } = useTheme();
   const { logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('employer_sidebar_collapsed') === 'true');
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSearchCandidate, setSelectedSearchCandidate] = useState<CandidateApplication | null>(null);
-
-  // Theme Dark / Light mode
-
-  // Notifications Bell dropdown
-  const [notificationOpen, setNotificationOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
@@ -400,15 +392,6 @@ const EmployerDashboard = () => {
     } catch { return []; }
   });
 
-  const handleClearAllNotifications = () => {
-    setNotifications([]);
-    setReadNotificationIds(prev => {
-      const newIds = Array.from(new Set([...prev, ...notifications.map(n => String(n.id))]));
-      localStorage.setItem('employer_read_notifications', JSON.stringify(newIds));
-      return newIds;
-    });
-  };
-
   const handleMarkNotificationsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
     setReadNotificationIds(prev => {
@@ -418,16 +401,17 @@ const EmployerDashboard = () => {
     });
   };
 
-  const handleRemoveNotification = (id: any) => {
-    setNotifications(prev => prev.filter(n => String(n.id) !== String(id)));
+  const handleMarkNotificationRead = (notification: { id: string | number }) => {
+    setNotifications(prev =>
+      prev.map(n => (String(n.id) === String(notification.id) ? { ...n, unread: false } : n))
+    );
     setReadNotificationIds(prev => {
-      const newIds = Array.from(new Set([...prev, String(id)]));
+      const newIds = Array.from(new Set([...prev, String(notification.id)]));
       localStorage.setItem('employer_read_notifications', JSON.stringify(newIds));
       return newIds;
     });
   };
 
-  const unreadNotificationsCount = notifications.filter(n => n.unread).length;
   const initials = (profile?.name || 'Company Profile').split(' ').map(n => n ? n[0] : '').filter(Boolean).join('').slice(0, 2).toUpperCase() || 'EP';
 
   // Load all data from backend on mount
@@ -543,9 +527,6 @@ const EmployerDashboard = () => {
   });
 
   useEffect(() => {
-    setMenuOpen(false);
-    setNotificationOpen(false);
-    setMobileSidebarOpen(false);
     if (activeTab) {
       setSeenTabs(prev => {
         const next = { ...prev, [activeTab]: true };
@@ -558,88 +539,36 @@ const EmployerDashboard = () => {
     }
   }, [activeTab]);
 
-  const toggleNotifications = () => {
-    setNotificationOpen(prev => {
-      const next = !prev;
-      if (next) {
-        setNotifications(curr => curr.map(n => ({ ...n, unread: false })));
-        setReadNotificationIds(prevIds => {
-          const newIds = Array.from(new Set([...prevIds, ...notifications.map(n => String(n.id))]));
-          localStorage.setItem('employer_read_notifications', JSON.stringify(newIds));
-          return newIds;
-        });
-      }
-      return next;
-    });
-  };
-
   const jobBadge = !seenTabs['post_job'] && activeJobsCount > 0 ? activeJobsCount : null;
   const appBadge = !seenTabs['candidates'] && pendingApplicationsCount > 0 ? pendingApplicationsCount : null;
   const feedbackBadge = !seenTabs['feedback'] && feedbacks.length > 0 ? feedbacks.length : null;
   const msgBadge = !seenTabs['chat'] && !seenTabs['messages'] && realUnreadMessages > 0 ? realUnreadMessages : null;
 
-  useEffect(() => {
-    localStorage.setItem('employer_sidebar_collapsed', String(sidebarCollapsed));
-  }, [sidebarCollapsed]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target && !target.closest('[data-admin-menu]')) {
-        setMenuOpen(false);
-      }
-      if (target && !target.closest('[data-admin-notifications]')) {
-        setNotificationOpen(false);
-      }
-    };
-    window.addEventListener('mousedown', handleClickOutside);
-    return () => window.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const menu = (
-    <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
-      <div className="px-3 py-3">
-        <div className="text-sm font-semibold text-[var(--text-primary)]">{profile.name}</div>
-        <div className="mt-1">
-          <span className="inline-flex items-center rounded-md bg-[#003366]/10 px-2 py-0.5 text-xs font-medium text-[#003366] border border-[#003366]/15">Employer</span>
-        </div>
-      </div>
-      <div className="my-1 h-px bg-[var(--border-color)]" />
-      <button
-        type="button"
-        onClick={() => { setMenuOpen(false); setActiveTab('profile'); }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
-      >
-        <User className="h-4 w-4" />
-        Company Profile
-      </button>
-      <button
-        type="button"
-        onClick={() => { setMenuOpen(false); setActiveTab('profile'); }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
-      >
-        <Settings className="h-4 w-4" />
-        Settings
-      </button>
-      <button
-        type="button"
-        onClick={() => { setMenuOpen(false); setHelpOpen(true); }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[var(--text-secondary)] hover:bg-black/5 hover:text-[var(--text-primary)]"
-      >
-        <HelpCircle className="h-4 w-4" />
-        Help
-      </button>
-      <div className="my-1 h-px bg-[var(--border-color)]" />
-      <button
-        type="button"
-        onClick={() => { setMenuOpen(false); handleLogout(); }}
-        className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-[#E24B4A] hover:bg-rose-50"
-      >
-        <LogOut className="h-4 w-4" />
-        Logout
-      </button>
-    </div>
-  );
+  const sidebarSections: SidebarNavSection[] = [
+    {
+      id: 'recruiting',
+      label: 'Recruiting',
+      items: [
+        { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', tooltip: 'Overview & recruitment metrics' },
+        { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', tooltip: 'Jobs, candidates, events & analytics' },
+        { id: 'post_job', label: 'Job Scaffolder', icon: 'work', badge: jobBadge, tooltip: `${activeJobsCount} active job postings` },
+        { id: 'candidates', label: 'Applications', icon: 'description', badge: appBadge, tooltip: `${pendingApplicationsCount} pending reviews` },
+        { id: 'pipeline', label: 'Pipeline Kanban', icon: 'view_kanban', tooltip: '5-stage candidate recruitment kanban' },
+        { id: 'search_talent', label: 'Talent Search', icon: 'search', tooltip: 'Search alumni by skills & criteria' },
+      ],
+    },
+    {
+      id: 'management',
+      label: 'Management',
+      items: [
+        { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbackBadge, tooltip: `${feedbacks.length} feedback submissions` },
+        { id: 'partnerships', label: 'MoU & Accreditation', icon: 'handshake', tooltip: 'Partner accreditation directory & MoUs' },
+        { id: 'chat', label: 'Messages', icon: 'forum', badge: msgBadge, tooltip: `${realUnreadMessages} unread messages` },
+        { id: 'analytics', label: 'Analytics', icon: 'analytics', tooltip: 'Recruitment analytics & insights' },
+        { id: 'profile', label: 'Company Profile', icon: 'business', tooltip: 'Manage company profile & settings' },
+      ],
+    },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -649,973 +578,631 @@ const EmployerDashboard = () => {
 
   return (
     <>
-      <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
-        <style>{`
-        @keyframes gradient-shift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes float-particle {
-          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-          25% { transform: translateY(-15px) translateX(8px); opacity: 0.5; }
-          50% { transform: translateY(-8px) translateX(-4px); opacity: 0.2; }
-          75% { transform: translateY(-22px) translateX(12px); opacity: 0.4; }
-        }
-        .sidebar-particle {
-          animation: float-particle 6s ease-in-out infinite;
-        }
-        .sidebar-particle:nth-child(2) { animation-delay: 2s; animation-duration: 8s; }
-        .sidebar-particle:nth-child(3) { animation-delay: 4s; animation-duration: 7s; }
-        .nav-btn {
-          transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .nav-btn:hover {
-          transform: translateX(3px);
-        }
-        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
-      `}</style>
+      <DashboardShell
+        sidebarSections={sidebarSections}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        title="ASTU Employer"
+        subtitle="Recruitment Hub"
+        brand="Employer"
+        userName={profile.name || 'Employer'}
+        userRole="Partner Employer"
+        userInitials={initials}
+        onLogout={handleLogout}
+        searchPlaceholder="Search candidates, departments, or postings..."
+        searchValue={searchQuery}
+        onSearch={setSearchQuery}
+        notifications={notifications.map((n) => ({
+          id: n.id,
+          title: n.title || 'Recruitment Alert',
+          text: n.text || n.message || '',
+          time: n.time,
+          unread: !!n.unread,
+          targetTab: n.targetTab,
+        }))}
+        onClearNotifications={handleMarkNotificationsRead}
+        onMarkNotificationRead={handleMarkNotificationRead}
+        onNotificationClick={(n) => {
+          if (n.targetTab) {
+            setActiveTab(n.targetTab);
+            toast.success(`Opening ${n.targetTab.replace('_', ' ')}...`);
+          }
+        }}
+        logoSrc="/images/astu-seal-logo.png"
+        menuActions={[
+          {
+            id: 'profile',
+            label: 'Company Profile',
+            icon: <User className="h-4 w-4" />,
+            onClick: () => setActiveTab('profile'),
+          },
+          {
+            id: 'analytics',
+            label: 'Analytics',
+            icon: <Settings className="h-4 w-4" />,
+            onClick: () => setActiveTab('analytics'),
+          },
+        ]}
+      >
 
-        {mobileSidebarOpen && (
-          <button
-            type="button"
-            aria-label="Close navigation"
-            onClick={() => setMobileSidebarOpen(false)}
-            className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-sm md:hidden"
-          />
-        )}
-
-        {/* Enhanced Sidebar Navigation */}
-        <aside className={`fixed left-0 top-0 z-[60] flex h-dvh w-64 flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-64'}`}>
-          {/* Animated overlay */}
-          <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.02)_0%,transparent_40%,rgba(34,211,238,0.04)_60%,transparent_100%)] bg-[length:400%_400%] animate-[gradient-shift_8s_ease_infinite] pointer-events-none" />
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-cyan-400/30 sidebar-particle" />
-            <div className="absolute top-[45%] right-[25%] w-1.5 h-1.5 rounded-full bg-[#2196F3]/25 sidebar-particle" />
-            <div className="absolute bottom-[30%] left-[30%] w-2.5 h-2.5 rounded-full bg-blue-400/20 sidebar-particle" />
-          </div>
-
-          {/* Sidebar Logo with Enhanced Status */}
-          <div className="relative z-10 px-4 py-4 border-b border-[var(--border-color)] bg-[var(--bg-sidebar)]">
-            <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="relative group/logo">
-                <div className="w-11 h-11 flex items-center justify-center">
-                  <img alt="ASTU Logo" className="h-10 w-10 object-contain scale-110"
-                    src="/images/astu-seal-logo.png" />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 " />
-              </div>
-              {!sidebarCollapsed && <div>
-                <h1 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">ASTU Employer</h1>
-                <p className="text-[9px] text-[var(--accent-cyan)] uppercase tracking-[0.2em] font-extrabold">Recruitment Hub</p>
-              </div>}
-            </div>
-          </div>
-
-          {/* Navigation Links with Enhanced Features */}
-          <nav className="relative z-10 flex-grow px-2 py-4 overflow-y-auto scrollbar-thin">
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-2 mb-2">
-                <p className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.2em]">Recruiting</p>
-              </div>
-            )}
-            <div className="space-y-0.5">
-              {[
-                { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & recruitment metrics' },
-                { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Jobs, candidates, events & analytics' },
-                { id: 'post_job', label: 'Job Scaffolder', icon: 'work', badge: jobBadge, tooltip: `${activeJobsCount} active job postings` },
-                { id: 'candidates', label: 'Applications', icon: 'description', badge: appBadge, tooltip: `${pendingApplicationsCount} pending reviews` },
-                { id: 'pipeline', label: 'Pipeline Kanban', icon: 'view_kanban', badge: null, tooltip: '5-stage candidate recruitment kanban' },
-                { id: 'search_talent', label: 'Talent Search', icon: 'search', badge: null, tooltip: 'Search alumni by skills & criteria' },
-              ].map((item) => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-2 py-2 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} ${activeTab === item.id ? 'bg-[#2196F3] text-white font-bold shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)] group-hover:text-white group-hover:border-[var(--brand-primary)]'}`}>
-                    <span className="material-symbols-outlined">{item.icon}</span>
-                    {item.badge && sidebarCollapsed && (
-                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-[#F87171] text-[7px] font-extrabold text-white shadow-lg animate-pulse">
-                        {item.badge > 9 ? '9+' : item.badge}
-                      </span>
-                    )}
-                  </span>
-                  {!sidebarCollapsed && (
-                    <>
-                      <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
-                      {item.badge && (
-                        <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg transition-all duration-300 transform scale-100 ${String(item.id) === 'candidates' ? 'bg-[#3B1A22] text-[#F87171] border border-[#71313A]' : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-color)]'}`}>
-                          {item.badge > 9 ? '9+' : item.badge}
-                        </span>
-                      )}
-                      {activeTab === item.id && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-                    </>
-                  )}
-                  {sidebarCollapsed && (
-                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                      {item.label}
-                      {item.badge && <span className="ml-1.5 text-[#F87171] font-bold">({item.badge})</span>}
-                    </div>
-                  )}
-                </button>
-              ))}
+        {searchResults && (
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-sm p-3 space-y-3 text-[var(--text-primary)]">
+            <div className="flex justify-between items-center px-2 pb-2 border-b border-[var(--border-color)]">
+              <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                Search Results ({searchResults.totalMatches} matches)
+              </span>
+              <button type="button" onClick={() => setSearchQuery('')} className="text-[10px] font-bold text-[#F87171] hover:underline cursor-pointer">
+                Close ✕
+              </button>
             </div>
 
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-2 mt-5 mb-2">
-                <p className="text-[9px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.2em]">Management</p>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22D3EE] animate-pulse" />
+            {searchResults.totalMatches === 0 ? (
+              <div className="p-4 text-center text-xs text-gray-500">
+                No matches found for "{searchQuery}". Try searching by skill, department, or candidate name.
               </div>
-            )}
-            <div className="space-y-0.5">
-              {[
-                { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbackBadge, tooltip: `${feedbacks.length} feedback submissions` },
-                { id: 'partnerships', label: 'MoU & Accreditation', icon: 'handshake', badge: null, tooltip: 'Partner accreditation directory & MoUs' },
-                { id: 'chat', label: 'Messages', icon: 'forum', badge: msgBadge, tooltip: `${realUnreadMessages} unread messages` },
-                { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
-                { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
-              ].map((item) => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative cursor-pointer ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-[#2196F3] text-white font-bold shadow-md' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)] group-hover:text-white group-hover:border-[var(--brand-primary)]'}`}>
-                    <span className="material-symbols-outlined">{item.icon}</span>
-                    {item.badge && sidebarCollapsed && (
-                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-[#F87171] text-[7px] font-extrabold text-white shadow-lg animate-pulse">
-                        {item.badge > 9 ? '9+' : item.badge}
-                      </span>
-                    )}
-                  </span>
-                  {!sidebarCollapsed && (
-                    <>
-                      <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
-                      {item.badge && (
-                        <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg bg-[#3B1A22] text-[#F87171] border border-[#71313A] transition-all duration-300 transform scale-100">
-                          {item.badge > 9 ? '9+' : item.badge}
-                        </span>
-                      )}
-                      {activeTab === item.id && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-                    </>
-                  )}
-                  {sidebarCollapsed && (
-                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                      {item.label}
-                      {item.badge && <span className="ml-1.5 text-[#F87171] font-bold">({item.badge})</span>}
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {sidebarCollapsed && (
-              <div className="mt-4 px-2">
-                <div className="flex justify-center">
-                  <div className="w-1 h-1 rounded-full bg-[#22D3EE] animate-pulse" title="System Online" />
-                </div>
-              </div>
-            )}
-          </nav>
-
-          {/* Sidebar Footer with Enhanced Actions */}
-          <div className="relative z-10 px-2 py-4 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-1">
-            {!sidebarCollapsed && (
+            ) : (
               <>
-                <button onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 text-left group gap-2.5 cursor-pointer">
-                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] group-hover:text-white material-symbols-outlined">help</span>
-                  <span className="text-sm font-medium">Help Center</span>
-                  <span className="ml-auto text-[8px] text-[var(--text-muted)] font-bold px-1.5 py-0.5 bg-[var(--bg-card)] rounded border border-[var(--border-color)]">v1.4</span>
-                </button>
-                <button onClick={handleLogout}
-                  className="nav-btn w-full flex items-center px-2 py-2 rounded-xl text-[#F87171] hover:text-white hover:bg-[#3B1A22] transition-all duration-200 text-left group gap-2.5 cursor-pointer">
-                  <span className="w-8 h-8 rounded-lg bg-[#3B1A22] border border-[#71313A] flex items-center justify-center text-[#F87171] group-hover:text-white material-symbols-outlined text-[18px]">logout</span>
-                  <span className="text-sm font-medium">Logout</span>
-                  <span className="ml-auto text-[8px] text-[var(--text-muted)] font-medium">Alt+L</span>
-                </button>
-              </>
-            )}
-            {sidebarCollapsed && (
-              <>
-                <button onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 group relative cursor-pointer" title="Help Center">
-                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] group-hover:text-white material-symbols-outlined">help</span>
-                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Help Center</div>
-                </button>
-                <button onClick={handleLogout}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-2 rounded-xl text-[#F87171] hover:text-white hover:bg-[#3B1A22] transition-all duration-200 group relative cursor-pointer" title="Logout">
-                  <span className="w-8 h-8 rounded-lg bg-[#3B1A22] border border-[#71313A] flex items-center justify-center material-symbols-outlined text-[#F87171] group-hover:text-white">logout</span>
-                  <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-[var(--bg-card)] text-white text-[10px] font-medium rounded-lg shadow-xl border border-[var(--border-color)] whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">Logout</div>
-                </button>
-              </>
-            )}
-          </div>
-        </aside>
-
-        {/* Main Content Area */}
-        <div className={`min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
-
-          {/* Header Section - Enterprise Dark Style */}
-          <header
-            className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-navbar)] px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 text-[var(--text-primary)]"
-          >
-            <div className="flex min-w-0 items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setSidebarCollapsed((value) => !value)}
-                className="hidden h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:inline-flex cursor-pointer"
-                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSidebarCollapsed(false);
-                  setMobileSidebarOpen(true);
-                }}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:hidden cursor-pointer"
-                aria-label="Open navigation"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
-              <div className="min-w-0 space-y-0.5">
-                <h1 className="truncate text-[16px] font-bold tracking-tight text-[var(--text-primary)]">
-                  {activeTab === 'dashboard' ? 'Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace('_', ' ')}
-                </h1>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Live Search Bar with Floating Dropdown Overlay */}
-              <div className="relative hidden md:block" data-admin-search>
-                <label
-                  className="group flex h-11 w-[420px] max-w-[36vw] items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-sm transition-all duration-200 focus-within:border-[var(--brand-primary)] focus-within:ring-2 focus-within:ring-[#2196F3]/20"
-                >
-                  <span className="mr-2 inline-flex h-5 w-5 items-center justify-center text-[var(--text-muted)]">
-                    <Search className="h-4.5 w-4.5 flex-none" />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search candidates, departments, or postings..."
-                    className="w-full bg-transparent outline-none placeholder:text-[var(--text-muted)] text-[var(--text-primary)]"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  {searchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchQuery('')}
-                      className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 text-xs font-bold cursor-pointer"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </label>
-
-                {/* Floating Search Results Dropdown */}
-                {searchResults && (
-                  <div className="absolute left-0 top-13 z-50 w-full max-h-[28rem] overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl p-3 space-y-3 text-[var(--text-primary)]">
-                    <div className="flex justify-between items-center px-2 pb-2 border-b border-[var(--border-color)]">
-                      <span className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
-                        Search Results ({searchResults.totalMatches} matches)
-                      </span>
-                      <button onClick={() => setSearchQuery('')} className="text-[10px] font-bold text-[#F87171] hover:underline cursor-pointer">
-                        Close ✕
-                      </button>
-                    </div>
-
-                    {searchResults.totalMatches === 0 ? (
-                      <div className="p-4 text-center text-xs text-gray-500">
-                        No matches found for "{searchQuery}". Try searching by skill, department, or candidate name.
-                      </div>
-                    ) : (
-                      <>
-                        {/* Matched Candidates */}
-                        {searchResults.candidates.length > 0 && (
-                          <div className="space-y-1">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-navy dark:text-emerald-400 px-2 block">
-                              🎓 Candidates ({searchResults.candidates.length})
-                            </span>
-                            {searchResults.candidates.slice(0, 4).map(candidate => (
-                              <div
-                                key={candidate.id}
-                                onClick={() => {
-                                  setSelectedSearchCandidate(candidate);
-                                  setSearchQuery('');
-                                }}
-                                className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
-                              >
-                                <div className="flex items-center gap-2.5">
-                                  <div className="w-7 h-7 rounded-full bg-astu-navy/10 text-astu-navy font-bold flex items-center justify-center text-xs">
-                                    {candidate.alumnusName[0]}
-                                  </div>
-                                  <div>
-                                    <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{candidate.alumnusName}</p>
-                                    <p className="text-[10px] text-gray-500 mt-0.5">{candidate.department} • CGPA {candidate.cgpa}</p>
-                                  </div>
-                                </div>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-astu-navy text-white">
-                                  View Profile
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Matched Jobs */}
-                        {searchResults.jobs.length > 0 && (
-                          <div className="space-y-1 border-t border-gray-150 dark:border-slate-800 pt-2">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#003366] dark:text-amber-400 px-2 block">
-                              💼 Job Openings ({searchResults.jobs.length})
-                            </span>
-                            {searchResults.jobs.slice(0, 3).map(job => (
-                              <div
-                                key={job.id}
-                                onClick={() => {
-                                  setActiveTab('post_job');
-                                  setSearchQuery('');
-                                }}
-                                className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
-                              >
-                                <div>
-                                  <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{job.title}</p>
-                                  <p className="text-[10px] text-gray-500 mt-0.5">{job.location} • {job.type}</p>
-                                </div>
-                                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                                  {job.status}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Matched Feedback */}
-                        {searchResults.feedbacks.length > 0 && (
-                          <div className="space-y-1 border-t border-gray-150 dark:border-slate-800 pt-2">
-                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 px-2 block">
-                              📝 Feedback Audits ({searchResults.feedbacks.length})
-                            </span>
-                            {searchResults.feedbacks.slice(0, 2).map(fb => (
-                              <div
-                                key={fb.id}
-                                onClick={() => {
-                                  setActiveTab('feedback');
-                                  setSearchQuery('');
-                                }}
-                                className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
-                              >
-                                <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{fb.alumnusName} - {fb.department}</p>
-                                <p className="text-[10px] text-gray-500 mt-0.5 truncate">"{fb.comments}"</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Dark Mode Toggle */}
-              <button
-                type="button"
-                onClick={() => {
-                  toggleTheme();
-                  toast.success(darkMode ? 'Light Theme activated!' : 'Premium Dark Theme activated!');
-                }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
-                aria-label="Toggle dark mode"
-              >
-                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
-
-              {/* Notification Bell */}
-              <div className="relative" data-admin-notifications>
-                <button
-                  type="button"
-                  onClick={toggleNotifications}
-                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-[8px] text-[var(--text-secondary)] hover:bg-black/5"
-                >
-                  <Bell className="h-4 w-4" />
-                  {unreadNotificationsCount > 0 && (
-                    <span className="absolute right-0.5 top-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#E24B4A] text-[9px] font-semibold leading-none text-white transition-all duration-300 transform scale-100">
-                      {unreadNotificationsCount}
+                {searchResults.candidates.length > 0 && (
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-navy dark:text-emerald-400 px-2 block">
+                      Candidates ({searchResults.candidates.length})
                     </span>
-                  )}
-                </button>
-                {notificationOpen && (
-                  <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl">
-                    <div className="border-b border-[var(--border-color)] px-4 py-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-sm font-bold text-[var(--text-primary)]">Notifications</div>
-                          <div className="text-xs text-[var(--text-secondary)]">{unreadNotificationsCount} unread recruit alerts</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={handleMarkNotificationsRead}
-                            className="text-[10px] font-bold text-astu-navy dark:text-emerald-400 hover:underline"
-                          >
-                            Mark Read
-                          </button>
-                          <span className="text-gray-300">|</span>
-                          <button
-                            onClick={handleClearAllNotifications}
-                            className="text-[10px] font-bold text-[#E24B4A] hover:underline"
-                          >
-                            Clear All
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-1 p-2 max-h-72 overflow-y-auto">
-                      {notifications.map((notif: any) => (
-                        <div
-                          key={notif.id}
-                          onClick={() => {
-                            setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, unread: false } : n));
-                            if (notif.targetTab) {
-                              setActiveTab(notif.targetTab);
-                              toast.success(`Opening ${notif.targetTab.replace('_', ' ')}...`);
-                            }
-                            setNotificationOpen(false);
-                          }}
-                          className="flex items-start gap-3 rounded-xl px-3 py-2.5 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                        >
-                          <span className={`mt-1.5 h-2.5 w-2.5 rounded-full flex-shrink-0 ${notif.unread ? 'bg-[#003580]' : 'bg-gray-300'}`} />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-[var(--text-primary)] leading-snug">{notif.text}</p>
-                            <p className="text-[10px] text-[var(--text-secondary)] font-medium mt-1">{notif.time}</p>
+                    {searchResults.candidates.slice(0, 4).map(candidate => (
+                      <div
+                        key={candidate.id}
+                        onClick={() => {
+                          setSelectedSearchCandidate(candidate);
+                          setSearchQuery('');
+                        }}
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full bg-astu-navy/10 text-astu-navy font-bold flex items-center justify-center text-xs">
+                            {candidate.alumnusName[0]}
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveNotification(notif.id);
-                            }}
-                            className="flex-shrink-0 text-gray-400 hover:text-rose-500"
-                          >
-                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
+                          <div>
+                            <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{candidate.alumnusName}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{candidate.department} • CGPA {candidate.cgpa}</p>
+                          </div>
                         </div>
-                      ))}
-                      {notifications.length === 0 && (
-                        <p className="px-2 py-6 text-center text-xs text-[var(--text-secondary)] font-medium">No new notifications.</p>
-                      )}
-                    </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-astu-navy text-white">
+                          View Profile
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
-              </div>
 
-              {/* Profile Dropdown */}
-              <div className="relative" data-admin-menu>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-3 rounded-[8px] border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 py-1.5 shadow-sm"
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#003580] text-xs font-semibold text-white">
-                    {initials}
-                  </div>
-                  <div className="hidden text-left sm:block">
-                    <div className="text-sm font-medium text-[var(--text-primary)]">{profile.name}</div>
-                    <div className="text-[11px] text-[var(--text-secondary)]">HR Manager</div>
-                  </div>
-                  <ChevronDown className="h-4 w-4 text-slate-400" />
-                </button>
-                {menuOpen && menu}
-              </div>
-            </div>
-          </header>
-
-          {/* Main Content */}
-          <main id="main-content" tabIndex={-1}className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
-            {activeTab === 'dashboard' && (
-              <div className="space-y-6">
-
-                {/* Welcome banner */}
-                <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
-                  <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-                    <div className="max-w-2xl space-y-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU corporate network</span>
-                      <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Welcome back, {profile.name}</h2>
-                      <p className="text-sm leading-relaxed text-white/85">
-                        Your current vacancy listings have collected <span className="font-bold text-astu-green">{totalApplicationsCount} candidate files</span>.
-                        Complete your graduate feedback forms to help align our technical curricula with industry standards.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('post_job')}
-                      className="flex items-center gap-1.5 whitespace-nowrap rounded-md bg-[#E24B4A] px-4 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition-all hover:bg-[#c94140]"
-                    >
-                      <span className="material-symbols-outlined">add</span>
-                      Post Career Placement
-                    </button>
-                  </div>
-                </section>
-
-                <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <h3 className="text-sm font-semibold">Employer Command Center</h3>
-                      <p className="mt-1 text-xs text-gray-500">One clear snapshot for hiring, review queues, curriculum feedback, and recruiter follow-up.</p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('analytics')}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
-                    >
-                      <span className="material-symbols-outlined text-base">analytics</span>
-                      Open analytics
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
-                    <div className="grid grid-cols-2 gap-3">
-                      {employerCommandSignals.map((signal) => (
-                        <button
-                          key={signal.label}
-                          onClick={() => setActiveTab(signal.tab)}
-                          className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
-                          </div>
-                          <p className="mt-2 text-2xl font-extrabold">{signal.value}</p>
-                        </button>
-                      ))}
-                    </div>
-                    <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
-                      <div className="mb-3 flex items-center justify-between">
-                        <h4 className="text-sm font-bold">Hiring Pipeline Health</h4>
-                        <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Live</span>
-                      </div>
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
-                        {hiringPipeline.map((item) => (
-                          <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
-                            <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
-                            <p className="mt-2 text-xl font-extrabold">{item.value}</p>
-                            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
-                            <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Stats Counters Grid */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                  {stats.map((stat) => (
-                    <div
-                      key={stat.id}
-                      onMouseEnter={() => setHoveredCard(stat.id)}
-                      onMouseLeave={() => setHoveredCard(null)}
-                      onClick={() => {
-                        if (stat.id === 1) setActiveTab('post_job');
-                        if (stat.id === 2) setActiveTab('candidates');
-                        if (stat.id === 3) setActiveTab('candidates');
-                        if (stat.id === 4) setActiveTab('candidates');
-                        if (stat.id === 5) setActiveTab('feedback');
-                      }}
-                      className={`group relative cursor-pointer overflow-hidden rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
-                        } ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
-                    >
-                      <div className="relative z-10 space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className={`p-2.5 rounded-xl bg-astu-navy/10 text-astu-navy`}>
-                            <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
-                          </div>
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">Active</span>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
-                          <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t border-gray-100/5">
-                          <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
-                          {stat.trend}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Active Jobs list overview */}
-                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
-                  }`}>
-                  <div className="mb-4 flex items-center justify-between border-b border-gray-150 pb-2">
-                    <div>
-                      <h3 className="text-sm font-semibold">Your Posted Positions</h3>
-                      <p className="text-xs text-gray-500 font-semibold">Quick updates on recent vacancies</p>
-                    </div>
-                    <button
-                      onClick={() => setActiveTab('post_job')}
-                      className="text-xs font-bold text-astu-navy hover:underline"
-                    >
-                      View All Positions &rarr;
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {jobs.slice(0, 2).map((job) => (
+                {searchResults.jobs.length > 0 && (
+                  <div className="space-y-1 border-t border-gray-150 dark:border-slate-800 pt-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#003366] dark:text-amber-400 px-2 block">
+                      Job Openings ({searchResults.jobs.length})
+                    </span>
+                    {searchResults.jobs.slice(0, 3).map(job => (
                       <div
                         key={job.id}
-                        className={`rounded-[10px] border p-4 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50/50 border-gray-200'
-                          }`}
+                        onClick={() => {
+                          setActiveTab('post_job');
+                          setSearchQuery('');
+                        }}
+                        className="flex items-center justify-between p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                       >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-bold text-sm">{job.title}</h4>
-                            <p className="text-xs text-gray-500">{job.location} • {job.type}</p>
-                          </div>
-                          <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[10px] font-extrabold rounded">
-                            {job.applicationsCount} Applied
-                          </span>
+                        <div>
+                          <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{job.title}</p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">{job.location} • {job.type}</p>
                         </div>
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                          {job.status}
+                        </span>
                       </div>
                     ))}
                   </div>
-                </section>
+                )}
 
-                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
-                  }`}>
-                  <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <h3 className="text-sm font-semibold">Employer Feature Control</h3>
-                      <p className="mt-1 text-xs text-gray-500">Recruitment, talent search, feedback, and partnership actions in one place.</p>
-                    </div>
-                    <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
-                      Hiring workflow active
+                {searchResults.feedbacks.length > 0 && (
+                  <div className="space-y-1 border-t border-gray-150 dark:border-slate-800 pt-2">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-600 px-2 block">
+                      Feedback Audits ({searchResults.feedbacks.length})
                     </span>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    {hiringControlCards.map((card) => (
-                      <button
-                        key={card.title}
-                        onClick={() => setActiveTab(card.tab)}
-                        className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-800/70 hover:bg-slate-800' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                    {searchResults.feedbacks.slice(0, 2).map(fb => (
+                      <div
+                        key={fb.id}
+                        onClick={() => {
+                          setActiveTab('feedback');
+                          setSearchQuery('');
+                        }}
+                        className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                       >
-                        <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
-                        <h4 className="mt-3 text-sm font-bold">{card.title}</h4>
-                        <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
-                      </button>
+                        <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{fb.alumnusName} - {fb.department}</p>
+                        <p className="text-[10px] text-gray-500 mt-0.5 truncate">"{fb.comments}"</p>
+                      </div>
                     ))}
                   </div>
-                  <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-                    {demandSignals.map((signal) => (
-                      <div key={signal.label} className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+                )}
+              </>
+            )}
+          </div>
+        )}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+
+              {/* Welcome banner */}
+              <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
+                <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                  <div className="max-w-2xl space-y-2">
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">ASTU corporate network</span>
+                    <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">Welcome back, {profile.name}</h2>
+                    <p className="text-sm leading-relaxed text-white/85">
+                      Your current vacancy listings have collected <span className="font-bold text-astu-green">{totalApplicationsCount} candidate files</span>.
+                      Complete your graduate feedback forms to help align our technical curricula with industry standards.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('post_job')}
+                    className="flex items-center gap-1.5 whitespace-nowrap rounded-md bg-[#E24B4A] px-4 py-2.5 text-xs font-bold tracking-wide text-white shadow-sm transition-all hover:bg-[#c94140]"
+                  >
+                    <span className="material-symbols-outlined">add</span>
+                    Post Career Placement
+                  </button>
+                </div>
+              </section>
+
+              <section className="rounded-[10px] border border-[var(--border-color)] bg-[var(--bg-card)] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold">Employer Command Center</h3>
+                    <p className="mt-1 text-xs text-gray-500">One clear snapshot for hiring, review queues, curriculum feedback, and recruiter follow-up.</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('analytics')}
+                    className="inline-flex items-center gap-1.5 rounded-md bg-astu-navy px-3 py-2 text-xs font-bold text-white transition-all hover:bg-astu-navy/90"
+                  >
+                    <span className="material-symbols-outlined text-base">analytics</span>
+                    Open analytics
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_1.2fr]">
+                  <div className="grid grid-cols-2 gap-3">
+                    {employerCommandSignals.map((signal) => (
+                      <button
+                        key={signal.label}
+                        onClick={() => setActiveTab(signal.tab)}
+                        className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                      >
                         <div className="flex items-center gap-2">
                           <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
-                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
                         </div>
-                        <p className="mt-2 text-lg font-extrabold">{signal.value}</p>
-                      </div>
+                        <p className="mt-2 text-2xl font-extrabold">{signal.value}</p>
+                      </button>
                     ))}
                   </div>
-                </section>
-
-                {/* Employer Analytics Graphs Row */}
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                  <AnalyticsChart
-                    type="area"
-                    title="Application Submissions"
-                    subtitle="Candidate applications received over last 6 months"
-                    data={monthlySubmissionsData}
-                    xKey="month"
-                    series={[{ key: 'applications', label: 'Applications Received' }]}
-                    height={200}
-                    darkMode={darkMode}
-                  />
-                  <AnalyticsChart
-                    type="pie"
-                    title="Evaluation Ratings"
-                    subtitle="Corporate evaluation of hired graduates"
-                    data={evaluationRatingsData}
-                    xKey="name"
-                    series={[{ key: 'value', label: 'Graduates Count' }]}
-                    height={200}
-                    darkMode={darkMode}
-                  />
-                </div>
-
-                {/* Employer Activity Timeline */}
-                <div>
-                  <ActivityTimeline
-                    activities={dynamicActivityTimeline}
-                    darkMode={darkMode}
-                    onViewAll={() => setActiveTab('messages')}
-                  />
-                </div>
-
-                {/* Quick actions panel */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
-                    }`}>
-                    <h3 className="font-bold text-md mb-4">Recruitment Quick Actions</h3>
-                    <div className="grid grid-cols-2 gap-4 text-xs font-bold">
-                      <button
-                        onClick={() => setActiveTab('post_job')}
-                        className="p-4 bg-astu-navy text-white rounded-2xl text-center hover:scale-102 transition-transform"
-                      >
-                        Post Placement Vacancy
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('candidates')}
-                        className="p-4 bg-astu-green text-white rounded-2xl text-center hover:scale-102 transition-transform"
-                      >
-                        Review Candidate Logs
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('search_talent')}
-                        className="p-4 bg-purple-600 text-white rounded-2xl text-center hover:scale-102 transition-transform"
-                      >
-                        Search Talent Directory
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('feedback')}
-                        className="p-4 bg-astu-red text-white rounded-2xl text-center hover:scale-102 transition-transform"
-                      >
-                        Submit Curriculum Feedback
-                      </button>
+                  <div className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+                    <div className="mb-3 flex items-center justify-between">
+                      <h4 className="text-sm font-bold">Hiring Pipeline Health</h4>
+                      <span className="rounded-md bg-astu-green/10 px-2 py-1 text-[10px] font-extrabold uppercase tracking-wide text-astu-green">Live</span>
                     </div>
-                  </section>
-
-                  <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
-                    }`}>
-                    <h3 className="font-bold text-md mb-4 font-body-md">Recruitment Partner Perks</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                      Get access to verified academic records directly from the ASTU Registrar office.
-                      Your feedback provides high-value guidelines to the dean board during curriculum modernization cycles.
-                    </p>
-                    <div className="p-3 bg-gray-50/5 border border-gray-100/5 rounded-xl text-xs flex items-center gap-2">
-                      <span className="material-symbols-outlined text-astu-green">verified</span>
-                      <span className="font-semibold text-gray-600">Verified ASTU Academic Records Integration Active</span>
-                    </div>
-                  </section>
-                </div>
-
-              </div>
-            )}
-
-            {activeTab === 'management' && (
-              <section className="space-y-6">
-                {/* 1. Shared Institutional Hub Bridge */}
-                <InstitutionalHubBridge currentHub="employer" />
-
-                {/* 2. Enhanced Employer Hero */}
-                <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#002244] via-[#003580] to-teal-900 p-6 md:p-8 text-white shadow-xl">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/4 pointer-events-none" />
-                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                    <div className="max-w-3xl space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          Corporate Talent & Partner Portal
-                        </span>
-                      </div>
-                      <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                        Corporate Employer Management Hub
-                      </h2>
-                      <p className="text-sm leading-relaxed text-white/80">
-                        Create job openings, manage internships, access verified STEM graduate pools, track application pipelines, and schedule campus recruitment events.
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      <button
-                        onClick={() => setActiveTab('post_job')}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-md transition-all"
-                      >
-                        <Briefcase className="w-3.5 h-3.5" />
-                        <span>Post Vacancy</span>
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('search_talent')}
-                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-bold border border-white/20 transition-all"
-                      >
-                        <Search className="w-3.5 h-3.5 text-teal-300" />
-                        <span>Search Talent</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. Employer Key Metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
-                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                      <Briefcase className="w-4 h-4 text-[#003580] dark:text-blue-400" />
-                      <p className="text-[10px] font-bold uppercase tracking-wider">Active Openings</p>
-                    </div>
-                    <p className="text-2xl font-extrabold text-[#003580] dark:text-blue-400 mt-2">4 Roles</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Software & Network Eng</p>
-                  </div>
-
-                  <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
-                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                      <UserCheck className="w-4 h-4 text-emerald-500" />
-                      <p className="text-[10px] font-bold uppercase tracking-wider">Candidates In Queue</p>
-                    </div>
-                    <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">28 Applied</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Verified ASTU Alumni</p>
-                  </div>
-
-                  <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
-                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                      <Sparkles className="w-4 h-4 text-purple-500" />
-                      <p className="text-[10px] font-bold uppercase tracking-wider">Shortlisted</p>
-                    </div>
-                    <p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400 mt-2">9 Candidates</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Ready for tech interview</p>
-                  </div>
-
-                  <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
-                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                      <Calendar className="w-4 h-4 text-teal-500" />
-                      <p className="text-[10px] font-bold uppercase tracking-wider">Campus Career Fair</p>
-                    </div>
-                    <p className="text-2xl font-extrabold text-teal-600 dark:text-teal-400 mt-2">Registered</p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">ASTU Main Campus</p>
-                  </div>
-                </div>
-
-                {/* 4. Action Cards */}
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {employerManagementActions.map((action) => (
-                    <button
-                      key={action.title}
-                      onClick={() => setActiveTab(action.tab)}
-                      className={`group rounded-2xl border p-5 text-left shadow-2xs hover:border-[#003580]/40 dark:hover:border-blue-500/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between ${
-                        darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between">
-                          <span className="material-symbols-outlined rounded-xl bg-[#003580]/10 dark:bg-blue-950/60 p-2.5 text-[#003580] dark:text-blue-400 group-hover:scale-110 transition-transform duration-300 text-xl">
-                            {action.icon}
-                          </span>
-                          <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#003580] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                      {hiringPipeline.map((item) => (
+                        <div key={item.label} className={`rounded-[10px] border p-3 ${darkMode ? 'border-slate-800 bg-slate-900/80' : 'border-gray-200 bg-gray-50'}`}>
+                          <span className="material-symbols-outlined text-astu-navy">{item.icon}</span>
+                          <p className="mt-2 text-xl font-extrabold">{item.value}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{item.label}</p>
+                          <p className="mt-1 text-[11px] leading-relaxed text-gray-500">{item.helper}</p>
                         </div>
-                        <h3 className="mt-3.5 text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#003580] dark:group-hover:text-blue-400 transition-colors">
-                          {action.title}
-                        </h3>
-                        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                          {action.desc}
-                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Stats Counters Grid */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                {stats.map((stat) => (
+                  <div
+                    key={stat.id}
+                    onMouseEnter={() => setHoveredCard(stat.id)}
+                    onMouseLeave={() => setHoveredCard(null)}
+                    onClick={() => {
+                      if (stat.id === 1) setActiveTab('post_job');
+                      if (stat.id === 2) setActiveTab('candidates');
+                      if (stat.id === 3) setActiveTab('candidates');
+                      if (stat.id === 4) setActiveTab('candidates');
+                      if (stat.id === 5) setActiveTab('feedback');
+                    }}
+                    className={`group relative cursor-pointer overflow-hidden rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-300 ${darkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-gray-200/60 text-gray-900'
+                      } ${hoveredCard === stat.id ? '-translate-y-1 shadow-md' : ''}`}
+                  >
+                    <div className="relative z-10 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className={`p-2.5 rounded-xl bg-astu-navy/10 text-astu-navy`}>
+                          <span className="material-symbols-outlined text-2xl font-bold">{stat.icon}</span>
+                        </div>
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-astu-green bg-astu-green/10 px-2 py-0.5 rounded">Active</span>
                       </div>
-                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-[#003580] dark:text-blue-400">
-                          Launch Workspace
-                        </span>
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                          Tab: {action.tab}
+                      <div>
+                        <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                        <p className="text-3xl font-extrabold text-astu-navy mt-1">{stat.value}</p>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 font-semibold pt-1 border-t border-gray-100/5">
+                        <span className="material-symbols-outlined text-base font-bold text-astu-green">{stat.trendIcon}</span>
+                        {stat.trend}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Active Jobs list overview */}
+              <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                }`}>
+                <div className="mb-4 flex items-center justify-between border-b border-gray-150 pb-2">
+                  <div>
+                    <h3 className="text-sm font-semibold">Your Posted Positions</h3>
+                    <p className="text-xs text-gray-500 font-semibold">Quick updates on recent vacancies</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('post_job')}
+                    className="text-xs font-bold text-astu-navy hover:underline"
+                  >
+                    View All Positions &rarr;
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {jobs.slice(0, 2).map((job) => (
+                    <div
+                      key={job.id}
+                      className={`rounded-[10px] border p-4 transition-all ${darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50/50 border-gray-200'
+                        }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-bold text-sm">{job.title}</h4>
+                          <p className="text-xs text-gray-500">{job.location} • {job.type}</p>
+                        </div>
+                        <span className="px-2 py-0.5 bg-astu-navy/10 text-astu-navy text-[10px] font-extrabold rounded">
+                          {job.applicationsCount} Applied
                         </span>
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               </section>
-            )}
 
-            {activeTab === 'profile' && (
-              <CompanyProfileTab
-                profile={profile}
-                onSave={handleSaveProfile}
-                darkMode={darkMode}
-              />
-            )}
-
-            {activeTab === 'post_job' && (
-              jobsLoading ? (
-                <div className="flex h-64 items-center justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003366] border-t-transparent"></div>
+              <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                }`}>
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold">Employer Feature Control</h3>
+                    <p className="mt-1 text-xs text-gray-500">Recruitment, talent search, feedback, and partnership actions in one place.</p>
+                  </div>
+                  <span className="rounded-md border border-astu-green/20 bg-astu-green/10 px-2.5 py-1 text-[11px] font-semibold text-astu-green">
+                    Hiring workflow active
+                  </span>
                 </div>
-              ) : (
-                <JobPostingTab
-                  jobs={jobs}
-                  onPostJob={handlePostJob}
-                  onToggleJobStatus={handleToggleJobStatus}
-                  onUpdateJob={handleUpdateJob}
-                  onDeleteJob={handleDeleteJob}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                  {hiringControlCards.map((card) => (
+                    <button
+                      key={card.title}
+                      onClick={() => setActiveTab(card.tab)}
+                      className={`rounded-[10px] border p-4 text-left transition-all hover:border-astu-navy/30 hover:shadow-sm ${darkMode ? 'border-slate-800 bg-slate-800/70 hover:bg-slate-800' : 'border-gray-200 bg-gray-50 hover:bg-white'}`}
+                    >
+                      <span className="material-symbols-outlined rounded-full bg-astu-navy/10 p-2 text-astu-navy">{card.icon}</span>
+                      <h4 className="mt-3 text-sm font-bold">{card.title}</h4>
+                      <p className="mt-1 text-xs leading-relaxed text-gray-500">{card.desc}</p>
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {demandSignals.map((signal) => (
+                    <div key={signal.label} className={`rounded-[10px] border p-4 ${darkMode ? 'border-slate-800 bg-slate-950/40' : 'border-gray-200 bg-white'}`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`material-symbols-outlined ${signal.tone}`}>{signal.icon}</span>
+                        <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">{signal.label}</p>
+                      </div>
+                      <p className="mt-2 text-lg font-extrabold">{signal.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Employer Analytics Graphs Row */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <AnalyticsChart
+                  type="area"
+                  title="Application Submissions"
+                  subtitle="Candidate applications received over last 6 months"
+                  data={monthlySubmissionsData}
+                  xKey="month"
+                  series={[{ key: 'applications', label: 'Applications Received' }]}
+                  height={200}
                   darkMode={darkMode}
                 />
-              )
-            )}
+                <AnalyticsChart
+                  type="pie"
+                  title="Evaluation Ratings"
+                  subtitle="Corporate evaluation of hired graduates"
+                  data={evaluationRatingsData}
+                  xKey="name"
+                  series={[{ key: 'value', label: 'Graduates Count' }]}
+                  height={200}
+                  darkMode={darkMode}
+                />
+              </div>
 
-            {activeTab === 'candidates' && (
-              <ApplicationsTab
-                applications={applications}
-                onUpdateStatus={handleUpdateApplicationStatus}
-                onMessageCandidate={(app) => {
-                  setActiveChatTarget({
-                    id: app.userId || app.alumniId,
-                    userId: app.userId || app.alumniId,
-                    name: app.alumnusName,
-                    email: app.alumnusEmail,
-                    avatar: app.alumnusAvatar,
-                    role: 'ALUMNI',
-                    roleLabel: 'Alumni Candidate',
-                    department: app.department
-                  });
-                  setActiveTab('messages');
-                  toast.success(`Opening conversation with ${app.alumnusName}...`);
-                }}
+              {/* Employer Activity Timeline */}
+              <div>
+                <ActivityTimeline
+                  activities={dynamicActivityTimeline}
+                  darkMode={darkMode}
+                  onViewAll={() => setActiveTab('messages')}
+                />
+              </div>
+
+              {/* Quick actions panel */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                  }`}>
+                  <h3 className="font-bold text-md mb-4">Recruitment Quick Actions</h3>
+                  <div className="grid grid-cols-2 gap-4 text-xs font-bold">
+                    <button
+                      onClick={() => setActiveTab('post_job')}
+                      className="p-4 bg-astu-navy text-white rounded-2xl text-center hover:scale-102 transition-transform"
+                    >
+                      Post Placement Vacancy
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('candidates')}
+                      className="p-4 bg-astu-green text-white rounded-2xl text-center hover:scale-102 transition-transform"
+                    >
+                      Review Candidate Logs
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('search_talent')}
+                      className="p-4 bg-purple-600 text-white rounded-2xl text-center hover:scale-102 transition-transform"
+                    >
+                      Search Talent Directory
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('feedback')}
+                      className="p-4 bg-astu-red text-white rounded-2xl text-center hover:scale-102 transition-transform"
+                    >
+                      Submit Curriculum Feedback
+                    </button>
+                  </div>
+                </section>
+
+                <section className={`rounded-[10px] border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200/60'
+                  }`}>
+                  <h3 className="font-bold text-md mb-4 font-body-md">Recruitment Partner Perks</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                    Get access to verified academic records directly from the ASTU Registrar office.
+                    Your feedback provides high-value guidelines to the dean board during curriculum modernization cycles.
+                  </p>
+                  <div className="p-3 bg-gray-50/5 border border-gray-100/5 rounded-xl text-xs flex items-center gap-2">
+                    <span className="material-symbols-outlined text-astu-green">verified</span>
+                    <span className="font-semibold text-gray-600">Verified ASTU Academic Records Integration Active</span>
+                  </div>
+                </section>
+              </div>
+
+            </div>
+          )}
+
+          {activeTab === 'management' && (
+            <section className="space-y-6">
+              {/* 1. Shared Institutional Hub Bridge */}
+              <InstitutionalHubBridge currentHub="employer" />
+
+              {/* 2. Enhanced Employer Hero */}
+              <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#002244] via-[#003580] to-teal-900 p-6 md:p-8 text-white shadow-xl">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/4 pointer-events-none" />
+                <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                  <div className="max-w-3xl space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Corporate Talent & Partner Portal
+                      </span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                      Corporate Employer Management Hub
+                    </h2>
+                    <p className="text-sm leading-relaxed text-white/80">
+                      Create job openings, manage internships, access verified STEM graduate pools, track application pipelines, and schedule campus recruitment events.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      onClick={() => setActiveTab('post_job')}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-md transition-all"
+                    >
+                      <Briefcase className="w-3.5 h-3.5" />
+                      <span>Post Vacancy</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('search_talent')}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur-md text-white text-xs font-bold border border-white/20 transition-all"
+                    >
+                      <Search className="w-3.5 h-3.5 text-teal-300" />
+                      <span>Search Talent</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Employer Key Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <Briefcase className="w-4 h-4 text-[#003580] dark:text-blue-400" />
+                    <p className="text-[10px] font-bold uppercase tracking-wider">Active Openings</p>
+                  </div>
+                  <p className="text-2xl font-extrabold text-[#003580] dark:text-blue-400 mt-2">4 Roles</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Software & Network Eng</p>
+                </div>
+
+                <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <UserCheck className="w-4 h-4 text-emerald-500" />
+                    <p className="text-[10px] font-bold uppercase tracking-wider">Candidates In Queue</p>
+                  </div>
+                  <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">28 Applied</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Verified ASTU Alumni</p>
+                </div>
+
+                <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <Sparkles className="w-4 h-4 text-purple-500" />
+                    <p className="text-[10px] font-bold uppercase tracking-wider">Shortlisted</p>
+                  </div>
+                  <p className="text-2xl font-extrabold text-purple-600 dark:text-purple-400 mt-2">9 Candidates</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Ready for tech interview</p>
+                </div>
+
+                <div className={`p-4 rounded-2xl border ${darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'} shadow-2xs`}>
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                    <Calendar className="w-4 h-4 text-teal-500" />
+                    <p className="text-[10px] font-bold uppercase tracking-wider">Campus Career Fair</p>
+                  </div>
+                  <p className="text-2xl font-extrabold text-teal-600 dark:text-teal-400 mt-2">Registered</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">ASTU Main Campus</p>
+                </div>
+              </div>
+
+              {/* 4. Action Cards */}
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {employerManagementActions.map((action) => (
+                  <button
+                    key={action.title}
+                    onClick={() => setActiveTab(action.tab)}
+                    className={`group rounded-2xl border p-5 text-left shadow-2xs hover:border-[#003580]/40 dark:hover:border-blue-500/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between ${
+                      darkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-200/80 bg-white'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="material-symbols-outlined rounded-xl bg-[#003580]/10 dark:bg-blue-950/60 p-2.5 text-[#003580] dark:text-blue-400 group-hover:scale-110 transition-transform duration-300 text-xl">
+                          {action.icon}
+                        </span>
+                        <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#003580] dark:group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                      </div>
+                      <h3 className="mt-3.5 text-sm font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#003580] dark:group-hover:text-blue-400 transition-colors">
+                        {action.title}
+                      </h3>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                        {action.desc}
+                      </p>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-[#003580] dark:text-blue-400">
+                        Launch Workspace
+                      </span>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Tab: {action.tab}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {activeTab === 'profile' && (
+            <CompanyProfileTab
+              profile={profile}
+              onSave={handleSaveProfile}
+              darkMode={darkMode}
+            />
+          )}
+
+          {activeTab === 'post_job' && (
+            jobsLoading ? (
+              <div className="flex h-64 items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003366] border-t-transparent"></div>
+              </div>
+            ) : (
+              <JobPostingTab
+                jobs={jobs}
+                onPostJob={handlePostJob}
+                onToggleJobStatus={handleToggleJobStatus}
+                onUpdateJob={handleUpdateJob}
+                onDeleteJob={handleDeleteJob}
                 darkMode={darkMode}
               />
-            )}
+            )
+          )}
 
-            {activeTab === 'search_talent' && (
-              <TalentSearchTab
-                darkMode={darkMode}
-                onSelectChatTarget={(target) => {
-                  setActiveChatTarget({
-                    id: target.userId || target.alumniId,
-                    userId: target.userId || target.alumniId,
-                    name: target.name,
-                    role: 'ALUMNI',
-                    roleLabel: 'Alumni Candidate'
-                  });
-                  setActiveTab('messages');
-                  toast.success(`Opening ASTU_AMS Hub chat with ${target.name}...`);
-                }}
-              />
-            )}
+          {activeTab === 'candidates' && (
+            <ApplicationsTab
+              applications={applications}
+              onUpdateStatus={handleUpdateApplicationStatus}
+              onMessageCandidate={(app) => {
+                setActiveChatTarget({
+                  id: app.userId || app.alumniId,
+                  userId: app.userId || app.alumniId,
+                  name: app.alumnusName,
+                  email: app.alumnusEmail,
+                  avatar: app.alumnusAvatar,
+                  role: 'ALUMNI',
+                  roleLabel: 'Alumni Candidate',
+                  department: app.department
+                });
+                setActiveTab('messages');
+                toast.success(`Opening conversation with ${app.alumnusName}...`);
+              }}
+              darkMode={darkMode}
+            />
+          )}
 
-            {activeTab === 'pipeline' && (
-              <CandidatePipelineKanban />
-            )}
+          {activeTab === 'search_talent' && (
+            <TalentSearchTab
+              darkMode={darkMode}
+              onSelectChatTarget={(target) => {
+                setActiveChatTarget({
+                  id: target.userId || target.alumniId,
+                  userId: target.userId || target.alumniId,
+                  name: target.name,
+                  role: 'ALUMNI',
+                  roleLabel: 'Alumni Candidate'
+                });
+                setActiveTab('messages');
+                toast.success(`Opening ASTU_AMS Hub chat with ${target.name}...`);
+              }}
+            />
+          )}
 
-            {activeTab === 'partnerships' && (
-              <PartnerMoUDirectory />
-            )}
+          {activeTab === 'pipeline' && (
+            <CandidatePipelineKanban />
+          )}
 
-            {activeTab === 'feedback' && (
-              <FeedbackTab
-                feedbacks={feedbacks}
-                onSubmitFeedback={handleRegisterFeedback}
-                onRefreshFeedbacks={() => employerService.getFeedbacks().then(setFeedbacks)}
-                darkMode={darkMode}
-              />
-            )}
+          {activeTab === 'partnerships' && (
+            <PartnerMoUDirectory />
+          )}
 
-            {(activeTab === 'chat' || activeTab === 'messages') && (
-              <MessagingTab
-                darkMode={darkMode}
-                initialTarget={activeChatTarget}
-              />
-            )}
+          {activeTab === 'feedback' && (
+            <FeedbackTab
+              feedbacks={feedbacks}
+              onSubmitFeedback={handleRegisterFeedback}
+              onRefreshFeedbacks={() => employerService.getFeedbacks().then(setFeedbacks)}
+              darkMode={darkMode}
+            />
+          )}
 
-            {activeTab === 'analytics' && (
-              <AnalyticsTab
-                darkMode={darkMode}
-              />
-            )}
-          </main>
-        </div>
-      </div>
+          {(activeTab === 'chat' || activeTab === 'messages') && (
+            <MessagingTab
+              darkMode={darkMode}
+              initialTarget={activeChatTarget}
+            />
+          )}
 
-      <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+          {activeTab === 'analytics' && (
+            <AnalyticsTab
+              darkMode={darkMode}
+            />
+          )}
+      </DashboardShell>
 
       {selectedSearchCandidate && (
         <CandidateProfileModal

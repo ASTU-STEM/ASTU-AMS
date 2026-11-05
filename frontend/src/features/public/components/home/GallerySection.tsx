@@ -82,7 +82,7 @@ export default function GallerySection({ images, headers, onNavigate }: GalleryS
               key={item.id || `gallery-${page}-${idx}`}
               type="button"
               onClick={() => onNavigate(viewAllLink)}
-              className="group relative aspect-[4/3] overflow-hidden rounded-3xl bg-slate-100 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-sky-400/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="home-surface group relative aspect-[4/3] bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:bg-slate-800 dark:focus-visible:ring-sky-400/50 motion-reduce:hover:translate-y-0"
             >
               <img
                 src={src}

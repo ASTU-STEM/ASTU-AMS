@@ -33,16 +33,9 @@ export const ViewAllButton = ({
 }) => {
   if (!visible) return null;
   return (
-    <button
-      type="button"
-      className="group inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-astu-navy shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-astu-navy/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-900/70 dark:text-sky-300 dark:hover:border-sky-500/50 motion-reduce:transition-none"
-      onClick={onClick}
-    >
+    <button type="button" className="home-btn home-btn--soft home-btn--sm group" onClick={onClick}>
       <span>{label}</span>
-      <ArrowRight
-        className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
-        aria-hidden="true"
-      />
+      <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
     </button>
   );
 };
@@ -94,7 +87,7 @@ export const SectionPager = ({
       <button
         type="button"
         onClick={onPrev}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-astu-navy shadow-sm transition duration-300 hover:border-astu-navy hover:bg-astu-navy hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 dark:border-slate-600 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-sky-600 dark:hover:text-white"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/90 bg-white text-astu-navy shadow-sm transition duration-300 hover:border-astu-navy hover:bg-astu-navy hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 dark:border-slate-600 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-sky-600 dark:hover:text-white"
         aria-label={`Previous ${label}`}
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -105,7 +98,7 @@ export const SectionPager = ({
       <button
         type="button"
         onClick={onNext}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-300 bg-white text-astu-navy shadow-sm transition duration-300 hover:border-astu-navy hover:bg-astu-navy hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 dark:border-slate-600 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-sky-600 dark:hover:text-white"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-300/90 bg-white text-astu-navy shadow-sm transition duration-300 hover:border-astu-navy hover:bg-astu-navy hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-astu-navy/40 dark:border-slate-600 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-sky-600 dark:hover:text-white"
         aria-label={`Next ${label}`}
       >
         <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -166,9 +159,9 @@ export const SectionShell = ({
   const { ref, visible } = useSectionReveal<HTMLElement>();
   const toneClass =
     tone === "muted"
-      ? "bg-slate-50 dark:bg-slate-950/50"
+      ? "home-section--muted"
       : tone === "band"
-        ? "bg-white dark:bg-slate-900/30"
+        ? "home-section--band"
         : "bg-[var(--bg-page)]";
 
   return (
@@ -184,14 +177,8 @@ export const SectionShell = ({
       >
         <div className="mb-10 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-3xl space-y-3">
-            {eyebrow ? (
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-astu-red">
-                {eyebrow}
-              </p>
-            ) : null}
-            <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white md:text-4xl">
-              {title}
-            </h2>
+            {eyebrow ? <p className="home-section__eyebrow">{eyebrow}</p> : null}
+            <h2 className="home-section__title">{title}</h2>
             {description ? (
               <p className="max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300 md:text-lg">
                 {description}

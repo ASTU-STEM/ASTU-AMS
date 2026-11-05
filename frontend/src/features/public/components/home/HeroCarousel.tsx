@@ -74,9 +74,12 @@ export default function HeroCarousel({
     return () => window.removeEventListener("keydown", onKey);
   }, [displaySlides.length]);
 
+  const supporting =
+    activeHero?.description || welcomeMessage || activeHero?.tagline || "";
+
   return (
     <section
-      className="relative isolate z-0 h-[min(88vh,760px)] min-h-[560px] w-full overflow-hidden bg-slate-950 md:h-[680px] lg:h-[720px]"
+      className="relative isolate z-0 h-[min(100svh,820px)] min-h-[580px] w-full overflow-hidden bg-slate-950 md:min-h-[640px]"
       aria-roledescription="carousel"
       aria-label="ASTU homepage highlights"
     >
@@ -92,60 +95,53 @@ export default function HeroCarousel({
             >
               <img
                 alt=""
-                className={`h-full w-full object-cover object-center transition-transform duration-[9000ms] ease-out motion-reduce:transition-none ${
-                  active ? "scale-100" : "scale-105"
+                className={`h-full w-full object-cover object-center motion-reduce:animate-none ${
+                  active ? "home-hero__kenburns" : "scale-105"
                 }`}
                 src={slide.image || DEFAULT_HERO_IMAGE}
                 onError={onHeroImageError}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/30" />
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-950/92 via-slate-950/58 to-slate-950/25" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/35" />
+              <div
+                className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-astu-red/20 to-transparent"
+                aria-hidden="true"
+              />
             </div>
           );
         })}
       </div>
 
-      <div className="relative z-10 mx-auto flex h-full max-w-[1440px] items-center px-4 py-16 md:px-8 md:py-20">
-        <div
-          key={activeSlideIndex}
-          className="home-hero__copy max-w-3xl space-y-5 md:space-y-6"
-        >
-          <p className="text-sm font-bold uppercase tracking-[0.22em] text-amber-300/95 md:text-[0.95rem]">
-            {brandSignal}
-          </p>
-          <h1 className="text-4xl font-black leading-[1.06] tracking-tight text-white drop-shadow-sm sm:text-5xl md:text-6xl lg:text-[3.85rem]">
+      <div className="relative z-10 mx-auto flex h-full max-w-[1440px] items-center px-4 py-20 md:px-8 md:py-24">
+        <div key={activeSlideIndex} className="home-hero__copy max-w-3xl space-y-5 md:space-y-6">
+          <p className="home-hero__brand">{brandSignal}</p>
+          <h1 className="home-hero__headline">
             {activeHero?.title || "Alumni Management System"}
           </h1>
-          {(activeHero?.description || welcomeMessage || activeHero?.tagline) ? (
-            <p className="max-w-2xl text-base leading-relaxed text-white/90 md:text-lg lg:text-xl">
-              {activeHero?.description || welcomeMessage || activeHero?.tagline}
+          {supporting ? (
+            <p className="max-w-2xl text-base leading-relaxed text-white/88 md:text-lg lg:text-xl">
+              {supporting}
             </p>
           ) : null}
 
-          <div className="flex flex-wrap items-center gap-3 pt-2 sm:gap-4">
+          <div className="flex flex-wrap items-center gap-3 pt-1 sm:gap-4">
             <button
               type="button"
-              className="group inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-[#9B1218] via-astu-red to-rose-500 px-7 py-4 text-sm font-bold tracking-wide text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.28),0_12px_32px_-8px_rgba(227,30,36,0.55)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_18px_40px_-8px_rgba(227,30,36,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-[0.98] sm:w-auto md:text-base motion-reduce:transition-none motion-reduce:hover:scale-100"
+              className="home-btn home-btn--accent home-btn--lg group w-full sm:w-auto"
               onClick={() => onNavigate(primaryLink)}
             >
-              <GraduationCap className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <GraduationCap className="home-btn__icon" aria-hidden="true" />
               <span>{liveHeroButtons?.primaryText || "Alumni Portal"}</span>
-              <ArrowRight
-                className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
+              <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
             </button>
             <button
               type="button"
-              className="group inline-flex min-h-12 w-full items-center justify-center gap-2.5 rounded-xl border border-white/25 bg-white/10 px-7 py-4 text-sm font-bold tracking-wide text-white shadow-[0_8px_24px_-12px_rgba(0,0,0,0.55)] backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-white/45 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-[0.98] sm:w-auto md:text-base motion-reduce:transition-none motion-reduce:hover:scale-100"
+              className="home-btn home-btn--secondary home-btn--lg group w-full sm:w-auto"
               onClick={() => onNavigate(secondaryLink)}
             >
-              <Building2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <Building2 className="home-btn__icon" aria-hidden="true" />
               <span>{liveHeroButtons?.secondaryText || "Employer Partnership"}</span>
-              <ArrowRight
-                className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
-                aria-hidden="true"
-              />
+              <ArrowRight className="home-btn__icon home-btn__icon--arrow" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -156,7 +152,7 @@ export default function HeroCarousel({
           <button
             type="button"
             onClick={onPrevSlide}
-            className="absolute left-3 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-slate-950/50 text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:border-white/50 hover:bg-astu-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:inline-flex md:left-5"
+            className="absolute left-3 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-slate-950/45 text-white shadow-lg backdrop-blur-md transition hover:border-white/50 hover:bg-astu-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:inline-flex md:left-5"
             aria-label="Previous slide"
           >
             <ArrowLeft className="h-5 w-5" aria-hidden="true" />
@@ -164,7 +160,7 @@ export default function HeroCarousel({
           <button
             type="button"
             onClick={onNextSlide}
-            className="absolute right-3 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-slate-950/50 text-white shadow-lg backdrop-blur-md transition hover:scale-105 hover:border-white/50 hover:bg-astu-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:inline-flex md:right-5"
+            className="absolute right-3 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-slate-950/45 text-white shadow-lg backdrop-blur-md transition hover:border-white/50 hover:bg-astu-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:inline-flex md:right-5"
             aria-label="Next slide"
           >
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -181,10 +177,10 @@ export default function HeroCarousel({
                 key={`dot-${idx}`}
                 role="tab"
                 onClick={() => onSelectSlide(idx)}
-                className={`h-2.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
+                className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
                   idx === activeSlideIndex
                     ? "w-8 bg-amber-400"
-                    : "w-2.5 bg-white/40 hover:bg-white/65"
+                    : "w-2 bg-white/40 hover:bg-white/65"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
                 aria-selected={idx === activeSlideIndex}
@@ -205,7 +201,7 @@ export default function HeroCarousel({
           className="rounded-full border border-white/20 bg-slate-950/40 p-2 text-white/90 shadow-md backdrop-blur-md transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 animate-bounce motion-reduce:animate-none"
           aria-label="Scroll to next section"
         >
-          <ChevronDown className="h-6 w-6" aria-hidden="true" />
+          <ChevronDown className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
     </section>

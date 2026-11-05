@@ -1,18 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
-import toast, { Toaster } from 'react-hot-toast';
-import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3, CheckCircle2, RefreshCw, ShieldCheck, ArrowRight, Building2, Sparkles, AlertTriangle, Layers, ExternalLink, FileCheck, Check, Clock } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Search, FileText, BarChart3, CheckCircle2, RefreshCw, ShieldCheck, ArrowRight, Building2, Sparkles, Layers, FileCheck, Check, Clock } from 'lucide-react';
 import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
-import HelpCenter from '../../../components/HelpCenter';
 import { PageLoader } from '../../../components/loaders';
-
-
-// Types
-import { GraduateRecord, VerificationRequest, DocumentProcessingRequest } from '../types/registrar.types';
-
-// Services
-import { registrarService } from '../services/registrar.service';
+import { DashboardShell } from '../../../layouts/DashboardShell';
+import type { SidebarNavSection } from '../../../layouts/AppSidebar';
 
 // Tabs
 import { RecordsTab } from '../components/RecordsTab';
@@ -69,58 +62,42 @@ const normalizeGraduateList = (rows: any[]) => {
 };
 
 const RegistrarDashboard = () => {
-  const { darkMode, toggleTheme } = useTheme();
-   const navigate = useNavigate();
-   const { user, logout } = useAuth();
+  const { darkMode } = useTheme();
+  const { user, logout } = useAuth();
 
-   // Dynamic authenticated Registrar profile state from database
-   const registrarName = useMemo(() => {
-     if (user) {
-       const full = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-       if (full) return full;
-       if ((user as any).name) return (user as any).name;
-       if (user.email) return user.email.split('@')[0];
-     }
-     const storedUser = localStorage.getItem('user');
-     if (storedUser) {
-       try {
-         const parsed = JSON.parse(storedUser);
-         const full = `${parsed.firstName || ''} ${parsed.lastName || ''}`.trim();
-         if (full) return full;
-         if (parsed.name) return parsed.name;
-       } catch (e) {}
-     }
-     return 'Office of Registrar';
-   }, [user]);
+  // Dynamic authenticated Registrar profile state from database
+  const registrarName = useMemo(() => {
+    if (user) {
+      const full = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      if (full) return full;
+      if ((user as any).name) return (user as any).name;
+      if (user.email) return user.email.split('@')[0];
+    }
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        const full = `${parsed.firstName || ''} ${parsed.lastName || ''}`.trim();
+        if (full) return full;
+        if (parsed.name) return parsed.name;
+      } catch (e) {}
+    }
+    return 'Office of Registrar';
+  }, [user]);
 
-   const registrarTitle = useMemo(() => {
-     if (user?.role === 'REGISTRAR') return 'Registrar Officer';
-     if (user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') return 'Platform Administrator';
-     return 'Registrar Officer';
-   }, [user]);
+  const registrarInitials = useMemo(() => {
+    const cleanName = registrarName.replace(/^(Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s+/, '').trim();
+    const parts = cleanName.split(' ');
+    if (parts.length >= 2 && parts[0] && parts[1]) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    if (parts.length === 1 && parts[0]) return parts[0].substring(0, 2).toUpperCase();
+    return 'AA';
+  }, [registrarName]);
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
 
-   const registrarInitials = useMemo(() => {
-     const cleanName = registrarName.replace(/^(Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s+/, '').trim();
-     const parts = cleanName.split(' ');
-     if (parts.length >= 2 && parts[0] && parts[1]) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-     if (parts.length === 1 && parts[0]) return parts[0].substring(0, 2).toUpperCase();
-     return 'AA';
-   }, [registrarName]);
-   const [activeTab, setActiveTab] = useState<string>('dashboard');
-   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
-   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('registrar_sidebar_collapsed') === 'true');
-   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
 
-   const [searchQuery, setSearchQuery] = useState('');
-   const normalizedSearch = useMemo(() => searchQuery.trim().toLowerCase(), [searchQuery]);
-
-
-   // Theme Dark / Light mode
-
-  // Notifications Bell dropdown
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
   // Core Data States
@@ -286,9 +263,11 @@ const RegistrarDashboard = () => {
       const name = d.alumni?.fullName || d.fullName || 'Alumnus';
       realNotifs.push({
         id: `doc_${d.id}`,
+        title: 'Document Request',
         text: `New ${d.documentType || 'Document'} request from ${name}`,
         unread: isPending,
-        time: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent'
+        time: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent',
+        targetTab: 'documents',
       });
     });
 
@@ -297,9 +276,11 @@ const RegistrarDashboard = () => {
       const name = v.fullName || v.alumni?.fullName || 'Alumnus';
       realNotifs.push({
         id: `verif_${v.id}`,
+        title: 'Identity Verification',
         text: `Identity verification pending for ${name}`,
         unread: isPending,
-        time: v.requestDate ? new Date(v.requestDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent'
+        time: v.requestDate ? new Date(v.requestDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent',
+        targetTab: 'verification',
       });
     });
 
@@ -308,9 +289,11 @@ const RegistrarDashboard = () => {
       const name = i.fullName || 'Alumnus';
       realNotifs.push({
         id: `issue_${i.id}`,
+        title: 'Data Correction',
         text: `Data correction request pending for ${name}`,
         unread: isPending,
-        time: i.createdAt ? new Date(i.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent'
+        time: i.createdAt ? new Date(i.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Recent',
+        targetTab: 'data_issues',
       });
     });
 
@@ -797,414 +780,150 @@ const RegistrarDashboard = () => {
   };
 
   const handleClearNotifications = () => {
-    setNotifications([]);
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
   };
 
-  const unreadNotificationsCount = notifications.filter(n => n.unread).length;
+  const handleMarkNotificationRead = (n: { id: string | number }) => {
+    setNotifications((prev) =>
+      prev.map((item) => (String(item.id) === String(n.id) ? { ...item, unread: false } : item))
+    );
+  };
 
-  useEffect(() => {
-    if (activeTab === 'dashboard' && normalizedSearch) {
-      // keep user in dashboard unless they explicitly search
+  const handleNotificationClick = (n: { targetTab?: string; id?: string | number }) => {
+    if (n.targetTab) {
+      setActiveTab(n.targetTab);
+      return;
     }
-  }, [activeTab, normalizedSearch]);
+    const id = String(n.id || '');
+    if (id.startsWith('doc_')) setActiveTab('documents');
+    else if (id.startsWith('verif_')) setActiveTab('verification');
+    else if (id.startsWith('issue_')) setActiveTab('data_issues');
+  };
 
-useEffect(() => {
-     localStorage.setItem('registrar_sidebar_collapsed', String(sidebarCollapsed));
-   }, [sidebarCollapsed]);
+  const sidebarSections: SidebarNavSection[] = useMemo(
+    () => [
+      {
+        id: 'core',
+        label: 'Registrar Core',
+        items: [
+          { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', tooltip: 'Overview & key metrics' },
+          { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', tooltip: 'Verification, clearance, certificates & migration' },
+          {
+            id: 'records',
+            label: 'Alumni Records',
+            icon: 'people',
+            badge: unseenAlumniCount > 0 ? unseenAlumniCount : null,
+            tooltip: unseenAlumniCount > 0 ? `${unseenAlumniCount} new alumni registered` : `${graduates.length} active records`,
+          },
+          { id: 'data_integration', label: 'Batch Import', icon: 'cloud_upload', tooltip: 'Excel/CSV import & batch processing' },
+        ],
+      },
+      {
+        id: 'queue',
+        label: 'Verification Queue',
+        items: [
+          {
+            id: 'verification',
+            label: 'Verifications',
+            icon: 'verified_user',
+            badge: pendingVerificationsCount > 0 ? pendingVerificationsCount : null,
+            tooltip: `${pendingVerificationsCount} pending approvals`,
+          },
+          {
+            id: 'documents',
+            label: 'Document Queue',
+            icon: 'description',
+            badge: documentRequestsCount > 0 ? documentRequestsCount : null,
+            tooltip: `${documentRequestsCount} documents awaiting action`,
+          },
+          {
+            id: 'data_issues',
+            label: 'Data Corrections',
+            icon: 'report_problem',
+            badge: pendingDataIssuesCount > 0 ? pendingDataIssuesCount : null,
+            tooltip: pendingDataIssuesCount > 0 ? `${pendingDataIssuesCount} pending correction requests` : 'Registration data correction requests',
+          },
+        ],
+      },
+      {
+        id: 'tracer',
+        label: 'Tracer & Reports',
+        items: [
+          { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', tooltip: 'Survey response tracking & analytics' },
+          { id: 'reporting', label: 'Reports & Export', icon: 'analytics', tooltip: 'Accreditation reports & data export' },
+        ],
+      },
+      {
+        id: 'comm',
+        label: 'Communication',
+        items: [
+          {
+            id: 'messages',
+            label: 'Messages',
+            icon: 'forum',
+            badge: unreadChatMessagesCount > 0 ? unreadChatMessagesCount : null,
+            tooltip: unreadChatMessagesCount > 0 ? `${unreadChatMessagesCount} unread messages` : 'Direct Messaging Hub',
+          },
+        ],
+      },
+    ],
+    [
+      unseenAlumniCount,
+      graduates.length,
+      pendingVerificationsCount,
+      documentRequestsCount,
+      pendingDataIssuesCount,
+      unreadChatMessagesCount,
+    ]
+  );
 
-   useEffect(() => {
-     setMobileSidebarOpen(false);
-     setShowNotifications(false);
-     setMenuOpen(false);
-   }, [activeTab]);
-
-   // Close dropdowns on click outside
-   useEffect(() => {
-     const handleClick = (e: MouseEvent) => {
-       const target = e.target as HTMLElement;
-       if (!target.closest('[data-admin-menu]') && !target.closest('[data-admin-notifications]')) {
-         setMenuOpen(false);
-         setShowNotifications(false);
-       }
-     };
-     window.addEventListener('mousedown', handleClick);
-     return () => window.removeEventListener('mousedown', handleClick);
-   }, []);
-
-   const handleLogout = () => {
-     logout();
-     toast.success('Logged out successfully');
-     window.location.href = '/login';
-   };
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    window.location.href = '/login';
+  };
 
 
-   return (
-    <>
-    <div className="app-shell min-h-screen bg-[var(--bg-page)] font-['Inter',sans-serif] text-[var(--text-primary)] antialiased">
-      <style>{`
-        @keyframes float-particle {
-          0%, 100% { transform: translateY(0) translateX(0); opacity: 0.4; }
-          25% { transform: translateY(-15px) translateX(8px); opacity: 0.6; }
-          50% { transform: translateY(-8px) translateX(-4px); opacity: 0.3; }
-          75% { transform: translateY(-22px) translateX(12px); opacity: 0.5; }
-        }
-        @keyframes gradient-shift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes glow-soft {
-          0%, 100% { box-shadow: 0 0 8px rgba(0,51,102,0.08); }
-          50% { box-shadow: 0 0 20px rgba(0,51,102,0.15); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        .sidebar-particle {
-          animation: float-particle 6s ease-in-out infinite;
-        }
-        .sidebar-particle:nth-child(2) { animation-delay: 2s; animation-duration: 8s; }
-        .sidebar-particle:nth-child(3) { animation-delay: 4s; animation-duration: 7s; }
-        .nav-btn {
-          transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .nav-btn:hover {
-          transform: translateX(3px);
-        }
-      `}</style>
+  return (
+    <DashboardShell
+      sidebarSections={sidebarSections}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      title="ASTU Registrar"
+      subtitle="Management Hub"
+      brand="Registrar"
+      userName={registrarName}
+      userRole="Registrar Admin"
+      userInitials={registrarInitials}
+      onLogout={handleLogout}
+      searchPlaceholder="Search SIS records, requests, documents..."
+      searchValue={searchQuery}
+      onSearch={(q) => {
+        setSearchQuery(q);
+        if (activeTab === 'dashboard' && q.trim().length > 1) setActiveTab('records');
+      }}
+      notifications={notifications}
+      onClearNotifications={handleClearNotifications}
+      onMarkNotificationRead={handleMarkNotificationRead}
+      onNotificationClick={handleNotificationClick}
+      logoSrc="/images/astu-seal-logo.png"
+      menuActions={[
+        {
+          id: 'surveys',
+          label: 'Tracer Reports',
+          icon: <FileText className="h-4 w-4" />,
+          onClick: () => setActiveTab('surveys'),
+        },
+        {
+          id: 'reporting',
+          label: 'Reports & Analytics',
+          icon: <BarChart3 className="h-4 w-4" />,
+          onClick: () => setActiveTab('reporting'),
+        },
+      ]}
+    >
+      {isLoadingData && <PageLoader />}
 
-      {mobileSidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close navigation"
-          onClick={() => setMobileSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-slate-950/45 backdrop-blur-sm md:hidden"
-        />
-      )}
-
-        {/* Sidebar Container */}
-        <aside className={`fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden shadow-xs transition-all duration-300 md:translate-x-0 bg-[var(--bg-sidebar)] border-r border-[var(--border-color)] text-[var(--text-primary)] ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'md:w-20' : 'md:w-72'}`}>
-          {/* Sidebar Logo Header */}
-          <div className="relative z-10 h-16 shrink-0 px-4 flex items-center border-b border-[var(--border-color)] bg-[var(--bg-sidebar)]">
-            <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'gap-3'}`}>
-              <div className="relative shrink-0 flex items-center justify-center h-10 w-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] p-1.5">
-                <img
-                  src="/images/astu-seal-logo.png"
-                  alt="ASTU Official Logo"
-                  className="h-full w-full object-contain"
-                />
-              </div>
-              {!sidebarCollapsed && (
-                <div>
-                  <h1 className="text-sm font-extrabold text-[var(--text-primary)] tracking-tight leading-tight">ASTU Registrar</h1>
-                  <p className="text-[10px] text-[var(--accent-cyan)] uppercase tracking-[0.18em] font-extrabold truncate mt-0.5">Management Hub</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden space-y-4">
-            {[
-              {
-                sectionKey: 'core',
-                sectionLabel: 'Registrar Core',
-                items: [
-                  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & key metrics' },
-                  { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Verification, clearance, certificates & migration' },
-                  { id: 'records', label: 'Alumni Records', icon: 'people', badge: unseenAlumniCount > 0 ? unseenAlumniCount : null, tooltip: unseenAlumniCount > 0 ? `${unseenAlumniCount} new alumni registered` : `${graduates.length} active records` },
-                  { id: 'data_integration', label: 'Batch Import', icon: 'cloud_upload', badge: null, tooltip: 'Excel/CSV import & batch processing' },
-                ]
-              },
-              {
-                sectionKey: 'queue',
-                sectionLabel: 'Verification Queue',
-                items: [
-                  { id: 'verification', label: 'Verifications', icon: 'verified_user', badge: pendingVerificationsCount > 0 ? pendingVerificationsCount : null, tooltip: `${pendingVerificationsCount} pending approvals` },
-                  { id: 'documents', label: 'Document Queue', icon: 'description', badge: documentRequestsCount > 0 ? documentRequestsCount : null, tooltip: `${documentRequestsCount} documents awaiting action` },
-                  { id: 'data_issues', label: 'Data Corrections', icon: 'report_problem', badge: pendingDataIssuesCount > 0 ? pendingDataIssuesCount : null, tooltip: pendingDataIssuesCount > 0 ? `${pendingDataIssuesCount} pending correction requests` : 'Registration data correction requests' },
-                ]
-              },
-              {
-                sectionKey: 'tracer',
-                sectionLabel: 'Tracer & Reports',
-                items: [
-                  { id: 'surveys', label: 'Tracer Surveys', icon: 'assignment', badge: null, tooltip: 'Survey response tracking & analytics' },
-                  { id: 'reporting', label: 'Reports & Export', icon: 'analytics', badge: null, tooltip: 'Accreditation reports & data export' },
-                ]
-              },
-              {
-                sectionKey: 'comm',
-                sectionLabel: 'Communication',
-                items: [
-                  { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadChatMessagesCount > 0 ? unreadChatMessagesCount : null, tooltip: unreadChatMessagesCount > 0 ? `${unreadChatMessagesCount} unread messages` : 'Direct Messaging Hub' }
-                ]
-              }
-            ].map(group => (
-              <div key={group.sectionKey}>
-                {!sidebarCollapsed && (
-                  <div className="px-2.5 mb-1.5 mt-1">
-                    <p className="text-[11px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.18em]">{group.sectionLabel}</p>
-                  </div>
-                )}
-                <div className="space-y-1">
-                  {group.items.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveTab(item.id)}
-                      title={sidebarCollapsed ? item.label : item.tooltip}
-                      className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id
-                        ? 'bg-[#2196F3] text-white font-extrabold shadow-lg shadow-[#2196F3]/25'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)]'
-                      }`}
-                    >
-                      <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-white/20 text-white' : 'bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--accent-cyan)] group-hover:text-white group-hover:border-[var(--brand-primary)]'}`}>
-                        <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                        {item.badge && sidebarCollapsed && (
-                          <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-[#F87171] text-[8px] font-black text-slate-950 shadow-lg">
-                            {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
-                          </span>
-                        )}
-                      </span>
-                      {!sidebarCollapsed && (
-                        <>
-                          <span className="text-xs font-bold flex-1 truncate text-left">{item.label}</span>
-                          {item.badge && (
-                            <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-extrabold ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-[#F87171] text-slate-950 font-black' : 'bg-[var(--bg-card-secondary)] text-[var(--accent-cyan)] border border-[var(--border-color)]'}`}>
-                              {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
-                            </span>
-                          )}
-                        </>
-                      )}
-                      {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                        <div className="ml-1 w-1.5 h-1.5 rounded-full bg-white shrink-0" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </nav>
-
-          {/* Sidebar Footer */}
-          <div className="relative z-10 p-3 border-t border-[var(--border-color)] bg-[var(--bg-sidebar)] space-y-1">
-            {!sidebarCollapsed ? (
-              <>
-                <button
-                  onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 text-left group gap-3.5 cursor-pointer"
-                >
-                  <span className="w-8 h-8 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] group-hover:text-white material-symbols-outlined text-[18px]">help</span>
-                  <span className="text-xs font-bold">Help Center</span>
-                  <span className="ml-auto text-[9px] text-[var(--accent-cyan)] font-mono font-extrabold px-1.5 py-0.5 bg-[var(--bg-card-secondary)] rounded border border-[var(--border-color)]">v2.0</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="nav-btn w-full flex items-center px-3 py-2.5 rounded-xl text-[#F87171] hover:text-white hover:bg-[#3B1A22] border border-transparent hover:border-[#71313A] transition-all duration-200 text-left group gap-3.5 cursor-pointer"
-                >
-                  <span className="w-8 h-8 rounded-lg bg-[#3B1A22] border border-[#71313A] flex items-center justify-center text-[#F87171] group-hover:text-white material-symbols-outlined text-[18px]">logout</span>
-                  <span className="text-xs font-bold">Logout</span>
-                  <span className="ml-auto text-[9px] text-[#F87171]/70 font-mono">Alt+L</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setHelpOpen(true)}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all duration-200 group relative cursor-pointer"
-                  title="Help Center"
-                >
-                  <span className="w-7 h-7 rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--accent-cyan)] material-symbols-outlined text-[17px]">help</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="nav-btn w-full flex items-center justify-center px-2 py-1.5 rounded-lg text-[#F87171] hover:bg-[#3B1A22] transition-all duration-200 group relative cursor-pointer"
-                  title="Logout"
-                >
-                  <span className="w-7 h-7 rounded-md bg-[#3B1A22] border border-[#71313A] flex items-center justify-center text-[#F87171] material-symbols-outlined text-[17px]">logout</span>
-                </button>
-              </>
-            )}
-          </div>
-        </aside>
-
-      {/* Main Content Area */}
-      <div className={`min-h-screen flex flex-col justify-between transition-[margin-left] duration-300 ease-in-out ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-72'}`}>
-        <div>
-          {/* Header bar */}
-          <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-navbar)] px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6 text-[var(--text-primary)]">
-             <div className="flex min-w-0 items-center gap-3">
-               <button
-                 type="button"
-                 onClick={() => setSidebarCollapsed((value) => !value)}
-                 className="hidden h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:inline-flex cursor-pointer transition-colors"
-                 title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-               >
-                 <Menu className="h-5 w-5" />
-               </button>
-               <button
-                 type="button"
-                 onClick={() => {
-                   setSidebarCollapsed(false);
-                   setMobileSidebarOpen(true);
-                 }}
-                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] md:hidden cursor-pointer"
-                 aria-label="Open navigation"
-               >
-                 <Menu className="h-5 w-5" />
-               </button>
-                <div className="min-w-0 flex items-center gap-2">
-                  <span className="text-xs text-[var(--text-muted)] hidden sm:inline">Registrar /</span>
-                  <h1 className="truncate text-sm sm:text-base font-extrabold tracking-tight text-[var(--text-primary)]">
-                    {activeTab === 'dashboard' ? 'Overview Dashboard' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1).replace(/_/g, ' ')}
-                  </h1>
-                </div>
-             </div>
-
-            <div className="flex items-center gap-3">
-              {/* Search Bar */}
-              <label
-                className="group hidden h-10 w-[380px] max-w-[32vw] items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 text-xs shadow-sm transition-all md:flex focus-within:border-[var(--brand-primary)] focus-within:ring-2 focus-within:ring-[#2196F3]/20"
-              >
-                <span className="mr-2 inline-flex h-4 w-4 items-center justify-center text-[var(--text-muted)]">
-                  <Search className="h-4 w-4 flex-none" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search SIS records, requests, documents..."
-                  className="w-full bg-transparent outline-none text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-xs"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (activeTab === 'dashboard' && e.target.value.trim().length > 1) {
-                      setActiveTab('records');
-                    }
-                  }}
-                />
-              </label>
-
-              {/* Dark Mode Toggle */}
-              <button
-                type="button"
-                onClick={() => {
-                  toggleTheme();
-                  toast.success(darkMode ? 'Light Theme activated!' : 'Enterprise Dark Theme active');
-                }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] cursor-pointer transition-colors"
-                aria-label="Toggle dark mode"
-              >
-                {darkMode ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
-              </button>
-
-              {/* Notification Bell */}
-              <div className="relative" data-admin-notifications>
-                <button
-                  type="button"
-                  onClick={() => setShowNotifications((v) => !v)}
-                  className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border border-[var(--border-color)] cursor-pointer transition-colors"
-                >
-                  <Bell className="h-4 w-4" />
-                  {unreadNotificationsCount > 0 && (
-                    <span className="absolute -top-1 -right-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#F87171] text-[9px] font-black leading-none text-slate-950 shadow-md">
-                      {unreadNotificationsCount}
-                    </span>
-                  )}
-                </button>
-                {showNotifications && (
-                  <div className="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl">
-                    <div className="border-b border-[var(--border-color)] px-4 py-3 bg-[var(--bg-navbar)]">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-sm font-extrabold text-[var(--text-primary)]">Pending Notifications</div>
-                          <div className="text-[11px] text-[var(--text-muted)]">Recent registrar queue updates</div>
-                        </div>
-                        <button
-                          onClick={handleClearNotifications}
-                          className="text-xs font-bold text-[#F87171] hover:underline cursor-pointer"
-                        >
-                          Clear All
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-1 p-2 max-h-80 overflow-y-auto">
-                      {notifications.map((notif) => (
-                        <div key={notif.id} className="flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-[var(--bg-card-secondary)] transition-colors border border-transparent hover:border-[var(--border-color)]">
-                          <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${notif.unread ? 'bg-[var(--accent-cyan)]' : 'bg-[var(--text-muted)]/40'}`} />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-semibold text-[var(--text-primary)]">{notif.text}</p>
-                            <p className="text-[10px] text-[var(--text-muted)] mt-0.5 font-mono">{notif.time}</p>
-                          </div>
-                        </div>
-                      ))}
-                      {notifications.length === 0 && (
-                        <p className="px-2 py-6 text-center text-xs text-[var(--text-muted)]">No new alerts.</p>
-                      )}
-                    </div>
-                    <div className="border-t border-[var(--border-color)] px-4 py-2.5 bg-[var(--bg-navbar)] text-center">
-                      <button type="button" onClick={() => { setShowNotifications(false); setActiveTab('verification'); }} className="text-xs font-bold text-[var(--accent-cyan)] hover:underline cursor-pointer">
-                        View all pending verifications →
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Profile Button with Initials */}
-              <div className="relative" data-admin-menu>
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] px-3 py-1.5 shadow-sm hover:border-[var(--brand-primary)]/50 transition-colors cursor-pointer"
-                >
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#2196F3] to-[#004d99] text-xs font-extrabold text-white shadow-sm">
-                    {registrarInitials}
-                  </div>
-                  <div className="hidden text-left sm:block">
-                    <div className="text-xs font-bold text-[var(--text-primary)] truncate max-w-[130px]">{registrarName}</div>
-                    <div className="text-[10px] text-[var(--accent-cyan)] font-medium">{registrarTitle}</div>
-                  </div>
-                  <ChevronDown className="h-3.5 w-3.5 text-[var(--text-muted)]" />
-                </button>
-                {menuOpen && (
-                  <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-1.5 shadow-2xl">
-                    <div className="px-3 py-2.5 bg-[var(--bg-navbar)] rounded-lg mb-1">
-                      <div className="text-xs font-bold text-[var(--text-primary)] truncate">{registrarName}</div>
-                      <div className="mt-1">
-                        <span className="inline-flex items-center rounded-md bg-[#2196F3]/15 px-2 py-0.5 text-[10px] font-bold text-[var(--accent-cyan)] border border-[var(--brand-primary)]/30">{registrarTitle}</span>
-                      </div>
-                    </div>
-                    <div className="my-1 h-px bg-[var(--border-color)]" />
-                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('surveys'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
-                      <FileText className="h-4 w-4 text-[var(--accent-cyan)]" /> Tracer Reports
-                    </button>
-                    <button type="button" onClick={() => { setMenuOpen(false); setActiveTab('reporting'); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
-                      <BarChart3 className="h-4 w-4 text-[var(--accent-cyan)]" /> Reports & Analytics
-                    </button>
-                    <div className="my-1 h-px bg-[var(--border-color)]" />
-                    <button type="button" onClick={() => { setMenuOpen(false); setHelpOpen(true); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-card-secondary)] hover:text-[var(--text-primary)] cursor-pointer">
-                      <HelpCircle className="h-4 w-4 text-[var(--accent-cyan)]" /> Help Center
-                    </button>
-                    <button type="button" onClick={() => { setMenuOpen(false); handleLogout(); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-bold text-[#F87171] hover:bg-[#3B1A22] cursor-pointer">
-                      <LogOut className="h-4 w-4 text-[#F87171]" /> Sign Out
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </header>
-
-            {/* isLoadingData was set but never read, so this page had no
-                loading UI at all: every counter showed 0 and the records table
-                rendered empty while the requests were still in flight. */}
-            {isLoadingData && (
-              <div className="px-4 pt-4 sm:px-6">
-                <PageLoader />
-              </div>
-            )}
-
-          {/* Dynamic tabs routing */}
-          <div className="flex-grow bg-[var(--bg-page)] p-4 sm:p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto w-full" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'management' && (
               <section className="space-y-6">
                 {/* 1. Shared Institutional Hub Bridge across Dashboards */}
@@ -1951,14 +1670,7 @@ useEffect(() => {
             {activeTab === 'messages' && (
               <MessagingTab darkMode={darkMode} />
             )}
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
-    </>
+    </DashboardShell>
   );
 };
 

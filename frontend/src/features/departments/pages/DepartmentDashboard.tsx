@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useTheme } from '../../../hooks/useTheme';
 import { Toaster } from 'react-hot-toast';
-import HelpCenter from '../../../components/HelpCenter';
+import { DashboardShell } from '../../../layouts/DashboardShell';
+import type { SidebarNavSection } from '../../../layouts/AppSidebar';
 
-// Navigation Components
-import { DepartmentSidebar } from '../components/navigation/DepartmentSidebar';
-import { DepartmentHeader } from '../components/navigation/DepartmentHeader';
-
-// Feature Tabs
 import { DashboardOverview } from '../components/DashboardOverview';
 import { EmploymentOutcomesMatrix } from '../components/outcomes/EmploymentOutcomesMatrix';
 import { TracerStudyWaveAudit } from '../components/tracer/TracerStudyWaveAudit';
@@ -22,24 +17,58 @@ import { AccreditationReports } from '../components/AccreditationReports';
 import { ExportCenter } from '../components/ExportCenter';
 import { TelegramChat } from '../../../components/TelegramChat';
 import InstitutionalHubBridge from '../../../components/InstitutionalHubBridge';
+import { useTheme } from '../../../hooks/useTheme';
+
+const SIDEBAR_SECTIONS: SidebarNavSection[] = [
+  {
+    id: 'core',
+    label: 'Department Core',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', tooltip: 'Overview & key metrics' },
+      { id: 'outcomes-matrix', label: 'Outcomes Matrix', icon: 'query_stats', badge: 'NEW', tooltip: 'Graduate Employment Outcomes Matrix' },
+      { id: 'wave-audit', label: 'Wave 3 Audit', icon: 'rule', badge: 'NEW', tooltip: 'Wave 3 Tracer Study & Curriculum Audit' },
+      { id: 'employment-analytics', label: 'Employment Analytics', icon: 'trending_up', tooltip: 'Graduate employment outcomes & trends' },
+      { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', tooltip: 'Analytics, curriculum, KPIs & partnerships' },
+    ],
+  },
+  {
+    id: 'surveys',
+    label: 'Analytics & Surveys',
+    items: [
+      { id: 'department-surveys', label: 'Department Surveys', icon: 'edit_note', badge: 'NEW', tooltip: 'Custom department surveys & alerts' },
+      { id: 'skill-gap', label: 'Skill Gap Reports', icon: 'school', tooltip: 'Skill gap analysis from employer data' },
+      { id: 'employer-feedback', label: 'Employer Feedback', icon: 'rate_review', tooltip: 'Employer reviews & curriculum feedback' },
+      { id: 'messages', label: 'Messages', icon: 'chat', tooltip: 'ASTU_AMS direct messaging hub' },
+    ],
+  },
+  {
+    id: 'reports',
+    label: 'Reports & Audit',
+    items: [
+      { id: 'tracer-reports', label: 'Tracer Reports', icon: 'assignment', tooltip: 'Tracer study reports & surveys' },
+      { id: 'curriculum', label: 'Curriculum Insights', icon: 'menu_book', tooltip: 'Curriculum review & analytics' },
+      { id: 'accreditation', label: 'Accreditation Reports', icon: 'verified', tooltip: 'Accreditation-ready reports' },
+      { id: 'export', label: 'Export Reports', icon: 'download', tooltip: 'Export data & reports' },
+    ],
+  },
+];
 
 export const DepartmentDashboard: React.FC = () => {
-  const { logout } = useAuth();
-  const { darkMode, toggleTheme } = useTheme();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => 
-    localStorage.getItem('department_sidebar_collapsed') === 'true'
-  );
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const { darkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
-  const [helpOpen, setHelpOpen] = useState(false);
 
-  const handleSidebarCollapseToggle = (val: boolean | ((prev: boolean) => boolean)) => {
-    setSidebarCollapsed(prev => {
-      const next = typeof val === 'function' ? val(prev) : val;
-      localStorage.setItem('department_sidebar_collapsed', String(next));
-      return next;
-    });
-  };
+  const userName =
+    [user?.firstName, user?.lastName].filter(Boolean).join(' ') ||
+    (user as any)?.name ||
+    'Department Head';
+  const userInitials = userName
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'DH';
 
   const renderActiveTabContent = () => {
     switch (activeTab) {
@@ -77,26 +106,35 @@ export const DepartmentDashboard: React.FC = () => {
           <div className="space-y-6">
             <InstitutionalHubBridge currentHub="department" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <button 
-                onClick={() => setActiveTab('outcomes-matrix')} 
-                className="bg-[var(--bg-card)] border border-[var(--border-color)] p-5 rounded-xl text-left hover:border-[#2196F3] transition-all"
+              <button
+                type="button"
+                onClick={() => setActiveTab('outcomes-matrix')}
+                className="bg-[var(--bg-card)] border border-[var(--border-color)] p-5 rounded-xl text-left hover:border-[#003580] transition-all"
               >
                 <div className="text-base font-semibold text-[var(--text-primary)]">Employment Outcomes Matrix</div>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">Cross-cohort placement rates, velocity and top corporate hiring partners.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Cross-cohort placement rates, velocity and top corporate hiring partners.
+                </p>
               </button>
-              <button 
-                onClick={() => setActiveTab('wave-audit')} 
-                className="bg-[var(--bg-card)] border border-[var(--border-color)] p-5 rounded-xl text-left hover:border-[#2196F3] transition-all"
+              <button
+                type="button"
+                onClick={() => setActiveTab('wave-audit')}
+                className="bg-[var(--bg-card)] border border-[var(--border-color)] p-5 rounded-xl text-left hover:border-[#003580] transition-all"
               >
                 <div className="text-base font-semibold text-[var(--text-primary)]">Wave 3 Tracer & Curriculum Audit</div>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">Syllabus relevance ratings, employer satisfaction, and ABET recommendations.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Syllabus relevance ratings, employer satisfaction, and ABET recommendations.
+                </p>
               </button>
-              <button 
-                onClick={() => setActiveTab('accreditation')} 
-                className="bg-[var(--bg-card)] border border-[var(--border-color)] p-5 rounded-xl text-left hover:border-[#2196F3] transition-all"
+              <button
+                type="button"
+                onClick={() => setActiveTab('accreditation')}
+                className="bg-[var(--bg-card)] border border-[var(--border-color)] p-5 rounded-xl text-left hover:border-[#003580] transition-all"
               >
                 <div className="text-base font-semibold text-[var(--text-primary)]">Accreditation Reports</div>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">ETA and international engineering accreditation compliance artifacts.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  ETA and international engineering accreditation compliance artifacts.
+                </p>
               </button>
             </div>
           </div>
@@ -107,51 +145,25 @@ export const DepartmentDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-input)] text-[var(--text-primary)] antialiased font-sans">
+    <>
       <Toaster position="top-right" />
-
-      {/* Mobile Backdrop */}
-      {mobileSidebarOpen && (
-        <button
-          type="button"
-          aria-label="Close navigation"
-          onClick={() => setMobileSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-xs md:hidden"
-        />
-      )}
-
-      {/* Sidebar */}
-      <DepartmentSidebar
-        sidebarCollapsed={sidebarCollapsed}
-        mobileSidebarOpen={mobileSidebarOpen}
+      <DashboardShell
+        sidebarSections={SIDEBAR_SECTIONS}
         activeTab={activeTab}
-        setActiveTab={(t) => {
-          setActiveTab(t);
-          setMobileSidebarOpen(false);
-        }}
-        onOpenHelp={() => setHelpOpen(true)}
+        onTabChange={setActiveTab}
+        title="ASTU Department"
+        subtitle="Management Portal"
+        brand="Department"
+        userName={userName}
+        userRole="Department Head"
+        userInitials={userInitials}
         onLogout={logout}
-      />
-
-      {/* Main Content Area */}
-      <div className={`flex flex-col min-h-screen transition-all duration-300 ${sidebarCollapsed ? 'md:pl-20' : 'md:pl-72'}`}>
-        <DepartmentHeader
-          activeTab={activeTab}
-          sidebarCollapsed={sidebarCollapsed}
-          setSidebarCollapsed={handleSidebarCollapseToggle}
-          setMobileSidebarOpen={setMobileSidebarOpen}
-          darkMode={darkMode}
-          toggleTheme={toggleTheme}
-          onNavigateTab={setActiveTab}
-        />
-
-        <main className="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto">
-          {renderActiveTabContent()}
-        </main>
-      </div>
-
-      <HelpCenter isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
-    </div>
+        searchPlaceholder="Search department workspace..."
+        logoSrc="/images/astu-seal-logo.png"
+      >
+        {renderActiveTabContent()}
+      </DashboardShell>
+    </>
   );
 };
 

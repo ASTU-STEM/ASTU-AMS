@@ -57,7 +57,11 @@ function StatCell({
 }) {
   const display = useCountUp(value, active);
   return (
-    <div className="group flex flex-col items-center justify-center gap-3 bg-slate-950 px-4 py-10 text-center transition duration-300 hover:bg-slate-900 sm:py-12 md:px-6 motion-reduce:transition-none">
+    <div className="group relative flex flex-col items-center justify-center gap-3 bg-slate-950 px-4 py-10 text-center transition duration-300 hover:bg-slate-900 sm:py-12 md:px-6 motion-reduce:transition-none">
+      <div
+        className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-astu-red/50 to-transparent opacity-0 transition group-hover:opacity-100"
+        aria-hidden="true"
+      />
       <div
         className={`inline-flex rounded-xl p-3 ${accent} ring-1 ring-white/10 transition duration-300 group-hover:scale-105 motion-reduce:group-hover:scale-100`}
       >
@@ -115,11 +119,11 @@ export default function ImpactCounters({ stats, headers }: ImpactCountersProps) 
     <section
       ref={rootRef}
       id="impact-numbers"
-      className="relative isolate z-0 w-full overflow-x-clip border-b border-astu-red bg-slate-950"
+      className="relative isolate z-0 w-full overflow-x-clip border-b-2 border-astu-red bg-slate-950"
       aria-label={headers?.title || "ASTU impact at a glance"}
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(7,89,166,0.22),_transparent_55%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(7,89,166,0.28),_transparent_55%),radial-gradient(ellipse_at_bottom,_rgba(227,30,36,0.12),_transparent_50%)]"
         aria-hidden="true"
       />
       <div className="relative mx-auto grid max-w-[1440px] grid-cols-2 gap-px bg-white/10 sm:grid-cols-4">

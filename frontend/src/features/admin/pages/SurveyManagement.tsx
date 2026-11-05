@@ -38,6 +38,36 @@ import {
 
 const MILESTONE_TYPES = new Set(['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH']);
 
+function toValidDate(value: unknown): Date | null {
+  if (value == null || value === '') return null;
+  const date = value instanceof Date ? value : new Date(value as string | number);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDateYmd(value: unknown, fallback = '—'): string {
+  const date = toValidDate(value);
+  return date ? date.toISOString().slice(0, 10) : fallback;
+}
+
+function formatDateTimeLocalValue(value: unknown): string | null {
+  const date = toValidDate(value);
+  return date ? date.toISOString().slice(0, 16) : null;
+}
+
+function formatLocaleDate(
+  value: unknown,
+  fallback = '—',
+  options?: Intl.DateTimeFormatOptions,
+): string {
+  const date = toValidDate(value);
+  return date ? date.toLocaleDateString(undefined, options) : fallback;
+}
+
+function formatLocaleDateTime(value: unknown, fallback = '—'): string {
+  const date = toValidDate(value);
+  return date ? date.toLocaleString() : fallback;
+}
+
 function getSurveyQuestionsList(survey: any): any[] {
   if (!survey) return [];
   if (Array.isArray(survey.questions)) return survey.questions;
@@ -141,7 +171,11 @@ export default function SurveyManagement() {
     if (!selectedSurvey || !scheduledDateTime) return;
     setIsScheduling(true);
     try {
-      const scheduledDateObj = new Date(scheduledDateTime);
+      const scheduledDateObj = toValidDate(scheduledDateTime);
+      if (!scheduledDateObj) {
+        toast.error('Please choose a valid launch date and time.');
+        return;
+      }
       const isoString = scheduledDateObj.toISOString();
       const isNowOrPast = scheduledDateObj <= new Date();
 
@@ -285,14 +319,14 @@ export default function SurveyManagement() {
       `"${item.survey?.title || ''}"`,
       `"${item.alumni?.department?.name || ''}"`,
       item.status || '',
-      item.assignedAt ? new Date(item.assignedAt).toISOString().slice(0, 10) : '',
-      item.dueDate ? new Date(item.dueDate).toISOString().slice(0, 10) : '',
+      formatDateYmd(item.assignedAt, ''),
+      formatDateYmd(item.dueDate, ''),
     ]);
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `tracer-assignments-batch-${batchFilter}-${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `tracer-assignments-batch-${batchFilter}-${formatDateYmd(new Date())}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -433,6 +467,10 @@ export default function SurveyManagement() {
     
     // If section questions are empty, but direct questions exist on survey object, populate them into the section!
     const qList = getSurveyQuestionsList(survey);
+    const totalSectionQs = mappedSections.reduce(
+      (sum: number, sec: any) => sum + (Array.isArray(sec?.questions) ? sec.questions.length : 0),
+      0,
+    );
     if (totalSectionQs === 0 && qList.length > 0) {
       const formattedQuestions = qList.map((q: any, i: number) => ({
         id: q.id,
@@ -1139,7 +1177,7 @@ export default function SurveyManagement() {
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         {wavesList.map((wave: any, idx) => {
                           const rate = wave.recipients > 0 ? Math.round((wave.completed / wave.recipients) * 100) : 0;
-                          const launchDateStr = new Date(wave.launchDate).toLocaleDateString(undefined, {
+                          const launchDateStr = formatLocaleDate(wave.launchDate, '—', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
@@ -1304,12 +1342,12 @@ export default function SurveyManagement() {
                         const pageItems = filtered.slice(startIdx, startIdx + wavePageSize);
 
                         return pageItems.map((item, idx) => {
-                          const assignedDate = new Date(item.assignedAt).toLocaleDateString(undefined, {
+                          const assignedDate = formatLocaleDate(item.assignedAt, '—', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
                           });
-                          const dueDate = new Date(item.dueDate).toLocaleDateString(undefined, {
+                          const dueDate = formatLocaleDate(item.dueDate, '—', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
@@ -1468,7 +1506,7 @@ export default function SurveyManagement() {
                   <div className="h-2 w-2 rounded-full bg-[#3b82f6]" /> In Progress
                 </span>
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
-                  Created: {new Date(selectedSurvey.createdAt).toISOString().split('T')[0]}
+                  Created: {formatDateYmd(selectedSurvey.createdAt)}
                 </span>
                 {['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(selectedSurvey.type) && (
                   <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 border border-amber-200">
@@ -1537,9 +1575,8 @@ export default function SurveyManagement() {
                   )}
                   <button
                     onClick={() => {
-                      const defaultVal = selectedSurvey?.scheduledAt
-                        ? new Date(selectedSurvey.scheduledAt).toISOString().slice(0, 16)
-                        : getNowDateTimeLocal();
+                      const defaultVal =
+                        formatDateTimeLocalValue(selectedSurvey?.scheduledAt) || getNowDateTimeLocal();
                       setScheduledDateTime(defaultVal);
                       setIsScheduleModalOpen(true);
                     }}
@@ -1698,9 +1735,10 @@ export default function SurveyManagement() {
                             </thead>
                             <tbody>
                               {selectedSurveyResponses.map((resItem: any) => {
-                                const submittedDateStr = resItem.submittedAt
-                                  ? new Date(resItem.submittedAt).toLocaleString()
-                                  : 'Recently Submitted';
+                                const submittedDateStr = formatLocaleDateTime(
+                                  resItem.submittedAt,
+                                  'Recently Submitted',
+                                );
                                 const alumniName = resItem.alumni?.fullName || 'Graduate Alumnus';
                                 const alumniEmail = resItem.alumni?.email || resItem.alumni?.user?.email || '';
                                 const studentId = resItem.alumni?.studentId || '';
@@ -2076,7 +2114,7 @@ export default function SurveyManagement() {
                   )}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Submitted by <strong>{viewingResponseModal.alumni?.fullName || 'Graduate'}</strong> ({viewingResponseModal.alumni?.email}) on {new Date(viewingResponseModal.submittedAt || viewingResponseModal.createdAt).toLocaleString()}
+                  Submitted by <strong>{viewingResponseModal.alumni?.fullName || 'Graduate'}</strong> ({viewingResponseModal.alumni?.email}) on {formatLocaleDateTime(viewingResponseModal.submittedAt || viewingResponseModal.createdAt)}
                 </p>
               </div>
               <button onClick={() => setViewingResponseModal(null)} className="rounded-full bg-slate-200 p-1.5 text-slate-600 hover:bg-slate-300">

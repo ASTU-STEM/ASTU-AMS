@@ -1472,8 +1472,14 @@ const createSafeModel = (name: string) => {
     },
     create: async ({ data }: any) => {
       const sanitized = sanitizePrismaCreate(data);
+      const now = new Date().toISOString();
       const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      const rec = { id, ...sanitized };
+      const rec = {
+        createdAt: now,
+        updatedAt: now,
+        ...sanitized,
+        id,
+      };
       store.push(rec);
       return sanitizeItemForRead(rec);
     },
@@ -1481,8 +1487,14 @@ const createSafeModel = (name: string) => {
       const items = Array.isArray(data) ? data : [data];
       const created = items.map((item: any) => {
         const sanitized = sanitizePrismaCreate(item);
+        const now = new Date().toISOString();
         const id = sanitized?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-        const rec = { id, ...sanitized };
+        const rec = {
+          createdAt: now,
+          updatedAt: now,
+          ...sanitized,
+          id,
+        };
         store.push(rec);
         return rec;
       });

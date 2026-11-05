@@ -10,9 +10,6 @@ import {
   ArrowRight,
   ExternalLink,
   ShieldCheck,
-  GraduationCap,
-  Briefcase,
-  HeartHandshake,
   RefreshCw,
 } from "lucide-react";
 import {
@@ -69,27 +66,6 @@ const defaultSections: { title: string; links: FooterLink[] }[] = [
     ],
   },
 ];
-
-const quickActions = [
-  {
-    label: "Join Alumni Network",
-    href: "/register",
-    icon: GraduationCap,
-    tone: "from-astu-navy to-blue-700",
-  },
-  {
-    label: "Partner as Employer",
-    href: "/employers",
-    icon: Briefcase,
-    tone: "from-emerald-700 to-teal-700",
-  },
-  {
-    label: "Support a Cause",
-    href: "/donations",
-    icon: HeartHandshake,
-    tone: "from-rose-700 to-astu-red",
-  },
-] as const;
 
 function telHref(phone?: string) {
   if (!phone) return undefined;
@@ -274,31 +250,6 @@ export default function Footer() {
               </button>
             </form>
           </div>
-        </div>
-
-        {/* Quick action strip */}
-        <div className="grid gap-3 py-8 sm:grid-cols-3 border-b border-slate-800/80">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <Link
-                key={action.href}
-                to={action.href}
-                className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${action.tone} px-4 py-4 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950`}
-              >
-                <div className="relative z-10 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <span className="flex-1 text-sm font-bold tracking-wide">{action.label}</span>
-                  <ArrowRight
-                    className="h-4 w-4 opacity-70 transition-transform group-hover:translate-x-0.5"
-                    aria-hidden="true"
-                  />
-                </div>
-              </Link>
-            );
-          })}
         </div>
 
         {/* Main grid */}

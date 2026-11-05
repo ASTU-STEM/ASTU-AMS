@@ -43,10 +43,12 @@ import { RegistrationProvider } from "./features/auth/contexts/RegistrationConte
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
 
 import { SystemSettingsProvider } from "./context/SystemSettingsContext";
+import ScrollToTop from "./components/ScrollToTop";
 
 function AppContent() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<HomePage />} />

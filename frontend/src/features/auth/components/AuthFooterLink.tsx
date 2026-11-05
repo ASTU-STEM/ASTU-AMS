@@ -9,9 +9,12 @@ interface AuthFooterLinkProps {
 
 export default function AuthFooterLink({ text, linkText, to }: AuthFooterLinkProps) {
   return (
-    <p className="text-center text-sm text-on-surface-variant">
+    <p className="text-center text-sm text-slate-600 dark:text-slate-400">
       {text}{' '}
-      <Link to={to} className="font-semibold text-astu-navy hover:underline">
+      <Link
+        to={to}
+        className="font-bold text-astu-navy transition hover:underline dark:text-sky-300 dark:hover:text-sky-200"
+      >
         {linkText}
       </Link>
     </p>

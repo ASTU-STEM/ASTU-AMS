@@ -59,10 +59,10 @@ export default function FaqSection({ items, headers, onNavigate }: FaqSectionPro
           return (
             <div
               key={id}
-              className={`overflow-hidden rounded-2xl border bg-white transition duration-300 dark:bg-slate-900/50 ${
+              className={`home-surface ${
                 open
                   ? "border-astu-navy/35 shadow-md dark:border-sky-500/40"
-                  : "border-slate-200/80 shadow-sm hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600"
+                  : "hover:border-slate-300 dark:hover:border-slate-600"
               }`}
             >
               <button

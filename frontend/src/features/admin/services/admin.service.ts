@@ -1,5 +1,5 @@
-import axios from 'axios';
-import type { ApiResult } from '../../auth/services/auth.service';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { authService, type ApiResult } from '../../auth/services/auth.service';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -10,6 +10,27 @@ const apiClient = axios.create({
   },
 });
 
+type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+let refreshInFlight: Promise<boolean> | null = null;
+let sessionExpiryRedirected = false;
+
+const clearLocalSession = () => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  localStorage.removeItem('astu_ams_user_role');
+  window.dispatchEvent(new Event('astu-auth-changed'));
+};
+
+const redirectToLoginOnce = () => {
+  if (sessionExpiryRedirected) return;
+  if (window.location.pathname.startsWith('/login')) return;
+  sessionExpiryRedirected = true;
+  const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+  window.location.assign(`/login?redirect=${redirect}`);
+};
+
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken');
   if (token) {
@@ -17,6 +38,42 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const original = error.config as RetriableConfig | undefined;
+    if (error.response?.status !== 401 || !original || original._retry) {
+      return Promise.reject(error);
+    }
+
+    original._retry = true;
+
+    if (!refreshInFlight) {
+      refreshInFlight = authService
+        .refreshToken()
+        .then((result) => result.ok)
+        .catch(() => false)
+        .finally(() => {
+          refreshInFlight = null;
+        });
+    }
+
+    const refreshed = await refreshInFlight;
+    if (refreshed) {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        original.headers = original.headers ?? {};
+        original.headers.Authorization = `Bearer ${token}`;
+      }
+      return apiClient(original);
+    }
+
+    clearLocalSession();
+    redirectToLoginOnce();
+    return Promise.reject(error);
+  }
+);
 
 export type AdminUserRow = {
   id: string;

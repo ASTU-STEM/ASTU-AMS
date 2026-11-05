@@ -42234,6 +42234,86 @@
       "ipAddress": "::ffff:127.0.0.1",
       "id": "dev-log-1793789454381",
       "createdAt": "2026-11-04T10:50:54.381Z"
+    },
+    {
+      "userId": "user-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793794911260",
+      "createdAt": "2026-11-04T12:21:51.260Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793794946052",
+      "createdAt": "2026-11-04T12:22:26.052Z"
+    },
+    {
+      "userId": "user-super-admin-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793795064288",
+      "createdAt": "2026-11-04T12:24:24.288Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793811703111",
+      "createdAt": "2026-11-04T17:01:43.111Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812353492",
+      "createdAt": "2026-11-04T17:12:33.492Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812357691",
+      "createdAt": "2026-11-04T17:12:37.691Z"
+    },
+    {
+      "userId": "user-cms-1",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812481930",
+      "createdAt": "2026-11-04T17:14:41.930Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812488384",
+      "createdAt": "2026-11-04T17:14:48.384Z"
+    },
+    {
+      "userId": "user-super-admin-2",
+      "action": "LOGOUT",
+      "details": "User logged out",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812494165",
+      "createdAt": "2026-11-04T17:14:54.165Z"
+    },
+    {
+      "userId": "user-dept-1",
+      "action": "LOGIN",
+      "details": "User logged in successfully",
+      "ipAddress": "::ffff:127.0.0.1",
+      "id": "dev-log-1793812498575",
+      "createdAt": "2026-11-04T17:14:58.575Z"
     }
   ],
   "notifications": [
@@ -64882,7 +64962,7 @@
           ]
         }
       },
-      "updatedAt": "2026-11-04T11:08:32.696Z",
+      "updatedAt": "2026-11-05T12:07:58.220Z",
       "updatedBy": "CMS Admin"
     }
   ],

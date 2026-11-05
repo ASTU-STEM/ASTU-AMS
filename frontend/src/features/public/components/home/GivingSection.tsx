@@ -65,7 +65,7 @@ export default function GivingSection({
           return (
             <div
               key={`${campaign.id}-${page}`}
-              className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-astu-navy/25 hover:shadow-xl focus-within:ring-2 focus-within:ring-astu-navy/25 dark:border-slate-700 dark:bg-slate-900/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              className="home-surface group focus-within:ring-2 focus-within:ring-astu-navy/25 motion-reduce:hover:translate-y-0"
             >
               <div className="aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img
@@ -95,14 +95,14 @@ export default function GivingSection({
                 ) : null}
                 <button
                   type="button"
-                  className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#9B1218] via-astu-red to-rose-500 px-4 py-2.5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_8px_20px_-8px_rgba(227,30,36,0.5)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_12px_28px_-8px_rgba(227,30,36,0.65)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:transition-none"
+                  className="home-btn home-btn--accent home-btn--sm w-full"
                   onClick={() =>
                     onDonate
                       ? onDonate(campaign)
                       : onNavigate(`/donations?cause=${encodeURIComponent(campaign.id)}`)
                   }
                 >
-                  <Heart className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <Heart className="home-btn__icon" aria-hidden="true" />
                   <span>Donate Now</span>
                 </button>
               </div>
