@@ -21,6 +21,12 @@ import SEOManagement from '../features/admin/pages/SEOManagement';
 import ApprovalWorkflow from '../features/admin/pages/ApprovalWorkflow';
 import ContentTemplates from '../features/admin/pages/ContentTemplates';
 import KnowledgeBaseManagement from '../features/admin/pages/KnowledgeBaseManagement';
+import PortalMenuControls from '../features/admin/pages/PortalMenuControls';
+import SurveyManagement from '../features/admin/pages/SurveyManagement';
+import AnalyticsOverview from '../features/admin/pages/AnalyticsOverview';
+import ReportsCenter from '../features/admin/pages/ReportsCenter';
+import JobsManagement from '../features/admin/pages/JobsManagement';
+import DonationsManagement from '../features/admin/pages/DonationsManagement';
 
 export default function CmsRoutes() {
   return (
@@ -33,8 +39,15 @@ export default function CmsRoutes() {
       <Route element={<CmsLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<CmsDashboard />} />
+        <Route path="surveys" element={<SurveyManagement />} />
+        <Route path="tracer-studies" element={<Navigate to="/cms/surveys" replace />} />
+        <Route path="analytics" element={<AnalyticsOverview />} />
+        <Route path="reports" element={<ReportsCenter />} />
         <Route path="registrations" element={<AnnouncementRegistrations />} />
         <Route path="events" element={<EventWorkshopManagement />} />
+        <Route path="jobs" element={<JobsManagement />} />
+        <Route path="careers" element={<Navigate to="/cms/jobs" replace />} />
+        <Route path="donations" element={<DonationsManagement />} />
         <Route path="homepage" element={<HomepageManagement />} />
         <Route path="content" element={<ContentList />} />
         <Route path="announcements" element={<ContentList />} />
@@ -45,6 +58,8 @@ export default function CmsRoutes() {
         <Route path="community-members" element={<CommunityMembersManagement />} />
         <Route path="knowledge-hub" element={<KnowledgeBaseManagement />} />
         <Route path="rag-knowledge" element={<KnowledgeBaseManagement />} />
+        <Route path="portal-controls" element={<PortalMenuControls />} />
+        <Route path="menu-controls" element={<PortalMenuControls />} />
         <Route path="media-gallery" element={<MediaGalleryHub />} />
         <Route path="media" element={<MediaGalleryHub />} />
         <Route path="gallery" element={<MediaGalleryHub />} />
