@@ -39,6 +39,7 @@ import AdminRoutes from "./routes/adminRoutes";
 import IctRoutes from "./routes/ictRoutes";
 import CmsRoutes from "./routes/cmsRoutes";
 import { RegistrationProvider } from "./features/auth/contexts/RegistrationContext";
+import { PortalMenuControlProvider } from "./context/PortalMenuControlContext";
 import VerificationRouteGuard from "./features/auth/components/VerificationRouteGuard";
 
 import { SystemSettingsProvider } from "./context/SystemSettingsContext";
@@ -172,7 +173,9 @@ function App() {
       <Toaster position="top-right" containerStyle={{ zIndex: 999999 }} toastOptions={{ style: { zIndex: 999999 } }} />
       <SystemSettingsProvider>
         <RegistrationProvider>
-          <AppContent />
+          <PortalMenuControlProvider>
+            <AppContent />
+          </PortalMenuControlProvider>
         </RegistrationProvider>
       </SystemSettingsProvider>
     </Provider>

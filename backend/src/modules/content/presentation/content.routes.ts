@@ -17,6 +17,11 @@ import {
   deleteMediaAssetController,
   getPublicMetricsController,
 } from './content.controller';
+import {
+  getMenuControlsController,
+  saveMenuControlsController,
+  resetMenuControlsController,
+} from './menuControls.controller';
 
 const router = Router();
 
@@ -50,6 +55,11 @@ const upload = multer({
     }
   },
 });
+
+// ─── Portal Menu Controls (Alumni Office Dashboard Control of All Actors) ───
+router.get('/menu-controls', optionalAuthenticateJWT, getMenuControlsController);
+router.put('/menu-controls', optionalAuthenticateJWT, saveMenuControlsController);
+router.post('/menu-controls/reset', optionalAuthenticateJWT, resetMenuControlsController);
 
 // ─── Public Endpoints (Accessible by Landing Page & Directory) ───
 router.get('/public-metrics', optionalAuthenticateJWT, getPublicMetricsController);

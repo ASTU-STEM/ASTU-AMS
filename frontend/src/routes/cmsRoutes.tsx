@@ -20,6 +20,7 @@ import MediaLibrary from '../features/admin/pages/MediaLibrary';
 import SEOManagement from '../features/admin/pages/SEOManagement';
 import ApprovalWorkflow from '../features/admin/pages/ApprovalWorkflow';
 import ContentTemplates from '../features/admin/pages/ContentTemplates';
+import KnowledgeBaseManagement from '../features/admin/pages/KnowledgeBaseManagement';
 
 export default function CmsRoutes() {
   return (
@@ -42,6 +43,8 @@ export default function CmsRoutes() {
         <Route path="institutional-pages" element={<HomepageManagement initialCategory="detail-pages" />} />
         <Route path="community" element={<CommunityManagement />} />
         <Route path="community-members" element={<CommunityMembersManagement />} />
+        <Route path="knowledge-hub" element={<KnowledgeBaseManagement />} />
+        <Route path="rag-knowledge" element={<KnowledgeBaseManagement />} />
         <Route path="media-gallery" element={<MediaGalleryHub />} />
         <Route path="media" element={<MediaGalleryHub />} />
         <Route path="gallery" element={<MediaGalleryHub />} />
