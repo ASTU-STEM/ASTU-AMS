@@ -11,6 +11,7 @@ import {
   Copy,
   Check,
   ArrowUpRight,
+  ShieldCheck,
 } from "lucide-react";
 import config from "../config";
 
@@ -192,20 +193,21 @@ async function streamAssistantMessage(
   userMessage: string,
   onDelta: (delta: string) => void,
   onDone: (meta: { citations: ChatCitation[]; actions: ChatAction[] }) => void,
-  onError: () => void
+  onError: () => void,
+  abortSignal?: AbortSignal
 ) {
   const streamUrl = `${config.apiUrl}/ai/public-chat-stream`;
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 20000);
+  let hasReceivedAnyDelta = false;
+  let finalCitations: ChatCitation[] = [];
+  let finalActions: ChatAction[] = [];
 
+  try {
     const response = await fetch(streamUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: userMessage }),
-      signal: controller.signal,
+      signal: abortSignal,
     });
-    clearTimeout(timeoutId);
 
     if (!response.ok || !response.body) {
       onError();
@@ -215,8 +217,6 @@ async function streamAssistantMessage(
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-    let finalCitations: ChatCitation[] = [];
-    let finalActions: ChatAction[] = [];
 
     while (true) {
       const { done, value } = await reader.read();
@@ -232,6 +232,7 @@ async function streamAssistantMessage(
           try {
             const data = JSON.parse(trimmed.slice(6));
             if (data.delta) {
+              hasReceivedAnyDelta = true;
               onDelta(data.delta);
             }
             if (data.done) {
@@ -243,47 +244,60 @@ async function streamAssistantMessage(
       }
     }
 
+    // Process any trailing line left in buffer
+    if (buffer.trim().startsWith("data: ")) {
+      try {
+        const data = JSON.parse(buffer.trim().slice(6));
+        if (data.delta) {
+          hasReceivedAnyDelta = true;
+          onDelta(data.delta);
+        }
+        if (data.done) {
+          if (Array.isArray(data.citations)) finalCitations = data.citations;
+          if (Array.isArray(data.actions)) finalActions = data.actions;
+        }
+      } catch {}
+    }
+
     onDone({ citations: finalCitations, actions: finalActions });
-  } catch {
-    onError();
+  } catch (err: any) {
+    if (err?.name === "AbortError") return;
+    if (hasReceivedAnyDelta) {
+      onDone({ citations: finalCitations, actions: finalActions });
+    } else {
+      onError();
+    }
   }
 }
 
-async function askAssistantFallback(userMessage: string): Promise<{ text: string; citations: ChatCitation[]; actions: ChatAction[] }> {
-  const candidateUrls = [
-    `${config.apiUrl}/ai/public-chat`,
-    "http://localhost:5000/api/ai/public-chat",
-  ];
+async function askAssistantFallback(
+  userMessage: string,
+  abortSignal?: AbortSignal
+): Promise<{ text: string; citations: ChatCitation[]; actions: ChatAction[] }> {
+  try {
+    const url = `${config.apiUrl}/ai/public-chat`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userMessage }),
+      signal: abortSignal,
+    });
 
-  for (const url of candidateUrls) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 7500);
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        const reply = data.data?.response;
-        const citations = data.data?.citations || [];
-        const actions = data.data?.actions || [];
-        if (typeof reply === "string" && reply.trim()) {
-          return {
-            text: reply.replace(/\*\*/g, "").replace(/\*/g, "").trim(),
-            citations,
-            actions,
-          };
-        }
+    if (response.ok) {
+      const data = await response.json();
+      const reply = data.data?.response;
+      const citations = data.data?.citations || [];
+      const actions = data.data?.actions || [];
+      if (typeof reply === "string" && reply.trim()) {
+        return {
+          text: reply.replace(/\*\*/g, "").replace(/\*/g, "").trim(),
+          citations,
+          actions,
+        };
       }
-    } catch {
-      /* try next URL / fallback */
     }
+  } catch {
+    /* fallback to local verified manual knowledge */
   }
 
   return {
@@ -322,10 +336,34 @@ function TypingDots({ isDark = false }: { isDark?: boolean }) {
   );
 }
 
+function renderFormattedText(text: string, isUser: boolean, isDark = false) {
+  if (!text || !text.includes("**")) return text;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**")) {
+          return (
+            <strong
+              key={i}
+              style={{
+                fontWeight: 700,
+                color: isUser ? "#fff" : isDark ? "#93c5fd" : COLORS.navy,
+              }}
+            >
+              {part.slice(2, -2)}
+            </strong>
+          );
+        }
+        return part;
+      })}
+    </>
+  );
+}
+
 function renderStructuredContent(rawText: string, isUser: boolean, isDark = false) {
-  const cleanedText = rawText
-    .replace(/\*\*/g, "")
-    .replace(/\*/g, "")
+  const cleanedText = (rawText || "")
+    .replace(/(?<!\*)\*(?!\*)/g, "")
     .replace(/"\s*"/g, '"');
 
   const lines = cleanedText.split("\n");
@@ -356,7 +394,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
                 lineHeight: 1.4,
               }}
             >
-              {trimmed}
+              {renderFormattedText(trimmed, isUser, isDark)}
             </div>
           );
         }
@@ -401,7 +439,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
                   color: isUser ? "#fff" : isDark ? "#f1f5f9" : "#1a1a2e",
                 }}
               >
-                {numMatch[2]}
+                {renderFormattedText(numMatch[2], isUser, isDark)}
               </span>
             </div>
           );
@@ -435,7 +473,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
                   color: isUser ? "#fff" : isDark ? "#f1f5f9" : "#1a1a2e",
                 }}
               >
-                {bulletMatch[2]}
+                {renderFormattedText(bulletMatch[2], isUser, isDark)}
               </span>
             </div>
           );
@@ -450,7 +488,7 @@ function renderStructuredContent(rawText: string, isUser: boolean, isDark = fals
               color: isUser ? "#fff" : isDark ? "#f1f5f9" : "#1a1a2e",
             }}
           >
-            {trimmed}
+            {renderFormattedText(trimmed, isUser, isDark)}
           </div>
         );
       })}
@@ -784,6 +822,8 @@ export default function ASTUCareerCopilot() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const isOpenRef = useRef(isOpen);
+  const isSendingRef = useRef(false);
+  const activeAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -839,7 +879,19 @@ export default function ASTUCareerCopilot() {
 
   const sendMessage = async (text: string) => {
     const trimmed = text?.trim();
-    if (!trimmed || isTyping) return;
+    if (!trimmed || isSendingRef.current) return;
+
+    isSendingRef.current = true;
+    setIsTyping(true);
+    setConfirmClear(false);
+
+    if (activeAbortRef.current) {
+      try {
+        activeAbortRef.current.abort();
+      } catch {}
+    }
+    const controller = new AbortController();
+    activeAbortRef.current = controller;
 
     const userMsg: ChatMessage = {
       id: Date.now(),
@@ -863,64 +915,100 @@ export default function ASTUCareerCopilot() {
 
     setMessages((prev) => [...prev, userMsg, initialBotMsg]);
     setInput("");
-    setIsTyping(true);
-    setConfirmClear(false);
 
     let accumulatedText = "";
+    let isFinalized = false;
 
-    await streamAssistantMessage(
-      trimmed,
-      (delta) => {
-        accumulatedText += delta;
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === botMsgId
-              ? { ...m, text: accumulatedText }
-              : m
-          )
-        );
-      },
-      (meta) => {
-        const cleanText = accumulatedText.trim() || getFallback(trimmed);
+    try {
+      await streamAssistantMessage(
+        trimmed,
+        (delta) => {
+          if (isFinalized) return;
+          accumulatedText += delta;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === botMsgId
+                ? { ...m, text: accumulatedText }
+                : m
+            )
+          );
+        },
+        (meta) => {
+          if (isFinalized) return;
+          isFinalized = true;
+          const cleanText = accumulatedText.trim() || getFallback(trimmed);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === botMsgId
+                ? {
+                    ...m,
+                    text: cleanText,
+                    isStreaming: false,
+                    citations: meta.citations,
+                    actions: meta.actions,
+                  }
+                : m
+            )
+          );
+          setIsTyping(false);
+          isSendingRef.current = false;
+          addUnreadIfClosed();
+        },
+        async () => {
+          if (isFinalized) return;
+          isFinalized = true;
+          const fallback = await askAssistantFallback(trimmed, controller.signal);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === botMsgId
+                ? {
+                    ...m,
+                    text: fallback.text,
+                    isStreaming: false,
+                    citations: fallback.citations,
+                    actions: fallback.actions,
+                  }
+                : m
+            )
+          );
+          setIsTyping(false);
+          isSendingRef.current = false;
+          addUnreadIfClosed();
+        },
+        controller.signal
+      );
+    } catch {
+      if (!isFinalized) {
+        isFinalized = true;
+        const localFallback = getFallback(trimmed);
         setMessages((prev) =>
           prev.map((m) =>
             m.id === botMsgId
               ? {
                   ...m,
-                  text: cleanText,
+                  text: localFallback,
                   isStreaming: false,
-                  citations: meta.citations,
-                  actions: meta.actions,
+                  citations: [],
+                  actions: [],
                 }
               : m
           )
         );
-        setIsTyping(false);
-        addUnreadIfClosed();
-      },
-      async () => {
-        // Fallback when streaming encounters connection or parser issue
-        const fallback = await askAssistantFallback(trimmed);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === botMsgId
-              ? {
-                  ...m,
-                  text: fallback.text,
-                  isStreaming: false,
-                  citations: fallback.citations,
-                  actions: fallback.actions,
-                }
-              : m
-          )
-        );
-        setIsTyping(false);
-        addUnreadIfClosed();
       }
-    );
+    } finally {
+      setIsTyping(false);
+      isSendingRef.current = false;
+    }
   };
 
   const clearChat = () => {
+    if (activeAbortRef.current) {
+      try {
+        activeAbortRef.current.abort();
+      } catch {}
+    }
+    isSendingRef.current = false;
+    setIsTyping(false);
     setMessages([
       {
         id: 1,
@@ -1384,6 +1472,7 @@ export default function ASTUCareerCopilot() {
                         <button
                           key={p.label}
                           type="button"
+                          disabled={isTyping}
                           onClick={() => sendMessage(p.query)}
                           style={{
                             fontSize: 12,
@@ -1394,14 +1483,17 @@ export default function ASTUCareerCopilot() {
                             border: darkMode
                               ? "1px solid rgba(255,255,255,0.12)"
                               : "1px solid rgba(7,89,166,0.16)",
-                            cursor: "pointer",
+                            cursor: isTyping ? "not-allowed" : "pointer",
+                            opacity: isTyping ? 0.55 : 1,
                             textAlign: "left",
                             fontWeight: 600,
-                            transition: "border-color 0.15s, transform 0.15s",
+                            transition: "border-color 0.15s, transform 0.15s, opacity 0.15s",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = COLORS.gold;
-                            e.currentTarget.style.transform = "translateY(-1px)";
+                            if (!isTyping) {
+                              e.currentTarget.style.borderColor = COLORS.gold;
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                            }
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.borderColor = darkMode
@@ -1417,40 +1509,6 @@ export default function ASTUCareerCopilot() {
                   </div>
                 )}
 
-                {isTyping && (
-                  <div
-                    style={{ display: "flex", gap: 10, alignItems: "flex-end" }}
-                    aria-label="Assistant is typing"
-                  >
-                    <div
-                      style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background: `linear-gradient(135deg, ${COLORS.navy}, ${COLORS.navyLight})`,
-                        color: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                      aria-hidden="true"
-                    >
-                      <Bot size={15} strokeWidth={2.25} />
-                    </div>
-                    <div
-                      style={{
-                        background: darkMode ? "#1e293b" : "#fff",
-                        borderRadius: 16,
-                        borderBottomLeftRadius: 4,
-                        padding: "10px 14px",
-                        border: darkMode ? "1px solid #334155" : "1px solid #e2e8f4",
-                      }}
-                    >
-                      <TypingDots isDark={darkMode} />
-                    </div>
-                  </div>
-                )}
                 <div ref={messagesEndRef} />
               </div>
 
