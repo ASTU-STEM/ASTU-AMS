@@ -1,6 +1,7 @@
 import { IContentRepository, ContentFilterOptions } from '../../application/ports/IContentRepository';
 import { ContentItem, MediaAsset, HomepageConfig } from '../../domain/entities/ContentItem';
 import prisma from '../../../../core/config/db';
+import { defaultBackendHomepageConfig } from '../defaultHomepageConfig';
 
 export class PrismaContentRepository implements IContentRepository {
   async findMany(filters?: ContentFilterOptions): Promise<{ items: ContentItem[]; total: number }> {
@@ -106,8 +107,19 @@ export class PrismaContentRepository implements IContentRepository {
   }
 
   async getHomepageConfig(key = 'main'): Promise<HomepageConfig | null> {
-    const config = await (prisma as any).homepageConfig.findUnique({ where: { key } });
-    if (!config) return null;
+    let config = await (prisma as any).homepageConfig.findUnique({ where: { key } });
+    if (!config || !config.data) {
+      // Auto-bootstrap from canonical backend config
+      config = await (prisma as any).homepageConfig.upsert({
+        where: { key },
+        create: { key, data: defaultBackendHomepageConfig, updatedBy: 'System Bootstrap' },
+        update: { data: defaultBackendHomepageConfig, updatedBy: 'System Bootstrap', updatedAt: new Date() },
+      });
+    } else {
+      // Ensure any newly added canonical keys exist
+      const mergedData = { ...defaultBackendHomepageConfig, ...config.data };
+      config.data = mergedData;
+    }
     return new HomepageConfig(
       config.id,
       config.key,
@@ -119,10 +131,11 @@ export class PrismaContentRepository implements IContentRepository {
   }
 
   async saveHomepageConfig(key = 'main', data: any, updatedBy = 'CMS Admin'): Promise<HomepageConfig> {
+    const merged = { ...defaultBackendHomepageConfig, ...data };
     const config = await (prisma as any).homepageConfig.upsert({
       where: { key },
-      create: { key, data, updatedBy },
-      update: { data, updatedBy, updatedAt: new Date() },
+      create: { key, data: merged, updatedBy },
+      update: { data: merged, updatedBy, updatedAt: new Date() },
     });
     return new HomepageConfig(
       config.id,
