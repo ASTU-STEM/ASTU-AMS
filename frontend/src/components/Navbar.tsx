@@ -34,30 +34,30 @@ const megaMenus: MegaMenu[] = [
     label: "About",
     icon: FaInfoCircle,
     items: [
-      { label: "About ASTU", sectionId: "impact", route: "/info/overview", description: "Mission, vision & history" },
-      { label: "Campuses", sectionId: "campuses", route: "/info/campuses", description: "Our campuses & facilities" },
-      { label: "Campus Life", sectionId: "campus-life", route: "/info/campus-life", description: "Student activities & culture" },
-      { label: "Research", sectionId: "research", route: "/info/research", description: "Innovation & discoveries" },
-      { label: "Success Stories", sectionId: "success-stories", route: "/info/alumni-stories", description: "Alumni achievements" },
+      { label: "About ASTU", route: "/info/overview", description: "Mission, vision & history" },
+      { label: "Campuses", route: "/info/campuses", description: "Our campuses & facilities" },
+      { label: "Campus Life", route: "/info/campus-life", description: "Student activities & culture" },
+      { label: "Research", route: "/info/research", description: "Innovation & discoveries" },
+      { label: "Success Stories", route: "/info/alumni-stories", description: "Alumni achievements" },
     ],
   },
   {
     label: "Services",
     icon: MdDashboardCustomize,
     items: [
-      { label: "Stakeholders", sectionId: "stakeholders", route: "/partners?tab=stakeholders", description: "Partners & collaborators" },
-      { label: "Career Opportunities", sectionId: "career-opportunities", route: "/partners?tab=employers", description: "Jobs & internships" },
-      { label: "Testimonials", sectionId: "testimonials", route: "/community", description: "What alumni say" },
+      { label: "Stakeholders", route: "/partners", description: "Partners & collaborators" },
+      { label: "Career Opportunities", route: "/employers", description: "Jobs & recruitment" },
+      { label: "Testimonials", route: "/community", description: "What alumni say" },
     ],
   },
   {
     label: "Media",
     icon: MdCampaign,
     items: [
-      { label: "Events", sectionId: "events", route: "/events", description: "Upcoming gatherings" },
-      { label: "Workshops", sectionId: "workshops", route: "/events", description: "Skill-building sessions" },
-      { label: "News", sectionId: "news", route: "/announcements", description: "Latest updates" },
-      { label: "Announcements", sectionId: "announcements", route: "/announcements", description: "Official notices" },
+      { label: "Events", route: "/events", description: "Upcoming gatherings" },
+      { label: "Workshops", route: "/events", description: "Skill-building sessions" },
+      { label: "News", route: "/announcements", description: "Latest updates" },
+      { label: "Announcements", route: "/announcements", description: "Official notices" },
       { label: "Gallery", route: "/gallery", description: "Photo moments" },
       { label: "Video Gallery", route: "/info/video-gallery", description: "Video highlights" },
     ],
@@ -133,12 +133,10 @@ export default function Navbar() {
   const handleSearchSelect = (item: (typeof searchItems)[number]) => {
     setSearchQuery("");
     setIsSearchOpen(false);
-    if (item.route && !item.sectionId) {
+    if (item.route) {
       navigate(item.route);
     } else if (item.sectionId) {
-      navigateToSection(item.sectionId, item.route);
-    } else if (item.route) {
-      navigate(item.route);
+      navigateToSection(item.sectionId);
     }
   };
 
@@ -201,11 +199,13 @@ export default function Navbar() {
   const handleMegaItemClick = (item: MegaMenuItem) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    if (item.route && !item.sectionId) {
+    if (item.route) {
       navigate(item.route);
       return;
     }
-    navigateToSection(item.sectionId, item.route);
+    if (item.sectionId) {
+      navigateToSection(item.sectionId);
+    }
   };
 
   const handleMegaEnter = (label: string) => {
@@ -353,7 +353,7 @@ export default function Navbar() {
           {!user ? (
             <Link
               to="/login"
-              className="hidden sm:inline-flex items-center text-sm font-semibold text-[#14304D] hover:text-[#C8102E] transition-colors px-2 py-1"
+              className="hidden sm:inline-flex items-center text-sm font-semibold text-[#003580] hover:text-[#C8102E] transition-colors px-2 py-1"
             >
               Login
             </Link>

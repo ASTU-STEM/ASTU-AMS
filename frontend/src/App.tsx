@@ -1,8 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Outlet } from "react-router-dom";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
 import { store } from "./store";
+import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 
 import HomePage from "./pages/HomePage";
 import PartnersPage from "./pages/PartnersPage";
@@ -44,32 +46,48 @@ import VerificationRouteGuard from "./features/auth/components/VerificationRoute
 
 import { SystemSettingsProvider } from "./context/SystemSettingsContext";
 
+function PublicLayout() {
+  return (
+    <div className="flex min-h-screen flex-col">
+      <div className="flex-1">
+        <Outlet />
+      </div>
+      <Footer variant="full" />
+    </div>
+  );
+}
+
 function AppContent() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/partners" element={<PartnersPage />} />
-        <Route path="/info/:slug" element={<PublicInfoPage />} />
-        <Route path="/announcements" element={<AnnouncementListPage />} />
-        <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
-        <Route path="/gallery" element={<PublicGalleryPage />} />
-        <Route path="/stories/:id" element={<StoryDetailPage />} />
-        <Route path="/events" element={<EventsPage />} />
-        <Route path="/events/:id" element={<EventDetailPage />} />
-        <Route path="/workshops/:id" element={<EventDetailPage />} />
-        <Route path="/community" element={<AlumniCommunityPage />} />
+        {/* Public routes wrapped in single global PublicLayout rendering Footer */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/partners" element={<PartnersPage />} />
+          <Route path="/info/:slug" element={<PublicInfoPage />} />
+          <Route path="/announcements" element={<AnnouncementListPage />} />
+          <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
+          <Route path="/gallery" element={<PublicGalleryPage />} />
+          <Route path="/stories/:id" element={<StoryDetailPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
+          <Route path="/workshops/:id" element={<EventDetailPage />} />
+          <Route path="/community" element={<AlumniCommunityPage />} />
+          <Route path="/employers" element={<EmployersPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
+        </Route>
+
+        {/* Auth routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<AlumniRegistrationPage />} />
         <Route path="/activate-account" element={<AlumniActivationPage />} />
-        <Route path="/employers" element={<EmployersPage />} />
         <Route path="/employers/register" element={<EmployerRegistrationPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/verify-2fa" element={<Verify2FAPage />} />
-        <Route path="/support" element={<SupportPage />} />
-        <Route path="/contact-registrar" element={<ContactRegistrarPage />} />
 
         {/* Verification routes protected by VerificationRouteGuard */}
         <Route element={<VerificationRouteGuard />}>
