@@ -606,12 +606,30 @@ a {
   50% { transform: translateY(-6px); }
 }
 
+@keyframes partner-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.08); }
+}
+
+@keyframes partner-dash {
+  to { stroke-dashoffset: -40; }
+}
+
 .animate-float {
-  transform: none;
+  animation: float 4s ease-in-out infinite;
 }
 
 .animate-float-slow {
-  transform: none;
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.animate-partner-pulse {
+  animation: partner-pulse 3s ease-in-out infinite;
+}
+
+.animate-partner-dash {
+  stroke-dasharray: 6 6;
+  animation: partner-dash 2s linear infinite;
 }
 
 /* Glow pulse */
