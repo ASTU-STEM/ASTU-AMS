@@ -453,5 +453,29 @@ export const defaultDetailPages: Record<string, DetailPageItem> = {
       { id: 'CO-3', heading: 'Skill Matching & Automated Tracer Engine', body: 'Our intelligent AMS platform matches candidate skills and degree credentials with partner employer requirements for streamlined hiring.', active: true },
     ],
   },
+  'privacy-policy': {
+    slug: 'privacy-policy',
+    title: 'Privacy Policy & Data Protection',
+    subtitle: 'How Adama Science and Technology University collects, protects, and handles alumni and partner data.',
+    iconName: 'ShieldCheck',
+    image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80',
+    sections: [
+      { id: 'PP-1', heading: 'Data Collection & Purpose', body: 'ASTU-AMS collects institutional contact, academic degree records, and career milestone data solely for longitudinal tracer studies, accreditation verification, alumni networking, and career placement services.', active: true },
+      { id: 'PP-2', heading: 'Security & Access Control', body: 'All graduate records and survey responses are encrypted and stored within secure university-controlled data centers under strict role-based access controls.', active: true },
+      { id: 'PP-3', heading: 'Third-Party Disclosure', body: 'Personal identifiable information is never sold or shared with unauthorized commercial parties. Verified employer partners only access candidate profiles with explicit graduate consent.', active: true },
+    ],
+  },
+  'terms-of-service': {
+    slug: 'terms-of-service',
+    title: 'Terms of Service & Usage Guidelines',
+    subtitle: 'Official guidelines and policies governing the use of the ASTU Alumni Management System.',
+    iconName: 'FileText',
+    image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80',
+    sections: [
+      { id: 'TS-1', heading: 'Authorized Platform Use', body: 'ASTU-AMS is dedicated to verified ASTU students, alumni, faculty, partner employers, and authorized institutional administrators.', active: true },
+      { id: 'TS-2', heading: 'Account Responsibilities', body: 'Users are responsible for maintaining the confidentiality of their credentials and ensuring all submitted career and employment information is accurate and authentic.', active: true },
+      { id: 'TS-3', heading: 'Code of Conduct', body: 'Members must engage respectfully in all mentorship forums, job applications, and community discussions in accordance with university institutional ethics.', active: true },
+    ],
+  },
 };
 

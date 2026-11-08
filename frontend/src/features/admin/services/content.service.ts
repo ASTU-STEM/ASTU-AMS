@@ -154,16 +154,36 @@ Through structured tracer surveys, regional alumni chapter meetups, and dedicate
     title: 'Semester Break: Campus Safety Notice',
     type: 'announcement',
     status: 'Published',
-    excerpt: 'Important safety reminders for students, faculty, and visitors during the upcoming semester break.',
-    content: 'University Security Directorate issues standard campus access guidelines during the inter-semester recess. Please ensure laboratory equipment is safely powered down and dormitory clearances are logged.',
+    excerpt: 'Mandatory campus safety directives, laboratory shutdown procedures, and facility access regulations during the inter-semester recess.',
+    content: `Adama Science and Technology University (ASTU) hereby issues this official safety directive regarding campus operations, facility closures, and security procedures during the upcoming semester break.
+
+All undergraduate and postgraduate students, resident scholars, laboratory directors, and visiting personnel are requested to take note of the following operational schedules:
+
+1. Campus Access & Gate Security Restrictions
+• Main Gates (Gate 1 & Gate 2) will enforce restricted security screening starting Friday, August 28, 2026 at 18:00 EAT.
+• Entry during the break period requires valid ASTU biometric ID cards or authorized visitor permits issued by the Security Operations Desk.
+• Student residential complexes will close on August 28 at 20:00 EAT and will reopen on Monday, September 21, 2026 at 08:00 EAT.
+
+2. Laboratory Lockdown & Equipment Power-Down Protocol
+• All departmental heads and laboratory technicians must ensure that high-voltage electrical equipment, gas lines, and chemical fume hoods are safely isolated and powered down.
+• Continuous experiments must be registered with the Office of the Vice President for Research and Technology Transfer by August 25, 2026 to ensure uninterruptible backup power supply.
+
+3. Student Residence Clearance Guidelines
+• Dormitory residents are required to surrender room keys to their respective block proctors upon completing room inventory checks.
+• Personal electronic items and valuables should be securely removed from dormitory halls prior to key handover.
+
+4. Emergency Contacts & 24/7 Security Dispatch
+• Campus Security Dispatch (Main Control Room): +251 22 110 0029 / +251 22 110 0030
+• Emergency Medical Clinic (Health Center): +251 22 110 0015
+• Directorate Email: security@astu.edu.et`,
     image: '/images/astu-building.jpg',
-    author: 'ASTU Directorate Notice',
-    updatedAt: 'Jun 7, 2026',
-    publishedAt: 'Jun 7, 2026',
-    views: 892,
-    tags: ['safety', 'campus', 'announcement'],
-    pinned: false,
-    featured: false,
+    author: 'Directorate of Campus Safety & Facilities Management',
+    updatedAt: 'August 26, 2026',
+    publishedAt: 'August 26, 2026',
+    views: 1240,
+    tags: ['campus-safety', 'directives', 'administration', 'student-services'],
+    pinned: true,
+    featured: true,
     language: 'EN',
     buttonText: 'Read Full Notice',
   },
@@ -205,6 +225,21 @@ Through structured tracer surveys, regional alumni chapter meetups, and dedicate
   },
 ];
 
+function isRealContentItem(item: any): boolean {
+  if (!item || typeof item !== 'object') return false;
+  const title = (item.title || '').trim();
+  if (!title || title.length < 4) return false;
+  if (/^(xsdcf|dffgdfg|asdf|ghjk|test|qwerty|123|abc|fghfgh|zxcv)/i.test(title)) return false;
+  if (
+    title.toLowerCase().includes('page configuration') ||
+    title.toLowerCase().includes('cms config') ||
+    title.toLowerCase().includes('homepage cms')
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export const contentService = {
   getItems(): ContentCardItem[] {
     try {
@@ -212,21 +247,18 @@ export const contentService = {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const hasRealNews = parsed.some(
+          const cleaned = parsed.filter(isRealContentItem);
+          const hasRealNews = cleaned.some(
             (p: any) => p.id === 'C-REAL-001' || (p.title && p.title.includes('DAAD'))
           );
-          if (!hasRealNews) {
-            const merged = [
-              initialItems[0],
-              initialItems[1],
-              initialItems[2],
-              initialItems[3],
-              ...parsed.filter((p: any) => p.title !== 'Homepage CMS Configuration'),
-            ];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-            return merged;
+          if (!hasRealNews || cleaned.length < 4) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(initialItems));
+            return initialItems;
           }
-          return parsed.filter((i) => i.title !== 'Homepage CMS Configuration');
+          if (cleaned.length !== parsed.length) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+          }
+          return cleaned;
         }
       }
     } catch {
@@ -237,7 +269,7 @@ export const contentService = {
   },
 
   saveItems(items: ContentCardItem[], emitEvent = true): void {
-    const cleaned = items.filter((i) => i.title !== 'Homepage CMS Configuration');
+    const cleaned = items.filter(isRealContentItem);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
 
     // Auto-sync published announcements to homepage CMS configuration
@@ -258,7 +290,7 @@ export const contentService = {
           })),
         });
       }
-    } catch {}
+    } catch { }
 
     if (emitEvent) {
       window.dispatchEvent(new Event('astu-cms-content-changed'));
@@ -458,14 +490,14 @@ export const contentService = {
       const rawItems: any[] = Array.isArray(res.data?.data)
         ? res.data.data
         : Array.isArray(res.data)
-        ? res.data
-        : [];
+          ? res.data
+          : [];
       if (rawItems.length > 0) {
-        const normalized = rawItems.map((i) => this.normalizeItem(i));
+        const normalized = rawItems.map((i) => this.normalizeItem(i)).filter(isRealContentItem);
         // Merge: API items + any local items not in API
         const apiIds = new Set(normalized.map((i) => i.id));
-        const localExtras = this.getItems().filter((i) => !apiIds.has(i.id));
-        const merged = [...normalized, ...localExtras];
+        const localExtras = this.getItems().filter((i) => !apiIds.has(i.id) && isRealContentItem(i));
+        const merged = [...normalized, ...localExtras].filter(isRealContentItem);
         this.saveItems(merged, false);
         return merged;
       }
