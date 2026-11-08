@@ -8,6 +8,7 @@ import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
+import Footer from '../components/Footer';
 import { notificationService } from '../features/notifications/services/notification.service';
 
 class AdminRouteBoundary extends React.Component<
@@ -452,6 +453,7 @@ export default function AdminLayout() {
             <Outlet />
           </AdminRouteBoundary>
         </main>
+        <Footer variant="minimal" />
       </div>
     </div>
 

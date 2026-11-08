@@ -9,6 +9,7 @@ import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
 import IctCommandPalette from '../components/IctCommandPalette';
 import IctEmergencyBanner from '../components/IctEmergencyBanner';
+import Footer from '../components/Footer';
 
 class IctRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -287,6 +288,7 @@ export default function IctLayout() {
               <Outlet />
             </IctRouteBoundary>
           </main>
+          <Footer variant="minimal" />
         </div>
       </div>
 
