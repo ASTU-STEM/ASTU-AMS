@@ -984,3 +984,45 @@ model HomepageConfig {
   updatedAt  DateTime @updatedAt
   createdAt  DateTime @default(now())
 }
+
+model KnowledgeDocument {
+  id          String   @id @default(uuid())
+  title       String
+  category    String   @default("General")
+  description String?
+  sourceType  String   @default("UPLOAD")
+  fileName    String?
+  mimeType    String?  @default("text/plain")
+  fileSize    Int?     @default(0)
+  rawContent  String
+  status      String   @default("PUBLISHED")
+  accessLevel String   @default("PUBLIC")
+  uploadedBy  String?  @default("Alumni Office Admin")
+  chunkCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  chunks      KnowledgeChunk[]
+
+  @@index([status, accessLevel])
+  @@index([category])
+}
+
+model KnowledgeChunk {
+  id          String   @id @default(uuid())
+  documentId  String
+  chunkIndex  Int      @default(0)
+  title       String
+  section     String   @default("General")
+  pageNumber  Int?
+  content     String
+  tokenCount  Int      @default(0)
+  embedding   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  document    KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@index([documentId, chunkIndex])
+}
