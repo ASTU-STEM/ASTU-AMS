@@ -79,240 +79,20 @@ const getDynamicStatIcon = (stat: any, idx: number) => {
   return fallbacks[idx % fallbacks.length];
 };
 
-const howItWorksSteps = [
-  {
-    step: 1,
-    badge: "01",
-    icon: CircleUserRound,
-    title: "CREATE YOUR PROFILE",
-    description:
-      "Build your verified professional identity and showcase your education, skills and experience.",
-    tags: ["Verified ID", "Skill Matrix"],
-    color: "from-astu-navy to-blue-800",
-    iconBg: "bg-blue-50 text-astu-navy border-blue-200/60",
-    cta: "Start Profile",
-    route: "/register",
-  },
-  {
-    step: 2,
-    badge: "02",
-    icon: Search,
-    title: "DISCOVER OPPORTUNITIES",
-    description:
-      "Find jobs, internships, mentorship and career opportunities.",
-    tags: ["Job Match", "Mentorship"],
-    color: "from-astu-red to-rose-700",
-    iconBg: "bg-rose-50 text-astu-red border-rose-200/60",
-    cta: "Explore Opportunities",
-    route: "/info/employer-portal",
-  },
-  {
-    step: 3,
-    badge: "03",
-    icon: Handshake,
-    title: "CONNECT & COLLABORATE",
-    description:
-      "Connect with alumni, employers and the ASTU community.",
-    tags: ["Global Network", "Industry Events"],
-    color: "from-emerald-600 to-teal-700",
-    iconBg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-    cta: "Join Network",
-    route: "/login",
-  },
-  {
-    step: 4,
-    badge: "04",
-    icon: LineChart,
-    title: "GROW & GIVE BACK",
-    description:
-      "Mentor students, share your experience and contribute to ASTU.",
-    tags: ["Tracer Surveys", "Curriculum"],
-    color: "from-purple-600 to-indigo-800",
-    iconBg: "bg-purple-50 text-purple-700 border-purple-200/60",
-    cta: "Take Tracer Survey",
-    route: "/info/alumni-portal",
-  },
-];
-
 const navSections = [
   { label: "Home", id: "home" },
   { label: "Impact Numbers", id: "impact-numbers" },
-  { label: "Impact", id: "impact" },
+  { label: "How It Works", id: "how-it-works" },
+  { label: "Campus Life", id: "campus-life" },
   { label: "Gallery", id: "gallery" },
-  { label: "Campuses", id: "campuses" },
-  { label: "Announcements", id: "announcements" },
-  { label: "Community", id: "community" },
   { label: "Events", id: "events" },
-  { label: "News", id: "news" },
+  { label: "Announcements", id: "announcements" },
   { label: "Success Stories", id: "success-stories" },
+  { label: "Accreditation", id: "accreditation" },
+  { label: "Partners", id: "partners" },
+  { label: "News", id: "news" },
   { label: "FAQ", id: "faq" },
   { label: "Contact", id: "contact" }
-];
-
-const communityPosts = [
-  {
-    name: "Abebe Yosef",
-    role: "Software Engineer",
-    text: "I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
-  },
-  {
-    name: "Bekele Kebede",
-    role: "Employer Partner",
-    text: "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80",
-  },
-  {
-    name: "Helina Sileshi",
-    role: "Mentor & Alumni",
-    text: "Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
-  },
-];
-
-const events: any[] = [];
-
-const workshops: any[] = [];
-
-const featuredAlumni = [
-  { name: "Dr. Ruth Alemu", role: "AI Research Scientist", impact: "Published 18 applied AI papers and mentors ASTU research teams.", image: arcImage },
-  { name: "Yonas Bekele", role: "Founder, GreenGrid Labs", impact: "Built a renewable-energy startup serving industrial campuses.", image: electricLabs },
-  { name: "Kalkidan Tadesse", role: "Cloud Platform Lead", impact: "Leads enterprise cloud migration programs for regional partners.", image: stateM },
-];
-
-const featuredEmployers = [
-  { name: "Ethio Telecom", area: "Telecom & Cloud", openings: "14 graduate roles" },
-  { name: "Ethiopian Airlines", area: "Aviation Technology", openings: "8 internship tracks" },
-  { name: "INSA", area: "Cybersecurity", openings: "6 research placements" },
-  { name: "Huawei Ethiopia", area: "Network Engineering", openings: "11 certification paths" },
-];
-
-const partners = [
-  { name: "Ethio Telecom" },
-  { name: "INSA" },
-  { name: "Ethiopian Airlines" },
-  { name: "Safaricom" },
-  { name: "Huawei" },
-  { name: "Commercial Bank of Ethiopia" },
-];
-
-const campusLifeCards = [
-  { id: "campus-life-1", title: "Reunions, career expos, and workshops", campus: "Events and Activities", description: "Chapter meetings and community programs that keep graduates connected to the university.", image: gallery2, action: "View events", link: "/events" },
-  { id: "campus-life-2", title: "Facilities", campus: "Innovation Spaces", description: "Laboratories, research centers, libraries, and employer interview rooms.", image: electricLabs, action: "Explore facilities", link: "/info/facilities" },
-  { id: "campus-life-3", title: "Museums and gallery", campus: "Campus Gallery", description: "Research showcases, graduation moments, and campus photography.", image: arcImage, action: "View gallery", link: "/gallery" },
-];
-
-const announcements = [
-  {
-    id: "ann-1",
-    day: "09",
-    month: "SEP",
-    title: "ASTU Engineering Innovation Summit 2026",
-    type: "Official announcement",
-    year: "2026",
-    date: "09 Sep 2026",
-  },
-  {
-    id: "ann-2",
-    day: "07",
-    month: "JUN",
-    title: "Semester Break: Campus Safety Notice",
-    type: "Official announcement",
-    year: "2026",
-    date: "07 Jun 2026",
-  },
-  {
-    id: "ann-3",
-    day: "28",
-    month: "APR",
-    title: "ASTU Alumni Network: Bridging Generations",
-    type: "Press",
-    year: "2026",
-    date: "28 Apr 2026",
-  },
-  {
-    id: "ann-4",
-    day: "31",
-    month: "MAY",
-    title: "Tracer Study 2026 response window is open",
-    type: "Alumni Announcement",
-    year: "2026",
-    date: "31 May 2026",
-  },
-];
-
-const campuses = [
-  { name: "Main Campus", description: "Central hub for alumni services, registrar workflows, and institutional engagement.", image: gallery1 },
-  { name: "Engineering Labs", description: "Applied research, workshops, innovation programs, and industry-linked training.", image: electricLabs },
-  { name: "Graduation & Events Hall", description: "Ceremonies, career fairs, alumni awards, and university achievement programs.", image: gc7 },
-  { name: "Research Collaboration Center", description: "Research publications, industry projects, and department KPI evidence.", image: arcImage },
-];
-
-const faqItems = [
-  { question: "Who can use ASTU-AMS?", answer: "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services." },
-  { question: "How are tracer studies used?", answer: "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence." },
-  { question: "Can employers register events?", answer: "Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports." },
-];
-
-const galleryImages = [
-  { src: gallery1, title: "ASTU main campus", num: "01" },
-  { src: stateM, title: "Innovation and collaboration", num: "02" },
-  { src: gc7, title: "Graduation ceremony", num: "03" },
-];
-
-const impactStats = [
-  {
-    id: "stat-1",
-    title: "Alumni Network",
-    label: "Alumni Network",
-    value: "1,238+",
-    detail: "Registered graduates across global technology hubs",
-    trend: "+18% YoY Growth",
-    icon: Users,
-    action: "View Network",
-    target: "/register",
-    gradient: "from-blue-600 to-indigo-700",
-    badgeBg: "bg-blue-50 text-blue-700 border-blue-200/80",
-  },
-  {
-    id: "stat-2",
-    title: "Fields of Study",
-    label: "Fields of Study",
-    value: "5",
-    detail: "Engineering, Applied Science, Tech & Research",
-    trend: "Fields of Study",
-    icon: BookOpen,
-    action: "Explore Programs",
-    target: "/info/overview",
-    gradient: "from-emerald-600 to-teal-700",
-    badgeBg: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
-  },
-  {
-    id: "stat-3",
-    title: "Partner Employers",
-    label: "Partner Employers",
-    value: "500+",
-    detail: "Hiring, internship placement, and curriculum feedback",
-    trend: "Corporate Link",
-    icon: Building2,
-    action: "Meet Partners",
-    target: "/info/featured-employers",
-    gradient: "from-amber-500 to-orange-600",
-    badgeBg: "bg-amber-50 text-amber-700 border-amber-200/80",
-  },
-  {
-    id: "stat-4",
-    title: "Graduate Impact",
-    label: "Graduate Impact",
-    value: "94%",
-    detail: "Employed or in higher research within 6 months",
-    trend: "Verified Placement",
-    icon: Trophy,
-    action: "View Impact Data",
-    target: "/info/impact-numbers",
-    gradient: "from-astu-red to-rose-700",
-    badgeBg: "bg-rose-50 text-astu-red border-rose-200/80",
-  },
 ];
 
 const parseNoticeDate = (dateStr?: string) => {
@@ -2194,20 +1974,20 @@ export default function HomePage() {
         </section>
 
         {/* ── SECTION 5: Alumni success stories ── */}
-        <section id="success-stories" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-24 border-t border-slate-200/80">
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/80">
+        <section id="success-stories" className="scroll-mt-24 w-full bg-[#F8FAFC] py-10 sm:py-14 border-t border-slate-200/80">
+          <div className="mx-auto max-w-[1100px] px-4 sm:px-6 lg:px-8">
+            <div className="mb-7 flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
               <div className="max-w-2xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-6 h-[2px] bg-[#C8102E]" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="w-5 h-[2px] bg-[#C8102E]" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
                     ALUMNI STORIES
                   </span>
                 </div>
-                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-tight leading-tight">
+                <h2 className="font-fraunces text-2xl sm:text-3xl lg:text-[34px] font-bold text-[#003580] tracking-tight leading-tight">
                   Alumni success stories
                 </h2>
-                <p className="mt-2.5 text-sm sm:text-base text-slate-500 leading-relaxed max-w-xl">
+                <p className="mt-1.5 text-xs sm:text-sm text-slate-500 leading-relaxed max-w-lg">
                   Inspiring career journeys, breakthroughs, and leadership milestones from our global graduate community.
                 </p>
               </div>
@@ -2215,7 +1995,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => navigate("/info/alumni-stories")}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all text-xs font-semibold shadow-2xs cursor-pointer group"
                 >
                   <span>View all stories</span>
                   <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -2262,8 +2042,8 @@ export default function HomePage() {
               const sideStory2 = storyList[2];
 
               return (
-                <div className="grid gap-6 lg:grid-cols-12 items-stretch">
-                  {/* Left Column (7 cols): Featured Card */}
+                <div className="grid gap-5 lg:grid-cols-12 items-stretch">
+                  {/* Left Column (7 cols): Featured Card - Compact, Zero-Void, Creative */}
                   <div
                     onClick={() => navigate(mainStory.link || `/stories/${mainStory.id || 'S-001'}`)}
                     role="button"
@@ -2277,76 +2057,69 @@ export default function HomePage() {
                     className="group relative lg:col-span-7 flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs hover:shadow-xl hover:border-[#003580]/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
                   >
                     <div>
-                      {/* Top Image: object-[68%_18%] perfectly centers Dr. Ruth's face and eliminates the orange wall void */}
-                      <div className="relative w-full h-72 sm:h-80 bg-slate-900 overflow-hidden">
+                      {/* Top Image: Compact 48 height, centered on face, zero orange wall void */}
+                      <div className="relative w-full h-44 sm:h-48 bg-slate-900 overflow-hidden">
                         <img
                           src={mainStory.img || mainStory.image || arcImage}
                           alt={mainStory.name || "Alumni story"}
                           className="h-full w-full object-cover object-[68%_18%] transition-transform duration-700 ease-out group-hover:scale-105"
                           onError={handleImageError}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/15 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/20 to-transparent opacity-85 group-hover:opacity-70 transition-opacity duration-300" />
                         
                         {/* Floating Badges */}
-                        <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#003580] shadow-xs">
+                        <div className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-md px-3 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-[#003580] shadow-xs">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse" />
                           <span>FEATURED ALUMNA</span>
                         </div>
 
-                        <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-slate-950/70 backdrop-blur-md px-3 py-1 text-[11px] font-semibold text-white shadow-xs">
+                        <div className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-slate-950/70 backdrop-blur-md px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
                           <span>{mainStory.graduationYear || "Class of 2018"}</span>
                         </div>
 
                         {/* Department Badge on Image Base */}
-                        <div className="absolute bottom-4 left-5 right-5 z-10 flex items-center justify-between">
-                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-black/55 backdrop-blur-md px-3 py-1 text-xs font-medium text-white/95">
-                            <GraduationCap className="h-3.5 w-3.5 text-amber-400" />
+                        <div className="absolute bottom-2.5 left-3.5 right-3.5 z-10 flex items-center justify-between">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-300 drop-shadow-xs">
+                            <GraduationCap className="h-3.5 w-3.5" />
                             <span>{mainStory.department || "Computer Science & Engineering"}</span>
                           </span>
                         </div>
                       </div>
 
-                      {/* Card Content & Narrative */}
-                      <div className="p-6 sm:p-8">
+                      {/* Card Content & Narrative - Compact & Focused */}
+                      <div className="p-4 sm:p-5">
                         {/* Editorial Pull-Quote */}
-                        <div className="relative pl-5 border-l-2 border-[#C8102E]">
-                          <Quote className="h-5 w-5 text-[#C8102E]/60 absolute -top-1 -left-2.5 bg-white py-0.5" />
-                          <p className="font-fraunces text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors duration-200 leading-relaxed">
+                        <div className="relative pl-3.5 border-l-2 border-[#C8102E]">
+                          <p className="font-fraunces text-sm sm:text-[15px] font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors duration-200 leading-snug">
                             "{mainStory.story || mainStory.text || mainStory.description}"
                           </p>
                         </div>
 
-                        {/* Dual Milestone Highlights */}
-                        <div className="mt-5 flex flex-wrap items-center gap-2">
-                          <div className="inline-flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200/80 px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-xs">
-                            <Sparkles className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                            <span>18 Applied Machine Learning Publications</span>
-                          </div>
-                          <div className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-200/80 px-3 py-1.5 text-xs font-semibold text-[#003580] shadow-xs">
-                            <ShieldCheck className="h-3.5 w-3.5 text-[#003580] shrink-0" />
-                            <span>ASTU AI Research Mentor</span>
-                          </div>
+                        {/* Micro-Achievement Pill */}
+                        <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-blue-50/80 border border-blue-200/60 px-2.5 py-1 text-[11px] font-semibold text-[#003580]">
+                          <Sparkles className="h-3 w-3 text-amber-500 shrink-0" />
+                          <span>18 Applied ML Publications • AI Research Mentor</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Card Footer */}
-                    <div className="mx-6 sm:mx-8 py-5 border-t border-slate-100 flex items-center justify-between">
+                    <div className="mx-4 sm:mx-5 py-3 border-t border-slate-100 flex items-center justify-between">
                       <div>
-                        <h4 className="font-bold text-base text-[#003580] group-hover:text-[#C8102E] transition-colors leading-tight">
+                        <h4 className="font-bold text-sm text-[#003580] group-hover:text-[#C8102E] transition-colors leading-tight">
                           {mainStory.name || mainStory.alumniName}
                         </h4>
-                        <p className="text-xs text-slate-500 mt-0.5 font-medium">{mainStory.role || mainStory.company}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 font-medium">{mainStory.role || mainStory.company}</p>
                       </div>
-                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#003580] text-white text-xs font-bold shadow-xs group-hover:bg-[#C8102E] transition-all">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#003580] text-white text-xs font-semibold shadow-2xs group-hover:bg-[#C8102E] transition-all">
                         <span>Read story</span>
                         <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
                       </span>
                     </div>
                   </div>
 
-                  {/* Right Column (5 cols): 2 Balanced Horizontal Media Spotlight Cards */}
-                  <div className="lg:col-span-5 flex flex-col gap-5 justify-between">
+                  {/* Right Column (5 cols): 2 Compact Horizontal Media Spotlight Cards */}
+                  <div className="lg:col-span-5 flex flex-col gap-4 justify-between">
                     {[sideStory1, sideStory2].map((story: any, sIdx: number) => (
                       <div
                         key={story.id || sIdx}
@@ -2359,17 +2132,17 @@ export default function HomePage() {
                             navigate(story.link || `/stories/${story.id || `S-00${sIdx + 2}`}`);
                           }
                         }}
-                        className="group relative flex-1 flex flex-col sm:flex-row overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 gap-5 hover:border-[#003580]/40 shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                        className="group relative flex-1 flex flex-col sm:flex-row overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-3.5 sm:p-4 gap-3.5 hover:border-[#003580]/40 shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
                       >
-                        {/* Left: Full-height sleek portrait */}
-                        <div className="relative w-full sm:w-36 md:w-40 sm:min-w-[140px] h-48 sm:h-auto rounded-xl bg-slate-900 overflow-hidden shrink-0 shadow-xs self-stretch">
+                        {/* Left: Compact Portrait Thumbnail */}
+                        <div className="relative w-full sm:w-28 md:w-32 h-36 sm:h-auto rounded-xl bg-slate-900 overflow-hidden shrink-0 shadow-xs self-stretch">
                           <img
                             src={story.img || story.image || (sIdx === 0 ? electricLabs : stateM)}
                             alt={story.name || "Alumni story"}
                             className="h-full w-full object-cover object-[center_20%] transition-transform duration-700 ease-out group-hover:scale-108"
                             onError={handleImageError}
                           />
-                          <div className="absolute top-2.5 left-2.5 rounded-full bg-slate-950/75 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
+                          <div className="absolute top-2 left-2 rounded-full bg-slate-950/75 backdrop-blur-xs px-2 py-0.5 text-[9px] font-semibold text-white shadow-xs">
                             {story.graduationYear || (sIdx === 0 ? "Class of 2016" : "Class of 2019")}
                           </div>
                         </div>
@@ -2377,37 +2150,37 @@ export default function HomePage() {
                         {/* Right: Info & Story Narrative */}
                         <div className="flex-1 flex flex-col justify-between min-w-0">
                           <div>
-                            <div className="flex items-center gap-1.5 mb-1.5">
+                            <div className="flex items-center gap-1.5 mb-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]" />
-                              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C8102E]">
+                              <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-[#C8102E]">
                                 ALUMNI SPOTLIGHT
                               </span>
                             </div>
 
-                            <h4 className="font-fraunces text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                            <h4 className="font-fraunces text-base font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
                               {story.name || story.alumniName}
                             </h4>
-                            <p className="text-xs font-semibold text-slate-500 mt-1 line-clamp-1">
+                            <p className="text-[11px] font-medium text-slate-500 mt-0.5 truncate">
                               {story.role || story.department}
                             </p>
 
-                            <p className="mt-2.5 text-xs sm:text-[13px] text-slate-600 leading-relaxed line-clamp-3">
+                            <p className="mt-1.5 text-xs text-slate-600 leading-relaxed line-clamp-2">
                               "{story.story || story.text || story.description}"
                             </p>
 
-                            <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                            <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-400 font-medium">
                               <BookOpen className="h-3 w-3 text-slate-400" />
-                              <span>{story.department || "Engineering"}</span>
+                              <span className="truncate">{story.department || "Engineering"}</span>
                             </div>
                           </div>
 
                           {/* Card Footer */}
-                          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <span className="text-xs font-bold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
+                          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1 transition-colors">
                               <span>Read story</span>
                               <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ASTU</span>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">ASTU</span>
                           </div>
                         </div>
                       </div>
