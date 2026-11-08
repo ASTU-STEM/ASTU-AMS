@@ -539,51 +539,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* FOOTER */}
-      <footer className="border-t border-outline-variant bg-surface py-10">
-        <div className="mx-auto grid max-w-[1440px] gap-8 px-4 md:grid-cols-4 md:px-8">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2.5">
-              <img src="/images/astu-seal-logo.png" alt="ASTU Logo" className="h-8 w-8 object-contain scale-110" />
-              <h5 className="text-sm font-bold text-astu-navy">ASTU-AMS</h5>
-            </div>
-            <p className="mt-1 text-xs text-on-surface-variant">{config.welcomeMessage || "The ASTU Alumni Management System connects graduates, employers, and departments in one platform."}</p>
-            <div className="mt-4 flex gap-2">
-              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">FB</button>
-              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">X</button>
-              <button className="rounded-md border border-outline-variant px-2 py-1 text-xs hover:bg-surface-container-low">IN</button>
-            </div>
-          </div>
-          <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">Resources</h6>
-            <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/alumni")}>Career Portal</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/alumni")}>Tracer Survey</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/alumni")}>Mentorship</button></li>
-            </ul>
-          </div>
-          <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">University</h6>
-            <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
-              <li><button className="hover:text-astu-navy">Official Website</button></li>
-              <li><button className="hover:text-astu-navy">Research Centers</button></li>
-              <li><button className="hover:text-astu-navy">Accreditation</button></li>
-            </ul>
-          </div>
-          <div>
-            <h6 className="text-xs font-semibold uppercase tracking-[0.14em] text-astu-navy">Support</h6>
-            <ul className="mt-3 space-y-2 text-xs text-on-surface-variant">
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/registrar/dashboard")}>Help Center</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/admin/dashboard")}>Privacy Policy</button></li>
-              <li><button className="hover:text-astu-navy" onClick={() => navigate("/registrar/dashboard")}>Contact Us</button></li>
-            </ul>
-          </div>
-        </div>
-        <div className="mx-auto mt-8 flex max-w-[1440px] flex-col justify-between gap-2 border-t border-outline-variant px-4 pt-5 text-xs text-on-surface-variant md:flex-row md:px-8">
-          <p>\u00a9 2026 Adama Science and Technology University. All rights reserved.</p>
-          <p>Designed for ASTU ICT and Tracer Study Coordination.</p>
-        </div>
-      </footer>
+
     </div>
   );
 }

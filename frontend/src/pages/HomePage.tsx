@@ -27,6 +27,7 @@ import {
   PlayCircle,
   Quote,
   Star,
+  Sparkles,
   Trophy,
   UserRoundCheck,
   Phone,
@@ -628,8 +629,8 @@ export default function HomePage() {
     const cfg = homepageCmsService.getSettings();
     return cfg?.campusLifeHeaders || {
       eyebrow: "Explore Life At ASTU",
-      title: "Campus Life, Facilities, Events, and Galleries",
-      description: "A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.",
+      title: "Life at ASTU",
+      description: "A public gateway to institutional experiences across ASTU: research facilities, alumni reunions, career expos, campus innovations, and heritage galleries.",
     };
   });
   const [liveEventsHeaders, setLiveEventsHeaders] = useState<any>(() => {
@@ -754,7 +755,7 @@ export default function HomePage() {
         const parsed = JSON.parse(storedUser);
         defaultName = parsed.name || '';
         defaultEmail = parsed.email || '';
-      } catch {}
+      } catch { }
     }
 
     setRsvpModalItem(item);
@@ -782,7 +783,7 @@ export default function HomePage() {
     const eventIdOrSlug = rsvpModalItem.id || rsvpModalItem.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
     try {
       await eventsService.rsvpToEvent(eventIdOrSlug, 'GOING');
-    } catch {}
+    } catch { }
 
     const updated = [...registeredTitles, rsvpModalItem.title];
     setRegisteredTitles(updated);
@@ -1130,7 +1131,7 @@ export default function HomePage() {
         const year = d.getFullYear().toString();
         return { day, month, year };
       }
-    } catch {}
+    } catch { }
     return { day: "20", month: "NOV", year: "2026" };
   };
 
@@ -1162,20 +1163,30 @@ export default function HomePage() {
   ], []);
 
   const displayedEventsList = useMemo(() => {
+    let list: any[] = [];
     if (liveEvents && liveEvents.length >= 3) {
-      return liveEvents.slice(0, 3);
+      list = liveEvents;
+    } else if (liveEvents && liveEvents.length > 0) {
+      list = [...liveEvents, ...defaultMockEvents];
+    } else {
+      list = defaultMockEvents;
     }
-    if (liveEvents && liveEvents.length > 0) {
-      return [...liveEvents, ...defaultMockEvents].slice(0, 3);
-    }
-    return defaultMockEvents;
+
+    // Sort upcoming events chronologically (earliest upcoming date first)
+    const sorted = [...list].sort((a: any, b: any) => {
+      const timeA = new Date(a.date).getTime() || 0;
+      const timeB = new Date(b.date).getTime() || 0;
+      return timeA - timeB;
+    });
+
+    return sorted.slice(0, 3);
   }, [liveEvents, defaultMockEvents]);
 
   // Top 3 campus life items for the homepage with fallback images and links
   const displayCampusLife = useMemo(() => {
     const list = liveCampusLife && liveCampusLife.length > 0 ? liveCampusLife : campusLifeCards;
     return list.slice(0, 3).map((item: any, idx: number) => {
-      const fallbackImages = [gallery2, electricLabs, arcImage];
+      const fallbackImages = [gc7, electricLabs, arcImage];
       const fallbackEyebrows = ["EVENTS & ACTIVITIES", "FACILITIES", "MUSEUMS & GALLERY"];
       const fallbackTitles = [
         "Reunions, career expos, and workshops",
@@ -1202,6 +1213,14 @@ export default function HomePage() {
     });
   }, [liveCampusLife]);
 
+  const campusLifeDescription = useMemo(() => {
+    const raw = liveCampusLifeHeaders?.description;
+    if (!raw || raw.includes("AAU")) {
+      return "A public gateway to institutional experiences across ASTU: research facilities, alumni reunions, career expos, campus innovations, and heritage galleries.";
+    }
+    return raw;
+  }, [liveCampusLifeHeaders?.description]);
+
   // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
@@ -1218,7 +1237,7 @@ export default function HomePage() {
       <main id="home">
         {/* Live Top Announcement Ticker */}
         {liveWelcomeEnabled !== false && liveWelcomeMessage && (
-          <aside aria-label="Announcement Banner" className="relative z-30 bg-[#14304D] border-b border-white/10 text-white py-2.5 px-4 shadow-xs">
+          <aside aria-label="Announcement Banner" className="relative z-30 bg-[#003580] border-b border-white/10 text-white py-2.5 px-4 shadow-xs">
             <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-3 overflow-hidden">
                 <span className="shrink-0 inline-flex items-center gap-1.5 rounded bg-[#C8102E] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
@@ -1243,9 +1262,8 @@ export default function HomePage() {
             {liveSlides.map((slide, idx) => (
               <div
                 key={slide.id || idx}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                  idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
-                }`}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+                  }`}
               >
                 <img
                   alt={slide.title}
@@ -1253,7 +1271,7 @@ export default function HomePage() {
                   src={slide.image}
                   onError={handleImageError}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0b1a2b]/95 via-[#0b1a2b]/85 to-[#0b1a2b]/60" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#001d4a]/95 via-[#002b6b]/85 to-[#003580]/60" />
               </div>
             ))}
           </div>
@@ -1321,9 +1339,8 @@ export default function HomePage() {
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    idx === currentSlide ? "w-5 bg-[#C8102E]" : "w-1.5 bg-white/40 hover:bg-white/70"
-                  }`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentSlide ? "w-5 bg-[#C8102E]" : "w-1.5 bg-white/40 hover:bg-white/70"
+                    }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
@@ -1334,22 +1351,33 @@ export default function HomePage() {
         {/* ── SECTION: ASTU Impact at a Glance ── */}
         <section id="impact-numbers" className="scroll-mt-24 w-full bg-white py-20 lg:py-24 border-b border-slate-100">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left title, Right subtitle */}
-            <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+            {/* Header: Left Title & Editorial Subtitle, Right Navigation Pill */}
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-[2px] bg-[#C8102E] inline-block rounded-full" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
                     {liveImpactHeaders?.eyebrow || "ASTU IMPACT AT A GLANCE"}
                   </span>
                 </div>
-                <h2 className="mt-2 text-3xl md:text-4xl lg:text-[40px] font-serif font-bold text-[#14304D] tracking-tight leading-tight">
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
                   {liveImpactHeaders?.title || "Connecting Academia to Industry"}
                 </h2>
+                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                  {liveImpactHeaders?.description || "Building a stronger connection between ASTU graduates, employers, research, and career opportunities."}
+                </p>
               </div>
-              <p className="max-w-md text-sm sm:text-base text-slate-500 leading-relaxed md:text-right">
-                {liveImpactHeaders?.description || "Building a stronger connection between ASTU graduates, employers, research, and career opportunities."}
-              </p>
+
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate("/info/overview")}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
+                >
+                  <span>Explore ASTU Impact</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
             </div>
 
             {/* 4 Stat Cards Grid */}
@@ -1360,38 +1388,53 @@ export default function HomePage() {
                 const targetUrl = stat.target || stat.link || liveSectionLinks.impactDefaultLinkTarget;
                 const buttonText = stat.action || liveSectionLinks.impactDefaultLinkText;
 
+                const metricContextNotes = [
+                  "Verified alumni tracked across 40+ countries and global industries.",
+                  "Undergraduate and postgraduate engineering and technology faculties.",
+                  "Enterprise recruiters, research partners, and startup accelerators.",
+                  "Graduates employed or pursuing advanced degrees within 6 months.",
+                ];
+
                 return (
                   <article
                     key={stat.id || stat.label || stat.title || idx}
                     onClick={() => navigate(targetUrl)}
-                    className="group flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-7 shadow-xs hover:shadow-md hover:border-[#14304D]/40 transition-all duration-300 cursor-pointer"
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-7 lg:p-8 shadow-[0_2px_12px_-2px_rgba(10,56,113,0.06)] hover:shadow-[0_20px_40px_-12px_rgba(10,56,113,0.12)] hover:border-[#003580]/40 hover:-translate-y-1.5 transition-all duration-300 cursor-pointer"
                   >
+                    {/* Subtle Top Accent Line on Hover */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#003580] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
                     <div>
                       {/* Top Row: Icon Container & Trend Tag */}
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-[#14304D] group-hover:bg-[#14304D] group-hover:text-white transition-all duration-300">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/80 border border-blue-100/80 text-[#003580] group-hover:bg-[#003580] group-hover:text-white transition-all duration-300 shadow-2xs">
                           <StatIcon className="h-5 w-5" />
                         </div>
-                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 group-hover:bg-rose-50 group-hover:text-[#C8102E] transition-colors">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100/90 border border-slate-200/60 px-3 py-1 text-[11px] font-semibold text-slate-700 group-hover:bg-rose-50 group-hover:border-rose-200/70 group-hover:text-[#C8102E] transition-colors">
                           {stat.trend || (idx === 0 ? "+18% YoY" : idx === 1 ? "Fields of Study" : idx === 2 ? "Corporate Link" : "Verified Placement")}
                         </span>
                       </div>
 
                       {/* Counter Value */}
-                      <div className="font-serif text-4xl lg:text-5xl font-bold tracking-tight text-[#14304D] group-hover:text-[#C8102E] transition-colors duration-300">
+                      <div className="font-fraunces text-4xl lg:text-[46px] font-extrabold tracking-tight text-[#003580] group-hover:text-[#C8102E] transition-colors duration-300">
                         {stat.value}{stat.suffix || ''}
                       </div>
 
                       {/* Metric Label */}
-                      <p className="mt-2 text-xs font-bold uppercase tracking-wider text-slate-600">
+                      <p className="mt-1.5 text-xs font-bold uppercase tracking-[0.14em] text-slate-800">
                         {labelTitle}
+                      </p>
+
+                      {/* Descriptive Footnote */}
+                      <p className="mt-2 text-xs text-slate-500 leading-relaxed font-normal">
+                        {metricContextNotes[idx] || "Official university institutional indicator benchmarked for accreditation."}
                       </p>
                     </div>
 
                     {/* Action Link Footer */}
                     {buttonText && (
                       <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[#14304D] group-hover:text-[#C8102E] transition-colors inline-flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-[#003580] group-hover:text-[#C8102E] transition-colors inline-flex items-center gap-1.5">
                           <span>{buttonText}</span>
                           <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
                         </span>
@@ -1405,115 +1448,174 @@ export default function HomePage() {
         </section>
 
         {/* ── SECTION: How ASTU-AMS Works ── */}
-        <section id="how-it-works" className="scroll-mt-24 w-full bg-[#F8FAFC] py-20 lg:py-24 border-b border-slate-200/80">
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left title, Right subtitle */}
-            <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
-                    {livePortalsHeaders?.eyebrow || "GET STARTED"}
-                  </span>
-                </div>
-                <h2 className="mt-2 text-3xl md:text-4xl lg:text-[40px] font-serif font-bold text-[#14304D] tracking-tight leading-tight">
-                  {livePortalsHeaders?.title || "How ASTU-AMS Works"}
-                </h2>
+        <section id="how-it-works" className="scroll-mt-24 w-full bg-gradient-to-b from-[#F8FAFC] via-[#F4F7FB] to-[#F8FAFC] py-20 lg:py-24 border-b border-slate-200/80 relative overflow-hidden">
+          {/* Subtle blueprint grid overlay */}
+          <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,#003580_1px,transparent_1px),linear-gradient(to_bottom,#003580_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-blue-400/[0.04] rounded-full blur-3xl pointer-events-none" />
+
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* Header: Centered Clean Title & Subtitle (No duplicate CTA button or roadmap pill) */}
+            <div className="mb-12 text-center max-w-2xl mx-auto pb-6 border-b border-slate-200/80">
+              <div className="inline-flex items-center gap-2 mb-2.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-100">
+                <span className="w-2 h-2 rounded-full bg-[#C8102E]" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
+                  {livePortalsHeaders?.eyebrow || "GET STARTED"}
+                </span>
               </div>
-              <p className="max-w-md text-sm sm:text-base text-slate-500 leading-relaxed md:text-right">
-                {livePortalsHeaders?.description || "From registration to verified impact — four simple steps connecting graduates, employers, and the university."}
+              <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
+                {livePortalsHeaders?.title || "How ASTU-AMS Works"}
+              </h2>
+              <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
+                {livePortalsHeaders?.description || "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps."}
               </p>
             </div>
 
-            {/* 4 Steps Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Visual Roadmap Connection Track (Desktop) */}
+            <div className="hidden lg:grid grid-cols-4 gap-6 mb-8 relative">
+              <div className="absolute top-3.5 left-[12%] right-[12%] h-[2px] bg-slate-200 z-0" />
+              {[
+                "01. Profile & Verification",
+                "02. Opportunities & Match",
+                "03. Global Collaboration",
+                "04. Longitudinal Impact",
+              ].map((stage, sIdx) => {
+                const isNavy = sIdx % 2 === 0;
+                return (
+                  <div key={sIdx} className="relative z-10 flex flex-col items-center text-center">
+                    <div
+                      className={`h-7 w-7 rounded-full border-2 flex items-center justify-center font-mono text-xs font-bold transition-transform shadow-xs ${
+                        isNavy
+                          ? "bg-[#003580] border-[#003580] text-white ring-4 ring-blue-50"
+                          : "bg-[#C8102E] border-[#C8102E] text-white ring-4 ring-rose-50"
+                      }`}
+                    >
+                      {sIdx + 1}
+                    </div>
+                    <span className="mt-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                      {stage}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 4 Steps Grid - Compact, Modern & Strictly ASTU Brand Colors */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {livePortals.map((item, idx) => {
                 const IconComponent = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || Users);
                 const descText = item.description || (Array.isArray(item.points) ? item.points[0] : item.text || '');
-                const stepNum = item.badge?.replace('Step ', '') || `0${idx + 1}`;
                 const tagsList: string[] = item.tags || (idx === 0 ? ["Verified ID", "Skill Matrix"] : idx === 1 ? ["Job Match", "Mentorship"] : idx === 2 ? ["Global Network", "Industry Events"] : ["Tracer Surveys", "Curriculum"]);
-                const ctaText = item.cta || (idx === 0 ? "Start Profile" : idx === 1 ? "Explore Opportunities" : idx === 2 ? "Join Network" : "Take Survey");
+                const ctaText = item.cta || (idx === 0 ? "Start Profile" : idx === 1 ? "Explore Opportunities" : idx === 2 ? "Join Network" : "Take Tracer Survey");
                 const routeUrl = item.route || (idx === 0 ? "/register" : idx === 1 ? "/info/employer-portal" : idx === 2 ? "/login" : "/info/alumni-portal");
 
-                const stepActionVerbs = ["CREATE", "DISCOVER", "CONNECT", "GIVE BACK"];
+                const stepActionVerbs = ["ONBOARDING", "OPPORTUNITY", "ENGAGEMENT", "GIVE BACK"];
                 const actionVerb = stepActionVerbs[idx] || "STAGE";
+                const isNavy = idx % 2 === 0;
+                const brandColor = isNavy ? "#003580" : "#C8102E";
+
+                const stepBullets = [
+                  ["Verified Student/Alumni ID", "Skill & Certification Matrix"],
+                  ["Direct Enterprise Recruitment", "Faculty Research Grants"],
+                  ["Global Alumni Directory", "Campus Expos & Hackathons"],
+                  ["Accreditation Tracer Survey", "Curriculum Advisory"],
+                ];
+
+                const currentBullets = tagsList.length >= 2 ? tagsList.slice(0, 2) : (stepBullets[idx] || ["Verified Platform Feature", "Accredited Workflow"]);
 
                 return (
                   <article
                     key={item.id || item.step || item.title || idx}
                     onClick={() => navigate(routeUrl)}
-                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-7 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#14304D]/40 transition-all duration-300 cursor-pointer"
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-5 sm:p-6 border border-slate-200/90 shadow-xs hover:shadow-md hover:border-[#003580]/40 hover:-translate-y-1 transition-all duration-200 cursor-pointer"
                   >
-                    {/* Top Accent Strip */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-slate-100 group-hover:bg-[#14304D] transition-colors" />
+                    {/* Top Accent Strip - Strictly ASTU Navy and ASTU Red */}
+                    <div
+                      className="absolute top-0 left-0 right-0 h-1 transition-colors"
+                      style={{ backgroundColor: brandColor }}
+                    />
 
                     <div>
-                      {/* Step Number & Icon */}
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-2.5">
-                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#14304D] text-white font-mono text-xs font-bold shadow-2xs group-hover:bg-[#C8102E] transition-colors">
-                            {stepNum.padStart(2, '0')}
-                          </span>
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-[#14304D] transition-colors">
-                            {actionVerb}
-                          </span>
+                      {/* Step Header: Icon & Action Verb Badge */}
+                      <div className="flex items-center justify-between mb-3.5">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-2xs transition-colors ${
+                            isNavy
+                              ? 'bg-blue-50 border border-blue-100 text-[#003580] group-hover:bg-[#003580] group-hover:text-white'
+                              : 'bg-rose-50 border border-rose-100 text-[#C8102E] group-hover:bg-[#C8102E] group-hover:text-white'
+                          }`}
+                        >
+                          <IconComponent className="h-4.5 w-4.5" />
                         </div>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 group-hover:bg-slate-200 group-hover:text-[#14304D] transition-colors">
-                          <IconComponent className="h-4 w-4" />
-                        </div>
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded-full ${
+                            isNavy
+                              ? 'bg-blue-50/80 text-[#003580]'
+                              : 'bg-rose-50/80 text-[#C8102E]'
+                          }`}
+                        >
+                          {actionVerb}
+                        </span>
                       </div>
 
                       {/* Title */}
-                      <h3 className="font-serif text-lg font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors leading-snug">
+                      <h3 className="font-fraunces text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#003580] transition-colors leading-snug">
                         {item.title}
                       </h3>
 
                       {/* Description */}
-                      <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
+                      <p className="mt-1.5 text-xs text-slate-500 leading-relaxed line-clamp-2">
                         {descText}
                       </p>
 
-                      {/* Category Tags */}
-                      {tagsList.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-1.5">
-                          {tagsList.map((tag: string, tIdx: number) => (
-                            <span key={tIdx} className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      {/* Feature Highlights - Compact Chips */}
+                      <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5">
+                        {currentBullets.map((feature: string, fIdx: number) => (
+                          <span
+                            key={fIdx}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 text-[11px] font-medium text-slate-600 border border-slate-200/60"
+                          >
+                            <CheckCircle2
+                              className={`h-3 w-3 shrink-0 ${isNavy ? 'text-[#003580]' : 'text-[#C8102E]'}`}
+                            />
+                            <span>{feature}</span>
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Bottom CTA Action Link */}
-                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs font-semibold text-[#14304D] group-hover:text-[#C8102E] transition-colors">
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
                         {ctaText}
                       </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#14304D] group-hover:translate-x-1 transition-all" />
+                      <div
+                        className={`flex h-6 w-6 items-center justify-center rounded-full transition-all duration-200 ${
+                          isNavy
+                            ? 'bg-blue-50 text-[#003580] group-hover:bg-[#003580] group-hover:text-white'
+                            : 'bg-rose-50 text-[#C8102E] group-hover:bg-[#C8102E] group-hover:text-white'
+                        }`}
+                      >
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                      </div>
                     </div>
                   </article>
                 );
               })}
             </div>
 
-            {/* Bottom Call to Action Card */}
-            <div className="mt-12 rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div>
-                <h4 className="font-serif text-xl sm:text-2xl font-bold text-[#14304D]">
-                  Ready to connect with the ASTU alumni network?
-                </h4>
-                <p className="mt-1 text-xs sm:text-sm text-slate-600">
-                  Join over 1,238+ verified graduates, researchers, and employers already collaborating on the platform.
-                </p>
-              </div>
+            {/* Centered Modern Get Started CTA - Clean & Professional without giant card */}
+            <div className="mt-12 flex flex-col items-center justify-center text-center">
               <button
-                className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-[#14304D] hover:bg-[#C8102E] px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer"
-                onClick={() => navigate(livePortalsHeaders?.ctaLink || liveSectionLinks.portalsGetStartedLink)}
+                type="button"
+                onClick={() => navigate(livePortalsHeaders?.ctaLink || liveSectionLinks.portalsGetStartedLink || "/register")}
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-[#003580] hover:bg-[#002766] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group"
               >
                 <span>{livePortalsHeaders?.ctaText || "Get Started Today"}</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </button>
+              <p className="mt-2.5 text-xs text-slate-500 font-medium">
+                Join the ASTU alumni community and start building your professional network.
+              </p>
             </div>
           </div>
         </section>
@@ -1521,96 +1623,212 @@ export default function HomePage() {
         {/* ── SECTION 1: Life at ASTU ── */}
         <section id="campus-life" className="scroll-mt-24 w-full bg-white py-16 md:py-24 border-t border-slate-100">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left title, Right subtitle + Detail Page link */}
-            <div className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
-                    {liveCampusLifeHeaders?.eyebrow || "EXPLORE ASTU"}
+            {/* Header: Left title & clean editorial intro, Right detail page pill */}
+            <div className="mb-10 sm:mb-12 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pb-6 border-b border-slate-100">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-[2px] bg-[#C8102E]" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
+                    {liveCampusLifeHeaders?.eyebrow || "EXPLORE LIFE AT ASTU"}
                   </span>
                 </div>
-                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
                   {liveCampusLifeHeaders?.title || "Life at ASTU"}
                 </h2>
-              </div>
-              <div className="flex flex-col items-start md:items-end gap-2.5">
-                <p className="max-w-md text-sm sm:text-base text-slate-500 leading-relaxed md:text-right">
-                  {liveCampusLifeHeaders?.description || "Events, facilities, and galleries across the ASTU community, in one place."}
+                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                  {campusLifeDescription}
                 </p>
+              </div>
+
+              <div className="shrink-0 flex items-center">
                 <button
                   type="button"
                   onClick={() => navigate("/info/campus-life")}
-                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#14304D] hover:text-[#C8102E] transition-colors cursor-pointer group"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
                 >
-                  <span>View all campus life</span>
+                  <span>Explore All Campus Life</span>
                   <span className="transition-transform group-hover:translate-x-1">→</span>
                 </button>
               </div>
             </div>
 
-            {/* 3 Modern Cards Grid: All with images */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-              {displayCampusLife.map((card: any, idx: number) => (
+            {/* Asymmetrical Master Layout: 7-col Featured Hero Card + 5-col Dual Showcase Stack */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+              {/* Left 7 Columns: Hero Feature Card with Authentic Photography & Navy Cinematic Overlay */}
+              <div className="lg:col-span-7 flex">
                 <div
-                  key={card.id || idx}
-                  onClick={() => navigate(card.link)}
+                  onClick={() => navigate(displayCampusLife[0]?.link || "/events")}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      navigate(card.link);
+                      navigate(displayCampusLife[0]?.link || "/events");
                     }
                   }}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_2px_10px_rgba(20,48,77,0.04)] hover:shadow-[0_18px_36px_rgba(20,48,77,0.09)] transition-all duration-300 hover:-translate-y-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#14304D]/20"
+                  className="relative w-full rounded-3xl overflow-hidden flex flex-col justify-between p-8 sm:p-10 text-white min-h-[460px] lg:min-h-[500px] shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#003580]/40"
                 >
-                  {/* Image container with 16:10 aspect ratio and zoom */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={card.image}
-                      alt={card.title}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      onError={handleImageError}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#14304D]/60 via-[#14304D]/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
+                  {/* Photo Background with 700ms smooth zoom */}
+                  <img
+                    src={displayCampusLife[0]?.image || gc7}
+                    alt={displayCampusLife[0]?.title || "Campus Life"}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                    onError={handleImageError}
+                  />
 
-                    {/* Category Badge Pill on top-left of image */}
-                    <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#14304D] shadow-xs">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]" />
-                      <span>{card.eyebrow}</span>
-                    </div>
+                  {/* Multi-layered Cinematic Navy Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#001d4a]/95 via-[#003580]/80 to-[#003580]/35 transition-opacity duration-300 group-hover:via-[#003580]/75" />
 
-                    {/* Subtle Index on top-right */}
-                    <div className="absolute top-4 right-4 rounded-full bg-black/40 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-semibold text-white/90">
-                      0{idx + 1}
+                  {/* Top Red Institutional Bar */}
+                  <div className="absolute top-0 left-8 sm:left-10 w-16 h-1.5 bg-[#C8102E] rounded-b-sm shadow-xs" aria-hidden="true" />
+
+                  {/* Top Tag & Index */}
+                  <div className="relative z-10 flex items-center justify-between pt-2">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white border border-white/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse" />
+                      <span>{displayCampusLife[0]?.eyebrow || "EVENTS & ACTIVITIES"}</span>
                     </div>
+                    <span className="text-xs font-semibold text-white/60 tracking-wider">
+                      01 / 03
+                    </span>
                   </div>
 
-                  {/* Card Body */}
-                  <div className="flex flex-col flex-1 justify-between p-6 sm:p-7">
-                    <div>
-                      <h3 className="font-serif text-xl sm:text-[22px] font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors duration-200 leading-snug">
-                        {card.title}
-                      </h3>
-                      <p className="mt-2.5 text-sm text-slate-600 leading-relaxed line-clamp-3">
-                        {card.description}
-                      </p>
-                    </div>
+                  {/* Bottom Content & CTA */}
+                  <div className="relative z-10 mt-auto pt-16">
+                    <h3 className="font-serif text-2xl sm:text-3xl lg:text-[34px] font-bold text-white leading-snug max-w-xl group-hover:text-blue-100 transition-colors">
+                      {displayCampusLife[0]?.title || "Reunions, career expos, and workshops"}
+                    </h3>
+                    <p className="mt-3 text-sm sm:text-base text-white/80 leading-relaxed max-w-lg">
+                      {displayCampusLife[0]?.description || "Chapter meetings, leadership workshops, career expos, and community programs that keep graduates connected to the university."}
+                    </p>
 
-                    {/* Bottom Action Row */}
-                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm font-semibold text-[#14304D] group-hover:text-[#C8102E] transition-colors">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span>{card.action}</span>
-                        <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-                      </span>
-                      <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                        ASTU AMS
+                    <div className="mt-8 pt-4 border-t border-white/15 flex items-center justify-between">
+                      <div className="inline-flex items-center gap-2 rounded-xl bg-[#C8102E] group-hover:bg-[#A60D26] h-12 px-6 text-sm font-semibold text-white transition-all shadow-md group-hover:shadow-lg">
+                        <span>{displayCampusLife[0]?.action || "View events"}</span>
+                        <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
+                      </div>
+                      <span className="text-xs text-white/60 uppercase tracking-widest hidden sm:inline">
+                        Featured Experience
                       </span>
                     </div>
                   </div>
                 </div>
-              ))}
+              </div>
+
+              {/* Right 5 Columns: 2 Stacked Horizontal Architectural Showcase Cards */}
+              <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
+                {/* Facilities Card (Card 02) */}
+                <div
+                  onClick={() => navigate(displayCampusLife[1]?.link || "/info/facilities")}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(displayCampusLife[1]?.link || "/info/facilities");
+                    }
+                  }}
+                  className="relative flex flex-col sm:flex-row overflow-hidden rounded-2xl border border-slate-200/90 bg-white hover:border-[#003580]/30 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group flex-1 min-h-[220px] focus:outline-none focus:ring-2 focus:ring-[#003580]/30"
+                >
+                  <div className="relative w-full sm:w-48 lg:w-44 shrink-0 min-h-[170px] sm:min-h-full overflow-hidden bg-slate-100">
+                    <img
+                      src={displayCampusLife[1]?.image || electricLabs}
+                      alt={displayCampusLife[1]?.title || "Facilities"}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                      onError={handleImageError}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
+                    <span className="absolute top-3 left-3 sm:hidden rounded-full bg-white/90 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#003580]">
+                      02
+                    </span>
+                  </div>
+
+                  <div className="p-6 sm:p-7 flex flex-col justify-between flex-1">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                          {displayCampusLife[1]?.eyebrow || "FACILITIES & SPACES"}
+                        </span>
+                        <span className="hidden sm:inline text-xs font-semibold text-slate-400">
+                          02
+                        </span>
+                      </div>
+                      <h4 className="font-serif text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                        {displayCampusLife[1]?.title || "Facilities"}
+                      </h4>
+                      <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
+                        {displayCampusLife[1]?.description || "Laboratories, research centers, central libraries, and employer interview rooms."}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-semibold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
+                        <span>{displayCampusLife[1]?.action || "Explore facilities"}</span>
+                        <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider">
+                        ASTU
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Museums & Gallery Card (Card 03) */}
+                <div
+                  onClick={() => navigate(displayCampusLife[2]?.link || "/gallery")}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(displayCampusLife[2]?.link || "/gallery");
+                    }
+                  }}
+                  className="relative flex flex-col sm:flex-row overflow-hidden rounded-2xl border border-slate-200/90 bg-white hover:border-[#003580]/30 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group flex-1 min-h-[220px] focus:outline-none focus:ring-2 focus:ring-[#003580]/30"
+                >
+                  <div className="relative w-full sm:w-48 lg:w-44 shrink-0 min-h-[170px] sm:min-h-full overflow-hidden bg-slate-100">
+                    <img
+                      src={displayCampusLife[2]?.image || arcImage}
+                      alt={displayCampusLife[2]?.title || "Museums and gallery"}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
+                      onError={handleImageError}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
+                    <span className="absolute top-3 left-3 sm:hidden rounded-full bg-white/90 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#003580]">
+                      03
+                    </span>
+                  </div>
+
+                  <div className="p-6 sm:p-7 flex flex-col justify-between flex-1">
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                          {displayCampusLife[2]?.eyebrow || "MUSEUMS & GALLERY"}
+                        </span>
+                        <span className="hidden sm:inline text-xs font-semibold text-slate-400">
+                          03
+                        </span>
+                      </div>
+                      <h4 className="font-serif text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                        {displayCampusLife[2]?.title || "Museums and gallery"}
+                      </h4>
+                      <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
+                        {displayCampusLife[2]?.description || "Research showcases, graduation moments, and campus photography."}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs sm:text-sm font-semibold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
+                        <span>{displayCampusLife[2]?.action || "View gallery"}</span>
+                        <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider">
+                        ASTU
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1618,29 +1836,33 @@ export default function HomePage() {
         {/* ── SECTION 2: Campus gallery ── */}
         <section id="gallery" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-[104px] border-y border-slate-200/80">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left title, Right 'View all' link */}
-            <div className="mb-12 flex items-end justify-between">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+            {/* Header: Left Title & Editorial Subtitle, Right Action Pill */}
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/80">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-[2px] bg-[#C8102E] inline-block rounded-full" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
                     {liveGallerySection?.homeEyebrow || "GALLERY"}
                   </span>
                 </div>
-                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
                   {liveGallerySection?.homeTitle || "Campus gallery"}
                 </h2>
+                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                  {liveGallerySection?.homeSubtitle || "Visual highlights, campus events, research milestones, and institutional memories at ASTU."}
+                </p>
               </div>
-              <a
-                href={liveGallerySection?.homeButtonLink || "/gallery"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate(liveGallerySection?.homeButtonLink || "/gallery");
-                }}
-                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
-              >
-                View all
-              </a>
+
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate(liveGallerySection?.homeButtonLink || "/gallery")}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
+                >
+                  <span>View full gallery</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
             </div>
 
             {/* Gallery Grid: 2 Columns. Left 1 large photo (01), Right 2 stacked photos (02, 03) */}
@@ -1658,7 +1880,7 @@ export default function HomePage() {
                     onError={handleImageError}
                   />
                 </div>
-                <div className="h-12 px-6 flex items-center justify-between bg-[#14304D] text-white shrink-0">
+                <div className="h-12 px-6 flex items-center justify-between bg-[#003580] text-white shrink-0">
                   <span className="text-xs sm:text-sm font-semibold tracking-wide">ASTU main campus</span>
                   <span className="text-xs font-mono text-slate-300">01</span>
                 </div>
@@ -1679,7 +1901,7 @@ export default function HomePage() {
                       onError={handleImageError}
                     />
                   </div>
-                  <div className="h-11 px-5 flex items-center justify-between bg-[#14304D] text-white shrink-0">
+                  <div className="h-11 px-5 flex items-center justify-between bg-[#003580] text-white shrink-0">
                     <span className="text-xs sm:text-sm font-semibold tracking-wide">Innovation and collaboration</span>
                     <span className="text-xs font-mono text-slate-300">02</span>
                   </div>
@@ -1698,7 +1920,7 @@ export default function HomePage() {
                       onError={handleImageError}
                     />
                   </div>
-                  <div className="h-11 px-5 flex items-center justify-between bg-[#14304D] text-white shrink-0">
+                  <div className="h-11 px-5 flex items-center justify-between bg-[#003580] text-white shrink-0">
                     <span className="text-xs sm:text-sm font-semibold tracking-wide">Graduation ceremony</span>
                     <span className="text-xs font-mono text-slate-300">03</span>
                   </div>
@@ -1709,31 +1931,46 @@ export default function HomePage() {
         </section>
 
         {/* ── SECTION 3: Upcoming alumni events ── */}
-        <section id="events" className="scroll-mt-24 w-full py-16 md:py-[104px] text-white relative overflow-hidden dark-band-grid">
+        <section id="events" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-24 relative overflow-hidden border-t border-slate-200/70">
+          {/* Soft architectural campus background image (gentle and comfortable for the eyes) */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+            <img
+              src={gallery1}
+              alt=""
+              className="w-full h-full object-cover opacity-[0.045] filter saturate-0 scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#F8FAFC] via-transparent to-[#F8FAFC]" />
+            <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-blue-500/[0.03] rounded-full blur-[100px]" />
+          </div>
+
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10">
-            {/* Header: Left title, Right 'View all' link */}
-            <div className="mb-12 flex items-end justify-between">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-blue-300 font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-200">
-                    {liveEventsHeaders?.eyebrow || "EVENTS AND WORKSHOPS"}
+            {/* Header: Left title & subtitle, Right 'View all events' pill */}
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/80">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-[2px] bg-[#C8102E]" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
+                    {liveEventsHeaders?.eyebrow || "EVENTS & WORKSHOPS"}
                   </span>
                 </div>
-                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-white tracking-[-0.015em] leading-tight">
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-tight leading-tight">
                   {liveEventsHeaders?.title || "Upcoming alumni events"}
                 </h2>
+                <p className="mt-2.5 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                  {liveEventsHeaders?.description || "Professional development, networking, and industry connection sessions open to ASTU alumni and students."}
+                </p>
               </div>
-              <a
-                href="/events"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/events");
-                }}
-                className="text-xs sm:text-sm font-medium text-slate-300 hover:text-white underline underline-offset-4 cursor-pointer"
-              >
-                View all
-              </a>
+
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate("/events")}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
+                >
+                  <span>View all events</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
             </div>
 
             {/* 3-column White Cards Grid */}
@@ -1745,45 +1982,58 @@ export default function HomePage() {
                 return (
                   <article
                     key={event.id || event.title + idx}
-                    className="card-soft flex flex-col justify-between overflow-hidden rounded-2xl bg-white text-slate-900 border-t-4 border-[#C8102E] border-x border-b border-slate-100"
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest("button")) return;
+                      navigate(
+                        event.link && event.link.startsWith("/events/")
+                          ? event.link
+                          : `/events/${event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+                        { state: { event } }
+                      );
+                    }}
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white text-slate-900 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 cursor-pointer border border-slate-200/90 hover:border-[#003580]/40"
                   >
+                    {/* Subtle top indicator on card hover */}
+                    <div className="h-1 w-full bg-gradient-to-r from-[#003580] via-[#C8102E] to-[#003580] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
                     <div>
                       {/* Top Date & Category Header Panel */}
-                      <div className="bg-[#F0F4F8] px-5 py-4 border-b border-slate-200/70 flex items-center justify-between shrink-0">
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-3xl sm:text-[34px] font-black text-[#14304D] leading-none">
+                      <div className="bg-[#F8FAFC] px-6 py-5 border-b border-slate-100 flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-3">
+                          <span className="font-serif text-3xl sm:text-[36px] font-black text-[#003580] leading-none tracking-tight">
                             {dateParts.day}
                           </span>
                           <div className="flex flex-col">
-                            <span className="text-[10px] sm:text-[11px] font-extrabold uppercase text-[#C8102E] tracking-wider leading-none">
+                            <span className="text-xs font-bold uppercase tracking-wider text-[#C8102E] leading-none">
                               {dateParts.month}
                             </span>
-                            <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 leading-none mt-1">
+                            <span className="text-[11px] font-semibold text-slate-400 leading-none mt-1">
                               {dateParts.year}
                             </span>
                           </div>
                         </div>
-                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                          {event.category || event.kind || "Event"}
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200/80 text-[10px] font-bold uppercase tracking-wider text-slate-700 shadow-2xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#003580]" />
+                          <span>{event.category || event.kind || "Event"}</span>
                         </span>
                       </div>
 
                       {/* Card Body */}
-                      <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+                      <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between">
                         <div>
-                          <h3 className="font-serif text-lg sm:text-xl font-bold text-[#14304D] leading-snug line-clamp-2">
+                          <h3 className="font-serif text-xl sm:text-[22px] font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors duration-200 leading-snug line-clamp-2">
                             {event.title}
                           </h3>
 
                           {event.location && (
-                            <div className="mt-2.5 flex items-center gap-1.5 text-xs text-slate-500">
-                              <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" aria-hidden="true" />
+                            <div className="mt-2.5 flex items-center gap-2 text-xs font-medium text-slate-500">
+                              <MapPin className="h-3.5 w-3.5 text-[#C8102E] shrink-0" aria-hidden="true" />
                               <span className="truncate">{event.location}</span>
                             </div>
                           )}
 
                           {event.description && (
-                            <p className="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed line-clamp-3">
+                            <p className="mt-3.5 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
                               {event.description}
                             </p>
                           )}
@@ -1792,47 +2042,51 @@ export default function HomePage() {
                     </div>
 
                     {/* Card Footer */}
-                    <div className="px-5 sm:px-6 pb-5 pt-2 shrink-0">
+                    <div className="px-6 pb-6 pt-2 shrink-0">
                       <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
                         {isRegistered ? (
                           <span
                             aria-live="polite"
-                            className="h-11 px-4 rounded-md border border-[#1E7B3A] bg-white text-[#1E7B3A] text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 select-none"
+                            className="h-10 px-4 rounded-xl border border-emerald-500/80 bg-emerald-50/60 text-emerald-700 text-xs font-semibold inline-flex items-center gap-1.5 select-none shadow-2xs"
                           >
-                            <Check className="h-3.5 w-3.5 text-[#1E7B3A]" aria-hidden="true" />
+                            <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
                             <span>Registered</span>
                           </span>
                         ) : (
                           <button
                             type="button"
-                            onClick={() =>
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleRegisterClick({
                                 title: event.title,
                                 kind: "Event",
                                 date: event.date,
                                 location: event.location,
                                 id: event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                              })
-                            }
-                            className="h-11 px-5 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer inline-flex items-center justify-center shadow-xs"
+                              });
+                            }}
+                            className="h-10 px-5 rounded-xl bg-[#003580] hover:bg-[#C8102E] text-white text-xs font-semibold transition-all duration-200 shadow-xs hover:shadow-md cursor-pointer inline-flex items-center justify-center gap-1.5 group/btn"
                           >
-                            Register
+                            <span>Register</span>
+                            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
                           </button>
                         )}
 
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             navigate(
                               event.link && event.link.startsWith("/events/")
                                 ? event.link
                                 : `/events/${event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
                               { state: { event } }
-                            )
-                          }
-                          className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
+                            );
+                          }}
+                          className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-[#003580] transition-colors cursor-pointer group-hover:underline underline-offset-4 flex items-center gap-1"
                         >
-                          Details
+                          <span>Details</span>
+                          <span className="transition-transform group-hover:translate-x-0.5">→</span>
                         </button>
                       </div>
                     </div>
@@ -1843,143 +2097,129 @@ export default function HomePage() {
           </div>
         </section>
         {/* ── SECTION 4: Official notices ── */}
-        <section id="announcements" className="scroll-mt-24 w-full bg-white py-16 md:py-[104px] border-t border-slate-100">
+        <section id="announcements" className="scroll-mt-24 w-full bg-white py-16 md:py-24 border-t border-slate-100">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 flex items-end justify-between">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-[2px] bg-[#C8102E]" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
                     {liveAnnouncementsHeaders?.eyebrow || "ANNOUNCEMENTS"}
                   </span>
                 </div>
-                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-tight leading-tight">
                   {liveAnnouncementsHeaders?.title || "Official notices"}
                 </h2>
+                <p className="mt-2.5 text-sm sm:text-base text-slate-500 leading-relaxed max-w-xl">
+                  {liveAnnouncementsHeaders?.description || "Institutional updates, academic schedules, partner calls, and university circulars."}
+                </p>
               </div>
-              <a
-                href={liveSectionLinks.announcementsViewAllLink || "/announcements"}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate(liveSectionLinks.announcementsViewAllLink || "/announcements");
-                }}
-                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
-              >
-                View all
-              </a>
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate(liveSectionLinks.announcementsViewAllLink || "/announcements")}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
+                >
+                  <span>View all notices</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
             </div>
 
-            <div className="grid gap-10 lg:grid-cols-12 items-start">
-              {/* Left Column (7 cols): Notice rows */}
-              <div className="lg:col-span-7 divide-y divide-slate-100">
-                {(liveAnnouncements && liveAnnouncements.length >= 3 ? liveAnnouncements.slice(0, 3) : announcements.slice(0, 3)).map((announcement: any, idx: number) => {
-                  const { day, month } = announcement.day && announcement.month
-                    ? { day: announcement.day, month: announcement.month }
-                    : parseNoticeDate(announcement.date || announcement.publishedAt);
-                  const subMeta = announcement.type
-                    ? `${announcement.type} • ${announcement.year || '2026'}`
-                    : `Official announcement • ${announcement.date || '2026'}`;
-                  const targetLink = announcement.link || `${liveSectionLinks.announcementItemLinkBase}/${announcement.id || announcement.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+            <div className="flex flex-col gap-4">
+              {(liveAnnouncements && liveAnnouncements.length >= 3 ? liveAnnouncements.slice(0, 3) : announcements.slice(0, 3)).map((announcement: any, idx: number) => {
+                const { day, month } = announcement.day && announcement.month
+                  ? { day: announcement.day, month: announcement.month }
+                  : parseNoticeDate(announcement.date || announcement.publishedAt);
+                const targetLink = announcement.link || `${liveSectionLinks.announcementItemLinkBase}/${announcement.id || announcement.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-                  return (
-                    <div
-                      key={announcement.id || idx}
-                      onClick={() => navigate(targetLink)}
-                      className="flex items-center justify-between py-6 cursor-pointer group transition-colors hover:bg-slate-50/60 px-3 rounded-lg -mx-3"
-                    >
-                      <div className="flex items-center gap-5 sm:gap-7 min-w-0">
-                        <div className="w-12 sm:w-14 shrink-0 text-left">
-                          <span className="block text-2xl sm:text-3xl font-serif font-bold text-[#14304D] leading-none">
-                            {day}
-                          </span>
-                          <span className="block text-[11px] font-bold text-[#C8102E] tracking-wider uppercase mt-1">
-                            {month}
-                          </span>
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="text-base sm:text-lg font-serif font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors truncate sm:whitespace-normal">
-                            {announcement.title}
-                          </h3>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {subMeta}
-                          </p>
-                        </div>
+                return (
+                  <div
+                    key={announcement.id || idx}
+                    onClick={() => navigate(targetLink)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        navigate(targetLink);
+                      }
+                    }}
+                    className="group relative flex items-center justify-between p-5 sm:p-6 rounded-2xl border border-slate-200/80 bg-white hover:border-[#003580]/30 shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                  >
+                    <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                      {/* Date badge */}
+                      <div className="w-12 sm:w-14 shrink-0 text-center sm:text-left">
+                        <span className="block text-2xl sm:text-[32px] font-serif font-black text-[#003580] leading-none">
+                          {day}
+                        </span>
+                        <span className="block text-[11px] font-bold text-[#C8102E] tracking-wider uppercase mt-1">
+                          {month}
+                        </span>
                       </div>
-                      <div className="shrink-0 pl-4">
-                        <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-[#C8102E] group-hover:translate-x-1 transition-all" />
+
+                      {/* Divider */}
+                      <div className="w-[1px] h-11 bg-slate-200/80 shrink-0 hidden sm:block" />
+
+                      {/* Content */}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]" />
+                            <span>{announcement.type || "Official announcement"}</span>
+                          </span>
+                          <span className="text-xs text-slate-400">•</span>
+                          <span className="text-xs text-slate-500 font-medium">
+                            {announcement.year || announcement.date || "2026"}
+                          </span>
+                        </div>
+                        <h3 className="text-base sm:text-lg font-serif font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug line-clamp-2">
+                          {announcement.title}
+                        </h3>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
 
-              {/* Right Column (5 cols): Subscribe Navy Card */}
-              <div className="lg:col-span-5 rounded-2xl bg-[#14304D] text-white p-7 sm:p-8 flex flex-col justify-between shadow-xs relative overflow-hidden">
-                {/* 56x5px red tab at top-left of navy feature card */}
-                <div className="absolute top-0 left-7 sm:left-8 w-[56px] h-[5px] bg-[#C8102E] rounded-b-sm" aria-hidden="true" />
-
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">
-                    STAY INFORMED
-                  </p>
-                  <h3 className="font-serif text-2xl sm:text-[26px] font-bold text-white mt-2 leading-snug">
-                    {liveAnnouncementsHeaders?.subscribeTitle || "Subscribe to official updates"}
-                  </h3>
-                  <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                    {liveAnnouncementsHeaders?.subscribeDesc || "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox."}
-                  </p>
-                </div>
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    toast.success("Subscribed to ASTU-AMS announcements.");
-                    (event.currentTarget as HTMLFormElement).reset();
-                  }}
-                  className="mt-6 space-y-3"
-                >
-                  <input
-                    type="email"
-                    required
-                    placeholder="name@example.com"
-                    className="w-full rounded-md bg-white text-slate-900 placeholder:text-slate-400 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
-                  />
-                  <button
-                    type="submit"
-                    className="w-full h-12 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-colors cursor-pointer shadow-sm"
-                  >
-                    Subscribe
-                  </button>
-                </form>
-              </div>
+                    {/* Action Arrow */}
+                    <div className="shrink-0 pl-4">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-50 group-hover:bg-[#003580] border border-slate-200/70 group-hover:border-transparent text-slate-400 group-hover:text-white flex items-center justify-center transition-all duration-200 group-hover:translate-x-1 shadow-2xs">
+                        <ArrowRight className="h-4 w-4" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
 
         {/* ── SECTION 5: Alumni success stories ── */}
-        <section id="success-stories" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-[104px] border-t border-slate-200/80">
+        <section id="success-stories" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-24 border-t border-slate-200/80">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 flex items-end justify-between">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/80">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-[2px] bg-[#C8102E]" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
                     ALUMNI STORIES
                   </span>
                 </div>
-                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-tight leading-tight">
                   Alumni success stories
                 </h2>
+                <p className="mt-2.5 text-sm sm:text-base text-slate-500 leading-relaxed max-w-xl">
+                  Inspiring career journeys, breakthroughs, and leadership milestones from our global graduate community.
+                </p>
               </div>
-              <a
-                href="/info/alumni-stories"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/info/alumni-stories");
-                }}
-                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
-              >
-                View all stories
-              </a>
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate("/info/alumni-stories")}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
+                >
+                  <span>View all stories</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
             </div>
 
             {(() => {
@@ -1988,22 +2228,31 @@ export default function HomePage() {
                   id: "S-001",
                   name: "Dr. Ruth Alemu",
                   role: "AI Research Scientist, Addis Ababa",
-                  story: "After graduating from ASTU's Computer Science program, Ruth joined a leading AI research lab and has published 18 applied machine learning papers.",
-                  img: arcImage,
+                  company: "ASTU AI Research Center & Regional Labs",
+                  graduationYear: "Class of 2018",
+                  department: "Computer Science & Engineering",
+                  text: "After graduating from ASTU's Computer Science program, Ruth joined a leading AI research lab and has published 18 applied machine learning papers. She actively mentors current ASTU scholars through the AMS portal.",
+                  img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
                 },
                 {
                   id: "S-002",
                   name: "Yonas Bekele",
                   role: "Founder and CEO, GreenGrid Labs",
-                  story: "Launched GreenGrid Labs, now delivering clean, decentralized energy infrastructure to over 40 industrial parks.",
-                  img: electricLabs,
+                  company: "GreenGrid Labs Ethiopia",
+                  graduationYear: "Class of 2016",
+                  department: "Electrical & Power Engineering",
+                  text: "Inspired by ASTU's renewable energy laboratories, Yonas launched GreenGrid Labs — now delivering clean, decentralized energy infrastructure to over 40 industrial parks.",
+                  img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
                 },
                 {
                   id: "S-003",
                   name: "Kalkidan Tadesse",
                   role: "Cloud Platform Lead, Ethio Telecom",
-                  story: "Credits ASTU's hands-on laboratory curriculum for rapid career trajectory.",
-                  img: stateM,
+                  company: "Ethio Telecom Enterprise Cloud",
+                  graduationYear: "Class of 2019",
+                  department: "Software Engineering",
+                  text: "Credits ASTU's hands-on laboratory curriculum for her rapid career trajectory from student innovator to enterprise cloud infrastructure leader.",
+                  img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
                 },
               ];
 
@@ -2014,100 +2263,125 @@ export default function HomePage() {
               return (
                 <div className="grid gap-6 lg:grid-cols-12 items-stretch">
                   {/* Left Column (7 cols): Featured Card */}
-                  <div className="card-soft lg:col-span-7 flex flex-col rounded-2xl border border-slate-200/80 bg-white overflow-hidden">
-                    <div className="relative w-full h-64 sm:h-72 bg-slate-100 overflow-hidden">
+                  <div
+                    onClick={() => navigate(mainStory.link || `/stories/${mainStory.id || 'S-001'}`)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        navigate(mainStory.link || `/stories/${mainStory.id || 'S-001'}`);
+                      }
+                    }}
+                    className="group relative lg:col-span-7 flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                  >
+                    {/* Top Image: object-top prevents portrait cropping */}
+                    <div className="relative w-full aspect-[16/11] sm:aspect-[16/10] bg-slate-900 overflow-hidden">
                       <img
                         src={mainStory.img || mainStory.image || arcImage}
                         alt={mainStory.name || "Alumni story"}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                        className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
                         onError={handleImageError}
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
+                      
+                      {/* Floating Badges */}
+                      <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#003580] shadow-xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse" />
+                        <span>FEATURED ALUMNA</span>
+                      </div>
+
+                      <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-[10px] font-mono font-bold text-white shadow-xs">
+                        <span>{mainStory.graduationYear || "Class of 2018"}</span>
+                      </div>
                     </div>
-                    <div className="p-6 sm:p-8 flex flex-col justify-between flex-1">
+
+                    {/* Card Content & Narrative */}
+                    <div className="p-7 sm:p-9 flex flex-col justify-between flex-1">
                       <div>
-                        {/* Red quote mark on featured story */}
-                        <Quote className="h-8 w-8 text-[#C8102E] shrink-0 mb-3" aria-hidden="true" />
-                        <p className="font-serif text-xl sm:text-2xl font-bold text-[#14304D] leading-snug">
+                        <Quote className="h-8 w-8 text-[#C8102E] shrink-0 mb-3 opacity-90" aria-hidden="true" />
+                        <p className="font-fraunces text-xl sm:text-2xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors duration-200 leading-snug">
                           "{mainStory.story || mainStory.text || mainStory.description}"
                         </p>
+
+                        {/* Creative Milestone Highlight */}
+                        <div className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-50/80 border border-blue-200/60 px-3.5 py-2 text-xs font-semibold text-[#003580]">
+                          <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                          <span>18 Applied Machine Learning Publications • AI Research Mentor</span>
+                        </div>
                       </div>
-                      <div className="mt-6 pt-5 border-t border-slate-100 flex items-end justify-between">
+
+                      <div className="mt-8 pt-5 border-t border-slate-100 flex items-center justify-between">
                         <div>
-                          <h4 className="font-bold text-sm text-[#14304D]">{mainStory.name || mainStory.alumniName}</h4>
+                          <h4 className="font-bold text-base text-[#003580] group-hover:text-[#C8102E] transition-colors">
+                            {mainStory.name || mainStory.alumniName}
+                          </h4>
                           <p className="text-xs text-slate-500 mt-0.5">{mainStory.role || mainStory.department}</p>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => navigate(mainStory.link || `/stories/${mainStory.id || 'S-001'}`)}
-                          className="text-xs sm:text-sm font-semibold text-[#14304D] hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
-                        >
-                          Read story
-                        </button>
+                        <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#003580] group-hover:text-[#C8102E] transition-colors">
+                          <span>Read story</span>
+                          <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right Column (5 cols): 2 Stacked Cards */}
-                  <div className="lg:col-span-5 flex flex-col gap-6">
-                    {/* Card 1 */}
-                    <div className="card-soft flex-1 rounded-2xl border border-slate-200/80 bg-white p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                      <div className="relative w-full sm:w-28 sm:h-28 h-40 rounded-xl bg-slate-100 overflow-hidden shrink-0">
-                        <img
-                          src={sideStory1.img || sideStory1.image || electricLabs}
-                          alt={sideStory1.name || "Alumni story"}
-                          className="absolute inset-0 h-full w-full object-cover"
-                          onError={handleImageError}
-                        />
-                      </div>
-                      <div className="flex-1 flex flex-col justify-between h-full min-w-0">
+                  {/* Right Column (5 cols): 2 Stacked Cards matching original layout */}
+                  <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
+                    {[sideStory1, sideStory2].map((story: any, sIdx: number) => (
+                      <div
+                        key={story.id || sIdx}
+                        onClick={() => navigate(story.link || `/stories/${story.id || `S-00${sIdx + 2}`}`)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            navigate(story.link || `/stories/${story.id || `S-00${sIdx + 2}`}`);
+                          }
+                        }}
+                        className="group relative flex-1 flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 hover:border-[#003580]/30 shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                      >
                         <div>
-                          <h4 className="font-bold text-base text-[#14304D]">{sideStory1.name || sideStory1.alumniName}</h4>
-                          <p className="text-xs text-slate-500 mt-0.5">{sideStory1.role || sideStory1.department}</p>
-                          <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
-                            {sideStory1.story || sideStory1.text || sideStory1.description}
-                          </p>
-                        </div>
-                        <div className="mt-3">
-                          <button
-                            type="button"
-                            onClick={() => navigate(sideStory1.link || `/stories/${sideStory1.id || 'S-002'}`)}
-                            className="text-xs font-semibold text-[#14304D] hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
-                          >
-                            Read story
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C8102E]">
+                              ALUMNI SPOTLIGHT
+                            </span>
+                            <span className="text-[10px] font-mono font-medium text-slate-400">
+                              {story.graduationYear || (sIdx === 0 ? "Class of '16" : "Class of '19")}
+                            </span>
+                          </div>
+                          <h4 className="font-fraunces text-lg font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                            {story.name || story.alumniName}
+                          </h4>
+                          <p className="text-xs text-slate-500 mt-0.5 font-medium">{story.role || story.department}</p>
 
-                    {/* Card 2 */}
-                    <div className="card-soft flex-1 rounded-2xl border border-slate-200/80 bg-white p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                      <div className="relative w-full sm:w-28 sm:h-28 h-40 rounded-xl bg-slate-100 overflow-hidden shrink-0">
-                        <img
-                          src={sideStory2.img || sideStory2.image || stateM}
-                          alt={sideStory2.name || "Alumni story"}
-                          className="absolute inset-0 h-full w-full object-cover"
-                          onError={handleImageError}
-                        />
-                      </div>
-                      <div className="flex-1 flex flex-col justify-between h-full min-w-0">
-                        <div>
-                          <h4 className="font-bold text-base text-[#14304D]">{sideStory2.name || sideStory2.alumniName}</h4>
-                          <p className="text-xs text-slate-500 mt-0.5">{sideStory2.role || sideStory2.department}</p>
-                          <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
-                            {sideStory2.story || sideStory2.text || sideStory2.description}
-                          </p>
+                          {/* Content Row: Square Thumbnail on Left, Narrative Text on Right */}
+                          <div className="mt-4 flex items-start gap-4">
+                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-slate-900 overflow-hidden shrink-0 shadow-xs">
+                              <img
+                                src={story.img || story.image || (sIdx === 0 ? electricLabs : stateM)}
+                                alt={story.name || "Alumni story"}
+                                className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-108"
+                                onError={handleImageError}
+                              />
+                            </div>
+                            <p className="flex-1 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3 sm:line-clamp-4">
+                              {story.story || story.text || story.description}
+                            </p>
+                          </div>
                         </div>
-                        <div className="mt-3">
-                          <button
-                            type="button"
-                            onClick={() => navigate(sideStory2.link || `/stories/${sideStory2.id || 'S-003'}`)}
-                            className="text-xs font-semibold text-[#14304D] hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
-                          >
-                            Read story
-                          </button>
+
+                        {/* Card Footer */}
+                        <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
+                          <span className="text-xs font-semibold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
+                            <span>Read story</span>
+                            <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
+                          </span>
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ASTU</span>
                         </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               );
@@ -2120,11 +2394,68 @@ export default function HomePage() {
           id="community"
           className="scroll-mt-24 relative py-16 md:py-[104px] overflow-hidden dark-band-grid"
           style={{
-            backgroundColor: '#14304D',
+            backgroundColor: '#003580',
             backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }}
         >
+          {/* Abstract Blueprint Grid Pattern */}
+          <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
+
+          {/* Abstract Worldwide Coordinate Geometry & Orbital Rings */}
+          <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-30">
+            <svg
+              className="w-full max-w-[1240px] h-full max-h-[660px] overflow-visible"
+              viewBox="0 0 1000 600"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Planetary Horizon & Equatorial Crosshairs */}
+              <line x1="80" y1="300" x2="920" y2="300" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" strokeDasharray="6 6" />
+              <line x1="500" y1="40" x2="500" y2="560" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="6 6" />
+
+              {/* Concentric Spherical Range Rings (Architectural Radar) */}
+              <circle cx="500" cy="300" r="120" stroke="rgba(169, 196, 224, 0.3)" strokeWidth="1" />
+              <circle cx="500" cy="300" r="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1.2" />
+              <circle cx="500" cy="300" r="310" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
+              <circle cx="500" cy="300" r="420" stroke="rgba(169, 196, 224, 0.12)" strokeWidth="1" />
+              <circle cx="500" cy="300" r="540" stroke="rgba(169, 196, 224, 0.06)" strokeWidth="1" strokeDasharray="8 8" />
+
+              {/* Abstract Globe Wireframe - Latitude Parallels */}
+              <ellipse cx="500" cy="300" rx="210" ry="64" stroke="rgba(169, 196, 224, 0.5)" strokeWidth="1.2" />
+              <ellipse cx="500" cy="225" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+              <ellipse cx="500" cy="375" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+              {/* Abstract Globe Wireframe - Longitude Meridians */}
+              <ellipse cx="500" cy="300" rx="85" ry="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1" />
+              <ellipse cx="500" cy="300" rx="160" ry="210" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+              {/* Tilted Worldwide Orbital Trajectory Rings */}
+              <g transform="rotate(-20 500 300)">
+                <ellipse cx="500" cy="300" rx="360" ry="110" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1.2" strokeDasharray="6 4" />
+                {/* Discrete Coordinate Pulse Points */}
+                <circle cx="140" cy="300" r="3.5" fill="#C8102E" />
+                <circle cx="140" cy="300" r="8" stroke="#C8102E" strokeWidth="1" opacity="0.4" />
+                <circle cx="860" cy="300" r="3.5" fill="#38bdf8" />
+                <circle cx="860" cy="300" r="8" stroke="#38bdf8" strokeWidth="1" opacity="0.4" />
+              </g>
+
+              {/* Complementary Counter-Orbital Arc */}
+              <g transform="rotate(32 500 300)">
+                <ellipse cx="500" cy="300" rx="330" ry="95" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="5 5" />
+                <circle cx="830" cy="300" r="3" fill="#38bdf8" opacity="0.6" />
+              </g>
+
+              {/* Subtle Coordinate Crosshair Calibration Marks */}
+              <g stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1">
+                <line x1="495" y1="90" x2="505" y2="90" />
+                <line x1="495" y1="510" x2="505" y2="510" />
+                <line x1="290" y1="295" x2="290" y2="305" />
+                <line x1="710" y1="295" x2="710" y2="305" />
+              </g>
+            </svg>
+          </div>
+
           {/* Decorative outlined circle shapes in top-right */}
           <div aria-hidden="true" className="absolute -top-16 -right-16 w-96 h-96 pointer-events-none opacity-40">
             <div className="absolute top-0 right-0 w-72 h-72 rounded-full border border-white/20" />
@@ -2142,20 +2473,6 @@ export default function HomePage() {
               <p className="mx-auto mt-4 max-w-2xl text-[17px] text-slate-300 leading-relaxed">
                 {liveCommunitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'}
               </p>
-            </div>
-
-            {/* Community Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-12 max-w-2xl mx-auto reveal">
-              {dynamicCommunityStats.map((stat, idx) => {
-                const Icon = idx === 0 ? Users : idx === 1 ? BookOpen : Globe;
-                return (
-                  <div key={stat.label} className={`reveal reveal-delay-${idx + 1} card-soft rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 text-center`}>
-                    <Icon className="h-6 w-6 text-blue-300 mx-auto mb-2" />
-                    <p className="text-2xl font-black text-white">{stat.value}</p>
-                    <p className="text-[11px] uppercase tracking-wider text-slate-400 mt-0.5">{stat.label}</p>
-                  </div>
-                );
-              })}
             </div>
 
             {/* Community Testimonials */}
@@ -2215,7 +2532,7 @@ export default function HomePage() {
         <section id="partners" className="scroll-mt-24 mx-auto max-w-[1240px] px-4 py-16 md:px-8 md:py-[104px] overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-4">
           <div className="mb-10 text-center reveal">
             <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#C8102E]">{livePartnersHeaders?.eyebrow || "OUR PARTNERS"}</p>
-            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">{livePartnersHeaders?.title || "Partner Companies"}</h2>
+            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">{livePartnersHeaders?.title || "Partner Companies"}</h2>
             <p className="mx-auto mt-3 max-w-xl text-[17px] text-slate-600 leading-relaxed">{livePartnersHeaders?.description || "Institutional partners supporting employability, internships, and research collaboration."}</p>
           </div>
           <div className="relative">
@@ -2229,11 +2546,11 @@ export default function HomePage() {
                     ) : LogoComponent ? (
                       <LogoComponent />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#14304D] text-white text-sm font-bold shadow-md">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#003580] text-white text-sm font-bold shadow-md">
                         {partner.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
-                    <span className="text-xs font-semibold text-[#14304D] text-center leading-tight">{partner.name}</span>
+                    <span className="text-xs font-semibold text-[#003580] text-center leading-tight">{partner.name}</span>
                   </div>
                 );
               })}
@@ -2244,29 +2561,33 @@ export default function HomePage() {
         {/* ── SECTION: News from the alumni community ── */}
         <section id="news" className="scroll-mt-24 w-full bg-white py-16 md:py-[104px] border-t border-slate-100">
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left Eyebrow & Title, Right 'View all news' link */}
-            <div className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div>
-                <div className="flex items-center">
-                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
-                  <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#C8102E]">
+            {/* Header: Left Title & Editorial Subtitle, Right Action Pill */}
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+              <div className="max-w-2xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-[2px] bg-[#C8102E] inline-block rounded-full" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
                     LATEST NEWS
                   </span>
                 </div>
-                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
                   News from the alumni community
                 </h2>
+                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                  Official news coverage, university milestones, and graduate impact stories from across the globe.
+                </p>
               </div>
-              <a
-                href="/announcements"
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate("/announcements");
-                }}
-                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer self-start sm:self-end transition-colors"
-              >
-                View all news
-              </a>
+
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate("/announcements")}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
+                >
+                  <span>View all news</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
             </div>
 
             {/* News List */}
@@ -2284,7 +2605,7 @@ export default function HomePage() {
                     <div className="flex items-start sm:items-center gap-5 sm:gap-8 min-w-0">
                       {/* Date Badge: Large Navy Day + Red Month */}
                       <div className="w-12 sm:w-16 shrink-0 text-left pt-0.5 sm:pt-0">
-                        <span className="block text-2xl sm:text-3xl font-serif font-bold text-[#14304D] leading-none">
+                        <span className="block text-2xl sm:text-3xl font-serif font-bold text-[#003580] leading-none">
                           {day}
                         </span>
                         <span className="block text-[11px] font-bold uppercase tracking-wider text-[#C8102E] mt-1">
@@ -2307,7 +2628,7 @@ export default function HomePage() {
                             </>
                           )}
                         </div>
-                        <h3 className="text-base sm:text-lg font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors leading-snug truncate sm:whitespace-normal">
+                        <h3 className="text-base sm:text-lg font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug truncate sm:whitespace-normal">
                           {item.title}
                         </h3>
                         {(item.excerpt || item.description) && (
@@ -2320,7 +2641,7 @@ export default function HomePage() {
 
                     {/* Right Arrow */}
                     <div className="shrink-0 pl-4 sm:pl-6">
-                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 group-hover:text-[#14304D] group-hover:bg-slate-200/50 transition-all">
+                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 group-hover:text-[#003580] group-hover:bg-slate-200/50 transition-all">
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
@@ -2336,13 +2657,13 @@ export default function HomePage() {
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
             <div className="mb-12 text-center reveal">
               <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#C8102E]">{liveFaqHeaders?.eyebrow || "FAQ"}</p>
-              <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">{liveFaqHeaders?.title || "Frequently Asked Questions"}</h2>
+              <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">{liveFaqHeaders?.title || "Frequently Asked Questions"}</h2>
               <p className="mx-auto mt-3 max-w-xl text-[17px] text-slate-600 leading-relaxed">{liveFaqHeaders?.description || "Common questions about ASTU-AMS, tracer studies, and alumni services."}</p>
             </div>
             <div className="mx-auto max-w-3xl space-y-3">
               {liveFaq.map((item, idx) => (
                 <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} card-soft group rounded-xl border border-slate-200/80 bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
-                  <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-[#14304D] hover:text-[#C8102E] hover:bg-slate-50 transition-colors [&::-webkit-details-marker]:hidden">
+                  <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-[#003580] hover:text-[#C8102E] hover:bg-slate-50 transition-colors [&::-webkit-details-marker]:hidden">
                     <span>{item.question}</span>
                     <ChevronDown className="h-5 w-5 shrink-0 text-slate-400 group-open:text-[#C8102E] transition-all duration-200 group-open:rotate-180" />
                   </summary>
@@ -2361,7 +2682,7 @@ export default function HomePage() {
             id="cta"
             className="scroll-mt-24 relative py-16 md:py-[104px] text-center overflow-hidden dark-band-grid"
             style={{
-              backgroundColor: '#14304D',
+              backgroundColor: '#003580',
               backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
               backgroundSize: '24px 24px',
             }}
@@ -2398,148 +2719,7 @@ export default function HomePage() {
 
       </main>
 
-      <footer className="border-t-2 border-astu-green/30 bg-gradient-to-b from-indigo-950 via-slate-900 to-slate-950 py-16 text-slate-300">
-        <div className="mx-auto max-w-[1440px] px-4 md:px-8 space-y-12">
 
-          {/* Top Panel: Newsletter Registration */}
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-10 border-b border-white/5">
-            <div className="max-w-md">
-              <h5 className="text-base font-bold text-white uppercase tracking-wider">Stay Connected with ASTU</h5>
-              <p className="text-xs text-slate-400 mt-1">Get updates on annual reunions, tech career expos, and graduate employment reports.</p>
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                toast.success('Thank you! You are subscribed to ASTU Alumni newsletter.');
-                (e.target as HTMLFormElement).reset();
-              }}
-              className="flex w-full lg:w-auto max-w-md gap-2"
-            >
-              <input
-                type="email"
-                placeholder="Enter email for campus news..."
-                className="w-full lg:w-64 h-12 text-sm px-4 py-3 bg-white/5 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-white/20 text-white placeholder-slate-400"
-                required
-              />
-              <button
-                type="submit"
-                className="h-12 px-6 bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm rounded-md transition-colors shadow-md whitespace-nowrap cursor-pointer"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-
-          {/* Middle Panel: Four Column Information Links */}
-          <div className="grid gap-10 md:grid-cols-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img
-                  alt="ASTU Official Emblem"
-                  className="h-12 w-12 object-contain scale-110 shrink-0"
-                  src="/images/astu-seal-logo.png"
-                />
-                <div>
-                  <h5 className="text-lg font-black text-white tracking-wider uppercase">ASTU-AMS</h5>
-                  <p className="text-[10px] text-astu-green uppercase tracking-widest font-extrabold">Alumni Network</p>
-                </div>
-              </div>
-              <p className="text-xs leading-relaxed text-slate-400">
-                Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.
-              </p>
-              <div className="flex gap-2 pt-2">
-                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Facebook</button>
-                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">Twitter</button>
-                <button className="rounded-lg border border-white/10 hover:border-[#FFD700] px-3.5 py-2 text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/5 transition-all">LinkedIn</button>
-              </div>
-            </div>
-
-            <div>
-              <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">Resources & Portals</h6>
-              <ul className="space-y-3 text-xs text-slate-400">
-                <li>
-                  <button
-                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                    onClick={() => navigate("/info/overview")}
-                  >
-                    Career Placement Portal
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                    onClick={() => navigate("/info/overview")}
-                  >
-                    Tracer Survey Hub
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                    onClick={() => navigate("/info/mentorship")}
-                  >
-                    Mentorship Scheduling
-                  </button>
-                </li>
-                <li>
-                  <a
-                    href="https://estudent.astu.edu.et/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 transition-all duration-300 hover:text-white hover:translate-x-1 text-left"
-                  >
-                    Student Portal
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">Official Contact Details</h6>
-              <ul className="space-y-3 text-xs text-slate-400">
-                <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-astu-green mt-0.5" />
-                  <span>Adama, Oromia, Ethiopia</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-astu-green" />
-                  <span>+251-</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-astu-green" />
-                  <a href="mailto:irccd@astu.edu.et" className="hover:text-white transition-colors">irccd@astu.edu.et</a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h6 className="text-xs font-extrabold uppercase tracking-[0.16em] text-[#FFD700] border-b border-white/10 pb-2 mb-4">Accreditation Support</h6>
-              <ul className="space-y-3 text-xs text-slate-400">
-                <li><button className="transition-all duration-300 hover:text-white hover:translate-x-1 text-left">Quality Assurance Deans</button></li>
-                <li><button className="transition-all duration-300 hover:text-white hover:translate-x-1 text-left">Accreditation Outcomes</button></li>
-                <li><button className="transition-all duration-300 hover:text-white hover:translate-x-1 text-left">Institutional Research</button></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom Panel: Copyright and Back to Top button */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-white/5 pt-8 text-xs text-slate-500 font-semibold">
-            <div className="flex flex-wrap items-center gap-3">
-              <p>© {new Date().getFullYear()} Adama Science and Technology University. All rights reserved.</p>
-              <span>&bull;</span>
-              <p className="text-astu-green">Tracer Study & ICT Coordination</p>
-            </div>
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="flex items-center gap-1 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl text-slate-300 hover:text-white transition-all hover:scale-105"
-            >
-              Back to Top
-              <ArrowLeft className="h-4 w-4 rotate-180" />
-            </button>
-          </div>
-
-        </div>
-      </footer>
 
       {/* Notice Detail Modal */}
       {selectedNotice && (
