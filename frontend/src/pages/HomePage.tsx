@@ -7,6 +7,7 @@ import {
   Briefcase,
   Building2,
   CalendarDays,
+  Check,
   ChevronDown,
   ExternalLink,
   Globe,
@@ -140,7 +141,6 @@ const navSections = [
   { label: "Announcements", id: "announcements" },
   { label: "Community", id: "community" },
   { label: "Events", id: "events" },
-  { label: "Workshops", id: "workshops" },
   { label: "News", id: "news" },
   { label: "Success Stories", id: "success-stories" },
   { label: "FAQ", id: "faq" },
@@ -195,17 +195,48 @@ const partners = [
 ];
 
 const campusLifeCards = [
-  { title: "Events and Activities", campus: "Main Campus", description: "Career expos, alumni reunions, workshops, chapter meetings, and community programs.", image: gallery2, action: "View Events" },
-  { title: "Facilities", campus: "Innovation Spaces", description: "Laboratories, research centers, libraries, student services, and employer interview rooms.", image: electricLabs, action: "Explore Facilities" },
-  { title: "ASTU Museums & Gallery", campus: "Campus Gallery", description: "Research showcases, graduation moments, campus photography, and public video archives.", image: arcImage, action: "View Gallery" },
+  { id: "campus-life-1", title: "Reunions, career expos, and workshops", campus: "Events and Activities", description: "Chapter meetings and community programs that keep graduates connected to the university.", image: gallery2, action: "View events", link: "/events" },
+  { id: "campus-life-2", title: "Facilities", campus: "Innovation Spaces", description: "Laboratories, research centers, libraries, and employer interview rooms.", image: electricLabs, action: "Explore facilities", link: "/info/facilities" },
+  { id: "campus-life-3", title: "Museums and gallery", campus: "Campus Gallery", description: "Research showcases, graduation moments, and campus photography.", image: arcImage, action: "View gallery", link: "/gallery" },
 ];
 
 const announcements = [
-  { title: "ASTU Alumni Association Inspires Graduating Class with Career Tips!", date: "March 7, 2025", type: "Alumni Announcement" },
-  { title: "ASTU hosts a five-day DAAD Alumni workshop", date: "March 7, 2025", type: "Employer Announcement" },
-  { title: "ASTU alumni serve as model United Nations secretariats!", date: "January 7, 2025", type: "Alumni Achievement" },
-  { title: "Tracer Study 2026 response window is open", date: "May 31, 2026", type: "Alumni Announcement" },
-  { title: "Call for employer partners: campus recruitment week", date: "May 28, 2026", type: "Employer Announcement" },
+  {
+    id: "ann-1",
+    day: "09",
+    month: "SEP",
+    title: "ASTU Engineering Innovation Summit 2026",
+    type: "Official announcement",
+    year: "2026",
+    date: "09 Sep 2026",
+  },
+  {
+    id: "ann-2",
+    day: "07",
+    month: "JUN",
+    title: "Semester Break: Campus Safety Notice",
+    type: "Official announcement",
+    year: "2026",
+    date: "07 Jun 2026",
+  },
+  {
+    id: "ann-3",
+    day: "28",
+    month: "APR",
+    title: "ASTU Alumni Network: Bridging Generations",
+    type: "Press",
+    year: "2026",
+    date: "28 Apr 2026",
+  },
+  {
+    id: "ann-4",
+    day: "31",
+    month: "MAY",
+    title: "Tracer Study 2026 response window is open",
+    type: "Alumni Announcement",
+    year: "2026",
+    date: "31 May 2026",
+  },
 ];
 
 const campuses = [
@@ -222,9 +253,9 @@ const faqItems = [
 ];
 
 const galleryImages = [
-  { src: gallery1, title: "ASTU Main Campus" },
-  { src: gallery2, title: "Innovation and Collaboration" },
-  { src: gallery3, title: "ASTU Alumni Identity" },
+  { src: gallery1, title: "ASTU main campus", num: "01" },
+  { src: stateM, title: "Innovation and collaboration", num: "02" },
+  { src: gc7, title: "Graduation ceremony", num: "03" },
 ];
 
 const impactStats = [
@@ -247,7 +278,7 @@ const impactStats = [
     label: "Fields of Study",
     value: "5",
     detail: "Engineering, Applied Science, Tech & Research",
-    trend: "5 Faculties",
+    trend: "Fields of Study",
     icon: BookOpen,
     action: "Explore Programs",
     target: "/info/overview",
@@ -282,6 +313,21 @@ const impactStats = [
   },
 ];
 
+const parseNoticeDate = (dateStr?: string) => {
+  if (!dateStr) return { day: "09", month: "SEP" };
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+    return { day, month };
+  }
+  const match = dateStr.match(/(\d{1,2})\s*([A-Za-z]{3})/);
+  if (match) {
+    return { day: match[1].padStart(2, "0"), month: match[2].toUpperCase() };
+  }
+  return { day: "09", month: "SEP" };
+};
+
 export default function HomePage() {
   const navigate = useNavigate();
   const { metrics } = usePublicMetrics();
@@ -314,9 +360,30 @@ export default function HomePage() {
     }
     const published = contentService.getPublishedNews();
     return published.length ? published : [
-      { title: "New Engineering Lab Inaugurated", date: "May 28, 2026" },
-      { title: "ASTU Research Grant Winners", date: "May 25, 2026" },
-      { title: "Annual Career Expo Announced", date: "May 20, 2026" }
+      {
+        id: "news-1",
+        title: "ASTU Engineering Innovation Summit 2026",
+        date: "28 May 2026",
+        excerpt: "Showcasing cutting-edge technology and student research projects across engineering departments.",
+        category: "NEWS",
+        readTime: "3 min read",
+      },
+      {
+        id: "news-2",
+        title: "New Sustainable Energy Research Lab Inaugurated",
+        date: "25 May 2026",
+        excerpt: "State-of-the-art facility expands applied research opportunities for alumni researchers and graduate teams.",
+        category: "NEWS",
+        readTime: "4 min read",
+      },
+      {
+        id: "news-3",
+        title: "ASTU Alumni Association Launches Global Mentorship Track",
+        date: "20 May 2026",
+        excerpt: "Connecting senior engineering alumni with graduating seniors across East Africa and international tech hubs.",
+        category: "NEWS",
+        readTime: "2 min read",
+      }
     ];
   });
   const [liveAnnouncements, setLiveAnnouncements] = useState<any[]>(() => {
@@ -1043,6 +1110,98 @@ export default function HomePage() {
     }
   }, []);
 
+  // Section 3: Parse dates for event card header e.g. "20", "NOV", "2026"
+  const parseEventDate = (dateStr?: string) => {
+    if (!dateStr) return { day: "20", month: "NOV", year: "2026" };
+    const str = dateStr.trim();
+    const match = str.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+    if (match) {
+      return {
+        day: match[1].padStart(2, "0"),
+        month: match[2].substring(0, 3).toUpperCase(),
+        year: match[3],
+      };
+    }
+    try {
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        const day = d.getDate().toString().padStart(2, "0");
+        const month = new Intl.DateTimeFormat("en-GB", { month: "short" }).format(d).toUpperCase();
+        const year = d.getFullYear().toString();
+        return { day, month, year };
+      }
+    } catch {}
+    return { day: "20", month: "NOV", year: "2026" };
+  };
+
+  const defaultMockEvents = useMemo(() => [
+    {
+      id: "data-science-bootcamp",
+      title: "Data Science Bootcamp",
+      date: "20 Nov 2026",
+      category: "TECHNICAL TRAINING",
+      location: "Engineering Building, Room 305",
+      description: "Intensive bootcamp covering machine learning, data visualization, and statistical analysis using Python and R.",
+    },
+    {
+      id: "alumni-networking-mixer",
+      title: "Alumni Networking Mixer",
+      date: "05 Dec 2026",
+      category: "NETWORKING",
+      location: "ASTU Conference Hall",
+      description: "Networking event for ASTU alumni across all graduation years. Connect with fellow graduates and share experiences.",
+    },
+    {
+      id: "career-fair",
+      title: "Career Fair",
+      date: "15 Jan 2027",
+      category: "CAREER",
+      location: "ASTU Sports Complex",
+      description: "Annual career fair featuring top employers from Ethiopia and East Africa. On-site interviews and networking opportunities.",
+    },
+  ], []);
+
+  const displayedEventsList = useMemo(() => {
+    if (liveEvents && liveEvents.length >= 3) {
+      return liveEvents.slice(0, 3);
+    }
+    if (liveEvents && liveEvents.length > 0) {
+      return [...liveEvents, ...defaultMockEvents].slice(0, 3);
+    }
+    return defaultMockEvents;
+  }, [liveEvents, defaultMockEvents]);
+
+  // Top 3 campus life items for the homepage with fallback images and links
+  const displayCampusLife = useMemo(() => {
+    const list = liveCampusLife && liveCampusLife.length > 0 ? liveCampusLife : campusLifeCards;
+    return list.slice(0, 3).map((item: any, idx: number) => {
+      const fallbackImages = [gallery2, electricLabs, arcImage];
+      const fallbackEyebrows = ["EVENTS & ACTIVITIES", "FACILITIES", "MUSEUMS & GALLERY"];
+      const fallbackTitles = [
+        "Reunions, career expos, and workshops",
+        "Facilities & Innovation Spaces",
+        "Museums and campus gallery",
+      ];
+      const fallbackDescriptions = [
+        "Chapter meetings, leadership workshops, career expos, and community programs that keep graduates connected to the university.",
+        "Laboratories, research centers, libraries, student services, and employer interview rooms across campuses.",
+        "Research showcases, graduation moments, campus photography, and historical exhibition collections.",
+      ];
+      const fallbackActions = ["View events", "Explore facilities", "View gallery"];
+      const fallbackLinks = ["/events", "/info/facilities", "/gallery"];
+
+      return {
+        id: item.id || `campus-life-${idx}`,
+        title: item.title || fallbackTitles[idx % fallbackTitles.length],
+        eyebrow: item.campus || fallbackEyebrows[idx % fallbackEyebrows.length],
+        description: item.description || fallbackDescriptions[idx % fallbackDescriptions.length],
+        image: item.image || fallbackImages[idx % fallbackImages.length],
+        action: item.action || fallbackActions[idx % fallbackActions.length],
+        link: item.link || fallbackLinks[idx % fallbackLinks.length],
+      };
+    });
+  }, [liveCampusLife]);
+
   // Removed redundant header listeners (now handled natively inside Navbar component)
 
   return (
@@ -1059,17 +1218,17 @@ export default function HomePage() {
       <main id="home">
         {/* Live Top Announcement Ticker */}
         {liveWelcomeEnabled !== false && liveWelcomeMessage && (
-          <aside aria-label="Announcement Banner" className="relative z-30 bg-gradient-to-r from-astu-navy via-[#003366] to-[#002244] border-b border-white/10 text-white py-2 px-4 shadow-sm">
-            <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <span className="shrink-0 inline-flex items-center gap-1 rounded bg-astu-red px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+          <aside aria-label="Announcement Banner" className="relative z-30 bg-[#14304D] border-b border-white/10 text-white py-2.5 px-4 shadow-xs">
+            <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <span className="shrink-0 inline-flex items-center gap-1.5 rounded bg-[#C8102E] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                   <Bell className="h-3 w-3" /> Announcement
                 </span>
-                <span className="truncate font-medium text-slate-100">{liveWelcomeMessage}</span>
+                <span className="truncate font-medium text-slate-200">{liveWelcomeMessage}</span>
               </div>
               <button
                 onClick={() => navigate(liveSectionLinks.tickerLinkTarget)}
-                className="shrink-0 text-[11px] font-bold text-[#FFCC00] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                className="shrink-0 text-xs font-semibold text-white hover:text-slate-200 underline underline-offset-4 inline-flex items-center gap-1 cursor-pointer"
               >
                 {liveSectionLinks.tickerLinkText} <ArrowRight className="h-3 w-3" />
               </button>
@@ -1077,15 +1236,8 @@ export default function HomePage() {
           </aside>
         )}
 
-        <section className="relative overflow-hidden min-h-[700px] md:h-[580px] lg:h-[750px] bg-slate-950">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
-            <div className="absolute top-20 left-[10%] w-2 h-2 rounded-full bg-astu-green/30" />
-            <div className="absolute top-40 left-[30%] w-1.5 h-1.5 rounded-full bg-astu-red/30" />
-            <div className="absolute top-60 left-[60%] w-2.5 h-2.5 rounded-full bg-astu-green/20" />
-            <div className="absolute top-32 right-[20%] w-1.5 h-1.5 rounded-full bg-white/20" />
-            <div className="absolute bottom-20 right-[40%] w-2 h-2 rounded-full bg-astu-red/20" />
-            <div className="absolute bottom-40 left-[50%] w-1 h-1 rounded-full bg-white/15" />
-          </div>
+        {/* ── HERO SLIDER SECTION ── */}
+        <section className="relative overflow-hidden min-h-[580px] md:h-[620px] lg:h-[700px] bg-slate-950 flex items-center">
           {/* Background Slides */}
           <div className="absolute inset-0 w-full h-full">
             {liveSlides.map((slide, idx) => (
@@ -1095,204 +1247,186 @@ export default function HomePage() {
                   idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
                 }`}
               >
-                {/* Background image - zoomed out for clear visibility */}
                 <img
                   alt={slide.title}
-                  className="h-full w-full object-cover object-[center_30%]"
+                  className="h-full w-full object-cover object-[center_35%]"
                   src={slide.image}
                   onError={handleImageError}
                 />
-                {/* Gentle overlay for rich aesthetic with high photo transparency */}
-                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,25,50,0.55),rgba(0,10,25,0.78))]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0b1a2b]/95 via-[#0b1a2b]/85 to-[#0b1a2b]/60" />
               </div>
             ))}
           </div>
 
-          {/* Compact text - hero is immediately visible below navbar */}
-          <div className="relative z-20 mx-auto flex h-full max-w-[1440px] items-center px-4 py-16 md:px-6 lg:py-20">
-            <div className="max-w-2xl space-y-4">
-              <span className="inline-block rounded-full bg-astu-red px-3 py-1 text-xs font-bold uppercase tracking-widest text-white shadow-md">
-                {(liveSlides[currentSlide] || liveSlides[0])?.tagline || liveHeroBadge}
-              </span>
-              <h1 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
-                {((liveSlides[currentSlide] || liveSlides[0])?.title || '').includes(" to the ") ? (
-                  <>
-                    {(liveSlides[currentSlide] || liveSlides[0])?.title.split(" to the ")[0]}
-                    <br />
-                    to the <span className="text-astu-green">{(liveSlides[currentSlide] || liveSlides[0])?.title.split(" to the ")[1]}</span>
-                  </>
-                ) : (
-                  (liveSlides[currentSlide] || liveSlides[0])?.title
-                )}
+          {/* Hero Content */}
+          <div className="relative z-20 mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+            <div className="max-w-2xl">
+              <div className="flex items-center mb-3">
+                <span className="text-[#E05368] font-bold mr-2 text-sm select-none">—</span>
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-[#E05368]">
+                  {(liveSlides[currentSlide] || liveSlides[0])?.tagline || liveHeroBadge}
+                </span>
+              </div>
+
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold leading-[1.14] text-white tracking-tight">
+                {(liveSlides[currentSlide] || liveSlides[0])?.title}
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-100 md:text-base">
+
+              <p className="mt-4 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-slate-200">
                 {(liveSlides[currentSlide] || liveSlides[0])?.description}
               </p>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <button
-                  className="inline-flex items-center gap-2 rounded-md bg-astu-red px-5 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition-all shadow-lg hover:shadow-xl hover:shadow-astu-red/20 hover:scale-105 btn-magnetic"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#C8102E] hover:bg-[#A60D26] px-6 h-12 text-sm font-semibold text-white transition-all shadow-sm hover:shadow-md cursor-pointer"
                   onClick={() => navigate(liveHeroButtons?.primaryLink || "/info/alumni-portal")}
                 >
-                  {liveHeroButtons?.primaryText || "Alumni Portal"}
+                  <span>{liveHeroButtons?.primaryText || "Alumni Portal"}</span>
+                  <ArrowRight className="h-4 w-4" />
                 </button>
                 <button
-                  className="inline-flex items-center gap-2 rounded-md border border-white/40 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition-all hover:scale-105 btn-magnetic backdrop-blur-sm"
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/40 bg-white/10 hover:bg-white/20 px-6 h-12 text-sm font-semibold text-white transition-all backdrop-blur-xs cursor-pointer"
                   onClick={() => navigate(liveHeroButtons?.secondaryLink || "/info/employer-portal")}
                 >
-                  {liveHeroButtons?.secondaryText || "Employer Partnership"}
-                  <Handshake className="h-4 w-4" />
+                  <Handshake className="h-4 w-4 text-slate-300" />
+                  <span>{liveHeroButtons?.secondaryText || "Employer Partnership"}</span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Left/Right navigation arrow buttons */}
+          {/* Slide Navigation Controls */}
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
+            className="absolute left-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-slate-900/80 transition-all backdrop-blur-xs hidden sm:block cursor-pointer"
             aria-label="Previous slide"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-astu-navy/80 hover:scale-110 transition-all duration-300 backdrop-blur-sm hidden sm:block shadow-lg hover:shadow-xl"
+            className="absolute right-4 top-1/2 z-35 -translate-y-1/2 rounded-full border border-white/20 bg-slate-900/40 p-2.5 text-white hover:bg-slate-900/80 transition-all backdrop-blur-xs hidden sm:block cursor-pointer"
             aria-label="Next slide"
           >
             <ArrowRight className="h-5 w-5" />
           </button>
 
-          {/* Bottom active slide indicator dots */}
-          <div className="absolute bottom-6 left-1/2 z-35 flex -translate-x-1/2 gap-2.5">
-            {liveSlides.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-2.5 rounded-full transition-all duration-300 ${idx === currentSlide ? "w-6 bg-[#FFD700]" : "w-2.5 bg-white/40 hover:bg-white/60"
+          {/* Slide Indicator Counter at Bottom */}
+          <div className="absolute bottom-6 right-6 sm:right-12 z-35 flex items-center gap-3 bg-slate-900/60 backdrop-blur-sm px-4 py-2 rounded-full border border-white/15">
+            <span className="font-mono text-xs font-bold text-white">
+              {String(currentSlide + 1).padStart(2, '0')} / {String(liveSlides.length).padStart(2, '0')}
+            </span>
+            <div className="flex gap-1.5">
+              {liveSlides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    idx === currentSlide ? "w-5 bg-[#C8102E]" : "w-1.5 bg-white/40 hover:bg-white/70"
                   }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
           </div>
-          <button
-            onClick={() => {
-              window.scrollTo({
-                top: window.innerHeight,
-                behavior: "smooth",
-              });
-            }}
-            className="absolute bottom-12 left-1/2 z-40 -translate-x-1/2 text-white hover:translate-y-1 transition-transform"
-            aria-label="Scroll down"
-          >
-            <ChevronDown className="h-8 w-8 md:h-10 md:w-10" style={{ marginTop: "-100px" }} />
-          </button>
         </section>
 
-        {/* UNIFIED ASTU IMPACT & JOURNEY ECOSYSTEM SECTION */}
-        <section id="how-it-works" className="relative z-20 mx-auto max-w-[1280px] px-4 py-12 md:px-8 md:py-16 my-8">
-          {/* Continuous surface container */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-50/90 via-white to-slate-50/60 rounded-3xl -z-10 border border-slate-200/60 shadow-xs" />
-
-          {/* 1. ASTU IMPACT AT A GLANCE - HEADER */}
-          {liveImpactHeaders && (
-            <div className="text-center reveal">
-              <span className="inline-flex items-center gap-2 rounded-full border border-astu-red/20 bg-astu-red/5 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-astu-red shadow-2xs">
-                <span className="h-1.5 w-1.5 rounded-full bg-astu-red" />
-                {liveImpactHeaders.eyebrow || "ASTU IMPACT AT A GLANCE"}
-              </span>
-              <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-astu-navy sm:text-4xl">
-                {liveImpactHeaders.title || "Connecting Academia to Industry"}
-              </h2>
-              {liveImpactHeaders.description && (
-                <p className="mx-auto mt-2.5 max-w-2xl text-xs sm:text-sm md:text-base text-slate-600 leading-relaxed font-medium">
-                  {liveImpactHeaders.description}
-                </p>
-              )}
+        {/* ── SECTION: ASTU Impact at a Glance ── */}
+        <section id="impact-numbers" className="scroll-mt-24 w-full bg-white py-20 lg:py-24 border-b border-slate-100">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header: Left title, Right subtitle */}
+            <div className="mb-12 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                    {liveImpactHeaders?.eyebrow || "ASTU IMPACT AT A GLANCE"}
+                  </span>
+                </div>
+                <h2 className="mt-2 text-3xl md:text-4xl lg:text-[40px] font-serif font-bold text-[#14304D] tracking-tight leading-tight">
+                  {liveImpactHeaders?.title || "Connecting Academia to Industry"}
+                </h2>
+              </div>
+              <p className="max-w-md text-sm sm:text-base text-slate-500 leading-relaxed md:text-right">
+                {liveImpactHeaders?.description || "Building a stronger connection between ASTU graduates, employers, research, and career opportunities."}
+              </p>
             </div>
-          )}
 
-          {/* 1. ASTU IMPACT - EDITORIAL STATISTICS GRID */}
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4 relative z-10">
-            {dynamicStats.map((stat, idx) => {
-              const StatIcon = getDynamicStatIcon(stat, idx);
-              const labelTitle = stat.label || stat.title || "Impact Metric";
-              const targetUrl = stat.target || stat.link || liveSectionLinks.impactDefaultLinkTarget;
-              const buttonText = stat.action || liveSectionLinks.impactDefaultLinkText;
+            {/* 4 Stat Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {dynamicStats.map((stat, idx) => {
+                const StatIcon = getDynamicStatIcon(stat, idx);
+                const labelTitle = stat.label || stat.title || "Impact Metric";
+                const targetUrl = stat.target || stat.link || liveSectionLinks.impactDefaultLinkTarget;
+                const buttonText = stat.action || liveSectionLinks.impactDefaultLinkText;
 
-              return (
-                <article
-                  key={stat.id || stat.label || stat.title || idx}
-                  onClick={() => navigate(targetUrl)}
-                  className={`reveal reveal-delay-${(idx % 4) + 1} group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-6 border border-slate-200/70 shadow-xs hover:border-astu-navy/30 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer`}
-                >
-                  {/* Subtle top indicator accent bar */}
-                  <div className="absolute top-0 left-6 right-6 h-[2px] bg-slate-200 group-hover:bg-gradient-to-r group-hover:from-astu-navy group-hover:to-astu-red transition-all duration-300" />
-
-                  <div>
-                    {/* Top Row: Icon Container & Tag */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="animatic-node flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-astu-navy group-hover:bg-astu-navy group-hover:text-white transition-all duration-300 shadow-2xs">
-                        <StatIcon className="h-5 w-5" />
+                return (
+                  <article
+                    key={stat.id || stat.label || stat.title || idx}
+                    onClick={() => navigate(targetUrl)}
+                    className="group flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-7 shadow-xs hover:shadow-md hover:border-[#14304D]/40 transition-all duration-300 cursor-pointer"
+                  >
+                    <div>
+                      {/* Top Row: Icon Container & Trend Tag */}
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-[#14304D] group-hover:bg-[#14304D] group-hover:text-white transition-all duration-300">
+                          <StatIcon className="h-5 w-5" />
+                        </div>
+                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 group-hover:bg-rose-50 group-hover:text-[#C8102E] transition-colors">
+                          {stat.trend || (idx === 0 ? "+18% YoY" : idx === 1 ? "Fields of Study" : idx === 2 ? "Corporate Link" : "Verified Placement")}
+                        </span>
                       </div>
-                      <span className="inline-flex items-center rounded-full bg-slate-100/90 px-2.5 py-0.5 text-[10px] font-semibold text-slate-600 group-hover:bg-rose-50 group-hover:text-astu-red transition-colors">
-                        {stat.trend || (idx === 0 ? "+18% YoY" : idx === 1 ? "5 Faculties" : idx === 2 ? "Corporate Link" : "Verified Placement")}
-                      </span>
+
+                      {/* Counter Value */}
+                      <div className="font-serif text-4xl lg:text-5xl font-bold tracking-tight text-[#14304D] group-hover:text-[#C8102E] transition-colors duration-300">
+                        {stat.value}{stat.suffix || ''}
+                      </div>
+
+                      {/* Metric Label */}
+                      <p className="mt-2 text-xs font-bold uppercase tracking-wider text-slate-600">
+                        {labelTitle}
+                      </p>
                     </div>
 
-                    {/* Counter Value - Prominent Visual Hero Focus */}
-                    <h3 className="text-4xl lg:text-5xl font-extrabold tracking-tight text-astu-navy group-hover:text-astu-red transition-colors duration-300">
-                      {stat.value}{stat.suffix || ''}
-                    </h3>
-
-                    {/* Metric Label */}
-                    <p className="mt-2 text-xs font-bold uppercase tracking-wider text-slate-700">
-                      {labelTitle}
-                    </p>
-                  </div>
-
-                  {/* Action Link Footer */}
-                  {buttonText && (
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(targetUrl); }}
-                        className="group/btn inline-flex items-center gap-1.5 text-xs font-bold text-astu-navy hover:text-astu-red transition-colors cursor-pointer"
-                      >
-                        <span>{buttonText}</span>
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/btn:translate-x-1" />
-                      </button>
-                    </div>
-                  )}
-                </article>
-              );
-            })}
-          </div>
-
-          {/* 2. DELIBERATE VISUAL TRANSITION (IMPACT → JOURNEY BRIDGE) */}
-          <div className="my-10 flex flex-col items-center justify-center text-center reveal">
-            {/* Vertical Connecting Line */}
-            <div className="h-10 w-0.5 bg-gradient-to-b from-slate-300 via-astu-navy/30 to-astu-navy" />
-            
-            {/* Transition Badge Header */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-astu-navy/20 bg-white px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-widest text-astu-navy shadow-sm -mt-2.5">
-              <span className="h-2 w-2 rounded-full bg-astu-red" />
-              <span>{livePortalsHeaders?.eyebrow || "YOUR ASTU JOURNEY"}</span>
+                    {/* Action Link Footer */}
+                    {buttonText && (
+                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <span className="text-xs font-semibold text-[#14304D] group-hover:text-[#C8102E] transition-colors inline-flex items-center gap-1.5">
+                          <span>{buttonText}</span>
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                        </span>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
             </div>
-            
-            <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-astu-navy sm:text-3xl">
-              {livePortalsHeaders?.title || "From Registration to Meaningful Career Impact"}
-            </h3>
-            <p className="mx-auto mt-1.5 max-w-xl text-xs sm:text-sm text-slate-600 font-medium">
-              {livePortalsHeaders?.description || "Four simple stages connecting graduates, employers, research, and institutional growth."}
-            </p>
           </div>
+        </section>
 
-          {/* 3. YOUR ASTU JOURNEY - 4 CONNECTED STEPS */}
-          <div className="relative">
-            {/* Desktop Horizontal Journey Connector Line */}
-            <div className="hidden lg:block absolute left-[12%] right-[12%] top-[40px] h-0.5 bg-gradient-to-r from-astu-navy/30 via-blue-500/40 to-astu-red/30 -z-0 pointer-events-none" />
+        {/* ── SECTION: How ASTU-AMS Works ── */}
+        <section id="how-it-works" className="scroll-mt-24 w-full bg-[#F8FAFC] py-20 lg:py-24 border-b border-slate-200/80">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header: Left title, Right subtitle */}
+            <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                    {livePortalsHeaders?.eyebrow || "GET STARTED"}
+                  </span>
+                </div>
+                <h2 className="mt-2 text-3xl md:text-4xl lg:text-[40px] font-serif font-bold text-[#14304D] tracking-tight leading-tight">
+                  {livePortalsHeaders?.title || "How ASTU-AMS Works"}
+                </h2>
+              </div>
+              <p className="max-w-md text-sm sm:text-base text-slate-500 leading-relaxed md:text-right">
+                {livePortalsHeaders?.description || "From registration to verified impact — four simple steps connecting graduates, employers, and the university."}
+              </p>
+            </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 relative z-10">
+            {/* 4 Steps Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {livePortals.map((item, idx) => {
                 const IconComponent = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || Users);
                 const descText = item.description || (Array.isArray(item.points) ? item.points[0] : item.text || '');
@@ -1305,643 +1439,707 @@ export default function HomePage() {
                 const actionVerb = stepActionVerbs[idx] || "STAGE";
 
                 return (
-                  <React.Fragment key={item.id || item.step || item.title || idx}>
-                    <article
-                      onClick={() => navigate(routeUrl)}
-                      className={`reveal reveal-delay-${(idx % 4) + 1} group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-6 border border-slate-200/80 shadow-xs hover:border-astu-navy/30 hover:shadow-lg transition-all duration-300 hover:-translate-y-1.5 cursor-pointer`}
-                    >
-                      {/* Top Accent Strip */}
-                      <div className="absolute top-0 left-0 right-0 h-1 bg-slate-100 group-hover:bg-gradient-to-r group-hover:from-astu-navy group-hover:to-astu-red transition-all duration-300" />
+                  <article
+                    key={item.id || item.step || item.title || idx}
+                    onClick={() => navigate(routeUrl)}
+                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-7 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#14304D]/40 transition-all duration-300 cursor-pointer"
+                  >
+                    {/* Top Accent Strip */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-slate-100 group-hover:bg-[#14304D] transition-colors" />
 
-                      <div>
-                        {/* Step Badge & Action Header */}
-                        <div className="mb-4 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="inline-flex h-8 px-3 items-center justify-center rounded-full bg-astu-navy text-white font-extrabold text-xs tracking-wider shadow-2xs group-hover:bg-astu-red transition-colors duration-300">
-                              {stepNum.padStart(2, '0')}
-                            </span>
-                            <span className="text-[11px] font-extrabold uppercase tracking-wider text-astu-navy group-hover:text-astu-red transition-colors">
-                              {actionVerb}
-                            </span>
-                          </div>
-                          <div className="animatic-node flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-astu-navy group-hover:bg-rose-50 group-hover:text-astu-red transition-all duration-300 border border-slate-200/50 shadow-2xs">
-                            <IconComponent className="h-4 w-4" />
-                          </div>
+                    <div>
+                      {/* Step Number & Icon */}
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2.5">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#14304D] text-white font-mono text-xs font-bold shadow-2xs group-hover:bg-[#C8102E] transition-colors">
+                            {stepNum.padStart(2, '0')}
+                          </span>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 group-hover:text-[#14304D] transition-colors">
+                            {actionVerb}
+                          </span>
                         </div>
-
-                        {/* Title */}
-                        <h4 className="mb-1.5 text-sm font-bold tracking-tight text-slate-900 group-hover:text-astu-navy transition-colors">
-                          {item.title}
-                        </h4>
-
-                        {/* Description */}
-                        <p className="text-xs leading-relaxed text-slate-600 line-clamp-3 font-normal">
-                          {descText}
-                        </p>
-
-                        {/* Category Tags */}
-                        {tagsList.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {tagsList.map((tag: string, tIdx: number) => (
-                              <span key={tIdx} className="inline-block rounded-md bg-slate-100/90 group-hover:bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 transition-colors">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 group-hover:bg-slate-200 group-hover:text-[#14304D] transition-colors">
+                          <IconComponent className="h-4 w-4" />
+                        </div>
                       </div>
 
-                      {/* Bottom CTA Action Link */}
-                      <div className="mt-4 pt-3 border-t border-slate-100">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigate(routeUrl); }}
-                          className="group/btn inline-flex items-center justify-between w-full text-xs font-bold text-astu-navy group-hover:text-astu-red transition-colors cursor-pointer"
-                        >
-                          <span>{ctaText}</span>
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-600 group-hover/btn:bg-astu-navy group-hover/btn:text-white transition-all duration-200">
-                            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+                      {/* Title */}
+                      <h3 className="font-serif text-lg font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors leading-snug">
+                        {item.title}
+                      </h3>
+
+                      {/* Description */}
+                      <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
+                        {descText}
+                      </p>
+
+                      {/* Category Tags */}
+                      {tagsList.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-1.5">
+                          {tagsList.map((tag: string, tIdx: number) => (
+                            <span key={tIdx} className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom CTA Action Link */}
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <span className="text-xs font-semibold text-[#14304D] group-hover:text-[#C8102E] transition-colors">
+                        {ctaText}
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#14304D] group-hover:translate-x-1 transition-all" />
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            {/* Bottom Call to Action Card */}
+            <div className="mt-12 rounded-2xl bg-white p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div>
+                <h4 className="font-serif text-xl sm:text-2xl font-bold text-[#14304D]">
+                  Ready to connect with the ASTU alumni network?
+                </h4>
+                <p className="mt-1 text-xs sm:text-sm text-slate-600">
+                  Join over 1,238+ verified graduates, researchers, and employers already collaborating on the platform.
+                </p>
+              </div>
+              <button
+                className="shrink-0 inline-flex items-center gap-2 rounded-lg bg-[#14304D] hover:bg-[#C8102E] px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer"
+                onClick={() => navigate(livePortalsHeaders?.ctaLink || liveSectionLinks.portalsGetStartedLink)}
+              >
+                <span>{livePortalsHeaders?.ctaText || "Get Started Today"}</span>
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 1: Life at ASTU ── */}
+        <section id="campus-life" className="scroll-mt-24 w-full bg-white py-16 md:py-24 border-t border-slate-100">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header: Left title, Right subtitle + Detail Page link */}
+            <div className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                    {liveCampusLifeHeaders?.eyebrow || "EXPLORE ASTU"}
+                  </span>
+                </div>
+                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                  {liveCampusLifeHeaders?.title || "Life at ASTU"}
+                </h2>
+              </div>
+              <div className="flex flex-col items-start md:items-end gap-2.5">
+                <p className="max-w-md text-sm sm:text-base text-slate-500 leading-relaxed md:text-right">
+                  {liveCampusLifeHeaders?.description || "Events, facilities, and galleries across the ASTU community, in one place."}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/info/campus-life")}
+                  className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#14304D] hover:text-[#C8102E] transition-colors cursor-pointer group"
+                >
+                  <span>View all campus life</span>
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 3 Modern Cards Grid: All with images */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+              {displayCampusLife.map((card: any, idx: number) => (
+                <div
+                  key={card.id || idx}
+                  onClick={() => navigate(card.link)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate(card.link);
+                    }
+                  }}
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_2px_10px_rgba(20,48,77,0.04)] hover:shadow-[0_18px_36px_rgba(20,48,77,0.09)] transition-all duration-300 hover:-translate-y-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#14304D]/20"
+                >
+                  {/* Image container with 16:10 aspect ratio and zoom */}
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={card.image}
+                      alt={card.title}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      onError={handleImageError}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#14304D]/60 via-[#14304D]/10 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
+
+                    {/* Category Badge Pill on top-left of image */}
+                    <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#14304D] shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]" />
+                      <span>{card.eyebrow}</span>
+                    </div>
+
+                    {/* Subtle Index on top-right */}
+                    <div className="absolute top-4 right-4 rounded-full bg-black/40 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-semibold text-white/90">
+                      0{idx + 1}
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="flex flex-col flex-1 justify-between p-6 sm:p-7">
+                    <div>
+                      <h3 className="font-serif text-xl sm:text-[22px] font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors duration-200 leading-snug">
+                        {card.title}
+                      </h3>
+                      <p className="mt-2.5 text-sm text-slate-600 leading-relaxed line-clamp-3">
+                        {card.description}
+                      </p>
+                    </div>
+
+                    {/* Bottom Action Row */}
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs sm:text-sm font-semibold text-[#14304D] group-hover:text-[#C8102E] transition-colors">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span>{card.action}</span>
+                        <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                      </span>
+                      <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                        ASTU AMS
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 2: Campus gallery ── */}
+        <section id="gallery" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-[104px] border-y border-slate-200/80">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header: Left title, Right 'View all' link */}
+            <div className="mb-12 flex items-end justify-between">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                    {liveGallerySection?.homeEyebrow || "GALLERY"}
+                  </span>
+                </div>
+                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                  {liveGallerySection?.homeTitle || "Campus gallery"}
+                </h2>
+              </div>
+              <a
+                href={liveGallerySection?.homeButtonLink || "/gallery"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(liveGallerySection?.homeButtonLink || "/gallery");
+                }}
+                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
+              >
+                View all
+              </a>
+            </div>
+
+            {/* Gallery Grid: 2 Columns. Left 1 large photo (01), Right 2 stacked photos (02, 03) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[480px]">
+              {/* Left Column: ASTU main campus (01) */}
+              <div
+                onClick={() => navigate("/gallery")}
+                className="card-soft h-full flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group min-h-[320px] md:min-h-0"
+              >
+                <div className="relative flex-1 min-h-[260px] md:min-h-0 w-full overflow-hidden bg-slate-100">
+                  <img
+                    src={gallery1}
+                    alt="ASTU main campus"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={handleImageError}
+                  />
+                </div>
+                <div className="h-12 px-6 flex items-center justify-between bg-[#14304D] text-white shrink-0">
+                  <span className="text-xs sm:text-sm font-semibold tracking-wide">ASTU main campus</span>
+                  <span className="text-xs font-mono text-slate-300">01</span>
+                </div>
+              </div>
+
+              {/* Right Column: 2 Stacked Photos */}
+              <div className="flex flex-col gap-6 h-full">
+                {/* Top Photo: Innovation and collaboration (02) */}
+                <div
+                  onClick={() => navigate("/gallery")}
+                  className="card-soft flex-1 flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group min-h-[220px] md:min-h-0"
+                >
+                  <div className="relative flex-1 min-h-[160px] md:min-h-0 w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={stateM}
+                      alt="Innovation and collaboration"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={handleImageError}
+                    />
+                  </div>
+                  <div className="h-11 px-5 flex items-center justify-between bg-[#14304D] text-white shrink-0">
+                    <span className="text-xs sm:text-sm font-semibold tracking-wide">Innovation and collaboration</span>
+                    <span className="text-xs font-mono text-slate-300">02</span>
+                  </div>
+                </div>
+
+                {/* Bottom Photo: Graduation ceremony (03) */}
+                <div
+                  onClick={() => navigate("/gallery")}
+                  className="card-soft flex-1 flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group min-h-[220px] md:min-h-0"
+                >
+                  <div className="relative flex-1 min-h-[160px] md:min-h-0 w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={gc7}
+                      alt="Graduation ceremony"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={handleImageError}
+                    />
+                  </div>
+                  <div className="h-11 px-5 flex items-center justify-between bg-[#14304D] text-white shrink-0">
+                    <span className="text-xs sm:text-sm font-semibold tracking-wide">Graduation ceremony</span>
+                    <span className="text-xs font-mono text-slate-300">03</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 3: Upcoming alumni events ── */}
+        <section id="events" className="scroll-mt-24 w-full py-16 md:py-[104px] text-white relative overflow-hidden dark-band-grid">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* Header: Left title, Right 'View all' link */}
+            <div className="mb-12 flex items-end justify-between">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-blue-300 font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-blue-200">
+                    {liveEventsHeaders?.eyebrow || "EVENTS AND WORKSHOPS"}
+                  </span>
+                </div>
+                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-white tracking-[-0.015em] leading-tight">
+                  {liveEventsHeaders?.title || "Upcoming alumni events"}
+                </h2>
+              </div>
+              <a
+                href="/events"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/events");
+                }}
+                className="text-xs sm:text-sm font-medium text-slate-300 hover:text-white underline underline-offset-4 cursor-pointer"
+              >
+                View all
+              </a>
+            </div>
+
+            {/* 3-column White Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+              {displayedEventsList.map((event: any, idx: number) => {
+                const dateParts = parseEventDate(event.date);
+                const isRegistered = registeredTitles.includes(event.title);
+
+                return (
+                  <article
+                    key={event.id || event.title + idx}
+                    className="card-soft flex flex-col justify-between overflow-hidden rounded-2xl bg-white text-slate-900 border-t-4 border-[#C8102E] border-x border-b border-slate-100"
+                  >
+                    <div>
+                      {/* Top Date & Category Header Panel */}
+                      <div className="bg-[#F0F4F8] px-5 py-4 border-b border-slate-200/70 flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-3xl sm:text-[34px] font-black text-[#14304D] leading-none">
+                            {dateParts.day}
+                          </span>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] sm:text-[11px] font-extrabold uppercase text-[#C8102E] tracking-wider leading-none">
+                              {dateParts.month}
+                            </span>
+                            <span className="text-[10px] sm:text-[11px] font-medium text-slate-500 leading-none mt-1">
+                              {dateParts.year}
+                            </span>
                           </div>
+                        </div>
+                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          {event.category || event.kind || "Event"}
+                        </span>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="font-serif text-lg sm:text-xl font-bold text-[#14304D] leading-snug line-clamp-2">
+                            {event.title}
+                          </h3>
+
+                          {event.location && (
+                            <div className="mt-2.5 flex items-center gap-1.5 text-xs text-slate-500">
+                              <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" aria-hidden="true" />
+                              <span className="truncate">{event.location}</span>
+                            </div>
+                          )}
+
+                          {event.description && (
+                            <p className="mt-3 text-xs sm:text-sm text-slate-500 leading-relaxed line-clamp-3">
+                              {event.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="px-5 sm:px-6 pb-5 pt-2 shrink-0">
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                        {isRegistered ? (
+                          <span
+                            aria-live="polite"
+                            className="h-11 px-4 rounded-md border border-[#1E7B3A] bg-white text-[#1E7B3A] text-xs sm:text-sm font-semibold inline-flex items-center gap-1.5 select-none"
+                          >
+                            <Check className="h-3.5 w-3.5 text-[#1E7B3A]" aria-hidden="true" />
+                            <span>Registered</span>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRegisterClick({
+                                title: event.title,
+                                kind: "Event",
+                                date: event.date,
+                                location: event.location,
+                                id: event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                              })
+                            }
+                            className="h-11 px-5 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white text-xs sm:text-sm font-semibold transition-colors cursor-pointer inline-flex items-center justify-center shadow-xs"
+                          >
+                            Register
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(
+                              event.link && event.link.startsWith("/events/")
+                                ? event.link
+                                : `/events/${event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+                              { state: { event } }
+                            )
+                          }
+                          className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
+                        >
+                          Details
                         </button>
                       </div>
-                    </article>
-
-                    {/* Mobile vertical progression indicator line */}
-                    {idx < livePortals.length - 1 && (
-                      <div className="lg:hidden flex items-center justify-center -my-2 sm:hidden pointer-events-none">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-400 border border-slate-200">
-                          <ArrowRight className="h-3 w-3 rotate-90" />
-                        </div>
-                      </div>
-                    )}
-                  </React.Fragment>
+                    </div>
+                  </article>
                 );
               })}
             </div>
           </div>
-
-          {/* 4. ACTION CONCLUDING CTA */}
-          <div className="mt-12 flex flex-col items-center justify-center text-center reveal">
-            {/* Visual connector line leading down to CTA */}
-            <div className="h-8 w-0.5 bg-gradient-to-b from-astu-navy/30 to-astu-navy mb-3" />
-
-            <button
-              className="group relative inline-flex items-center gap-2.5 rounded-xl bg-astu-navy px-8 py-3.5 text-sm font-semibold text-white shadow-md shadow-astu-navy/15 transition-all duration-300 hover:bg-[#002244] hover:shadow-xl hover:shadow-astu-navy/25 hover:-translate-y-0.5 cursor-pointer border border-transparent hover:border-astu-red/30"
-              onClick={() => navigate(livePortalsHeaders?.ctaLink || liveSectionLinks.portalsGetStartedLink)}
-            >
-              <span>{livePortalsHeaders?.ctaText || "Get Started Today"}</span>
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 text-white group-hover:text-rose-300" />
-            </button>
-            
-            <p className="mt-2.5 text-xs text-slate-500 font-medium tracking-wide">
-              Join the ASTU alumni community and start building your professional network.
-            </p>
-          </div>
-        </section>        <span id="campuses" className="relative -top-24 block" />
-        <section id="campus-life" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{liveCampusLifeHeaders?.eyebrow || "Explore Life At ASTU"}</p>
-            <h3 className="mt-2 text-2xl font-bold text-astu-navy md:text-3xl">{liveCampusLifeHeaders?.title || "Campus Life, Facilities, Events, and Galleries"}</h3>
-            <p className="mx-auto mt-2 max-w-2xl text-sm text-on-surface-variant">
-              {liveCampusLifeHeaders?.description || "A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services."}
-            </p>
-          </div>
-          <div className="grid gap-5 md:grid-cols-3">
-            {/* Limit to 3 campus-life cards on home page */}
-            {liveCampusLife.slice(0, 3).map((card, idx) => {
-              const targetRoute = card.link || (
-                card.action?.toLowerCase().includes("event") ? "/events" :
-                card.action?.toLowerCase().includes("facilit") ? "/info/facilities" :
-                card.action?.toLowerCase().includes("gallery") ? "/info/gallery" :
-                "/info/campus-life"
-              );
-
-              const handleNavigate = () => {
-                if (targetRoute.startsWith("#")) {
-                  const el = document.querySelector(targetRoute);
-                  if (el) {
-                    el.scrollIntoView({ behavior: "smooth" });
-                  } else {
-                    navigate(`/${targetRoute}`);
-                  }
-                } else {
-                  navigate(targetRoute);
-                }
-              };
-
-              return (
-                <article
-                  key={card.id || card.title || idx}
-                  className={`reveal reveal-delay-${(idx % 3) + 1} flex flex-col justify-between overflow-hidden rounded-xl border border-outline-variant bg-white card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}
-                >
-                  <div>
-                    <div
-                      className="cursor-pointer overflow-hidden"
-                      onClick={handleNavigate}
-                    >
-                      <img
-                        src={card.image}
-                        alt={card.title}
-                        className="h-52 w-full object-cover transition-transform duration-700 hover:scale-105"
-                        onError={handleImageError}
-                      />
-                    </div>
-                    <div className="p-5 pb-0">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-astu-red">{card.campus}</p>
-                      <h4
-                        onClick={handleNavigate}
-                        className="mt-2 text-lg font-semibold text-astu-navy hover:text-astu-red transition-colors cursor-pointer"
-                      >
-                        {card.title}
-                      </h4>
-                      <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">{card.description}</p>
-                    </div>
-                  </div>
-                  <div className="p-5 pt-4">
-                    {card.action && (
-                      <button
-                        type="button"
-                        onClick={handleNavigate}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low hover:border-astu-navy btn-magnetic cursor-pointer transition-all"
-                      >
-                        <span>{card.action}</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </button>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
         </section>
-
-        {/* â”€â”€ Campuses section REMOVED (shown via campus-life card link) â”€â”€ */}
-
-        {/* Gallery Preview — max 3 on home page, full gallery at /gallery or custom link */}
-        <span id="gallery" className="relative -top-24 block" />
-        <section
-          className="mx-auto max-w-[1440px] px-4 py-14 md:px-8 md:py-20 transition-colors duration-300 rounded-3xl"
-          style={{
-            backgroundColor:
-              liveGallerySection?.homeBgColor && liveGallerySection.homeBgColor !== 'transparent'
-                ? liveGallerySection.homeBgColor
-                : undefined,
-          }}
-        >
-          {/* Section header */}
-          <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center reveal">
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-astu-red/10 border border-astu-red/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red">
-                <Image className="h-3 w-3" /> {liveGallerySection?.homeEyebrow || 'Campus Gallery'}
-              </span>
-              <h2 className="mt-3 text-3xl font-black text-astu-navy md:text-4xl">
-                {liveGallerySection?.homeTitle ? (
-                  liveGallerySection.homeTitle
-                ) : (
-                  <>Campus <span className="animate-gradient-text">Life &amp; Moments</span></>
-                )}
-              </h2>
-              <p className="mt-2 max-w-lg text-sm text-on-surface-variant leading-relaxed">
-                {liveGallerySection?.homeSubtitle ||
-                  'A glimpse of life at ASTU — research, innovation, graduation ceremonies, and alumni milestones.'}
-              </p>
-            </div>
-            <a
-              href={liveGallerySection?.homeButtonLink || '/gallery'}
-              onClick={(e) => {
-                e.preventDefault();
-                navigate(liveGallerySection?.homeButtonLink || '/gallery');
-              }}
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-astu-navy px-6 py-3 text-sm font-bold text-white shadow-md hover:brightness-110 hover:shadow-lg hover:scale-105 transition-all duration-200"
-            >
-              <Image className="h-4 w-4" />
-              {liveGallerySection?.homeButtonText || 'View All Gallery'}
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-
-          {/* 3-column photo grid */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            {(liveGallery.length > 0 ? liveGallery : galleryImages).slice(0, 3).map((item: any, idx: number) => (
-              <article
-                key={item.id || item.title || idx}
-                className={`reveal reveal-delay-${idx + 1} group relative overflow-hidden rounded-2xl shadow-[0_4px_24px_rgba(0,51,102,0.14)] cursor-pointer`}
-                style={{ aspectRatio: '4/3' }}
-                onClick={() => navigate('/gallery')}
-              >
-                {/* Image */}
-                <img
-                  src={item.src || item.image || item.url || galleryImages[idx % 3]?.src}
-                  alt={item.title || 'Campus Gallery'}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  onError={handleImageError}
-                />
-                {/* Always-visible bottom gradient + title */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <p className="text-white font-bold text-sm line-clamp-1">{item.title || 'Campus Gallery'}</p>
-                  {item.album && (
-                    <p className="text-white/70 text-[11px] mt-0.5 flex items-center gap-1">
-                      <Image className="h-3 w-3" />{item.album}
-                    </p>
-                  )}
-                </div>
-                {/* Hover overlay — 'View Gallery' pill */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <span className="inline-flex items-center gap-1.5 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 text-xs font-bold text-white shadow-lg">
-                    <ExternalLink className="h-3.5 w-3.5" /> View Gallery
+        {/* ── SECTION 4: Official notices ── */}
+        <section id="announcements" className="scroll-mt-24 w-full bg-white py-16 md:py-[104px] border-t border-slate-100">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 flex items-end justify-between">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                    {liveAnnouncementsHeaders?.eyebrow || "ANNOUNCEMENTS"}
                   </span>
                 </div>
-              </article>
-            ))}
-          </div>
-
-          {/* Show count + hyperlink when CMS has more than 3 images */}
-          {liveGallery.length > 3 && (
-            <div className="mt-8 flex flex-col items-center gap-3 reveal">
-              <p className="text-sm text-on-surface-variant">
-                Showing <strong className="text-astu-navy">3</strong> of{' '}
-                <strong className="text-astu-navy">{liveGallery.length}</strong> gallery items
-              </p>
-              <a
-                href="/gallery"
-                onClick={(e) => { e.preventDefault(); navigate('/gallery'); }}
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-astu-navy px-8 py-3 text-sm font-bold text-astu-navy hover:bg-astu-navy hover:text-white transition-all duration-300 hover:scale-105"
-              >
-                <Image className="h-4 w-4" />
-                View Full Gallery — {liveGallery.length} Photos &amp; Videos
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </div>
-          )}
-        </section>
-        {/* ── Upcoming Events ── */}
-        <section id="events" className="mx-auto max-w-[1440px] px-4 py-14 md:px-8 md:py-20">
-          {/* Section header */}
-          <div className="reveal mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-astu-red/10 border border-astu-red/20 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-astu-red">
-                <CalendarDays className="h-3 w-3" /> {liveEventsHeaders?.eyebrow || 'Events & Workshops'}
-              </span>
-              <h2 className="mt-3 text-3xl font-black text-astu-navy md:text-4xl">
-                {liveEventsHeaders?.title || 'Upcoming Alumni Events'}
-              </h2>
-              <p className="mt-2 max-w-xl text-sm text-on-surface-variant leading-relaxed">
-                {liveEventsHeaders?.description || 'Networking, learning, and professional growth opportunities.'}
-              </p>
-            </div>
-            {/* View All link — always visible */}
-            <a
-              href="/events"
-              onClick={(e) => { e.preventDefault(); navigate('/events'); }}
-              className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-astu-navy px-6 py-3 text-sm font-bold text-white shadow-md hover:brightness-110 hover:shadow-lg hover:scale-105 transition-all duration-200"
-            >
-              {liveEventsHeaders?.viewAllText || liveSectionLinks.eventsViewAllText}
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-
-          {/* 3-per-row event cards */}
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {liveEvents.slice(0, 3).map((event, idx) => (
-              <article
-                key={event.title + idx}
-                className={`reveal reveal-delay-${idx + 1} group flex flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-[0_4px_20px_rgba(0,51,102,0.08)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_16px_40px_rgba(0,51,102,0.14)]`}
-              >
-                {/* Image with overlay */}
-                <div className="relative overflow-hidden h-48">
-                  <img
-                    alt={event.title}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src={event.image}
-                    onError={handleImageError}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                  <span className="absolute top-3 left-3 rounded-full bg-astu-red px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wide">
-                    {event.category || event.kind || 'Event'}
-                  </span>
-                </div>
-                {/* Content */}
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className="text-base font-bold text-astu-navy group-hover:text-astu-red transition-colors line-clamp-2 leading-snug">
-                    {event.title}
-                  </h3>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-on-surface-variant">
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays className="h-3.5 w-3.5 text-astu-red" />{event.date}
-                    </span>
-                    {event.location && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPin className="h-3.5 w-3.5 text-astu-red" />{event.location}
-                      </span>
-                    )}
-                  </div>
-                  {event.description && <p className="mt-3 line-clamp-2 text-xs text-on-surface-variant">{event.description}</p>}
-                  {/* Action buttons pushed to bottom */}
-                  <div className="mt-auto pt-4 flex gap-2">
-                    <button
-                      className={`flex-1 rounded-xl px-3 py-2.5 text-xs font-bold transition-all cursor-pointer ${registeredTitles.includes(event.title) ? 'bg-emerald-600 text-white' : 'bg-astu-navy text-white hover:brightness-110 hover:shadow-md'}`}
-                      onClick={() => handleRegisterClick({ title: event.title, kind: 'Event', date: event.date, location: event.location, id: event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') })}
-                    >
-                      {registeredTitles.includes(event.title) ? '✓ Registered' : (liveEventsHeaders?.registerButtonText || liveSectionLinks.eventsCardRegisterText)}
-                    </button>
-                    <button
-                      onClick={() => navigate(event.link && event.link.startsWith('/events/') ? event.link : `/events/${event.id || event.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`, { state: { event } })}
-                      className="rounded-xl border-2 border-outline-variant px-3 py-2.5 text-xs font-bold hover:border-astu-navy hover:text-astu-navy cursor-pointer transition-all"
-                    >
-                      {liveEventsHeaders?.detailsButtonText || liveSectionLinks.eventsCardDetailsText}
-                    </button>
-                  </div>
-                </div>
-                {/* Bottom accent line */}
-                <div className="h-0.5 bg-gradient-to-r from-astu-navy via-astu-green to-astu-red opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </article>
-            ))}
-          </div>
-
-          {liveEvents.length === 0 && (
-            <p className="rounded-xl border border-dashed border-outline-variant bg-white p-6 text-center text-sm text-on-surface-variant">
-              {liveEventsHeaders?.emptyText || 'No upcoming events have been published yet.'}
-            </p>
-          )}
-
-          {/* Hyperlink to full events list when admin has added more than 3 */}
-          {liveEvents.length > 3 && (
-            <div className="mt-8 flex flex-col items-center gap-3 reveal">
-              <p className="text-sm text-on-surface-variant">
-                Showing <strong className="text-astu-navy">3</strong> of{' '}
-                <strong className="text-astu-navy">{liveEvents.length}</strong> upcoming events
-              </p>
-              <a
-                href="/events"
-                onClick={(e) => { e.preventDefault(); navigate('/events'); }}
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-astu-navy px-8 py-3 text-sm font-bold text-astu-navy hover:bg-astu-navy hover:text-white transition-all duration-300 hover:scale-105"
-              >
-                <CalendarDays className="h-4 w-4" />
-                View All {liveEvents.length} Events
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </div>
-          )}
-        </section>
-        <section id="announcements" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-            <article className="reveal rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]">
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-astu-navy/10">
-                    <Bell className="h-5 w-5 text-astu-navy" />
-                  </span>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{liveAnnouncementsHeaders?.eyebrow || "Announcements"}</p>
-                    <h3 className="text-xl font-bold text-astu-navy">{liveAnnouncementsHeaders?.title || "Official Notices"}</h3>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate(liveSectionLinks.announcementsViewAllLink)}
-                  className="rounded-md border border-outline-variant px-3 py-2 text-xs font-semibold text-astu-navy hover:bg-surface-container-low transition-colors cursor-pointer"
-                >
-                  {liveSectionLinks.announcementsViewAllText}
-                </button>
+                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                  {liveAnnouncementsHeaders?.title || "Official notices"}
+                </h2>
               </div>
-              <div className="divide-y divide-outline-variant">
-                {liveAnnouncements.slice(0, 3).map((announcement, idx) => (
-                  <button
-                    key={announcement.id || (announcement.title + idx)}
-                    onClick={() => navigate(announcement.link || `${liveSectionLinks.announcementItemLinkBase}/${announcement.id || announcement.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
-                    className="flex w-full items-start gap-3 py-3.5 text-left hover:bg-surface-container-low/60 rounded-lg px-2 transition-all cursor-pointer group"
-                  >
-                    <div className="relative mt-1 shrink-0">
-                      <Bell className="h-4 w-4 text-astu-red group-hover:scale-110 transition-transform" />
-                      {announcement.pinned && (
-                        <span className="absolute -top-1.5 -right-1.5 h-2 w-2 rounded-full bg-amber-500" />
-                      )}
-                    </div>
-                    <span className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="block text-sm font-semibold text-astu-navy group-hover:text-astu-red transition-colors line-clamp-1">{announcement.title}</span>
-                        {announcement.pinned && (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 shrink-0">
-                            📌 PINNED
-                          </span>
-                        )}
-                      </div>
-                      <span className="mt-0.5 block text-xs text-on-surface-variant">
-                        {announcement.type || 'Official Notice'} · {announcement.date}
-                        {announcement.author && <span className="opacity-80"> · {announcement.author}</span>}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-                {liveAnnouncements.length === 0 && (
-                  <div className="py-8 text-center text-xs text-on-surface-variant">
-                    No announcements published yet. Check back soon for official university notices.
-                  </div>
-                )}
-              </div>
-              {liveAnnouncements.length > 3 && (
-                <div className="mt-3 pt-3 border-t border-outline-variant/60 flex items-center justify-between text-xs">
-                  <span className="text-on-surface-variant">Showing 3 of {liveAnnouncements.length} official notices</span>
-                  <button
-                    type="button"
-                    onClick={() => navigate(liveSectionLinks.announcementsViewAllLink || '/announcements')}
-                    className="font-bold text-astu-navy hover:text-astu-red inline-flex items-center gap-1 cursor-pointer"
-                  >
-                    View All {liveAnnouncements.length} Notices →
-                  </button>
-                </div>
-              )}
-            </article>
-
-            <aside className="reveal rounded-xl border border-outline-variant bg-astu-navy p-5 text-white shadow-sm">
-              <FileText className="h-7 w-7 text-astu-green" />
-              <h4 className="mt-4 text-xl font-bold">{liveAnnouncementsHeaders?.subscribeTitle || "Subscribe to official updates"}</h4>
-              <p className="mt-2 text-sm leading-relaxed text-white/75">
-                {liveAnnouncementsHeaders?.subscribeDesc || "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox."}
-              </p>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  toast.success("Subscribed to ASTU-AMS announcements.");
-                  (event.currentTarget as HTMLFormElement).reset();
+              <a
+                href={liveSectionLinks.announcementsViewAllLink || "/announcements"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(liveSectionLinks.announcementsViewAllLink || "/announcements");
                 }}
-                className="mt-5 space-y-3"
+                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
               >
-                <input type="email" required placeholder="Enter your email" className="w-full rounded-md border border-white/20 bg-white/10 px-3 py-3 text-sm text-white outline-none placeholder:text-white/55 focus:border-astu-green" />
-                <button className="w-full rounded-md bg-astu-green px-4 py-3 text-sm font-bold text-white hover:brightness-110 cursor-pointer">Subscribe</button>
-              </form>
-            </aside>
-          </div>
-        </section>        {/* ── Success Stories ── */}
-        <section id="success-stories" className="relative bg-gradient-to-br from-slate-50 via-white to-blue-50/40 py-16 md:py-20 overflow-hidden">
-          {/* Background decorative elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-astu-navy/4 blur-3xl" />
-            <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-astu-green/5 blur-2xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-astu-red/3 blur-3xl" />
-          </div>
-          <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
-            <div className="mb-12 text-center reveal">
-              <span className="inline-flex items-center gap-2 rounded-full bg-astu-red/10 border border-astu-red/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-astu-red">
-                <Trophy className="h-3.5 w-3.5" /> Our Stories
-              </span>
-              <h2 className="mt-4 text-3xl font-black text-astu-navy md:text-4xl">
-                Alumni <span className="animate-gradient-text">Success Stories</span>
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm text-on-surface-variant leading-relaxed">
-                Discover inspiring journeys of ASTU graduates who are shaping industries, advancing research, and making meaningful global impact.
-              </p>
+                View all
+              </a>
             </div>
 
-            {liveStories && liveStories.length > 0 ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {liveStories.slice(0, 3).map((story: any, idx: number) => {
-                  const personName = story.alumniName || story.name || story.author || 'ASTU Alumni';
-                  const storyTitle = story.title || `${personName}'s Journey`;
-                  const storyDesc = story.text || story.excerpt || story.description || story.content || '';
-                  const storyRole = story.role || story.department || 'Alumni Member';
-                  const initial = (personName || 'A').charAt(0).toUpperCase();
+            <div className="grid gap-10 lg:grid-cols-12 items-start">
+              {/* Left Column (7 cols): Notice rows */}
+              <div className="lg:col-span-7 divide-y divide-slate-100">
+                {(liveAnnouncements && liveAnnouncements.length >= 3 ? liveAnnouncements.slice(0, 3) : announcements.slice(0, 3)).map((announcement: any, idx: number) => {
+                  const { day, month } = announcement.day && announcement.month
+                    ? { day: announcement.day, month: announcement.month }
+                    : parseNoticeDate(announcement.date || announcement.publishedAt);
+                  const subMeta = announcement.type
+                    ? `${announcement.type} • ${announcement.year || '2026'}`
+                    : `Official announcement • ${announcement.date || '2026'}`;
+                  const targetLink = announcement.link || `${liveSectionLinks.announcementItemLinkBase}/${announcement.id || announcement.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
                   return (
-                    <article
-                      key={story.id || story.title || story.name || idx}
-                      className={`reveal reveal-delay-${(idx % 3) + 1} group relative flex flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-[0_2px_16px_rgba(0,51,102,0.08)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,51,102,0.15)]`}
+                    <div
+                      key={announcement.id || idx}
+                      onClick={() => navigate(targetLink)}
+                      className="flex items-center justify-between py-6 cursor-pointer group transition-colors hover:bg-slate-50/60 px-3 rounded-lg -mx-3"
                     >
-                      {(story.image || story.coverImage) && (
-                        <div className="overflow-hidden h-48 bg-slate-100">
-                          <img
-                            src={story.image || story.coverImage}
-                            alt={storyTitle}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            onError={handleImageError}
-                          />
+                      <div className="flex items-center gap-5 sm:gap-7 min-w-0">
+                        <div className="w-12 sm:w-14 shrink-0 text-left">
+                          <span className="block text-2xl sm:text-3xl font-serif font-bold text-[#14304D] leading-none">
+                            {day}
+                          </span>
+                          <span className="block text-[11px] font-bold text-[#C8102E] tracking-wider uppercase mt-1">
+                            {month}
+                          </span>
                         </div>
-                      )}
-                      <div className="flex flex-1 flex-col p-5">
-                        <Quote className="h-5 w-5 text-astu-red/40 mb-2" />
-                        <h4 className="text-base font-bold text-astu-navy group-hover:text-astu-red transition-colors line-clamp-2">
-                          {storyTitle}
-                        </h4>
-                        {storyDesc && (
-                          <p className="mt-2 text-sm leading-relaxed text-on-surface-variant line-clamp-3">
-                            {storyDesc}
+                        <div className="min-w-0">
+                          <h3 className="text-base sm:text-lg font-serif font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors truncate sm:whitespace-normal">
+                            {announcement.title}
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-1">
+                            {subMeta}
                           </p>
-                        )}
-                        <div className="mt-auto pt-4 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-astu-navy to-astu-green flex items-center justify-center text-white text-xs font-bold">
-                              {initial}
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold text-astu-navy">{personName}</p>
-                              <p className="text-[10px] text-on-surface-variant">{storyRole}</p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => navigate(story.link || `/stories/${story.id || 'S-00' + (idx + 1)}`)}
-                            className="inline-flex items-center gap-1 rounded-lg bg-astu-navy/5 hover:bg-astu-navy hover:text-white px-3 py-1.5 text-xs font-semibold text-astu-navy transition-all cursor-pointer"
-                          >
-                            Read More <ArrowRight className="h-3 w-3" />
-                          </button>
                         </div>
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-astu-navy via-astu-green to-astu-red opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </article>
+                      <div className="shrink-0 pl-4">
+                        <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-[#C8102E] group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </div>
                   );
                 })}
               </div>
-            ) : (
-              /* Fallback static stories when no dynamic stories are loaded */
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {[
-                  {
-                    id: "S-001",
-                    name: "Dr. Ruth Alemu",
-                    role: "AI Research Scientist, Addis Ababa",
-                    story: "After graduating from ASTU's Computer Science program, Ruth joined a leading AI research lab and has published 18 applied AI papers. She actively mentors current ASTU students through the AMS platform.",
-                    img: arcImage,
-                    grad: "2018",
-                  },
-                  {
-                    id: "S-002",
-                    name: "Yonas Bekele",
-                    role: "Founder, GreenGrid Labs",
-                    story: "Inspired by ASTU's engineering labs, Yonas founded GreenGrid Labs — a renewable energy startup now serving 12 industrial campuses across East Africa, creating over 200 clean-energy jobs.",
-                    img: electricLabs,
-                    grad: "2016",
-                  },
-                  {
-                    id: "S-003",
-                    name: "Kalkidan Tadesse",
-                    role: "Cloud Platform Lead, Ethio Telecom",
-                    story: "Kalkidan credits ASTU's hands-on lab programs for her rapid growth in cloud engineering. She now leads enterprise cloud migration programs for regional partners and mentors junior graduates.",
-                    img: stateM,
-                    grad: "2019",
-                  },
-                ].map((item, idx) => (
-                  <article
-                    key={item.name}
-                    className={`reveal reveal-delay-${idx + 1} group relative flex flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-[0_2px_16px_rgba(0,51,102,0.08)] transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_12px_32px_rgba(0,51,102,0.15)]`}
+
+              {/* Right Column (5 cols): Subscribe Navy Card */}
+              <div className="lg:col-span-5 rounded-2xl bg-[#14304D] text-white p-7 sm:p-8 flex flex-col justify-between shadow-xs relative overflow-hidden">
+                {/* 56x5px red tab at top-left of navy feature card */}
+                <div className="absolute top-0 left-7 sm:left-8 w-[56px] h-[5px] bg-[#C8102E] rounded-b-sm" aria-hidden="true" />
+
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">
+                    STAY INFORMED
+                  </p>
+                  <h3 className="font-serif text-2xl sm:text-[26px] font-bold text-white mt-2 leading-snug">
+                    {liveAnnouncementsHeaders?.subscribeTitle || "Subscribe to official updates"}
+                  </h3>
+                  <p className="mt-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    {liveAnnouncementsHeaders?.subscribeDesc || "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox."}
+                  </p>
+                </div>
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    toast.success("Subscribed to ASTU-AMS announcements.");
+                    (event.currentTarget as HTMLFormElement).reset();
+                  }}
+                  className="mt-6 space-y-3"
+                >
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@example.com"
+                    className="w-full rounded-md bg-white text-slate-900 placeholder:text-slate-400 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full h-12 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-colors cursor-pointer shadow-sm"
                   >
-                    <div className="relative overflow-hidden h-48">
-                      <img src={item.img} alt={item.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" onError={handleImageError} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      <span className="absolute bottom-3 right-3 rounded-full bg-astu-green/90 px-2.5 py-0.5 text-[10px] font-bold text-white">Class of {item.grad}</span>
+                    Subscribe
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION 5: Alumni success stories ── */}
+        <section id="success-stories" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-[104px] border-t border-slate-200/80">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 flex items-end justify-between">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
+                    ALUMNI STORIES
+                  </span>
+                </div>
+                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                  Alumni success stories
+                </h2>
+              </div>
+              <a
+                href="/info/alumni-stories"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/info/alumni-stories");
+                }}
+                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
+              >
+                View all stories
+              </a>
+            </div>
+
+            {(() => {
+              const storyList = (liveStories && liveStories.length >= 3) ? liveStories : [
+                {
+                  id: "S-001",
+                  name: "Dr. Ruth Alemu",
+                  role: "AI Research Scientist, Addis Ababa",
+                  story: "After graduating from ASTU's Computer Science program, Ruth joined a leading AI research lab and has published 18 applied machine learning papers.",
+                  img: arcImage,
+                },
+                {
+                  id: "S-002",
+                  name: "Yonas Bekele",
+                  role: "Founder and CEO, GreenGrid Labs",
+                  story: "Launched GreenGrid Labs, now delivering clean, decentralized energy infrastructure to over 40 industrial parks.",
+                  img: electricLabs,
+                },
+                {
+                  id: "S-003",
+                  name: "Kalkidan Tadesse",
+                  role: "Cloud Platform Lead, Ethio Telecom",
+                  story: "Credits ASTU's hands-on laboratory curriculum for rapid career trajectory.",
+                  img: stateM,
+                },
+              ];
+
+              const mainStory = storyList[0];
+              const sideStory1 = storyList[1];
+              const sideStory2 = storyList[2];
+
+              return (
+                <div className="grid gap-6 lg:grid-cols-12 items-stretch">
+                  {/* Left Column (7 cols): Featured Card */}
+                  <div className="card-soft lg:col-span-7 flex flex-col rounded-2xl border border-slate-200/80 bg-white overflow-hidden">
+                    <div className="relative w-full h-64 sm:h-72 bg-slate-100 overflow-hidden">
+                      <img
+                        src={mainStory.img || mainStory.image || arcImage}
+                        alt={mainStory.name || "Alumni story"}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                        onError={handleImageError}
+                      />
                     </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      <Quote className="h-5 w-5 text-astu-red/40 mb-2" />
-                      <p className="text-sm leading-relaxed text-on-surface-variant line-clamp-4 flex-1">{item.story}</p>
-                      <div className="mt-4 pt-4 border-t border-outline-variant flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-astu-navy to-[#1a4f8a] flex items-center justify-center text-white text-sm font-bold shadow">
-                            {item.name.charAt(0)}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-astu-navy">{item.name}</p>
-                            <p className="text-[10px] text-on-surface-variant">{item.role}</p>
-                          </div>
+                    <div className="p-6 sm:p-8 flex flex-col justify-between flex-1">
+                      <div>
+                        {/* Red quote mark on featured story */}
+                        <Quote className="h-8 w-8 text-[#C8102E] shrink-0 mb-3" aria-hidden="true" />
+                        <p className="font-serif text-xl sm:text-2xl font-bold text-[#14304D] leading-snug">
+                          "{mainStory.story || mainStory.text || mainStory.description}"
+                        </p>
+                      </div>
+                      <div className="mt-6 pt-5 border-t border-slate-100 flex items-end justify-between">
+                        <div>
+                          <h4 className="font-bold text-sm text-[#14304D]">{mainStory.name || mainStory.alumniName}</h4>
+                          <p className="text-xs text-slate-500 mt-0.5">{mainStory.role || mainStory.department}</p>
                         </div>
                         <button
-                          onClick={() => navigate(`/stories/${item.id}`)}
-                          className="inline-flex items-center gap-1 rounded-lg bg-astu-navy/5 hover:bg-astu-navy hover:text-white px-3 py-1.5 text-xs font-semibold text-astu-navy transition-all cursor-pointer"
+                          type="button"
+                          onClick={() => navigate(mainStory.link || `/stories/${mainStory.id || 'S-001'}`)}
+                          className="text-xs sm:text-sm font-semibold text-[#14304D] hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
                         >
-                          Read More <ArrowRight className="h-3 w-3" />
+                          Read story
                         </button>
                       </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-astu-navy via-astu-green to-astu-red opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </article>
-                ))}
-              </div>
-            )}
+                  </div>
 
-            <div className="mt-10 flex justify-center reveal">
-              <button
-                onClick={() => navigate('/info/alumni-stories')}
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-astu-navy px-8 py-3 text-sm font-bold text-astu-navy hover:bg-astu-navy hover:text-white transition-all duration-300 hover:scale-105 btn-magnetic"
-              >
-                <Star className="h-4 w-4" /> View All Alumni Stories
-              </button>
-            </div>
+                  {/* Right Column (5 cols): 2 Stacked Cards */}
+                  <div className="lg:col-span-5 flex flex-col gap-6">
+                    {/* Card 1 */}
+                    <div className="card-soft flex-1 rounded-2xl border border-slate-200/80 bg-white p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                      <div className="relative w-full sm:w-28 sm:h-28 h-40 rounded-xl bg-slate-100 overflow-hidden shrink-0">
+                        <img
+                          src={sideStory1.img || sideStory1.image || electricLabs}
+                          alt={sideStory1.name || "Alumni story"}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          onError={handleImageError}
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between h-full min-w-0">
+                        <div>
+                          <h4 className="font-bold text-base text-[#14304D]">{sideStory1.name || sideStory1.alumniName}</h4>
+                          <p className="text-xs text-slate-500 mt-0.5">{sideStory1.role || sideStory1.department}</p>
+                          <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
+                            {sideStory1.story || sideStory1.text || sideStory1.description}
+                          </p>
+                        </div>
+                        <div className="mt-3">
+                          <button
+                            type="button"
+                            onClick={() => navigate(sideStory1.link || `/stories/${sideStory1.id || 'S-002'}`)}
+                            className="text-xs font-semibold text-[#14304D] hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
+                          >
+                            Read story
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 2 */}
+                    <div className="card-soft flex-1 rounded-2xl border border-slate-200/80 bg-white p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                      <div className="relative w-full sm:w-28 sm:h-28 h-40 rounded-xl bg-slate-100 overflow-hidden shrink-0">
+                        <img
+                          src={sideStory2.img || sideStory2.image || stateM}
+                          alt={sideStory2.name || "Alumni story"}
+                          className="absolute inset-0 h-full w-full object-cover"
+                          onError={handleImageError}
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between h-full min-w-0">
+                        <div>
+                          <h4 className="font-bold text-base text-[#14304D]">{sideStory2.name || sideStory2.alumniName}</h4>
+                          <p className="text-xs text-slate-500 mt-0.5">{sideStory2.role || sideStory2.department}</p>
+                          <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
+                            {sideStory2.story || sideStory2.text || sideStory2.description}
+                          </p>
+                        </div>
+                        <div className="mt-3">
+                          <button
+                            type="button"
+                            onClick={() => navigate(sideStory2.link || `/stories/${sideStory2.id || 'S-003'}`)}
+                            className="text-xs font-semibold text-[#14304D] hover:text-[#C8102E] underline underline-offset-4 cursor-pointer"
+                          >
+                            Read story
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
-        </section>        {/* ── Community Section ── */}
-        <section id="community" className="relative py-16 md:py-20 overflow-hidden bg-gradient-to-br from-astu-navy via-[#003366] to-[#002244]">
-          {/* Background decorative */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-astu-green/5 blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full bg-astu-red/5 blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-5">
-              <Users className="h-[400px] w-[400px] text-white" />
-            </div>
+        </section>
+
+        {/* ── Community Section ── */}
+        <section
+          id="community"
+          className="scroll-mt-24 relative py-16 md:py-[104px] overflow-hidden dark-band-grid"
+          style={{
+            backgroundColor: '#14304D',
+            backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        >
+          {/* Decorative outlined circle shapes in top-right */}
+          <div aria-hidden="true" className="absolute -top-16 -right-16 w-96 h-96 pointer-events-none opacity-40">
+            <div className="absolute top-0 right-0 w-72 h-72 rounded-full border border-white/20" />
+            <div className="absolute -top-10 -right-10 w-96 h-96 rounded-full border border-white/15" />
           </div>
+
           <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
             <div className="mb-12 text-center reveal">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-astu-green">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-200">
                 <Globe className="h-3.5 w-3.5" /> {liveCommunitySection?.title || 'ASTU Alumni Community'}
               </span>
-              <h2 className="mt-4 text-3xl font-black text-white md:text-4xl">
-                Your Networks <span className="text-astu-green">Around the World</span>
+              <h2 className="mt-4 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-white tracking-[-0.015em] leading-tight">
+                Alumni Network <span className="text-blue-200">Around the World</span>
               </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-300 leading-relaxed">
+              <p className="mx-auto mt-4 max-w-2xl text-[17px] text-slate-300 leading-relaxed">
                 {liveCommunitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'}
               </p>
             </div>
@@ -1951,8 +2149,8 @@ export default function HomePage() {
               {dynamicCommunityStats.map((stat, idx) => {
                 const Icon = idx === 0 ? Users : idx === 1 ? BookOpen : Globe;
                 return (
-                  <div key={stat.label} className={`reveal reveal-delay-${idx + 1} rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 text-center hover:bg-white/10 transition-all hover:-translate-y-1`}>
-                    <Icon className="h-6 w-6 text-astu-green mx-auto mb-2" />
+                  <div key={stat.label} className={`reveal reveal-delay-${idx + 1} card-soft rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 text-center`}>
+                    <Icon className="h-6 w-6 text-blue-300 mx-auto mb-2" />
                     <p className="text-2xl font-black text-white">{stat.value}</p>
                     <p className="text-[11px] uppercase tracking-wider text-slate-400 mt-0.5">{stat.label}</p>
                   </div>
@@ -1965,11 +2163,11 @@ export default function HomePage() {
               {liveCommunityPosts.map((post: any, idx: number) => (
                 <article
                   key={post.name}
-                  className={`reveal reveal-delay-${(idx % 3) + 1} group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 transition-all duration-300 hover:bg-white/10 hover:-translate-y-1 hover:border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.15)]`}
+                  className={`reveal reveal-delay-${(idx % 3) + 1} card-soft group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.15)]`}
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <Quote className="h-6 w-6 text-astu-green/60" />
+                      <Quote className="h-6 w-6 text-blue-300/60" />
                       {post.degree && (
                         <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
                           {post.degree}
@@ -1982,12 +2180,12 @@ export default function HomePage() {
                     <img
                       src={post.image}
                       alt={post.name}
-                      className="h-12 w-12 rounded-full object-cover border-2 border-astu-green/60 shrink-0 shadow-md bg-white/10"
+                      className="h-12 w-12 rounded-full object-cover border-2 border-blue-300/40 shrink-0 shadow-md bg-white/10"
                       onError={handleImageError}
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold text-white truncate">{post.name}</p>
-                      <p className="text-[11px] text-astu-green font-medium truncate">{post.role}</p>
+                      <p className="text-[11px] text-blue-200 font-medium truncate">{post.role}</p>
                       {post.org && <p className="text-[10px] text-slate-300 truncate">{post.org}</p>}
                     </div>
                   </div>
@@ -1999,42 +2197,43 @@ export default function HomePage() {
             <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 reveal">
               <button
                 onClick={() => navigate('/register')}
-                className="inline-flex items-center gap-2 rounded-xl bg-astu-green px-8 py-3.5 text-sm font-bold text-white hover:brightness-110 transition-all hover:scale-105 shadow-lg hover:shadow-astu-green/25 btn-magnetic"
+                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-colors shadow-sm"
               >
                 <UserRoundCheck className="h-4 w-4" /> Join ASTU Alumni Network
               </button>
               <button
                 onClick={() => navigate('/community')}
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-white/30 px-8 py-3.5 text-sm font-bold text-white hover:bg-white/10 transition-all hover:scale-105"
+                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-md border border-white/30 text-white font-bold text-sm hover:bg-white/10 transition-colors"
               >
                 <Globe className="h-4 w-4" /> Explore Community
               </button>
             </div>
           </div>
-        </section>        {/* ── Partner Logos ── */}
-        <span id="stakeholders" className="relative -top-24 block" />
-        <section id="partners" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16 overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-4">
-          <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{livePartnersHeaders?.eyebrow || "Our Partners"}</p>
-            <h3 className="mt-1 text-2xl font-bold text-astu-navy md:text-3xl">{livePartnersHeaders?.title || "Partner Companies"}</h3>
-            <p className="mx-auto mt-2 max-w-xl text-sm text-on-surface-variant">{livePartnersHeaders?.description || "Institutional partners supporting employability, internships, and research collaboration."}</p>
+        </section>
+
+        {/* ── Partner Logos ── */}
+        <section id="partners" className="scroll-mt-24 mx-auto max-w-[1240px] px-4 py-16 md:px-8 md:py-[104px] overflow-hidden bg-gradient-to-b from-[#f8faff] to-white rounded-2xl my-4">
+          <div className="mb-10 text-center reveal">
+            <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#C8102E]">{livePartnersHeaders?.eyebrow || "OUR PARTNERS"}</p>
+            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">{livePartnersHeaders?.title || "Partner Companies"}</h2>
+            <p className="mx-auto mt-3 max-w-xl text-[17px] text-slate-600 leading-relaxed">{livePartnersHeaders?.description || "Institutional partners supporting employability, internships, and research collaboration."}</p>
           </div>
           <div className="relative">
             <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
               {[...livePartners, ...livePartners].map((partner, idx) => {
                 const LogoComponent = partnerLogos[partner.name];
                 return (
-                  <div key={`${partner.name}-${idx}`} className="flex min-w-[160px] flex-col items-center gap-3 rounded-xl border border-outline-variant bg-white p-5 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]">
+                  <div key={`${partner.name}-${idx}`} className="flex min-w-[160px] flex-col items-center gap-3 rounded-xl border border-slate-200/80 bg-white p-5 card-soft shadow-[0_2px_8px_rgba(0,51,102,0.06)]">
                     {partner.logo ? (
                       <img src={partner.logo} alt={partner.name} className="h-10 max-w-[140px] object-contain" />
                     ) : LogoComponent ? (
                       <LogoComponent />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-astu-navy text-white text-sm font-bold shadow-md">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#14304D] text-white text-sm font-bold shadow-md">
                         {partner.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
-                    <span className="text-xs font-semibold text-astu-navy text-center leading-tight">{partner.name}</span>
+                    <span className="text-xs font-semibold text-[#14304D] text-center leading-tight">{partner.name}</span>
                   </div>
                 );
               })}
@@ -2042,137 +2241,154 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── News & Workshops ── */}
-        <div id="news" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="grid gap-10 lg:grid-cols-[1fr_400px]">
-            {/* News */}
-            <section>
-              <div className="mb-6 reveal">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Latest News</p>
-                <h3 className="mt-1 text-2xl font-bold text-astu-navy md:text-3xl">News from ASTU Alumni Community</h3>
-                <p className="mt-1 text-sm text-on-surface-variant">Stay current with alumni achievements, partnerships, and campus developments.</p>
+        {/* ── SECTION: News from the alumni community ── */}
+        <section id="news" className="scroll-mt-24 w-full bg-white py-16 md:py-[104px] border-t border-slate-100">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header: Left Eyebrow & Title, Right 'View all news' link */}
+            <div className="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div>
+                <div className="flex items-center">
+                  <span className="text-[#C8102E] font-bold mr-2 text-sm select-none">—</span>
+                  <span className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#C8102E]">
+                    LATEST NEWS
+                  </span>
+                </div>
+                <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                  News from the alumni community
+                </h2>
               </div>
-              <div className="space-y-3">
-                {liveNews.slice(0, 3).map((item: any, idx: number) => (
-                  <article
-                    key={item.id || item.title + idx}
-                    className={`reveal reveal-delay-${(idx % 3) + 1} flex items-start gap-4 rounded-xl border border-outline-variant bg-white p-4 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] cursor-pointer group`}
-                    onClick={() => navigate(item.link || `/announcements/${item.id || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-astu-navy/5 text-astu-navy group-hover:bg-astu-navy group-hover:text-white transition-all">
-                      <FileText className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-semibold text-astu-navy group-hover:text-astu-red transition-colors line-clamp-2">{item.title}</h4>
-                      {item.excerpt && <p className="mt-1 text-xs text-on-surface-variant line-clamp-2">{item.excerpt}</p>}
-                      <p className="mt-1.5 text-[10px] font-medium text-slate-400">{item.date}</p>
-                    </div>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-slate-300 group-hover:text-astu-red transition-colors mt-1" />
-                  </article>
-                ))}
-              </div>
-              <button
-                onClick={() => navigate('/announcements')}
-                className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-astu-navy hover:text-astu-red transition-colors cursor-pointer reveal"
+              <a
+                href="/announcements"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/announcements");
+                }}
+                className="text-xs sm:text-sm font-medium text-slate-600 hover:text-[#C8102E] underline underline-offset-4 cursor-pointer self-start sm:self-end transition-colors"
               >
-                See All News <ArrowRight className="h-4 w-4" />
-              </button>
-            </section>
+                View all news
+              </a>
+            </div>
 
-            {/* Workshops */}
-            <section id="workshops">
-              <div className="mb-6 reveal">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">Workshops</p>
-                <h3 className="mt-1 text-2xl font-bold text-astu-navy md:text-3xl">Upcoming Workshops</h3>
-                <p className="mt-1 text-sm text-on-surface-variant">Professional development sessions open to alumni and students.</p>
-              </div>
-              <div className="space-y-3">
-                {liveWorkshops.slice(0, 3).map((ws: any, idx: number) => {
-                  const workshopLink = ws.link || `/events/${ws.id || ws.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-                  const isRegistered = registeredTitles.includes(ws.title);
-                  return (
-                    <article
-                      key={ws.title + idx}
-                      className={`reveal reveal-delay-${(idx % 3) + 1} rounded-xl border border-outline-variant bg-white p-4 card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)] group`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <span className="inline-block rounded-md bg-astu-navy/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-astu-navy">{ws.focus || 'Career Development'}</span>
-                          <h4
-                            onClick={() => navigate(workshopLink)}
-                            className="mt-1.5 text-sm font-semibold text-astu-navy hover:text-astu-red transition-colors line-clamp-2 cursor-pointer"
-                          >
-                            {ws.title}
-                          </h4>
-                          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-on-surface-variant">
-                            <span className="inline-flex items-center gap-1"><CalendarDays className="h-3 w-3" />{ws.date}</span>
-                            {ws.seats && <span>{ws.seats}</span>}
-                          </div>
+            {/* News List */}
+            <div className="divide-y divide-slate-100 border-t border-b border-slate-100">
+              {liveNews.slice(0, 3).map((item: any, idx: number) => {
+                const { day, month } = parseNoticeDate(item.date || item.publishedAt);
+                const itemLink = item.link || `/announcements/${item.id || item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+
+                return (
+                  <article
+                    key={item.id || idx}
+                    onClick={() => navigate(itemLink)}
+                    className="group flex items-center justify-between py-6 sm:py-7 px-3 sm:px-4 -mx-3 sm:-mx-4 rounded-xl cursor-pointer transition-all duration-200 hover:bg-slate-50/70"
+                  >
+                    <div className="flex items-start sm:items-center gap-5 sm:gap-8 min-w-0">
+                      {/* Date Badge: Large Navy Day + Red Month */}
+                      <div className="w-12 sm:w-16 shrink-0 text-left pt-0.5 sm:pt-0">
+                        <span className="block text-2xl sm:text-3xl font-serif font-bold text-[#14304D] leading-none">
+                          {day}
+                        </span>
+                        <span className="block text-[11px] font-bold uppercase tracking-wider text-[#C8102E] mt-1">
+                          {month}
+                        </span>
+                      </div>
+
+                      {/* Content block */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            {item.category || "NEWS"}
+                          </span>
+                          {item.readTime && (
+                            <>
+                              <span className="text-slate-300">•</span>
+                              <span className="text-[10px] font-medium text-slate-400">
+                                {item.readTime}
+                              </span>
+                            </>
+                          )}
                         </div>
+                        <h3 className="text-base sm:text-lg font-bold text-[#14304D] group-hover:text-[#C8102E] transition-colors leading-snug truncate sm:whitespace-normal">
+                          {item.title}
+                        </h3>
+                        {(item.excerpt || item.description) && (
+                          <p className="mt-1 text-xs sm:text-sm text-slate-500 leading-relaxed line-clamp-1 sm:line-clamp-2">
+                            {item.excerpt || item.description}
+                          </p>
+                        )}
                       </div>
-                      <div className="mt-3 pt-3 border-t border-outline-variant/60 flex items-center justify-between">
-                        <button
-                          type="button"
-                          onClick={() => navigate(workshopLink)}
-                          className="inline-flex items-center gap-1 text-xs font-bold text-astu-navy hover:text-astu-red transition-colors cursor-pointer group/link"
-                        >
-                          View Details <ArrowRight className="h-3 w-3 group-hover/link:translate-x-0.5 transition-transform" />
-                        </button>
-                        <button
-                          className="rounded-lg bg-astu-navy px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-astu-navy/90 transition-all cursor-pointer shadow-sm hover:shadow"
-                          onClick={() => handleRegisterClick({ title: ws.title, kind: 'Workshop', date: ws.date })}
-                        >
-                          {isRegistered ? '✓ Registered' : 'Register'}
-                        </button>
+                    </div>
+
+                    {/* Right Arrow */}
+                    <div className="shrink-0 pl-4 sm:pl-6">
+                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 group-hover:text-[#14304D] group-hover:bg-slate-200/50 transition-all">
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* ── FAQ ── */}
-        <section id="faq" className="mx-auto max-w-[1440px] px-4 py-12 md:px-8 md:py-16">
-          <div className="mb-8 text-center reveal">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-astu-red">{liveFaqHeaders?.eyebrow || "FAQ"}</p>
-            <h3 className="mt-1 text-2xl font-bold text-astu-navy md:text-3xl">{liveFaqHeaders?.title || "Frequently Asked Questions"}</h3>
-            <p className="mx-auto mt-2 max-w-xl text-sm text-on-surface-variant">{liveFaqHeaders?.description || "Common questions about ASTU-AMS, tracer studies, and alumni services."}</p>
-          </div>
-          <div className="mx-auto max-w-3xl space-y-3">
-            {liveFaq.map((item, idx) => (
-              <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} group rounded-xl border border-outline-variant bg-white overflow-hidden card-hover shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
-                <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-astu-navy hover:bg-slate-50 transition-colors [&::-webkit-details-marker]:hidden">
-                  <span>{item.question}</span>
-                  <HelpCircle className="h-5 w-5 shrink-0 text-astu-red transition-transform duration-300 group-open:rotate-180" />
-                </summary>
-                <div className="border-t border-outline-variant px-5 py-4 text-sm leading-relaxed text-on-surface-variant">
-                  {item.answer}
-                </div>
-              </details>
-            ))}
+        <section id="faq" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-[104px] border-t border-slate-200/80">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 text-center reveal">
+              <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#C8102E]">{liveFaqHeaders?.eyebrow || "FAQ"}</p>
+              <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">{liveFaqHeaders?.title || "Frequently Asked Questions"}</h2>
+              <p className="mx-auto mt-3 max-w-xl text-[17px] text-slate-600 leading-relaxed">{liveFaqHeaders?.description || "Common questions about ASTU-AMS, tracer studies, and alumni services."}</p>
+            </div>
+            <div className="mx-auto max-w-3xl space-y-3">
+              {liveFaq.map((item, idx) => (
+                <details key={item.id || idx} className={`reveal reveal-delay-${(idx % 3) + 1} card-soft group rounded-xl border border-slate-200/80 bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,51,102,0.06)]`}>
+                  <summary className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-[#14304D] hover:text-[#C8102E] hover:bg-slate-50 transition-colors [&::-webkit-details-marker]:hidden">
+                    <span>{item.question}</span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-slate-400 group-open:text-[#C8102E] transition-all duration-200 group-open:rotate-180" />
+                  </summary>
+                  <div className="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-600">
+                    {item.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* ── Final CTA ── */}
         {liveCtaSection?.enabled !== false && (
-          <section id="cta" className="relative bg-gradient-to-r from-astu-navy via-primary-container to-slate-900 py-16 text-center overflow-hidden">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute top-10 left-[20%] w-3 h-3 rounded-full bg-astu-green/20 animate-float" style={{ animationDelay: "0s" }} />
-              <div className="absolute bottom-10 right-[30%] w-2 h-2 rounded-full bg-astu-red/20 animate-float" style={{ animationDelay: "1.5s" }} />
-              <div className="absolute top-20 right-[15%] w-1.5 h-1.5 rounded-full bg-white/15 animate-float" style={{ animationDelay: "3s" }} />
+          <section
+            id="cta"
+            className="scroll-mt-24 relative py-16 md:py-[104px] text-center overflow-hidden dark-band-grid"
+            style={{
+              backgroundColor: '#14304D',
+              backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          >
+            {/* Decorative outlined circle shapes in top-right */}
+            <div aria-hidden="true" className="absolute -top-16 -right-16 w-80 h-80 pointer-events-none opacity-40">
+              <div className="absolute top-0 right-0 w-64 h-64 rounded-full border border-white/20" />
+              <div className="absolute -top-8 -right-8 w-80 h-80 rounded-full border border-white/15" />
             </div>
-            <div className="max-w-[1440px] mx-auto px-4 reveal relative z-10">
-              <h3 className="text-3xl font-bold text-white md:text-4xl">{liveCtaSection?.title || "Ready to Join ASTU-AMS?"}</h3>
-              <p className="mt-4 text-slate-200 max-w-2xl mx-auto">
+            <div className="max-w-[1240px] mx-auto px-4 reveal relative z-10">
+              <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-white tracking-[-0.015em] leading-tight">
+                {liveCtaSection?.title || "Ready to Join ASTU-AMS?"}
+              </h2>
+              <p className="mt-4 text-[17px] text-slate-200 max-w-2xl mx-auto leading-relaxed">
                 {liveCtaSection?.description || "Connect with fellow alumni, discover career opportunities, and contribute to university excellence."}
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-4">
-                <button className="px-6 py-3 bg-white text-astu-navy font-bold rounded-xl hover:bg-slate-100 transition-all shadow-md hover:scale-105 btn-magnetic cursor-pointer" onClick={() => navigate(liveCtaSection?.primaryCtaLink || "/login")}>
+                <button
+                  className="h-12 px-8 inline-flex items-center justify-center bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm rounded-md transition-colors shadow-sm cursor-pointer"
+                  onClick={() => navigate(liveCtaSection?.primaryCtaLink || "/login")}
+                >
                   {liveCtaSection?.primaryCtaText || "Alumni Portal"}
                 </button>
-                <button className="px-6 py-3 border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all hover:scale-105 btn-magnetic cursor-pointer" onClick={() => navigate(liveCtaSection?.secondaryCtaLink || "/login")}>
+                <button
+                  className="h-12 px-8 inline-flex items-center justify-center border border-white/40 text-white font-bold text-sm rounded-md hover:bg-white/10 transition-colors cursor-pointer"
+                  onClick={() => navigate(liveCtaSection?.secondaryCtaLink || "/login")}
+                >
                   {liveCtaSection?.secondaryCtaText || "Employer Portal"}
                 </button>
               </div>
@@ -2202,12 +2418,12 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter email for campus news..."
-                className="w-full lg:w-64 text-xs px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFD700]/30 text-white"
+                className="w-full lg:w-64 h-12 text-sm px-4 py-3 bg-white/5 border border-white/10 rounded-md focus:outline-none focus:ring-2 focus:ring-white/20 text-white placeholder-slate-400"
                 required
               />
               <button
                 type="submit"
-                className="px-5 py-3 bg-[#FFD700] hover:bg-[#FFD700]/95 text-indigo-950 font-bold text-xs rounded-xl hover:scale-105 transition-all shadow-md whitespace-nowrap"
+                className="h-12 px-6 bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm rounded-md transition-colors shadow-md whitespace-nowrap cursor-pointer"
               >
                 Subscribe
               </button>
@@ -2550,7 +2766,7 @@ export default function HomePage() {
                   <button onClick={() => setRsvpModalItem(null)} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">
                     Cancel
                   </button>
-                  <button onClick={confirmRsvpRegistration} className="rounded-lg bg-[#003580] px-5 py-2 text-xs font-semibold text-white hover:brightness-110 shadow-md">
+                  <button onClick={confirmRsvpRegistration} className="h-10 px-5 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white text-xs font-semibold shadow-md transition-colors cursor-pointer">
                     Complete & Confirm RSVP
                   </button>
                 </div>

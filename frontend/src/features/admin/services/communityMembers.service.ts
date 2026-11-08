@@ -202,13 +202,32 @@ const defaultMembers: CommunityMember[] = [
   },
 ];
 
+function isRealMember(m: any): boolean {
+  if (!m || typeof m !== 'object') return false;
+  const name = (m.name || '').trim();
+  if (!name || name.length < 3) return false;
+  // Filter out dummy / test keystroke names
+  if (/^(ghjk|asdf|test|qwerty|123|abc|xyz|sample)/i.test(name)) return false;
+  // Must have role or organization
+  if (!m.role && !m.org) return false;
+  return true;
+}
+
 export const communityMembersService = {
   getMembers(): CommunityMember[] {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          const valid = parsed.filter(isRealMember);
+          if (valid.length >= 6) {
+            if (valid.length !== parsed.length) {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(valid));
+            }
+            return valid;
+          }
+        }
       }
     } catch {
       /* ignore */

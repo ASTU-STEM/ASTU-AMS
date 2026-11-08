@@ -830,6 +830,32 @@ export const homepageCmsService = {
         if (!Array.isArray(parsed.partners) || parsed.partners.length === 0) {
           parsed.partners = defaultPartnersList;
         }
+        if (parsed.eventBanner && (parsed.eventBanner.title?.includes('Carnival') || parsed.eventBanner.title?.includes('2026') || parsed.eventBanner.description?.includes('April 25'))) {
+          parsed.eventBanner = {
+            badge: 'Upcoming Flagship Event',
+            title: 'ASTU Alumni Global Homecoming & Tech Summit 2027',
+            date: 'April 24–25, 2027',
+            location: 'ASTU Main Campus • Adama, Ethiopia',
+            description: 'Celebrating over three decades of ASTU engineering and scientific heritage! A landmark homecoming bringing together graduates, university leadership, academic researchers, and enterprise partners.',
+            features: [
+              '1,500+ Expected Delegates & Alumni',
+              'Industry Innovation & Career Expo',
+              'Applied Research & Startup Incubation Showcase',
+            ],
+            primaryButtonText: 'Register for Homecoming',
+            primaryButtonLink: '/register',
+            secondaryButtonText: 'View Summit Schedule',
+            secondaryButtonLink: '/events',
+          };
+        }
+        if (parsed.communityPageHero) {
+          if (parsed.communityPageHero.title === 'Your Networks Around the World') {
+            parsed.communityPageHero.title = 'Your Network Around the World';
+          }
+          if (parsed.communityPageHero.subtitle) {
+            parsed.communityPageHero.subtitle = parsed.communityPageHero.subtitle.replace(/nearly three decades/gi, 'over three decades');
+          }
+        }
         return parsed;
       }
     } catch {
