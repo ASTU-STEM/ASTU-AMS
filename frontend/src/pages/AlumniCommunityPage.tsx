@@ -233,11 +233,68 @@ export default function AlumniCommunityPage() {
       <section
         className="relative overflow-hidden py-16 md:py-[104px] text-white dark-band-grid"
         style={{
-          backgroundColor: '#14304D',
+          backgroundColor: '#003580',
           backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
           backgroundSize: '24px 24px',
         }}
       >
+        {/* Abstract Blueprint Grid Pattern */}
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
+
+        {/* Abstract Worldwide Coordinate Geometry & Orbital Rings */}
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-30">
+          <svg
+            className="w-full max-w-[1240px] h-full max-h-[660px] overflow-visible"
+            viewBox="0 0 1000 600"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Planetary Horizon & Equatorial Crosshairs */}
+            <line x1="80" y1="300" x2="920" y2="300" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" strokeDasharray="6 6" />
+            <line x1="500" y1="40" x2="500" y2="560" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="6 6" />
+
+            {/* Concentric Spherical Range Rings (Architectural Radar) */}
+            <circle cx="500" cy="300" r="120" stroke="rgba(169, 196, 224, 0.3)" strokeWidth="1" />
+            <circle cx="500" cy="300" r="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1.2" />
+            <circle cx="500" cy="300" r="310" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
+            <circle cx="500" cy="300" r="420" stroke="rgba(169, 196, 224, 0.12)" strokeWidth="1" />
+            <circle cx="500" cy="300" r="540" stroke="rgba(169, 196, 224, 0.06)" strokeWidth="1" strokeDasharray="8 8" />
+
+            {/* Abstract Globe Wireframe - Latitude Parallels */}
+            <ellipse cx="500" cy="300" rx="210" ry="64" stroke="rgba(169, 196, 224, 0.5)" strokeWidth="1.2" />
+            <ellipse cx="500" cy="225" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+            <ellipse cx="500" cy="375" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+            {/* Abstract Globe Wireframe - Longitude Meridians */}
+            <ellipse cx="500" cy="300" rx="85" ry="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1" />
+            <ellipse cx="500" cy="300" rx="160" ry="210" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+            {/* Tilted Worldwide Orbital Trajectory Rings */}
+            <g transform="rotate(-20 500 300)">
+              <ellipse cx="500" cy="300" rx="360" ry="110" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1.2" strokeDasharray="6 4" />
+              {/* Discrete Coordinate Pulse Points */}
+              <circle cx="140" cy="300" r="3.5" fill="#C8102E" />
+              <circle cx="140" cy="300" r="8" stroke="#C8102E" strokeWidth="1" opacity="0.4" />
+              <circle cx="860" cy="300" r="3.5" fill="#38bdf8" />
+              <circle cx="860" cy="300" r="8" stroke="#38bdf8" strokeWidth="1" opacity="0.4" />
+            </g>
+
+            {/* Complementary Counter-Orbital Arc */}
+            <g transform="rotate(32 500 300)">
+              <ellipse cx="500" cy="300" rx="330" ry="95" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="5 5" />
+              <circle cx="830" cy="300" r="3" fill="#38bdf8" opacity="0.6" />
+            </g>
+
+            {/* Subtle Coordinate Crosshair Calibration Marks */}
+            <g stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1">
+              <line x1="495" y1="90" x2="505" y2="90" />
+              <line x1="495" y1="510" x2="505" y2="510" />
+              <line x1="290" y1="295" x2="290" y2="305" />
+              <line x1="710" y1="295" x2="710" y2="305" />
+            </g>
+          </svg>
+        </div>
+
         {/* Decorative outlined circular accents in top-right */}
         <div aria-hidden="true" className="absolute -top-16 -right-16 w-96 h-96 pointer-events-none opacity-40">
           <div className="absolute top-0 right-0 w-72 h-72 rounded-full border border-white/20" />
@@ -313,7 +370,7 @@ export default function AlumniCommunityPage() {
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-[#C8102E]">
               DISTINGUISHED ALUMNI ROSTER
             </p>
-            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
               Alumni Leaders Shaping Global Progress
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-[17px] text-slate-600 leading-relaxed">
@@ -331,7 +388,7 @@ export default function AlumniCommunityPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search alumni by name, role, organization (e.g. Boeing, Ethiopian Airlines), or degree..."
-                  className="w-full h-12 rounded-lg border border-slate-200 bg-slate-50/70 pl-12 pr-10 text-sm text-[#14304D] outline-none focus:border-[#14304D] focus:bg-white focus:ring-1 focus:ring-[#14304D] transition-colors"
+                  className="w-full h-12 rounded-lg border border-slate-200 bg-slate-50/70 pl-12 pr-10 text-sm text-[#003580] outline-none focus:border-[#003580] focus:bg-white focus:ring-1 focus:ring-[#003580] transition-colors"
                 />
                 {searchQuery && (
                   <button
@@ -360,7 +417,7 @@ export default function AlumniCommunityPage() {
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${isActive
-                        ? 'bg-[#14304D] text-white shadow-sm'
+                        ? 'bg-[#003580] text-white shadow-sm'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
                   >
@@ -375,8 +432,8 @@ export default function AlumniCommunityPage() {
           {/* Directory Grid */}
           {communityMembers.length < 6 ? (
             <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-12 text-center max-w-lg mx-auto">
-              <Users className="h-12 w-12 text-[#14304D] mx-auto mb-3 opacity-60" />
-              <h3 className="text-lg font-bold text-[#14304D]">Directory Under Curation</h3>
+              <Users className="h-12 w-12 text-[#003580] mx-auto mb-3 opacity-60" />
+              <h3 className="text-lg font-bold text-[#003580]">Directory Under Curation</h3>
               <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                 The ASTU Alumni Leaders Directory is currently being verified and updated with distinguished graduates across industry, academia, and civil infrastructure.
               </p>
@@ -390,14 +447,14 @@ export default function AlumniCommunityPage() {
           ) : filteredMembers.length === 0 ? (
             <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-12 text-center max-w-md mx-auto">
               <Users className="h-12 w-12 text-slate-400 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-[#14304D]">No alumni matched your search</h3>
+              <h3 className="text-base font-bold text-[#003580]">No alumni matched your search</h3>
               <p className="mt-1 text-sm text-slate-500">Try adjusting your search terms or selecting another category filter.</p>
               <button
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedCategory('all');
                 }}
-                className="mt-4 h-10 px-5 rounded-md bg-[#14304D] text-white font-semibold text-xs hover:bg-[#1f4870] transition-colors cursor-pointer"
+                className="mt-4 h-10 px-5 rounded-md bg-[#003580] text-white font-semibold text-xs hover:bg-[#1f4870] transition-colors cursor-pointer"
               >
                 Reset Filters
               </button>
@@ -412,7 +469,7 @@ export default function AlumniCommunityPage() {
                   <div>
                     {/* Top Row: Badge & Share */}
                     <div className="flex items-center justify-between gap-2 mb-4">
-                      <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-[#14304D]">
+                      <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-[#003580]">
                         {member.badge || `Class of ${member.gradYear}`}
                       </span>
                       <button
@@ -445,7 +502,7 @@ export default function AlumniCommunityPage() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-bold text-[#14304D] line-clamp-1">
+                        <h3 className="text-base font-bold text-[#003580] line-clamp-1">
                           {member.name}
                         </h3>
                         <p className="text-xs sm:text-sm font-semibold text-[#C8102E] line-clamp-1 mt-0.5">
@@ -460,8 +517,8 @@ export default function AlumniCommunityPage() {
 
                     {/* Degree and Location Info */}
                     <div className="rounded-lg bg-slate-50 p-3 mb-3 border border-slate-100">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#14304D]">
-                        <GraduationCap className="h-3.5 w-3.5 text-[#14304D] shrink-0" />
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#003580]">
+                        <GraduationCap className="h-3.5 w-3.5 text-[#003580] shrink-0" />
                         <span className="truncate">{member.degree}</span>
                       </div>
                       {member.location && (
@@ -482,7 +539,7 @@ export default function AlumniCommunityPage() {
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <button
                       onClick={() => setActiveModalMember(member)}
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-[#14304D] hover:text-[#C8102E] transition-colors cursor-pointer group/btn"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-[#003580] hover:text-[#C8102E] transition-colors cursor-pointer group/btn"
                     >
                       View Biography <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
                     </button>
@@ -502,7 +559,7 @@ export default function AlumniCommunityPage() {
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-[#C8102E]">
               REGIONAL PRESENCE
             </p>
-            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
               ASTU Alumni Chapters Worldwide
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-[17px] text-slate-600 leading-relaxed">
@@ -518,14 +575,14 @@ export default function AlumniCommunityPage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="rounded-md bg-slate-100 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-[#14304D]">
+                    <span className="rounded-md bg-slate-100 border border-slate-200 px-2.5 py-1 text-xs font-semibold text-[#003580]">
                       {chap.members}
                     </span>
-                    <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-[#14304D]">
-                      <MapPin className="h-4 w-4 text-[#14304D]" />
+                    <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-[#003580]">
+                      <MapPin className="h-4 w-4 text-[#003580]" />
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold text-[#14304D] leading-snug">{chap.name}</h3>
+                  <h3 className="text-lg font-bold text-[#003580] leading-snug">{chap.name}</h3>
                   <p className="text-sm text-slate-600 mt-1.5">
                     Regional Hub: <span className="font-semibold text-slate-800">{chap.hub}</span>
                   </p>
@@ -535,7 +592,7 @@ export default function AlumniCommunityPage() {
                 </div>
                 <a
                   href={`mailto:${chap.contact}`}
-                  className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#14304D] hover:text-[#C8102E] transition-colors cursor-pointer"
+                  className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[#003580] hover:text-[#C8102E] transition-colors cursor-pointer"
                 >
                   <Mail className="h-4 w-4" /> Contact Chapter Lead
                 </a>
@@ -554,7 +611,7 @@ export default function AlumniCommunityPage() {
                 <span className="inline-flex items-center gap-2 rounded-md bg-red-50 border border-red-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-[#C8102E]">
                   <Calendar className="h-3.5 w-3.5 text-[#C8102E]" /> {eventBanner.badge}
                 </span>
-                <h2 className="mt-3 font-fraunces text-2xl sm:text-3xl lg:text-[36px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+                <h2 className="mt-3 font-fraunces text-2xl sm:text-3xl lg:text-[36px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
                   {eventBanner.title}
                 </h2>
                 <div className="mt-2 flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-700">
@@ -563,7 +620,7 @@ export default function AlumniCommunityPage() {
                   </span>
                   <span className="text-slate-300">•</span>
                   <span className="flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4 text-[#14304D]" /> {eventBanner.location}
+                    <MapPin className="h-4 w-4 text-[#003580]" /> {eventBanner.location}
                   </span>
                 </div>
                 <p className="mt-4 text-[17px] text-slate-600 leading-relaxed">
@@ -588,7 +645,7 @@ export default function AlumniCommunityPage() {
                 </button>
                 <button
                   onClick={() => navigate(eventBanner.secondaryButtonLink)}
-                  className="h-12 px-8 rounded-md border border-slate-300 text-[#14304D] hover:bg-slate-50 font-semibold text-sm transition-colors text-center cursor-pointer inline-flex items-center justify-center"
+                  className="h-12 px-8 rounded-md border border-slate-300 text-[#003580] hover:bg-slate-50 font-semibold text-sm transition-colors text-center cursor-pointer inline-flex items-center justify-center"
                 >
                   {eventBanner.secondaryButtonText}
                 </button>
@@ -605,7 +662,7 @@ export default function AlumniCommunityPage() {
             <p className="text-xs font-bold uppercase tracking-[0.08em] text-[#C8102E]">
               ALUMNI ENGAGEMENT
             </p>
-            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#14304D] tracking-[-0.015em] leading-tight">
+            <h2 className="mt-2 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
               Ways to Engage With Your Alma Mater
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-[17px] text-slate-600 leading-relaxed">
@@ -622,15 +679,15 @@ export default function AlumniCommunityPage() {
                   className="card-soft rounded-xl border border-slate-200/80 bg-white p-7 flex flex-col justify-between"
                 >
                   <div>
-                    <div className="h-12 w-12 rounded-lg bg-[#14304D]/5 text-[#14304D] flex items-center justify-center mb-5">
-                      <Icon className="h-6 w-6 text-[#14304D]" />
+                    <div className="h-12 w-12 rounded-lg bg-[#003580]/5 text-[#003580] flex items-center justify-center mb-5">
+                      <Icon className="h-6 w-6 text-[#003580]" />
                     </div>
-                    <h3 className="text-xl font-bold text-[#14304D]">{pillar.title}</h3>
+                    <h3 className="text-xl font-bold text-[#003580]">{pillar.title}</h3>
                     <p className="text-sm text-slate-600 mt-2.5 leading-relaxed">{pillar.desc}</p>
                   </div>
                   <button
                     onClick={() => navigate(pillar.link)}
-                    className="mt-6 h-12 px-6 rounded-md border border-slate-300 text-[#14304D] hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-white text-sm font-semibold transition-colors inline-flex items-center justify-between cursor-pointer"
+                    className="mt-6 h-12 px-6 rounded-md border border-slate-300 text-[#003580] hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-white text-sm font-semibold transition-colors inline-flex items-center justify-between cursor-pointer"
                   >
                     <span>{pillar.action}</span>
                     <ArrowRight className="h-4 w-4" />
@@ -664,7 +721,7 @@ export default function AlumniCommunityPage() {
                   }}
                 />
                 <div>
-                  <h3 className="text-lg font-bold text-[#14304D]">{activeModalMember.name}</h3>
+                  <h3 className="text-lg font-bold text-[#003580]">{activeModalMember.name}</h3>
                   <p className="text-xs sm:text-sm font-semibold text-[#C8102E]">{activeModalMember.role}</p>
                   <p className="text-xs sm:text-sm text-slate-600">{activeModalMember.org}</p>
                 </div>
@@ -696,7 +753,7 @@ export default function AlumniCommunityPage() {
               </div>
 
               <div>
-                <h4 className="font-bold text-[#14304D] text-sm mb-1">Career & Impact Overview</h4>
+                <h4 className="font-bold text-[#003580] text-sm mb-1">Career & Impact Overview</h4>
                 <p className="text-slate-600 leading-relaxed">{activeModalMember.bio}</p>
               </div>
 
