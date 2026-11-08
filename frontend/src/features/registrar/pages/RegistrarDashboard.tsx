@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3 } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import Footer from '../../../components/Footer';
 
 
 // Types
@@ -1454,6 +1455,7 @@ useEffect(() => {
           </div>
         </div>
 
+        <Footer variant="minimal" />
       </div>
     </div>
 

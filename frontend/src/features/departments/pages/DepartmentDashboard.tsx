@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { HelpCircle, LogOut, Menu, ChevronDown, FileText, BarChart3, Settings } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import Footer from '../../../components/Footer';
 
 // Components
 import { DashboardOverview } from '../components/DashboardOverview';
@@ -466,6 +467,7 @@ const DepartmentDashboard = () => {
                         {renderSection()}
                     </div>
 
+                    <Footer variant="minimal" />
                 </main>
             </div>
 

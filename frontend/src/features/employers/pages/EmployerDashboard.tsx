@@ -3,6 +3,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import Footer from '../../../components/Footer';
 
 // Types
 import {
@@ -863,7 +864,7 @@ const EmployerDashboard = () => {
         </aside>
 
         {/* Main Content Area */}
-        <div className={`min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+        <div className={`min-h-screen flex flex-col justify-between transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
 
           {/* Header Section - Admin Layout Style */}
           <header
@@ -1520,6 +1521,7 @@ const EmployerDashboard = () => {
               />
             )}
           </main>
+          <Footer variant="minimal" />
         </div>
       </div>
 
