@@ -59,3 +59,6 @@ temp/
 .kilo/
 .gemini/
 
+# Documentation work files
+docs/task_division.md
+
