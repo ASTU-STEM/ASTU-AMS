@@ -75,6 +75,7 @@ export default function EventDetailPage() {
   const location = useLocation();
   const passedEvent = (location.state as any)?.event;
 
+  const [allEvents, setAllEvents] = useState<any[]>([]);
   const [eventData, setEventData] = useState<EventDetailPageData | null>(passedEvent ? {
     id: passedEvent.id || id || '',
     title: passedEvent.title || '',
@@ -94,6 +95,40 @@ export default function EventDetailPage() {
   const [isRegistered, setIsRegistered] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
 
+  // Pagination / Page Handler: Previous and Next Event computation
+  const { prevEvent, nextEvent, currentIndex, totalEvents } = useMemo(() => {
+    if (!allEvents.length || !eventData) {
+      return { prevEvent: null, nextEvent: null, currentIndex: -1, totalEvents: 0 };
+    }
+    const idx = allEvents.findIndex(
+      (e) =>
+        e.id === eventData.id ||
+        e.title?.toLowerCase() === eventData.title?.toLowerCase() ||
+        (id && e.id?.toLowerCase() === id.toLowerCase()) ||
+        (id && e.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === id.toLowerCase())
+    );
+    return {
+      prevEvent: idx > 0 ? allEvents[idx - 1] : null,
+      nextEvent: idx >= 0 && idx < allEvents.length - 1 ? allEvents[idx + 1] : null,
+      currentIndex: idx,
+      totalEvents: allEvents.length,
+    };
+  }, [allEvents, eventData, id]);
+
+  // Keyboard navigation for Prev/Next event page handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'ArrowLeft' && prevEvent) {
+        navigate(`/events/${encodeURIComponent(prevEvent.id || prevEvent.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`);
+      } else if (e.key === 'ArrowRight' && nextEvent) {
+        navigate(`/events/${encodeURIComponent(nextEvent.id || nextEvent.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [prevEvent, nextEvent, navigate]);
+
   useEffect(() => {
     let isMounted = true;
     if (!id) return;
@@ -111,75 +146,69 @@ export default function EventDetailPage() {
 
     const loadEvent = async () => {
       try {
-        // 1. Check CMS events stored in localStorage by EventWorkshopManagement
+        let fullList: any[] = [];
         const localEventsJson = localStorage.getItem('astu_ams_cms_events_items');
         if (localEventsJson) {
           try {
             const list = JSON.parse(localEventsJson);
-            if (Array.isArray(list)) {
-              const cmsMatch = list.find(
-                (e: any) =>
-                  e.id === id ||
-                  e.id?.toLowerCase() === id.toLowerCase() ||
-                  e.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === id.toLowerCase() ||
-                  e.title?.toLowerCase() === id.toLowerCase()
-              );
-              if (cmsMatch && isMounted) {
-                setEventData({
-                  id: cmsMatch.id,
-                  title: cmsMatch.title,
-                  date: cmsMatch.date,
-                  location: cmsMatch.location,
-                  type: cmsMatch.kind || cmsMatch.type || 'Event',
-                  description: cmsMatch.description,
-                  image: cmsMatch.image,
-                  category: cmsMatch.category,
-                  organizer: cmsMatch.organizer,
-                  capacity: Number(cmsMatch.capacity) || 185,
-                  rsvps: Number(cmsMatch.rsvps) || 0,
-                  registrationInfo: cmsMatch.registrationInfo,
-                  highlights: cmsMatch.highlights,
-                } as any);
-                setLoading(false);
-                return;
-              }
-            }
+            if (Array.isArray(list) && list.length) fullList = list;
           } catch { }
         }
-
-        // 2. Check homepage CMS config
         const cmsConfig = homepageCmsService.getSettings();
         if (cmsConfig) {
-          const allPosts: any[] = [...((cmsConfig.events || []) as any[]), ...((cmsConfig.workshops || []) as any[])];
-          const match: any = allPosts.find(
-            (e: any) =>
-              e.id === id ||
-              e.id?.toLowerCase() === id.toLowerCase() ||
-              e.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === id.toLowerCase() ||
-              e.title?.toLowerCase() === id.toLowerCase()
-          );
-          if (match && isMounted) {
-            setEventData({
-              id: match.id,
-              title: match.title,
-              date: match.date,
-              location: match.location,
-              type: match.kind || match.type || 'Event',
-              description: match.description,
-              image: match.image,
-              category: match.category,
-              organizer: match.organizer,
-              capacity: Number(match.capacity) || 185,
-              rsvps: Number(match.rsvps) || 0,
-              registrationInfo: match.registrationInfo,
-              highlights: match.highlights,
+          const cmsPosts: any[] = [...((cmsConfig.events || []) as any[]), ...((cmsConfig.workshops || []) as any[])];
+          cmsPosts.forEach(cp => {
+            if (!fullList.some(e => e.id === cp.id || e.title === cp.title)) {
+              fullList.push(cp);
+            }
+          });
+        }
+        try {
+          const apiEvents = await eventsService.getAllEvents();
+          if (apiEvents?.length) {
+            apiEvents.forEach(ae => {
+              if (!fullList.some(e => e.id === ae.id || e.title === ae.title)) {
+                fullList.push(ae);
+              }
             });
-            setLoading(false);
-            return;
           }
+        } catch { }
+        if (!fullList.some(e => e.id === 'WS-001' || e.title === DEFAULT_BOOTCAMP_DATA.title)) {
+          fullList.push(DEFAULT_BOOTCAMP_DATA);
+        }
+        if (isMounted) {
+          setAllEvents(fullList);
         }
 
-        // 3. Check passed state
+        const found = fullList.find(
+          (e: any) =>
+            e.id === id ||
+            e.id?.toLowerCase() === id.toLowerCase() ||
+            e.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') === id.toLowerCase() ||
+            e.title?.toLowerCase() === id.toLowerCase()
+        );
+
+        if (found && isMounted) {
+          setEventData({
+            id: found.id,
+            title: found.title,
+            date: found.date,
+            location: found.location,
+            type: found.kind || found.type || 'Event',
+            description: found.description,
+            image: found.image || DEFAULT_EVENT_IMAGES[found.title] || '/images/astu-building.jpg',
+            category: found.category,
+            organizer: found.organizer,
+            capacity: Number(found.capacity) || 185,
+            rsvps: Number(found.rsvps) || (Array.isArray(found.rsvps) ? found.rsvps.length : 120),
+            registrationInfo: found.registrationInfo,
+            highlights: found.highlights,
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Check passed state if any
         if (passedEvent && isMounted) {
           setEventData({
             id: passedEvent.id || id || '',
@@ -188,7 +217,7 @@ export default function EventDetailPage() {
             location: passedEvent.location || '',
             type: passedEvent.type || passedEvent.kind || 'Event',
             description: passedEvent.description,
-            image: passedEvent.image,
+            image: passedEvent.image || DEFAULT_EVENT_IMAGES[passedEvent.title] || '/images/astu-building.jpg',
             category: passedEvent.category,
             organizer: passedEvent.organizer,
             capacity: Number(passedEvent.capacity) || 185,
@@ -200,25 +229,7 @@ export default function EventDetailPage() {
           return;
         }
 
-        // 4. Check backend API events
-        const events = await eventsService.getAllEvents();
-        if (!isMounted) return;
-        const apiMatch = events.find(
-          (e) =>
-            e.id === id ||
-            e.id?.toLowerCase() === id.toLowerCase() ||
-            e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === id.toLowerCase() ||
-            e.title.toLowerCase() === id.toLowerCase()
-        );
-
-        if (apiMatch) {
-          setEventData({
-            ...apiMatch,
-            capacity: 185,
-            rsvps: Array.isArray(apiMatch.rsvps) ? apiMatch.rsvps.length : 120,
-            image: DEFAULT_EVENT_IMAGES[apiMatch.title] || '/images/astu-building.jpg',
-          });
-        } else if (
+        if (
           id === 'WS-001' ||
           id.toLowerCase().includes('data-science') ||
           id.toLowerCase().includes('bootcamp')
