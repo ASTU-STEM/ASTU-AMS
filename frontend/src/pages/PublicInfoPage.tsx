@@ -386,13 +386,7 @@ export default function PublicInfoPage() {
             {/* Hero Main Content */}
             <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-3xl">
-                <div className="mb-4 inline-flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/10 p-2.5 backdrop-blur-md">
-                  <IconComponent className="h-5 w-5 text-emerald-400" />
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-300">
-                    {page.badge || "ASTU Institutional Resource"}
-                  </span>
-                </div>
-                <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
+                <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl font-fraunces">
                   {page.title}
                 </h1>
                 <p className="mt-4 text-sm leading-relaxed text-slate-200/95 sm:text-base sm:leading-7 max-w-2xl">

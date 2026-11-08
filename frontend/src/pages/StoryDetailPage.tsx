@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
+  ArrowRight,
   Award,
   Briefcase,
   Building2,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import ChatBot from '../components/ChatBot';
 import storiesService, { AlumniStory } from '../features/admin/services/stories.service';
 
 export default function StoryDetailPage() {
@@ -91,7 +93,7 @@ export default function StoryDetailPage() {
     <div className="flex min-h-screen flex-col bg-[#f8fafc] font-sans text-slate-800">
       <Navbar />
 
-      {/* Top Header Breadcrumb Navigation */}
+      {/* ── Top Header Breadcrumb Navigation ── */}
       <header className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
           <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500">
@@ -103,7 +105,7 @@ export default function StoryDetailPage() {
               Alumni Success Stories
             </Link>
             <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-            <span className="max-w-[200px] truncate text-slate-900 sm:max-w-md">
+            <span className="max-w-[200px] truncate text-slate-900 sm:max-w-md font-bold">
               {story.name}
             </span>
           </nav>
@@ -111,14 +113,14 @@ export default function StoryDetailPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/info/alumni-stories')}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5 text-[#003580]" />
               All Stories
             </button>
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 cursor-pointer"
             >
               <Share2 className="h-3.5 w-3.5 text-slate-500" />
               {copied ? 'Copied!' : 'Share'}
@@ -372,6 +374,9 @@ export default function StoryDetailPage() {
           </aside>
         </div>
       </main>
+
+      {/* RAG Copilot Assistant */}
+      <ChatBot />
     </div>
   );
 }

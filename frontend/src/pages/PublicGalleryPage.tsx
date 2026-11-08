@@ -4,19 +4,22 @@ import {
   ArrowLeft,
   Calendar,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Film,
   Filter,
   GraduationCap,
   Image as ImageIcon,
-  ImagePlus,
-  Microscope,
   PlayCircle,
   Search,
+  ShieldCheck,
   Sparkles,
   Tag,
   User,
   X,
+  Share2,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import ChatBot from '../components/ChatBot';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
@@ -24,16 +27,19 @@ import gallerySettingsService, {
   GalleryPageSettings,
 } from '../features/admin/services/gallerySettings.service';
 
-interface GalleryItem {
+export interface GalleryItem {
   id: string;
   title: string;
   type: 'Photo' | 'Video';
   album: string;
+  category?: 'EVENTS' | 'GRADUATION' | 'RESEARCH' | 'CAMPUS' | 'WORKSHOPS';
   src?: string;
   image?: string;
   status?: string;
   uploadedBy?: string;
   date?: string;
+  photoCount?: number;
+  duration?: string;
 }
 
 const defaultGalleryItems: GalleryItem[] = [
@@ -42,80 +48,144 @@ const defaultGalleryItems: GalleryItem[] = [
     title: 'AI Workshop Opening Session',
     type: 'Video',
     album: 'Workshop Gallery',
+    category: 'WORKSHOPS',
     src: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80',
     status: 'Approved',
     uploadedBy: 'CSE Department',
     date: '2 days ago',
+    duration: '04:15',
   },
   {
     id: 'M-002',
     title: '2026 Graduation Main Stage',
     type: 'Photo',
     album: 'Graduation Gallery',
+    category: 'GRADUATION',
     src: '/images/gc7.jpg',
     status: 'Approved',
     uploadedBy: 'Registrar Office',
     date: '1 week ago',
+    photoCount: 48,
   },
   {
     id: 'M-003',
     title: 'Research Expo Robotics Booth',
     type: 'Photo',
     album: 'Research Gallery',
+    category: 'RESEARCH',
     src: '/images/electriclabs.jpeg',
     status: 'Approved',
     uploadedBy: 'Research Directorate',
     date: '3 days ago',
+    photoCount: 24,
   },
   {
     id: 'M-004',
     title: 'Alumni Career Day Panel',
     type: 'Photo',
     album: 'Event Gallery',
+    category: 'EVENTS',
     src: '/images/astu-building.jpg',
     status: 'Approved',
     uploadedBy: 'Alumni Office',
     date: '5 hours ago',
+    photoCount: 16,
   },
   {
     id: 'M-005',
     title: 'Campus Innovation Labs',
     type: 'Photo',
     album: 'Campus Gallery',
+    category: 'CAMPUS',
     src: '/images/humanitary building.jpg',
     status: 'Approved',
     uploadedBy: 'Public Relations',
     date: '1 day ago',
+    photoCount: 30,
   },
   {
     id: 'M-006',
     title: 'Engineering Fair 2026',
     type: 'Photo',
     album: 'Event Gallery',
+    category: 'EVENTS',
     src: '/images/campus-2.jpeg',
     status: 'Approved',
     uploadedBy: 'Engineering Faculty',
     date: '2 weeks ago',
+    photoCount: 36,
   },
   {
     id: 'M-007',
     title: 'Cloud Computing Workshop',
     type: 'Video',
     album: 'Workshop Gallery',
+    category: 'WORKSHOPS',
     src: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=80',
     status: 'Approved',
     uploadedBy: 'ICT Directorate',
     date: '30 min ago',
+    duration: '06:40',
   },
   {
     id: 'M-008',
     title: 'Campus Aerial Drone Footage',
     type: 'Video',
     album: 'Campus Gallery',
+    category: 'CAMPUS',
     src: '/images/arc.jpg',
     status: 'Approved',
     uploadedBy: 'Marketing Team',
     date: '1 month ago',
+    duration: '02:50',
+  },
+  {
+    id: 'M-009',
+    title: 'Presidential Awards & Medal Convocations',
+    type: 'Photo',
+    album: 'Graduation Gallery',
+    category: 'GRADUATION',
+    src: '/images/State-M.jpg',
+    status: 'Approved',
+    uploadedBy: 'President Office',
+    date: '2 weeks ago',
+    photoCount: 42,
+  },
+  {
+    id: 'M-010',
+    title: 'Renewable Solar Energy Testing Field',
+    type: 'Photo',
+    album: 'Research Gallery',
+    category: 'RESEARCH',
+    src: '/images/electriclabs.jpeg',
+    status: 'Approved',
+    uploadedBy: 'Energy Center',
+    date: '4 days ago',
+    photoCount: 18,
+  },
+  {
+    id: 'M-011',
+    title: 'Alumni Homecoming Gala Night',
+    type: 'Photo',
+    album: 'Event Gallery',
+    category: 'EVENTS',
+    src: '/images/astuget.jpg',
+    status: 'Approved',
+    uploadedBy: 'Alumni Affairs',
+    date: '3 weeks ago',
+    photoCount: 54,
+  },
+  {
+    id: 'M-012',
+    title: 'Student Technology Incubation Pitch',
+    type: 'Video',
+    album: 'Workshop Gallery',
+    category: 'WORKSHOPS',
+    src: '/images/astusteam.jpg',
+    status: 'Approved',
+    uploadedBy: 'STEM Incubation Center',
+    date: '5 days ago',
+    duration: '08:15',
   },
 ];
 
@@ -123,16 +193,17 @@ export default function PublicGalleryPage() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState<GalleryPageSettings>(() => gallerySettingsService.getSettings());
 
-  const loadMedia = () => {
+  const loadMedia = (): GalleryItem[] => {
     try {
       const stored = localStorage.getItem('astu_ams_cms_gallery_items');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.filter((m: any) => m.status === 'Approved' || !m.status);
+          const approved = parsed.filter((m: any) => m.status === 'Approved' || !m.status);
+          if (approved.length > 0) return approved;
         }
       }
-    } catch {}
+    } catch { }
 
     const cmsConfig = homepageCmsService.getSettings();
     if (cmsConfig?.gallery?.length) {
@@ -143,10 +214,15 @@ export default function PublicGalleryPage() {
   };
 
   const [items, setItems] = useState<GalleryItem[]>(loadMedia);
-  const [selectedAlbum, setSelectedAlbum] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<'All' | 'Photo' | 'Video'>('All');
   const [search, setSearch] = useState('');
   const [activeModalItem, setActiveModalItem] = useState<GalleryItem | null>(null);
+
+  // Pagination states (Page Handler)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6); // 6 albums per page matching screenshot 2
+  const [paginationMode, setPaginationMode] = useState<'paged' | 'infinite'>('paged');
 
   useEffect(() => {
     const syncMedia = () => setItems(loadMedia());
@@ -163,206 +239,536 @@ export default function PublicGalleryPage() {
     };
   }, []);
 
-  const albumsList = ['All', 'Event Gallery', 'Workshop Gallery', 'Graduation Gallery', 'Campus Gallery', 'Research Gallery'];
+  // Reset pagination when search or category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCategory, selectedType, pageSize]);
+
+  const categoryTabs = [
+    { id: 'all', label: 'All Galleries' },
+    { id: 'events', label: 'Events' },
+    { id: 'workshops', label: 'Workshops' },
+    { id: 'graduation', label: 'Graduation' },
+    { id: 'campus', label: 'Campus' },
+    { id: 'research', label: 'Research' },
+  ];
 
   const filtered = useMemo(() => {
     return items.filter((item) => {
-      if (selectedAlbum !== 'All' && item.album !== selectedAlbum) return false;
+      // Type filter
       if (selectedType !== 'All' && item.type !== selectedType) return false;
+
+      // Category filter
+      if (selectedCategory !== 'all') {
+        const itemCat = (item.category || '').toLowerCase();
+        const itemAlbum = (item.album || '').toLowerCase();
+        const target = selectedCategory.toLowerCase();
+
+        const match =
+          itemCat.includes(target) ||
+          itemAlbum.includes(target) ||
+          (target === 'events' && (itemCat.includes('event') || itemAlbum.includes('event'))) ||
+          (target === 'workshops' && (itemCat.includes('workshop') || itemAlbum.includes('workshop'))) ||
+          (target === 'graduation' && (itemCat.includes('graduation') || itemAlbum.includes('graduation'))) ||
+          (target === 'campus' && (itemCat.includes('campus') || itemAlbum.includes('campus'))) ||
+          (target === 'research' && (itemCat.includes('research') || itemAlbum.includes('research')));
+
+        if (!match) return false;
+      }
+
+      // Search keyword filter
       if (search.trim()) {
         const q = search.toLowerCase();
-        return (
-          item.title.toLowerCase().includes(q) ||
-          (item.album && item.album.toLowerCase().includes(q)) ||
-          (item.uploadedBy && item.uploadedBy.toLowerCase().includes(q))
-        );
+        const inTitle = item.title.toLowerCase().includes(q);
+        const inAlbum = item.album && item.album.toLowerCase().includes(q);
+        const inUploadedBy = item.uploadedBy && item.uploadedBy.toLowerCase().includes(q);
+        if (!inTitle && !inAlbum && !inUploadedBy) return false;
       }
+
       return true;
     });
-  }, [items, selectedAlbum, selectedType, search]);
+  }, [items, selectedCategory, selectedType, search]);
+
+  // Page handler calculations
+  const totalAlbums = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalAlbums / pageSize));
+
+  // If in infinite/load more mode, show from 0 to currentPage * pageSize. In paged mode, slice by page.
+  const displayedAlbums = useMemo(() => {
+    if (paginationMode === 'infinite') {
+      return filtered.slice(0, currentPage * pageSize);
+    }
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize, paginationMode]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    const target = document.getElementById('gallery-feed-nav');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleLoadMore = () => {
+    setPaginationMode('infinite');
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const getPageNumbers = (current: number, total: number) => {
+    const delta = 1;
+    const range: (number | string)[] = [];
+    for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+      range.push(i);
+    }
+    if (current - delta > 2) {
+      range.unshift('...');
+    }
+    if (current + delta < total - 1) {
+      range.push('...');
+    }
+    range.unshift(1);
+    if (total > 1) {
+      range.push(total);
+    }
+    return range;
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-800 flex flex-col">
       <Navbar />
 
-      {/* Header Banner (Fully Controlled by CMS Admin) */}
-      <div
-        className="relative overflow-hidden text-white py-12 px-4 sm:px-6 transition-all"
-        style={{ backgroundColor: settings.bannerBgColor || '#003580' }}
-      >
-        {settings.showBannerImage && settings.bannerImage && (
-          <div className="absolute inset-0 z-0">
-            <img
-              src={settings.bannerImage}
-              alt="Gallery Banner"
-              className="h-full w-full object-cover object-center opacity-25"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-[#003580]/85 to-[#003580]/90" />
-          </div>
-        )}
+      {/* ── Prestige Academic Blue Hero Banner (Minimal & Clean) ── */}
+      <header className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] text-white pt-10 pb-12 sm:pt-14 sm:pb-16 px-4 sm:px-6 shadow-xl">
+        {/* Dedicated Background Image Overlay */}
+        <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none">
+          <img
+            alt="ASTU Media Archive"
+            className="h-full w-full object-cover"
+            src={settings.bannerImage || '/images/arc.jpg'}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
+            }}
+          />
+        </div>
 
-        <div className="relative z-10 mx-auto max-w-[1240px]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-start sm:items-center gap-4">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-[#FFD700] backdrop-blur-md border border-white/15">
-                <ImageIcon className="h-7 w-7" />
-              </span>
-              <div>
-                {settings.bannerBadge && (
-                  <span className="inline-flex items-center gap-1.5 rounded-md bg-white/15 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#FFD700] mb-2 backdrop-blur-sm border border-white/10">
-                    <Sparkles className="h-3 w-3" />
-                    {settings.bannerBadge}
-                  </span>
-                )}
-                <h1 className="text-2xl font-black sm:text-3xl lg:text-4xl tracking-tight leading-tight">
-                  {settings.bannerTitle || 'ASTU Media & Photo Gallery'}
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-200 mt-2 max-w-2xl leading-relaxed">
-                  {settings.bannerSubtitle ||
-                    'Visual showcases, event archives, research expos, graduation ceremonies, and campus life at Adama Science and Technology University.'}
-                </p>
+        {/* Blueprint grid pattern ("like we did for other") */}
+        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
+
+        {/* Dot Grid Background Overlay */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-15"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1.2px, transparent 1.2px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+
+        {/* Ambient Concentric Circular Arc Line Graphic */}
+        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/6 h-[560px] w-[560px] opacity-25">
+          <svg viewBox="0 0 500 500" className="h-full w-full" fill="none">
+            <circle cx="250" cy="250" r="90" stroke="white" strokeWidth="1" strokeDasharray="3 3" />
+            <circle cx="250" cy="250" r="160" stroke="white" strokeWidth="1.2" />
+            <circle cx="250" cy="250" r="230" stroke="white" strokeWidth="1" strokeDasharray="5 5" />
+            <circle cx="250" cy="250" r="300" stroke="white" strokeWidth="1.2" />
+            <circle cx="250" cy="250" r="370" stroke="white" strokeWidth="1" strokeDasharray="6 6" />
+          </svg>
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-[1360px]">
+          {/* Breadcrumb Navigation: Home / Media */}
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-6 font-normal">
+            <Link to="/" className="hover:text-white transition-colors">
+              Home
+            </Link>
+            <span className="text-slate-400 font-light">/</span>
+            <span className="text-white font-medium">Media</span>
+          </nav>
+
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="max-w-2xl space-y-3">
+              {/* Eyebrow with Rose Dash */}
+              <div className="flex items-center gap-2.5">
+                <span className="w-5 h-[2px] bg-[#E05A6D] inline-block rounded-full"></span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#E05A6D]">
+                  OFFICIAL CAMPUS MEDIA ARCHIVE
+                </span>
               </div>
+
+              {/* Headline Title */}
+              <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold tracking-[-0.015em] text-white leading-[1.14]">
+                Media and photo gallery
+              </h1>
+
+              {/* Subtitle Description */}
+              <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
+                Visual showcases, event archives, research expos, graduation ceremonies, and campus life at Adama Science and Technology University.
+              </p>
             </div>
 
-            <div className="hidden lg:flex items-center gap-3 self-end rounded-xl bg-white/10 px-4 py-2.5 backdrop-blur-md border border-white/15 text-xs text-slate-200">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-              <div>
-                <p className="font-bold text-white">Verified ASTU Archive</p>
-                <p className="text-[10px] text-slate-300">Managed by Directorate of Communication</p>
+            {/* Right Badge: Verified ASTU archive */}
+            <div className="shrink-0 self-start lg:self-center">
+              <div className="rounded-2xl border border-white/15 bg-white/[0.04] backdrop-blur-sm px-5 py-3.5 flex items-center gap-3.5 shadow-sm">
+                <div className="h-9 w-9 rounded-full border border-rose-300/40 bg-rose-500/10 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="h-4.5 w-4.5 text-rose-200" strokeWidth={1.8} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-white leading-tight">
+                    Verified ASTU archive
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-normal">
+                    Managed by Directorate of Communication
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Container */}
-      <main className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 flex-1 w-full space-y-6">
-        {/* Filters & Search */}
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs md:flex-row md:items-center md:justify-between">
-          {/* Album Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-            {albumsList.map((album) => (
-              <button
-                key={album}
-                onClick={() => setSelectedAlbum(album)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                  selectedAlbum === album
-                    ? 'bg-[#003580] text-white shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {album}
-              </button>
-            ))}
-          </div>
-
-          {/* Type Toggle & Search Bar */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs">
-              {(['All', 'Photo', 'Video'] as const).map((type) => (
+      {/* ── Modern Sticky Filter & Controls Bar (Clean, Non-Overlapping) ── */}
+      <nav
+        id="gallery-feed-nav"
+        className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs"
+      >
+        <div className="mx-auto max-w-[1360px] px-4 py-3 sm:px-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            {/* Category Pill Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+              {categoryTabs.map((tab) => (
                 <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`rounded-lg px-2.5 py-1 font-semibold transition-all cursor-pointer ${
-                    selectedType === type ? 'bg-[#003580] text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200'
-                  }`}
+                  key={tab.id}
+                  onClick={() => setSelectedCategory(tab.id)}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${selectedCategory === tab.id
+                      ? 'bg-[#0a3871] text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                    }`}
                 >
-                  {type}
+                  {tab.label}
                 </button>
               ))}
             </div>
 
-            <div className="relative w-48 sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={settings.searchPlaceholder || 'Search gallery...'}
-                className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs outline-none focus:border-[#003580] focus:ring-2 focus:ring-[#003580]/10"
-              />
+            {/* Type Selector, Search and Album Count */}
+            <div className="flex items-center gap-2.5 self-stretch md:self-auto">
+              {/* Type Toggle: All | Photos | Videos */}
+              <div className="flex items-center rounded-xl border border-slate-200 bg-slate-100 p-0.5 shrink-0">
+                {(['All', 'Photo', 'Video'] as const).map((type) => {
+                  const label = type === 'All' ? 'All' : type === 'Photo' ? 'Photos' : 'Videos';
+                  const isActive = selectedType === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setSelectedType(type)}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${isActive
+                          ? 'bg-[#0a3871] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative flex-1 md:w-64">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search albums..."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-1.5 pl-8.5 pr-8 text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:border-[#0a3871] focus:bg-white transition-all shadow-2xs"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Album Count Badge */}
+              <span className="hidden sm:inline-flex items-center rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 shrink-0">
+                {filtered.length} {filtered.length === 1 ? 'album' : 'albums'}
+              </span>
             </div>
           </div>
         </div>
+      </nav>
 
-        {/* Gallery Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item) => (
-            <article
-              key={item.id}
-              onClick={() => setActiveModalItem(item)}
-              className="group cursor-pointer overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-[#003580]/40"
-            >
-              <div className="relative h-56 w-full overflow-hidden bg-slate-900">
-                <img
-                  src={item.src || item.image || '/images/astu-building.jpg'}
-                  alt={item.title}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  onError={(e) => {
-                    const el = e.target as HTMLImageElement;
-                    if (el.src.includes('astu-building.jpg')) {
-                      el.src = '/images/fallback-campus.svg';
-                    } else {
-                      el.src = '/images/astu-building.jpg';
-                    }
-                  }}
-                />
-                {item.type === 'Video' && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/35 backdrop-blur-[1px]">
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-transform group-hover:scale-110">
-                      <PlayCircle className="h-7 w-7" />
-                    </span>
-                  </div>
-                )}
-                <div className="absolute top-3 left-3">
-                  <span className="rounded-md bg-slate-950/70 backdrop-blur-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white border border-white/10">
-                    {item.album}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#003580] transition-colors line-clamp-1">
-                  {item.title}
-                </h3>
-                <div className="mt-2 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-2.5">
-                  <span className="flex items-center gap-1">
-                    <User className="h-3.5 w-3.5 text-slate-400" />
-                    {item.uploadedBy || 'ASTU Media'}
-                  </span>
-                  <span className="flex items-center gap-1 text-[11px] text-slate-400">
-                    <Calendar className="h-3 w-3" />
-                    {item.date || 'Recently'}
-                  </span>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
-            <ImageIcon className="mx-auto h-12 w-12 text-slate-300" />
-            <h3 className="mt-3 text-base font-bold text-slate-700">
-              {settings.emptyTitle || 'No media items found'}
-            </h3>
-            <p className="mt-1 text-xs text-slate-500">
-              {settings.emptySubtitle || 'Try adjusting your search terms or selecting a different album.'}
-            </p>
+      {/* ── Main Gallery Content ── */}
+      <main className="mx-auto max-w-[1360px] px-4 py-8 sm:px-6 flex-1 w-full space-y-7">
+        {/* Results Counter & Search Indicator */}
+        {(search || selectedCategory !== 'all' || selectedType !== 'All') && (
+          <div className="flex items-center justify-between gap-3 text-xs text-slate-500 bg-slate-100/70 rounded-xl px-4 py-2 border border-slate-200/60">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-700">
+                Found {filtered.length} {filtered.length === 1 ? 'album' : 'albums'}
+              </span>
+              {search && (
+                <span>
+                  matching <span className="font-extrabold text-[#0a3871]">"{search}"</span>
+                </span>
+              )}
+              {selectedCategory !== 'all' && (
+                <span className="text-slate-400">
+                  in {categoryTabs.find((c) => c.id === selectedCategory)?.label}
+                </span>
+              )}
+              {selectedType !== 'All' && (
+                <span className="text-slate-400">({selectedType === 'Photo' ? 'Photos only' : 'Videos only'})</span>
+              )}
+            </div>
             <button
               onClick={() => {
-                setSelectedAlbum('All');
-                setSelectedType('All');
                 setSearch('');
+                setSelectedCategory('all');
+                setSelectedType('All');
               }}
-              className="mt-4 rounded-xl bg-[#003580] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-[#002855]"
+              className="text-[#0a3871] font-extrabold hover:underline cursor-pointer"
             >
               Reset Filters
             </button>
           </div>
         )}
+
+        {/* Empty State */}
+        {filtered.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center shadow-xs space-y-4">
+            <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+              <ImageIcon className="h-8 w-8 text-slate-300" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-fraunces text-lg font-bold text-slate-800">No Media Albums Found</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                We could not find any official photo collections or video dispatches matching your current filter.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCategory('all');
+                setSelectedType('All');
+                setSearch('');
+              }}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#0a3871] px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-[#072a56] transition-colors cursor-pointer"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        ) : (
+          /* ── 3-Column Album Cards Grid (Matching Image 2) ── */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedAlbums.map((item) => (
+              <article
+                key={item.id}
+                onClick={() => setActiveModalItem(item)}
+                className="card-soft group cursor-pointer overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
+              >
+                <div>
+                  {/* Media Visual Container (Matching Image 2) */}
+                  <div className="relative h-60 w-full overflow-hidden bg-slate-900">
+                    <img
+                      src={item.src || item.image || '/images/astu-building.jpg'}
+                      alt={item.title}
+                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
+                      }}
+                    />
+
+                    {/* Translucent Play Circle for Videos (Matching Image 2) */}
+                    {item.type === 'Video' && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/25 backdrop-blur-[1px]">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-[#0a3871] shadow-lg transition-transform group-hover:scale-115">
+                          <PlayCircle className="h-7 w-7 fill-white" />
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Category Pill Top Left (Matching Image 2) */}
+                    <div className="absolute top-3.5 left-3.5 z-10">
+                      <span className="rounded-md bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-800 shadow-sm border border-slate-200/60">
+                        {item.category || item.album.replace(' Gallery', '').toUpperCase()}
+                      </span>
+                    </div>
+
+                    {/* Bottom Right Pill: Photo count or Video duration (Matching Image 2) */}
+                    <div className="absolute bottom-3 right-3 z-10">
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-black/65 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-white shadow-sm border border-white/10">
+                        {item.type === 'Video' ? (
+                          <>
+                            <PlayCircle className="h-3 w-3 text-white" />
+                            <span>Video • {item.duration || '02:40'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <ImageIcon className="h-3 w-3 text-white" />
+                            <span>{item.photoCount || 12} photos</span>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Body (Matching Image 2: [Album title], [Issuing office] [Date]) */}
+                  <div className="p-4 sm:p-5 space-y-2">
+                    <h3 className="font-fraunces text-base font-bold text-slate-900 group-hover:text-[#0a3871] transition-colors leading-snug line-clamp-1">
+                      {item.title}
+                    </h3>
+
+                    <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                      <span className="font-medium text-slate-600 truncate max-w-[170px]">
+                        {item.uploadedBy || 'ASTU Office'}
+                      </span>
+                      <span className="text-slate-400 font-normal shrink-0">
+                        {item.date || 'Recently'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {/* ── Page Handler & Load More Controls (Matching Image 2 & User Request) ── */}
+        {totalAlbums > 0 && (
+          <div className="flex flex-col items-center justify-center space-y-4 pt-4">
+            {/* Status counter (Matching Image 2: "Showing 6 of [N] albums") */}
+            <p className="text-xs text-slate-500 font-medium">
+              Showing{' '}
+              <span className="font-bold text-slate-900">
+                {paginationMode === 'infinite'
+                  ? Math.min(displayedAlbums.length, totalAlbums)
+                  : Math.min((currentPage - 1) * pageSize + 1, totalAlbums)}
+              </span>
+              {paginationMode === 'paged' && (
+                <>
+                  {' '}to{' '}
+                  <span className="font-bold text-slate-900">
+                    {Math.min(currentPage * pageSize, totalAlbums)}
+                  </span>
+                </>
+              )}{' '}
+              of <span className="font-bold text-slate-900">{totalAlbums}</span> albums
+            </p>
+
+            {/* Load more button (Matching Image 2) */}
+            {paginationMode === 'infinite' && displayedAlbums.length < totalAlbums && (
+              <button
+                type="button"
+                onClick={handleLoadMore}
+                className="rounded-xl border border-[#0a3871] bg-white px-7 py-2.5 text-xs font-bold text-[#0a3871] shadow-2xs hover:bg-[#0a3871] hover:text-white transition-all cursor-pointer"
+              >
+                Load more
+              </button>
+            )}
+
+            {/* Full Page Handler (Pagination Pill Bar) */}
+            {totalPages > 1 && (
+              <div className="card-soft flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-xs">
+                {/* Previous Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaginationMode('paged');
+                    handlePageChange(currentPage - 1);
+                  }}
+                  disabled={currentPage === 1}
+                  className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${currentPage === 1
+                      ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                      : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  title="Previous page"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <span>Prev</span>
+                </button>
+
+                {/* Numbered Page Buttons */}
+                <div className="flex items-center gap-1">
+                  {getPageNumbers(currentPage, totalPages).map((p, idx) => {
+                    if (p === '...') {
+                      return (
+                        <span key={`ellipsis-${idx}`} className="px-2 text-xs text-slate-400">
+                          ...
+                        </span>
+                      );
+                    }
+                    const pageNum = Number(p);
+                    const isActive = pageNum === currentPage && paginationMode === 'paged';
+                    return (
+                      <button
+                        key={`page-${pageNum}`}
+                        type="button"
+                        onClick={() => {
+                          setPaginationMode('paged');
+                          handlePageChange(pageNum);
+                        }}
+                        className={`h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive
+                            ? 'bg-[#0a3871] text-white shadow-xs'
+                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
+                          }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPaginationMode('paged');
+                    handlePageChange(currentPage + 1);
+                  }}
+                  disabled={currentPage === totalPages}
+                  className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${currentPage === totalPages
+                      ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                      : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                    }`}
+                  title="Next page"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+
+                {/* Per Page Selector */}
+                <div className="ml-2 flex items-center gap-1.5 text-xs text-slate-500 border-l border-slate-200 pl-3">
+                  <span className="text-[11px] font-medium hidden sm:inline">Per page:</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setCurrentPage(1);
+                      setPaginationMode('paged');
+                    }}
+                    className="rounded-xl border border-slate-200 bg-slate-50/80 px-2 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-[#0a3871] cursor-pointer"
+                  >
+                    <option value={6}>6</option>
+                    <option value={9}>9</option>
+                    <option value={12}>12</option>
+                    <option value={18}>18</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </main>
 
-      {/* Lightbox / Video Preview Modal */}
+      {/* ── High-Resolution Lightbox / Video Modal ── */}
       {activeModalItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
@@ -374,14 +780,16 @@ export default function PublicGalleryPage() {
           >
             <div className="flex items-center justify-between border-b border-slate-100 p-4">
               <div>
-                <span className="rounded-md bg-[#003580]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[#003580]">
+                <span className="rounded-md bg-[#0a3871]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0a3871]">
                   {activeModalItem.album}
                 </span>
-                <h3 className="mt-1 text-base font-bold text-slate-900">{activeModalItem.title}</h3>
+                <h3 className="mt-1 font-fraunces text-base font-bold text-slate-900">
+                  {activeModalItem.title}
+                </h3>
               </div>
               <button
                 onClick={() => setActiveModalItem(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -415,17 +823,31 @@ export default function PublicGalleryPage() {
                   {activeModalItem.date || 'Recently'}
                 </span>
               </div>
-              <button
-                onClick={() => setActiveModalItem(null)}
-                className="rounded-lg bg-[#003580] px-4 py-1.5 text-xs font-semibold text-white shadow-xs"
-              >
-                Close Preview
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (navigator.clipboard) {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success('Gallery album link copied!');
+                    }
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  Share
+                </button>
+                <button
+                  onClick={() => setActiveModalItem(null)}
+                  className="rounded-lg bg-[#0a3871] px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[#072a56] transition-colors cursor-pointer"
+                >
+                  Close Preview
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* RAG Copilot Assistant */}
       <ChatBot />
     </div>
   );
