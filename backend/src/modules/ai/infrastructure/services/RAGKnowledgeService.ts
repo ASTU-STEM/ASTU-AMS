@@ -318,6 +318,20 @@ export class RAGKnowledgeService {
       };
     }
 
+    const lowQ = q.toLowerCase();
+    if (['hi', 'hello', 'hey', 'greetings'].includes(lowQ) || lowQ.startsWith('hello ') || lowQ.startsWith('hi ') || lowQ.startsWith('hey ') || lowQ.includes('good morning') || lowQ.includes('good afternoon')) {
+      return {
+        response: 'Hello! 👋 I am ASTU AI, the official assistant for Adama Science & Technology University.\n\nI can assist you with:\n• 📄 Requesting official transcripts and academic documents\n• 💼 Browsing jobs and verified employer vacancies\n• 📊 Graduate employment telemetry and tracer studies\n• 📋 Registering as alumni, student, or partner employer\n• 📍 Campus location, research centers, and departments\n\nHow can I help you today?',
+        isGrounded: true,
+        citations: [],
+        actions: [
+          { label: 'Register on Portal', route: '/register' },
+          { label: 'Official Notices', route: '/announcements' },
+        ],
+        retrievedChunksCount: 0,
+      };
+    }
+
     const chunks = await this.searchKnowledge(q, {
       maxResults: 3,
       minScore: options.targetDocumentId ? 0.08 : 0.14,
@@ -327,7 +341,6 @@ export class RAGKnowledgeService {
 
     // Determine relevant action links based on user query
     const actions: ActionItem[] = [];
-    const lowQ = q.toLowerCase();
     if (lowQ.includes('transcript') || lowQ.includes('degree') || lowQ.includes('document') || lowQ.includes('medium')) {
       actions.push({ label: 'Document Services', route: '/info/alumni-portal' });
     }
@@ -429,6 +442,15 @@ ${contextText}`;
     };
   }
 
+  private static formatGroundedText(raw: string): string {
+    return (raw || '')
+      .replace(/^#+\s*/gm, '')
+      .replace(/(?<=\S)\s*•\s*/g, '\n• ')
+      .replace(/(?<=\S)\s+(\d+\.\s+)/g, '\n$1')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
   /**
    * Intelligently synthesize a direct, grounded answer from retrieved chunks
    * when an external LLM is offline, unconfigured, or times out.
@@ -458,7 +480,7 @@ ${contextText}`;
           const endIdx = content.indexOf('Privacy test note', idx41);
           const block = endIdx !== -1 ? content.slice(idx41, endIdx) : content.slice(idx41, idx41 + 400);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle} - Section 4.1):\n\n` +
-            block.replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -469,7 +491,7 @@ ${contextText}`;
           const endIdx = content.search(/6\.\s+Example Support/i);
           const block = endIdx !== -1 ? content.slice(idx5, endIdx) : content.slice(idx5, idx5 + 500);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle} - Section 5):\n\n` +
-            block.replace(/\s*•\s*/g, '\n• ').replace(/\n{3,}/g, '\n\n').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -494,7 +516,7 @@ ${contextText}`;
           const idxEnd = content.indexOf('4.1', idx4);
           const block = idxEnd !== -1 ? content.slice(idx4, idxEnd) : content.slice(idx4, idx4 + 400);
           return `Based on verified ASTU documentation (${chunk.documentTitle} - Section 4):\n\n` +
-            block.replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -505,7 +527,7 @@ ${contextText}`;
         if (progIdx !== -1) {
           const block = content.slice(progIdx, progIdx + 1200);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle}):\n\n` +
-            block.replace(/^#+\s*/gm, '').replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -515,7 +537,7 @@ ${contextText}`;
         if (transcriptIdx !== -1) {
           const block = content.slice(transcriptIdx, transcriptIdx + 1200);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle}):\n\n` +
-            block.replace(/^#+\s*/gm, '').replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -533,7 +555,7 @@ ${contextText}`;
         if (locIdx !== -1) {
           const block = content.slice(locIdx, locIdx + 1000);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle}):\n\n` +
-            block.replace(/^#+\s*/gm, '').replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -544,7 +566,7 @@ ${contextText}`;
         if (regIdx !== -1) {
           const block = content.slice(regIdx, regIdx + 1000);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle}):\n\n` +
-            block.replace(/^#+\s*/gm, '').replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -555,7 +577,7 @@ ${contextText}`;
         if (jobIdx !== -1) {
           const block = content.slice(jobIdx, jobIdx + 1000);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle}):\n\n` +
-            block.replace(/^#+\s*/gm, '').replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
 
@@ -566,7 +588,7 @@ ${contextText}`;
         if (tracerIdx !== -1) {
           const block = content.slice(tracerIdx, tracerIdx + 1000);
           return `Based on verified ASTU institutional documentation (${chunk.documentTitle}):\n\n` +
-            block.replace(/^#+\s*/gm, '').replace(/\s*•\s*/g, '\n• ').trim();
+            this.formatGroundedText(block);
         }
       }
     }
@@ -612,14 +634,7 @@ ${contextText}`;
       return `Based on verified ASTU documentation (${selectedDoc}):\n\nThis specific document does not contain verified information answering "${query}". Please check "All Published & Draft Documents" in the target document selector or consult official ASTU channels.`;
     }
 
-    const formatted = bestBlock
-      .replace(/^#{1,4}\s+/gm, '')
-      .replace(/(?<=\S)\s*#{1,4}\s+/g, '\n\n')
-      .replace(/\s*•\s*/g, '\n• ')
-      .replace(/(?<=\s|^)(\d+\.)\s+(?=[A-Z])/g, '\n$1 ')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
-
+    const formatted = this.formatGroundedText(bestBlock);
     return `Based on verified ASTU institutional documentation (${selectedDoc}):\n\n${formatted}`;
   }
 
