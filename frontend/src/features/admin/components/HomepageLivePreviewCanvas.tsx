@@ -577,7 +577,7 @@ export default function HomepageLivePreviewCanvas({
               {campusLifeHeaders.title || 'Campus Life, Facilities, Events, and Galleries'}
             </h2>
             <p className="text-xs text-slate-500 mt-1 max-w-xl mx-auto">
-              {campusLifeHeaders.description || 'A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.'}
+              {campusLifeHeaders.description || 'A public gateway to institutional experiences across ASTU: research facilities, alumni reunions, career expos, campus innovations, and heritage galleries.'}
             </p>
           </div>
 

@@ -285,7 +285,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   const [campusLifeHeaders, setCampusLifeHeaders] = useState({
     eyebrow: 'Explore Life At ASTU',
     title: 'Campus Life, Facilities, Events, and Galleries',
-    description: 'A public gateway for the same institutional experiences AAU highlights: events, facilities, campus activities, media galleries, and services.',
+    description: 'A public gateway to institutional experiences across ASTU: research facilities, alumni reunions, career expos, campus innovations, and heritage galleries.',
   });
   const [campusLife, setCampusLife] = useState<CampusLifeCard[]>(initialCampusLife);
   const [campuses, setCampuses] = useState<Campus[]>(initialCampuses);
