@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ExternalLink,
   Globe,
+  GraduationCap,
   Handshake,
   LineChart,
   ShieldCheck,
@@ -2273,61 +2274,79 @@ export default function HomePage() {
                         navigate(mainStory.link || `/stories/${mainStory.id || 'S-001'}`);
                       }
                     }}
-                    className="group relative lg:col-span-7 flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                    className="group relative lg:col-span-7 flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs hover:shadow-xl hover:border-[#003580]/40 transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
                   >
-                    {/* Top Image: object-top prevents portrait cropping */}
-                    <div className="relative w-full aspect-[16/11] sm:aspect-[16/10] bg-slate-900 overflow-hidden">
-                      <img
-                        src={mainStory.img || mainStory.image || arcImage}
-                        alt={mainStory.name || "Alumni story"}
-                        className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
-                        onError={handleImageError}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
-                      
-                      {/* Floating Badges */}
-                      <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#003580] shadow-xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse" />
-                        <span>FEATURED ALUMNA</span>
+                    <div>
+                      {/* Top Image: object-[68%_18%] perfectly centers Dr. Ruth's face and eliminates the orange wall void */}
+                      <div className="relative w-full h-72 sm:h-80 bg-slate-900 overflow-hidden">
+                        <img
+                          src={mainStory.img || mainStory.image || arcImage}
+                          alt={mainStory.name || "Alumni story"}
+                          className="h-full w-full object-cover object-[68%_18%] transition-transform duration-700 ease-out group-hover:scale-105"
+                          onError={handleImageError}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/15 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300" />
+                        
+                        {/* Floating Badges */}
+                        <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur-md px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#003580] shadow-xs">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse" />
+                          <span>FEATURED ALUMNA</span>
+                        </div>
+
+                        <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-slate-950/70 backdrop-blur-md px-3 py-1 text-[11px] font-semibold text-white shadow-xs">
+                          <span>{mainStory.graduationYear || "Class of 2018"}</span>
+                        </div>
+
+                        {/* Department Badge on Image Base */}
+                        <div className="absolute bottom-4 left-5 right-5 z-10 flex items-center justify-between">
+                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-black/55 backdrop-blur-md px-3 py-1 text-xs font-medium text-white/95">
+                            <GraduationCap className="h-3.5 w-3.5 text-amber-400" />
+                            <span>{mainStory.department || "Computer Science & Engineering"}</span>
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-[10px] font-mono font-bold text-white shadow-xs">
-                        <span>{mainStory.graduationYear || "Class of 2018"}</span>
+                      {/* Card Content & Narrative */}
+                      <div className="p-6 sm:p-8">
+                        {/* Editorial Pull-Quote */}
+                        <div className="relative pl-5 border-l-2 border-[#C8102E]">
+                          <Quote className="h-5 w-5 text-[#C8102E]/60 absolute -top-1 -left-2.5 bg-white py-0.5" />
+                          <p className="font-fraunces text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors duration-200 leading-relaxed">
+                            "{mainStory.story || mainStory.text || mainStory.description}"
+                          </p>
+                        </div>
+
+                        {/* Dual Milestone Highlights */}
+                        <div className="mt-5 flex flex-wrap items-center gap-2">
+                          <div className="inline-flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200/80 px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-xs">
+                            <Sparkles className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                            <span>18 Applied Machine Learning Publications</span>
+                          </div>
+                          <div className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 border border-blue-200/80 px-3 py-1.5 text-xs font-semibold text-[#003580] shadow-xs">
+                            <ShieldCheck className="h-3.5 w-3.5 text-[#003580] shrink-0" />
+                            <span>ASTU AI Research Mentor</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Card Content & Narrative */}
-                    <div className="p-7 sm:p-9 flex flex-col justify-between flex-1">
+                    {/* Card Footer */}
+                    <div className="mx-6 sm:mx-8 py-5 border-t border-slate-100 flex items-center justify-between">
                       <div>
-                        <Quote className="h-8 w-8 text-[#C8102E] shrink-0 mb-3 opacity-90" aria-hidden="true" />
-                        <p className="font-fraunces text-xl sm:text-2xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors duration-200 leading-snug">
-                          "{mainStory.story || mainStory.text || mainStory.description}"
-                        </p>
-
-                        {/* Creative Milestone Highlight */}
-                        <div className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-50/80 border border-blue-200/60 px-3.5 py-2 text-xs font-semibold text-[#003580]">
-                          <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                          <span>18 Applied Machine Learning Publications • AI Research Mentor</span>
-                        </div>
+                        <h4 className="font-bold text-base text-[#003580] group-hover:text-[#C8102E] transition-colors leading-tight">
+                          {mainStory.name || mainStory.alumniName}
+                        </h4>
+                        <p className="text-xs text-slate-500 mt-0.5 font-medium">{mainStory.role || mainStory.company}</p>
                       </div>
-
-                      <div className="mt-8 pt-5 border-t border-slate-100 flex items-center justify-between">
-                        <div>
-                          <h4 className="font-bold text-base text-[#003580] group-hover:text-[#C8102E] transition-colors">
-                            {mainStory.name || mainStory.alumniName}
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">{mainStory.role || mainStory.department}</p>
-                        </div>
-                        <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#003580] group-hover:text-[#C8102E] transition-colors">
-                          <span>Read story</span>
-                          <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
-                        </span>
-                      </div>
+                      <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#003580] text-white text-xs font-bold shadow-xs group-hover:bg-[#C8102E] transition-all">
+                        <span>Read story</span>
+                        <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
+                      </span>
                     </div>
                   </div>
 
-                  {/* Right Column (5 cols): 2 Stacked Cards matching original layout */}
-                  <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
+                  {/* Right Column (5 cols): 2 Balanced Horizontal Media Spotlight Cards */}
+                  <div className="lg:col-span-5 flex flex-col gap-5 justify-between">
                     {[sideStory1, sideStory2].map((story: any, sIdx: number) => (
                       <div
                         key={story.id || sIdx}
@@ -2340,45 +2359,56 @@ export default function HomePage() {
                             navigate(story.link || `/stories/${story.id || `S-00${sIdx + 2}`}`);
                           }
                         }}
-                        className="group relative flex-1 flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 hover:border-[#003580]/30 shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
+                        className="group relative flex-1 flex flex-col sm:flex-row overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 gap-5 hover:border-[#003580]/40 shadow-xs hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#003580]/20"
                       >
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C8102E]">
-                              ALUMNI SPOTLIGHT
-                            </span>
-                            <span className="text-[10px] font-mono font-medium text-slate-400">
-                              {story.graduationYear || (sIdx === 0 ? "Class of '16" : "Class of '19")}
-                            </span>
-                          </div>
-                          <h4 className="font-fraunces text-lg font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
-                            {story.name || story.alumniName}
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5 font-medium">{story.role || story.department}</p>
-
-                          {/* Content Row: Square Thumbnail on Left, Narrative Text on Right */}
-                          <div className="mt-4 flex items-start gap-4">
-                            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-slate-900 overflow-hidden shrink-0 shadow-xs">
-                              <img
-                                src={story.img || story.image || (sIdx === 0 ? electricLabs : stateM)}
-                                alt={story.name || "Alumni story"}
-                                className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-108"
-                                onError={handleImageError}
-                              />
-                            </div>
-                            <p className="flex-1 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3 sm:line-clamp-4">
-                              {story.story || story.text || story.description}
-                            </p>
+                        {/* Left: Full-height sleek portrait */}
+                        <div className="relative w-full sm:w-36 md:w-40 sm:min-w-[140px] h-48 sm:h-auto rounded-xl bg-slate-900 overflow-hidden shrink-0 shadow-xs self-stretch">
+                          <img
+                            src={story.img || story.image || (sIdx === 0 ? electricLabs : stateM)}
+                            alt={story.name || "Alumni story"}
+                            className="h-full w-full object-cover object-[center_20%] transition-transform duration-700 ease-out group-hover:scale-108"
+                            onError={handleImageError}
+                          />
+                          <div className="absolute top-2.5 left-2.5 rounded-full bg-slate-950/75 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-xs">
+                            {story.graduationYear || (sIdx === 0 ? "Class of 2016" : "Class of 2019")}
                           </div>
                         </div>
 
-                        {/* Card Footer */}
-                        <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-xs font-semibold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
-                            <span>Read story</span>
-                            <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ASTU</span>
+                        {/* Right: Info & Story Narrative */}
+                        <div className="flex-1 flex flex-col justify-between min-w-0">
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]" />
+                              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#C8102E]">
+                                ALUMNI SPOTLIGHT
+                              </span>
+                            </div>
+
+                            <h4 className="font-fraunces text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                              {story.name || story.alumniName}
+                            </h4>
+                            <p className="text-xs font-semibold text-slate-500 mt-1 line-clamp-1">
+                              {story.role || story.department}
+                            </p>
+
+                            <p className="mt-2.5 text-xs sm:text-[13px] text-slate-600 leading-relaxed line-clamp-3">
+                              "{story.story || story.text || story.description}"
+                            </p>
+
+                            <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                              <BookOpen className="h-3 w-3 text-slate-400" />
+                              <span>{story.department || "Engineering"}</span>
+                            </div>
+                          </div>
+
+                          {/* Card Footer */}
+                          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
+                              <span>Read story</span>
+                              <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ASTU</span>
+                          </div>
                         </div>
                       </div>
                     ))}
