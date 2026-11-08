@@ -63085,45 +63085,7 @@
           "footerInstitutionalResearchText": "Institutional Research",
           "footerInstitutionalResearchLink": "/info/overview"
         },
-        "eventsPage": {
-          "slug": "events",
-          "title": "Events & Activities",
-          "subtitle": "Stay informed about upcoming ASTU events, alumni reunions, career fairs, hackathons, and campus activities.",
-          "iconName": "CalendarDays",
-          "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1800&q=80",
-          "sections": [
-            {
-              "id": "EV-1",
-              "heading": "ASTU Alumni Carnival 2026",
-              "body": "April 25–26, 2026 — Main Campus. A homecoming event uniting graduates, academic staff, current students, and stakeholders to celebrate ASTU's legacy and achievements.",
-              "active": true
-            },
-            {
-              "id": "EV-2",
-              "heading": "Career Fairs & Recruitment Days",
-              "body": "Bi-annual career fairs bringing 50+ employer partners on campus for direct recruitment, internship placements, and graduate trainee programs.",
-              "active": true
-            },
-            {
-              "id": "EV-3",
-              "heading": "DAAD Alumni Workshop",
-              "body": "March 2026 — ASTU Research Center. A five-day workshop hosted in collaboration with the German Academic Exchange Service (DAAD) for research and academic networking.",
-              "active": true
-            },
-            {
-              "id": "EV-4",
-              "heading": "Student Hackathons & Innovation Challenges",
-              "body": "Competitive coding challenges, hardware hackathons, and design sprints where student teams solve real-world engineering problems in 24–48 hours.",
-              "active": true
-            },
-            {
-              "id": "EV-5",
-              "heading": "Cultural & Sports Events",
-              "body": "Inter-university sports competitions, cultural festivals, ASTU talent shows, and graduation ceremonies celebrating academic milestones.",
-              "active": true
-            }
-          ]
-        },
+        "testimonials": [],
         "detailPages": {
           "overview": {
             "slug": "overview",
@@ -64461,9 +64423,48 @@
           "contactEmail": "irccd@astu.edu.et",
           "contactPhone": "+251-221-110000",
           "contactAddress": "Adama Science and Technology University, Adama, Oromia, Ethiopia"
+        },
+        "eventsPage": {
+          "slug": "events",
+          "title": "Events & Activities",
+          "subtitle": "Stay informed about upcoming ASTU events, alumni reunions, career fairs, hackathons, and campus activities.",
+          "iconName": "CalendarDays",
+          "image": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1800&q=80",
+          "sections": [
+            {
+              "id": "EV-1",
+              "heading": "ASTU Alumni Carnival 2026",
+              "body": "April 25–26, 2026 — Main Campus. A homecoming event uniting graduates, academic staff, current students, and stakeholders to celebrate ASTU's legacy and achievements.",
+              "active": true
+            },
+            {
+              "id": "EV-2",
+              "heading": "Career Fairs & Recruitment Days",
+              "body": "Bi-annual career fairs bringing 50+ employer partners on campus for direct recruitment, internship placements, and graduate trainee programs.",
+              "active": true
+            },
+            {
+              "id": "EV-3",
+              "heading": "DAAD Alumni Workshop",
+              "body": "March 2026 — ASTU Research Center. A five-day workshop hosted in collaboration with the German Academic Exchange Service (DAAD) for research and academic networking.",
+              "active": true
+            },
+            {
+              "id": "EV-4",
+              "heading": "Student Hackathons & Innovation Challenges",
+              "body": "Competitive coding challenges, hardware hackathons, and design sprints where student teams solve real-world engineering problems in 24–48 hours.",
+              "active": true
+            },
+            {
+              "id": "EV-5",
+              "heading": "Cultural & Sports Events",
+              "body": "Inter-university sports competitions, cultural festivals, ASTU talent shows, and graduation ceremonies celebrating academic milestones.",
+              "active": true
+            }
+          ]
         }
       },
-      "updatedAt": "2026-11-08T23:06:40.836Z",
+      "updatedAt": "2026-11-08T23:24:02.171Z",
       "updatedBy": "CMS Admin"
     }
   ],
