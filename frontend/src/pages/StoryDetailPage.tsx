@@ -52,8 +52,34 @@ export default function StoryDetailPage() {
     };
   }, [id]);
 
-  const allStories = storiesService.getStories();
-  const relatedStories = allStories.filter((s) => s.id !== story?.id).slice(0, 4);
+  const allStories = useMemo(() => storiesService.getStories(), []);
+  const relatedStories = useMemo(() => allStories.filter((s) => s.id !== story?.id).slice(0, 4), [allStories, story]);
+
+  // Page Handler: Previous and Next Story computation
+  const { prevStory, nextStory, currentIndex, totalStories } = useMemo(() => {
+    if (!allStories.length || !story) return { prevStory: null, nextStory: null, currentIndex: -1, totalStories: 0 };
+    const idx = allStories.findIndex((s) => s.id === story.id);
+    return {
+      prevStory: idx > 0 ? allStories[idx - 1] : null,
+      nextStory: idx >= 0 && idx < allStories.length - 1 ? allStories[idx + 1] : null,
+      currentIndex: idx,
+      totalStories: allStories.length,
+    };
+  }, [allStories, story]);
+
+  // Keyboard navigation for Prev/Next story page handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'ArrowLeft' && prevStory) {
+        navigate(`/stories/${encodeURIComponent(prevStory.id)}`);
+      } else if (e.key === 'ArrowRight' && nextStory) {
+        navigate(`/stories/${encodeURIComponent(nextStory.id)}`);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [prevStory, nextStory, navigate]);
 
   const handleShare = () => {
     if (navigator.clipboard) {
@@ -285,19 +311,68 @@ export default function StoryDetailPage() {
               </div>
             </div>
 
-            {/* Bottom Actions Card */}
+            {/* Previous & Next Story Page Handler Navigation Strip */}
+            <div className="pt-6 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {prevStory ? (
+                <Link
+                  to={`/stories/${encodeURIComponent(prevStory.id)}`}
+                  className="group flex flex-col p-4 rounded-xl border border-slate-200 hover:border-[#003580]/40 hover:bg-slate-50 transition-all text-left shadow-xs"
+                >
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5 group-hover:text-[#003580] transition-colors">
+                    <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
+                    <span>Previous Spotlight</span>
+                  </span>
+                  <span className="mt-1.5 text-sm font-bold text-slate-900 group-hover:text-[#003580] line-clamp-1 font-serif">
+                    {prevStory.name}
+                  </span>
+                  <span className="text-[11px] text-slate-500 mt-0.5 truncate">
+                    {prevStory.role}
+                  </span>
+                </Link>
+              ) : (
+                <div />
+              )}
+
+              {nextStory ? (
+                <Link
+                  to={`/stories/${encodeURIComponent(nextStory.id)}`}
+                  className="group flex flex-col p-4 rounded-xl border border-slate-200 hover:border-[#003580]/40 hover:bg-slate-50 transition-all text-right shadow-xs sm:items-end"
+                >
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5 group-hover:text-[#003580] transition-colors">
+                    <span>Next Spotlight</span>
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                  </span>
+                  <span className="mt-1.5 text-sm font-bold text-slate-900 group-hover:text-[#003580] line-clamp-1 font-serif">
+                    {nextStory.name}
+                  </span>
+                  <span className="text-[11px] text-slate-500 mt-0.5 truncate">
+                    {nextStory.role}
+                  </span>
+                </Link>
+              ) : (
+                <div />
+              )}
+            </div>
+
+            {/* Bottom Actions Card & Page Counter */}
             <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
               <button
                 onClick={() => navigate('/info/alumni-stories')}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50 cursor-pointer"
               >
                 <ArrowLeft className="h-4 w-4 text-[#003580]" />
                 All Success Stories
               </button>
 
+              {currentIndex >= 0 && totalStories > 0 && (
+                <span className="text-xs text-slate-500 font-medium">
+                  Story {currentIndex + 1} of {totalStories}
+                </span>
+              )}
+
               <button
                 onClick={() => navigate('/login')}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#003580] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110"
+                className="inline-flex items-center gap-2 rounded-lg bg-[#003580] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:brightness-110 cursor-pointer"
               >
                 Connect on ASTU-AMS
                 <ChevronRight className="h-4 w-4" />
