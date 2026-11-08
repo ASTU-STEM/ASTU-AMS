@@ -87,19 +87,36 @@ export class AIController {
   static async publicChat(req: Request, res: Response, next: NextFunction) {
     try {
       const { message } = req.body;
-      const result = await PublicKnowledgeAssistantService.processPublicMessage(message || '');
-      const responseText = typeof result === 'string' ? result : ((result as any)?.response || '');
-      const citations = typeof result === 'string' ? [] : ((result as any)?.citations || []);
-      const actions = typeof result === 'string' ? [] : ((result as any)?.actions || []);
+      let fullText = '';
+      let citations: any[] = [];
+      let actions: any[] = [];
+
+      try {
+        const ragResult = await RAGKnowledgeService.queryAndGenerate(message || '');
+        if (ragResult && ragResult.response) {
+          fullText = ragResult.response;
+          citations = ragResult.citations || [];
+          actions = ragResult.actions || [];
+        }
+      } catch (ragErr) {
+        console.warn('RAG query error in publicChat:', ragErr);
+      }
+
+      if (!fullText) {
+        const result = await PublicKnowledgeAssistantService.processPublicMessage(message || '');
+        fullText = typeof result === 'string' ? result : ((result as any)?.response || '');
+      }
+
       return sendSuccess(res, 'Public chat response generated.', {
-        response: responseText,
+        response: fullText,
         citations,
         actions,
       });
     } catch (err: any) {
       console.error('AIController.publicChat EXCEPTION:', err?.stack || err);
+      const fallbackText = await PublicKnowledgeAssistantService.processPublicMessage(req.body?.message || '');
       return sendSuccess(res, 'Public chat response generated.', {
-        response: `[Backend Exception]: ${err?.message || err}`,
+        response: fallbackText,
         citations: [],
         actions: [],
       });
@@ -114,7 +131,6 @@ export class AIController {
       res.setHeader('Cache-Control', 'no-cache, no-transform');
       res.setHeader('Connection', 'keep-alive');
       res.setHeader('X-Accel-Buffering', 'no');
-      res.setHeader('Transfer-Encoding', 'chunked');
       res.socket?.setNoDelay(true);
       res.flushHeaders?.();
 
@@ -129,13 +145,13 @@ export class AIController {
 
       try {
         const ragResult = await RAGKnowledgeService.queryAndGenerate(message || '');
-        if (ragResult && ragResult.isGrounded && ragResult.response) {
+        if (ragResult && ragResult.response) {
           fullText = ragResult.response;
           citations = ragResult.citations || [];
           actions = ragResult.actions || [];
         }
       } catch (ragErr) {
-        // Fall back to public assistant
+        console.warn('RAG query error in publicChatStream:', ragErr);
       }
 
       if (!fullText) {
@@ -171,7 +187,7 @@ export class AIController {
         if (typeof (res as any).flush === 'function') {
           (res as any).flush();
         }
-        await new Promise((resolve) => setTimeout(resolve, 25));
+        await new Promise((resolve) => setTimeout(resolve, 20));
       }
 
       if (!clientDisconnected && !req.destroyed) {
@@ -190,7 +206,8 @@ export class AIController {
     } catch (err: any) {
       console.error('AIController.publicChatStream error:', err?.message || err);
       if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ done: true, delta: `[Error: ${err?.message || 'Streaming failed'}]`, citations: [], actions: [] })}\n\n`);
+        const fallbackText = await PublicKnowledgeAssistantService.processPublicMessage(req.body?.message || '');
+        res.write(`data: ${JSON.stringify({ done: true, delta: fallbackText, citations: [], actions: [] })}\n\n`);
         res.end();
       }
     }
