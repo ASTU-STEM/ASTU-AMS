@@ -62126,6 +62126,331 @@
       "id": "hc-main",
       "key": "main",
       "data": {
+        "welcomeMessage": "Welcome to the ASTU Alumni Management System — Connecting graduates, employers, and departments for longitudinal career tracking and institutional excellence.",
+        "welcomeEnabled": true,
+        "heroBadge": "ASTU Alumni Management System",
+        "heroButtons": {
+          "primaryText": "Alumni Portal",
+          "primaryLink": "/info/alumni-portal",
+          "secondaryText": "Employer Partnership",
+          "secondaryLink": "/info/employer-portal"
+        },
+        "heroSlides": [
+          {
+            "id": "HS-1",
+            "image": "/images/astu-building.jpg",
+            "tagline": "Quality Assurance & Accreditation",
+            "title": "Connecting ASTU's Excellence to the Global Industry",
+            "description": "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.",
+            "active": true
+          },
+          {
+            "id": "HS-2",
+            "image": "/images/campus-2.jpeg",
+            "tagline": "Enterprise Networking & Placement",
+            "title": "Empowering ASTU Graduates Through Innovation, Skills, and Modern Workplace Opportunities",
+            "description": "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.",
+            "active": true
+          },
+          {
+            "id": "HS-3",
+            "image": "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80",
+            "tagline": "Academic Innovation & Tracer Feedback",
+            "title": "Coordinating Strategic Tracer Studies to Identify Workforce Trends and Skill Gaps",
+            "description": "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, supporting data-driven curriculum improvements, strengthening industry collaboration, enhancing graduate employability, and contributing to successful university accreditation and continuous quality assurance outcomes.",
+            "active": true
+          }
+        ],
+        "impactHeaders": {
+          "eyebrow": "ASTU IMPACT AT A GLANCE",
+          "title": "Connecting Academia to Industry",
+          "description": "Building a stronger connection between ASTU graduates, employers, research and career opportunities."
+        },
+        "impactStats": [
+          {
+            "id": "IS-1",
+            "label": "Registered Alumni Members",
+            "value": "1,238",
+            "suffix": "+",
+            "detail": "Registered in the alumni network across all batches",
+            "icon": "Users",
+            "action": "View Network",
+            "target": "/register",
+            "active": true
+          },
+          {
+            "id": "IS-2",
+            "label": "Fields of Study",
+            "value": "5",
+            "suffix": " Major Areas",
+            "detail": "Applied Engineering, Computing, Applied Sciences & Technology",
+            "icon": "BookOpen",
+            "action": "Explore Programs",
+            "target": "/info/overview",
+            "active": true
+          },
+          {
+            "id": "IS-3",
+            "label": "Corporate Partners",
+            "value": "500",
+            "suffix": "+",
+            "detail": "Hiring, internships, and biennial curriculum feedback",
+            "icon": "Building2",
+            "action": "Meet Partners",
+            "target": "/partners",
+            "active": true
+          },
+          {
+            "id": "IS-4",
+            "label": "Employment Rate",
+            "value": "87",
+            "suffix": "%",
+            "detail": "Tracked across 6, 12, and 24-month post-graduation longitudinal tracer cycles",
+            "icon": "LineChart",
+            "action": "View Outcomes",
+            "target": "/info/impact-numbers",
+            "active": true
+          },
+          {
+            "id": "IS-5",
+            "label": "Digital Requests",
+            "value": "6K",
+            "suffix": "+",
+            "detail": "Transcript, credential verification, and degree certificate requests",
+            "icon": "FileCheck2",
+            "action": "Registrar Hub",
+            "target": "/info/registrar-portal",
+            "active": true
+          }
+        ],
+        "portalsHeaders": {
+          "eyebrow": "Get Started",
+          "title": "How ASTU-AMS Works",
+          "description": "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps.",
+          "ctaText": "Get Started Today",
+          "ctaLink": "/login"
+        },
+        "portals": [
+          {
+            "id": "SP-1",
+            "title": "CREATE YOUR PROFILE",
+            "icon": "CircleUserRound",
+            "points": [
+              "Build your verified professional identity and showcase your education, skills and experience.",
+              "Access verified alumni directory, job listings, and career events."
+            ],
+            "cta": "Start Profile",
+            "route": "/register",
+            "active": true,
+            "step": 1,
+            "color": "from-blue-900 to-indigo-900",
+            "iconBg": "bg-blue-50 text-blue-900 border-blue-200/60",
+            "description": "Build your verified professional identity and showcase your education, skills and experience."
+          },
+          {
+            "id": "SP-2",
+            "title": "DISCOVER OPPORTUNITIES",
+            "icon": "Search",
+            "points": [
+              "Find jobs, internships, mentorship and career opportunities across verified partner firms.",
+              "Connect directly with hiring engineering managers and alumni founders."
+            ],
+            "cta": "Explore Opportunities",
+            "route": "/info/employer-portal",
+            "active": true,
+            "step": 2,
+            "color": "from-red-700 to-rose-900",
+            "iconBg": "bg-red-50 text-red-700 border-red-200/60",
+            "description": "Find jobs, internships, mentorship and career opportunities across premier tech and engineering employers."
+          },
+          {
+            "id": "SP-3",
+            "title": "CONNECT & NETWORK",
+            "icon": "Users",
+            "points": [
+              "Join your departmental alumni chapter, attend events, and network with industry leaders worldwide.",
+              "Participate in high-impact mentorship tracks and regional symposiums."
+            ],
+            "cta": "Join Network",
+            "route": "/login",
+            "active": true,
+            "step": 3,
+            "color": "from-emerald-700 to-teal-900",
+            "iconBg": "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+            "description": "Join your departmental alumni chapter, attend events, and network with industry leaders worldwide."
+          },
+          {
+            "id": "SP-4",
+            "title": "GROW & GIVE BACK",
+            "icon": "Trophy",
+            "points": [
+              "Share employer feedback through tracer studies to help shape ASTU's curricula.",
+              "Mentor students, sponsor laboratory projects, and celebrate university milestones."
+            ],
+            "cta": "Take Tracer Survey",
+            "route": "/info/alumni-portal",
+            "active": true,
+            "step": 4,
+            "color": "from-amber-700 to-orange-900",
+            "iconBg": "bg-amber-50 text-amber-700 border-amber-200/60",
+            "description": "Share employer feedback through tracer studies to help shape ASTU's curricula and support next generations."
+          }
+        ],
+        "campusLifeHeaders": {
+          "eyebrow": "Explore Life At ASTU",
+          "title": "Life at ASTU",
+          "description": "A public gateway to institutional experiences across ASTU: research facilities, alumni reunions, career expos, campus innovations, and heritage galleries."
+        },
+        "campusLife": [
+          {
+            "id": "CL-1",
+            "title": "Dynamic Campus Events & Activities",
+            "campus": "Main Campus",
+            "description": "Annual alumni homecoming, regional conferences, tech talks, and departmental project expos that bridge academia and industry.",
+            "image": "/images/campus-2.jpeg",
+            "action": "View Events",
+            "link": "/events",
+            "active": true
+          },
+          {
+            "id": "CL-2",
+            "title": "World-Class Laboratories & Facilities",
+            "campus": "Innovation Spaces",
+            "description": "12+ specialized engineering laboratories and research centers equipped for prototyping, hardware testing, and student research.",
+            "image": "/images/electriclabs.jpeg",
+            "action": "Explore Facilities",
+            "link": "/info/facilities",
+            "active": true
+          },
+          {
+            "id": "CL-3",
+            "title": "Institutional Research & Heritage Gallery",
+            "campus": "Campus Gallery",
+            "description": "Explore 30+ years of university history, campus photography, alumni achievement awards, and scientific breakthrough archives.",
+            "image": "/images/arc.jpg",
+            "action": "View Gallery",
+            "link": "/gallery",
+            "active": true
+          }
+        ],
+        "campuses": [
+          {
+            "id": "CM-1",
+            "name": "Main Campus",
+            "description": "Central hub for alumni services, registrar workflows, and institutional engagement.",
+            "image": "/images/astu-building.jpg",
+            "active": true
+          },
+          {
+            "id": "CM-2",
+            "name": "Engineering Labs",
+            "description": "Applied research, workshops, innovation programs, and industry-linked training.",
+            "image": "/images/electriclabs.jpeg",
+            "active": true
+          },
+          {
+            "id": "CM-3",
+            "name": "Graduation & Events Hall",
+            "description": "Ceremonies, career fairs, alumni awards, and university achievement programs.",
+            "image": "/images/gc7.jpg",
+            "active": true
+          },
+          {
+            "id": "CM-4",
+            "name": "Research Collaboration Center",
+            "description": "Research publications, industry projects, and department KPI evidence.",
+            "image": "/images/arc.jpg",
+            "active": true
+          }
+        ],
+        "industryBridge": {
+          "enabled": true,
+          "eyebrow": "Industry-Campus Bridge",
+          "title": "Nurturing Innovation in Modern Laboratories",
+          "description": "ASTU combines rigorous engineering education with practical lab training. Through ASTU-AMS, graduate outcomes and employer feedback feed directly into curriculum updates.",
+          "stat1Value": "12+",
+          "stat1Label": "Research Centers",
+          "stat2Value": "80+",
+          "stat2Label": "Industry Partners",
+          "buttonText": "Explore Campus Life",
+          "buttonLink": "/info/campus-life",
+          "image": "/images/arc.jpg"
+        },
+        "galleryHeaders": {
+          "eyebrow": "CAMPUS GALLERY",
+          "title": "Campus Life & Moments",
+          "subtitle": "A glimpse of life at ASTU — research, innovation, graduation ceremonies, and alumni milestones.",
+          "buttonText": "View All Gallery",
+          "buttonLink": "/gallery"
+        },
+        "gallery": [
+          {
+            "id": "GI-1",
+            "title": "ASTU Main Campus Architecture",
+            "src": "/images/astu-building.jpg",
+            "active": true
+          },
+          {
+            "id": "GI-2",
+            "title": "Innovation and Collaboration Hub",
+            "src": "/images/campus-2.jpeg",
+            "active": true
+          },
+          {
+            "id": "GI-3",
+            "title": "ASTU Alumni Identity & Legacy",
+            "src": "/images/astu-logo.jpeg",
+            "active": true
+          },
+          {
+            "id": "GI-4",
+            "title": "Applied Robotics and Research Labs",
+            "src": "/images/electriclabs.jpeg",
+            "active": true
+          },
+          {
+            "id": "GI-5",
+            "title": "Commencement Day Celebration",
+            "src": "/images/gc7.jpg",
+            "active": true
+          },
+          {
+            "id": "GI-6",
+            "title": "Applied Research Center Facility",
+            "src": "/images/arc.jpg",
+            "active": true
+          }
+        ],
+        "videos": [
+          {
+            "id": "VI-1",
+            "title": "Career Expo Highlights",
+            "image": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80",
+            "link": "https://www.youtube.com",
+            "active": true
+          },
+          {
+            "id": "VI-2",
+            "title": "Research & Innovation Forum",
+            "image": "/images/arc.jpg",
+            "link": "https://www.youtube.com",
+            "active": true
+          },
+          {
+            "id": "VI-3",
+            "title": "Graduation Ceremony Replay",
+            "image": "/images/gc7.jpg",
+            "link": "https://www.youtube.com",
+            "active": true
+          }
+        ],
+        "eventsHeaders": {
+          "eyebrow": "Events & Workshops",
+          "title": "Upcoming Alumni Events",
+          "description": "Networking, learning, and professional growth opportunities across all ASTU campuses.",
+          "viewAllText": "See All Events →",
+          "viewAllLink": "/info/events"
+        },
         "events": [
           {
             "id": "E-1791400930680",
@@ -62308,12 +62633,457 @@
             "active": true
           }
         ],
-        "eventsHeaders": {
-          "eyebrow": "Events & Workshops",
-          "title": "Upcoming Alumni Events",
-          "description": "Networking, learning, and professional growth opportunities across all ASTU campuses.",
-          "viewAllText": "See All Events →",
-          "viewAllLink": "/info/events"
+        "announcementsHeaders": {
+          "eyebrow": "Announcements",
+          "title": "Official Notices",
+          "subscribeTitle": "Subscribe to official updates",
+          "subscribeDesc": "Receive announcements, events, partner calls, tracer survey reminders, and campus notices directly in your inbox."
+        },
+        "announcements": [
+          {
+            "id": "C-6636",
+            "title": "ASTU Engineering Innovation Summit 2026",
+            "date": "9/9/2026",
+            "type": "Official Announcement",
+            "active": true,
+            "pinned": true,
+            "author": "Content Manager"
+          },
+          {
+            "id": "C-004",
+            "title": "Semester Break: Campus Safety Notice",
+            "date": "6/7/2026",
+            "type": "Official Announcement",
+            "active": true,
+            "pinned": true,
+            "author": "System Admin"
+          },
+          {
+            "id": "C-001",
+            "title": "ASTU Alumni Network: Bridging Generations",
+            "date": "5/28/2026",
+            "type": "post",
+            "active": true,
+            "pinned": true,
+            "author": "Content Manager"
+          },
+          {
+            "id": "C-REAL-001",
+            "title": "ASTU Hosts a Five-Day DAAD Alumni Workshop on Sustainable Water Supply & Environmental Protection",
+            "date": "Mar 7, 2025",
+            "type": "Official Announcement",
+            "active": true,
+            "pinned": true,
+            "author": "ASTU International Relations & Corporate Communication Directorate (IRCCD)"
+          },
+          {
+            "id": "C-REAL-002",
+            "title": "ASTU Alumni Association Inspires Graduating Class with Career Tips!",
+            "date": "Mar 7, 2025",
+            "type": "post",
+            "active": true,
+            "pinned": true,
+            "author": "ASTU Alumni Association & Students Skill Development Office"
+          },
+          {
+            "id": "C-REAL-003",
+            "title": "ASTU Alumni Spotlight: Yohannes Melese, Gold Medalist & Dual-Major Graduate!",
+            "date": "Mar 7, 2025",
+            "type": "post",
+            "active": true,
+            "pinned": true,
+            "author": "ASTU Academic Registrar & Alumni Directorate"
+          },
+          {
+            "id": "C-012",
+            "title": "Semester Break: Campus Safety Notice",
+            "date": "8/26/2026",
+            "type": "Official Announcement",
+            "active": true,
+            "pinned": false,
+            "author": "Content Manager"
+          },
+          {
+            "id": "C-002",
+            "title": "Industry Partnership Week 2026",
+            "date": "8/26/2026",
+            "type": "page",
+            "active": true,
+            "pinned": false,
+            "author": "Content Manager"
+          },
+          {
+            "id": "C-006",
+            "title": "ASTU Research Grant Winners 2026",
+            "date": "5/25/2026",
+            "type": "post",
+            "active": true,
+            "pinned": false,
+            "author": "Content Manager"
+          },
+          {
+            "id": "C-REAL-004",
+            "title": "ASTU Alumni Serving as Model United Nations Secretariats & Global Delegates",
+            "date": "Jan 7, 2025",
+            "type": "Official Announcement",
+            "active": true,
+            "pinned": false,
+            "author": "ASTU Corporate Communication Directorate"
+          }
+        ],
+        "newsHeaders": {
+          "eyebrow": "News & Bulletins",
+          "title": "Latest Campus News"
+        },
+        "newsItems": [
+          {
+            "id": "NW-1",
+            "title": "ASTU Engineering Innovation Summit Highlights",
+            "date": "28 May 2026",
+            "excerpt": "Showcasing cutting-edge technology and student research projects across engineering departments.",
+            "image": "/images/arc.jpg",
+            "active": true
+          },
+          {
+            "id": "NW-2",
+            "title": "Sustainable Energy Research Lab Inauguration",
+            "date": "25 May 2026",
+            "excerpt": "State-of-the-art facility expands applied research opportunities for alumni researchers and graduate teams.",
+            "image": "/images/electriclabs.jpeg",
+            "active": true
+          },
+          {
+            "id": "NW-3",
+            "title": "ASTU Alumni Association Launches Global Mentorship Track",
+            "date": "20 May 2026",
+            "excerpt": "Connecting senior engineering alumni with graduating seniors across East Africa and international tech hubs.",
+            "image": "/images/campus-2.jpeg",
+            "active": true
+          }
+        ],
+        "storiesHeaders": {
+          "eyebrow": "Alumni Spotlight",
+          "title": "Stories of Impact & Leadership",
+          "description": "Meet the remarkable graduates shaping industries, building enterprises, and carrying ASTU's legacy forward worldwide."
+        },
+        "stories": [
+          {
+            "id": "SS-1",
+            "name": "Dr. Ruth Alemu",
+            "role": "AI Research Scientist",
+            "company": "ASTU AI Research Center & Regional Labs",
+            "text": "After graduating from ASTU's Computer Science program, Ruth joined a leading AI research lab and has published 18 applied machine learning papers. She actively mentors current ASTU scholars through the AMS portal.",
+            "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+            "graduationYear": "Class of 2018",
+            "department": "Computer Science & Engineering",
+            "milestone": "AI Research Pioneer",
+            "active": true
+          },
+          {
+            "id": "SS-2",
+            "name": "Yonas Bekele",
+            "role": "Founder & CEO",
+            "company": "GreenGrid Labs Ethiopia",
+            "text": "Inspired by ASTU's renewable energy laboratories, Yonas launched GreenGrid Labs — now delivering clean, decentralized energy infrastructure to over 12 industrial parks in East Africa.",
+            "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+            "graduationYear": "Class of 2016",
+            "department": "Electrical & Power Engineering",
+            "milestone": "CleanTech Pioneer",
+            "active": true
+          },
+          {
+            "id": "SS-3",
+            "name": "Kalkidan Tadesse",
+            "role": "Cloud Platform Lead",
+            "company": "Ethio Telecom Enterprise Cloud",
+            "text": "Kalkidan credits ASTU's hands-on laboratory curriculum for her rapid career trajectory. She now spearheads enterprise cloud migration projects across regional public and private entities.",
+            "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+            "graduationYear": "Class of 2019",
+            "department": "Software Engineering",
+            "milestone": "Cloud Architecture Leader",
+            "active": true
+          },
+          {
+            "id": "SS-4",
+            "name": "Yohannes Melese",
+            "role": "International Technology Delegate & Systems Researcher",
+            "company": "ASTU Advanced Innovation Directorate",
+            "text": "Gold medalist and dual major graduate with a 3.98 CGPA and 47 A+ grades, pioneering regional embedded systems and AI hardware research.",
+            "image": "/images/electriclabs.jpeg",
+            "graduationYear": "Class of 2024",
+            "department": "Dual Major: Electronics & Computing",
+            "milestone": "Dual-Major Gold Medalist",
+            "active": true
+          }
+        ],
+        "partnersHeaders": {
+          "eyebrow": "Our Partners",
+          "title": "Partner Companies & Employers",
+          "description": "Institutional and enterprise partners collaborating on graduate recruitment, technology internships, and applied research."
+        },
+        "partners": [
+          {
+            "id": "PT-1",
+            "name": "Ethio Telecom",
+            "logo": "/images/partners/ethio-telecom.png",
+            "active": true,
+            "industry": "Telecom, Cloud & Fintech",
+            "location": "Addis Ababa & Regional Hubs",
+            "openings": "14+ Graduate Engineering Tracks",
+            "partnershipType": "Strategic",
+            "website": "https://www.ethiotelecom.et",
+            "description": "National telecommunications provider collaborating with ASTU on enterprise cloud engineering, fiber optics, and Telebirr fintech integration.",
+            "contactEmail": "careers@ethiotelecom.et",
+            "featured": true
+          },
+          {
+            "id": "PT-2",
+            "name": "Ethiopian Airlines",
+            "logo": "/images/partners/ethiopian-airlines.svg",
+            "active": true,
+            "industry": "Aviation & Systems Engineering",
+            "location": "Bole, Addis Ababa",
+            "openings": "8 Aviation Cadet & Internship Tracks",
+            "partnershipType": "Strategic",
+            "website": "https://www.ethiopianairlines.com",
+            "description": "Africa’s leading aviation group partnering on avionics, maintenance engineering, software systems, and aeronautical training.",
+            "contactEmail": "recruitment@ethiopianairlines.com",
+            "featured": true
+          },
+          {
+            "id": "PT-3",
+            "name": "INSA",
+            "logo": "/images/partners/insa.png",
+            "active": true,
+            "industry": "Cybersecurity & Cryptography",
+            "location": "Addis Ababa",
+            "openings": "6 Advanced Research Placements",
+            "partnershipType": "Research",
+            "website": "https://www.insa.gov.et",
+            "description": "Information Network Security Administration spearheading joint cryptographic research and national cyber defense internships.",
+            "contactEmail": "info@insa.gov.et",
+            "featured": true
+          },
+          {
+            "id": "PT-4",
+            "name": "Huawei",
+            "logo": "/images/partners/huawei.svg",
+            "active": true,
+            "industry": "ICT Infrastructure & 5G",
+            "location": "Addis Ababa & Regional Hubs",
+            "openings": "11 ICT Academy Certification Paths",
+            "partnershipType": "Technology",
+            "website": "https://www.huawei.com",
+            "description": "Global tech leader hosting the Huawei ICT Academy at ASTU, providing hands-on 5G networking and cloud training.",
+            "contactEmail": "ethiopia_recruitment@huawei.com",
+            "featured": true
+          },
+          {
+            "id": "PT-5",
+            "name": "Safaricom",
+            "logo": "/images/partners/safaricom.png",
+            "active": true,
+            "industry": "Mobile Telephony & Digital Services",
+            "location": "Ethiopia Network Hubs",
+            "openings": "12 Digital Engineering Roles",
+            "partnershipType": "Recruitment",
+            "website": "https://safaricom.et",
+            "description": "Next-generation telecommunications operator offering fast-track graduate development in mobile network and software architecture.",
+            "contactEmail": "talent@safaricom.et",
+            "featured": true
+          },
+          {
+            "id": "PT-6",
+            "name": "Commercial Bank of Ethiopia",
+            "logo": "/images/partners/cbe.png",
+            "active": true,
+            "industry": "Fintech & Banking Systems",
+            "location": "Ethiopia Nationwide",
+            "openings": "20+ IT & Security Openings",
+            "partnershipType": "Recruitment",
+            "website": "https://www.combanketh.et",
+            "description": "Ethiopia’s premier financial institution recruiting ASTU computer science and engineering graduates for core banking platforms.",
+            "contactEmail": "jobs@cbe.com.et",
+            "featured": true
+          },
+          {
+            "id": "PT-7",
+            "name": "DAAD (German Academic Exchange)",
+            "logo": "",
+            "active": true,
+            "industry": "International Academic & Research Consortia",
+            "location": "Germany / East Africa",
+            "openings": "Joint Research & Exchange Fellowships",
+            "partnershipType": "Research",
+            "website": "https://www.daad.de",
+            "description": "Facilitating collaborative engineering workshops, sustainable water research, and postgraduate scholarship opportunities.",
+            "contactEmail": "alumni@daad-ethiopia.org",
+            "featured": false
+          },
+          {
+            "id": "PT-8",
+            "name": "Meta Finetec PLC",
+            "logo": "",
+            "active": true,
+            "industry": "Applied Enterprise Software",
+            "location": "Addis Ababa",
+            "openings": "5 Full-Stack Developer Roles",
+            "partnershipType": "Internship",
+            "website": "https://metafinetec.com",
+            "description": "Innovative software house providing senior engineering students with real-world agile development and microservices experience.",
+            "contactEmail": "hr@metafinetec.com",
+            "featured": false
+          }
+        ],
+        "featuredEmployers": [
+          {
+            "id": "FE-1",
+            "name": "Ethio Telecom",
+            "area": "Telecom, Cloud & Fintech",
+            "openings": "14 graduate roles",
+            "active": true
+          },
+          {
+            "id": "FE-2",
+            "name": "Ethiopian Airlines",
+            "area": "Aviation & Systems Engineering",
+            "openings": "8 internship tracks",
+            "active": true
+          },
+          {
+            "id": "FE-3",
+            "name": "INSA",
+            "area": "Cybersecurity & Cryptography",
+            "openings": "6 research placements",
+            "active": true
+          },
+          {
+            "id": "FE-4",
+            "name": "Huawei Ethiopia",
+            "area": "ICT Infrastructure & 5G",
+            "openings": "11 certification paths",
+            "active": true
+          }
+        ],
+        "faqHeaders": {
+          "eyebrow": "FAQ",
+          "title": "Frequently Asked Questions",
+          "description": "Common questions about ASTU-AMS, tracer studies, alumni verification, and career services."
+        },
+        "faq": [
+          {
+            "id": "FQ-1",
+            "question": "Who can use ASTU-AMS?",
+            "answer": "Verified alumni, employers, registrar teams, academic departments, and institutional administrators each have access to role-specific portals.",
+            "category": "General",
+            "active": true
+          },
+          {
+            "id": "FQ-2",
+            "question": "How do tracer studies support accreditation?",
+            "answer": "Tracer survey responses provide empirical data on employment outcomes, time-to-hire, and required workplace skills, directly satisfying ETA and international accreditation criteria.",
+            "category": "Tracer",
+            "active": true
+          },
+          {
+            "id": "FQ-3",
+            "question": "How can employer partners register and recruit ASTU graduates?",
+            "answer": "Organizations can register via the Employer Portal with their commercial TIN verification to publish job vacancies, filter verified candidates, and schedule campus interview days.",
+            "category": "Employers",
+            "active": true
+          },
+          {
+            "id": "FQ-4",
+            "question": "How do alumni request verified transcripts and degree certificates?",
+            "answer": "Log into your alumni profile, navigate to Document Services, and submit a digital request directly routed to the ASTU Registrar office for digital or physical issuance.",
+            "category": "Registrar",
+            "active": true
+          },
+          {
+            "id": "FQ-5",
+            "question": "How can alumni mentor current students?",
+            "answer": "Alumni can opt-in to the Mentorship Track in their profile settings, specify their areas of technical expertise, and receive student mentee bookings.",
+            "category": "Mentorship",
+            "active": true
+          }
+        ],
+        "accreditation": {
+          "eyebrow": "Quality Assurance",
+          "title": "Data-Driven Accreditation & Excellence",
+          "description": "ASTU-AMS provides verified tracer data, employment analytics, and employer feedback required by accreditation agencies and university management.",
+          "point1Title": "Global Accreditation",
+          "point1Desc": "Build transparent, audited institutional reports.",
+          "point2Title": "Market Alignment",
+          "point2Desc": "Align curriculum with industry expectations.",
+          "buttonText": "View Impact Numbers",
+          "buttonLink": "/info/impact-numbers",
+          "image1": "/images/arc.jpg",
+          "image2": "/images/electriclabs.jpeg"
+        },
+        "ctaSection": {
+          "enabled": true,
+          "title": "Ready to Join ASTU-AMS?",
+          "description": "Connect with fellow alumni, discover career opportunities, and contribute to university excellence.",
+          "primaryCtaText": "Alumni Portal",
+          "primaryCtaLink": "/login",
+          "secondaryCtaText": "Employer Portal",
+          "secondaryCtaLink": "/login"
+        },
+        "footer": {
+          "aboutText": "Connecting graduates, corporate employers, and department heads in one unified ecosystem. Improving national quality audits and modernizing student career placements.",
+          "address": "Adama Science and Technology University, Adama, Oromia, Ethiopia",
+          "poBox": "P.O. Box 1888, Adama, Ethiopia",
+          "phone": "+251-221-110000",
+          "email": "irccd@astu.edu.et",
+          "officeHours": "Monday to Friday, 8:00 AM – 5:00 PM (EAT)",
+          "socialFacebook": "https://facebook.com/adamaastu",
+          "socialTelegram": "https://t.me/Adama_STU_Almuni",
+          "socialTwitter": "#",
+          "socialLinkedin": "#",
+          "copyrightText": "Adama Science and Technology University. All rights reserved."
+        },
+        "sectionLinks": {
+          "tickerLinkText": "Details",
+          "tickerLinkTarget": "/announcements",
+          "impactDefaultLinkText": "View Details",
+          "impactDefaultLinkTarget": "/info/impact-numbers",
+          "portalsGetStartedText": "Get Started Today",
+          "portalsGetStartedLink": "/login",
+          "campusLifeViewAllText": "Explore All",
+          "campusLifeViewAllLink": "/info/campus-life",
+          "industryBridgeButtonText": "Explore Campus Life",
+          "industryBridgeButtonLink": "/info/campus-life",
+          "eventsViewAllText": "See All Events →",
+          "eventsViewAllLink": "/events",
+          "eventsCardDetailsText": "View Details",
+          "eventsCardDetailsLink": "/events",
+          "eventsCardRegisterText": "Register",
+          "announcementsViewAllText": "View all",
+          "announcementsViewAllLink": "/announcements",
+          "announcementItemLinkBase": "/announcements",
+          "partnersViewAllText": "View All Partners",
+          "partnersViewAllLink": "/info/featured-employers",
+          "faqViewAllText": "View All FAQs",
+          "faqViewAllLink": "/info/faq",
+          "storiesReadMoreText": "Read More",
+          "storiesViewAllText": "View All Stories",
+          "storiesViewAllLink": "/info/community-feed",
+          "accreditationButtonText": "View Impact Numbers",
+          "accreditationButtonLink": "/info/impact-numbers",
+          "footerCareerPortalText": "Career Placement Portal",
+          "footerCareerPortalLink": "/info/overview",
+          "footerTracerHubText": "Tracer Survey Hub",
+          "footerTracerHubLink": "/info/overview",
+          "footerMentorshipText": "Mentorship Scheduling",
+          "footerMentorshipLink": "/info/mentorship",
+          "footerStudentPortalText": "Student Portal",
+          "footerStudentPortalLink": "https://estudent.astu.edu.et/",
+          "footerQualityAssuranceText": "Quality Assurance Deans",
+          "footerQualityAssuranceLink": "/info/accreditation",
+          "footerAccreditationOutcomesText": "Accreditation Outcomes",
+          "footerAccreditationOutcomesLink": "/info/impact-numbers",
+          "footerInstitutionalResearchText": "Institutional Research",
+          "footerInstitutionalResearchLink": "/info/overview"
         },
         "eventsPage": {
           "slug": "events",
@@ -63502,49 +64272,6 @@
             ]
           }
         },
-        "sectionLinks": {
-          "tickerLinkText": "Details",
-          "tickerLinkTarget": "/announcements",
-          "impactDefaultLinkText": "View Details",
-          "impactDefaultLinkTarget": "/info/impact-numbers",
-          "portalsGetStartedText": "Get Started Today",
-          "portalsGetStartedLink": "/login",
-          "campusLifeViewAllText": "Explore All",
-          "campusLifeViewAllLink": "/info/campus-life",
-          "industryBridgeButtonText": "Explore Campus Life",
-          "industryBridgeButtonLink": "/info/campus-life",
-          "eventsViewAllText": "See All Events →",
-          "eventsViewAllLink": "/events",
-          "eventsCardDetailsText": "View Details",
-          "eventsCardDetailsLink": "/events",
-          "eventsCardRegisterText": "Register",
-          "announcementsViewAllText": "View all",
-          "announcementsViewAllLink": "/announcements",
-          "announcementItemLinkBase": "/announcements",
-          "partnersViewAllText": "View All Partners",
-          "partnersViewAllLink": "/info/featured-employers",
-          "faqViewAllText": "View All FAQs",
-          "faqViewAllLink": "/info/faq",
-          "storiesReadMoreText": "Read More",
-          "storiesViewAllText": "View All Stories",
-          "storiesViewAllLink": "/info/community-feed",
-          "accreditationButtonText": "View Impact Numbers",
-          "accreditationButtonLink": "/info/impact-numbers",
-          "footerCareerPortalText": "Career Placement Portal",
-          "footerCareerPortalLink": "/info/overview",
-          "footerTracerHubText": "Tracer Survey Hub",
-          "footerTracerHubLink": "/info/overview",
-          "footerMentorshipText": "Mentorship Scheduling",
-          "footerMentorshipLink": "/info/mentorship",
-          "footerStudentPortalText": "Student Portal",
-          "footerStudentPortalLink": "https://estudent.astu.edu.et/",
-          "footerQualityAssuranceText": "Quality Assurance Deans",
-          "footerQualityAssuranceLink": "/info/accreditation",
-          "footerAccreditationOutcomesText": "Accreditation Outcomes",
-          "footerAccreditationOutcomesLink": "/info/impact-numbers",
-          "footerInstitutionalResearchText": "Institutional Research",
-          "footerInstitutionalResearchLink": "/info/overview"
-        },
         "partnersPage": {
           "heroBadge": "Employer & Industry Partnerships",
           "heroTitle": "Partner with ASTU to Access",
@@ -63734,215 +64461,9 @@
           "contactEmail": "irccd@astu.edu.et",
           "contactPhone": "+251-221-110000",
           "contactAddress": "Adama Science and Technology University, Adama, Oromia, Ethiopia"
-        },
-        "partners": [
-          {
-            "id": "PT-1",
-            "name": "Ethio Telecom",
-            "logo": "/images/partners/ethio-telecom.png",
-            "active": true,
-            "industry": "Telecom, Cloud & Fintech",
-            "location": "Addis Ababa & Regional Hubs",
-            "openings": "14+ Graduate Engineering Tracks",
-            "partnershipType": "Strategic",
-            "website": "https://www.ethiotelecom.et",
-            "description": "National telecommunications provider collaborating with ASTU on enterprise cloud engineering, fiber optics, and Telebirr fintech integration.",
-            "contactEmail": "careers@ethiotelecom.et",
-            "featured": true
-          },
-          {
-            "id": "PT-2",
-            "name": "Ethiopian Airlines",
-            "logo": "/images/partners/ethiopian-airlines.svg",
-            "active": true,
-            "industry": "Aviation & Systems Engineering",
-            "location": "Bole, Addis Ababa",
-            "openings": "8 Aviation Cadet & Internship Tracks",
-            "partnershipType": "Strategic",
-            "website": "https://www.ethiopianairlines.com",
-            "description": "Africa’s leading aviation group partnering on avionics, maintenance engineering, software systems, and aeronautical training.",
-            "contactEmail": "recruitment@ethiopianairlines.com",
-            "featured": true
-          },
-          {
-            "id": "PT-3",
-            "name": "INSA",
-            "logo": "/images/partners/insa.png",
-            "active": true,
-            "industry": "Cybersecurity & Cryptography",
-            "location": "Addis Ababa",
-            "openings": "6 Advanced Research Placements",
-            "partnershipType": "Research",
-            "website": "https://www.insa.gov.et",
-            "description": "Information Network Security Administration spearheading joint cryptographic research and national cyber defense internships.",
-            "contactEmail": "info@insa.gov.et",
-            "featured": true
-          },
-          {
-            "id": "PT-4",
-            "name": "Huawei",
-            "logo": "/images/partners/huawei.svg",
-            "active": true,
-            "industry": "ICT Infrastructure & 5G",
-            "location": "Addis Ababa & Regional Hubs",
-            "openings": "11 ICT Academy Certification Paths",
-            "partnershipType": "Technology",
-            "website": "https://www.huawei.com",
-            "description": "Global tech leader hosting the Huawei ICT Academy at ASTU, providing hands-on 5G networking and cloud training.",
-            "contactEmail": "ethiopia_recruitment@huawei.com",
-            "featured": true
-          },
-          {
-            "id": "PT-5",
-            "name": "Safaricom",
-            "logo": "/images/partners/safaricom.png",
-            "active": true,
-            "industry": "Mobile Telephony & Digital Services",
-            "location": "Ethiopia Network Hubs",
-            "openings": "12 Digital Engineering Roles",
-            "partnershipType": "Recruitment",
-            "website": "https://safaricom.et",
-            "description": "Next-generation telecommunications operator offering fast-track graduate development in mobile network and software architecture.",
-            "contactEmail": "talent@safaricom.et",
-            "featured": true
-          },
-          {
-            "id": "PT-6",
-            "name": "Commercial Bank of Ethiopia",
-            "logo": "/images/partners/cbe.png",
-            "active": true,
-            "industry": "Fintech & Banking Systems",
-            "location": "Ethiopia Nationwide",
-            "openings": "20+ IT & Security Openings",
-            "partnershipType": "Recruitment",
-            "website": "https://www.combanketh.et",
-            "description": "Ethiopia’s premier financial institution recruiting ASTU computer science and engineering graduates for core banking platforms.",
-            "contactEmail": "jobs@cbe.com.et",
-            "featured": true
-          },
-          {
-            "id": "PT-7",
-            "name": "DAAD (German Academic Exchange)",
-            "logo": "",
-            "active": true,
-            "industry": "International Academic & Research Consortia",
-            "location": "Germany / East Africa",
-            "openings": "Joint Research & Exchange Fellowships",
-            "partnershipType": "Research",
-            "website": "https://www.daad.de",
-            "description": "Facilitating collaborative engineering workshops, sustainable water research, and postgraduate scholarship opportunities.",
-            "contactEmail": "alumni@daad-ethiopia.org",
-            "featured": false
-          },
-          {
-            "id": "PT-8",
-            "name": "Meta Finetec PLC",
-            "logo": "",
-            "active": true,
-            "industry": "Applied Enterprise Software",
-            "location": "Addis Ababa",
-            "openings": "5 Full-Stack Developer Roles",
-            "partnershipType": "Internship",
-            "website": "https://metafinetec.com",
-            "description": "Innovative software house providing senior engineering students with real-world agile development and microservices experience.",
-            "contactEmail": "hr@metafinetec.com",
-            "featured": false
-          }
-        ],
-        "announcements": [
-          {
-            "id": "C-6636",
-            "title": "ASTU Engineering Innovation Summit 2026",
-            "date": "9/9/2026",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": true,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-004",
-            "title": "Semester Break: Campus Safety Notice",
-            "date": "6/7/2026",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": true,
-            "author": "System Admin"
-          },
-          {
-            "id": "C-001",
-            "title": "ASTU Alumni Network: Bridging Generations",
-            "date": "5/28/2026",
-            "type": "post",
-            "active": true,
-            "pinned": true,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-REAL-001",
-            "title": "ASTU Hosts a Five-Day DAAD Alumni Workshop on Sustainable Water Supply & Environmental Protection",
-            "date": "Mar 7, 2025",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": true,
-            "author": "ASTU International Relations & Corporate Communication Directorate (IRCCD)"
-          },
-          {
-            "id": "C-REAL-002",
-            "title": "ASTU Alumni Association Inspires Graduating Class with Career Tips!",
-            "date": "Mar 7, 2025",
-            "type": "post",
-            "active": true,
-            "pinned": true,
-            "author": "ASTU Alumni Association & Students Skill Development Office"
-          },
-          {
-            "id": "C-REAL-003",
-            "title": "ASTU Alumni Spotlight: Yohannes Melese, Gold Medalist & Dual-Major Graduate!",
-            "date": "Mar 7, 2025",
-            "type": "post",
-            "active": true,
-            "pinned": true,
-            "author": "ASTU Academic Registrar & Alumni Directorate"
-          },
-          {
-            "id": "C-012",
-            "title": "Semester Break: Campus Safety Notice",
-            "date": "8/26/2026",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": false,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-002",
-            "title": "Industry Partnership Week 2026",
-            "date": "8/26/2026",
-            "type": "page",
-            "active": true,
-            "pinned": false,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-006",
-            "title": "ASTU Research Grant Winners 2026",
-            "date": "5/25/2026",
-            "type": "post",
-            "active": true,
-            "pinned": false,
-            "author": "Content Manager"
-          },
-          {
-            "id": "C-REAL-004",
-            "title": "ASTU Alumni Serving as Model United Nations Secretariats & Global Delegates",
-            "date": "Jan 7, 2025",
-            "type": "Official Announcement",
-            "active": true,
-            "pinned": false,
-            "author": "ASTU Corporate Communication Directorate"
-          }
-        ]
+        }
       },
-      "updatedAt": "2026-11-08T22:39:07.337Z",
+      "updatedAt": "2026-11-08T22:52:22.159Z",
       "updatedBy": "CMS Admin"
     }
   ],
@@ -67370,6 +67891,166 @@
       "status": "APPROVED",
       "createdAt": "2026-09-22T16:47:37.952Z",
       "updatedAt": "2026-10-09T07:47:37.952Z"
+    }
+  ],
+  "knowledgeDocuments": [
+    {
+      "id": "doc-1794177978044-2qwdz",
+      "title": "ASTU Campus Location, Overview & Contact Directory",
+      "category": "Campus Overview",
+      "description": "ASTU campus location, faculties, research laboratories, admissions, and verified contact directory.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# ASTU Campus Location & Directory\nAdama Science and Technology University (ASTU) is a premier national STEM institution located in Adama (Nazret), Oromia Region, Ethiopia (~100km southeast of Addis Ababa along the expressway).\nCampus Facilities:\n• Main Campus: Houses university central administration, student services, Central Library, and lecture facilities.\n• Research Complex: Houses centers of excellence in Robotics, Artificial Intelligence, Renewable Energy, and Advanced Manufacturing.\n• Convocation Hall: Hosts annual graduation ceremonies, research symposiums, and national employer career fairs.\nAdmissions & Entrance:\n• Undergraduate (BSc): Administered through the Ministry of Education (MoE) national university placement for top-performing STEM students.\n• Postgraduate (MSc/PhD): Coordinated directly by the ASTU Directorate of Postgraduate Studies.\nContact Information:\n• Alumni Relations: alumni@astu.edu.et\n• Registrar Directorate: registrar@astu.edu.et | Campus Block 102\n• Telephone: +251 22 110 0001\n• Postal: P.O. Box 1888, Adama, Ethiopia",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-11-08T22:46:18.044Z",
+      "updatedAt": "2026-11-08T22:46:18.139Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "doc-1794177977905-tuoie",
+      "title": "ASTU Portal Registration & Account Activation Guide",
+      "category": "Admissions & Accounts",
+      "description": "Step-by-step guidance for alumni, students, and employers to create and verify portal accounts.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# How to Register on ASTU-AMS\nAccount Registration Steps:\n1. Click the Register button on the top navigation bar.\n2. Select your user role: Alumni, Student, or Partner Employer.\n3. Enter your full name, student ID number, graduation batch year, and active email address.\n4. Create a secure password.\n5. Verify the one-time code sent to your email to activate your account.\n6. Once verified, complete your career profile and skills portfolio to receive tailored job recommendations.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-11-08T22:46:17.905Z",
+      "updatedAt": "2026-11-08T22:46:17.997Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "doc-1794177977759-7cib9",
+      "title": "ASTU Academic Engineering Departments & Programs",
+      "category": "Academic Departments",
+      "description": "Core engineering and applied science schools, departments, and skill requirements.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Engineering Programs & Department Directory\nAdama Science and Technology University is a premier STEM institution organized into key engineering departments:\n• Computer Science & Engineering (CSE) and Software Engineering (SWE)\n• Electrical & Computer Engineering (ECE)\n• Mechanical Engineering (ME)\n• Civil Engineering & Architecture (CE)\n• Applied Natural Sciences (Applied Physics, Chemistry, Mathematics)\nCurriculum Focus:\nHands-on laboratory training, senior capstone innovation projects, and mandatory industrial internships with national enterprise partners.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-11-08T22:46:17.759Z",
+      "updatedAt": "2026-11-08T22:46:17.862Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "doc-1794177977629-mv1x3",
+      "title": "ASTU Career Center, Job Placements & Partner Employers",
+      "category": "Careers & Jobs",
+      "description": "Job search procedures, campus hiring events, and partner employer directory.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Career Center & Verified Employer Vacancies\nASTU-AMS connects graduates with verified corporate and government employers across Ethiopia.\nTop Hiring Employers for ASTU Graduates:\n• Safaricom Ethiopia (Telecommunications & Cloud Infrastructure)\n• Ethio Telecom (Core Network & Mobile Financial Services)\n• Sunshine Construction (Civil Engineering & Project Management)\n• INSA - Information Network Security Administration (Cybersecurity & Defense)\n• Wabi Tena (Healthcare & Software Systems)\nHow to Apply:\n1. Open Career Center / Jobs in your portal.\n2. Filter vacancies by department (CSE, ECE, ME, CE) or employer.\n3. Submit your application directly using your ASTU verified profile.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-11-08T22:46:17.629Z",
+      "updatedAt": "2026-11-08T22:46:17.710Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "doc-1794177977499-arlf8",
+      "title": "ASTU Graduate Tracer Studies & National MoE Benchmarks",
+      "category": "Tracer Studies",
+      "description": "Institutional outcomes, national MoE alignment, graduate employment rates, and curriculum review surveys.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Wave 3 Graduate Tracer Study Guidelines\nThe ASTU Graduate Tracer Study is a longitudinal survey conducted at 6, 12, and 24 months post-graduation to track graduate employment outcomes.\nKey Institutional Telemetry:\n• Overall ASTU Graduate Employment Rate: 55.0%\n• Electrical & Computer Engineering (ECE) Placement: 75.0%\n• Software Engineering (SWE) Placement: 63.0%\n• Average Starting Salary: ETB 19,185 per month\n• Top Software Engineering Starting Salary: ETB 23,400 per month\n• Average Time to Employment: 16.3 months\nYour responses guide ASTU curriculum updates and ensure HERQA / ETA quality accreditation standards.",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-11-08T22:46:17.499Z",
+      "updatedAt": "2026-11-08T22:46:17.577Z",
+      "chunkCount": 1
+    },
+    {
+      "id": "doc-1794177977364-lnxyo",
+      "title": "ASTU Official Registrar Services & Academic Transcript Manual",
+      "category": "Registrar",
+      "description": "Official university policies for requesting transcripts, degree certificates, and medium of instruction letters.",
+      "sourceType": "POLICY",
+      "status": "PUBLISHED",
+      "accessLevel": "PUBLIC",
+      "rawContent": "# Official Transcript Request Procedures\nAdama Science and Technology University alumni and graduating students can request official academic transcripts through the ASTU-AMS Registrar portal.\n1. Sign in to your verified Alumni account.\n2. Navigate to Document Services -> Request Document.\n3. Select the document type: Official Transcript, Degree Certificate Copy, or English Medium of Instruction Letter.\n4. Provide the delivery destination address or institutional recipient email.\n5. Standard Registrar processing SLA is 24 to 48 business hours.\n6. Track processing status in real time under My Document Requests.\nRegistrar Contact: registrar@astu.edu.et | Campus Block 102",
+      "uploadedBy": "University Registrar & Alumni Office",
+      "createdAt": "2026-11-08T22:46:17.365Z",
+      "updatedAt": "2026-11-08T22:46:17.456Z",
+      "chunkCount": 1
+    }
+  ],
+  "knowledgeChunks": [
+    {
+      "id": "chk-1794177977409-jianr",
+      "documentId": "doc-1794177977364-lnxyo",
+      "chunkIndex": 0,
+      "title": "ASTU Official Registrar Services & Academic Transcript Manual",
+      "section": "Official Transcript Request Procedures",
+      "content": "# Official Transcript Request Procedures Adama Science and Technology University alumni and graduating students can request official academic transcripts through the ASTU-AMS Registrar portal. 1. Sign in to your verified Alumni account. 2. Navigate to Document Services -> Request Document. 3. Select the document type: Official Transcript, Degree Certificate Copy, or English Medium of Instruction Letter. 4. Provide the delivery destination address or institutional recipient email. 5. Standard Registrar processing SLA is 24 to 48 business hours. 6. Track processing status in real time under My Document Requests. Registrar Contact: registrar@astu.edu.et | Campus Block 102",
+      "tokenCount": 95,
+      "embedding": [],
+      "createdAt": "2026-11-08T22:46:17.409Z",
+      "updatedAt": "2026-11-08T22:46:17.409Z"
+    },
+    {
+      "id": "chk-1794177977539-w98df",
+      "documentId": "doc-1794177977499-arlf8",
+      "chunkIndex": 0,
+      "title": "ASTU Graduate Tracer Studies & National MoE Benchmarks",
+      "section": "Wave 3 Graduate Tracer Study Guidelines",
+      "content": "# Wave 3 Graduate Tracer Study Guidelines The ASTU Graduate Tracer Study is a longitudinal survey conducted at 6, 12, and 24 months post-graduation to track graduate employment outcomes. Key Institutional Telemetry: • Overall ASTU Graduate Employment Rate: 55.0% • Electrical & Computer Engineering (ECE) Placement: 75.0% • Software Engineering (SWE) Placement: 63.0% • Average Starting Salary: ETB 19,185 per month • Top Software Engineering Starting Salary: ETB 23,400 per month • Average Time to Employment: 16.3 months Your responses guide ASTU curriculum updates and ensure HERQA / ETA quality accreditation standards.",
+      "tokenCount": 92,
+      "embedding": [],
+      "createdAt": "2026-11-08T22:46:17.539Z",
+      "updatedAt": "2026-11-08T22:46:17.539Z"
+    },
+    {
+      "id": "chk-1794177977671-leha0",
+      "documentId": "doc-1794177977629-mv1x3",
+      "chunkIndex": 0,
+      "title": "ASTU Career Center, Job Placements & Partner Employers",
+      "section": "Career Center & Verified Employer Vacancies",
+      "content": "# Career Center & Verified Employer Vacancies ASTU-AMS connects graduates with verified corporate and government employers across Ethiopia. Top Hiring Employers for ASTU Graduates: • Safaricom Ethiopia (Telecommunications & Cloud Infrastructure) • Ethio Telecom (Core Network & Mobile Financial Services) • Sunshine Construction (Civil Engineering & Project Management) • INSA - Information Network Security Administration (Cybersecurity & Defense) • Wabi Tena (Healthcare & Software Systems) How to Apply: 1. Open Career Center / Jobs in your portal. 2. Filter vacancies by department (CSE, ECE, ME, CE) or employer. 3. Submit your application directly using your ASTU verified profile.",
+      "tokenCount": 98,
+      "embedding": [],
+      "createdAt": "2026-11-08T22:46:17.671Z",
+      "updatedAt": "2026-11-08T22:46:17.671Z"
+    },
+    {
+      "id": "chk-1794177977817-goupu",
+      "documentId": "doc-1794177977759-7cib9",
+      "chunkIndex": 0,
+      "title": "ASTU Academic Engineering Departments & Programs",
+      "section": "Engineering Programs & Department Directory",
+      "content": "# Engineering Programs & Department Directory Adama Science and Technology University is a premier STEM institution organized into key engineering departments: • Computer Science & Engineering (CSE) and Software Engineering (SWE) • Electrical & Computer Engineering (ECE) • Mechanical Engineering (ME) • Civil Engineering & Architecture (CE) • Applied Natural Sciences (Applied Physics, Chemistry, Mathematics) Curriculum Focus: Hands-on laboratory training, senior capstone innovation projects, and mandatory industrial internships with national enterprise partners.",
+      "tokenCount": 72,
+      "embedding": [],
+      "createdAt": "2026-11-08T22:46:17.817Z",
+      "updatedAt": "2026-11-08T22:46:17.817Z"
+    },
+    {
+      "id": "chk-1794177977950-uu580",
+      "documentId": "doc-1794177977905-tuoie",
+      "chunkIndex": 0,
+      "title": "ASTU Portal Registration & Account Activation Guide",
+      "section": "How to Register on ASTU-AMS",
+      "content": "# How to Register on ASTU-AMS Account Registration Steps: 1. Click the Register button on the top navigation bar. 2. Select your user role: Alumni, Student, or Partner Employer. 3. Enter your full name, student ID number, graduation batch year, and active email address. 4. Create a secure password. 5. Verify the one-time code sent to your email to activate your account. 6. Once verified, complete your career profile and skills portfolio to receive tailored job recommendations.",
+      "tokenCount": 77,
+      "embedding": [],
+      "createdAt": "2026-11-08T22:46:17.950Z",
+      "updatedAt": "2026-11-08T22:46:17.950Z"
+    },
+    {
+      "id": "chk-1794177978087-lid2k",
+      "documentId": "doc-1794177978044-2qwdz",
+      "chunkIndex": 0,
+      "title": "ASTU Campus Location, Overview & Contact Directory",
+      "section": "ASTU Campus Location & Directory",
+      "content": "# ASTU Campus Location & Directory Adama Science and Technology University (ASTU) is a premier national STEM institution located in Adama (Nazret), Oromia Region, Ethiopia (~100km southeast of Addis Ababa along the expressway). Campus Facilities: • Main Campus: Houses university central administration, student services, Central Library, and lecture facilities. • Research Complex: Houses centers of excellence in Robotics, Artificial Intelligence, Renewable Energy, and Advanced Manufacturing. • Convocation Hall: Hosts annual graduation ceremonies, research symposiums, and national employer career fairs. Admissions & Entrance: • Undergraduate (BSc): Administered through the Ministry of Education (MoE) national university placement for top-performing STEM students. • Postgraduate (MSc/PhD): Coordinated directly by the ASTU Directorate of Postgraduate Studies. Contact Information: • Alumni Relations: alumni@astu.edu.et • Registrar Directorate: registrar@astu.edu.et | Campus Block 102 • Telephone: +251 22 110 0001 • Postal: P.O. Box 1888, Adama, Ethiopia",
+      "tokenCount": 138,
+      "embedding": [],
+      "createdAt": "2026-11-08T22:46:18.088Z",
+      "updatedAt": "2026-11-08T22:46:18.088Z"
     }
   ]
 }
