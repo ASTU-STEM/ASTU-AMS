@@ -71,10 +71,13 @@ export class OpenRouterService {
         }
       } catch (error: any) {
         console.warn(`OpenRouter model [${currentModel}] call notice:`, error.response?.data?.error?.message || error.message);
+        const code = error?.code || error?.cause?.code;
+        if (code === 'ENOTFOUND' || code === 'ECONNREFUSED' || code === 'EAI_AGAIN') {
+          break; // Stop immediately if network/domain is unreachable
+        }
       }
     }
 
-    console.warn('All OpenRouter model candidates failed or timed out. Falling back to institutional telemetry response.');
     return this.generateMockResponse(prompt, systemInstruction);
   }
 
