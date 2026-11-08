@@ -589,6 +589,87 @@ export default function EventDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* ── Page Handler (Event Pagination & Navigation Strip) ── */}
+        <div className="mt-12 pt-8 border-t border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4">
+            {/* Previous Event */}
+            <div>
+              {prevEvent ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/events/${encodeURIComponent(prevEvent.id || prevEvent.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`)}
+                  className="group w-full flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white hover:border-[#003580]/40 hover:bg-slate-50 transition-all text-left shadow-xs cursor-pointer"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-[#003580] text-slate-600 group-hover:text-white transition-colors">
+                    <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-[#003580] transition-colors">
+                      Previous Event
+                    </span>
+                    <span className="block text-xs sm:text-sm font-bold text-slate-900 truncate group-hover:text-[#003580] transition-colors font-serif">
+                      {prevEvent.title}
+                    </span>
+                    <span className="block text-[10px] text-slate-500 mt-0.5">
+                      {prevEvent.date}
+                    </span>
+                  </div>
+                </button>
+              ) : (
+                <div className="hidden md:block" />
+              )}
+            </div>
+
+            {/* Center: Counter & Back to Events Index */}
+            <div className="flex flex-col items-center justify-center text-center gap-1.5 order-first md:order-none">
+              {currentIndex >= 0 && totalEvents > 0 && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-[11px] font-bold text-slate-700">
+                  <span>Event {currentIndex + 1} of {totalEvents}</span>
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => navigate('/events')}
+                className="text-xs font-semibold text-[#003580] hover:text-[#C8102E] transition-colors inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>View All Events</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+              <span className="text-[10px] text-slate-400 hidden lg:inline">
+                Use ← and → arrow keys to navigate
+              </span>
+            </div>
+
+            {/* Next Event */}
+            <div>
+              {nextEvent ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/events/${encodeURIComponent(nextEvent.id || nextEvent.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}`)}
+                  className="group w-full flex items-center justify-between gap-3 p-4 rounded-2xl border border-slate-200 bg-white hover:border-[#003580]/40 hover:bg-slate-50 transition-all text-right shadow-xs cursor-pointer"
+                >
+                  <div className="min-w-0 text-right flex-1">
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-[#003580] transition-colors">
+                      Next Event
+                    </span>
+                    <span className="block text-xs sm:text-sm font-bold text-slate-900 truncate group-hover:text-[#003580] transition-colors font-serif">
+                      {nextEvent.title}
+                    </span>
+                    <span className="block text-[10px] text-slate-500 mt-0.5">
+                      {nextEvent.date}
+                    </span>
+                  </div>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-[#003580] text-slate-600 group-hover:text-white transition-colors">
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </div>
+                </button>
+              ) : (
+                <div className="hidden md:block" />
+              )}
+            </div>
+          </div>
+        </div>
       </main>
 
       {/* Full Participant Registration Form Modal */}
