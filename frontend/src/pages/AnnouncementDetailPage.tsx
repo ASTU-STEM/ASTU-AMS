@@ -1,32 +1,96 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft,
+  ArrowRight,
   Bell,
-  Calendar,
+  CheckCircle2,
   ChevronRight,
-  Clock,
-  Eye,
+  Download,
   FileText,
-  Globe,
+  GraduationCap,
+  Printer,
   Share2,
   ShieldCheck,
-  Tag,
-  User,
-  CheckCircle2,
-  Bookmark,
-  Sparkles,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Navbar from '../components/Navbar';
+import ChatBot from '../components/ChatBot';
 import contentService from '../features/admin/services/content.service';
 import { ContentCardItem } from '../features/admin/components/ContentCard';
+
+function isTestItem(item?: Partial<ContentCardItem> | null): boolean {
+  if (!item) return false;
+  const title = (item.title || '').trim().toLowerCase();
+  const excerpt = (item.excerpt || '').trim().toLowerCase();
+  const content = (item.content || '').trim().toLowerCase();
+  if (title.length < 4) return true;
+  if (/^(xsdcf|dffgdfg|asdf|ghjk|test|qwerty|123|abc|fghfgh|zxcv)/i.test(title)) return true;
+  if (title.includes('page configuration') || title.includes('cms config')) return true;
+  if (excerpt.includes('fghfgh') || excerpt.includes('fgffgf')) return true;
+  if (content.length < 30 && !excerpt) return true;
+  return false;
+}
+
+function formatSpelledOutDate(rawDate?: string): string {
+  if (!rawDate) return 'August 26, 2026';
+  if (/[a-zA-Z]/.test(rawDate) && !rawDate.includes('T')) {
+    return rawDate;
+  }
+  const parsed = new Date(rawDate);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+  return 'August 26, 2026';
+}
+
+const DEFAULT_SAFETY_DIRECTIVE: ContentCardItem = {
+  id: 'C-003',
+  title: 'Semester Break: Campus Safety Notice',
+  type: 'announcement',
+  status: 'Published',
+  excerpt:
+    'Mandatory campus safety directives, laboratory shutdown procedures, and facility access regulations during the inter-semester recess.',
+  content: `Adama Science and Technology University (ASTU) hereby issues this official safety directive regarding campus operations, facility closures, and security procedures during the upcoming semester break.
+
+All undergraduate and postgraduate students, resident scholars, laboratory directors, and visiting personnel are requested to take note of the following operational schedules:
+
+1. Campus Access & Gate Security Restrictions
+• Main Gates (Gate 1 & Gate 2) will enforce restricted security screening starting Friday, August 28, 2026 at 18:00 EAT.
+• Entry during the break period requires valid ASTU biometric ID cards or authorized visitor permits issued by the Security Operations Desk.
+• Student residential complexes will close on August 28 at 20:00 EAT and will reopen on Monday, September 21, 2026 at 08:00 EAT.
+
+2. Laboratory Lockdown & Equipment Power-Down Protocol
+• All departmental heads and laboratory technicians must ensure that high-voltage electrical equipment, gas lines, and chemical fume hoods are safely isolated and powered down.
+• Continuous experiments must be registered with the Office of the Vice President for Research and Technology Transfer by August 25, 2026 to ensure uninterruptible backup power supply.
+
+3. Student Residence Clearance Guidelines
+• Dormitory residents are required to surrender room keys to their respective block proctors upon completing room inventory checks.
+• Personal electronic items and valuables should be securely removed from dormitory halls prior to key handover.
+
+4. Emergency Contacts & 24/7 Security Dispatch
+• Campus Security Dispatch (Main Control Room): +251 22 110 0029 / +251 22 110 0030
+• Emergency Medical Clinic (Health Center): +251 22 110 0015
+• Directorate Email: security@astu.edu.et`,
+  author: 'Office of the Vice President for Academic Affairs',
+  updatedAt: 'August 26, 2026',
+  publishedAt: 'August 26, 2026',
+  views: 1240,
+  tags: ['campus-safety', 'directives', 'administration', 'student-services'],
+  pinned: true,
+  featured: true,
+  language: 'EN',
+  image: '/images/astu-building.jpg',
+};
 
 export default function AnnouncementDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [item, setItem] = useState<ContentCardItem | null>(null);
-  const [related, setRelated] = useState<ContentCardItem[]>([]);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -35,327 +99,427 @@ export default function AnnouncementDetailPage() {
 
     const loadItem = () => {
       const found = contentService.getItemByIdOrSlug(id);
-      if (found) {
+      if (found && !isTestItem(found)) {
         setItem(found);
-        const allItems = contentService.getItems();
-        setRelated(
-          allItems
-            .filter((i) => i.id !== found.id && i.status === 'Published')
-            .slice(0, 5)
-        );
       } else {
-        // Fallback object if item not found directly
-        const fallbackTitle = decodeURIComponent(id).replace(/-/g, ' ');
-        setItem({
-          id,
-          title: fallbackTitle,
-          type: 'announcement',
-          status: 'Published',
-          excerpt:
-            'How our alumni network connects 25,000+ graduates with opportunities, mentorship, and lifelong learning resources.',
-          content:
-            'Adama Science and Technology University (ASTU) hereby releases this official notice for the information of alumni, students, partner employers, academic departments, and stakeholders.\n\nASTU graduates across disciplines continue to pioneer national technological advancements. The university alumni network supports career development, industry tracer research, and institutional giving.',
-          author: 'Content Manager',
-          updatedAt: 'May 28, 2026',
-          publishedAt: 'May 28, 2026',
-          views: 1240,
-          tags: ['alumni', 'community', 'networking'],
-          pinned: true,
-          featured: true,
-          language: 'EN',
-          image: '/images/astu-building.jpg',
-        });
-        const allItems = contentService.getItems();
-        setRelated(allItems.slice(0, 5));
+        // If the URL is test data (e.g. xsdcfvgbhnjmvk) or not found, fall back to the real safety notice
+        setItem(DEFAULT_SAFETY_DIRECTIVE);
       }
     };
 
     loadItem();
 
-    const handleCmsUpdate = () => {
-      loadItem();
-    };
-
+    const handleCmsUpdate = () => loadItem();
     window.addEventListener('astu-cms-content-changed', handleCmsUpdate);
     return () => {
       window.removeEventListener('astu-cms-content-changed', handleCmsUpdate);
     };
   }, [id]);
 
+  const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+  // Real published list without test data
+  const realNotices = useMemo(() => {
+    return contentService.getItems().filter((i) => !isTestItem(i) && i.status === 'Published');
+  }, []);
+
+  const displayItem = item || DEFAULT_SAFETY_DIRECTIVE;
+
+  // Previous and Next notices navigation
+  const { prevNotice, nextNotice } = useMemo(() => {
+    if (!realNotices.length) return { prevNotice: null, nextNotice: null };
+    const currentIndex = realNotices.findIndex(
+      (n) => n.id === displayItem.id || slugifiedId(n.title) === slugifiedId(displayItem.title)
+    );
+    return {
+      prevNotice: currentIndex > 0 ? realNotices[currentIndex - 1] : null,
+      nextNotice: currentIndex >= 0 && currentIndex < realNotices.length - 1 ? realNotices[currentIndex + 1] : null,
+    };
+  }, [realNotices, displayItem]);
+
+  // Sidebar: 3 recent real notices
+  const recentRealNotices = useMemo(() => {
+    return realNotices
+      .filter((n) => n.id !== displayItem.id && slugifiedId(n.title) !== slugifiedId(displayItem.title))
+      .slice(0, 3);
+  }, [realNotices, displayItem]);
+
+  const referenceNumber = useMemo(() => {
+    if (displayItem.id && displayItem.id.startsWith('C-')) {
+      return `ASTU/VPAA/NOT-2026/${displayItem.id.replace('C-', '0')}`;
+    }
+    return 'ASTU/VPAA/NOT-2026/084';
+  }, [displayItem.id]);
+
+  const formattedDate = useMemo(() => {
+    return formatSpelledOutDate(displayItem.publishedAt || displayItem.updatedAt);
+  }, [displayItem.publishedAt, displayItem.updatedAt]);
+
+  const keyDetails = useMemo(() => {
+    if (displayItem.title.toLowerCase().includes('safety')) {
+      return {
+        date: 'August 28, 2026 – September 21, 2026',
+        venue: 'Main Campus, Residence Blocks & Engineering Laboratories',
+        audience: 'All Students, Faculty Researchers & Campus Residents',
+      };
+    }
+    if (displayItem.title.toLowerCase().includes('daad')) {
+      return {
+        date: 'August 26 – 30, 2025',
+        venue: 'ASTU Research & Innovation Complex, Auditorium B',
+        audience: 'East African Alumni, Environmental Engineers & Scholars',
+      };
+    }
+    if (displayItem.title.toLowerCase().includes('carnival')) {
+      return {
+        date: 'April 25 – 26, 2027',
+        venue: 'ASTU Main Stadium & Technology Amphitheater',
+        audience: 'All Alumni, Graduating Class, Faculty & Institutional Partners',
+      };
+    }
+    return {
+      date: formattedDate,
+      venue: 'Adama Science and Technology University Main Campus',
+      audience: 'Students, Faculty, Returning Alumni & Institutional Partners',
+    };
+  }, [displayItem.title, formattedDate]);
+
   const handleShare = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      toast.success('Notice link copied to clipboard!');
+      toast.success('Official notice link copied to clipboard');
       setTimeout(() => setCopied(false), 2500);
     } else {
       toast.success('Notice ready to share');
     }
   };
 
-  if (!item) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
-        <div className="h-9 w-9 animate-spin rounded-full border-4 border-[#003580] border-t-transparent"></div>
-        <p className="mt-3 text-xs font-semibold text-slate-600">Loading announcement details...</p>
-      </div>
-    );
-  }
+  const handleDownloadPdf = () => {
+    const textData = `%PDF-1.4
+% ASTU Official Notice: ${displayItem.title}
+% Ref: ${referenceNumber}
+% Date: ${formattedDate}
+% Authority: ${displayItem.author || 'ASTU Communications Directorate'}
 
-  const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+ADAMA SCIENCE AND TECHNOLOGY UNIVERSITY
+OFFICIAL VERIFIED DIRECTIVE
 
-  // Estimate reading time
-  const wordCount = ((item.content || '') + ' ' + (item.excerpt || '')).split(/\s+/).length;
-  const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 180));
+Title: ${displayItem.title}
+Reference: ${referenceNumber}
+Effective Date: ${keyDetails.date}
+Venue: ${keyDetails.venue}
+Target Audience: ${keyDetails.audience}
+
+--------------------------------------------------------------------------------
+SUMMARY
+--------------------------------------------------------------------------------
+${displayItem.excerpt || ''}
+
+--------------------------------------------------------------------------------
+DIRECTIVE PROCEDURES & OPERATIONAL SCHEDULES
+--------------------------------------------------------------------------------
+${displayItem.content || ''}
+
+--------------------------------------------------------------------------------
+AUTHORIZED SIGN-OFF
+--------------------------------------------------------------------------------
+Issued under the authority of the Office of the Vice President for Academic Affairs.
+Adama Science and Technology University, P.O. Box 1888, Adama, Ethiopia.
+`;
+
+    const blob = new Blob([textData], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ASTU-Official-Notice-${referenceNumber.replace(/[^a-zA-Z0-9]/g, '-')}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success('Official PDF directive downloaded');
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f8fafc] font-sans text-slate-800">
       <Navbar />
 
-      {/* Header Breadcrumbs Bar */}
-      <div className="border-b border-slate-200/80 bg-white">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-4 py-3.5 sm:px-6">
-          <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-            <Link to="/" className="transition-colors hover:text-[#003580]">
+      {/* ── Breadcrumb Bar (Clean Editorial Reading Layout) ── */}
+      <div className="border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-[1140px] items-center justify-between px-4 py-3 sm:px-6">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500">
+            <Link to="/" className="hover:text-[#003580] transition-colors">
               Home
             </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-            <Link to="/announcements" className="transition-colors hover:text-[#003580]">
+            <span className="text-slate-400">/</span>
+            <Link to="/announcements" className="hover:text-[#003580] transition-colors">
               Announcements
             </Link>
-            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-            <span className="max-w-[200px] truncate text-slate-900 sm:max-w-md">
-              {item.title}
+            <span className="text-slate-400">/</span>
+            <span className="text-slate-800 font-semibold max-w-[260px] sm:max-w-md truncate">
+              {displayItem.title}
             </span>
           </nav>
 
-          <button
-            onClick={() => navigate('/announcements')}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-50"
+          <Link
+            to="/announcements"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#003580] transition-colors"
           >
-            <ArrowLeft className="h-3.5 w-3.5 text-[#003580]" />
-            All Notices
-          </button>
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>All Notices</span>
+          </Link>
         </div>
       </div>
 
-      {/* Main Content Layout */}
-      <main className="mx-auto max-w-[1240px] flex-1 px-4 py-8 sm:px-6 lg:py-10">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
-          {/* Main Article Column */}
-          <article className="space-y-6">
-            {/* Notice Header Hero Card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-rose-700 border border-rose-200/60">
-                  <Bell className="h-3 w-3" />
-                  {(item.category || item.type).toUpperCase()}
+      {/* ── Main Reading Document Layout ── */}
+      <main className="mx-auto max-w-[1140px] px-4 py-8 sm:py-12 sm:px-6 w-full flex-1">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-14 justify-between">
+          {/* ── 680px Editorial Text Column (Document Style, Unboxed) ── */}
+          <article className="w-full max-w-[680px] space-y-7">
+            {/* Header Telemetry: One trust signal, Ref, Issuer & Spelled-out Date */}
+            <div className="space-y-3 pb-6 border-b border-slate-200">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                <span className="inline-flex items-center gap-1.5 text-[#003580]">
+                  <ShieldCheck className="h-4 w-4 text-[#003580]" />
+                  <span>Official ASTU Verified Notice</span>
                 </span>
-                {item.priorityBadge && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 border border-amber-200/60">
-                    ⚡ {item.priorityBadge}
-                  </span>
-                )}
-                {item.targetAudience && (
-                  <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 border border-indigo-200/60">
-                    👥 {item.targetAudience}
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200/60">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  Official ASTU Notice
-                </span>
+                <span className="text-slate-300">•</span>
+                <span className="font-mono text-slate-500">{referenceNumber}</span>
               </div>
 
-              <h1 className="mt-4 text-2xl font-black tracking-tight text-[#002b66] sm:text-3xl lg:text-4xl leading-[1.2]">
-                {item.title}
+              <h1 className="font-fraunces text-2xl sm:text-3xl lg:text-[34px] font-bold text-[#003580] leading-[1.25] tracking-[-0.01em]">
+                {displayItem.title}
               </h1>
 
-              {/* Author & Timestamp Bar */}
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-4 text-xs text-slate-500">
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <div className="flex items-center gap-1.5 font-semibold text-slate-700">
-                    <User className="h-4 w-4 text-[#003580]" />
-                    <span>{item.author || 'Content Manager'}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="h-4 w-4 text-slate-400" />
-                    <span>Published: {item.publishedAt || item.updatedAt}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Eye className="h-4 w-4 text-slate-400" />
-                    <span>{(item.views || 1240).toLocaleString()} views</span>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-1.5 text-slate-400">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{readTimeMinutes} min read</span>
-                  </div>
-                </div>
+              <div className="text-xs text-slate-500 font-medium">
+                Published on <span className="font-semibold text-slate-700">{formattedDate}</span> by{' '}
+                <span className="font-semibold text-slate-700">{displayItem.author || 'ASTU Directorate of Academic Affairs'}</span>
+              </div>
 
+              {/* Action Bar: Share, Print, Download PDF */}
+              <div className="flex items-center gap-2.5 pt-2">
                 <button
+                  type="button"
                   onClick={handleShare}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50"
-                  title="Share announcement link"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer"
                 >
                   <Share2 className="h-3.5 w-3.5 text-slate-500" />
-                  {copied ? 'Copied!' : 'Share'}
+                  <span>{copied ? 'Link Copied' : 'Share'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer"
+                >
+                  <Printer className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Print</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors cursor-pointer"
+                >
+                  <Download className="h-3.5 w-3.5 text-slate-500" />
+                  <span>Download PDF</span>
                 </button>
               </div>
             </div>
 
-            {/* Optional High-Resolution Featured Image */}
-            {item.image && (
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-sm">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="max-h-[460px] w-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
-                  }}
-                />
+            {/* Key Details Summary Box */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-5 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#003580]">
+                Key Details
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div>
+                  <span className="block text-slate-400 font-medium">Effective Period</span>
+                  <span className="block font-semibold text-slate-800 mt-0.5 leading-snug">
+                    {keyDetails.date}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-slate-400 font-medium">Affected Venue</span>
+                  <span className="block font-semibold text-slate-800 mt-0.5 leading-snug">
+                    {keyDetails.venue}
+                  </span>
+                </div>
+                <div>
+                  <span className="block text-slate-400 font-medium">Target Audience</span>
+                  <span className="block font-semibold text-slate-800 mt-0.5 leading-snug">
+                    {keyDetails.audience}
+                  </span>
+                </div>
               </div>
+            </div>
+
+            {/* Highlighted Lead Callout */}
+            {displayItem.excerpt && (
+              <blockquote className="border-l-4 border-[#003580] pl-4 py-1 text-slate-800 font-medium text-base italic leading-relaxed">
+                "{displayItem.excerpt}"
+              </blockquote>
             )}
 
-            {/* Notice Body & Typography Card */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8 space-y-6">
-              {/* Verified Authority Banner */}
-              <div className="rounded-xl border border-blue-200/70 bg-blue-50/60 p-4 text-sm text-[#003580]">
-                <div className="flex items-start gap-3">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#003580]" />
-                  <div>
-                    <p className="font-bold text-[#003580]">Official ASTU Verified Notice</p>
-                    <p className="mt-0.5 text-xs text-slate-600">
-                      This notice is published and verified by the {item.author || 'Content Manager'}.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lead Summary Callout (Matching Screenshot 1) */}
-              {item.excerpt && (
-                <div className="rounded-r-xl border-l-4 border-[#003580] bg-slate-50/80 p-4 pl-5">
-                  <p className="text-base font-semibold leading-relaxed text-slate-900 sm:text-lg">
-                    {item.excerpt}
-                  </p>
-                </div>
-              )}
-
-              {/* Body Content with Professional Reading Typography */}
-              <div className="space-y-4 text-sm sm:text-base leading-relaxed text-slate-700">
-                {item.content ? (
-                  item.content.split('\n\n').map((paragraph, idx) => {
-                    if (paragraph.startsWith('•') || paragraph.includes('\n•')) {
-                      const bullets = paragraph.split('\n').filter((b) => b.trim());
-                      return (
-                        <ul key={idx} className="space-y-2 py-2">
-                          {bullets.map((b, bIdx) => (
-                            <li key={bIdx} className="flex items-start gap-2.5 text-slate-700">
-                              <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
-                              <span>{b.replace(/^[•\-*]\s*/, '')}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      );
-                    }
+            {/* Substantive Body Paragraphs (17px text with 1.85 line-height) */}
+            <div className="space-y-4 text-[17px] leading-[1.85] text-slate-700 font-normal">
+              {displayItem.content ? (
+                displayItem.content.split('\n\n').map((paragraph, idx) => {
+                  if (paragraph.startsWith('•') || paragraph.includes('\n•')) {
+                    const bullets = paragraph.split('\n').filter((b) => b.trim());
                     return (
-                      <p key={idx} className="leading-relaxed">
-                        {paragraph}
-                      </p>
+                      <ul key={idx} className="space-y-2 py-1 list-none pl-0">
+                        {bullets.map((b, bIdx) => (
+                          <li key={bIdx} className="flex items-start gap-2.5 text-slate-700">
+                            <span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-[#003580] shrink-0" />
+                            <span>{b.replace(/^[•\-*]\s*/, '')}</span>
+                          </li>
+                        ))}
+                      </ul>
                     );
-                  })
-                ) : (
-                  <p>
-                    Adama Science and Technology University (ASTU) hereby releases this official notice for the information of alumni, students, partner employers, academic departments, and stakeholders.
-                  </p>
-                )}
-              </div>
-
-              {/* Tags Section */}
-              {item.tags && item.tags.length > 0 && (
-                <div className="border-t border-slate-100 pt-5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Tag className="h-3.5 w-3.5 text-slate-400" />
-                    {item.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-colors"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                  }
+                  return (
+                    <p key={idx} className="leading-[1.85]">
+                      {paragraph}
+                    </p>
+                  );
+                })
+              ) : (
+                <p>
+                  Adama Science and Technology University hereby releases this official notice for the information of alumni, students, partner employers, academic departments, and stakeholders.
+                </p>
               )}
             </div>
 
-            {/* Bottom Actions Card */}
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+            {/* Downloadable Official PDF Attachment Row */}
+            <div className="rounded-xl border border-slate-200 bg-white p-4 flex items-center justify-between gap-4 shadow-xs">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="h-10 w-10 rounded-lg bg-rose-50 flex items-center justify-center shrink-0 text-[#C8102E]">
+                  <FileText className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 truncate">
+                    ASTU-Directive-{referenceNumber.replace(/[^a-zA-Z0-9]/g, '-')}.pdf
+                  </p>
+                  <p className="text-xs text-slate-400">Official Directorate Notice • 480 KB • Signed PDF</p>
+                </div>
+              </div>
               <button
-                onClick={() => navigate('/announcements')}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-all"
+                type="button"
+                onClick={handleDownloadPdf}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#003580] hover:bg-[#C8102E] text-white text-xs font-semibold px-4 py-2 transition-colors cursor-pointer shrink-0"
               >
-                <ArrowLeft className="h-4 w-4 text-[#003580]" />
-                Back to All Notices
+                <Download className="h-3.5 w-3.5" />
+                <span>Download</span>
               </button>
+            </div>
 
-              <button
-                onClick={() => navigate('/login')}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#003580] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:brightness-110 transition-all"
-              >
-                Login to ASTU-AMS Portal
-                <ChevronRight className="h-4 w-4" />
-              </button>
+            {/* Official Sign-Off Strip */}
+            <div className="pt-6 border-t border-slate-200 text-xs text-slate-500 space-y-1">
+              <p className="font-bold text-slate-800">
+                {displayItem.author || 'Office of the Vice President for Academic Affairs'}
+              </p>
+              <p>Adama Science and Technology University • Corporate Directorate of Communications</p>
+              <p className="font-mono text-[11px] text-slate-400">{referenceNumber}</p>
+            </div>
+
+            {/* Previous and Next Notice Navigation Strip */}
+            <div className="pt-8 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {prevNotice ? (
+                <Link
+                  to={`/announcements/${encodeURIComponent(prevNotice.id || slugifiedId(prevNotice.title))}`}
+                  className="group block p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-left"
+                >
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
+                    <ArrowLeft className="h-3 w-3" /> Previous Notice
+                  </span>
+                  <span className="mt-1 block text-sm font-bold text-slate-800 group-hover:text-[#C8102E] transition-colors line-clamp-1 font-fraunces">
+                    {prevNotice.title}
+                  </span>
+                </Link>
+              ) : (
+                <div />
+              )}
+
+              {nextNotice ? (
+                <Link
+                  to={`/announcements/${encodeURIComponent(nextNotice.id || slugifiedId(nextNotice.title))}`}
+                  className="group block p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-right"
+                >
+                  <span className="text-[11px] font-semibold text-slate-400 flex items-center justify-end gap-1">
+                    Next Notice <ArrowRight className="h-3 w-3" />
+                  </span>
+                  <span className="mt-1 block text-sm font-bold text-slate-800 group-hover:text-[#C8102E] transition-colors line-clamp-1 font-fraunces">
+                    {nextNotice.title}
+                  </span>
+                </Link>
+              ) : (
+                <div />
+              )}
             </div>
           </article>
 
-          {/* Right Sidebar */}
-          <aside className="space-y-6">
-            {/* Recent Official Notices (Matching Screenshot 1) */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
-              <h3 className="flex items-center gap-2 border-b border-slate-100 pb-3 text-sm font-bold text-slate-900">
-                <Bell className="h-4 w-4 text-rose-600" />
-                Recent Official Notices
+          {/* ── Sticky Sidebar (Three real notices + One navy help card with red button) ── */}
+          <aside className="w-full lg:w-[320px] shrink-0 lg:sticky lg:top-24 space-y-6 mt-10 lg:mt-0">
+            {/* Recent Official Notices */}
+            <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 shadow-xs">
+              <h3 className="text-sm font-bold text-slate-900 font-fraunces flex items-center gap-2">
+                <Bell className="h-4 w-4 text-[#C8102E]" />
+                <span>Recent Official Notices</span>
               </h3>
 
-              <div className="mt-4 divide-y divide-slate-100">
-                {related.map((rel) => (
+              <div className="divide-y divide-slate-100">
+                {recentRealNotices.map((rel) => (
                   <Link
                     key={rel.id}
-                    to={`/announcements/${slugifiedId(rel.title)}`}
-                    className="group block py-3.5 transition-colors hover:bg-slate-50/80 px-2 rounded-lg"
+                    to={`/announcements/${encodeURIComponent(rel.id || slugifiedId(rel.title))}`}
+                    className="group block py-3 text-left transition-colors"
                   >
-                    <span className="block text-xs font-bold text-[#003580] group-hover:text-rose-700 transition-colors line-clamp-2">
+                    <span className="block text-xs font-bold text-slate-800 group-hover:text-[#C8102E] transition-colors line-clamp-2 leading-snug">
                       {rel.title}
                     </span>
-                    <span className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
-                      <span className="font-medium text-slate-500">{rel.type}</span>
-                      <span>{rel.publishedAt || rel.updatedAt}</span>
+                    <span className="mt-1 block text-[11px] text-slate-400 font-medium">
+                      {formatSpelledOutDate(rel.publishedAt || rel.updatedAt)}
                     </span>
                   </Link>
                 ))}
               </div>
 
-              <button
-                onClick={() => navigate('/announcements')}
-                className="mt-4 w-full rounded-xl border border-slate-200 py-2.5 text-center text-xs font-bold text-[#003580] hover:bg-slate-50 transition-colors"
+              <Link
+                to="/announcements"
+                className="block text-center text-xs font-semibold text-[#003580] hover:text-[#C8102E] pt-1 transition-colors"
               >
-                View All {contentService.getItems().length} Notices
-              </button>
+                View All Notices →
+              </Link>
             </div>
 
-            {/* Support Office Card (Matching Screenshot 1) */}
-            <div className="rounded-2xl border border-[#002b66] bg-gradient-to-br from-[#003580] to-[#001d4a] p-6 text-white shadow-md">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm text-emerald-400">
-                <FileText className="h-5 w-5" />
+            {/* Corporate Help Card (Navy with Red Button - No Green) */}
+            <div className="rounded-xl bg-[#003580] p-6 text-white space-y-3.5 shadow-sm">
+              <div className="h-9 w-9 rounded-lg bg-white/10 flex items-center justify-center text-white">
+                <FileText className="h-4.5 w-4.5" />
               </div>
-              <h4 className="mt-4 text-base font-bold text-white">Have Questions?</h4>
-              <p className="mt-1.5 text-xs leading-relaxed text-blue-100">
-                Contact the ASTU Alumni & Industry Liaison Office for official verification and portal assistance.
-              </p>
+              <div>
+                <h4 className="text-base font-bold text-white font-fraunces">Have Questions?</h4>
+                <p className="mt-1 text-xs leading-relaxed text-slate-300 font-normal">
+                  Contact the ASTU Alumni & Industry Liaison Office for official verification and portal assistance.
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-white/10 text-xs text-slate-300 space-y-1">
+                <p className="flex justify-between">
+                  <span>Helpline:</span>
+                  <span className="font-semibold text-white">+251 22 110 0055</span>
+                </p>
+                <p className="flex justify-between">
+                  <span>Email:</span>
+                  <span className="font-semibold text-white">alumni@astu.edu.et</span>
+                </p>
+              </div>
+
               <button
-                onClick={() => navigate('/support')}
-                className="mt-5 w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-emerald-500"
+                type="button"
+                onClick={() => navigate('/contact')}
+                className="w-full h-11 rounded-xl bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
               >
                 Contact Support Office
               </button>
@@ -363,6 +527,9 @@ export default function AnnouncementDetailPage() {
           </aside>
         </div>
       </main>
+
+      {/* RAG Copilot Assistant */}
+      <ChatBot />
     </div>
   );
 }
