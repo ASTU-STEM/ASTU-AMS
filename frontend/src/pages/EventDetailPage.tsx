@@ -5,6 +5,9 @@ import {
   MapPin,
   Users,
   ArrowLeft,
+  ArrowRight,
+  ChevronRight,
+  GraduationCap,
   Share2,
   CheckCircle2,
   Bookmark,
@@ -15,6 +18,8 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import Navbar from '../components/Navbar';
+import ChatBot from '../components/ChatBot';
 import homepageCmsService from '../features/admin/services/homepageCms.service';
 import eventsService, { ApiEvent } from '../features/admin/services/events.service';
 import registrationService from '../features/admin/services/registration.service';
@@ -102,7 +107,7 @@ export default function EventDetailPage() {
           setIsRegistered(true);
         }
       }
-    } catch {}
+    } catch { }
 
     const loadEvent = async () => {
       try {
@@ -139,7 +144,7 @@ export default function EventDetailPage() {
                 return;
               }
             }
-          } catch {}
+          } catch { }
         }
 
         // 2. Check homepage CMS config
@@ -275,7 +280,7 @@ export default function EventDetailPage() {
         const parsed = JSON.parse(storedUser);
         setRegName(parsed.name || '');
         setRegEmail(parsed.email || '');
-      } catch {}
+      } catch { }
     }
     setShowRegModal(true);
   };
@@ -295,7 +300,7 @@ export default function EventDetailPage() {
       if (eventData.id && !eventData.id.startsWith('E-') && !eventData.id.startsWith('WS-')) {
         await eventsService.rsvpToEvent(eventData.id, 'GOING');
       }
-    } catch {}
+    } catch { }
 
     // Synchronize directly with CMS Admin Registrations Desk
     try {
@@ -330,8 +335,8 @@ export default function EventDetailPage() {
 
   const bannerImg = eventData
     ? (eventData as any).image ||
-      DEFAULT_EVENT_IMAGES[eventData.title] ||
-      '/images/astu-building.jpg'
+    DEFAULT_EVENT_IMAGES[eventData.title] ||
+    '/images/astu-building.jpg'
     : '/images/astu-building.jpg';
 
   const isWorkshop =
@@ -344,8 +349,8 @@ export default function EventDetailPage() {
     eventData?.rsvps !== undefined && eventData?.rsvps !== null && Number(eventData.rsvps) > 0
       ? Number(eventData.rsvps)
       : eventData?.capacity
-      ? Math.round(Number(eventData.capacity) * 0.65)
-      : 120;
+        ? Math.round(Number(eventData.capacity) * 0.65)
+        : 120;
 
   const displayRegistered = isRegistered ? baseRegistered + 1 : baseRegistered;
   const capacityTotal = Number(eventData?.capacity) || 185;
@@ -379,15 +384,17 @@ export default function EventDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* Header Banner Navigation */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 flex flex-col">
+      <Navbar />
+
+      {/* ── Top Navigation Bar ── */}
+      <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50"
+            onClick={() => navigate('/events')}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 transition-all hover:bg-slate-50 cursor-pointer"
           >
-            <ArrowLeft className="h-4 w-4 text-[#003580]" /> Back to Homepage
+            <ArrowLeft className="h-4 w-4 text-[#003580]" /> Back to Events
           </button>
           <div className="flex items-center gap-2">
             <button
@@ -395,13 +402,13 @@ export default function EventDetailPage() {
                 navigator.clipboard.writeText(window.location.href);
                 toast.success('Link copied to clipboard!');
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
             >
               <Share2 className="h-3.5 w-3.5 text-slate-500" /> Share
             </button>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Container */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -422,9 +429,8 @@ export default function EventDetailPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-6 text-white">
                 <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                    isWorkshop ? 'bg-amber-500 text-slate-950' : 'bg-[#003580] text-white'
-                  }`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${isWorkshop ? 'bg-amber-500 text-slate-950' : 'bg-[#003580] text-white'
+                    }`}
                 >
                   <Sparkles className="h-3 w-3" />{' '}
                   {isWorkshop ? 'ASTU Technical Workshop' : 'ASTU Alumni Event'}
@@ -490,14 +496,14 @@ export default function EventDetailPage() {
                 <ul className="grid gap-2 text-xs text-slate-700 sm:grid-cols-2">
                   {(eventData?.highlights
                     ? String(eventData.highlights)
-                        .split('\n')
-                        .filter((h) => h.trim())
+                      .split('\n')
+                      .filter((h) => h.trim())
                     : [
-                        'Certificate of Participation',
-                        'Alumni & Executive Networking',
-                        'Hands-on Practical Sessions',
-                        'Instant QR Check-in Pass',
-                      ]
+                      'Certificate of Participation',
+                      'Alumni & Executive Networking',
+                      'Hands-on Practical Sessions',
+                      'Instant QR Check-in Pass',
+                    ]
                   ).map((highlight, index) => (
                     <li key={index} className="flex items-center gap-2 rounded-lg bg-slate-50 p-2.5">
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />{' '}
@@ -545,11 +551,10 @@ export default function EventDetailPage() {
 
               <button
                 onClick={handleRegisterClick}
-                className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-md transition-all ${
-                  isRegistered
+                className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-md transition-all ${isRegistered
                     ? 'bg-emerald-600 hover:bg-emerald-700'
                     : 'bg-[#003580] hover:brightness-110'
-                }`}
+                  }`}
               >
                 {isRegistered ? (
                   <>
@@ -766,6 +771,9 @@ export default function EventDetailPage() {
           </div>
         </div>
       )}
+
+      {/* RAG Copilot Assistant */}
+      <ChatBot />
     </div>
   );
 }
