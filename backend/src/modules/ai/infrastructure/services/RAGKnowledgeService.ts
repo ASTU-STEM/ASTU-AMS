@@ -411,7 +411,12 @@ ${contextText}`;
         const llmPromise = OpenRouterService.generateText(q, systemPrompt);
         const generated = await Promise.race([llmPromise, timeoutPromise]);
 
-        if (generated && generated.trim().length > 10 && !generated.includes('ASTU AI ASSISTANT TELEMETRY RESPONSE')) {
+        if (
+          generated &&
+          generated.trim().length > 10 &&
+          !generated.includes('ASTU AI ASSISTANT TELEMETRY RESPONSE') &&
+          !generated.includes('ASTU Assistant Guidance')
+        ) {
           const cleanedGenerated = generated
             .replace(/\*\*/g, '')
             .replace(/\*/g, '')
