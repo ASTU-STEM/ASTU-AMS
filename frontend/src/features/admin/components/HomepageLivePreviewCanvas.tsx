@@ -361,11 +361,10 @@ export default function HomepageLivePreviewCanvas({
                 setPreviewMode('homepage');
                 if (activeSection === 'detail-pages') onSectionClick?.('hero');
               }}
-              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                previewMode === 'homepage'
+              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${previewMode === 'homepage'
                   ? 'bg-white dark:bg-slate-900 text-[#003580] dark:text-sky-300 shadow-xs border border-slate-200 dark:border-slate-700'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60'
-              }`}
+                }`}
             >
               <span>🏠</span>
               <span>Homepage</span>
@@ -377,11 +376,10 @@ export default function HomepageLivePreviewCanvas({
                 setPreviewMode('detail');
                 onSectionClick?.('detail-pages');
               }}
-              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                previewMode === 'detail'
+              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${previewMode === 'detail'
                   ? 'bg-white dark:bg-slate-900 text-[#003580] dark:text-sky-300 shadow-xs border border-slate-200 dark:border-slate-700'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60'
-              }`}
+                }`}
             >
               <FileText className="h-3 w-3 text-blue-500" />
               <span>Sub-Pages (/info)</span>
@@ -396,11 +394,10 @@ export default function HomepageLivePreviewCanvas({
                 setPreviewMode('partners');
                 onSectionClick?.('partners-portal');
               }}
-              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                previewMode === 'partners'
+              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${previewMode === 'partners'
                   ? 'bg-white dark:bg-slate-900 text-[#003580] dark:text-sky-300 shadow-xs border border-slate-200 dark:border-slate-700'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60'
-              }`}
+                }`}
             >
               <Handshake className="h-3 w-3 text-emerald-600" />
               <span>Partners Page</span>
@@ -412,11 +409,10 @@ export default function HomepageLivePreviewCanvas({
                 setPreviewMode('community');
                 onSectionClick?.('community');
               }}
-              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                previewMode === 'community'
+              className={`px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${previewMode === 'community'
                   ? 'bg-white dark:bg-slate-900 text-[#003580] dark:text-sky-300 shadow-xs border border-slate-200 dark:border-slate-700'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60'
-              }`}
+                }`}
             >
               <Globe className="h-3 w-3 text-indigo-600" />
               <span>Community Page</span>
@@ -867,9 +863,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-hero"
               onClick={() => onSectionClick?.('hero')}
-              className={`relative bg-slate-900 text-white min-h-[420px] flex items-center cursor-pointer transition-all ${
-                activeSection === 'hero' ? 'ring-4 ring-inset ring-amber-400' : ''
-              }`}
+              className={`relative bg-slate-900 text-white min-h-[420px] flex items-center cursor-pointer transition-all ${activeSection === 'hero' ? 'ring-4 ring-inset ring-amber-400' : ''
+                }`}
             >
               <SectionBadge id="hero" label="Editing Hero & Banner" />
 
@@ -920,9 +915,8 @@ export default function HomepageLivePreviewCanvas({
                         key={idx}
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setActiveSlideIdx(idx); }}
-                        className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                          activeSlideIdx === idx ? 'w-6 bg-amber-400' : 'w-1.5 bg-white/40'
-                        }`}
+                        className={`h-1.5 rounded-full transition-all cursor-pointer ${activeSlideIdx === idx ? 'w-6 bg-amber-400' : 'w-1.5 bg-white/40'
+                          }`}
                       />
                     ))}
                   </div>
@@ -934,9 +928,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-impact"
               onClick={() => onSectionClick?.('impact')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'impact' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${activeSection === 'impact' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
               <SectionBadge id="impact" label="Editing Impact Statistics" />
 
@@ -986,9 +979,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-portals"
               onClick={() => onSectionClick?.('portals')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'portals' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${activeSection === 'portals' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
               <SectionBadge id="portals" label="Editing Journey & How ASTU-AMS Works" />
 
@@ -1035,9 +1027,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-campus-life"
               onClick={() => onSectionClick?.('campus-life')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'campus-life' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${activeSection === 'campus-life' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
               <SectionBadge id="campus-life" label="Editing Campus Life & Labs" />
 
@@ -1075,9 +1066,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-gallery"
               onClick={() => onSectionClick?.('gallery')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'gallery' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${activeSection === 'gallery' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
               <SectionBadge id="gallery" label="Editing Campus Gallery" />
 
@@ -1131,9 +1121,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-events-news"
               onClick={() => onSectionClick?.('events-news')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'events-news' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${activeSection === 'events-news' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
               <SectionBadge id="events-news" label="Editing Events & Notices" />
 
@@ -1166,31 +1155,21 @@ export default function HomepageLivePreviewCanvas({
               </div>
             </div>
 
-            {/* ── 7. UNIFIED ALUMNI IMPACT & SUCCESS STORIES ── */}
+            {/* ── 7. FEATURED ALUMNI SUCCESS STORIES SPOTLIGHT ── */}
             <div
               id="preview-section-stories"
-              onClick={() => onSectionClick?.('community')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'community' || activeSection === 'events-news' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              onClick={() => onSectionClick?.('events-news')}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${activeSection === 'events-news' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
-              <SectionBadge id="community" label="Editing Alumni Impact & Community" />
+              <SectionBadge id="events-news" label="Editing Alumni Success Stories" />
 
-              {/* Part 1: Individual Alumni Achievements */}
+              {/* Header */}
               <div className="flex items-end justify-between mb-8 pb-4 border-b border-slate-200">
                 <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-4 h-[2px] bg-[#C8102E]" />
-                    <span className="text-[10px] font-bold text-[#C8102E] uppercase tracking-widest block">
-                      ALUMNI IMPACT
-                    </span>
-                  </div>
                   <h2 className="text-2xl sm:text-3xl font-black text-[#003580] leading-tight">
-                    {storiesHeaders?.title || 'Alumni Impact & Success Stories'}
+                    {storiesHeaders?.title || 'Alumni success stories'}
                   </h2>
-                  <p className="text-xs text-slate-500 mt-1 max-w-lg">
-                    Inspiring career milestones, innovation breakthroughs, and leadership achievements from ASTU graduates worldwide.
-                  </p>
                 </div>
                 <span className="text-xs font-bold text-[#003580] flex items-center gap-1 shrink-0">
                   <span>View all stories</span>
@@ -1230,73 +1209,14 @@ export default function HomepageLivePreviewCanvas({
                   </div>
                 </div>
               </div>
-
-              {/* Architectural Flow Divider */}
-              <div className="relative my-10 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200" />
-                </div>
-                <div className="relative bg-white px-3 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#003580]" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
-                    Connected Beyond Graduation
-                  </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]" />
-                </div>
-              </div>
-
-              {/* Part 2: Community Continuation (Contained Navy Brand Canvas) */}
-              <div
-                id="preview-section-community"
-                className="rounded-3xl bg-[#003580] text-white p-8 md:p-12 relative overflow-hidden shadow-xl"
-              >
-                <div className="text-center max-w-2xl mx-auto mb-8">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-200 mb-2">
-                    <Globe className="h-3 w-3" />
-                    <span>{communitySection?.title || 'ASTU Global Network'}</span>
-                  </span>
-                  <h3 className="text-2xl sm:text-3xl font-black">Connected Beyond Graduation</h3>
-                  <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                    {communitySection?.subtitle || 'Connecting graduates across technology hubs, fostering lifelong mentorship, and advancing industry collaboration worldwide.'}
-                  </p>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {(communityPosts.length > 0 ? communityPosts.slice(0, 3) : [
-                    { name: 'Abebe Yosef', role: 'Software Engineer', text: 'I landed my new role after using ASTU-AMS job matching and mentorship support.' },
-                    { name: 'Bekele Kebede', role: 'Employer Partner', text: 'Hiring from ASTU-AMS has been efficient. We found strong engineering candidates.' },
-                    { name: 'Helina Sileshi', role: 'Mentor & Alumni', text: 'Proud to mentor ASTU students through the AMS platform.' },
-                  ]).map((p: any, idx: number) => (
-                    <div key={p.id || idx} className="rounded-2xl bg-white/10 border border-white/15 p-5 backdrop-blur-md">
-                      <Quote className="h-5 w-5 text-blue-300/60 mb-2" />
-                      <p className="text-xs text-slate-200 italic line-clamp-3">"{p.text}"</p>
-                      <div className="mt-4 pt-3 border-t border-white/10">
-                        <span className="text-xs font-bold text-white block truncate">{p.name}</span>
-                        <span className="text-[10px] text-blue-200 block truncate">{p.role}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Primary vs Secondary CTA Buttons */}
-                <div className="mt-8 flex items-center justify-center gap-3">
-                  <span className="rounded-xl bg-[#C8102E] text-white px-5 py-2 text-xs font-bold shadow-md">
-                    Join ASTU Alumni Network
-                  </span>
-                  <span className="rounded-xl border border-white/30 text-white px-5 py-2 text-xs font-semibold">
-                    Explore Community
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* ── 9. PARTNER COMPANIES CAROUSEL ── */}
             <div
               id="preview-section-partners-portal"
               onClick={() => onSectionClick?.('partners-portal')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'partners-portal' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${activeSection === 'partners-portal' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
               <SectionBadge id="partners-portal" label="Editing Partners" />
 
@@ -1333,9 +1253,8 @@ export default function HomepageLivePreviewCanvas({
               <div
                 id="preview-section-accreditation-faq"
                 onClick={() => onSectionClick?.('accreditation-faq')}
-                className={`relative mx-auto max-w-[1180px] px-6 my-10 cursor-pointer transition-all ${
-                  activeSection === 'accreditation-faq' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-                }`}
+                className={`relative mx-auto max-w-[1180px] px-6 my-10 cursor-pointer transition-all ${activeSection === 'accreditation-faq' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                  }`}
               >
                 <SectionBadge id="accreditation-faq" label="Editing Accreditation & FAQ" />
                 <div className="rounded-2xl bg-slate-50 dark:bg-slate-800 p-6 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -1359,9 +1278,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-accreditation-faq"
               onClick={() => onSectionClick?.('accreditation-faq')}
-              className={`relative mx-auto max-w-[800px] px-6 my-10 cursor-pointer transition-all ${
-                activeSection === 'accreditation-faq' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
+              className={`relative mx-auto max-w-[800px] px-6 my-10 cursor-pointer transition-all ${activeSection === 'accreditation-faq' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+                }`}
             >
               <div className="text-center mb-6">
                 <span className="text-[10px] font-bold text-rose-600 uppercase tracking-widest block mb-1">
@@ -1399,9 +1317,8 @@ export default function HomepageLivePreviewCanvas({
             <div
               id="preview-section-footer-cta"
               onClick={() => onSectionClick?.('footer-cta')}
-              className={`cursor-pointer transition-all ${
-                activeSection === 'footer-cta' ? 'ring-4 ring-inset ring-amber-400' : ''
-              }`}
+              className={`cursor-pointer transition-all ${activeSection === 'footer-cta' ? 'ring-4 ring-inset ring-amber-400' : ''
+                }`}
             >
               <SectionBadge id="footer-cta" label="Editing Footer & Directory" />
 

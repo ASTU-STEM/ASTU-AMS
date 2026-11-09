@@ -721,6 +721,91 @@ export default function PublicInfoPage() {
                     </div>
                   </div>
                 )}
+
+                {/* ── Connected Beyond Graduation Community & Testimonials Section ── */}
+                <div className="pt-12 mt-12 border-t border-slate-200/90">
+                  <div className="mb-8 text-center max-w-2xl mx-auto">
+                    <span className="inline-block text-[11px] font-bold uppercase tracking-[0.2em] text-[#C8102E] mb-2">
+                      CONNECTED BEYOND GRADUATION
+                    </span>
+                    <h3 className="font-fraunces text-2xl sm:text-3xl font-bold text-[#003580] tracking-tight">
+                      Voices of the ASTU Alumni Community
+                    </h3>
+                    <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                      Discover how graduates and industry mentors stay engaged, support career development, and empower the next generation.
+                    </p>
+                  </div>
+
+                  {/* 3 Compact Testimonial Cards in clean white editorial style */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                    {[
+                      {
+                        name: "Abebe Yosef",
+                        role: "Software Engineer",
+                        text: "I landed my new role after using ASTU-AMS job matching and mentorship support. The direct connection to senior alumni made all the difference.",
+                        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+                      },
+                      {
+                        name: "Bekele Kebede",
+                        role: "Employer Partner",
+                        text: "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical foundation and problem-solving readiness.",
+                        image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80",
+                      },
+                      {
+                        name: "Helina Sileshi",
+                        role: "Mentor & Alumni",
+                        text: "Proud to mentor ASTU students through the AMS platform. Giving back and guiding upcoming innovators is one of the most rewarding parts of being an alumnus.",
+                        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
+                      },
+                    ].map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-2xs hover:shadow-md hover:border-[#003580]/40 transition-all flex flex-col justify-between"
+                      >
+                        <div>
+                          <div className="flex items-center gap-3.5 mb-4">
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="h-12 w-12 rounded-full object-cover border border-slate-200"
+                            />
+                            <div>
+                              <h4 className="text-sm font-bold text-[#003580] leading-snug">
+                                {item.name}
+                              </h4>
+                              <p className="text-[11px] font-semibold text-slate-500">
+                                {item.role}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-xs text-slate-600 leading-relaxed italic">
+                            "{item.text}"
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Alumni Community Action CTAs */}
+                  <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/register")}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#C8102E] hover:bg-[#A60D26] text-white text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer"
+                    >
+                      <Users className="h-4 w-4" />
+                      <span>Join ASTU Alumni Network</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navigate("/info/community")}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-300 hover:border-[#003580] bg-white hover:bg-slate-50 text-[#003580] text-xs sm:text-sm font-bold shadow-2xs transition-all cursor-pointer"
+                    >
+                      <Globe className="h-4 w-4 text-[#003580]" />
+                      <span>Explore Community</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           ) : isOverviewPage ? (
