@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   X,
   Building2,
@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   Award,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Partner } from '../features/admin/services/homepageCms.service';
 import { partnerLogos } from './PartnerLogos';
@@ -19,12 +21,43 @@ interface CompanyDetailModalProps {
   company: Partner | null;
   onClose: () => void;
   onRegisterInterest?: (company: Partner) => void;
+  partners?: Partner[];
+  onSelectCompany?: (company: Partner) => void;
 }
 
-export default function CompanyDetailModal({ company, onClose, onRegisterInterest }: CompanyDetailModalProps) {
+export default function CompanyDetailModal({
+  company,
+  onClose,
+  onRegisterInterest,
+  partners,
+  onSelectCompany,
+}: CompanyDetailModalProps) {
   if (!company) return null;
 
   const LogoComponent = partnerLogos[company.name];
+
+  const currentIndex = partners && company ? partners.findIndex((p) => p.name === company.name) : -1;
+  const prevCompany = currentIndex > 0 && partners ? partners[currentIndex - 1] : null;
+  const nextCompany =
+    currentIndex >= 0 && partners && currentIndex < partners.length - 1 ? partners[currentIndex + 1] : null;
+
+  useEffect(() => {
+    if (!company) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && prevCompany && onSelectCompany) {
+        e.preventDefault();
+        onSelectCompany(prevCompany);
+      } else if (e.key === 'ArrowRight' && nextCompany && onSelectCompany) {
+        e.preventDefault();
+        onSelectCompany(nextCompany);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [company, prevCompany, nextCompany, onSelectCompany, onClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
@@ -38,13 +71,44 @@ export default function CompanyDetailModal({ company, onClose, onRegisterInteres
       <div className="relative w-full max-w-xl overflow-hidden rounded-3xl bg-white text-slate-900 shadow-2xl transition-all dark:bg-slate-900 dark:text-white border border-slate-100 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
         {/* Top Header Banner */}
         <div className="relative bg-gradient-to-r from-[#001f3f] to-[#003366] px-6 py-8 text-white">
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white/80 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="absolute top-4 right-4 flex items-center gap-1.5">
+            {partners && partners.length > 1 && onSelectCompany && (
+              <div className="flex items-center gap-1 mr-1">
+                <button
+                  type="button"
+                  onClick={() => prevCompany && onSelectCompany(prevCompany)}
+                  disabled={!prevCompany}
+                  className={`rounded-full p-1.5 text-white/80 transition-all cursor-pointer ${
+                    !prevCompany ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 hover:text-white'
+                  }`}
+                  title="Previous organization (←)"
+                  aria-label="Previous organization"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => nextCompany && onSelectCompany(nextCompany)}
+                  disabled={!nextCompany}
+                  className={`rounded-full p-1.5 text-white/80 transition-all cursor-pointer ${
+                    !nextCompany ? 'opacity-30 cursor-not-allowed' : 'bg-white/10 hover:bg-white/20 hover:text-white'
+                  }`}
+                  title="Next organization (→)"
+                  aria-label="Next organization"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full bg-white/10 p-2 text-white/80 hover:bg-white/20 hover:text-white transition-all cursor-pointer"
+              aria-label="Close modal"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
           <div className="flex items-center gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white p-2 shadow-md">
@@ -66,6 +130,11 @@ export default function CompanyDetailModal({ company, onClose, onRegisterInteres
                 {company.partnershipType && (
                   <span className="rounded-full bg-amber-400/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300">
                     {company.partnershipType} Track
+                  </span>
+                )}
+                {currentIndex >= 0 && partners && (
+                  <span className="text-[10px] font-semibold text-slate-300">
+                    ({currentIndex + 1} of {partners.length})
                   </span>
                 )}
               </div>
@@ -156,14 +225,49 @@ export default function CompanyDetailModal({ company, onClose, onRegisterInteres
         </div>
 
         {/* Footer Actions */}
-        <div className="border-t border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/80 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
-          >
-            Close
-          </button>
+        <div className="border-t border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/80 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+            >
+              Close
+            </button>
+
+            {partners && partners.length > 1 && onSelectCompany && (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => prevCompany && onSelectCompany(prevCompany)}
+                  disabled={!prevCompany}
+                  className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                    !prevCompany
+                      ? 'opacity-30 cursor-not-allowed text-slate-400'
+                      : 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+                  }`}
+                  title="Previous organization"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Prev</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => nextCompany && onSelectCompany(nextCompany)}
+                  disabled={!nextCompany}
+                  className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                    !nextCompany
+                      ? 'opacity-30 cursor-not-allowed text-slate-400'
+                      : 'text-slate-700 hover:bg-slate-100 cursor-pointer'
+                  }`}
+                  title="Next organization"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
 
           <a
             href="/employers/register"
