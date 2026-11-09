@@ -11,7 +11,6 @@ import {
   ChevronDown,
   ExternalLink,
   Globe,
-  GraduationCap,
   Handshake,
   LineChart,
   ShieldCheck,
@@ -41,7 +40,6 @@ import {
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
-import TelebirrDonationModal from "../components/TelebirrDonationModal";
 import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
@@ -58,6 +56,7 @@ import arcImage from "../assets/images/arc.jpg";
 import stateM from "../assets/images/State-M.jpg";
 import gc7 from "../assets/images/gc7.jpg";
 import electricLabs from "../assets/images/electriclabs.jpeg";
+import humanitarianBuilding from "../assets/images/humanitary building.jpg";
 
 const FALLBACK_IMAGE = "/images/fallback-campus.svg";
 
@@ -79,23 +78,6 @@ const getDynamicStatIcon = (stat: any, idx: number) => {
   const fallbacks = [Users, BookOpen, Building2, Trophy, LineChart];
   return fallbacks[idx % fallbacks.length];
 };
-
-const navSections = [
-  { label: "Home", id: "home" },
-  { label: "Impact Numbers", id: "impact-numbers" },
-  { label: "How It Works", id: "how-it-works" },
-  { label: "Campus Life", id: "campus-life" },
-  { label: "Gallery", id: "gallery" },
-  { label: "Events", id: "events" },
-  { label: "Announcements", id: "announcements" },
-  { label: "Success Stories", id: "success-stories" },
-  { label: "Accreditation", id: "accreditation" },
-  { label: "Partners", id: "partners" },
-  { label: "News", id: "news" },
-  { label: "Giving", id: "giving" },
-  { label: "FAQ", id: "faq" },
-  { label: "Contact", id: "contact" }
-];
 
 const howItWorksSteps = [
   {
@@ -150,6 +132,21 @@ const howItWorksSteps = [
     cta: "Take Tracer Survey",
     route: "/info/alumni-portal",
   },
+];
+
+const navSections = [
+  { label: "Home", id: "home" },
+  { label: "Impact Numbers", id: "impact-numbers" },
+  { label: "Impact", id: "impact" },
+  { label: "Gallery", id: "gallery" },
+  { label: "Campuses", id: "campuses" },
+  { label: "Announcements", id: "announcements" },
+  { label: "Community", id: "community" },
+  { label: "Events", id: "events" },
+  { label: "News", id: "news" },
+  { label: "Success Stories", id: "success-stories" },
+  { label: "FAQ", id: "faq" },
+  { label: "Contact", id: "contact" }
 ];
 
 const communityPosts = [
@@ -266,10 +263,10 @@ const galleryImages = [
 const impactStats = [
   {
     id: "stat-1",
-    title: "Alumni Network",
-    label: "Alumni Network",
-    value: "1,238+",
-    detail: "Registered graduates across global technology hubs",
+    title: "Registered alumni",
+    label: "Registered alumni",
+    value: "1,258+",
+    detail: "Verified against the registrar list",
     trend: "+18% YoY Growth",
     icon: Users,
     action: "View Network",
@@ -279,10 +276,10 @@ const impactStats = [
   },
   {
     id: "stat-2",
-    title: "Fields of Study",
-    label: "Fields of Study",
+    title: "Fields of study",
+    label: "Fields of study",
     value: "5",
-    detail: "Engineering, Applied Science, Tech & Research",
+    detail: "Engineering and applied sciences",
     trend: "Fields of Study",
     icon: BookOpen,
     action: "Explore Programs",
@@ -292,10 +289,10 @@ const impactStats = [
   },
   {
     id: "stat-3",
-    title: "Partner Employers",
-    label: "Partner Employers",
+    title: "Corporate partners",
+    label: "Corporate partners",
     value: "500+",
-    detail: "Hiring, internship placement, and curriculum feedback",
+    detail: "Recruiting on campus",
     trend: "Corporate Link",
     icon: Building2,
     action: "Meet Partners",
@@ -305,10 +302,10 @@ const impactStats = [
   },
   {
     id: "stat-4",
-    title: "Graduate Impact",
-    label: "Graduate Impact",
-    value: "94%",
-    detail: "Employed or in higher research within 6 months",
+    title: "Employed within 12 months",
+    label: "Employed within 12 months",
+    value: "89%",
+    detail: "Longitudinal tracer survey",
     trend: "Verified Placement",
     icon: Trophy,
     action: "View Impact Data",
@@ -339,23 +336,6 @@ export default function HomePage() {
 
   const [activeSection, setActiveSection] = useState("home");
   const [user, setUser] = useState<any>(null);
-  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
-  const [selectedDonationCampaign, setSelectedDonationCampaign] = useState<{
-    id?: string;
-    title: string;
-    category?: string;
-    defaultAmount?: number;
-  } | null>(null);
-
-  const handleOpenDonation = (category = "Scholarships & Student Support") => {
-    setSelectedDonationCampaign({
-      id: "general-advancement",
-      title: "ASTU University Advancement & Student Support Fund",
-      category,
-      defaultAmount: 500,
-    });
-    setIsDonationModalOpen(true);
-  };
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [liveEvents, setLiveEvents] = useState<any[]>(() => {
@@ -1292,9 +1272,7 @@ export default function HomePage() {
                   src={slide.image}
                   onError={handleImageError}
                 />
-                {/* Lighter, clearer scrim so real campus photo is clearly visible */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#00142e]/75 via-[#001e4a]/45 to-slate-950/20" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#001d4a]/95 via-[#002b6b]/85 to-[#003580]/60" />
               </div>
             ))}
           </div>
@@ -1309,11 +1287,11 @@ export default function HomePage() {
                 </span>
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold leading-[1.14] text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold leading-[1.14] text-white tracking-tight">
                 {(liveSlides[currentSlide] || liveSlides[0])?.title}
               </h1>
 
-              <p className="mt-4 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-slate-100 drop-shadow-[0_1px_5px_rgba(0,0,0,0.7)]">
+              <p className="mt-4 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-slate-200">
                 {(liveSlides[currentSlide] || liveSlides[0])?.description}
               </p>
 
@@ -1371,557 +1349,233 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── SECTION: ASTU Impact at a Glance ── */}
-        <section id="impact-numbers" className="scroll-mt-24 w-full bg-white py-20 lg:py-24 border-b border-slate-100">
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left Title & Editorial Subtitle, Right Navigation Pill */}
-            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
-              <div className="max-w-2xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-6 h-[2px] bg-[#C8102E] inline-block rounded-full" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
-                    {liveImpactHeaders?.eyebrow || "ASTU IMPACT AT A GLANCE"}
-                  </span>
-                </div>
-                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
-                  {liveImpactHeaders?.title || "Connecting Academia to Industry"}
-                </h2>
-                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
-                  {liveImpactHeaders?.description || "Building a stronger connection between ASTU graduates, employers, research, and career opportunities."}
-                </p>
-              </div>
-
-              <div className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => navigate("/info/overview")}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
-                >
-                  <span>Explore ASTU Impact</span>
-                  <span className="transition-transform group-hover:translate-x-1">→</span>
-                </button>
-              </div>
-            </div>
-
-            {/* 4-Column Horizontal Telemetry Bar - Clean Minimal Layout */}
-            <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-                {/* Column 1: Registered Alumni */}
-                <div
-                  onClick={() => navigate("/register")}
-                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
-                >
-                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
-                    {metrics.registeredAlumniFormatted || "1,258+"}
-                  </div>
-                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                    Registered alumni
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500 font-normal">
-                    Verified against the registrar list
-                  </p>
-                </div>
-
-                {/* Column 2: Fields of Study */}
-                <div
-                  onClick={() => navigate("/info/overview")}
-                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
-                >
-                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
-                    {String(metrics.fieldsOfStudy || 5)}
-                  </div>
-                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                    Fields of study
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500 font-normal">
-                    Engineering and applied sciences
-                  </p>
-                </div>
-
-                {/* Column 3: Corporate Partners */}
-                <div
-                  onClick={() => navigate("/info/featured-employers")}
-                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
-                >
-                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
-                    {metrics.corporatePartnersFormatted || "500+"}
-                  </div>
-                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                    Corporate partners
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500 font-normal">
-                    Recruiting on campus
-                  </p>
-                </div>
-
-                {/* Column 4: Employed within 12 months */}
-                <div
-                  onClick={() => navigate("/info/overview")}
-                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
-                >
-                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
-                    {metrics.employmentRateFormatted || "89%"}
-                  </div>
-                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                    Employed within 12 months
-                  </p>
-                  <p className="mt-1 text-xs text-slate-500 font-normal">
-                    Longitudinal tracer survey
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── SECTION: How ASTU-AMS Works ── */}
-        <section id="how-it-works" className="scroll-mt-24 w-full bg-gradient-to-b from-[#F8FAFC] via-[#F4F7FB] to-[#F8FAFC] py-16 lg:py-20 border-b border-slate-200/80 relative overflow-hidden">
-          {/* Subtle blueprint grid overlay */}
-          <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,#003580_1px,transparent_1px),linear-gradient(to_bottom,#003580_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-blue-400/[0.04] rounded-full blur-3xl pointer-events-none" />
-
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10">
-            {/* Header: Centered Clean Title & Subtitle (No duplicate top stepper) */}
-            <div className="mb-10 text-center max-w-2xl mx-auto pb-4 border-b border-slate-200/80">
-              <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-100">
-                <span className="w-2 h-2 rounded-full bg-[#C8102E]" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
-                  {livePortalsHeaders?.eyebrow || "GET STARTED"}
-                </span>
-              </div>
-              <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
-                {livePortalsHeaders?.title || "How ASTU-AMS Works"}
-              </h2>
-              <p className="mt-2.5 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
-                {livePortalsHeaders?.description || "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps."}
-              </p>
-            </div>
-
-            {/* 4 Steps Grid - Compact, Modern & Strictly ASTU Brand Colors */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {livePortals.map((item, idx) => {
-                const IconComponent = typeof item.icon === 'function' ? item.icon : (iconMap[item.icon] || Users);
-                const descText = item.description || (Array.isArray(item.points) ? item.points[0] : item.text || '');
-                const tagsList: string[] = item.tags || (idx === 0 ? ["Verified ID", "Skill Matrix"] : idx === 1 ? ["Job Match", "Mentorship"] : idx === 2 ? ["Global Network", "Industry Events"] : ["Tracer Surveys", "Curriculum"]);
-                const ctaText = item.cta || (idx === 0 ? "Start Profile" : idx === 1 ? "Explore Opportunities" : idx === 2 ? "Join Network" : "Take Tracer Survey");
-                const routeUrl = item.route || (idx === 0 ? "/register" : idx === 1 ? "/info/employer-portal" : idx === 2 ? "/login" : "/info/alumni-portal");
-
-                const stepActionVerbs = ["ONBOARDING", "OPPORTUNITY", "ENGAGEMENT", "GIVE BACK"];
-                const actionVerb = stepActionVerbs[idx] || "STAGE";
-                const isNavy = idx % 2 === 0;
-                const brandColor = isNavy ? "#003580" : "#C8102E";
-
-                const stepBullets = [
-                  ["Verified Student/Alumni ID", "Skill & Certification Matrix"],
-                  ["Direct Enterprise Recruitment", "Faculty Research Grants"],
-                  ["Global Alumni Directory", "Campus Expos & Hackathons"],
-                  ["Accreditation Tracer Survey", "Curriculum Advisory"],
-                ];
-
-                const currentBullets = tagsList.length >= 2 ? tagsList.slice(0, 2) : (stepBullets[idx] || ["Verified Platform Feature", "Accredited Workflow"]);
+        {/* ── SECTION: ASTU Impact at a Glance (Architectural Metric Bar) ── */}
+        <section id="impact-numbers" className="scroll-mt-24 w-full bg-white border-y border-slate-200/80 py-8 sm:py-10 lg:py-12 relative">
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+              {dynamicStats.slice(0, 4).map((stat, idx) => {
+                const targetUrl = stat.target || stat.link || liveSectionLinks.impactDefaultLinkTarget;
+                const valStr = String(stat.value || '').trim();
+                const suffStr = stat.suffix && !valStr.endsWith(stat.suffix.trim()) ? stat.suffix.trim() : '';
+                const displayValue = `${valStr}${suffStr}`;
 
                 return (
-                  <article
-                    key={item.id || item.step || item.title || idx}
-                    onClick={() => navigate(routeUrl)}
-                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-5 sm:p-6 border border-slate-200/90 shadow-xs hover:shadow-md hover:border-[#003580]/40 hover:-translate-y-1 transition-all duration-200 cursor-pointer"
+                  <div
+                    key={stat.id || idx}
+                    onClick={() => navigate(targetUrl)}
+                    className="p-5 sm:p-6 lg:px-8 flex flex-col justify-start group cursor-pointer hover:bg-slate-50/70 transition-colors duration-200"
                   >
-                    {/* Top Accent Strip - Strictly ASTU Navy and ASTU Red */}
-                    <div
-                      className="absolute top-0 left-0 right-0 h-1 transition-colors"
-                      style={{ backgroundColor: brandColor }}
-                    />
-
-                    <div>
-                      {/* Step Header: Icon & Action Verb Badge */}
-                      <div className="flex items-center justify-between mb-3.5">
-                        <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-2xs transition-colors ${isNavy
-                              ? 'bg-blue-50 border border-blue-100 text-[#003580] group-hover:bg-[#003580] group-hover:text-white'
-                              : 'bg-rose-50 border border-rose-100 text-[#C8102E] group-hover:bg-[#C8102E] group-hover:text-white'
-                            }`}
-                        >
-                          <IconComponent className="h-4.5 w-4.5" />
-                        </div>
-                        <span
-                          className={`text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded-full ${isNavy
-                              ? 'bg-blue-50/80 text-[#003580]'
-                              : 'bg-rose-50/80 text-[#C8102E]'
-                            }`}
-                        >
-                          {actionVerb}
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="font-fraunces text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#003580] transition-colors leading-snug">
-                        {item.title}
-                      </h3>
-
-                      {/* Description */}
-                      <p className="mt-1.5 text-xs text-slate-500 leading-relaxed line-clamp-2">
-                        {descText}
-                      </p>
-
-                      {/* Feature Highlights - Compact Chips */}
-                      <div className="mt-3.5 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5">
-                        {currentBullets.map((feature: string, fIdx: number) => (
-                          <span
-                            key={fIdx}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 text-[11px] font-medium text-slate-600 border border-slate-200/60"
-                          >
-                            <CheckCircle2
-                              className={`h-3 w-3 shrink-0 ${isNavy ? 'text-[#003580]' : 'text-[#C8102E]'}`}
-                            />
-                            <span>{feature}</span>
-                          </span>
-                        ))}
-                      </div>
+                    <div className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors duration-200">
+                      {displayValue}
                     </div>
-
-                    {/* Bottom CTA Action Link */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
-                        {ctaText}
-                      </span>
-                      <div
-                        className={`flex h-6 w-6 items-center justify-center rounded-full transition-all duration-200 ${isNavy
-                            ? 'bg-blue-50 text-[#003580] group-hover:bg-[#003580] group-hover:text-white'
-                            : 'bg-rose-50 text-[#C8102E] group-hover:bg-[#C8102E] group-hover:text-white'
-                          }`}
-                      >
-                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                      </div>
+                    <div className="mt-3 text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#003580] transition-colors duration-200">
+                      {stat.label}
                     </div>
-                  </article>
+                    <div className="mt-1 text-xs sm:text-[13px] text-slate-500 leading-relaxed font-normal">
+                      {stat.detail}
+                    </div>
+                  </div>
                 );
               })}
             </div>
+          </div>
+        </section>
 
-            {/* Centered Modern Get Started CTA - Clean & Professional without giant card */}
-            <div className="mt-12 flex flex-col items-center justify-center text-center">
-              <button
-                type="button"
-                onClick={() => navigate(livePortalsHeaders?.ctaLink || liveSectionLinks.portalsGetStartedLink || "/register")}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-[#003580] hover:bg-[#002766] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer group"
-              >
-                <span>{livePortalsHeaders?.ctaText || "Get Started Today"}</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </button>
-              <p className="mt-2.5 text-xs text-slate-500 font-medium">
-                Join the ASTU alumni community and start building your professional network.
+        {/* ── SECTION: How ASTU-AMS Works (The 4-Step Connected Journey) ── */}
+        <section id="how-it-works" className="scroll-mt-24 w-full bg-gradient-to-b from-[#F8FAFC] via-[#F4F8FD]/50 to-[#F8FAFC] text-slate-900 border-b border-slate-200/80 py-12 lg:py-16 relative overflow-hidden">
+          {/* Subtle architectural precision dot grid */}
+          <div className="absolute inset-0 bg-[radial-gradient(#003580_0.75px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] pointer-events-none" />
+
+          <div className="mx-auto max-w-[1320px] px-4 sm:px-6 lg:px-8 relative z-10">
+            {/* Header: Centered Clean Title & Subtitle with tight, balanced spacing */}
+            <div className="mb-10 text-center max-w-xl mx-auto">
+              <h2 className="font-fraunces text-2xl sm:text-3xl font-bold text-slate-900 tracking-[-0.015em] leading-tight">
+                {livePortalsHeaders?.title || "How ASTU-AMS Works"}
+              </h2>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-md mx-auto">
+                {livePortalsHeaders?.description || "Your path from verified graduate to global leader in four connected stages."}
               </p>
             </div>
-          </div>
-        </section>
 
-        {/* ── SECTION 1: Life at ASTU ── */}
-        <section id="campus-life" className="scroll-mt-24 w-full bg-white py-16 md:py-24 border-t border-slate-100">
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left title & clean editorial intro, Right detail page pill */}
-            <div className="mb-10 sm:mb-12 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pb-6 border-b border-slate-100">
-              <div className="max-w-2xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-6 h-[2px] bg-[#C8102E]" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
-                    {liveCampusLifeHeaders?.eyebrow || "EXPLORE LIFE AT ASTU"}
-                  </span>
-                </div>
-                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
-                  {liveCampusLifeHeaders?.title || "Life at ASTU"}
-                </h2>
-                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
-                  {campusLifeDescription}
-                </p>
-              </div>
-
-              <div className="shrink-0 flex items-center">
-                <button
-                  type="button"
-                  onClick={() => navigate("/info/campus-life")}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
-                >
-                  <span>Explore All Campus Life</span>
-                  <span className="transition-transform group-hover:translate-x-1">→</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Asymmetrical Master Layout: 7-col Featured Hero Card + 5-col Dual Showcase Stack */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
-              {/* Left 7 Columns: Hero Feature Card with Authentic Photography & Navy Cinematic Overlay */}
-              <div className="lg:col-span-7 flex">
-                <div
-                  onClick={() => navigate(displayCampusLife[0]?.link || "/events")}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      navigate(displayCampusLife[0]?.link || "/events");
-                    }
-                  }}
-                  className="relative w-full rounded-3xl overflow-hidden flex flex-col justify-between p-8 sm:p-10 text-white min-h-[460px] lg:min-h-[500px] shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#003580]/40"
-                >
-                  {/* Photo Background with 700ms smooth zoom */}
-                  <img
-                    src={displayCampusLife[0]?.image || gc7}
-                    alt={displayCampusLife[0]?.title || "Campus Life"}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-                    onError={handleImageError}
-                  />
-
-                  {/* Multi-layered Cinematic Navy Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#001d4a]/95 via-[#003580]/80 to-[#003580]/35 transition-opacity duration-300 group-hover:via-[#003580]/75" />
-
-                  {/* Top Red Institutional Bar */}
-                  <div className="absolute top-0 left-8 sm:left-10 w-16 h-1.5 bg-[#C8102E] rounded-b-sm shadow-xs" aria-hidden="true" />
-
-                  {/* Top Tag & Index */}
-                  <div className="relative z-10 flex items-center justify-between pt-2">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white border border-white/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse" />
-                      <span>{displayCampusLife[0]?.eyebrow || "EVENTS & ACTIVITIES"}</span>
-                    </div>
-                    <span className="text-xs font-semibold text-white/60 tracking-wider">
-                      01 / 03
-                    </span>
-                  </div>
-
-                  {/* Bottom Content & CTA */}
-                  <div className="relative z-10 mt-auto pt-16">
-                    <h3 className="font-serif text-2xl sm:text-3xl lg:text-[34px] font-bold text-white leading-snug max-w-xl group-hover:text-blue-100 transition-colors">
-                      {displayCampusLife[0]?.title || "Reunions, career expos, and workshops"}
-                    </h3>
-                    <p className="mt-3 text-sm sm:text-base text-white/80 leading-relaxed max-w-lg">
-                      {displayCampusLife[0]?.description || "Chapter meetings, leadership workshops, career expos, and community programs that keep graduates connected to the university."}
-                    </p>
-
-                    <div className="mt-8 pt-4 border-t border-white/15 flex items-center justify-between">
-                      <div className="inline-flex items-center gap-2 rounded-xl bg-[#C8102E] group-hover:bg-[#A60D26] h-12 px-6 text-sm font-semibold text-white transition-all shadow-md group-hover:shadow-lg">
-                        <span>{displayCampusLife[0]?.action || "View events"}</span>
-                        <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
-                      </div>
-                      <span className="text-xs text-white/60 uppercase tracking-widest hidden sm:inline">
-                        Featured Experience
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right 5 Columns: 2 Stacked Horizontal Architectural Showcase Cards */}
-              <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
-                {/* Facilities Card (Card 02) */}
-                <div
-                  onClick={() => navigate(displayCampusLife[1]?.link || "/info/facilities")}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      navigate(displayCampusLife[1]?.link || "/info/facilities");
-                    }
-                  }}
-                  className="relative flex flex-col sm:flex-row overflow-hidden rounded-2xl border border-slate-200/90 bg-white hover:border-[#003580]/30 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group flex-1 min-h-[220px] focus:outline-none focus:ring-2 focus:ring-[#003580]/30"
-                >
-                  <div className="relative w-full sm:w-48 lg:w-44 shrink-0 min-h-[170px] sm:min-h-full overflow-hidden bg-slate-100">
-                    <img
-                      src={displayCampusLife[1]?.image || electricLabs}
-                      alt={displayCampusLife[1]?.title || "Facilities"}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-                      onError={handleImageError}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
-                    <span className="absolute top-3 left-3 sm:hidden rounded-full bg-white/90 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#003580]">
-                      02
-                    </span>
-                  </div>
-
-                  <div className="p-6 sm:p-7 flex flex-col justify-between flex-1">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
-                          {displayCampusLife[1]?.eyebrow || "FACILITIES & SPACES"}
-                        </span>
-                        <span className="hidden sm:inline text-xs font-semibold text-slate-400">
-                          02
-                        </span>
-                      </div>
-                      <h4 className="font-serif text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
-                        {displayCampusLife[1]?.title || "Facilities"}
-                      </h4>
-                      <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
-                        {displayCampusLife[1]?.description || "Laboratories, research centers, central libraries, and employer interview rooms."}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-semibold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
-                        <span>{displayCampusLife[1]?.action || "Explore facilities"}</span>
-                        <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider">
-                        ASTU
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Museums & Gallery Card (Card 03) */}
-                <div
-                  onClick={() => navigate(displayCampusLife[2]?.link || "/gallery")}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      navigate(displayCampusLife[2]?.link || "/gallery");
-                    }
-                  }}
-                  className="relative flex flex-col sm:flex-row overflow-hidden rounded-2xl border border-slate-200/90 bg-white hover:border-[#003580]/30 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group flex-1 min-h-[220px] focus:outline-none focus:ring-2 focus:ring-[#003580]/30"
-                >
-                  <div className="relative w-full sm:w-48 lg:w-44 shrink-0 min-h-[170px] sm:min-h-full overflow-hidden bg-slate-100">
-                    <img
-                      src={displayCampusLife[2]?.image || arcImage}
-                      alt={displayCampusLife[2]?.title || "Museums and gallery"}
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-108"
-                      onError={handleImageError}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent sm:hidden" />
-                    <span className="absolute top-3 left-3 sm:hidden rounded-full bg-white/90 backdrop-blur-xs px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#003580]">
-                      03
-                    </span>
-                  </div>
-
-                  <div className="p-6 sm:p-7 flex flex-col justify-between flex-1">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#C8102E]">
-                          {displayCampusLife[2]?.eyebrow || "MUSEUMS & GALLERY"}
-                        </span>
-                        <span className="hidden sm:inline text-xs font-semibold text-slate-400">
-                          03
-                        </span>
-                      </div>
-                      <h4 className="font-serif text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
-                        {displayCampusLife[2]?.title || "Museums and gallery"}
-                      </h4>
-                      <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-3">
-                        {displayCampusLife[2]?.description || "Research showcases, graduation moments, and campus photography."}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-semibold text-[#003580] group-hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors">
-                        <span>{displayCampusLife[2]?.action || "View gallery"}</span>
-                        <span className="transition-transform group-hover:translate-x-1 duration-200">→</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider">
-                        ASTU
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── SECTION 2: Campus gallery ── */}
-        <section id="gallery" className="scroll-mt-24 w-full bg-[#F8FAFC] py-16 md:py-[104px] border-y border-slate-200/80">
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Header: Left Title & Editorial Subtitle, Right Action Pill */}
-            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200/80">
-              <div className="max-w-2xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-6 h-[2px] bg-[#C8102E] inline-block rounded-full" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
-                    {liveGallerySection?.homeEyebrow || "GALLERY"}
-                  </span>
-                </div>
-                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
-                  {liveGallerySection?.homeTitle || "Campus gallery"}
-                </h2>
-                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
-                  {liveGallerySection?.homeSubtitle || "Visual highlights, campus events, research milestones, and institutional memories at ASTU."}
-                </p>
-              </div>
-
-              <div className="shrink-0">
-                <button
-                  type="button"
-                  onClick={() => navigate(liveGallerySection?.homeButtonLink || "/gallery")}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-300 hover:border-[#003580] bg-white hover:bg-[#003580] text-[#003580] hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold shadow-xs cursor-pointer group"
-                >
-                  <span>View full gallery</span>
-                  <span className="transition-transform group-hover:translate-x-1">→</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Gallery Grid: 2 Columns. Left 1 large photo (01), Right 2 stacked photos (02, 03) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[480px]">
-              {/* Left Column: ASTU main campus (01) */}
+            {/* 4 Connected Stages with continuous timeline */}
+            <div className="relative">
+              {/* Horizontal Connecting Timeline Line across top (Desktop) */}
               <div
-                onClick={() => navigate("/gallery")}
-                className="card-soft h-full flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group min-h-[320px] md:min-h-0"
+                aria-hidden="true"
+                className="hidden lg:block absolute top-[6px] left-[32px] right-[32px] h-[2px] bg-slate-200 pointer-events-none z-0"
               >
-                <div className="relative flex-1 min-h-[260px] md:min-h-0 w-full overflow-hidden bg-slate-100">
-                  <img
-                    src={gallery1}
-                    alt="ASTU main campus"
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    onError={handleImageError}
-                  />
-                </div>
-                <div className="h-12 px-6 flex items-center justify-between bg-[#003580] text-white shrink-0">
-                  <span className="text-xs sm:text-sm font-semibold tracking-wide">ASTU main campus</span>
-                  <span className="text-xs font-mono text-slate-300">01</span>
-                </div>
+                <div className="h-full w-full bg-gradient-to-r from-[#003580] via-emerald-500 to-[#003580]" />
               </div>
 
-              {/* Right Column: 2 Stacked Photos */}
-              <div className="flex flex-col gap-6 h-full">
-                {/* Top Photo: Innovation and collaboration (02) */}
-                <div
-                  onClick={() => navigate("/gallery")}
-                  className="card-soft flex-1 flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group min-h-[220px] md:min-h-0"
-                >
-                  <div className="relative flex-1 min-h-[160px] md:min-h-0 w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={stateM}
-                      alt="Innovation and collaboration"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      onError={handleImageError}
-                    />
-                  </div>
-                  <div className="h-11 px-5 flex items-center justify-between bg-[#003580] text-white shrink-0">
-                    <span className="text-xs sm:text-sm font-semibold tracking-wide">Innovation and collaboration</span>
-                    <span className="text-xs font-mono text-slate-300">02</span>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 relative z-10">
+                {[
+                  {
+                    step: '01',
+                    title: 'Create Your Profile',
+                    linkText: 'Start Profile',
+                    route: '/register',
+                  },
+                  {
+                    step: '02',
+                    title: 'Discover Opportunities',
+                    linkText: 'Explore Opportunities',
+                    route: '/info/employer-portal',
+                  },
+                  {
+                    step: '03',
+                    title: 'Connect & Network',
+                    linkText: 'Join Network',
+                    route: '/login',
+                  },
+                  {
+                    step: '04',
+                    title: 'Grow & Give Back',
+                    linkText: 'Take Tracer Survey',
+                    route: '/info/alumni-portal',
+                  },
+                ].map((item, idx) => {
+                  const portal = livePortals[idx] || {};
+                  const title = portal.title || item.title;
+                  const cta = portal.cta || item.linkText;
+                  const route = portal.route || item.route;
 
-                {/* Bottom Photo: Graduation ceremony (03) */}
-                <div
-                  onClick={() => navigate("/gallery")}
-                  className="card-soft flex-1 flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200/80 cursor-pointer group min-h-[220px] md:min-h-0"
-                >
-                  <div className="relative flex-1 min-h-[160px] md:min-h-0 w-full overflow-hidden bg-slate-100">
-                    <img
-                      src={gc7}
-                      alt="Graduation ceremony"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      onError={handleImageError}
-                    />
-                  </div>
-                  <div className="h-11 px-5 flex items-center justify-between bg-[#003580] text-white shrink-0">
-                    <span className="text-xs sm:text-sm font-semibold tracking-wide">Graduation ceremony</span>
-                    <span className="text-xs font-mono text-slate-300">03</span>
-                  </div>
-                </div>
+                  return (
+                    <div
+                      key={item.step}
+                      onClick={() => navigate(route)}
+                      className="group cursor-pointer flex flex-col justify-start"
+                    >
+                      {/* Node dot on the timeline */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-3.5 h-3.5 rounded-full bg-white border-2 border-emerald-500 ring-4 ring-emerald-50 shadow-2xs group-hover:scale-125 group-hover:border-[#003580] group-hover:ring-blue-100 transition-all duration-300 shrink-0" />
+                        <span className="lg:hidden h-[2px] flex-1 bg-gradient-to-r from-emerald-500 to-slate-200" />
+                      </div>
+
+                      {/* Step Number */}
+                      <span className="font-mono text-xs font-bold text-emerald-600 tracking-widest uppercase">
+                        {item.step}
+                      </span>
+
+                      {/* Heading */}
+                      <h3 className="font-fraunces text-xl sm:text-[22px] font-bold text-slate-900 group-hover:text-[#003580] transition-colors mt-2 leading-snug">
+                        {title}
+                      </h3>
+
+                      {/* Action Link */}
+                      <div className="mt-3 inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#003580] group-hover:text-[#C8102E] transition-colors">
+                        <span>{cta}</span>
+                        <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
+
+            {/* Clean Centered Get Started Button at the Middle */}
+            <div className="mt-12 sm:mt-14 text-center">
+              <button
+                type="button"
+                onClick={() => navigate(livePortalsHeaders?.ctaLink || "/register")}
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#003580] hover:bg-[#C8102E] text-white font-bold text-xs sm:text-sm tracking-wide transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer group"
+              >
+                <span>{livePortalsHeaders?.ctaText || "Get Started"}</span>
+                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SECTION: Campus Life & Moments Gallery (Modern Clean Editorial Layout) ── */}
+        <section id="campus-life" className="scroll-mt-24 w-full bg-white py-16 sm:py-20 md:py-24 border-t border-slate-200/80">
+          <div id="gallery" className="scroll-mt-24" />
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header: Left Title, Right "View the gallery →" */}
+            <div className="mb-8 sm:mb-10 flex items-center justify-between">
+              <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] tracking-[-0.015em]">
+                {liveCampusLifeHeaders?.title || "Campus life"}
+              </h2>
+              <button
+                type="button"
+                onClick={() => navigate(liveGallerySection?.homeButtonLink || "/gallery")}
+                className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-700 hover:text-[#003580] transition-colors cursor-pointer"
+              >
+                <span>View the gallery</span>
+                <span className="text-emerald-600 font-bold transition-transform group-hover:translate-x-1">→</span>
+              </button>
+            </div>
+
+            {/* 3 Straight Editorial Cards with Asymmetric Center Hero (20-25% taller) */}
+            {(() => {
+              const galleryItems = [
+                {
+                  id: "G-1",
+                  title: "Main campus, Block B",
+                  subtitle: "BLOCK B · OCT 2026",
+                  img: humanitarianBuilding || "/images/humanitary building.jpg",
+                  alt: "ASTU Main campus, Block B",
+                  aspectClass: "aspect-[4/5]",
+                  cardClass: "group cursor-pointer flex flex-col",
+                },
+                {
+                  id: "G-2",
+                  title: "Graduation ceremony",
+                  subtitle: "MAIN AUDITORIUM · JUL 2026",
+                  img: "https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&fit=crop&w=1200&q=80",
+                  fallbackImg: gc7,
+                  alt: "ASTU Graduation ceremony",
+                  aspectClass: "aspect-[2/3]",
+                  cardClass: "group cursor-pointer flex flex-col md:-mt-8 lg:-mt-10 z-10",
+                },
+                {
+                  id: "G-3",
+                  title: "Innovation and collaboration",
+                  subtitle: "CSE LAB 3 · SEP 2026",
+                  img: electricLabs || "/images/electriclabs.jpeg",
+                  alt: "ASTU Innovation and collaboration",
+                  aspectClass: "aspect-[4/5]",
+                  cardClass: "group cursor-pointer flex flex-col",
+                },
+              ];
+
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start pt-2 md:pt-6">
+                  {galleryItems.map((item) => (
+                    <article
+                      key={item.id}
+                      onClick={() => navigate("/gallery")}
+                      className={item.cardClass}
+                    >
+                      {/* Full-bleed Photo Container with Controlled Aspect Ratio and Square Corners */}
+                      <div className={`w-full ${item.aspectClass} overflow-hidden bg-slate-100 rounded-none shadow-2xs`}>
+                        <img
+                          src={item.img}
+                          alt={item.alt}
+                          className="w-full h-full object-cover rounded-none group-hover:scale-103 transition-transform duration-500 ease-out"
+                          onError={(e) => {
+                            if (item.fallbackImg && e.currentTarget.src !== item.fallbackImg) {
+                              e.currentTarget.src = item.fallbackImg;
+                            } else {
+                              handleImageError(e);
+                            }
+                          }}
+                        />
+                      </div>
+
+                      {/* Clean Square White Card Label Directly Underneath */}
+                      <div className="bg-white p-3.5 sm:p-4 border border-slate-100 shadow-2xs text-left rounded-none">
+                        <h3 className="font-fraunces text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#003580] transition-colors leading-snug">
+                          {item.title}
+                        </h3>
+                        <p className="font-mono text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-wider mt-1">
+                          {item.subtitle}
+                        </p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </section>
 
@@ -2187,344 +1841,331 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── SECTION 5: Alumni Impact & Success Stories (Unified Section) ── */}
-        <section id="success-stories" className="scroll-mt-24 w-full bg-white border-t border-slate-200/80">
-          {/* Part 1: Editorial Success Stories (Individual Achievements) */}
-          <div className="pt-16 md:pt-20 pb-12 md:pb-14">
-            <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-              {/* Header */}
-              <div className="mb-10 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-[2px] bg-[#C8102E]" />
-                    <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
-                      ALUMNI IMPACT
-                    </span>
-                  </div>
-                  <h2 className="font-fraunces text-3xl sm:text-4xl font-bold text-[#003580] tracking-[-0.015em]">
-                    Alumni Impact &amp; Success Stories
-                  </h2>
-                </div>
-                <div className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/info/alumni-stories")}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 hover:border-[#003580] bg-white hover:bg-[#003580] text-slate-700 hover:text-white transition-all text-xs font-semibold shadow-2xs cursor-pointer group"
-                  >
-                    <span>View all stories</span>
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
+        {/* ── SECTION 5: Alumni success stories (Editorial Asymmetric Layout) ── */}
+        <section id="success-stories" className="scroll-mt-24 w-full bg-white py-16 md:py-20 border-t border-slate-200/80">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header */}
+            <div className="mb-10 sm:mb-12 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200/80">
+              <h2 className="font-fraunces text-3xl sm:text-4xl font-bold text-[#003580] tracking-[-0.015em]">
+                Alumni success stories
+              </h2>
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate("/info/alumni-stories")}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 hover:border-[#003580] bg-white hover:bg-[#003580] text-slate-700 hover:text-white transition-all text-xs font-semibold shadow-2xs cursor-pointer group"
+                >
+                  <span>View all stories</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </button>
               </div>
+            </div>
 
-              {(() => {
-                const defaultStories = [
-                  {
-                    id: "S-001",
-                    name: "Dr. Ruth Alemu",
-                    role: "AI Research Scientist",
-                    department: "COMPUTER SCIENCE",
-                    year: "2018",
-                    summary: "18 papers in applied machine learning.",
-                    img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
-                    link: "/info/alumni-stories",
-                  },
-                  {
-                    id: "S-002",
-                    name: "Yonas Bekele",
-                    role: "Founder and CEO, GreenGrid Labs",
-                    department: "ELECTRICAL AND POWER ENGINEERING",
-                    year: "2016",
-                    summary: "Delivers decentralised energy infrastructure to 14 woredas in Oromia.",
-                    img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
-                    link: "/info/alumni-stories",
-                  },
-                  {
-                    id: "S-003",
-                    name: "Kalkidan Tadesse",
-                    role: "Cloud Platform Lead",
-                    department: "SOFTWARE ENGINEERING",
-                    year: "2019",
-                    summary: "Moved core services to a cloud platform; deployment now takes minutes.",
-                    img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
-                    link: "/info/alumni-stories",
-                  },
-                ];
+            {(() => {
+              const defaultStories = [
+                {
+                  id: "S-001",
+                  name: "Dr. Ruth Alemu",
+                  role: "AI Research Scientist",
+                  department: "COMPUTER SCIENCE",
+                  year: "2018",
+                  summary: "18 papers in applied machine learning.",
+                  img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+                  link: "/info/alumni-stories",
+                },
+                {
+                  id: "S-002",
+                  name: "Yonas Bekele",
+                  role: "Founder and CEO, GreenGrid Labs",
+                  department: "ELECTRICAL AND POWER ENGINEERING",
+                  year: "2016",
+                  summary: "Delivers decentralised energy infrastructure to 14 woredas in Oromia.",
+                  img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
+                  link: "/info/alumni-stories",
+                },
+                {
+                  id: "S-003",
+                  name: "Kalkidan Tadesse",
+                  role: "Cloud Platform Lead",
+                  department: "SOFTWARE ENGINEERING",
+                  year: "2019",
+                  summary: "Moved core services to a cloud platform; deployment now takes minutes.",
+                  img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+                  link: "/info/alumni-stories",
+                },
+              ];
 
-                const stories = (liveStories && liveStories.length >= 3)
-                  ? liveStories.slice(0, 3).map((s: any, idx: number) => ({
-                    ...defaultStories[idx],
-                    ...s,
-                    name: s.name || defaultStories[idx].name,
-                    role: s.role || defaultStories[idx].role,
-                    department: s.department ? s.department.replace(/&/g, 'AND').toUpperCase() : defaultStories[idx].department,
-                    year: s.graduationYear ? s.graduationYear.replace(/class of/i, '').trim() : defaultStories[idx].year,
-                    summary: s.shortSummary || s.summary || s.milestone || (s.text ? (s.text.length > 95 ? s.text.slice(0, 95) + '…' : s.text) : defaultStories[idx].summary),
-                    img: s.image || s.img || defaultStories[idx].img,
-                    link: s.link || `/stories/${s.id || defaultStories[idx].id}`,
-                  }))
-                  : defaultStories;
+              const stories = (liveStories && liveStories.length >= 3)
+                ? liveStories.slice(0, 3).map((s: any, idx: number) => ({
+                  ...defaultStories[idx],
+                  ...s,
+                  name: s.name || defaultStories[idx].name,
+                  role: s.role || defaultStories[idx].role,
+                  department: s.department ? s.department.replace(/&/g, 'AND').toUpperCase() : defaultStories[idx].department,
+                  year: s.graduationYear ? s.graduationYear.replace(/class of/i, '').trim() : defaultStories[idx].year,
+                  summary: s.shortSummary || s.summary || s.milestone || (s.text ? (s.text.length > 95 ? s.text.slice(0, 95) + '…' : s.text) : defaultStories[idx].summary),
+                  img: s.image || s.img || defaultStories[idx].img,
+                  link: s.link || `/stories/${s.id || defaultStories[idx].id}`,
+                }))
+                : defaultStories;
 
-                const story1 = stories[0];
-                const story2 = stories[1];
-                const story3 = stories[2];
+              const story1 = stories[0];
+              const story2 = stories[1];
+              const story3 = stories[2];
 
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-                    {/* Card 1: Horizontal Side-by-Side */}
-                    <article
-                      onClick={() => navigate(story1.link || "/info/alumni-stories")}
-                      className="border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-300 group cursor-pointer flex flex-col justify-between rounded-sm"
-                    >
-                      <div>
-                        <div className="border-t-2 border-slate-700/80 pt-2 mb-4">
-                          <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                            {story1.department} · {story1.year}
-                          </span>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 items-start">
-                          <div className="w-full sm:w-36 h-48 sm:h-52 overflow-hidden bg-slate-100 shrink-0">
-                            <img
-                              src={story1.img}
-                              alt={story1.name}
-                              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                              onError={handleImageError}
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-fraunces text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
-                              {story1.name}
-                            </h3>
-                            <p className="text-xs font-semibold text-slate-700 mt-1">
-                              {story1.role}
-                            </p>
-                            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                              {story1.summary}
-                            </p>
-                            <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
-                              <span>Read profile</span>
-                              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                            </div>
-                          </div>
-                        </div>
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+                  {/* Card 1: Horizontal Side-by-Side */}
+                  <article
+                    onClick={() => navigate(story1.link || "/info/alumni-stories")}
+                    className="border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="border-t-2 border-slate-700/80 pt-2 mb-4">
+                        <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                          {story1.department} · {story1.year}
+                        </span>
                       </div>
-                    </article>
-
-                    {/* Card 2: Stacked (Top Photo, Bottom Info) */}
-                    <article
-                      onClick={() => navigate(story2.link || "/info/alumni-stories")}
-                      className="border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-300 group cursor-pointer flex flex-col justify-between rounded-sm"
-                    >
-                      <div>
-                        <div className="border-t-2 border-slate-700/80 pt-2 mb-4">
-                          <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                            {story2.department} · {story2.year}
-                          </span>
-                        </div>
-                        <div className="w-full h-44 sm:h-48 overflow-hidden bg-slate-100 mb-4">
+                      <div className="flex flex-col sm:flex-row gap-4 items-start">
+                        <div className="w-full sm:w-36 h-48 sm:h-52 overflow-hidden bg-slate-100 shrink-0">
                           <img
-                            src={story2.img}
-                            alt={story2.name}
+                            src={story1.img}
+                            alt={story1.name}
                             className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                             onError={handleImageError}
                           />
                         </div>
-                        <h3 className="font-fraunces text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
-                          {story2.name}
-                        </h3>
-                        <p className="text-xs font-semibold text-slate-700 mt-1">
-                          {story2.role}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                          {story2.summary}
-                        </p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-fraunces text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                            {story1.name}
+                          </h3>
+                          <p className="text-xs font-semibold text-slate-700 mt-1">
+                            {story1.role}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                            {story1.summary}
+                          </p>
+                          <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
+                            <span>Read profile</span>
+                            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                          </div>
+                        </div>
                       </div>
-                      <div className="mt-4 pt-2">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
-                          <span>Read profile</span>
-                          <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                    </div>
+                  </article>
+
+                  {/* Card 2: Stacked (Top Photo, Bottom Info) */}
+                  <article
+                    onClick={() => navigate(story2.link || "/info/alumni-stories")}
+                    className="border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="border-t-2 border-slate-700/80 pt-2 mb-4">
+                        <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                          {story2.department} · {story2.year}
                         </span>
                       </div>
-                    </article>
-
-                    {/* Card 3: Inverted Stacked (Top Info, Bottom Photo) */}
-                    <article
-                      onClick={() => navigate(story3.link || "/info/alumni-stories")}
-                      className="border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-300 group cursor-pointer flex flex-col justify-between rounded-sm"
-                    >
-                      <div>
-                        <div className="border-t-2 border-slate-700/80 pt-2 mb-4">
-                          <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
-                            {story3.department} · {story3.year}
-                          </span>
-                        </div>
-                        <h3 className="font-fraunces text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
-                          {story3.name}
-                        </h3>
-                        <p className="text-xs font-semibold text-slate-700 mt-1">
-                          {story3.role}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                          {story3.summary}
-                        </p>
-                        <div className="mt-3 mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
-                          <span>Read profile</span>
-                          <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
-                        </div>
-                      </div>
-                      <div className="w-full h-44 sm:h-48 overflow-hidden bg-slate-100">
+                      <div className="w-full h-44 sm:h-48 overflow-hidden bg-slate-100 mb-4">
                         <img
-                          src={story3.img}
-                          alt={story3.name}
+                          src={story2.img}
+                          alt={story2.name}
                           className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                           onError={handleImageError}
                         />
                       </div>
-                    </article>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Part 2: Community Continuation (Connected Beyond Graduation) */}
-          <div
-            id="community"
-            className="scroll-mt-24 relative py-14 md:py-16 overflow-hidden dark-band-grid border-t-2 border-[#C8102E]"
-            style={{
-              backgroundColor: '#003580',
-              backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }}
-          >
-            {/* Abstract Blueprint Grid Pattern */}
-            <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
-
-            {/* Abstract Worldwide Coordinate Geometry & Orbital Rings */}
-            <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-30">
-              <svg
-                className="w-full max-w-[1240px] h-full max-h-[660px] overflow-visible"
-                viewBox="0 0 1000 600"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Planetary Horizon & Equatorial Crosshairs */}
-                <line x1="80" y1="300" x2="920" y2="300" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" strokeDasharray="6 6" />
-                <line x1="500" y1="40" x2="500" y2="560" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="6 6" />
-
-                {/* Concentric Spherical Range Rings (Architectural Radar) */}
-                <circle cx="500" cy="300" r="120" stroke="rgba(169, 196, 224, 0.3)" strokeWidth="1" />
-                <circle cx="500" cy="300" r="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1.2" />
-                <circle cx="500" cy="300" r="310" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
-                <circle cx="500" cy="300" r="420" stroke="rgba(169, 196, 224, 0.12)" strokeWidth="1" />
-                <circle cx="500" cy="300" r="540" stroke="rgba(169, 196, 224, 0.06)" strokeWidth="1" strokeDasharray="8 8" />
-
-                {/* Abstract Globe Wireframe - Latitude Parallels */}
-                <ellipse cx="500" cy="300" rx="210" ry="64" stroke="rgba(169, 196, 224, 0.5)" strokeWidth="1.2" />
-                <ellipse cx="500" cy="225" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
-                <ellipse cx="500" cy="375" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
-
-                {/* Abstract Globe Wireframe - Longitude Meridians */}
-                <ellipse cx="500" cy="300" rx="85" ry="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1" />
-                <ellipse cx="500" cy="300" rx="160" ry="210" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
-
-                {/* Tilted Worldwide Orbital Trajectory Rings */}
-                <g transform="rotate(-20 500 300)">
-                  <ellipse cx="500" cy="300" rx="360" ry="110" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1.2" strokeDasharray="6 4" />
-                  {/* Discrete Coordinate Pulse Points */}
-                  <circle cx="140" cy="300" r="3.5" fill="#C8102E" />
-                  <circle cx="140" cy="300" r="8" stroke="#C8102E" strokeWidth="1" opacity="0.4" />
-                  <circle cx="860" cy="300" r="3.5" fill="#38bdf8" />
-                  <circle cx="860" cy="300" r="8" stroke="#38bdf8" strokeWidth="1" opacity="0.4" />
-                </g>
-
-                {/* Complementary Counter-Orbital Arc */}
-                <g transform="rotate(32 500 300)">
-                  <ellipse cx="500" cy="300" rx="330" ry="95" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="5 5" />
-                  <circle cx="830" cy="300" r="3" fill="#38bdf8" opacity="0.6" />
-                </g>
-
-                {/* Subtle Coordinate Crosshair Calibration Marks */}
-                <g stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1">
-                  <line x1="495" y1="90" x2="505" y2="90" />
-                  <line x1="495" y1="510" x2="505" y2="510" />
-                  <line x1="290" y1="295" x2="290" y2="305" />
-                  <line x1="710" y1="295" x2="710" y2="305" />
-                </g>
-              </svg>
-            </div>
-
-            {/* Decorative outlined circle shapes in top-right */}
-            <div aria-hidden="true" className="absolute -top-16 -right-16 w-96 h-96 pointer-events-none opacity-40">
-              <div className="absolute top-0 right-0 w-72 h-72 rounded-full border border-white/20" />
-              <div className="absolute -top-10 -right-10 w-96 h-96 rounded-full border border-white/15" />
-            </div>
-
-            <div className="relative z-10 mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-              <div className="mb-10 text-center reveal">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-200">
-                  <Globe className="h-3.5 w-3.5" /> {liveCommunitySection?.title || 'ASTU Global Network'}
-                </span>
-                <h3 className="mt-3 font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-[-0.015em] leading-snug">
-                  Connected Beyond Graduation
-                </h3>
-                <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-                  {liveCommunitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'}
-                </p>
-              </div>
-
-              {/* Community Testimonials */}
-              <div id="testimonials" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 scroll-mt-24">
-                {liveCommunityPosts.map((post: any, idx: number) => (
-                  <article
-                    key={post.name}
-                    className={`reveal reveal-delay-${(idx % 3) + 1} card-soft group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:border-white/25 hover:bg-white/[0.08] transition-all`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <Quote className="h-6 w-6 text-blue-300/60" />
-                        {post.degree && (
-                          <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
-                            {post.degree}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm leading-relaxed text-slate-200 italic">"{post.text}"</p>
+                      <h3 className="font-fraunces text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                        {story2.name}
+                      </h3>
+                      <p className="text-xs font-semibold text-slate-700 mt-1">
+                        {story2.role}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                        {story2.summary}
+                      </p>
                     </div>
-                    <div className="mt-5 flex items-center gap-3 pt-4 border-t border-white/10">
-                      <img
-                        src={post.image}
-                        alt={post.name}
-                        className="h-12 w-12 rounded-full object-cover border-2 border-blue-300/40 shrink-0 shadow-md bg-white/10"
-                        onError={handleImageError}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-white truncate">{post.name}</p>
-                        <p className="text-[11px] text-blue-200 font-medium truncate">{post.role}</p>
-                        {post.org && <p className="text-[10px] text-slate-300 truncate">{post.org}</p>}
-                      </div>
+                    <div className="mt-4 pt-2">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
+                        <span>Read profile</span>
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                      </span>
                     </div>
                   </article>
-                ))}
-              </div>
 
-              {/* Join CTA with clear primary & secondary CTA hierarchy */}
-              <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 reveal">
-                <button
-                  type="button"
-                  onClick={() => navigate('/register')}
-                  className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+                  {/* Card 3: Inverted Stacked (Top Info, Bottom Photo) */}
+                  <article
+                    onClick={() => navigate(story3.link || "/info/alumni-stories")}
+                    className="border border-slate-200/90 bg-white p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-300 group cursor-pointer flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="border-t-2 border-slate-700/80 pt-2 mb-4">
+                        <span className="font-mono text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+                          {story3.department} · {story3.year}
+                        </span>
+                      </div>
+                      <h3 className="font-fraunces text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                        {story3.name}
+                      </h3>
+                      <p className="text-xs font-semibold text-slate-700 mt-1">
+                        {story3.role}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                        {story3.summary}
+                      </p>
+                      <div className="mt-3 mb-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors">
+                        <span>Read profile</span>
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </div>
+                    <div className="w-full h-44 sm:h-48 overflow-hidden bg-slate-100">
+                      <img
+                        src={story3.img}
+                        alt={story3.name}
+                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                        onError={handleImageError}
+                      />
+                    </div>
+                  </article>
+                </div>
+              );
+            })()}
+          </div>
+        </section>
+
+        {/* ── Community Section ── */}
+        <section
+          id="community"
+          className="scroll-mt-24 relative py-16 md:py-[104px] overflow-hidden dark-band-grid"
+          style={{
+            backgroundColor: '#003580',
+            backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        >
+          {/* Abstract Blueprint Grid Pattern */}
+          <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
+
+          {/* Abstract Worldwide Coordinate Geometry & Orbital Rings */}
+          <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-30">
+            <svg
+              className="w-full max-w-[1240px] h-full max-h-[660px] overflow-visible"
+              viewBox="0 0 1000 600"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              {/* Planetary Horizon & Equatorial Crosshairs */}
+              <line x1="80" y1="300" x2="920" y2="300" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" strokeDasharray="6 6" />
+              <line x1="500" y1="40" x2="500" y2="560" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="6 6" />
+
+              {/* Concentric Spherical Range Rings (Architectural Radar) */}
+              <circle cx="500" cy="300" r="120" stroke="rgba(169, 196, 224, 0.3)" strokeWidth="1" />
+              <circle cx="500" cy="300" r="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1.2" />
+              <circle cx="500" cy="300" r="310" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
+              <circle cx="500" cy="300" r="420" stroke="rgba(169, 196, 224, 0.12)" strokeWidth="1" />
+              <circle cx="500" cy="300" r="540" stroke="rgba(169, 196, 224, 0.06)" strokeWidth="1" strokeDasharray="8 8" />
+
+              {/* Abstract Globe Wireframe - Latitude Parallels */}
+              <ellipse cx="500" cy="300" rx="210" ry="64" stroke="rgba(169, 196, 224, 0.5)" strokeWidth="1.2" />
+              <ellipse cx="500" cy="225" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+              <ellipse cx="500" cy="375" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+              {/* Abstract Globe Wireframe - Longitude Meridians */}
+              <ellipse cx="500" cy="300" rx="85" ry="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1" />
+              <ellipse cx="500" cy="300" rx="160" ry="210" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+              {/* Tilted Worldwide Orbital Trajectory Rings */}
+              <g transform="rotate(-20 500 300)">
+                <ellipse cx="500" cy="300" rx="360" ry="110" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1.2" strokeDasharray="6 4" />
+                {/* Discrete Coordinate Pulse Points */}
+                <circle cx="140" cy="300" r="3.5" fill="#C8102E" />
+                <circle cx="140" cy="300" r="8" stroke="#C8102E" strokeWidth="1" opacity="0.4" />
+                <circle cx="860" cy="300" r="3.5" fill="#38bdf8" />
+                <circle cx="860" cy="300" r="8" stroke="#38bdf8" strokeWidth="1" opacity="0.4" />
+              </g>
+
+              {/* Complementary Counter-Orbital Arc */}
+              <g transform="rotate(32 500 300)">
+                <ellipse cx="500" cy="300" rx="330" ry="95" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="5 5" />
+                <circle cx="830" cy="300" r="3" fill="#38bdf8" opacity="0.6" />
+              </g>
+
+              {/* Subtle Coordinate Crosshair Calibration Marks */}
+              <g stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1">
+                <line x1="495" y1="90" x2="505" y2="90" />
+                <line x1="495" y1="510" x2="505" y2="510" />
+                <line x1="290" y1="295" x2="290" y2="305" />
+                <line x1="710" y1="295" x2="710" y2="305" />
+              </g>
+            </svg>
+          </div>
+
+          {/* Decorative outlined circle shapes in top-right */}
+          <div aria-hidden="true" className="absolute -top-16 -right-16 w-96 h-96 pointer-events-none opacity-40">
+            <div className="absolute top-0 right-0 w-72 h-72 rounded-full border border-white/20" />
+            <div className="absolute -top-10 -right-10 w-96 h-96 rounded-full border border-white/15" />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-[1440px] px-4 md:px-8">
+            <div className="mb-12 text-center reveal">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-blue-200">
+                <Globe className="h-3.5 w-3.5" /> {liveCommunitySection?.title || 'ASTU Alumni Community'}
+              </span>
+              <h2 className="mt-4 font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-white tracking-[-0.015em] leading-tight">
+                Alumni Network <span className="text-blue-200">Around the World</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-[17px] text-slate-300 leading-relaxed">
+                {liveCommunitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates making a difference worldwide.'}
+              </p>
+            </div>
+
+            {/* Community Testimonials */}
+            <div id="testimonials" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 scroll-mt-24">
+              {liveCommunityPosts.map((post: any, idx: number) => (
+                <article
+                  key={post.name}
+                  className={`reveal reveal-delay-${(idx % 3) + 1} card-soft group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.15)]`}
                 >
-                  <UserRoundCheck className="h-4 w-4" /> Join ASTU Alumni Network
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/community')}
-                  className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-md border border-white/30 text-white font-semibold text-sm hover:bg-white/10 hover:border-white/50 transition-all cursor-pointer"
-                >
-                  <Globe className="h-4 w-4" /> Explore Community
-                </button>
-              </div>
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <Quote className="h-6 w-6 text-blue-300/60" />
+                      {post.degree && (
+                        <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+                          {post.degree}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm leading-relaxed text-slate-200 italic">"{post.text}"</p>
+                  </div>
+                  <div className="mt-5 flex items-center gap-3 pt-4 border-t border-white/10">
+                    <img
+                      src={post.image}
+                      alt={post.name}
+                      className="h-12 w-12 rounded-full object-cover border-2 border-blue-300/40 shrink-0 shadow-md bg-white/10"
+                      onError={handleImageError}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-white truncate">{post.name}</p>
+                      <p className="text-[11px] text-blue-200 font-medium truncate">{post.role}</p>
+                      {post.org && <p className="text-[10px] text-slate-300 truncate">{post.org}</p>}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* Join CTA */}
+            <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 reveal">
+              <button
+                onClick={() => navigate('/register')}
+                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-colors shadow-sm"
+              >
+                <UserRoundCheck className="h-4 w-4" /> Join ASTU Alumni Network
+              </button>
+              <button
+                onClick={() => navigate('/community')}
+                className="inline-flex items-center justify-center gap-2 h-12 px-7 rounded-md border border-white/30 text-white font-bold text-sm hover:bg-white/10 transition-colors"
+              >
+                <Globe className="h-4 w-4" /> Explore Community
+              </button>
             </div>
           </div>
         </section>
@@ -2673,87 +2314,6 @@ export default function HomePage() {
                   </div>
                 </details>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── SECTION: Give Back to ASTU ── */}
-        <section id="giving" className="scroll-mt-24 w-full bg-white py-16 md:py-20 border-t border-slate-200/80">
-          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-              {/* Left Column: Editorial message */}
-              <div className="lg:col-span-7 flex flex-col justify-center">
-                {/* Eyebrow */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="w-6 h-[2px] bg-[#C8102E] inline-block rounded-full" />
-                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#C8102E]">
-                    GIVE BACK TO ASTU
-                  </span>
-                </div>
-
-                {/* Main Heading */}
-                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#003580] tracking-[-0.015em] leading-[1.22]">
-                  Your Journey Can Open Doors for Others.
-                </h2>
-
-                {/* Description */}
-                <p className="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
-                  Your contribution helps empower the next generation of innovators, researchers, and leaders at Adama Science and Technology University.
-                </p>
-
-                {/* Optional Understated Impact Categories */}
-                <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap gap-2.5">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 text-xs font-medium text-slate-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#003580]" />
-                    Scholarships &amp; Student Support
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 text-xs font-medium text-slate-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#C8102E]" />
-                    Research &amp; Innovation
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 text-xs font-medium text-slate-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                    Learning Resources &amp; Facilities
-                  </span>
-                </div>
-
-                {/* Primary CTA Button */}
-                <div className="mt-8 flex items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (user?.role === 'ALUMNI') {
-                        navigate('/alumni/dashboard?tab=donations');
-                      } else {
-                        handleOpenDonation();
-                      }
-                    }}
-                    className="inline-flex items-center gap-2.5 px-6 py-3 rounded-md bg-[#003580] hover:bg-[#002244] text-white text-sm font-semibold transition-all duration-200 shadow-xs cursor-pointer group"
-                  >
-                    <span>Donate Now</span>
-                    <span className="transition-transform group-hover:translate-x-1">→</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Right Column: University / Student photo */}
-              <div className="lg:col-span-5">
-                <div className="relative rounded-2xl border border-slate-200/90 overflow-hidden bg-slate-100 shadow-2xs aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3]">
-                  <img
-                    src={gc7}
-                    alt="ASTU Scholars and Graduating Students"
-                    className="w-full h-full object-cover object-center"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
-                    }}
-                  />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent p-4 pt-8">
-                    <p className="text-xs font-medium text-white/90 tracking-wide">
-                      Adama Science and Technology University Scholars
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
@@ -3065,17 +2625,6 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
-      {/* Donation Modal */}
-      <TelebirrDonationModal
-        isOpen={isDonationModalOpen}
-        onClose={() => setIsDonationModalOpen(false)}
-        campaign={selectedDonationCampaign}
-        onSuccess={() => {
-          setIsDonationModalOpen(false);
-          toast.success("Thank you for your generous contribution to ASTU!");
-        }}
-      />
 
       <ChatBot />
     </div>
