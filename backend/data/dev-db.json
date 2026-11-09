@@ -62846,7 +62846,7 @@
             "openings": "8 Aviation Cadet & Internship Tracks",
             "partnershipType": "Strategic",
             "website": "https://www.ethiopianairlines.com",
-            "description": "Africa’s leading aviation group partnering on avionics, maintenance engineering, software systems, and aeronautical training.",
+            "description": "Africa's leading aviation group partnering on avionics, maintenance engineering, software systems, and aeronautical training.",
             "contactEmail": "recruitment@ethiopianairlines.com",
             "featured": true
           },
@@ -62902,7 +62902,7 @@
             "openings": "20+ IT & Security Openings",
             "partnershipType": "Recruitment",
             "website": "https://www.combanketh.et",
-            "description": "Ethiopia’s premier financial institution recruiting ASTU computer science and engineering graduates for core banking platforms.",
+            "description": "Ethiopia's premier financial institution recruiting ASTU computer science and engineering graduates for core banking platforms.",
             "contactEmail": "jobs@cbe.com.et",
             "featured": true
           },
@@ -62918,20 +62918,6 @@
             "website": "https://www.daad.de",
             "description": "Facilitating collaborative engineering workshops, sustainable water research, and postgraduate scholarship opportunities.",
             "contactEmail": "alumni@daad-ethiopia.org",
-            "featured": false
-          },
-          {
-            "id": "PT-8",
-            "name": "Meta Finetec PLC",
-            "logo": "",
-            "active": true,
-            "industry": "Applied Enterprise Software",
-            "location": "Addis Ababa",
-            "openings": "5 Full-Stack Developer Roles",
-            "partnershipType": "Internship",
-            "website": "https://metafinetec.com",
-            "description": "Innovative software house providing senior engineering students with real-world agile development and microservices experience.",
-            "contactEmail": "hr@metafinetec.com",
             "featured": false
           }
         ],
@@ -63062,7 +63048,7 @@
           "announcementsViewAllLink": "/announcements",
           "announcementItemLinkBase": "/announcements",
           "partnersViewAllText": "View All Partners",
-          "partnersViewAllLink": "/info/featured-employers",
+          "partnersViewAllLink": "/partners",
           "faqViewAllText": "View All FAQs",
           "faqViewAllLink": "/info/faq",
           "storiesReadMoreText": "Read More",
@@ -64464,7 +64450,7 @@
           ]
         }
       },
-      "updatedAt": "2026-11-08T23:24:02.171Z",
+      "updatedAt": "2026-11-09T20:54:50.846Z",
       "updatedBy": "CMS Admin"
     }
   ],
