@@ -1166,27 +1166,39 @@ export default function HomepageLivePreviewCanvas({
               </div>
             </div>
 
-            {/* ── 7. FEATURED ALUMNI SUCCESS STORIES SPOTLIGHT ── */}
+            {/* ── 7. UNIFIED ALUMNI IMPACT & SUCCESS STORIES ── */}
             <div
               id="preview-section-stories"
-              onClick={() => onSectionClick?.('events-news')}
-              className="relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer"
+              onClick={() => onSectionClick?.('community')}
+              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
+                activeSection === 'community' || activeSection === 'events-news' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
+              }`}
             >
-              <div className="flex items-end justify-between mb-8">
+              <SectionBadge id="community" label="Editing Alumni Impact & Community" />
+
+              {/* Part 1: Individual Alumni Achievements */}
+              <div className="flex items-end justify-between mb-8 pb-4 border-b border-slate-200">
                 <div>
-                  <span className="text-[10px] font-bold text-[#C8102E] uppercase tracking-widest block mb-1">
-                    {storiesHeaders?.eyebrow || 'ALUMNI EXCELLENCE'}
-                  </span>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="w-4 h-[2px] bg-[#C8102E]" />
+                    <span className="text-[10px] font-bold text-[#C8102E] uppercase tracking-widest block">
+                      ALUMNI IMPACT
+                    </span>
+                  </div>
                   <h2 className="text-2xl sm:text-3xl font-black text-[#003580] leading-tight">
-                    {storiesHeaders?.title || 'Stories from our graduates'}
+                    {storiesHeaders?.title || 'Alumni Impact & Success Stories'}
                   </h2>
+                  <p className="text-xs text-slate-500 mt-1 max-w-lg">
+                    Inspiring career milestones, innovation breakthroughs, and leadership achievements from ASTU graduates worldwide.
+                  </p>
                 </div>
-                <span className="text-xs font-bold text-[#003580] flex items-center gap-1">
+                <span className="text-xs font-bold text-[#003580] flex items-center gap-1 shrink-0">
                   <span>View all stories</span>
                   <ArrowRight className="h-3 w-3" />
                 </span>
               </div>
 
+              {/* 3 Story Cards */}
               <div className="grid gap-6 lg:grid-cols-12 items-stretch">
                 <div className="lg:col-span-7 rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xs p-6 flex flex-col justify-between">
                   <div>
@@ -1218,27 +1230,34 @@ export default function HomepageLivePreviewCanvas({
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* ── 8. ALUMNI COMMUNITY SECTION ── */}
-            <div
-              id="preview-section-community"
-              onClick={() => onSectionClick?.('community')}
-              className={`relative py-12 px-6 max-w-[1180px] mx-auto cursor-pointer transition-all ${
-                activeSection === 'community' ? 'ring-4 ring-inset ring-amber-400 rounded-3xl' : ''
-              }`}
-            >
-              <SectionBadge id="community" label="Editing Community Section" />
+              {/* Architectural Flow Divider */}
+              <div className="relative my-10 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative bg-white px-3 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#003580]" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                    Connected Beyond Graduation
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E]" />
+                </div>
+              </div>
 
-              <div className="rounded-3xl bg-[#003580] text-white p-8 md:p-12 relative overflow-hidden">
+              {/* Part 2: Community Continuation (Contained Navy Brand Canvas) */}
+              <div
+                id="preview-section-community"
+                className="rounded-3xl bg-[#003580] text-white p-8 md:p-12 relative overflow-hidden shadow-xl"
+              >
                 <div className="text-center max-w-2xl mx-auto mb-8">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-200 mb-2">
                     <Globe className="h-3 w-3" />
-                    <span>{communitySection?.title || 'ASTU Alumni Community'}</span>
+                    <span>{communitySection?.title || 'ASTU Global Network'}</span>
                   </span>
-                  <h2 className="text-2xl sm:text-3xl font-black">Alumni Network Around the World</h2>
+                  <h3 className="text-2xl sm:text-3xl font-black">Connected Beyond Graduation</h3>
                   <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                    {communitySection?.subtitle || 'Connect your alumni network globally and help expand the community of Adama Science and Technology University graduates.'}
+                    {communitySection?.subtitle || 'Connecting graduates across technology hubs, fostering lifelong mentorship, and advancing industry collaboration worldwide.'}
                   </p>
                 </div>
 
@@ -1257,6 +1276,16 @@ export default function HomepageLivePreviewCanvas({
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Primary vs Secondary CTA Buttons */}
+                <div className="mt-8 flex items-center justify-center gap-3">
+                  <span className="rounded-xl bg-[#C8102E] text-white px-5 py-2 text-xs font-bold shadow-md">
+                    Join ASTU Alumni Network
+                  </span>
+                  <span className="rounded-xl border border-white/30 text-white px-5 py-2 text-xs font-semibold">
+                    Explore Community
+                  </span>
                 </div>
               </div>
             </div>

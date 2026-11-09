@@ -1867,37 +1867,35 @@ export default function HomePage() {
         </section>
 
         {/* ── UNIFIED SECTION: Alumni Impact & Success Stories ── */}
-        <section id="success-stories" className="scroll-mt-24 w-full bg-white border-t border-slate-200/80">
-          {/* Part 1: Individual Alumni Achievements (White Editorial Area) */}
-          <div className="pt-14 sm:pt-16 md:pt-20 pb-12 sm:pb-14">
-            <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-              {/* Header: Unified Alumni Impact Identity */}
-              <div className="mb-10 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-[2px] bg-[#C8102E]" />
-                    <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
-                      ALUMNI IMPACT
-                    </span>
-                  </div>
-                  <h2 className="font-fraunces text-3xl sm:text-4xl font-bold text-[#003580] tracking-[-0.015em] leading-tight">
-                    Alumni Impact &amp; Success Stories
-                  </h2>
-                  <p className="mt-2 text-xs sm:text-sm text-slate-500 max-w-lg leading-relaxed font-normal">
-                    Inspiring career milestones, innovation breakthroughs, and leadership achievements from ASTU graduates worldwide.
-                  </p>
+        <section id="success-stories" className="scroll-mt-24 w-full bg-[#fbfcfd] py-14 sm:py-16 md:py-20 border-t border-slate-200/80">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            {/* Header: Unified Alumni Impact Identity */}
+            <div className="mb-10 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-slate-200/80">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-5 h-[2px] bg-[#C8102E]" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
+                    ALUMNI IMPACT
+                  </span>
                 </div>
-                <div className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/info/alumni-stories")}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 hover:border-[#003580] bg-white hover:bg-[#003580] text-slate-700 hover:text-white transition-all text-xs font-semibold shadow-2xs cursor-pointer group"
-                  >
-                    <span>View all stories</span>
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
+                <h2 className="font-fraunces text-3xl sm:text-4xl font-bold text-[#003580] tracking-[-0.015em] leading-tight">
+                  Alumni Impact &amp; Success Stories
+                </h2>
+                <p className="mt-2 text-xs sm:text-sm text-slate-500 max-w-lg leading-relaxed font-normal">
+                  Inspiring career milestones, innovation breakthroughs, and leadership achievements from ASTU graduates worldwide.
+                </p>
               </div>
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => navigate("/info/alumni-stories")}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-200 hover:border-[#003580] bg-white hover:bg-[#003580] text-slate-700 hover:text-white transition-all text-xs font-semibold shadow-2xs cursor-pointer group"
+                >
+                  <span>View all stories</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+            </div>
 
               {(() => {
                 const defaultStories = [
@@ -2066,150 +2064,162 @@ export default function HomePage() {
                   </div>
                 );
               })()}
-            </div>
-          </div>
-
-          {/* Part 2: Community Continuation (Connected Beyond Graduation - Deep Navy Brand Canvas) */}
-          <div
-            id="community"
-            className="scroll-mt-24 relative py-14 sm:py-16 md:py-20 overflow-hidden dark-band-grid text-white"
-            style={{
-              backgroundColor: '#003580',
-              backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }}
-          >
-            {/* Seamless Top Boundary Line */}
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-300/35 to-transparent pointer-events-none" />
-
-            {/* Abstract Blueprint Grid Pattern */}
-            <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
-
-            {/* Abstract Worldwide Coordinate Geometry & Orbital Rings */}
-            <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-30">
-              <svg
-                className="w-full max-w-[1240px] h-full max-h-[660px] overflow-visible"
-                viewBox="0 0 1000 600"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* Planetary Horizon & Equatorial Crosshairs */}
-                <line x1="80" y1="300" x2="920" y2="300" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" strokeDasharray="6 6" />
-                <line x1="500" y1="40" x2="500" y2="560" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="6 6" />
-
-                {/* Concentric Spherical Range Rings (Architectural Radar) */}
-                <circle cx="500" cy="300" r="120" stroke="rgba(169, 196, 224, 0.3)" strokeWidth="1" />
-                <circle cx="500" cy="300" r="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1.2" />
-                <circle cx="500" cy="300" r="310" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
-                <circle cx="500" cy="300" r="420" stroke="rgba(169, 196, 224, 0.12)" strokeWidth="1" />
-                <circle cx="500" cy="300" r="540" stroke="rgba(169, 196, 224, 0.06)" strokeWidth="1" strokeDasharray="8 8" />
-
-                {/* Abstract Globe Wireframe - Latitude Parallels */}
-                <ellipse cx="500" cy="300" rx="210" ry="64" stroke="rgba(169, 196, 224, 0.5)" strokeWidth="1.2" />
-                <ellipse cx="500" cy="225" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
-                <ellipse cx="500" cy="375" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
-
-                {/* Abstract Globe Wireframe - Longitude Meridians */}
-                <ellipse cx="500" cy="300" rx="85" ry="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1" />
-                <ellipse cx="500" cy="300" rx="160" ry="210" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
-
-                {/* Tilted Worldwide Orbital Trajectory Rings */}
-                <g transform="rotate(-20 500 300)">
-                  <ellipse cx="500" cy="300" rx="360" ry="110" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1.2" strokeDasharray="6 4" />
-                  {/* Discrete Coordinate Pulse Points */}
-                  <circle cx="140" cy="300" r="3.5" fill="#C8102E" />
-                  <circle cx="140" cy="300" r="8" stroke="#C8102E" strokeWidth="1" opacity="0.4" />
-                  <circle cx="860" cy="300" r="3.5" fill="#38bdf8" />
-                  <circle cx="860" cy="300" r="8" stroke="#38bdf8" strokeWidth="1" opacity="0.4" />
-                </g>
-
-                {/* Complementary Counter-Orbital Arc */}
-                <g transform="rotate(32 500 300)">
-                  <ellipse cx="500" cy="300" rx="330" ry="95" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="5 5" />
-                  <circle cx="830" cy="300" r="3" fill="#38bdf8" opacity="0.6" />
-                </g>
-
-                {/* Subtle Coordinate Crosshair Calibration Marks */}
-                <g stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1">
-                  <line x1="495" y1="90" x2="505" y2="90" />
-                  <line x1="495" y1="510" x2="505" y2="510" />
-                  <line x1="290" y1="295" x2="290" y2="305" />
-                  <line x1="710" y1="295" x2="710" y2="305" />
-                </g>
-              </svg>
-            </div>
-
-            {/* Decorative outlined circle shapes in top-right */}
-            <div aria-hidden="true" className="absolute -top-16 -right-16 w-96 h-96 pointer-events-none opacity-40">
-              <div className="absolute top-0 right-0 w-72 h-72 rounded-full border border-white/20" />
-              <div className="absolute -top-10 -right-10 w-96 h-96 rounded-full border border-white/15" />
-            </div>
-
-            <div className="relative z-10 mx-auto max-w-[1240px] px-4 md:px-8">
-              {/* Complementary, Smaller Heading — Connected Beyond Graduation */}
-              <div className="mb-10 text-center reveal">
-                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-200">
-                  <Globe className="h-3 w-3" /> {liveCommunitySection?.title || 'ASTU Global Network'}
+            {/* Architectural Flow Divider: Transition into Global Community */}
+            <div className="relative my-10 sm:my-14 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative bg-[#fbfcfd] px-4 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#003580]" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                  CONNECTED BEYOND GRADUATION
                 </span>
-                <h3 className="mt-3 font-fraunces text-2xl sm:text-3xl font-bold text-white tracking-[-0.015em] leading-tight">
-                  Connected Beyond Graduation
-                </h3>
-                <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
-                  {liveCommunitySection?.subtitle || 'Connecting graduates across technology hubs, fostering lifelong mentorship, and advancing industry collaboration worldwide.'}
-                </p>
+                <span className="w-2 h-2 rounded-full bg-[#C8102E]" />
+              </div>
+            </div>
+
+            {/* Part 2: Community Continuation (Contained Navy Brand Canvas) */}
+            <div
+              id="community"
+              className="scroll-mt-24 relative rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-12 text-white overflow-hidden shadow-xl border border-blue-900/40"
+              style={{
+                backgroundColor: '#003580',
+                backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.13) 1px, transparent 1px)',
+                backgroundSize: '24px 24px',
+              }}
+            >
+              {/* Seamless Top Boundary Line */}
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-300/35 to-transparent pointer-events-none" />
+
+              {/* Abstract Blueprint Grid Pattern */}
+              <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
+
+              {/* Abstract Worldwide Coordinate Geometry & Orbital Rings */}
+              <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none overflow-hidden flex items-center justify-center opacity-30">
+                <svg
+                  className="w-full max-w-[1240px] h-full max-h-[660px] overflow-visible"
+                  viewBox="0 0 1000 600"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  {/* Planetary Horizon & Equatorial Crosshairs */}
+                  <line x1="80" y1="300" x2="920" y2="300" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" strokeDasharray="6 6" />
+                  <line x1="500" y1="40" x2="500" y2="560" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="6 6" />
+
+                  {/* Concentric Spherical Range Rings (Architectural Radar) */}
+                  <circle cx="500" cy="300" r="120" stroke="rgba(169, 196, 224, 0.3)" strokeWidth="1" />
+                  <circle cx="500" cy="300" r="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1.2" />
+                  <circle cx="500" cy="300" r="310" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="4 4" />
+                  <circle cx="500" cy="300" r="420" stroke="rgba(169, 196, 224, 0.12)" strokeWidth="1" />
+                  <circle cx="500" cy="300" r="540" stroke="rgba(169, 196, 224, 0.06)" strokeWidth="1" strokeDasharray="8 8" />
+
+                  {/* Abstract Globe Wireframe - Latitude Parallels */}
+                  <ellipse cx="500" cy="300" rx="210" ry="64" stroke="rgba(169, 196, 224, 0.5)" strokeWidth="1.2" />
+                  <ellipse cx="500" cy="225" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+                  <ellipse cx="500" cy="375" rx="180" ry="44" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+                  {/* Abstract Globe Wireframe - Longitude Meridians */}
+                  <ellipse cx="500" cy="300" rx="85" ry="210" stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1" />
+                  <ellipse cx="500" cy="300" rx="160" ry="210" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" strokeDasharray="4 4" />
+
+                  {/* Tilted Worldwide Orbital Trajectory Rings */}
+                  <g transform="rotate(-20 500 300)">
+                    <ellipse cx="500" cy="300" rx="360" ry="110" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1.2" strokeDasharray="6 4" />
+                    {/* Discrete Coordinate Pulse Points */}
+                    <circle cx="140" cy="300" r="3.5" fill="#C8102E" />
+                    <circle cx="140" cy="300" r="8" stroke="#C8102E" strokeWidth="1" opacity="0.4" />
+                    <circle cx="860" cy="300" r="3.5" fill="#38bdf8" />
+                    <circle cx="860" cy="300" r="8" stroke="#38bdf8" strokeWidth="1" opacity="0.4" />
+                  </g>
+
+                  {/* Complementary Counter-Orbital Arc */}
+                  <g transform="rotate(32 500 300)">
+                    <ellipse cx="500" cy="300" rx="330" ry="95" stroke="rgba(169, 196, 224, 0.2)" strokeWidth="1" strokeDasharray="5 5" />
+                    <circle cx="830" cy="300" r="3" fill="#38bdf8" opacity="0.6" />
+                  </g>
+
+                  {/* Subtle Coordinate Crosshair Calibration Marks */}
+                  <g stroke="rgba(169, 196, 224, 0.4)" strokeWidth="1">
+                    <line x1="495" y1="90" x2="505" y2="90" />
+                    <line x1="495" y1="510" x2="505" y2="510" />
+                    <line x1="290" y1="295" x2="290" y2="305" />
+                    <line x1="710" y1="295" x2="710" y2="305" />
+                  </g>
+                </svg>
               </div>
 
-              {/* Community Testimonials */}
-              <div id="testimonials" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 scroll-mt-24">
-                {liveCommunityPosts.map((post: any, idx: number) => (
-                  <article
-                    key={post.name}
-                    className={`reveal reveal-delay-${(idx % 3) + 1} card-soft group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:border-white/25 hover:bg-white/[0.08] transition-all`}
+              {/* Decorative outlined circle shapes in top-right */}
+              <div aria-hidden="true" className="absolute -top-16 -right-16 w-96 h-96 pointer-events-none opacity-40">
+                <div className="absolute top-0 right-0 w-72 h-72 rounded-full border border-white/20" />
+                <div className="absolute -top-10 -right-10 w-96 h-96 rounded-full border border-white/15" />
+              </div>
+
+              <div className="relative z-10">
+                {/* Complementary, Smaller Heading — Connected Beyond Graduation */}
+                <div className="mb-8 text-center reveal">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-200">
+                    <Globe className="h-3 w-3" /> {liveCommunitySection?.title || 'ASTU Global Network'}
+                  </span>
+                  <h3 className="mt-3 font-fraunces text-2xl sm:text-3xl font-bold text-white tracking-[-0.015em] leading-tight">
+                    Connected Beyond Graduation
+                  </h3>
+                  <p className="mx-auto mt-2 max-w-xl text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                    {liveCommunitySection?.subtitle || 'Connecting graduates across technology hubs, fostering lifelong mentorship, and advancing industry collaboration worldwide.'}
+                  </p>
+                </div>
+
+                {/* Community Testimonials */}
+                <div id="testimonials" className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 scroll-mt-24">
+                  {liveCommunityPosts.map((post: any, idx: number) => (
+                    <article
+                      key={post.name}
+                      className={`reveal reveal-delay-${(idx % 3) + 1} card-soft group relative flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-6 shadow-[0_4px_20px_rgba(0,0,0,0.15)] hover:border-white/25 hover:bg-white/[0.08] transition-all`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <Quote className="h-6 w-6 text-blue-300/60" />
+                          {post.degree && (
+                            <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
+                              {post.degree}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm leading-relaxed text-slate-200 italic">"{post.text}"</p>
+                      </div>
+                      <div className="mt-5 flex items-center gap-3 pt-4 border-t border-white/10">
+                        <img
+                          src={post.image}
+                          alt={post.name}
+                          className="h-12 w-12 rounded-full object-cover border-2 border-blue-300/40 shrink-0 shadow-md bg-white/10"
+                          onError={handleImageError}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold text-white truncate">{post.name}</p>
+                          <p className="text-[11px] text-blue-200 font-medium truncate">{post.role}</p>
+                          {post.org && <p className="text-[10px] text-slate-300 truncate">{post.org}</p>}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                {/* Join CTA with Clear Primary vs Secondary Hierarchy */}
+                <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 reveal">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/register')}
+                    className="inline-flex items-center justify-center gap-2 h-11 px-7 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
                   >
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-3">
-                        <Quote className="h-6 w-6 text-blue-300/60" />
-                        {post.degree && (
-                          <span className="text-[10px] font-semibold text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10">
-                            {post.degree}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm leading-relaxed text-slate-200 italic">"{post.text}"</p>
-                    </div>
-                    <div className="mt-5 flex items-center gap-3 pt-4 border-t border-white/10">
-                      <img
-                        src={post.image}
-                        alt={post.name}
-                        className="h-12 w-12 rounded-full object-cover border-2 border-blue-300/40 shrink-0 shadow-md bg-white/10"
-                        onError={handleImageError}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold text-white truncate">{post.name}</p>
-                        <p className="text-[11px] text-blue-200 font-medium truncate">{post.role}</p>
-                        {post.org && <p className="text-[10px] text-slate-300 truncate">{post.org}</p>}
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-
-              {/* Join CTA with Clear Primary vs Secondary Hierarchy */}
-              <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 reveal">
-                <button
-                  type="button"
-                  onClick={() => navigate('/register')}
-                  className="inline-flex items-center justify-center gap-2 h-11 px-7 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <UserRoundCheck className="h-4 w-4" /> Join ASTU Alumni Network
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/community')}
-                  className="inline-flex items-center justify-center gap-2 h-11 px-7 rounded-md border border-white/30 text-white font-semibold text-sm hover:bg-white/10 hover:border-white/50 transition-all cursor-pointer"
-                >
-                  <Globe className="h-4 w-4" /> Explore Community
-                </button>
+                    <UserRoundCheck className="h-4 w-4" /> Join ASTU Alumni Network
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/community')}
+                    className="inline-flex items-center justify-center gap-2 h-11 px-7 rounded-md border border-white/30 text-white font-semibold text-sm hover:bg-white/10 hover:border-white/50 transition-all cursor-pointer"
+                  >
+                    <Globe className="h-4 w-4" /> Explore Community
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -2342,7 +2352,7 @@ export default function HomePage() {
         {/* ── SECTION: Give Back to ASTU (Addis Ababa University Inspired 3-Card Layout) ── */}
         <section
           id="giving"
-          className="scroll-mt-24 relative py-20 sm:py-24 overflow-hidden text-white border-t border-slate-200/80"
+          className="scroll-mt-24 relative py-14 sm:py-16 md:py-18 overflow-hidden text-white border-t border-slate-200/80"
         >
           {/* Meaningful ASTU campus or graduation background image */}
           <div className="absolute inset-0 select-none pointer-events-none">
@@ -2361,44 +2371,42 @@ export default function HomePage() {
           {/* Blueprint grid pattern overlay */}
           <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
 
-          <div className="relative z-10 mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-            {/* Centered section heading and short supporting description */}
-            <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16 reveal">
-              <div className="inline-flex items-center justify-center gap-2 mb-3">
-                <span className="w-5 h-[2px] bg-[#C8102E] inline-block rounded-full" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-red-200">
-                  GIVE BACK TO ASTU
-                </span>
-                <span className="w-5 h-[2px] bg-[#C8102E] inline-block rounded-full" />
-              </div>
-              <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-white tracking-[-0.015em] leading-tight">
+          <div className="relative z-10 mx-auto max-w-[1020px] px-4 sm:px-6">
+            {/* Centered clean heading and short supporting description */}
+            <div className="text-center max-w-xl mx-auto mb-10 sm:mb-12 reveal">
+              <h2 className="font-fraunces text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-[-0.015em] leading-tight">
                 Give Back. Inspire the Future.
               </h2>
-              <p className="mt-3.5 text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal">
-                Your contribution helps create opportunities for the next generation of innovators, researchers, and leaders at ASTU.
+              <p className="mt-2.5 text-xs sm:text-sm text-slate-200/90 leading-relaxed font-normal">
+                Support the next generation of innovators and leaders at ASTU.
               </p>
             </div>
 
             {/* Three horizontally aligned donation cards on desktop, stacked on mobile */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
               {/* Card 1: Scholarship Support */}
-              <div className="rounded-2xl bg-white p-7 sm:p-8 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+              <div className="rounded-2xl bg-white p-6 sm:p-7 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 text-[#003580] flex items-center justify-center mb-5 group-hover:bg-[#003580] group-hover:text-white transition-colors duration-200">
-                    <GraduationCap className="h-6 w-6" strokeWidth={1.8} />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-[#003580] flex items-center justify-center group-hover:bg-[#003580] group-hover:text-white transition-colors duration-200">
+                      <GraduationCap className="h-5 w-5" strokeWidth={1.8} />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#003580] bg-blue-50/80 border border-blue-100/80 px-2.5 py-1 rounded-md">
+                      Over 500K ETB
+                    </span>
                   </div>
-                  <h3 className="font-fraunces text-xl sm:text-2xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                  <h3 className="font-fraunces text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
                     Scholarship Support
                   </h3>
-                  <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                  <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
                     Help students access educational opportunities.
                   </p>
                 </div>
-                <div className="mt-8 pt-5 border-t border-slate-100">
+                <div className="mt-6 pt-4 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => handleContribute("Scholarship Support", "Scholarship Support Fund", 500)}
-                    className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-md bg-[#003580] hover:bg-[#C8102E] text-white text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs cursor-pointer group/btn"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-md bg-[#003580] hover:bg-[#C8102E] text-white text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs cursor-pointer group/btn"
                   >
                     <span>Contribute</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
@@ -2407,23 +2415,28 @@ export default function HomePage() {
               </div>
 
               {/* Card 2: Research & Innovation */}
-              <div className="rounded-2xl bg-white p-7 sm:p-8 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+              <div className="rounded-2xl bg-white p-6 sm:p-7 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 text-[#003580] flex items-center justify-center mb-5 group-hover:bg-[#003580] group-hover:text-white transition-colors duration-200">
-                    <Lightbulb className="h-6 w-6" strokeWidth={1.8} />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-[#003580] flex items-center justify-center group-hover:bg-[#003580] group-hover:text-white transition-colors duration-200">
+                      <Lightbulb className="h-5 w-5" strokeWidth={1.8} />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#003580] bg-blue-50/80 border border-blue-100/80 px-2.5 py-1 rounded-md">
+                      Over 500K ETB
+                    </span>
                   </div>
-                  <h3 className="font-fraunces text-xl sm:text-2xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                  <h3 className="font-fraunces text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
                     Research &amp; Innovation
                   </h3>
-                  <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                  <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
                     Support research, creativity, and discovery.
                   </p>
                 </div>
-                <div className="mt-8 pt-5 border-t border-slate-100">
+                <div className="mt-6 pt-4 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => handleContribute("Research & Innovation", "Research & Innovation Fund", 1000)}
-                    className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-md bg-[#003580] hover:bg-[#C8102E] text-white text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs cursor-pointer group/btn"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-md bg-[#003580] hover:bg-[#C8102E] text-white text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs cursor-pointer group/btn"
                   >
                     <span>Contribute</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
@@ -2432,23 +2445,28 @@ export default function HomePage() {
               </div>
 
               {/* Card 3: University Development */}
-              <div className="rounded-2xl bg-white p-7 sm:p-8 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
+              <div className="rounded-2xl bg-white p-6 sm:p-7 border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 text-[#003580] flex items-center justify-center mb-5 group-hover:bg-[#003580] group-hover:text-white transition-colors duration-200">
-                    <Building2 className="h-6 w-6" strokeWidth={1.8} />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 text-[#003580] flex items-center justify-center mb-4 group-hover:bg-[#003580] group-hover:text-white transition-colors duration-200">
+                      <Building2 className="h-5 w-5" strokeWidth={1.8} />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#003580] bg-blue-50/80 border border-blue-100/80 px-2.5 py-1 rounded-md">
+                      Over 500K ETB
+                    </span>
                   </div>
-                  <h3 className="font-fraunces text-xl sm:text-2xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
+                  <h3 className="font-fraunces text-lg sm:text-xl font-bold text-[#003580] group-hover:text-[#C8102E] transition-colors leading-snug">
                     University Development
                   </h3>
-                  <p className="mt-2.5 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                  <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
                     Contribute to a stronger ASTU community.
                   </p>
                 </div>
-                <div className="mt-8 pt-5 border-t border-slate-100">
+                <div className="mt-6 pt-4 border-t border-slate-100">
                   <button
                     type="button"
                     onClick={() => handleContribute("University Development", "University Development Fund", 500)}
-                    className="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-md bg-[#003580] hover:bg-[#C8102E] text-white text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs cursor-pointer group/btn"
+                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-md bg-[#003580] hover:bg-[#C8102E] text-white text-xs sm:text-sm font-semibold transition-colors duration-200 shadow-2xs cursor-pointer group/btn"
                   >
                     <span>Contribute</span>
                     <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
