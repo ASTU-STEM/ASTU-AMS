@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, MapPin, Search, Sparkles, X } from 'lucide-react';
+import { Calendar, CalendarDays, ChevronLeft, ChevronRight, MapPin, Search, Sparkles, X } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ChatBot from '../components/ChatBot';
 import eventsService from '../features/admin/services/events.service';
@@ -114,14 +114,57 @@ export default function EventsPage() {
       });
   }, [events, filter, search]);
 
+  // ── Pagination State (Page Handler) ──
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6); // 6 events per page aligns cleanly with 2 rows of 3-col grid
+
+  // Reset page when filter, search, or pageSize changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, search, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedEvents = useMemo(() => {
+    return filtered.slice(startIndex, startIndex + pageSize);
+  }, [filtered, startIndex, pageSize]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    const target = document.getElementById('events-feed-grid');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const getPageNumbers = (current: number, total: number) => {
+    const delta = 1;
+    const range: (number | string)[] = [];
+    for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+      range.push(i);
+    }
+    if (current - delta > 2) {
+      range.unshift('...');
+    }
+    if (current + delta < total - 1) {
+      range.push('...');
+    }
+    range.unshift(1);
+    if (total > 1) {
+      range.push(total);
+    }
+    return range;
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-[#f8fafc] font-sans text-slate-800">
       <Navbar />
 
-      {/* ── Prestige Academic Blue Hero Banner (Consistent with Notices and Gallery) ── */}
+      {/* ── Hero Banner (Clean & Modern) ── */}
       <header className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] text-white pt-10 pb-12 sm:pt-14 sm:pb-16 px-4 sm:px-6 shadow-xl">
-        {/* Dedicated Background Image Overlay */}
-        <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none">
+        {/* Subtle Campus Background Image (Clean & Visible) */}
+        <div className="absolute inset-0 opacity-25 pointer-events-none">
           <img
             alt="ASTU Events"
             className="h-full w-full object-cover"
@@ -132,32 +175,12 @@ export default function EventsPage() {
           />
         </div>
 
-        {/* Blueprint grid pattern ("like we did for other") */}
-        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
-
-        {/* Dot Grid Background Overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-15"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1.2px, transparent 1.2px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-
-        {/* Ambient Concentric Circular Arc Line Graphic */}
-        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/6 h-[560px] w-[560px] opacity-25">
-          <svg viewBox="0 0 500 500" className="h-full w-full" fill="none">
-            <circle cx="250" cy="250" r="90" stroke="white" strokeWidth="1" strokeDasharray="3 3" />
-            <circle cx="250" cy="250" r="160" stroke="white" strokeWidth="1.2" />
-            <circle cx="250" cy="250" r="230" stroke="white" strokeWidth="1" strokeDasharray="5 5" />
-            <circle cx="250" cy="250" r="300" stroke="white" strokeWidth="1.2" />
-            <circle cx="250" cy="250" r="370" stroke="white" strokeWidth="1" strokeDasharray="6 6" />
-          </svg>
-        </div>
+        {/* Blueprint grid pattern */}
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
 
         <div className="relative z-10 mx-auto max-w-[1360px]">
           {/* Breadcrumb Navigation: Home / Events */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-6 font-normal">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-5 font-normal">
             <Link to="/" className="hover:text-white transition-colors">
               Home
             </Link>
@@ -165,43 +188,16 @@ export default function EventsPage() {
             <span className="text-white font-medium">Events & Activities</span>
           </nav>
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="max-w-2xl space-y-3">
-              {/* Eyebrow with Rose Dash */}
-              <div className="flex items-center gap-2.5">
-                <span className="w-5 h-[2px] bg-[#E05A6D] inline-block rounded-full"></span>
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#E05A6D]">
-                  CAMPUS ENGAGEMENT & PROFESSIONAL WORKSHOPS
-                </span>
-              </div>
+          <div className="max-w-3xl space-y-3">
+            {/* Headline Title */}
+            <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold tracking-tight text-white leading-tight">
+              {eventsPageConfig.title || 'Events & Activities'}
+            </h1>
 
-              {/* Headline Title */}
-              <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold tracking-[-0.015em] text-white leading-[1.14]">
-                Events & Activities
-              </h1>
-
-              {/* Subtitle Description */}
-              <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
-                Stay informed about upcoming ASTU events, alumni reunions, career fairs, hackathons, and campus activities.
-              </p>
-            </div>
-
-            {/* Right Badge: Official Campus Calendar */}
-            <div className="shrink-0 self-start lg:self-center">
-              <div className="rounded-2xl border border-white/15 bg-white/[0.04] backdrop-blur-sm px-5 py-3.5 flex items-center gap-3.5 shadow-sm">
-                <div className="h-9 w-9 rounded-full border border-rose-300/40 bg-rose-500/10 flex items-center justify-center shrink-0">
-                  <Calendar className="h-4.5 w-4.5 text-rose-200" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-white leading-tight">
-                    Official Campus Calendar
-                  </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5 font-normal">
-                    Updated live by ASTU Event Operations
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Subtitle Description */}
+            <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
+              {eventsPageConfig.subtitle || 'Stay informed about upcoming ASTU events, alumni reunions, career fairs, hackathons, and campus activities.'}
+            </p>
           </div>
         </div>
       </header>
@@ -256,11 +252,11 @@ export default function EventsPage() {
         </div>
       </nav>
 
-      <main className="mx-auto w-full max-w-[1360px] flex-1 space-y-6 px-4 py-8 sm:px-6">
+      <main id="events-feed-grid" className="mx-auto w-full max-w-[1360px] flex-1 space-y-6 px-4 py-8 sm:px-6">
 
         {loading && <p className="text-sm font-semibold text-slate-500">Loading events...</p>}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((event, idx) => {
+          {paginatedEvents.map((event, idx) => {
             const eventSlug = event.id || slugify(event.title || '');
             return (
               <article key={eventSlug + idx} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
@@ -307,6 +303,101 @@ export default function EventsPage() {
             );
           })}
         </div>
+
+        {/* ── Events Page Handler (Pagination Controls) ── */}
+        {!loading && filtered.length > 0 && (
+          <div className="card-soft mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 shadow-xs">
+            {/* Left: Range text */}
+            <div className="text-xs text-slate-500 font-medium text-center sm:text-left">
+              Showing{' '}
+              <span className="font-bold text-slate-900">{startIndex + 1}</span>{' '}
+              to{' '}
+              <span className="font-bold text-slate-900">
+                {Math.min(startIndex + pageSize, filtered.length)}
+              </span>{' '}
+              of{' '}
+              <span className="font-bold text-slate-900">{filtered.length}</span>{' '}
+              events
+            </div>
+
+            {/* Middle: Page pills */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  currentPage === 1
+                    ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                    : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+                title="Previous page"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Prev</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {getPageNumbers(currentPage, totalPages).map((p, idx) => {
+                  if (p === '...') {
+                    return (
+                      <span key={`event-ellipsis-${idx}`} className="px-2 text-xs text-slate-400">
+                        ...
+                      </span>
+                    );
+                  }
+                  const pageNum = Number(p);
+                  const isActive = pageNum === currentPage;
+                  return (
+                    <button
+                      key={`event-page-${pageNum}`}
+                      type="button"
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-[#003580] text-white shadow-xs'
+                          : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  currentPage === totalPages
+                    ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                    : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+                title="Next page"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            {/* Right: Items per page selector */}
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span className="text-[11px] font-medium hidden sm:inline">Per page:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-[#003580] cursor-pointer"
+              >
+                <option value={6}>6</option>
+                <option value={9}>9</option>
+                <option value={12}>12</option>
+                <option value={24}>24</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         {!loading && filtered.length === 0 && <p className="text-sm text-slate-500">{eventsPageConfig.emptyText || 'No events found.'}</p>}
       </main>
 

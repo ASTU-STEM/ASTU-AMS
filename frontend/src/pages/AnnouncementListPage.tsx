@@ -50,7 +50,7 @@ export default function AnnouncementListPage() {
 
   // Pagination states (Page Handler)
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(9); // 9 per page aligns cleanly with 3-column grid
+  const [pageSize, setPageSize] = useState(6); // 6 per page provides 2 clean 3-card rows and immediate multi-page navigation
 
   useEffect(() => {
     let isMounted = true;
@@ -274,49 +274,23 @@ export default function AnnouncementListPage() {
     <div className="flex min-h-screen flex-col bg-[#f8fafc] font-sans text-slate-800">
       <Navbar />
 
-      {/* ── Dark Navy Hero Header ── */}
+      {/* ── Hero Banner (Clean & Modern) ── */}
       <header className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] pt-10 pb-12 sm:pt-14 sm:pb-16 text-white shadow-xl">
-        {/* Subtle campus background image overlay */}
-        <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none">
+        {/* Campus background image overlay - Crisp & Visible */}
+        <div className="absolute inset-0 opacity-25 pointer-events-none">
           <img
             alt="ASTU Campus"
             className="h-full w-full object-cover"
-            src={settings.heroImage || '/images/astu-building.jpg'}
+            src={(settings as any)?.heroImage || (settings as any)?.bannerImage || '/images/astu-building.jpg'}
             onError={(e) => {
               (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
             }}
           />
         </div>
 
-        {/* Blueprint grid pattern ("like we did for other") */}
-        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
-
-        {/* Dot grid accent overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-15"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.25) 1.2px, transparent 1.2px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-
-        {/* Decorative concentric circle outlines in top-right */}
-        <svg
-          aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 h-full w-[650px] opacity-25 select-none overflow-visible"
-          viewBox="0 0 650 350"
-          fill="none"
-        >
-          <circle cx="520" cy="60" r="140" stroke="rgba(169, 196, 224, 0.45)" strokeWidth="1" />
-          <circle cx="520" cy="60" r="240" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" />
-          <circle cx="520" cy="60" r="360" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" />
-          <circle cx="520" cy="60" r="480" stroke="rgba(169, 196, 224, 0.16)" strokeWidth="1" />
-          <circle cx="520" cy="60" r="620" stroke="rgba(169, 196, 224, 0.08)" strokeWidth="1" />
-        </svg>
-
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb Navigation: Home / Notices */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-6 font-normal">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-5 font-normal">
             <Link to="/" className="hover:text-white transition-colors">
               Home
             </Link>
@@ -324,41 +298,16 @@ export default function AnnouncementListPage() {
             <span className="text-white font-medium">Notices</span>
           </nav>
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            {/* Left Title and Eyebrow Block */}
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="w-5 h-[2px] bg-[#E05A6D] inline-block rounded-full" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#E05A6D]">
-                  OFFICIAL COMMUNICATIONS
-                </span>
-              </div>
+          <div className="max-w-3xl space-y-3">
+            {/* Headline Title */}
+            <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-white tracking-tight leading-tight">
+              {settings.bannerTitle && settings.bannerTitle !== 'ASTU Official Notices & Announcements' ? settings.bannerTitle : 'Notices & Announcements'}
+            </h1>
 
-              <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-white tracking-[-0.015em] leading-[1.14]">
-                Notices and announcements
-              </h1>
-
-              <p className="mt-3 text-sm sm:text-base text-slate-300 leading-relaxed max-w-[540px] font-normal">
-                Official communications, university bulletins, academic notices, and alumni achievements.
-              </p>
-            </div>
-
-            {/* Right Badge: Verified communications / Published by ASTU */}
-            <div className="shrink-0 self-start lg:self-center">
-              <div className="rounded-2xl border border-white/15 bg-white/[0.04] backdrop-blur-sm px-5 py-3.5 flex items-center gap-3.5 shadow-sm">
-                <div className="h-9 w-9 rounded-full border border-rose-300/40 bg-rose-500/10 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="h-4.5 w-4.5 text-rose-200" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-white leading-tight">
-                    Verified communications
-                  </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5 font-normal">
-                    Published by ASTU
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Subtitle Description */}
+            <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
+              {settings.bannerSubtitle && !settings.bannerSubtitle.startsWith('Official communications, university') ? settings.bannerSubtitle : 'Official university bulletins, academic notices, and public communications.'}
+            </p>
           </div>
         </div>
       </header>
@@ -837,7 +786,7 @@ export default function AnnouncementListPage() {
         )}
 
         {/* ── Page Handler (Pagination Controls) ── */}
-        {((viewMode === 'grid' && totalGridPages > 1) || (viewMode === 'list' && totalListPages > 1)) && (
+        {(viewMode === 'grid' ? totalGridItems > 0 : totalListItems > 0) && (
           <div className="card-soft mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 shadow-xs">
             {/* Left: Summary text */}
             <div className="text-xs text-slate-500 font-medium text-center sm:text-left">

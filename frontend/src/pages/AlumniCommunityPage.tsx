@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Calendar,
   Sparkles,
+  ChevronLeft,
   ChevronRight,
   Mail,
   UserPlus,
@@ -217,6 +218,90 @@ export default function AlumniCommunityPage() {
       return matchesCategory && matchesQuery;
     });
   }, [communityMembers, selectedCategory, searchQuery]);
+
+  // ── Pagination States (Page Handler) ──
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(8); // 8 items per page aligns with 2/4-column responsive grid
+
+  // Reset to first page when search, category, or pageSize changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, pageSize]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedMembers = useMemo(() => {
+    return filteredMembers.slice(startIndex, startIndex + pageSize);
+  }, [filteredMembers, startIndex, pageSize]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setCurrentPage(newPage);
+    const target = document.getElementById('community-directory');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const getPageNumbers = (current: number, total: number) => {
+    const delta = 1;
+    const range: (number | string)[] = [];
+    for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+      range.push(i);
+    }
+    if (current - delta > 2) {
+      range.unshift('...');
+    }
+    if (current + delta < total - 1) {
+      range.push('...');
+    }
+    range.unshift(1);
+    if (total > 1) {
+      range.push(total);
+    }
+    return range;
+  };
+
+  // ── Modal Biography Page Handler (Previous / Next Alumnus) ──
+  const currentModalIndex = useMemo(() => {
+    if (!activeModalMember) return -1;
+    return filteredMembers.findIndex((m) => m.id === activeModalMember.id);
+  }, [activeModalMember, filteredMembers]);
+
+  const handlePrevModalMember = () => {
+    if (currentModalIndex > 0) {
+      setActiveModalMember(filteredMembers[currentModalIndex - 1]);
+    }
+  };
+
+  const handleNextModalMember = () => {
+    if (currentModalIndex >= 0 && currentModalIndex < filteredMembers.length - 1) {
+      setActiveModalMember(filteredMembers[currentModalIndex + 1]);
+    }
+  };
+
+  // Keyboard navigation for biography modal: ArrowLeft, ArrowRight, Escape
+  useEffect(() => {
+    if (!activeModalMember) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (currentModalIndex > 0) {
+          setActiveModalMember(filteredMembers[currentModalIndex - 1]);
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (currentModalIndex >= 0 && currentModalIndex < filteredMembers.length - 1) {
+          setActiveModalMember(filteredMembers[currentModalIndex + 1]);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setActiveModalMember(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModalMember, currentModalIndex, filteredMembers]);
 
   const handleCopyShare = (member: CommunityMember) => {
     if (navigator.clipboard) {
@@ -460,94 +545,190 @@ export default function AlumniCommunityPage() {
               </button>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredMembers.map((member) => (
-                <article
-                  key={member.id}
-                  className="card-soft relative flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 transition-all"
-                >
-                  <div>
-                    {/* Top Row: Badge & Share */}
-                    <div className="flex items-center justify-between gap-2 mb-4">
-                      <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-[#003580]">
-                        {member.badge || `Class of ${member.gradYear}`}
-                      </span>
-                      <button
-                        onClick={() => handleCopyShare(member)}
-                        title="Share profile highlight"
-                        className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    {/* Member Profile Photo & Info */}
-                    <div className="flex items-start gap-3.5 mb-3">
-                      <div className="relative shrink-0">
-                        <img
-                          src={member.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
-                          alt={member.name}
-                          className="h-16 w-16 rounded-xl object-cover border border-slate-200 shadow-sm"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
-                          }}
-                        />
-                        <span
-                          className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#1E7B3A] text-white ring-2 ring-white"
-                          title="Verified Alumni"
-                        >
-                          <CheckCircle2 className="h-3 w-3" />
+            <>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {paginatedMembers.map((member) => (
+                  <article
+                    key={member.id}
+                    className="card-soft relative flex flex-col justify-between overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 transition-all"
+                  >
+                    <div>
+                      {/* Top Row: Badge & Share */}
+                      <div className="flex items-center justify-between gap-2 mb-4">
+                        <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-[#003580]">
+                          {member.badge || `Class of ${member.gradYear}`}
                         </span>
+                        <button
+                          onClick={() => handleCopyShare(member)}
+                          title="Share profile highlight"
+                          className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+                        >
+                          <Share2 className="h-4 w-4" />
+                        </button>
                       </div>
 
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-bold text-[#003580] line-clamp-1">
-                          {member.name}
-                        </h3>
-                        <p className="text-xs sm:text-sm font-semibold text-[#C8102E] line-clamp-1 mt-0.5">
-                          {member.role}
-                        </p>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1 line-clamp-1">
-                          <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                          <span className="truncate">{member.org}</span>
+                      {/* Member Profile Photo & Info */}
+                      <div className="flex items-start gap-3.5 mb-3">
+                        <div className="relative shrink-0">
+                          <img
+                            src={member.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'}
+                            alt={member.name}
+                            className="h-16 w-16 rounded-xl object-cover border border-slate-200 shadow-sm"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src =
+                                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+                            }}
+                          />
+                          <span
+                            className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#1E7B3A] text-white ring-2 ring-white"
+                            title="Verified Alumni"
+                          >
+                            <CheckCircle2 className="h-3 w-3" />
+                          </span>
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-base font-bold text-[#003580] line-clamp-1">
+                            {member.name}
+                          </h3>
+                          <p className="text-xs sm:text-sm font-semibold text-[#C8102E] line-clamp-1 mt-0.5">
+                            {member.role}
+                          </p>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-600 mt-1 line-clamp-1">
+                            <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <span className="truncate">{member.org}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Degree and Location Info */}
-                    <div className="rounded-lg bg-slate-50 p-3 mb-3 border border-slate-100">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#003580]">
-                        <GraduationCap className="h-3.5 w-3.5 text-[#003580] shrink-0" />
-                        <span className="truncate">{member.degree}</span>
-                      </div>
-                      {member.location && (
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
-                          <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                          <span className="truncate">{member.location}</span>
+                      {/* Degree and Location Info */}
+                      <div className="rounded-lg bg-slate-50 p-3 mb-3 border border-slate-100">
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-[#003580]">
+                          <GraduationCap className="h-3.5 w-3.5 text-[#003580] shrink-0" />
+                          <span className="truncate">{member.degree}</span>
                         </div>
-                      )}
+                        {member.location && (
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                            <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <span className="truncate">{member.location}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Bio Snippet */}
+                      <p className="text-xs sm:text-sm leading-relaxed text-slate-600 line-clamp-3 mb-4">
+                        {member.quote ? `"${member.quote}"` : member.bio}
+                      </p>
                     </div>
 
-                    {/* Bio Snippet */}
-                    <p className="text-xs sm:text-sm leading-relaxed text-slate-600 line-clamp-3 mb-4">
-                      {member.quote ? `"${member.quote}"` : member.bio}
-                    </p>
+                    {/* Card Action */}
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <button
+                        onClick={() => setActiveModalMember(member)}
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-[#003580] hover:text-[#C8102E] transition-colors cursor-pointer group/btn"
+                      >
+                        View Biography <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                      </button>
+                      <span className="text-xs font-semibold text-slate-500">Class of {member.gradYear}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {/* ── Directory Page Handler Pagination Bar ── */}
+              {filteredMembers.length > 0 && (
+                <div className="card-soft mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 shadow-xs">
+                  {/* Left: Summary text */}
+                  <div className="text-xs text-slate-500 font-medium text-center sm:text-left">
+                    Showing{' '}
+                    <span className="font-bold text-slate-900">{startIndex + 1}</span>{' '}
+                    to{' '}
+                    <span className="font-bold text-slate-900">
+                      {Math.min(startIndex + pageSize, filteredMembers.length)}
+                    </span>{' '}
+                    of{' '}
+                    <span className="font-bold text-slate-900">{filteredMembers.length}</span>{' '}
+                    Alumni Leaders
                   </div>
 
-                  {/* Card Action */}
-                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  {/* Middle: Page navigation pills */}
+                  <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => setActiveModalMember(member)}
-                      className="inline-flex items-center gap-1 text-sm font-semibold text-[#003580] hover:text-[#C8102E] transition-colors cursor-pointer group/btn"
+                      type="button"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                        currentPage === 1
+                          ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                          : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                      title="Previous page"
                     >
-                      View Biography <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Prev</span>
                     </button>
-                    <span className="text-xs font-semibold text-slate-500">Class of {member.gradYear}</span>
+
+                    <div className="flex items-center gap-1">
+                      {getPageNumbers(currentPage, totalPages).map((p, idx) => {
+                        if (p === '...') {
+                          return (
+                            <span key={`ellipsis-${idx}`} className="px-2 text-xs text-slate-400">
+                              ...
+                            </span>
+                          );
+                        }
+                        const pageNum = Number(p);
+                        const isActive = pageNum === currentPage;
+                        return (
+                          <button
+                            key={`page-${pageNum}`}
+                            type="button"
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                              isActive
+                                ? 'bg-[#003580] text-white shadow-xs'
+                                : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                        currentPage === totalPages
+                          ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                          : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                      }`}
+                      title="Next page"
+                    >
+                      <span className="hidden sm:inline">Next</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
-                </article>
-              ))}
-            </div>
+
+                  {/* Right: Items per page selector */}
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <span className="text-[11px] font-medium hidden sm:inline">Per page:</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => setPageSize(Number(e.target.value))}
+                      className="rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-[#003580] cursor-pointer"
+                    >
+                      <option value={8}>8</option>
+                      <option value={12}>12</option>
+                      <option value={16}>16</option>
+                      <option value={24}>24</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
@@ -721,17 +902,59 @@ export default function AlumniCommunityPage() {
                   }}
                 />
                 <div>
-                  <h3 className="text-lg font-bold text-[#003580]">{activeModalMember.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-[#003580]">{activeModalMember.name}</h3>
+                    {currentModalIndex >= 0 && (
+                      <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+                        ({currentModalIndex + 1} of {filteredMembers.length})
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs sm:text-sm font-semibold text-[#C8102E]">{activeModalMember.role}</p>
                   <p className="text-xs sm:text-sm text-slate-600">{activeModalMember.org}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setActiveModalMember(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                {filteredMembers.length > 1 && (
+                  <div className="flex items-center gap-0.5 mr-1">
+                    <button
+                      type="button"
+                      onClick={handlePrevModalMember}
+                      disabled={currentModalIndex <= 0}
+                      className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
+                        currentModalIndex <= 0
+                          ? 'opacity-30 cursor-not-allowed text-slate-300'
+                          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                      }`}
+                      title="Previous leader (←)"
+                      aria-label="Previous leader"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextModalMember}
+                      disabled={currentModalIndex >= filteredMembers.length - 1}
+                      className={`rounded-lg p-1.5 transition-colors cursor-pointer ${
+                        currentModalIndex >= filteredMembers.length - 1
+                          ? 'opacity-30 cursor-not-allowed text-slate-300'
+                          : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                      }`}
+                      title="Next leader (→)"
+                      aria-label="Next leader"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => setActiveModalMember(null)}
+                  className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 cursor-pointer"
+                  aria-label="Close modal"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3 text-xs sm:text-sm">
@@ -764,19 +987,54 @@ export default function AlumniCommunityPage() {
               )}
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-              <button
-                onClick={() => handleCopyShare(activeModalMember)}
-                className="h-11 px-5 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 font-semibold text-sm inline-flex items-center gap-1.5 cursor-pointer"
-              >
-                <Share2 className="h-4 w-4" /> Share Profile
-              </button>
+            <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                {filteredMembers.length > 1 && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={handlePrevModalMember}
+                      disabled={currentModalIndex <= 0}
+                      className={`h-9 px-3 rounded-md border border-slate-200 text-xs font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer ${
+                        currentModalIndex <= 0
+                          ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                          : 'bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                      title="Previous leader"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <span>Prev</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextModalMember}
+                      disabled={currentModalIndex >= filteredMembers.length - 1}
+                      className={`h-9 px-3 rounded-md border border-slate-200 text-xs font-semibold inline-flex items-center gap-1 transition-colors cursor-pointer ${
+                        currentModalIndex >= filteredMembers.length - 1
+                          ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                          : 'bg-white text-slate-700 hover:bg-slate-50'
+                      }`}
+                      title="Next leader"
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => handleCopyShare(activeModalMember)}
+                  className="h-9 px-3 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold text-xs inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <Share2 className="h-3.5 w-3.5" /> Share
+                </button>
+              </div>
+
               <button
                 onClick={() => {
                   setActiveModalMember(null);
                   navigate('/register');
                 }}
-                className="h-11 px-6 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-semibold text-sm transition-colors cursor-pointer"
+                className="h-9 px-5 rounded-md bg-[#C8102E] hover:bg-[#A60D26] text-white font-semibold text-xs transition-colors cursor-pointer w-full sm:w-auto"
               >
                 Connect on AMS
               </button>
