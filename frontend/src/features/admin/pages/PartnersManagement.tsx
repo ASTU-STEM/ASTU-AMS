@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Briefcase,
   Building2,
@@ -41,6 +41,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import homepageCmsService, {
   defaultPartnersPageConfig,
   PartnersPageConfig,
@@ -85,6 +86,30 @@ export default function PartnersManagement() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+
+  // Partner Pagination & Search
+  const [partnerPage, setPartnerPage] = useState(1);
+  const [partnerPageSize, setPartnerPageSize] = useState(8);
+  const [partnerSearch, setPartnerSearch] = useState('');
+
+  const filteredPartners = useMemo(() => {
+    if (!partnerSearch.trim()) return partners;
+    const q = partnerSearch.toLowerCase();
+    return partners.filter((p) =>
+      p.name.toLowerCase().includes(q) ||
+      (p.industry && p.industry.toLowerCase().includes(q)) ||
+      (p.location && p.location.toLowerCase().includes(q))
+    );
+  }, [partners, partnerSearch]);
+
+  const paginatedPartners = useMemo(() => {
+    const start = (partnerPage - 1) * partnerPageSize;
+    return filteredPartners.slice(start, start + partnerPageSize);
+  }, [filteredPartners, partnerPage, partnerPageSize]);
+
+  useEffect(() => {
+    setPartnerPage(1);
+  }, [partnerSearch]);
 
   // ── MODAL STATES FOR ALL "ADD" ACTIONS ──
   // 1. Company Modal
@@ -722,8 +747,19 @@ export default function PartnersManagement() {
                   </button>
                 </div>
 
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={partnerSearch}
+                    onChange={(e) => setPartnerSearch(e.target.value)}
+                    placeholder="Search partner companies..."
+                    className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-white outline-none focus:border-[#003366]"
+                  />
+                </div>
+
                 <div className="space-y-2">
-                  {partners.map((company) => (
+                  {paginatedPartners.map((company) => (
                     <div
                       key={company.id}
                       className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 hover:border-[#003366]/40 transition-all dark:border-slate-700 dark:bg-slate-800"
@@ -777,7 +813,26 @@ export default function PartnersManagement() {
                       </div>
                     </div>
                   ))}
+
+                  {filteredPartners.length === 0 && (
+                    <div className="text-center py-6 text-xs text-slate-400">
+                      No partner companies found matching your query.
+                    </div>
+                  )}
                 </div>
+
+                {filteredPartners.length > 0 && (
+                  <AdminTablePagination
+                    currentPage={partnerPage}
+                    totalItems={filteredPartners.length}
+                    pageSize={partnerPageSize}
+                    onPageChange={setPartnerPage}
+                    onPageSizeChange={setPartnerPageSize}
+                    pageSizeOptions={[5, 8, 16, 32]}
+                    itemName="partner companies"
+                    className="rounded-xl border border-slate-200 dark:border-slate-800 p-2"
+                  />
+                )}
               </div>
             )}
 

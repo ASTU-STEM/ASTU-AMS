@@ -30,6 +30,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import ImageUploader from '../components/ImageUploader';
 import homepageCmsService from '../services/homepageCms.service';
 import eventsService from '../services/events.service';
@@ -469,6 +470,19 @@ export default function EventWorkshopManagement() {
     return items;
   }, [events, filter, search]);
 
+  // Pagination Handler
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, search]);
+
+  const paginatedEvents = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
+
   const resetForm = (kind: EventKind = 'Event') => {
     setEditingId(null);
     setForm({
@@ -763,7 +777,7 @@ export default function EventWorkshopManagement() {
 
         {/* Posts Cards Grid */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((event) => (
+          {paginatedEvents.map((event) => (
             <article
               key={event.id}
               className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white dark:bg-slate-800 dark:border-slate-700 p-4 shadow-2xs hover:shadow-md transition-all group"
@@ -861,9 +875,21 @@ export default function EventWorkshopManagement() {
           ))}
         </div>
 
-        {filtered.length === 0 && (
+        {filtered.length === 0 ? (
           <div className="py-12 text-center text-xs text-slate-400">
             No events or workshops found matching your query.
+          </div>
+        ) : (
+          <div className="mt-6">
+            <AdminTablePagination
+              currentPage={currentPage}
+              totalItems={filtered.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[6, 9, 15, 30]}
+              itemName="events & workshops"
+            />
           </div>
         )}
       </section>

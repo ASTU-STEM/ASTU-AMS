@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
+import AdminTablePagination from '../components/AdminTablePagination';
 
 interface Campaign {
   id: string;
@@ -220,6 +221,19 @@ export default function DonationsManagement() {
     (c) =>
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (c.category && c.category.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // Pagination for Campaigns Tab
+  const [campaignPage, setCampaignPage] = useState(1);
+  const [campaignPageSize, setCampaignPageSize] = useState(6);
+
+  useEffect(() => {
+    setCampaignPage(1);
+  }, [searchQuery]);
+
+  const paginatedCampaigns = filteredCampaigns.slice(
+    (campaignPage - 1) * campaignPageSize,
+    campaignPage * campaignPageSize
   );
 
   // Filtering & Sorting for Donor Records Tab
@@ -638,69 +652,85 @@ export default function DonationsManagement() {
 
         {/* Tab 1: Campaigns Management Grid */}
         {activeTab === 'campaigns' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
-            {filteredCampaigns.map((c) => {
-              const progressPct = Math.min(100, Math.round(((c.raised || 0) / (c.goal || 1)) * 100));
-              return (
-                <div
-                  key={c.id}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[9px] font-extrabold rounded-md uppercase tracking-wider">
-                        {c.category || 'Fund'}
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-500">{c.donorCount || 0} donors</span>
+          <div className="space-y-4 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {paginatedCampaigns.map((c) => {
+                const progressPct = Math.min(100, Math.round(((c.raised || 0) / (c.goal || 1)) * 100));
+                return (
+                  <div
+                    key={c.id}
+                    className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[9px] font-extrabold rounded-md uppercase tracking-wider">
+                          {c.category || 'Fund'}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500">{c.donorCount || 0} donors</span>
+                      </div>
+
+                      <h3 className="text-sm font-extrabold text-slate-900">{c.title}</h3>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">
+                        {c.description || 'Fundraising campaign for ASTU university development.'}
+                      </p>
+
+                      <div className="mt-4 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-emerald-700">{c.raised.toLocaleString()} ETB</span>
+                          <span className="text-slate-400">of {c.goal.toLocaleString()} ETB</span>
+                        </div>
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 transition-all"
+                            style={{ width: `${progressPct}%` }}
+                          ></div>
+                        </div>
+                      </div>
                     </div>
 
-                    <h3 className="text-sm font-extrabold text-slate-900">{c.title}</h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">
-                      {c.description || 'Fundraising campaign for ASTU university development.'}
-                    </p>
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                      <button
+                        onClick={() => handleOpenEdit(c)}
+                        className="flex-1 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        <Edit3 className="h-3.5 w-3.5" />
+                        Edit Cause
+                      </button>
 
-                    <div className="mt-4 space-y-1.5">
-                      <div className="flex items-center justify-between text-xs font-bold">
-                        <span className="text-emerald-700">{c.raised.toLocaleString()} ETB</span>
-                        <span className="text-slate-400">of {c.goal.toLocaleString()} ETB</span>
-                      </div>
-                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 transition-all"
-                          style={{ width: `${progressPct}%` }}
-                        ></div>
-                      </div>
+                      <button
+                        onClick={() => handleDeleteCampaign(c.id, c.title)}
+                        className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors border border-rose-100"
+                        title="Delete Campaign"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
+                );
+              })}
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                    <button
-                      onClick={() => handleOpenEdit(c)}
-                      className="flex-1 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <Edit3 className="h-3.5 w-3.5" />
-                      Edit Cause
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteCampaign(c.id, c.title)}
-                      className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors border border-rose-100"
-                      title="Delete Campaign"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+              {filteredCampaigns.length === 0 && (
+                <div className="col-span-full py-12 text-center text-slate-500 space-y-2">
+                  <AlertCircle className="mx-auto h-8 w-8 text-slate-400" />
+                  <p className="text-xs font-bold">No donation campaigns found</p>
+                  <p className="text-[10px] text-slate-400">Click "Create Campaign" to add your first cause</p>
                 </div>
-              );
-            })}
+              )}
+            </div>
 
-            {filteredCampaigns.length === 0 && (
-              <div className="col-span-full py-12 text-center text-slate-500 space-y-2">
-                <AlertCircle className="mx-auto h-8 w-8 text-slate-400" />
-                <p className="text-xs font-bold">No donation campaigns found</p>
-                <p className="text-[10px] text-slate-400">Click "Create Campaign" to add your first cause</p>
-              </div>
-            )}
+            {/* Campaigns Pagination */}
+            <AdminTablePagination
+              currentPage={campaignPage}
+              totalItems={filteredCampaigns.length}
+              pageSize={campaignPageSize}
+              onPageChange={setCampaignPage}
+              onPageSizeChange={(newSize) => {
+                setCampaignPageSize(newSize);
+                setCampaignPage(1);
+              }}
+              pageSizeOptions={[6, 12, 24, 48]}
+              itemName="campaigns"
+            />
           </div>
         )}
 
@@ -861,58 +891,18 @@ export default function DonationsManagement() {
             </div>
 
             {/* Pagination Controls */}
-            {filteredDonors.length > 0 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs font-medium text-slate-600">
-                <div className="flex items-center gap-3">
-                  <span>
-                    Showing <strong className="text-slate-900">{(currentDonorPage - 1) * donorRowsPerPage + 1}</strong> to{' '}
-                    <strong className="text-slate-900">
-                      {Math.min(currentDonorPage * donorRowsPerPage, filteredDonors.length)}
-                    </strong>{' '}
-                    of <strong className="text-slate-900">{filteredDonors.length}</strong> donor records
-                  </span>
-
-                  <div className="flex items-center gap-1.5 ml-2 border-l border-slate-200 pl-3">
-                    <span className="text-[11px] text-slate-400 font-bold uppercase">Rows per page:</span>
-                    <select
-                      value={donorRowsPerPage}
-                      onChange={(e) => {
-                        setDonorRowsPerPage(Number(e.target.value));
-                        setDonorPage(1);
-                      }}
-                      className="text-xs px-2 py-1 rounded-lg border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none"
-                    >
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setDonorPage((prev) => Math.max(1, prev - 1))}
-                    disabled={currentDonorPage === 1}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-colors"
-                    title="Previous Page"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <span className="px-3 py-1 bg-slate-100 rounded-lg text-slate-800 font-extrabold text-xs">
-                    Page {currentDonorPage} of {totalDonorPages}
-                  </span>
-                  <button
-                    onClick={() => setDonorPage((prev) => Math.min(totalDonorPages, prev + 1))}
-                    disabled={currentDonorPage === totalDonorPages}
-                    className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition-colors"
-                    title="Next Page"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
+            <AdminTablePagination
+              currentPage={donorPage}
+              totalItems={filteredDonors.length}
+              pageSize={donorRowsPerPage}
+              onPageChange={setDonorPage}
+              onPageSizeChange={(newSize) => {
+                setDonorRowsPerPage(newSize);
+                setDonorPage(1);
+              }}
+              pageSizeOptions={[5, 10, 20, 50, 100]}
+              itemName="donor records"
+            />
           </div>
         )}
       </div>

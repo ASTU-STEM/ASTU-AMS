@@ -18,6 +18,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
+import AdminTablePagination from '../components/AdminTablePagination';
 import {
   knowledgeService,
   KnowledgeDocItem,
@@ -41,6 +42,19 @@ export default function KnowledgeBaseManagement() {
   const [search, setSearch] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('All');
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedCat, selectedStatus]);
+
+  const paginatedDocuments = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return documents.slice(start, start + pageSize);
+  }, [documents, currentPage, pageSize]);
 
   // Modals
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -376,7 +390,7 @@ export default function KnowledgeBaseManagement() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {documents.map((doc) => (
+                {paginatedDocuments.map((doc) => (
                   <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-3.5 px-4 font-medium text-slate-900 max-w-xs">
                       <div className="flex items-start gap-2.5">
@@ -473,6 +487,22 @@ export default function KnowledgeBaseManagement() {
             </table>
           </div>
         )}
+
+        {/* Knowledge Documents Pagination */}
+        <div className="border-t border-slate-100 p-3">
+          <AdminTablePagination
+            currentPage={currentPage}
+            totalItems={documents.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            pageSizeOptions={[5, 10, 20, 50]}
+            itemName="knowledge sources"
+          />
+        </div>
       </div>
 
       {/* Upload Document Modal */}

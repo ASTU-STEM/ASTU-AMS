@@ -28,6 +28,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import homepageCmsService from '../services/homepageCms.service';
 
 export type MediaType = 'image' | 'video' | 'audio' | 'document';
@@ -447,6 +448,19 @@ export default function MediaLibrary({ hideHeader = false }: { hideHeader?: bool
     });
   }, [media, folder, typeFilter, search]);
 
+  // Pagination Handler
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [folder, typeFilter, search]);
+
+  const paginatedMedia = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
+
   const counts = useMemo(() => {
     const total = media.length;
     const images = media.filter((m) => m.type === 'image').length;
@@ -710,7 +724,7 @@ export default function MediaLibrary({ hideHeader = false }: { hideHeader?: bool
 
       {view === 'grid' ? (
         <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-          {filtered.map((m) => {
+          {paginatedMedia.map((m) => {
             const Icon = typeIcon[m.type];
             const selected = selectedIds.includes(m.id);
             return (
@@ -825,7 +839,7 @@ export default function MediaLibrary({ hideHeader = false }: { hideHeader?: bool
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filtered.map((m) => {
+              {paginatedMedia.map((m) => {
                 const Icon = typeIcon[m.type];
                 return (
                   <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -876,6 +890,20 @@ export default function MediaLibrary({ hideHeader = false }: { hideHeader?: bool
           </table>
         </div>
       )}
+
+      {/* Pagination Controls */}
+      <AdminTablePagination
+        currentPage={currentPage}
+        totalItems={filtered.length}
+        pageSize={pageSize}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[12, 24, 48, 96]}
+        itemName="media files"
+      />
 
       {/* Upload Details Modal */}
       <AdminModal

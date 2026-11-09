@@ -34,6 +34,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminPageHeader from '../components/AdminPageHeader';
+import AdminTablePagination from '../components/AdminTablePagination';
 import ImageUploader from '../components/ImageUploader';
 import GalleryItemModal, { GalleryMediaItem } from '../components/GalleryItemModal';
 import homepageCmsService from '../services/homepageCms.service';
@@ -325,6 +326,19 @@ export default function GalleryManagement({ hideHeader = false }: { hideHeader?:
     }
     return items;
   }, [media, activeAlbum, selectedTab, search]);
+
+  // Gallery Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeAlbum, selectedTab, search]);
+
+  const paginatedMedia = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredMedia.slice(start, start + pageSize);
+  }, [filteredMedia, currentPage, pageSize]);
 
   const albumStats = useMemo(() => {
     const items = media.filter((m) => m.album === activeAlbum);
@@ -743,7 +757,7 @@ export default function GalleryManagement({ hideHeader = false }: { hideHeader?:
 
               {/* Media List Rows */}
               <div className="mt-4 space-y-2.5">
-                {filteredMedia.map((item) => (
+                {paginatedMedia.map((item) => (
                   <div
                     key={item.id}
                     className="flex flex-col gap-3 rounded-xl border border-slate-200/70 bg-white p-3.5 transition-all hover:border-[#003580]/40 hover:shadow-xs dark:border-slate-800 dark:bg-slate-800/40 sm:flex-row sm:items-center sm:justify-between"
@@ -871,6 +885,20 @@ export default function GalleryManagement({ hideHeader = false }: { hideHeader?:
                   </div>
                 )}
               </div>
+
+              {/* Gallery Album Pagination */}
+              <AdminTablePagination
+                currentPage={currentPage}
+                totalItems={filteredMedia.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+                pageSizeOptions={[6, 12, 24, 48]}
+                itemName="gallery items"
+              />
             </div>
           </section>
         </div>
