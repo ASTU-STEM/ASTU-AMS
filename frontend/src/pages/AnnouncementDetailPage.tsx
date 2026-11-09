@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -90,6 +90,10 @@ All undergraduate and postgraduate students, resident scholars, laboratory direc
 export default function AnnouncementDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isNewsRoute = location.pathname.startsWith('/news');
+  const basePath = isNewsRoute ? '/news' : '/announcements';
+  const sectionLabel = isNewsRoute ? 'News' : 'Announcements';
   const [item, setItem] = useState<ContentCardItem | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -252,8 +256,8 @@ Adama Science and Technology University, P.O. Box 1888, Adama, Ethiopia.
               Home
             </Link>
             <span className="text-slate-400">/</span>
-            <Link to="/announcements" className="hover:text-[#003580] transition-colors">
-              Announcements
+            <Link to={basePath} className="hover:text-[#003580] transition-colors">
+              {sectionLabel}
             </Link>
             <span className="text-slate-400">/</span>
             <span className="text-slate-800 font-semibold max-w-[260px] sm:max-w-md truncate">
@@ -262,11 +266,11 @@ Adama Science and Technology University, P.O. Box 1888, Adama, Ethiopia.
           </nav>
 
           <Link
-            to="/announcements"
+            to={basePath}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#003580] transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            <span>All Notices</span>
+            <span>{isNewsRoute ? 'All News' : 'All Notices'}</span>
           </Link>
         </div>
       </div>
@@ -427,11 +431,11 @@ Adama Science and Technology University, P.O. Box 1888, Adama, Ethiopia.
             <div className="pt-8 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {prevNotice ? (
                 <Link
-                  to={`/announcements/${encodeURIComponent(prevNotice.id || slugifiedId(prevNotice.title))}`}
+                  to={`${basePath}/${encodeURIComponent(prevNotice.id || slugifiedId(prevNotice.title))}`}
                   className="group block p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-left"
                 >
                   <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
-                    <ArrowLeft className="h-3 w-3" /> Previous Notice
+                    <ArrowLeft className="h-3 w-3" /> Previous {isNewsRoute ? 'Article' : 'Notice'}
                   </span>
                   <span className="mt-1 block text-sm font-bold text-slate-800 group-hover:text-[#C8102E] transition-colors line-clamp-1 font-fraunces">
                     {prevNotice.title}
@@ -443,11 +447,11 @@ Adama Science and Technology University, P.O. Box 1888, Adama, Ethiopia.
 
               {nextNotice ? (
                 <Link
-                  to={`/announcements/${encodeURIComponent(nextNotice.id || slugifiedId(nextNotice.title))}`}
+                  to={`${basePath}/${encodeURIComponent(nextNotice.id || slugifiedId(nextNotice.title))}`}
                   className="group block p-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-right"
                 >
                   <span className="text-[11px] font-semibold text-slate-400 flex items-center justify-end gap-1">
-                    Next Notice <ArrowRight className="h-3 w-3" />
+                    Next {isNewsRoute ? 'Article' : 'Notice'} <ArrowRight className="h-3 w-3" />
                   </span>
                   <span className="mt-1 block text-sm font-bold text-slate-800 group-hover:text-[#C8102E] transition-colors line-clamp-1 font-fraunces">
                     {nextNotice.title}
@@ -472,7 +476,7 @@ Adama Science and Technology University, P.O. Box 1888, Adama, Ethiopia.
                 {recentRealNotices.map((rel) => (
                   <Link
                     key={rel.id}
-                    to={`/announcements/${encodeURIComponent(rel.id || slugifiedId(rel.title))}`}
+                    to={`${basePath}/${encodeURIComponent(rel.id || slugifiedId(rel.title))}`}
                     className="group block py-3 text-left transition-colors"
                   >
                     <span className="block text-xs font-bold text-slate-800 group-hover:text-[#C8102E] transition-colors line-clamp-2 leading-snug">
@@ -486,10 +490,10 @@ Adama Science and Technology University, P.O. Box 1888, Adama, Ethiopia.
               </div>
 
               <Link
-                to="/announcements"
+                to={basePath}
                 className="block text-center text-xs font-semibold text-[#003580] hover:text-[#C8102E] pt-1 transition-colors"
               >
-                View All Notices →
+                View All {sectionLabel} →
               </Link>
             </div>
 

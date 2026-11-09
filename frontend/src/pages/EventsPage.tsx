@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, CalendarDays, ChevronLeft, ChevronRight, MapPin, Search, Sparkles, X } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ChatBot from '../components/ChatBot';
@@ -12,6 +12,16 @@ const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-
 
 export default function EventsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isWorkshopsRoute = location.pathname.startsWith('/workshops');
+
+  useEffect(() => {
+    if (isWorkshopsRoute) {
+      setFilter('Workshop');
+    } else {
+      setFilter('All');
+    }
+  }, [isWorkshopsRoute]);
   const [events, setEvents] = useState<any[]>(() => {
     try {
       const stored = localStorage.getItem('astu_ams_cms_events_items');
@@ -185,18 +195,20 @@ export default function EventsPage() {
               Home
             </Link>
             <span className="text-slate-400 font-light">/</span>
-            <span className="text-white font-medium">Events & Activities</span>
+            <span className="text-white font-medium">{isWorkshopsRoute ? 'Workshops & Training' : 'Events & Activities'}</span>
           </nav>
 
           <div className="max-w-3xl space-y-3">
             {/* Headline Title */}
             <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold tracking-tight text-white leading-tight">
-              {eventsPageConfig.title || 'Events & Activities'}
+              {isWorkshopsRoute ? 'Workshops & Training' : (eventsPageConfig.title || 'Events & Activities')}
             </h1>
 
             {/* Subtitle Description */}
             <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
-              {eventsPageConfig.subtitle || 'Stay informed about upcoming ASTU events, alumni reunions, career fairs, hackathons, and campus activities.'}
+              {isWorkshopsRoute
+                ? 'Join interactive skill-building sessions, professional masterclasses, and hands-on technical workshops organized by ASTU.'
+                : (eventsPageConfig.subtitle || 'Stay informed about upcoming ASTU events, alumni reunions, career fairs, hackathons, and campus activities.')}
             </p>
           </div>
         </div>
@@ -212,7 +224,14 @@ export default function EventsPage() {
                 <button
                   key={item}
                   type="button"
-                  onClick={() => setFilter(item)}
+                  onClick={() => {
+                    setFilter(item);
+                    if (item === 'Workshop' && !isWorkshopsRoute) {
+                      navigate('/workshops');
+                    } else if (item !== 'Workshop' && isWorkshopsRoute) {
+                      navigate('/events');
+                    }
+                  }}
                   className={`rounded-full px-4 py-1.5 text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${filter === item
                       ? 'bg-[#0a3871] text-white shadow-xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -38,15 +38,33 @@ import { ContentCardItem } from '../features/admin/components/ContentCard';
 
 export default function AnnouncementListPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isNewsRoute = location.pathname.startsWith('/news');
+  const isAnnouncementsRoute = location.pathname.startsWith('/announcements');
+
+  const getInitialCategory = (): string => {
+    if (location.pathname.startsWith('/news')) return 'news';
+    if (location.pathname.startsWith('/announcements')) return 'announcements';
+    return 'all';
+  };
+
   const [items, setItems] = useState<ContentCardItem[]>(() => contentService.getItems());
   const [settings, setSettings] = useState<AnnouncementPageSettings>(() =>
     announcementSettingsService.getSettings()
   );
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>(getInitialCategory);
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'views' | 'pinned'>('newest');
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/news')) {
+      setSelectedCategory('news');
+    } else if (location.pathname.startsWith('/announcements')) {
+      setSelectedCategory('announcements');
+    }
+  }, [location.pathname]);
 
   // Pagination states (Page Handler)
   const [currentPage, setCurrentPage] = useState(1);
@@ -78,11 +96,16 @@ export default function AnnouncementListPage() {
     setCurrentPage(1);
   }, [search, selectedCategory, selectedYear, sortBy, pageSize]);
 
+  const isNewsActive = isNewsRoute || selectedCategory === 'news';
+  const isAnnouncementsActive = isAnnouncementsRoute || selectedCategory === 'announcements';
+  const currentBasePath = isNewsActive ? '/news' : '/announcements';
+
   const slugifiedId = (title: string) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
   const handleShare = (e: React.MouseEvent, item: ContentCardItem) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/announcements/${encodeURIComponent(item.id || slugifiedId(item.title))}`;
+    const itemPath = (isNewsActive || item.type === 'news' || item.type === 'post') ? '/news' : '/announcements';
+    const url = `${window.location.origin}${itemPath}/${encodeURIComponent(item.id || slugifiedId(item.title))}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       toast.success('Notice link copied to clipboard!');
@@ -289,24 +312,34 @@ export default function AnnouncementListPage() {
         </div>
 
         <div className="relative z-10 mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumb Navigation: Home / Notices */}
+          {/* Breadcrumb Navigation */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-5 font-normal">
             <Link to="/" className="hover:text-white transition-colors">
               Home
             </Link>
             <span className="text-slate-400 font-light">/</span>
-            <span className="text-white font-medium">Notices</span>
+            <span className="text-white font-medium">
+              {isNewsActive ? 'News' : 'Announcements'}
+            </span>
           </nav>
 
           <div className="max-w-3xl space-y-3">
             {/* Headline Title */}
             <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-white tracking-tight leading-tight">
-              {settings.bannerTitle && settings.bannerTitle !== 'ASTU Official Notices & Announcements' ? settings.bannerTitle : 'Notices & Announcements'}
+              {isNewsActive
+                ? 'Campus News & Dispatches'
+                : (settings.bannerTitle && settings.bannerTitle !== 'ASTU Official Notices & Announcements'
+                  ? settings.bannerTitle
+                  : 'Official Notices & Announcements')}
             </h1>
 
             {/* Subtitle Description */}
             <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
-              {settings.bannerSubtitle && !settings.bannerSubtitle.startsWith('Official communications, university') ? settings.bannerSubtitle : 'Official university bulletins, academic notices, and public communications.'}
+              {isNewsActive
+                ? 'Campus research breakthroughs, university press updates, student achievements, and academic news from ASTU.'
+                : (settings.bannerSubtitle && !settings.bannerSubtitle.startsWith('Official communications, university')
+                  ? settings.bannerSubtitle
+                  : 'Official university bulletins, academic notices, and public communications.')}
             </p>
           </div>
         </div>
@@ -324,7 +357,7 @@ export default function AnnouncementListPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search notices by title or keyword"
+                placeholder={isNewsActive ? "Search news by title or keyword..." : "Search announcements by title or keyword..."}
                 className="w-full h-12 rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-[#003580] placeholder:text-slate-400 outline-none focus:border-[#003580] focus:ring-1 focus:ring-[#003580]/20 transition-all"
               />
               {search && (
@@ -380,7 +413,14 @@ export default function AnnouncementListPage() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setSelectedCategory(tab.id)}
+                    onClick={() => {
+                      setSelectedCategory(tab.id);
+                      if (tab.id === 'news' && !isNewsRoute) {
+                        navigate('/news');
+                      } else if (tab.id === 'announcements' && !isAnnouncementsRoute) {
+                        navigate('/announcements');
+                      }
+                    }}
                     className={`relative pb-2.5 text-sm transition-colors cursor-pointer ${isActive
                         ? 'font-bold text-[#003580]'
                         : 'font-medium text-slate-600 hover:text-[#003580]'
@@ -489,7 +529,7 @@ export default function AnnouncementListPage() {
                   <h2
                     onClick={() =>
                       navigate(
-                        `/announcements/${encodeURIComponent(
+                        `${currentBasePath}/${encodeURIComponent(
                           spotlightNotice.id || slugifiedId(spotlightNotice.title)
                         )}`
                       )
@@ -536,7 +576,7 @@ export default function AnnouncementListPage() {
                     <button
                       onClick={() =>
                         navigate(
-                          `/announcements/${encodeURIComponent(
+                          `${currentBasePath}/${encodeURIComponent(
                             spotlightNotice.id || slugifiedId(spotlightNotice.title)
                           )}`
                         )
@@ -588,7 +628,7 @@ export default function AnnouncementListPage() {
                   key={item.id || item.title}
                   onClick={() =>
                     navigate(
-                      `/announcements/${encodeURIComponent(item.id || slugifiedId(item.title))}`
+                      `${currentBasePath}/${encodeURIComponent(item.id || slugifiedId(item.title))}`
                     )
                   }
                   className={`card-soft group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white cursor-pointer ${!hasImage ? `border-l-4 ${theme.accentBorder}` : ''
@@ -729,7 +769,7 @@ export default function AnnouncementListPage() {
                   key={item.id || item.title}
                   onClick={() =>
                     navigate(
-                      `/announcements/${encodeURIComponent(item.id || slugifiedId(item.title))}`
+                      `${currentBasePath}/${encodeURIComponent(item.id || slugifiedId(item.title))}`
                     )
                   }
                   className="card-soft group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 cursor-pointer"

@@ -42,9 +42,9 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
             <img
               src={settings?.appearance?.logoUrl || "/images/astu-seal-logo.png"}
               alt={`${abbreviation} Logo`}
-              className="h-5 w-5 object-contain"
+              className="h-6 w-6 object-contain shrink-0"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "/images/astu-logo.jpeg";
+                (e.target as HTMLImageElement).src = "/images/astu-seal-logo.png";
               }}
             />
             <p className="text-slate-400 text-center sm:text-left text-[11px]">
@@ -84,16 +84,14 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
           {/* Brand & University Contact Details (2 cols on lg) */}
           <div className="lg:col-span-2 space-y-3.5 pr-0 lg:pr-4">
             <Link to="/" className="inline-flex items-center gap-3 group">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/20 shrink-0 group-hover:scale-105 transition-transform">
-                <img
-                  src={settings?.appearance?.logoUrl || "/images/astu-seal-logo.png"}
-                  alt={`${abbreviation} Logo`}
-                  className="h-full w-full object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/astu-logo.jpeg";
-                  }}
-                />
-              </div>
+              <img
+                src={settings?.appearance?.logoUrl || "/images/astu-seal-logo.png"}
+                alt={`${abbreviation} Logo`}
+                className="h-11 w-11 sm:h-12 sm:w-12 object-contain shrink-0 group-hover:scale-105 transition-transform"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/images/astu-seal-logo.png";
+                }}
+              />
               <div>
                 <span className="font-serif text-lg font-bold text-white tracking-tight block group-hover:text-blue-100 transition-colors">
                   {abbreviation}-AMS

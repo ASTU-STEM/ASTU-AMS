@@ -69,9 +69,12 @@ function AppContent() {
           <Route path="/info/:slug" element={<PublicInfoPage />} />
           <Route path="/announcements" element={<AnnouncementListPage />} />
           <Route path="/announcements/:id" element={<AnnouncementDetailPage />} />
+          <Route path="/news" element={<AnnouncementListPage />} />
+          <Route path="/news/:id" element={<AnnouncementDetailPage />} />
           <Route path="/gallery" element={<PublicGalleryPage />} />
           <Route path="/stories/:id" element={<StoryDetailPage />} />
           <Route path="/events" element={<EventsPage />} />
+          <Route path="/workshops" element={<EventsPage />} />
           <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/workshops/:id" element={<EventDetailPage />} />
           <Route path="/community" element={<AlumniCommunityPage />} />

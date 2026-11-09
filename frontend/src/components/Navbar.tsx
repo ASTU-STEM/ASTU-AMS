@@ -55,8 +55,8 @@ const megaMenus: MegaMenu[] = [
     icon: MdCampaign,
     items: [
       { label: "Events", route: "/events", description: "Upcoming gatherings" },
-      { label: "Workshops", route: "/events", description: "Skill-building sessions" },
-      { label: "News", route: "/announcements", description: "Latest updates" },
+      { label: "Workshops", route: "/workshops", description: "Skill-building sessions" },
+      { label: "News", route: "/news", description: "Latest updates" },
       { label: "Announcements", route: "/announcements", description: "Official notices" },
       { label: "Gallery", route: "/gallery", description: "Photo moments" },
       { label: "Video Gallery", route: "/info/video-gallery", description: "Video highlights" },
