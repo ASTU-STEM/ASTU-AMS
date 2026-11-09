@@ -807,7 +807,7 @@ export const defaultHomepageCmsConfig: HomepageCmsConfig = {
     {
       id: "HS-1",
       image: "/images/astu-building.jpg",
-      tagline: "Quality Assurance & Accreditation",
+      tagline: "",
       title: "Connecting ASTU's Excellence to the Global Industry",
       description: "A unified gateway for alumni, employers, and departments to foster professional growth, talent acquisition, and academic innovation at Adama Science and Technology University. Join 1,238+ alumni already connected.",
       active: true,
@@ -815,7 +815,7 @@ export const defaultHomepageCmsConfig: HomepageCmsConfig = {
     {
       id: "HS-2",
       image: "/images/campus-2.jpeg",
-      tagline: "Enterprise Networking & Placement",
+      tagline: "",
       title: "Empowering ASTU Graduates Through Innovation, Skills, and Modern Workplace Opportunities",
       description: "Discover corporate partners, publish practical career openings, and track your employment outcomes. Building bridges between classroom theory and real-world placement across 5 fields of study.",
       active: true,
@@ -823,9 +823,9 @@ export const defaultHomepageCmsConfig: HomepageCmsConfig = {
     {
       id: "HS-3",
       image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=80",
-      tagline: "Academic Innovation & Tracer Feedback",
+      tagline: "",
       title: "Coordinating Strategic Tracer Studies to Identify Workforce Trends and Skill Gaps",
-      description: "Enabling department heads and partner companies to identify technological skill gaps directly from the workforce, supporting data-driven curriculum improvements, strengthening industry collaboration, enhancing graduate employability, and contributing to successful university accreditation and continuous quality assurance outcomes.",
+      description: "Enabling departments and industry partners to identify skill trends, strengthen curricula, enhance graduate career outcomes, and advance accreditation standards.",
       active: true,
     },
   ],
@@ -1487,7 +1487,7 @@ export const homepageCmsService = {
         }
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        } catch {}
+        } catch { }
         return data;
       }
     } catch {
@@ -1510,7 +1510,7 @@ export const homepageCmsService = {
             }
             try {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-            } catch {}
+            } catch { }
             return parsed;
           } catch {
             /* ignore JSON parse error */
