@@ -41,6 +41,7 @@ import {
 import toast from "react-hot-toast";
 import Navbar from "../components/Navbar";
 import ChatBot from "../components/ChatBot";
+import TelebirrDonationModal from "../components/TelebirrDonationModal";
 import { partnerLogos } from "../components/PartnerLogos";
 import eventsService from "../features/admin/services/events.service";
 import contentService from "../features/admin/services/content.service";
@@ -91,8 +92,230 @@ const navSections = [
   { label: "Accreditation", id: "accreditation" },
   { label: "Partners", id: "partners" },
   { label: "News", id: "news" },
+  { label: "Giving", id: "giving" },
   { label: "FAQ", id: "faq" },
   { label: "Contact", id: "contact" }
+];
+
+const howItWorksSteps = [
+  {
+    step: 1,
+    badge: "01",
+    icon: CircleUserRound,
+    title: "CREATE YOUR PROFILE",
+    description:
+      "Build your verified professional identity and showcase your education, skills and experience.",
+    tags: ["Verified ID", "Skill Matrix"],
+    color: "from-astu-navy to-blue-800",
+    iconBg: "bg-blue-50 text-astu-navy border-blue-200/60",
+    cta: "Start Profile",
+    route: "/register",
+  },
+  {
+    step: 2,
+    badge: "02",
+    icon: Search,
+    title: "DISCOVER OPPORTUNITIES",
+    description:
+      "Find jobs, internships, mentorship and career opportunities.",
+    tags: ["Job Match", "Mentorship"],
+    color: "from-astu-red to-rose-700",
+    iconBg: "bg-rose-50 text-astu-red border-rose-200/60",
+    cta: "Explore Opportunities",
+    route: "/info/employer-portal",
+  },
+  {
+    step: 3,
+    badge: "03",
+    icon: Handshake,
+    title: "CONNECT & COLLABORATE",
+    description:
+      "Connect with alumni, employers and the ASTU community.",
+    tags: ["Global Network", "Industry Events"],
+    color: "from-emerald-600 to-teal-700",
+    iconBg: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+    cta: "Join Network",
+    route: "/login",
+  },
+  {
+    step: 4,
+    badge: "04",
+    icon: LineChart,
+    title: "GROW & GIVE BACK",
+    description:
+      "Mentor students, share your experience and contribute to ASTU.",
+    tags: ["Tracer Surveys", "Curriculum"],
+    color: "from-purple-600 to-indigo-800",
+    iconBg: "bg-purple-50 text-purple-700 border-purple-200/60",
+    cta: "Take Tracer Survey",
+    route: "/info/alumni-portal",
+  },
+];
+
+const communityPosts = [
+  {
+    name: "Abebe Yosef",
+    role: "Software Engineer",
+    text: "I landed my new role after using ASTU-AMS job matching and mentorship support. Thank you ASTU community.",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80",
+  },
+  {
+    name: "Bekele Kebede",
+    role: "Employer Partner",
+    text: "Hiring from ASTU-AMS has been efficient. We found strong engineering candidates with the right practical skills.",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80",
+  },
+  {
+    name: "Helina Sileshi",
+    role: "Mentor & Alumni",
+    text: "Proud to mentor ASTU students through the AMS platform. The next generation of innovators is ready!",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=200&q=80",
+  },
+];
+
+const events: any[] = [];
+
+const workshops: any[] = [];
+
+const featuredAlumni = [
+  { name: "Dr. Ruth Alemu", role: "AI Research Scientist", impact: "Published 18 applied AI papers and mentors ASTU research teams.", image: arcImage },
+  { name: "Yonas Bekele", role: "Founder, GreenGrid Labs", impact: "Built a renewable-energy startup serving industrial campuses.", image: electricLabs },
+  { name: "Kalkidan Tadesse", role: "Cloud Platform Lead", impact: "Leads enterprise cloud migration programs for regional partners.", image: stateM },
+];
+
+const featuredEmployers = [
+  { name: "Ethio Telecom", area: "Telecom & Cloud", openings: "14 graduate roles" },
+  { name: "Ethiopian Airlines", area: "Aviation Technology", openings: "8 internship tracks" },
+  { name: "INSA", area: "Cybersecurity", openings: "6 research placements" },
+  { name: "Huawei Ethiopia", area: "Network Engineering", openings: "11 certification paths" },
+];
+
+const partners = [
+  { name: "Ethio Telecom" },
+  { name: "INSA" },
+  { name: "Ethiopian Airlines" },
+  { name: "Safaricom" },
+  { name: "Huawei" },
+  { name: "Commercial Bank of Ethiopia" },
+];
+
+const campusLifeCards = [
+  { id: "campus-life-1", title: "Reunions, career expos, and workshops", campus: "Events and Activities", description: "Chapter meetings and community programs that keep graduates connected to the university.", image: gallery2, action: "View events", link: "/events" },
+  { id: "campus-life-2", title: "Facilities", campus: "Innovation Spaces", description: "Laboratories, research centers, libraries, and employer interview rooms.", image: electricLabs, action: "Explore facilities", link: "/info/facilities" },
+  { id: "campus-life-3", title: "Museums and gallery", campus: "Campus Gallery", description: "Research showcases, graduation moments, and campus photography.", image: arcImage, action: "View gallery", link: "/gallery" },
+];
+
+const announcements = [
+  {
+    id: "ann-1",
+    day: "09",
+    month: "SEP",
+    title: "ASTU Engineering Innovation Summit 2026",
+    type: "Official announcement",
+    year: "2026",
+    date: "09 Sep 2026",
+  },
+  {
+    id: "ann-2",
+    day: "07",
+    month: "JUN",
+    title: "Semester Break: Campus Safety Notice",
+    type: "Official announcement",
+    year: "2026",
+    date: "07 Jun 2026",
+  },
+  {
+    id: "ann-3",
+    day: "28",
+    month: "APR",
+    title: "ASTU Alumni Network: Bridging Generations",
+    type: "Press",
+    year: "2026",
+    date: "28 Apr 2026",
+  },
+  {
+    id: "ann-4",
+    day: "31",
+    month: "MAY",
+    title: "Tracer Study 2026 response window is open",
+    type: "Alumni Announcement",
+    year: "2026",
+    date: "31 May 2026",
+  },
+];
+
+const campuses = [
+  { name: "Main Campus", description: "Central hub for alumni services, registrar workflows, and institutional engagement.", image: gallery1 },
+  { name: "Engineering Labs", description: "Applied research, workshops, innovation programs, and industry-linked training.", image: electricLabs },
+  { name: "Graduation & Events Hall", description: "Ceremonies, career fairs, alumni awards, and university achievement programs.", image: gc7 },
+  { name: "Research Collaboration Center", description: "Research publications, industry projects, and department KPI evidence.", image: arcImage },
+];
+
+const faqItems = [
+  { question: "Who can use ASTU-AMS?", answer: "Verified alumni, employers, registrar teams, departments, and system administrators each access role-specific services." },
+  { question: "How are tracer studies used?", answer: "Responses support employment analytics, skill-gap reviews, curriculum updates, and accreditation evidence." },
+  { question: "Can employers register events?", answer: "Employer partners can coordinate job posts, internships, campus recruitment events, interviews, and feedback reports." },
+];
+
+const galleryImages = [
+  { src: gallery1, title: "ASTU main campus", num: "01" },
+  { src: stateM, title: "Innovation and collaboration", num: "02" },
+  { src: gc7, title: "Graduation ceremony", num: "03" },
+];
+
+const impactStats = [
+  {
+    id: "stat-1",
+    title: "Alumni Network",
+    label: "Alumni Network",
+    value: "1,238+",
+    detail: "Registered graduates across global technology hubs",
+    trend: "+18% YoY Growth",
+    icon: Users,
+    action: "View Network",
+    target: "/register",
+    gradient: "from-blue-600 to-indigo-700",
+    badgeBg: "bg-blue-50 text-blue-700 border-blue-200/80",
+  },
+  {
+    id: "stat-2",
+    title: "Fields of Study",
+    label: "Fields of Study",
+    value: "5",
+    detail: "Engineering, Applied Science, Tech & Research",
+    trend: "Fields of Study",
+    icon: BookOpen,
+    action: "Explore Programs",
+    target: "/info/overview",
+    gradient: "from-emerald-600 to-teal-700",
+    badgeBg: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+  },
+  {
+    id: "stat-3",
+    title: "Partner Employers",
+    label: "Partner Employers",
+    value: "500+",
+    detail: "Hiring, internship placement, and curriculum feedback",
+    trend: "Corporate Link",
+    icon: Building2,
+    action: "Meet Partners",
+    target: "/info/featured-employers",
+    gradient: "from-amber-500 to-orange-600",
+    badgeBg: "bg-amber-50 text-amber-700 border-amber-200/80",
+  },
+  {
+    id: "stat-4",
+    title: "Graduate Impact",
+    label: "Graduate Impact",
+    value: "94%",
+    detail: "Employed or in higher research within 6 months",
+    trend: "Verified Placement",
+    icon: Trophy,
+    action: "View Impact Data",
+    target: "/info/impact-numbers",
+    gradient: "from-astu-red to-rose-700",
+    badgeBg: "bg-rose-50 text-astu-red border-rose-200/80",
+  },
 ];
 
 const parseNoticeDate = (dateStr?: string) => {
@@ -116,6 +339,23 @@ export default function HomePage() {
 
   const [activeSection, setActiveSection] = useState("home");
   const [user, setUser] = useState<any>(null);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [selectedDonationCampaign, setSelectedDonationCampaign] = useState<{
+    id?: string;
+    title: string;
+    category?: string;
+    defaultAmount?: number;
+  } | null>(null);
+
+  const handleOpenDonation = (category = "Scholarships & Student Support") => {
+    setSelectedDonationCampaign({
+      id: "general-advancement",
+      title: "ASTU University Advancement & Student Support Fund",
+      category,
+      defaultAmount: 500,
+    });
+    setIsDonationModalOpen(true);
+  };
   const [currentSlide, setCurrentSlide] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [liveEvents, setLiveEvents] = useState<any[]>(() => {
@@ -1052,7 +1292,9 @@ export default function HomePage() {
                   src={slide.image}
                   onError={handleImageError}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#001d4a]/95 via-[#002b6b]/85 to-[#003580]/60" />
+                {/* Lighter, clearer scrim so real campus photo is clearly visible */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#00142e]/75 via-[#001e4a]/45 to-slate-950/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-black/20" />
               </div>
             ))}
           </div>
@@ -1067,11 +1309,11 @@ export default function HomePage() {
                 </span>
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold leading-[1.14] text-white tracking-tight">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-bold leading-[1.14] text-white tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]">
                 {(liveSlides[currentSlide] || liveSlides[0])?.title}
               </h1>
 
-              <p className="mt-4 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-slate-200">
+              <p className="mt-4 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-slate-100 drop-shadow-[0_1px_5px_rgba(0,0,0,0.7)]">
                 {(liveSlides[currentSlide] || liveSlides[0])?.description}
               </p>
 
@@ -1161,123 +1403,98 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 4 Stat Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {dynamicStats.map((stat, idx) => {
-                const StatIcon = getDynamicStatIcon(stat, idx);
-                const labelTitle = stat.label || stat.title || "Impact Metric";
-                const targetUrl = stat.target || stat.link || liveSectionLinks.impactDefaultLinkTarget;
-                const buttonText = stat.action || liveSectionLinks.impactDefaultLinkText;
+            {/* 4-Column Horizontal Telemetry Bar - Clean Minimal Layout */}
+            <div className="rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+                {/* Column 1: Registered Alumni */}
+                <div
+                  onClick={() => navigate("/register")}
+                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
+                >
+                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
+                    {metrics.registeredAlumniFormatted || "1,258+"}
+                  </div>
+                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    Registered alumni
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 font-normal">
+                    Verified against the registrar list
+                  </p>
+                </div>
 
-                const metricContextNotes = [
-                  "Verified alumni tracked across 40+ countries and global industries.",
-                  "Undergraduate and postgraduate engineering and technology faculties.",
-                  "Enterprise recruiters, research partners, and startup accelerators.",
-                  "Graduates employed or pursuing advanced degrees within 6 months.",
-                ];
+                {/* Column 2: Fields of Study */}
+                <div
+                  onClick={() => navigate("/info/overview")}
+                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
+                >
+                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
+                    {String(metrics.fieldsOfStudy || 5)}
+                  </div>
+                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    Fields of study
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 font-normal">
+                    Engineering and applied sciences
+                  </p>
+                </div>
 
-                return (
-                  <article
-                    key={stat.id || stat.label || stat.title || idx}
-                    onClick={() => navigate(targetUrl)}
-                    className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-7 lg:p-8 shadow-[0_2px_12px_-2px_rgba(10,56,113,0.06)] hover:shadow-[0_20px_40px_-12px_rgba(10,56,113,0.12)] hover:border-[#003580]/40 hover:-translate-y-1.5 transition-all duration-300 cursor-pointer"
-                  >
-                    {/* Subtle Top Accent Line on Hover */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#003580] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Column 3: Corporate Partners */}
+                <div
+                  onClick={() => navigate("/info/featured-employers")}
+                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
+                >
+                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
+                    {metrics.corporatePartnersFormatted || "500+"}
+                  </div>
+                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    Corporate partners
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 font-normal">
+                    Recruiting on campus
+                  </p>
+                </div>
 
-                    <div>
-                      {/* Top Row: Icon Container & Trend Tag */}
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50/80 border border-blue-100/80 text-[#003580] group-hover:bg-[#003580] group-hover:text-white transition-all duration-300 shadow-2xs">
-                          <StatIcon className="h-5 w-5" />
-                        </div>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100/90 border border-slate-200/60 px-3 py-1 text-[11px] font-semibold text-slate-700 group-hover:bg-rose-50 group-hover:border-rose-200/70 group-hover:text-[#C8102E] transition-colors">
-                          {stat.trend || (idx === 0 ? "+18% YoY" : idx === 1 ? "Fields of Study" : idx === 2 ? "Corporate Link" : "Verified Placement")}
-                        </span>
-                      </div>
-
-                      {/* Counter Value */}
-                      <div className="font-fraunces text-4xl lg:text-[46px] font-extrabold tracking-tight text-[#003580] group-hover:text-[#C8102E] transition-colors duration-300">
-                        {stat.value}{stat.suffix || ''}
-                      </div>
-
-                      {/* Metric Label */}
-                      <p className="mt-1.5 text-xs font-bold uppercase tracking-[0.14em] text-slate-800">
-                        {labelTitle}
-                      </p>
-
-                      {/* Descriptive Footnote */}
-                      <p className="mt-2 text-xs text-slate-500 leading-relaxed font-normal">
-                        {metricContextNotes[idx] || "Official university institutional indicator benchmarked for accreditation."}
-                      </p>
-                    </div>
-
-                    {/* Action Link Footer */}
-                    {buttonText && (
-                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-xs font-semibold text-[#003580] group-hover:text-[#C8102E] transition-colors inline-flex items-center gap-1.5">
-                          <span>{buttonText}</span>
-                          <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
-                        </span>
-                      </div>
-                    )}
-                  </article>
-                );
-              })}
+                {/* Column 4: Employed within 12 months */}
+                <div
+                  onClick={() => navigate("/info/overview")}
+                  className="p-6 sm:p-8 hover:bg-slate-50/60 transition-colors cursor-pointer group"
+                >
+                  <div className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] group-hover:text-[#C8102E] tracking-tight leading-none transition-colors">
+                    {metrics.employmentRateFormatted || "89%"}
+                  </div>
+                  <p className="mt-3 text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                    Employed within 12 months
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 font-normal">
+                    Longitudinal tracer survey
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* ── SECTION: How ASTU-AMS Works ── */}
-        <section id="how-it-works" className="scroll-mt-24 w-full bg-gradient-to-b from-[#F8FAFC] via-[#F4F7FB] to-[#F8FAFC] py-20 lg:py-24 border-b border-slate-200/80 relative overflow-hidden">
+        <section id="how-it-works" className="scroll-mt-24 w-full bg-gradient-to-b from-[#F8FAFC] via-[#F4F7FB] to-[#F8FAFC] py-16 lg:py-20 border-b border-slate-200/80 relative overflow-hidden">
           {/* Subtle blueprint grid overlay */}
           <div className="absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,#003580_1px,transparent_1px),linear-gradient(to_bottom,#003580_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-blue-400/[0.04] rounded-full blur-3xl pointer-events-none" />
 
           <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 relative z-10">
-            {/* Header: Centered Clean Title & Subtitle (No duplicate CTA button or roadmap pill) */}
-            <div className="mb-12 text-center max-w-2xl mx-auto pb-6 border-b border-slate-200/80">
-              <div className="inline-flex items-center gap-2 mb-2.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-100">
+            {/* Header: Centered Clean Title & Subtitle (No duplicate top stepper) */}
+            <div className="mb-10 text-center max-w-2xl mx-auto pb-4 border-b border-slate-200/80">
+              <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-100">
                 <span className="w-2 h-2 rounded-full bg-[#C8102E]" />
                 <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#C8102E]">
                   {livePortalsHeaders?.eyebrow || "GET STARTED"}
                 </span>
               </div>
-              <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
+              <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#003580] tracking-[-0.015em] leading-tight">
                 {livePortalsHeaders?.title || "How ASTU-AMS Works"}
               </h2>
-              <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
+              <p className="mt-2.5 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
                 {livePortalsHeaders?.description || "From registration to real impact — here's how our platform empowers alumni, employers, and the university community in four simple steps."}
               </p>
-            </div>
-
-            {/* Visual Roadmap Connection Track (Desktop) */}
-            <div className="hidden lg:grid grid-cols-4 gap-6 mb-8 relative">
-              <div className="absolute top-3.5 left-[12%] right-[12%] h-[2px] bg-slate-200 z-0" />
-              {[
-                "01. Profile & Verification",
-                "02. Opportunities & Match",
-                "03. Global Collaboration",
-                "04. Longitudinal Impact",
-              ].map((stage, sIdx) => {
-                const isNavy = sIdx % 2 === 0;
-                return (
-                  <div key={sIdx} className="relative z-10 flex flex-col items-center text-center">
-                    <div
-                      className={`h-7 w-7 rounded-full border-2 flex items-center justify-center font-mono text-xs font-bold transition-transform shadow-xs ${
-                        isNavy
-                          ? "bg-[#003580] border-[#003580] text-white ring-4 ring-blue-50"
-                          : "bg-[#C8102E] border-[#C8102E] text-white ring-4 ring-rose-50"
-                      }`}
-                    >
-                      {sIdx + 1}
-                    </div>
-                    <span className="mt-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                      {stage}
-                    </span>
-                  </div>
-                );
-              })}
             </div>
 
             {/* 4 Steps Grid - Compact, Modern & Strictly ASTU Brand Colors */}
@@ -1319,20 +1536,18 @@ export default function HomePage() {
                       {/* Step Header: Icon & Action Verb Badge */}
                       <div className="flex items-center justify-between mb-3.5">
                         <div
-                          className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-2xs transition-colors ${
-                            isNavy
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-2xs transition-colors ${isNavy
                               ? 'bg-blue-50 border border-blue-100 text-[#003580] group-hover:bg-[#003580] group-hover:text-white'
                               : 'bg-rose-50 border border-rose-100 text-[#C8102E] group-hover:bg-[#C8102E] group-hover:text-white'
-                          }`}
+                            }`}
                         >
                           <IconComponent className="h-4.5 w-4.5" />
                         </div>
                         <span
-                          className={`text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded-full ${
-                            isNavy
+                          className={`text-[10px] font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded-full ${isNavy
                               ? 'bg-blue-50/80 text-[#003580]'
                               : 'bg-rose-50/80 text-[#C8102E]'
-                          }`}
+                            }`}
                         >
                           {actionVerb}
                         </span>
@@ -1370,11 +1585,10 @@ export default function HomePage() {
                         {ctaText}
                       </span>
                       <div
-                        className={`flex h-6 w-6 items-center justify-center rounded-full transition-all duration-200 ${
-                          isNavy
+                        className={`flex h-6 w-6 items-center justify-center rounded-full transition-all duration-200 ${isNavy
                             ? 'bg-blue-50 text-[#003580] group-hover:bg-[#003580] group-hover:text-white'
                             : 'bg-rose-50 text-[#C8102E] group-hover:bg-[#C8102E] group-hover:text-white'
-                        }`}
+                          }`}
                       >
                         <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                       </div>
@@ -2463,6 +2677,87 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── SECTION: Give Back to ASTU ── */}
+        <section id="giving" className="scroll-mt-24 w-full bg-white py-16 md:py-20 border-t border-slate-200/80">
+          <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              {/* Left Column: Editorial message */}
+              <div className="lg:col-span-7 flex flex-col justify-center">
+                {/* Eyebrow */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-6 h-[2px] bg-[#C8102E] inline-block rounded-full" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#C8102E]">
+                    GIVE BACK TO ASTU
+                  </span>
+                </div>
+
+                {/* Main Heading */}
+                <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[40px] font-bold text-[#003580] tracking-[-0.015em] leading-[1.22]">
+                  Your Journey Can Open Doors for Others.
+                </h2>
+
+                {/* Description */}
+                <p className="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl">
+                  Your contribution helps empower the next generation of innovators, researchers, and leaders at Adama Science and Technology University.
+                </p>
+
+                {/* Optional Understated Impact Categories */}
+                <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap gap-2.5">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 text-xs font-medium text-slate-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#003580]" />
+                    Scholarships &amp; Student Support
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 text-xs font-medium text-slate-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#C8102E]" />
+                    Research &amp; Innovation
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 text-xs font-medium text-slate-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                    Learning Resources &amp; Facilities
+                  </span>
+                </div>
+
+                {/* Primary CTA Button */}
+                <div className="mt-8 flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (user?.role === 'ALUMNI') {
+                        navigate('/alumni/dashboard?tab=donations');
+                      } else {
+                        handleOpenDonation();
+                      }
+                    }}
+                    className="inline-flex items-center gap-2.5 px-6 py-3 rounded-md bg-[#003580] hover:bg-[#002244] text-white text-sm font-semibold transition-all duration-200 shadow-xs cursor-pointer group"
+                  >
+                    <span>Donate Now</span>
+                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: University / Student photo */}
+              <div className="lg:col-span-5">
+                <div className="relative rounded-2xl border border-slate-200/90 overflow-hidden bg-slate-100 shadow-2xs aspect-[4/3] sm:aspect-[16/11] lg:aspect-[4/3]">
+                  <img
+                    src={gc7}
+                    alt="ASTU Scholars and Graduating Students"
+                    className="w-full h-full object-cover object-center"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
+                    }}
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent p-4 pt-8">
+                    <p className="text-xs font-medium text-white/90 tracking-wide">
+                      Adama Science and Technology University Scholars
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── Final CTA ── */}
         {liveCtaSection?.enabled !== false && (
           <section
@@ -2770,6 +3065,17 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* Donation Modal */}
+      <TelebirrDonationModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        campaign={selectedDonationCampaign}
+        onSuccess={() => {
+          setIsDonationModalOpen(false);
+          toast.success("Thank you for your generous contribution to ASTU!");
+        }}
+      />
 
       <ChatBot />
     </div>
