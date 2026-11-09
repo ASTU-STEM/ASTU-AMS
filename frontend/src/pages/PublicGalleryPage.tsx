@@ -193,6 +193,26 @@ export default function PublicGalleryPage() {
   const navigate = useNavigate();
   const [settings, setSettings] = useState<GalleryPageSettings>(() => gallerySettingsService.getSettings());
 
+  const normalizeItem = (item: any, idx: number): GalleryItem => {
+    const isVideo = item.type === 'Video' || Boolean(item.duration && !item.photoCount);
+    const defaultAlbum = isVideo ? 'Workshop Gallery' : 'Campus Gallery';
+    const defaultCategory = (isVideo ? 'WORKSHOPS' : 'CAMPUS') as NonNullable<GalleryItem['category']>;
+    return {
+      id: item.id || `M-${idx + 1}`,
+      title: item.title || 'ASTU Media Archive',
+      type: isVideo ? 'Video' : 'Photo',
+      album: item.album || defaultAlbum,
+      category: item.category || defaultCategory,
+      src: item.src || item.image || '/images/astu-building.jpg',
+      image: item.image || item.src || '/images/astu-building.jpg',
+      status: item.status || 'Approved',
+      uploadedBy: item.uploadedBy || 'ASTU Communications',
+      date: item.date || 'Recently',
+      photoCount: item.photoCount || 16,
+      duration: item.duration || '04:15',
+    };
+  };
+
   const loadMedia = (): GalleryItem[] => {
     try {
       const stored = localStorage.getItem('astu_ams_cms_gallery_items');
@@ -200,17 +220,17 @@ export default function PublicGalleryPage() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const approved = parsed.filter((m: any) => m.status === 'Approved' || !m.status);
-          if (approved.length > 0) return approved;
+          if (approved.length > 0) return approved.map(normalizeItem);
         }
       }
     } catch { }
 
     const cmsConfig = homepageCmsService.getSettings();
-    if (cmsConfig?.gallery?.length) {
-      return cmsConfig.gallery;
+    if (cmsConfig?.gallery?.length && cmsConfig.gallery.some((g: any) => g.album || g.category)) {
+      return cmsConfig.gallery.map(normalizeItem);
     }
 
-    return defaultGalleryItems;
+    return defaultGalleryItems.map(normalizeItem);
   };
 
   const [items, setItems] = useState<GalleryItem[]>(loadMedia);
@@ -279,9 +299,9 @@ export default function PublicGalleryPage() {
       // Search keyword filter
       if (search.trim()) {
         const q = search.toLowerCase();
-        const inTitle = item.title.toLowerCase().includes(q);
-        const inAlbum = item.album && item.album.toLowerCase().includes(q);
-        const inUploadedBy = item.uploadedBy && item.uploadedBy.toLowerCase().includes(q);
+        const inTitle = (item.title || '').toLowerCase().includes(q);
+        const inAlbum = (item.album || '').toLowerCase().includes(q);
+        const inUploadedBy = (item.uploadedBy || '').toLowerCase().includes(q);
         if (!inTitle && !inAlbum && !inUploadedBy) return false;
       }
 
@@ -592,7 +612,7 @@ export default function PublicGalleryPage() {
                     {/* Category Pill Top Left (Matching Image 2) */}
                     <div className="absolute top-3.5 left-3.5 z-10">
                       <span className="rounded-md bg-white/95 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-slate-800 shadow-sm border border-slate-200/60">
-                        {item.category || item.album.replace(' Gallery', '').toUpperCase()}
+                        {item.category || (item.album ? item.album.replace(' Gallery', '') : 'CAMPUS').toUpperCase()}
                       </span>
                     </div>
 
@@ -776,7 +796,7 @@ export default function PublicGalleryPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="rounded-md bg-[#0a3871]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0a3871]">
-                    {activeModalItem.album}
+                    {activeModalItem.album || activeModalItem.category || 'Campus Gallery'}
                   </span>
                   {currentModalIndex >= 0 && (
                     <span className="text-xs text-slate-400 font-medium">

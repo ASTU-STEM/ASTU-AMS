@@ -3,19 +3,11 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   CalendarDays,
   MapPin,
-  Users,
   ArrowLeft,
   ArrowRight,
   ChevronRight,
-  GraduationCap,
   Share2,
-  CheckCircle2,
-  Bookmark,
   Building,
-  Clock,
-  QrCode,
-  Sparkles,
-  ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
@@ -427,62 +419,49 @@ export default function EventDetailPage() {
           {/* Left Column: Media & Content */}
           <div className="space-y-6 lg:col-span-2">
             {/* Hero Poster */}
-            <div className="relative h-72 sm:h-96 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-lg">
+            <div className="relative h-64 sm:h-80 lg:h-96 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-sm">
               <img
                 src={bannerImg}
                 alt={eventData?.title}
-                className="h-full w-full object-cover opacity-90"
+                className="h-full w-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
                     'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80';
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-6 text-white">
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${isWorkshop ? 'bg-amber-500 text-slate-950' : 'bg-[#003580] text-white'
-                    }`}
-                >
-                  <Sparkles className="h-3 w-3" />{' '}
-                  {isWorkshop ? 'ASTU Technical Workshop' : 'ASTU Alumni Event'}
-                </span>
-                <h1 className="mt-2 text-2xl font-extrabold leading-tight text-white drop-shadow-md sm:text-3xl">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-fraunces font-bold text-white leading-tight">
                   {eventData?.title}
                 </h1>
               </div>
             </div>
 
             {/* Quick Specs Bar */}
-            <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#003580]">
-                  <CalendarDays className="h-5 w-5" />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-xs">
+              <div className="flex items-center gap-3 sm:pr-4 py-2 sm:py-0">
+                <CalendarDays className="h-5 w-5 text-slate-400 shrink-0" />
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date</p>
-                  <p className="text-xs font-bold text-slate-800">{eventData?.date}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-slate-900">{eventData?.date}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                  <MapPin className="h-5 w-5" />
-                </div>
+              <div className="flex items-center gap-3 sm:px-4 py-2 sm:py-0">
+                <MapPin className="h-5 w-5 text-slate-400 shrink-0" />
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Venue</p>
-                  <p className="text-xs font-bold text-slate-800">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-900">
                     {eventData?.location || 'ASTU Main Campus'}
                   </p>
                 </div>
               </div>
 
-              <div className="col-span-2 flex items-center gap-3 sm:col-span-1">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600">
-                  <Building className="h-5 w-5" />
-                </div>
+              <div className="flex items-center gap-3 sm:pl-4 py-2 sm:py-0">
+                <Building className="h-5 w-5 text-slate-400 shrink-0" />
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Organizer</p>
-                  <p className="text-xs font-bold text-slate-800">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-900">
                     {eventData?.organizer || 'ASTU Alumni Office'}
                   </p>
                 </div>
@@ -491,99 +470,70 @@ export default function EventDetailPage() {
 
             {/* Detailed Overview */}
             <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-                <ShieldCheck className="h-5 w-5 text-[#003580]" /> About This{' '}
-                {isWorkshop ? 'Workshop' : 'Event'}
+              <h2 className="text-lg sm:text-xl font-bold font-fraunces text-slate-900">
+                About this {isWorkshop ? 'workshop' : 'event'}
               </h2>
               <p className="text-sm leading-relaxed text-slate-600">
                 {eventData?.description ||
                   'Join ASTU graduates, researchers, and corporate partners for technical workshops, career networking, keynotes, and strategic tracer feedback sessions at Adama Science and Technology University.'}
               </p>
 
-              <div className="mt-4 border-t border-slate-100 pt-4">
-                <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Key Highlights
-                </h3>
-                <ul className="grid gap-2 text-xs text-slate-700 sm:grid-cols-2">
-                  {(eventData?.highlights
-                    ? String(eventData.highlights)
+              {eventData?.highlights && (
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    Key Highlights
+                  </h3>
+                  <ul className="space-y-2 text-xs sm:text-sm text-slate-700">
+                    {String(eventData.highlights)
                       .split('\n')
                       .filter((h) => h.trim())
-                    : [
-                      'Certificate of Participation',
-                      'Alumni & Executive Networking',
-                      'Hands-on Practical Sessions',
-                      'Instant QR Check-in Pass',
-                    ]
-                  ).map((highlight, index) => (
-                    <li key={index} className="flex items-center gap-2 rounded-lg bg-slate-50 p-2.5">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />{' '}
-                      {highlight.trim()}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                      .map((highlight, index) => (
+                        <li key={index} className="flex items-start gap-2.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#003580] mt-2 shrink-0" />
+                          <span>{highlight.trim()}</span>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Right Column: RSVP Action Card */}
           <div className="space-y-6">
-            <div className="sticky top-20 space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-md">
+            <div className="sticky top-20 space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div>
-                <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600">
-                  Open Registration
-                </span>
-                <h3 className="mt-2 text-lg font-bold text-slate-900">
-                  Registration & Seat Booking
+                <h3 className="text-lg font-bold font-fraunces text-slate-900">
+                  Registration
                 </h3>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 leading-relaxed">
                   {eventData?.registrationInfo ||
-                    'Free registration for all verified ASTU alumni, students, and partners.'}
+                    'Free registration for all ASTU alumni, students, and partners.'}
                 </p>
               </div>
 
-              <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs">
-                <div className="flex justify-between text-slate-600">
-                  <span>Registered Attendees</span>
-                  <span className="font-bold text-slate-900">
-                    {displayRegistered} Registered
-                  </span>
+              {eventData?.capacity && (
+                <div className="rounded-xl bg-slate-50 border border-slate-100 p-3 text-xs flex justify-between items-center text-slate-600">
+                  <span>Capacity</span>
+                  <span className="font-semibold text-slate-900">{eventData.capacity} seats</span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className="h-full rounded-full bg-[#003580] transition-all duration-500"
-                    style={{ width: `${filledPercent}%` }}
-                  ></div>
-                </div>
-                <p className="text-right text-[10px] text-slate-400">
-                  {filledPercent}% Capacity Filled
-                </p>
-              </div>
+              )}
 
               <button
+                type="button"
                 onClick={handleRegisterClick}
-                className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white shadow-md transition-all ${isRegistered
+                className={`w-full rounded-xl py-3 text-sm font-semibold text-white shadow-xs transition-all cursor-pointer ${
+                  isRegistered
                     ? 'bg-emerald-600 hover:bg-emerald-700'
-                    : 'bg-[#003580] hover:brightness-110'
-                  }`}
+                    : 'bg-[#003580] hover:bg-[#002B66]'
+                }`}
               >
-                {isRegistered ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5" /> View QR Event Pass
-                  </>
-                ) : (
-                  <>
-                    <QrCode className="h-5 w-5" /> Register for {isWorkshop ? 'Workshop' : 'Event'}
-                  </>
-                )}
+                {isRegistered ? 'View Registration Pass' : 'Register for Event'}
               </button>
 
               {isRegistered && (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-3.5 text-center text-xs text-emerald-800">
-                  <p className="font-semibold">✓ You are registered for this event!</p>
-                  <p className="mt-0.5 text-[11px] text-emerald-600">
-                    Bring your digital QR pass for entry check-in.
-                  </p>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-center text-xs text-emerald-800">
+                  <p className="font-semibold">You are registered for this event</p>
                 </div>
               )}
             </div>
