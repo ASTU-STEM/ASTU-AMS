@@ -4,14 +4,20 @@ import {
   Users,
   Building2,
   ArrowRight,
-  ShieldCheck,
   Cpu,
   GraduationCap,
   Sparkles,
   Phone,
   Mail,
   MapPin,
-  CheckCircle2,
+  Briefcase,
+  MessageSquare,
+  Search,
+  TrendingUp,
+  Handshake,
+  ShieldCheck,
+  Award,
+  ChevronDown,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { partnerLogos } from '../components/PartnerLogos';
@@ -20,9 +26,69 @@ import homepageCmsService, {
   PartnersPageConfig,
   Partner,
   defaultPartnersList,
+  PartnerBenefit,
 } from '../features/admin/services/homepageCms.service';
 import { usePublicMetrics } from '../services/publicMetrics.service';
 import CompanyDetailModal from '../components/CompanyDetailModal';
+
+const DEFAULT_BENEFITS: PartnerBenefit[] = [
+  {
+    id: 'B-1',
+    icon: 'Users',
+    title: 'Hire Talented Graduates',
+    description: 'Access a vetted pool of ASTU graduates equipped with practical training in engineering, applied science, and technology.',
+    active: true,
+  },
+  {
+    id: 'B-2',
+    icon: 'Briefcase',
+    title: 'Post Job Opportunities',
+    description: 'Publish full-time vacancies and internships directly to verified graduating students and alumni.',
+    active: true,
+  },
+  {
+    id: 'B-3',
+    icon: 'MessageSquare',
+    title: 'Give Industry Feedback',
+    description: 'Directly inform curriculum design and departmental revisions to align graduate competencies with market demands.',
+    active: true,
+  },
+  {
+    id: 'B-4',
+    icon: 'Search',
+    title: 'Verified Student Information',
+    description: 'Search alumni profiles with registrar-verified academic records, engineering disciplines, and graduation cohorts.',
+    active: true,
+  },
+  {
+    id: 'B-5',
+    icon: 'TrendingUp',
+    title: 'Track Recruitment Analytics',
+    description: 'Monitor application flows, candidate engagement velocity, and hiring outcomes through enterprise partner telemetry.',
+    active: true,
+  },
+  {
+    id: 'B-6',
+    icon: 'Handshake',
+    title: 'Build Strategic Partnerships',
+    description: 'Establish long-term ties for sponsored capstone projects, cooperative R&D laboratories, and talent pipelines.',
+    active: true,
+  },
+];
+
+const iconMap: Record<string, React.ElementType> = {
+  Users,
+  Briefcase,
+  MessageSquare,
+  Search,
+  TrendingUp,
+  Handshake,
+  ShieldCheck,
+  Award,
+  Cpu,
+  GraduationCap,
+  Building2,
+};
 
 export default function PartnersPage() {
   const navigate = useNavigate();
@@ -78,6 +144,11 @@ export default function PartnersPage() {
     };
   }, []);
 
+  const benefitsList =
+    config.benefits && config.benefits.length > 0
+      ? config.benefits.filter((b) => b.active !== false)
+      : DEFAULT_BENEFITS;
+
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-[#C8102E]/10 selection:text-[#C8102E]">
       <Navbar />
@@ -97,279 +168,127 @@ export default function PartnersPage() {
         </aside>
       )}
 
-      {/* ── 1. PRESTIGE ACADEMIC BLUE HERO BANNER (REAL ASTU LAB/CAMPUS PHOTO + ABSTRACT BLUEPRINT) ── */}
-      <header className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] pt-10 pb-14 sm:pt-14 sm:pb-20 text-white shadow-xl">
-        {/* Real ASTU Engineering Lab / Research Facility Photograph Overlay */}
-        <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none select-none">
+      {/* ── 1. Full Hero Section (Full Viewport, Real Partnership Ceremony, Subtle Blur & Clean) ── */}
+      <header className="relative overflow-hidden min-h-[calc(100vh-76px)] sm:min-h-[calc(100vh-80px)] flex flex-col items-center justify-between text-white shadow-xl">
+        {/* Real ASTU Industry Partnership Signing Ceremony Photography (Gently Blurred, Not Too Blurred) */}
+        <div className="absolute inset-0 select-none pointer-events-none overflow-hidden">
           <img
-            alt="ASTU Engineering Research Laboratory"
-            className="h-full w-full object-cover"
-            src="/images/electriclabs.jpeg"
+            alt="ASTU Strategic Industry Partnership Signing Ceremony"
+            className="h-full w-full object-cover object-[center_30%] scale-105"
+            src="/images/partner-mou.jpg"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/images/astu-building.jpg';
+              (e.target as HTMLImageElement).src = '/images/regofficephoto.jpg';
             }}
           />
+          {/* Balanced Academic Scrim — Keeps Real Handshake & Ceremony Visible while Text Stays Crisp */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#00142e]/65 via-[#002147]/50 to-[#001026]/75" />
         </div>
 
-        {/* Abstract Blueprint Grid Pattern */}
-        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
+        {/* Abstract Blueprint Grid Pattern Overlay */}
+        <div className="absolute inset-0 opacity-[0.04] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
 
-        {/* Abstract Dot Grid Accent Overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-15"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(169, 196, 224, 0.25) 1.2px, transparent 1.2px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
+        {/* Top Spacer for perfect vertical balance */}
+        <div className="w-full h-8 sm:h-12 pointer-events-none" />
 
-        {/* Abstract Concentric Radar Arcs & Mathematical Rings in Top-Right */}
-        <svg
-          aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 h-full w-[650px] opacity-25 select-none overflow-visible"
-          viewBox="0 0 650 350"
-          fill="none"
-        >
-          <circle cx="520" cy="60" r="140" stroke="rgba(169, 196, 224, 0.45)" strokeWidth="1" />
-          <circle cx="520" cy="60" r="240" stroke="rgba(169, 196, 224, 0.35)" strokeWidth="1" strokeDasharray="4 4" />
-          <circle cx="520" cy="60" r="360" stroke="rgba(169, 196, 224, 0.25)" strokeWidth="1" />
-          <circle cx="520" cy="60" r="480" stroke="rgba(169, 196, 224, 0.16)" strokeWidth="1" strokeDasharray="6 6" />
-          <circle cx="520" cy="60" r="620" stroke="rgba(169, 196, 224, 0.08)" strokeWidth="1" />
-        </svg>
+        {/* Centered Hero Content */}
+        <div className="relative z-10 mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8 py-8 flex flex-col items-center justify-center text-center my-auto">
+          {/* Headline Title */}
+          <h1 className="font-fraunces text-3xl sm:text-5xl lg:text-[60px] font-bold text-white tracking-tight leading-[1.14] max-w-4xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.65)]">
+            {config.heroTitle || 'Partner with ASTU to Access'}{' '}
+            <span>{config.heroHighlight || 'Top Engineering & Tech Graduates'}</span>
+          </h1>
 
-        <div className="relative z-10 mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-          {/* Breadcrumb Navigation: Home / Partners */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-6 font-normal">
-            <Link to="/" className="hover:text-white transition-colors">
-              Home
-            </Link>
-            <span className="text-slate-400 font-light">/</span>
-            <span className="text-white font-medium">Industry Partners</span>
-          </nav>
+          {/* One Unified Expressive Idea */}
+          <p className="mt-6 text-base sm:text-lg lg:text-xl text-slate-100 leading-relaxed max-w-2xl font-normal mx-auto drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)]">
+            Collaborate with Ethiopia&apos;s premier technology university to recruit verified engineering talent, co-sponsor applied research, and build strategic industry pipelines.
+          </p>
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            {/* Left Title and Eyebrow Block */}
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-2.5 mb-3">
-                <span className="w-5 h-[2px] bg-[#E05A6D] inline-block rounded-full" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#E05A6D]">
-                  {config.heroBadge || 'CORPORATE & INDUSTRY ALLIANCES'}
-                </span>
-              </div>
-
-              <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold text-white tracking-[-0.015em] leading-[1.14]">
-                {config.heroTitle || 'Partner with ASTU to Access'}{' '}
-                <span className="text-[#FFD700]">{config.heroHighlight || 'Top Graduates'}</span>
-              </h1>
-
-              <p className="mt-4 text-sm sm:text-base text-slate-200/90 leading-relaxed max-w-xl font-normal">
-                {config.heroSubtitle ||
-                  'Connect with verified alumni talent, post job opportunities, and shape the future of technical education through industry collaboration.'}
-              </p>
-
-              {/* Action Buttons */}
-              <div className="mt-8 flex flex-wrap items-center gap-3.5">
-                <button
-                  type="button"
-                  onClick={() => navigate(config.heroPrimaryCtaLink || '/employers/register')}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C8102E] hover:bg-[#A60D26] text-white px-7 py-3.5 text-sm font-bold shadow-md hover:shadow-lg transition-all cursor-pointer"
-                >
-                  <span>{config.heroPrimaryCtaText || 'Register as Employer'}</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate(config.heroSecondaryCtaLink || '/login')}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 hover:bg-white/15 text-white px-6 py-3.5 text-sm font-medium backdrop-blur-sm transition-all cursor-pointer"
-                >
-                  <span>{config.heroSecondaryCtaText || 'Employer Login'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Right Badge: Verified Enterprise Network */}
-            <div className="hidden lg:flex items-center gap-3.5 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-md px-5 py-4 shadow-xl">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-rose-300">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-white">
-                  Verified Enterprise Network
-                </p>
-                <p className="text-[11px] text-slate-300">
-                  500+ Active Institutional Alliances
-                </p>
-              </div>
-            </div>
+          {/* Action Buttons */}
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
+            <button
+              type="button"
+              onClick={() => navigate(config.heroPrimaryCtaLink || '/employers/register')}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C8102E] hover:bg-[#A60D26] text-white px-8 py-4 text-sm font-bold shadow-lg hover:shadow-xl transition-all cursor-pointer hover:scale-105 active:scale-95"
+            >
+              <span>{config.heroPrimaryCtaText || 'Register as Employer'}</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(config.heroSecondaryCtaLink || '/login')}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 hover:bg-white/20 text-white px-8 py-4 text-sm font-semibold backdrop-blur-sm transition-all cursor-pointer hover:scale-105 active:scale-95"
+            >
+              <span>{config.heroSecondaryCtaText || 'Employer Portal Login'}</span>
+            </button>
           </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="relative z-10 pb-8 text-white/60 text-xs flex flex-col items-center gap-1.5 animate-pulse pointer-events-none select-none">
+          <span className="tracking-wide">Explore Partnership Opportunities</span>
+          <ChevronDown className="h-4 w-4" />
         </div>
       </header>
 
-      {/* ── 2. THREE PILLARS OF STRATEGIC COLLABORATION (CONSOLIDATED & NON-REPETITIVE) ── */}
-      <section className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-        <div className="text-center max-w-2xl mx-auto mb-16">
+      {/* ── 2. KEY PARTNERSHIP BENEFITS (CLEAN & PROFESSIONAL GRID) ── */}
+      <section className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+        <div className="text-center max-w-2xl mx-auto mb-14">
           <div className="inline-flex items-center gap-2 mb-2.5">
             <span className="w-4 h-[2px] bg-[#C8102E] inline-block rounded-full" />
             <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#C8102E]">
-              COLLABORATION TRACKS
+              {config.benefitsEyebrow || 'MUTUAL VALUE & TALENT ACCESS'}
             </span>
           </div>
-          <h2 className="font-fraunces text-3xl sm:text-4xl lg:text-[42px] font-bold text-[#002147] tracking-tight">
-            How Enterprises Engage with ASTU
+          <h2 className="font-fraunces text-3xl sm:text-4xl font-bold text-[#002147] tracking-tight">
+            {config.benefitsTitle || 'Why Partner with ASTU?'}
           </h2>
           <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Three distinct institutional avenues designed for talent pipelines, applied R&amp;D, and workforce development.
+            {config.benefitsSubtitle ||
+              'Join 500+ leading industry enterprises, public institutions, and research consortia actively recruiting and collaborating with ASTU.'}
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
-          {/* Track 1: Direct Talent Acquisition */}
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-[0_1px_3px_rgba(0,33,71,0.04),0_10px_24px_-8px_rgba(0,33,71,0.06)] hover:shadow-md hover:border-[#002147]/30 transition-all flex flex-col justify-between">
-            <div>
-              <div className="h-12 w-12 rounded-xl bg-[#002147] text-white flex items-center justify-center mb-6 shadow-xs">
-                <Users className="h-6 w-6" />
-              </div>
-
-              <h3 className="font-fraunces text-xl font-bold text-[#002147] mb-3">
-                1. Talent Acquisition &amp; Careers
-              </h3>
-
-              <p className="text-sm text-slate-600 leading-relaxed mb-6 font-normal">
-                Directly recruit top-tier software engineers, electrical technologists, and applied scientists with registrar-verified credentials.
-              </p>
-
-              <ul className="space-y-3.5 text-xs text-slate-700 font-medium">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Priority access to annual Campus Job Expos and dedicated interview suites</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Direct job and internship dispatches to verified graduating seniors</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Registrar-verified academic credentials, GPAs, and transcripts</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mt-8 pt-5 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => navigate('/employers/register')}
-                className="text-xs font-bold text-[#002147] hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {benefitsList.map((benefit) => {
+            const Icon = iconMap[benefit.icon] || Users;
+            return (
+              <div
+                key={benefit.id || benefit.title}
+                className="group rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-[0_1px_3px_rgba(0,33,71,0.04),0_6px_16px_-4px_rgba(0,33,71,0.04)] hover:shadow-md hover:border-[#002147]/30 transition-all flex flex-col justify-between"
               >
-                <span>Register as Employer</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Track 2: Applied R&D & Capstones */}
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-[0_1px_3px_rgba(0,33,71,0.04),0_10px_24px_-8px_rgba(0,33,71,0.06)] hover:shadow-md hover:border-[#002147]/30 transition-all flex flex-col justify-between">
-            <div>
-              <div className="h-12 w-12 rounded-xl bg-[#002147] text-white flex items-center justify-center mb-6 shadow-xs">
-                <Cpu className="h-6 w-6" />
+                <div>
+                  <div className="h-11 w-11 rounded-xl bg-[#002147]/5 text-[#002147] group-hover:bg-[#002147] group-hover:text-white transition-all flex items-center justify-center mb-4 shadow-2xs">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-fraunces text-lg font-bold text-[#002147] mb-2 group-hover:text-[#C8102E] transition-colors">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                    {benefit.description}
+                  </p>
+                </div>
               </div>
-
-              <h3 className="font-fraunces text-xl font-bold text-[#002147] mb-3">
-                2. Applied R&amp;D &amp; Capstones
-              </h3>
-
-              <p className="text-sm text-slate-600 leading-relaxed mb-6 font-normal">
-                Co-sponsor graduation capstone projects and access ASTU’s 12+ specialized engineering and robotics laboratories.
-              </p>
-
-              <ul className="space-y-3.5 text-xs text-slate-700 font-medium">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Commission applied industry problem solving in university research centers</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Co-develop intellectual property, prototyping, and technical patents</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Joint research grant applications with senior university faculty</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mt-8 pt-5 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => navigate('/contact')}
-                className="text-xs font-bold text-[#002147] hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>Inquire About Lab Research</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Track 3: Curriculum Advisory & Upskilling */}
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-8 shadow-[0_1px_3px_rgba(0,33,71,0.04),0_10px_24px_-8px_rgba(0,33,71,0.06)] hover:shadow-md hover:border-[#002147]/30 transition-all flex flex-col justify-between">
-            <div>
-              <div className="h-12 w-12 rounded-xl bg-[#002147] text-white flex items-center justify-center mb-6 shadow-xs">
-                <GraduationCap className="h-6 w-6" />
-              </div>
-
-              <h3 className="font-fraunces text-xl font-bold text-[#002147] mb-3">
-                3. Curriculum &amp; Upskilling
-              </h3>
-
-              <p className="text-sm text-slate-600 leading-relaxed mb-6 font-normal">
-                Shape future engineering curricula to align with real-world market needs and access executive corporate training modules.
-              </p>
-
-              <ul className="space-y-3.5 text-xs text-slate-700 font-medium">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Biennial curriculum review advisory seats aligned with ETA accreditation</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Continuous Professional Development (CPD) modules for enterprise teams</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="h-4 w-4 text-[#002147] shrink-0 mt-0.5" />
-                  <span>Longitudinal graduate tracer feedback integration</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="mt-8 pt-5 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => navigate('/contact')}
-                className="text-xs font-bold text-[#002147] hover:text-[#C8102E] inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>Curriculum Partnership</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </section>
 
       {/* ── 3. COLLABORATING ENTERPRISES (MARQUEE CAROUSEL) ── */}
-      <section className="bg-slate-50/80 py-16 lg:py-20 border-y border-slate-200/80 overflow-hidden">
+      <section className="bg-slate-50/70 py-14 lg:py-16 border-y border-slate-200/80 overflow-hidden">
         <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 text-center max-w-xl mx-auto">
-            <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#C8102E] mb-2 block">
+          <div className="mb-8 text-center max-w-xl mx-auto">
+            <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#C8102E] mb-1.5 block">
               ENTERPRISE ALLIANCES
             </span>
             <h3 className="font-fraunces text-2xl sm:text-3xl font-bold text-[#002147]">
               Collaborating Partner Organizations
             </h3>
-            <p className="mt-2 text-xs sm:text-sm text-slate-600">
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-600">
               Institutional partners supporting employability, accreditation feedback, internships, and research collaboration.
             </p>
           </div>
 
-          <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 p-5 shadow-xs">
+          <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 p-4 sm:p-5 shadow-2xs">
             <div className="flex gap-6 animate-scroll hover:[animation-play-state:paused]">
               {[...partnersList, ...partnersList].map((partner, idx) => {
                 const LogoComponent = partnerLogos[partner.name];
@@ -377,24 +296,24 @@ export default function PartnersPage() {
                   <div
                     key={`${partner.name}-${idx}`}
                     onClick={() => setSelectedCompanyModal(partner)}
-                    className="flex min-w-[180px] flex-col items-center justify-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-4 hover:bg-white hover:border-[#002147]/30 hover:shadow-xs transition-all cursor-pointer group"
+                    className="flex min-w-[170px] flex-col items-center justify-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/60 p-4 hover:bg-white hover:border-[#002147]/30 hover:shadow-2xs transition-all cursor-pointer group"
                   >
-                    <div className="h-12 w-full flex items-center justify-center">
+                    <div className="h-11 w-full flex items-center justify-center">
                       {partner.logo ? (
                         <img
                           src={partner.logo}
                           alt={partner.name}
-                          className="max-h-10 max-w-[130px] w-auto h-auto object-contain transition-transform group-hover:scale-105"
+                          className="max-h-9 max-w-[120px] w-auto h-auto object-contain transition-transform group-hover:scale-105"
                         />
                       ) : LogoComponent ? (
                         <LogoComponent className="group-hover:scale-105" />
                       ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#002147] text-white text-xs font-bold shadow-xs">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#002147] text-white text-xs font-bold shadow-xs">
                           {partner.name.slice(0, 2).toUpperCase()}
                         </div>
                       )}
                     </div>
-                    <span className="text-xs font-semibold text-slate-700 text-center truncate max-w-[150px] group-hover:text-[#002147]">
+                    <span className="text-xs font-semibold text-slate-700 text-center truncate max-w-[140px] group-hover:text-[#002147]">
                       {partner.name}
                     </span>
                   </div>
@@ -406,9 +325,9 @@ export default function PartnersPage() {
       </section>
 
       {/* ── 4. INSTITUTIONAL TELEMETRY & EXECUTIVE LIAISON DESK ── */}
-      <section className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
+      <section className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
         {/* Telemetry Numbers */}
-        <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 pb-16 border-b border-slate-200">
+        <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 pb-14 border-b border-slate-200">
           <div className="text-center">
             <div className="font-fraunces text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#002147]">
               {metrics.corporatePartnersFormatted || '500+'}
@@ -443,42 +362,31 @@ export default function PartnersPage() {
           </div>
         </div>
 
-        {/* Executive Directorate Strip */}
-        <div
-          className="mt-16 rounded-3xl p-8 sm:p-12 text-white shadow-xl border border-white/10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, #001838 0%, #002244 60%, #00122e 100%)',
-          }}
-        >
-          {/* Subtle dot pattern */}
-          <div
-            className="absolute inset-0 pointer-events-none opacity-20"
-            style={{
-              backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }}
-          />
-
+        {/* Executive Directorate Strip - Clean, Soft & Simple */}
+        <div className="mt-14 rounded-3xl p-8 sm:p-11 bg-slate-50 border border-slate-200/90 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 relative overflow-hidden">
           <div className="relative z-10 max-w-2xl space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-300">
-              OFFICE OF CORPORATE COMMUNICATIONS &amp; INDUSTRY LINKAGE
-            </span>
-            <h3 className="font-fraunces text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
+            <div className="inline-flex items-center gap-2">
+              <span className="w-3.5 h-[2px] bg-[#C8102E] inline-block rounded-full" />
+              <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#C8102E]">
+                OFFICE OF CORPORATE COMMUNICATIONS &amp; INDUSTRY LINKAGE
+              </span>
+            </div>
+            <h3 className="font-fraunces text-2xl sm:text-3xl font-bold text-[#002147] tracking-tight leading-snug">
               Ready to Form a Strategic Partnership with ASTU?
             </h3>
-            <p className="text-xs sm:text-sm text-blue-100/80 leading-relaxed max-w-xl">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl font-normal">
               Connect directly with our Directorate to discuss talent pipelines, laboratory research, and sponsored campus recruitment initiatives.
             </p>
 
-            <div className="pt-2 flex flex-wrap items-center gap-5 text-xs text-blue-200/90">
-              <span className="flex items-center gap-1.5">
-                <Phone className="h-3.5 w-3.5 text-rose-300" /> +251 22 110 0055
+            <div className="pt-2 flex flex-wrap items-center gap-3 text-xs font-semibold text-[#002147]">
+              <span className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200/90 px-3.5 py-2 shadow-2xs">
+                <Phone className="h-3.5 w-3.5 text-[#C8102E]" /> +251 22 110 0055
               </span>
-              <span className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5 text-rose-300" /> irccd@astu.edu.et
+              <span className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200/90 px-3.5 py-2 shadow-2xs">
+                <Mail className="h-3.5 w-3.5 text-[#C8102E]" /> irccd@astu.edu.et
               </span>
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-rose-300" /> Main Campus, Adama
+              <span className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200/90 px-3.5 py-2 shadow-2xs">
+                <MapPin className="h-3.5 w-3.5 text-[#C8102E]" /> Main Campus, Adama
               </span>
             </div>
           </div>
@@ -487,7 +395,7 @@ export default function PartnersPage() {
             <button
               type="button"
               onClick={() => navigate('/employers/register')}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C8102E] hover:bg-[#A60D26] text-white px-7 py-3.5 text-xs font-bold uppercase tracking-wider shadow-md transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#C8102E] hover:bg-[#A60D26] text-white px-7 py-3.5 text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
               <span>Register Organization</span>
               <ArrowRight className="h-4 w-4" />
@@ -495,7 +403,7 @@ export default function PartnersPage() {
             <button
               type="button"
               onClick={() => navigate('/contact')}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/5 hover:bg-white/10 text-white px-6 py-3.5 text-xs font-semibold backdrop-blur-sm transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-[#002147] px-6 py-3.5 text-xs font-bold uppercase tracking-wider shadow-2xs transition-all cursor-pointer"
             >
               <span>Contact Directorate</span>
             </button>
@@ -507,6 +415,8 @@ export default function PartnersPage() {
       {selectedCompanyModal && (
         <CompanyDetailModal
           company={selectedCompanyModal}
+          partners={partnersList}
+          onSelectCompany={(company) => setSelectedCompanyModal(company)}
           onClose={() => setSelectedCompanyModal(null)}
           onRegisterInterest={(company) => {
             setSelectedCompanyModal(null);
@@ -514,7 +424,6 @@ export default function PartnersPage() {
           }}
         />
       )}
-
     </div>
   );
 }

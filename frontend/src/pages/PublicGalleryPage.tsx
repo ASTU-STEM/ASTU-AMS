@@ -337,14 +337,55 @@ export default function PublicGalleryPage() {
     return range;
   };
 
+  // ── Modal Preview Page Handler (Previous / Next image in Lightbox) ──
+  const currentModalIndex = useMemo(() => {
+    if (!activeModalItem) return -1;
+    return filtered.findIndex((item) => item.id === activeModalItem.id);
+  }, [activeModalItem, filtered]);
+
+  const handlePrevModalItem = () => {
+    if (currentModalIndex > 0) {
+      setActiveModalItem(filtered[currentModalIndex - 1]);
+    }
+  };
+
+  const handleNextModalItem = () => {
+    if (currentModalIndex >= 0 && currentModalIndex < filtered.length - 1) {
+      setActiveModalItem(filtered[currentModalIndex + 1]);
+    }
+  };
+
+  // Keyboard navigation for gallery modal: ArrowLeft / ArrowRight / Escape
+  useEffect(() => {
+    if (!activeModalItem) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (currentModalIndex > 0) {
+          setActiveModalItem(filtered[currentModalIndex - 1]);
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (currentModalIndex >= 0 && currentModalIndex < filtered.length - 1) {
+          setActiveModalItem(filtered[currentModalIndex + 1]);
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setActiveModalItem(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModalItem, currentModalIndex, filtered]);
+
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-800 flex flex-col">
       <Navbar />
 
-      {/* ── Prestige Academic Blue Hero Banner (Minimal & Clean) ── */}
+      {/* ── Hero Banner (Clean & Modern) ── */}
       <header className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] text-white pt-10 pb-12 sm:pt-14 sm:pb-16 px-4 sm:px-6 shadow-xl">
-        {/* Dedicated Background Image Overlay */}
-        <div className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none">
+        {/* Subtle Campus Background Image (Clean & Visible) */}
+        <div className="absolute inset-0 opacity-25 pointer-events-none">
           <img
             alt="ASTU Media Archive"
             className="h-full w-full object-cover"
@@ -355,32 +396,12 @@ export default function PublicGalleryPage() {
           />
         </div>
 
-        {/* Blueprint grid pattern ("like we did for other") */}
-        <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
-
-        {/* Dot Grid Background Overlay */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-15"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1.2px, transparent 1.2px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-
-        {/* Ambient Concentric Circular Arc Line Graphic */}
-        <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/6 h-[560px] w-[560px] opacity-25">
-          <svg viewBox="0 0 500 500" className="h-full w-full" fill="none">
-            <circle cx="250" cy="250" r="90" stroke="white" strokeWidth="1" strokeDasharray="3 3" />
-            <circle cx="250" cy="250" r="160" stroke="white" strokeWidth="1.2" />
-            <circle cx="250" cy="250" r="230" stroke="white" strokeWidth="1" strokeDasharray="5 5" />
-            <circle cx="250" cy="250" r="300" stroke="white" strokeWidth="1.2" />
-            <circle cx="250" cy="250" r="370" stroke="white" strokeWidth="1" strokeDasharray="6 6" />
-          </svg>
-        </div>
+        {/* Blueprint grid pattern */}
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem] pointer-events-none" />
 
         <div className="relative z-10 mx-auto max-w-[1360px]">
           {/* Breadcrumb Navigation: Home / Media */}
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-6 font-normal">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 mb-5 font-normal">
             <Link to="/" className="hover:text-white transition-colors">
               Home
             </Link>
@@ -388,43 +409,16 @@ export default function PublicGalleryPage() {
             <span className="text-white font-medium">Media</span>
           </nav>
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="max-w-2xl space-y-3">
-              {/* Eyebrow with Rose Dash */}
-              <div className="flex items-center gap-2.5">
-                <span className="w-5 h-[2px] bg-[#E05A6D] inline-block rounded-full"></span>
-                <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#E05A6D]">
-                  OFFICIAL CAMPUS MEDIA ARCHIVE
-                </span>
-              </div>
+          <div className="max-w-3xl space-y-3">
+            {/* Headline Title */}
+            <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold tracking-tight text-white leading-tight">
+              {settings.bannerTitle || 'Media and photo gallery'}
+            </h1>
 
-              {/* Headline Title */}
-              <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[48px] font-bold tracking-[-0.015em] text-white leading-[1.14]">
-                Media and photo gallery
-              </h1>
-
-              {/* Subtitle Description */}
-              <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
-                Visual showcases, event archives, research expos, graduation ceremonies, and campus life at Adama Science and Technology University.
-              </p>
-            </div>
-
-            {/* Right Badge: Verified ASTU archive */}
-            <div className="shrink-0 self-start lg:self-center">
-              <div className="rounded-2xl border border-white/15 bg-white/[0.04] backdrop-blur-sm px-5 py-3.5 flex items-center gap-3.5 shadow-sm">
-                <div className="h-9 w-9 rounded-full border border-rose-300/40 bg-rose-500/10 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="h-4.5 w-4.5 text-rose-200" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-white leading-tight">
-                    Verified ASTU archive
-                  </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5 font-normal">
-                    Managed by Directorate of Communication
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Subtitle Description */}
+            <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-2xl">
+              {settings.bannerSubtitle || 'Visual showcases, event archives, research expos, graduation ceremonies, and campus life at Adama Science and Technology University.'}
+            </p>
           </div>
         </div>
       </header>
@@ -780,9 +774,16 @@ export default function PublicGalleryPage() {
           >
             <div className="flex items-center justify-between border-b border-slate-100 p-4">
               <div>
-                <span className="rounded-md bg-[#0a3871]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0a3871]">
-                  {activeModalItem.album}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-md bg-[#0a3871]/10 px-2 py-0.5 text-[10px] font-bold uppercase text-[#0a3871]">
+                    {activeModalItem.album}
+                  </span>
+                  {currentModalIndex >= 0 && (
+                    <span className="text-xs text-slate-400 font-medium">
+                      Item {currentModalIndex + 1} of {filtered.length}
+                    </span>
+                  )}
+                </div>
                 <h3 className="mt-1 font-fraunces text-base font-bold text-slate-900">
                   {activeModalItem.title}
                 </h3>
@@ -790,12 +791,55 @@ export default function PublicGalleryPage() {
               <button
                 onClick={() => setActiveModalItem(null)}
                 className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                aria-label="Close preview"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="relative max-h-[70vh] bg-black flex items-center justify-center">
+            <div className="relative max-h-[70vh] bg-black flex items-center justify-center select-none">
+              {/* Floating Previous Button */}
+              {filtered.length > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePrevModalItem();
+                  }}
+                  disabled={currentModalIndex <= 0}
+                  aria-label="Previous item"
+                  title="Previous item (←)"
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-xs transition-all ${
+                    currentModalIndex <= 0
+                      ? 'opacity-25 cursor-not-allowed pointer-events-none'
+                      : 'hover:bg-black/90 hover:scale-105 cursor-pointer shadow-lg'
+                  }`}
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+              )}
+
+              {/* Floating Next Button */}
+              {filtered.length > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNextModalItem();
+                  }}
+                  disabled={currentModalIndex >= filtered.length - 1}
+                  aria-label="Next item"
+                  title="Next item (→)"
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-xs transition-all ${
+                    currentModalIndex >= filtered.length - 1
+                      ? 'opacity-25 cursor-not-allowed pointer-events-none'
+                      : 'hover:bg-black/90 hover:scale-105 cursor-pointer shadow-lg'
+                  }`}
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              )}
+
               <img
                 src={activeModalItem.src || activeModalItem.image || '/images/astu-building.jpg'}
                 alt={activeModalItem.title}
@@ -805,14 +849,14 @@ export default function PublicGalleryPage() {
                 }}
               />
               {activeModalItem.type === 'Video' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white pointer-events-none">
                   <PlayCircle className="h-16 w-16 mb-2 text-[#FFD700]" />
                   <p className="text-xs font-semibold">Video preview stream ready</p>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between bg-slate-50 p-4 text-xs text-slate-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 text-xs text-slate-500">
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
                   <User className="h-3.5 w-3.5 text-slate-400" />
@@ -824,6 +868,38 @@ export default function PublicGalleryPage() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                {filtered.length > 1 && (
+                  <div className="flex items-center gap-1 mr-2 border-r border-slate-200 pr-3">
+                    <button
+                      type="button"
+                      onClick={handlePrevModalItem}
+                      disabled={currentModalIndex <= 0}
+                      className={`inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                        currentModalIndex <= 0
+                          ? 'opacity-35 cursor-not-allowed bg-slate-100 text-slate-400'
+                          : 'bg-white text-slate-700 hover:bg-slate-100 cursor-pointer'
+                      }`}
+                      title="Previous item"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Prev</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextModalItem}
+                      disabled={currentModalIndex >= filtered.length - 1}
+                      className={`inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                        currentModalIndex >= filtered.length - 1
+                          ? 'opacity-35 cursor-not-allowed bg-slate-100 text-slate-400'
+                          : 'bg-white text-slate-700 hover:bg-slate-100 cursor-pointer'
+                      }`}
+                      title="Next item"
+                    >
+                      <span className="hidden sm:inline">Next</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
                 <button
                   onClick={() => {
                     if (navigator.clipboard) {
@@ -831,7 +907,7 @@ export default function PublicGalleryPage() {
                       toast.success('Gallery album link copied!');
                     }
                   }}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Share
                 </button>

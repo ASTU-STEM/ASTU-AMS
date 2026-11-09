@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -25,6 +25,7 @@ import {
   MapPin,
   Phone,
   Mail,
+  ChevronLeft,
   ChevronRight,
   Sparkles,
   ExternalLink,
@@ -256,6 +257,51 @@ export default function PublicInfoPage() {
   const isOverviewPage = slug === "overview";
   const isContactPage = slug === "contact";
 
+  // ── Pagination State for Alumni Stories (/info/alumni-stories) ──
+  const [storiesPage, setStoriesPage] = useState(1);
+  const [storiesPageSize, setStoriesPageSize] = useState(6); // 6 stories per page provides 3 clean 2-col rows
+
+  // ── Pagination State for General Institutional Sections ──
+  const [sectionsPage, setSectionsPage] = useState(1);
+  const [sectionsPageSize, setSectionsPageSize] = useState(6);
+
+  // Reset pagination on slug change
+  useEffect(() => {
+    setStoriesPage(1);
+    setSectionsPage(1);
+  }, [slug]);
+
+  const totalStoryPages = Math.max(1, Math.ceil(alumniStories.length / storiesPageSize));
+  const storyStartIndex = (storiesPage - 1) * storiesPageSize;
+  const paginatedStories = useMemo(() => {
+    return alumniStories.slice(storyStartIndex, storyStartIndex + storiesPageSize);
+  }, [alumniStories, storyStartIndex, storiesPageSize]);
+
+  const totalSectionPages = Math.max(1, Math.ceil(page.sections.length / sectionsPageSize));
+  const sectionStartIndex = (sectionsPage - 1) * sectionsPageSize;
+  const paginatedSections = useMemo(() => {
+    return page.sections.slice(sectionStartIndex, sectionStartIndex + sectionsPageSize);
+  }, [page.sections, sectionStartIndex, sectionsPageSize]);
+
+  const getPageNumbers = (current: number, total: number) => {
+    const delta = 1;
+    const range: (number | string)[] = [];
+    for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+      range.push(i);
+    }
+    if (current - delta > 2) {
+      range.unshift('...');
+    }
+    if (current + delta < total - 1) {
+      range.push('...');
+    }
+    range.unshift(1);
+    if (total > 1) {
+      range.push(total);
+    }
+    return range;
+  };
+
   const handleInquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inquiryForm.name || !inquiryForm.email || !inquiryForm.message) {
@@ -277,6 +323,44 @@ export default function PublicInfoPage() {
       });
     }, 600);
   };
+
+  // ── Institutional Information Topics Sequence (Page Handler) ──
+  const publicInfoTopics = [
+    { slug: 'overview', title: 'ASTU-AMS Overview' },
+    { slug: 'impact-numbers', title: 'Impact Metrics' },
+    { slug: 'accreditation', title: 'Accreditation & Quality' },
+    { slug: 'achievements', title: 'Institutional Achievements' },
+    { slug: 'campus-life', title: 'Campus Life & Culture' },
+    { slug: 'facilities', title: 'Research Facilities' },
+    { slug: 'mentorship', title: 'Alumni Mentorship' },
+    { slug: 'research', title: 'Applied Research Centers' },
+    { slug: 'innovation', title: 'Incubation & Arc' },
+    { slug: 'faq', title: 'Frequently Asked Questions' },
+    { slug: 'contact', title: 'Institutional Directory' },
+  ];
+
+  const currentTopicIndex = publicInfoTopics.findIndex((t) => t.slug === slug);
+  const prevTopic = currentTopicIndex > 0 ? publicInfoTopics[currentTopicIndex - 1] : null;
+  const nextTopic =
+    currentTopicIndex >= 0 && currentTopicIndex < publicInfoTopics.length - 1
+      ? publicInfoTopics[currentTopicIndex + 1]
+      : null;
+
+  // Keyboard navigation for info pages (ArrowLeft / ArrowRight)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+      if (e.key === 'ArrowLeft' && prevTopic) {
+        navigate(`/info/${prevTopic.slug}`);
+      } else if (e.key === 'ArrowRight' && nextTopic) {
+        navigate(`/info/${nextTopic.slug}`);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [prevTopic, nextTopic, navigate]);
 
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-900 antialiased selection:bg-[#003580] selection:text-white">
@@ -333,10 +417,10 @@ export default function PublicInfoPage() {
       )}
 
       <main>
-        {/* ── HERO SECTION ── */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] text-white">
-          {/* Subtle background image overlay */}
-          <div className="absolute inset-0 opacity-20 mix-blend-overlay">
+        {/* ── HERO SECTION (Clean & Modern) ── */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#001d4a] via-[#002b66] to-[#0a3977] text-white pt-10 pb-14 sm:pt-14 sm:pb-16 shadow-xl">
+          {/* Background image overlay - clear, crisp and visible */}
+          <div className="absolute inset-0 opacity-25 pointer-events-none">
             <img
               alt={page.title}
               className="h-full w-full object-cover"
@@ -348,111 +432,70 @@ export default function PublicInfoPage() {
             />
           </div>
 
-          {/* Clean grid pattern */}
-          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:4rem_4rem]" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {/* Breadcrumb Navigation: Home / [Page Title] */}
+            <div className="flex items-center justify-between mb-5">
+              <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[13px] text-slate-300/80 font-normal">
+                <Link to="/" className="hover:text-white transition-colors">
+                  Home
+                </Link>
+                <span className="text-slate-400 font-light">/</span>
+                <span className="text-white font-medium">{page.title}</span>
+              </nav>
 
-          <div className="relative mx-auto max-w-7xl px-4 pt-12 pb-16 sm:px-6 lg:px-8 lg:pt-16 lg:pb-24">
-            {/* Top Navigation Row */}
-            <div className="flex items-center justify-between mb-8">
-              <button
-                type="button"
-                onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white cursor-pointer"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                <span>Back to Home</span>
-              </button>
-
-              <div className="flex items-center gap-3">
-                {isCmsAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/cms/homepage?tab=detail-pages&page=${slug}`)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-400/20 px-3.5 py-1.5 text-xs font-bold text-amber-200 backdrop-blur-md transition-all hover:bg-amber-400 hover:text-slate-950 cursor-pointer"
-                  >
-                    <Edit3 className="h-3.5 w-3.5" />
-                    <span>Edit Page in CMS</span>
-                  </button>
-                )}
-
-                <div className="hidden sm:flex items-center gap-2 text-xs text-white/70">
-                  <span>Institutional Portal</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span className="font-semibold text-white capitalize">{slug.replace(/-/g, " ")}</span>
-                </div>
-              </div>
+              {isCmsAdmin && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/cms/homepage?tab=detail-pages&page=${slug}`)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-400/20 px-3.5 py-1.5 text-xs font-bold text-amber-200 backdrop-blur-md transition-all hover:bg-amber-400 hover:text-slate-950 cursor-pointer"
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                  <span>Edit in CMS</span>
+                </button>
+              )}
             </div>
 
             {/* Hero Main Content */}
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-3xl">
-                <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl font-fraunces">
-                  {page.title}
-                </h1>
-                <p className="mt-4 text-sm leading-relaxed text-slate-200/95 sm:text-base sm:leading-7 max-w-2xl">
-                  {page.subtitle}
-                </p>
-              </div>
+            <div className="max-w-3xl space-y-2.5">
+              <h1 className="font-fraunces text-3xl sm:text-4xl lg:text-[44px] font-bold tracking-tight text-white leading-tight">
+                {page.title}
+              </h1>
+              <p className="text-sm sm:text-base text-slate-200/90 leading-relaxed font-normal max-w-xl">
+                {page.subtitle}
+              </p>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3">
-                {isEmployerPortal ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/employers/register")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-red-500 hover:scale-105 cursor-pointer"
-                    >
-                      <Briefcase className="h-4 w-4" />
-                      <span>Register as Employer</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/login")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 cursor-pointer"
-                    >
-                      <span>Employer Login</span>
-                    </button>
-                  </>
-                ) : isContactPage ? (
-                  <>
+              {/* Action Buttons (Only when contextual/needed) */}
+              {(isEmployerPortal || isContactPage) && (
+                <div className="flex flex-wrap items-center gap-3 pt-3">
+                  {isEmployerPortal ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/employers/register")}
+                        className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-red-500 cursor-pointer"
+                      >
+                        <Briefcase className="h-4 w-4" />
+                        <span>Register as Employer</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/login")}
+                        className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 cursor-pointer"
+                      >
+                        <span>Employer Login</span>
+                      </button>
+                    </>
+                  ) : (
                     <a
                       href="#inquiry-form"
-                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#003580] shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-[#003580] shadow-lg transition-all hover:bg-slate-100 cursor-pointer"
                     >
                       <MessageSquare className="h-4 w-4" />
                       <span>Send Direct Message</span>
                     </a>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/partners")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 cursor-pointer"
-                    >
-                      <span>View Partners</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/login")}
-                      className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#003580] shadow-lg transition-all hover:bg-slate-100 hover:scale-105 cursor-pointer"
-                    >
-                      <GraduationCap className="h-4 w-4" />
-                      <span>Portal Login</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => navigate("/partners")}
-                      className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-md transition-all hover:bg-white/20 cursor-pointer"
-                    >
-                      <span>View Partners</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -476,7 +519,7 @@ export default function PublicInfoPage() {
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           {/* 1. SPECIAL RICH GRID FOR ALUMNI STORIES */}
           {isStoriesPage ? (
-            <div className="space-y-12">
+            <div id="stories-feed-top" className="space-y-12">
               <div className="space-y-6">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
                   <div>
@@ -484,7 +527,7 @@ export default function PublicInfoPage() {
                       Featured Alumni Spotlights
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Real journeys of ASTU graduates excelling across industries worldwide. Managed via CMS.
+                      Real journeys of ASTU graduates excelling across industries worldwide.
                     </p>
                   </div>
                   <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[#003580]">
@@ -493,14 +536,15 @@ export default function PublicInfoPage() {
                   </span>
                 </div>
 
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {alumniStories.map((story) => (
+                {/* 2-Column Responsive Card Grid (Comfortable Wideness - Not Too Wide, Not Crowded) */}
+                <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+                  {paginatedStories.map((story) => (
                     <article
                       key={story.id}
-                      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#003580]/40 hover:shadow-lg"
+                      className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-7 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-[#003580]/40 hover:shadow-lg"
                     >
                       <div>
-                        <div className="flex items-start gap-4 mb-4">
+                        <div className="flex items-center gap-4 mb-4">
                           {story.image ? (
                             <img
                               src={story.image}
@@ -517,14 +561,16 @@ export default function PublicInfoPage() {
                           )}
 
                           <div className="min-w-0 flex-1">
-                            {story.featured && (
-                              <span className="mb-1 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
-                                <Sparkles className="h-3 w-3 text-amber-500" /> Featured
-                              </span>
-                            )}
-                            <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-[#003580] transition-colors">
-                              {story.name}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-[#003580] transition-colors">
+                                {story.name}
+                              </h3>
+                              {story.featured && (
+                                <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200 shrink-0">
+                                  <Sparkles className="h-3 w-3 text-amber-500" /> Featured
+                                </span>
+                              )}
+                            </div>
                             <p className="line-clamp-1 text-xs font-semibold text-[#003580]">
                               {story.role}
                             </p>
@@ -543,29 +589,138 @@ export default function PublicInfoPage() {
                             </span>
                           )}
                           {story.department && (
-                            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-medium text-slate-600 truncate max-w-[180px]">
+                            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-medium text-slate-600 truncate max-w-[220px]">
                               {story.department}
                             </span>
                           )}
                         </div>
 
-                        <p className="text-xs leading-relaxed text-slate-600 line-clamp-3">
+                        <p className="text-xs leading-relaxed text-slate-600 line-clamp-2">
                           {story.text}
                         </p>
                       </div>
 
-                      <div className="mt-5 border-t border-slate-100 pt-4">
+                      <div className="mt-5 border-t border-slate-100 pt-3.5">
                         <Link
                           to={`/stories/${story.id}`}
-                          className="inline-flex items-center justify-between w-full rounded-xl bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-[#003580] group-hover:bg-[#003580] group-hover:text-white transition-all shadow-2xs"
+                          className="inline-flex items-center justify-between w-full rounded-xl bg-slate-50 px-4 py-2.5 text-xs font-bold text-[#003580] group-hover:bg-[#003580] group-hover:text-white transition-all shadow-2xs"
                         >
-                          <span>Read Full Success Story</span>
+                          <span>Read Story</span>
                           <ChevronRight className="h-4 w-4" />
                         </Link>
                       </div>
                     </article>
                   ))}
                 </div>
+
+                {/* ── Alumni Stories Page Handler Pagination Bar ── */}
+                {alumniStories.length > 0 && (
+                  <div className="card-soft mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white px-5 py-4 shadow-xs">
+                    {/* Left: Summary text */}
+                    <div className="text-xs text-slate-500 font-medium text-center sm:text-left">
+                      Showing{' '}
+                      <span className="font-bold text-slate-900">{storyStartIndex + 1}</span>{' '}
+                      to{' '}
+                      <span className="font-bold text-slate-900">
+                        {Math.min(storyStartIndex + storiesPageSize, alumniStories.length)}
+                      </span>{' '}
+                      of{' '}
+                      <span className="font-bold text-slate-900">{alumniStories.length}</span>{' '}
+                      Alumni Stories
+                    </div>
+
+                    {/* Middle: Page navigation pills */}
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStoriesPage((prev) => Math.max(1, prev - 1));
+                          const el = document.getElementById('stories-feed-top');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        disabled={storiesPage === 1}
+                        className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                          storiesPage === 1
+                            ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                            : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                        }`}
+                        title="Previous page"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Prev</span>
+                      </button>
+
+                      <div className="flex items-center gap-1">
+                        {getPageNumbers(storiesPage, totalStoryPages).map((p, idx) => {
+                          if (p === '...') {
+                            return (
+                              <span key={`story-ellipsis-${idx}`} className="px-2 text-xs text-slate-400">
+                                ...
+                              </span>
+                            );
+                          }
+                          const pageNum = Number(p);
+                          const isActive = pageNum === storiesPage;
+                          return (
+                            <button
+                              key={`story-page-${pageNum}`}
+                              type="button"
+                              onClick={() => {
+                                setStoriesPage(pageNum);
+                                const el = document.getElementById('stories-feed-top');
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                              className={`h-8 w-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                isActive
+                                  ? 'bg-[#003580] text-white shadow-xs'
+                                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60'
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStoriesPage((prev) => Math.min(totalStoryPages, prev + 1));
+                          const el = document.getElementById('stories-feed-top');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        disabled={storiesPage === totalStoryPages}
+                        className={`inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                          storiesPage === totalStoryPages
+                            ? 'opacity-40 cursor-not-allowed bg-slate-50 text-slate-400'
+                            : 'bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                        }`}
+                        title="Next page"
+                      >
+                        <span className="hidden sm:inline">Next</span>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Right: Items per page selector */}
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <span className="text-[11px] font-medium hidden sm:inline">Per page:</span>
+                      <select
+                        value={storiesPageSize}
+                        onChange={(e) => {
+                          setStoriesPageSize(Number(e.target.value));
+                          setStoriesPage(1);
+                        }}
+                        className="rounded-xl border border-slate-200 bg-slate-50/80 px-2.5 py-1 text-xs font-semibold text-slate-700 outline-none focus:border-[#003580] cursor-pointer"
+                      >
+                        <option value={4}>4</option>
+                        <option value={6}>6</option>
+                        <option value={8}>8</option>
+                        <option value={12}>12</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : isOverviewPage ? (
@@ -1350,13 +1505,85 @@ export default function PublicInfoPage() {
                   </button>
                 </div>
               </div>
+
+              {/* ── Institutional Topic Page Handler Bar ── */}
+              {currentTopicIndex >= 0 && (
+                <nav
+                  aria-label="Institutional Topic Navigation"
+                  className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4 mt-6"
+                >
+                  {/* Previous Topic */}
+                  {prevTopic ? (
+                    <Link
+                      to={`/info/${prevTopic.slug}`}
+                      className="group flex items-center gap-3 text-left w-full sm:w-auto p-2 rounded-xl hover:bg-slate-50 transition-colors"
+                      title="Previous topic (or press ← ArrowLeft)"
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 group-hover:border-[#003580] group-hover:bg-[#003580] group-hover:text-white transition-all shadow-xs">
+                        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-[#003580]">
+                          Previous Topic
+                        </span>
+                        <span className="block text-xs sm:text-sm font-bold text-slate-800 truncate max-w-[200px]">
+                          {prevTopic.title}
+                        </span>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="hidden sm:block w-36" />
+                  )}
+
+                  {/* Topic Counter & Index */}
+                  <div className="flex flex-col items-center justify-center text-center px-2">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      Topic {currentTopicIndex + 1} of {publicInfoTopics.length}
+                    </span>
+                    <Link
+                      to="/info/overview"
+                      className="text-xs font-semibold text-[#003580] hover:underline mt-0.5"
+                    >
+                      All Topics
+                    </Link>
+                  </div>
+
+                  {/* Next Topic */}
+                  {nextTopic ? (
+                    <Link
+                      to={`/info/${nextTopic.slug}`}
+                      className="group flex items-center justify-end gap-3 text-right w-full sm:w-auto p-2 rounded-xl hover:bg-slate-50 transition-colors"
+                      title="Next topic (or press → ArrowRight)"
+                    >
+                      <div className="min-w-0">
+                        <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-[#003580]">
+                          Next Topic
+                        </span>
+                        <span className="block text-xs sm:text-sm font-bold text-slate-800 truncate max-w-[200px]">
+                          {nextTopic.title}
+                        </span>
+                      </div>
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 group-hover:border-[#003580] group-hover:bg-[#003580] group-hover:text-white transition-all shadow-xs">
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="hidden sm:block w-36" />
+                  )}
+                </nav>
+              )}
             </div>
           )}
         </section>
       </main>
 
       {/* Selected Company Modal */}
-      <CompanyDetailModal company={selectedCompanyModal} onClose={() => setSelectedCompanyModal(null)} />
+      <CompanyDetailModal
+        company={selectedCompanyModal}
+        partners={partnersList}
+        onSelectCompany={(company) => setSelectedCompanyModal(company)}
+        onClose={() => setSelectedCompanyModal(null)}
+      />
     </div>
   );
 }
