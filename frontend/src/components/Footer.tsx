@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import {
   Facebook,
   Linkedin,
@@ -8,11 +8,8 @@ import {
   Phone,
   MapPin,
   Clock,
-  ShieldCheck,
-  ArrowRight,
   ArrowUp,
 } from "lucide-react";
-import toast from "react-hot-toast";
 import { useSystemSettings } from "../context/SystemSettingsContext";
 
 export interface FooterProps {
@@ -21,9 +18,7 @@ export interface FooterProps {
 }
 
 export default function Footer({ variant = "full", className = "" }: FooterProps) {
-  const navigate = useNavigate();
   const { settings } = useSystemSettings();
-  const [emailInput, setEmailInput] = useState("");
 
   const universityName = settings?.general?.universityName || "Adama Science and Technology University";
   const abbreviation = settings?.general?.abbreviation || "ASTU";
@@ -31,13 +26,6 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
   const postalCode = settings?.general?.postalCode || "P.O. Box 1888";
   const phoneNumber = settings?.general?.phoneNumber || "+251-221-110000";
   const contactEmail = settings?.general?.contactEmail || "irccd@astu.edu.et";
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput.trim()) return;
-    toast.success("Subscribed to official ASTU-AMS bulletins.");
-    setEmailInput("");
-  };
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -47,13 +35,23 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
   if (variant === "minimal") {
     return (
       <footer
-        className={`w-full border-t-2 border-[#C8102E] bg-[#002766] text-slate-300 text-xs ${className}`}
+        className={`w-full border-t border-[#C8102E]/70 bg-[#002147] text-slate-300 text-xs ${className}`}
       >
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-slate-400 text-center sm:text-left">
-            &copy; {new Date().getFullYear()} {universityName}. All rights reserved.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-slate-300">
+        <div className="mx-auto max-w-[1140px] px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <img
+              src={settings?.appearance?.logoUrl || "/images/astu-seal-logo.png"}
+              alt={`${abbreviation} Logo`}
+              className="h-5 w-5 object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/images/astu-logo.jpeg";
+              }}
+            />
+            <p className="text-slate-400 text-center sm:text-left text-[11px]">
+              &copy; {new Date().getFullYear()} {universityName}. All rights reserved.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3.5 text-slate-300 text-[11px]">
             <Link to="/info/overview" className="hover:text-white transition-colors">
               About {abbreviation}-AMS
             </Link>
@@ -75,110 +73,92 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
     );
   }
 
-  // ── FULL GLOBAL VARIANT (for all Public Pages) ──
+  // ── FULL GLOBAL VARIANT (Clean, narrow & professional for all Public Pages) ──
   return (
     <footer
-      className={`w-full border-t-2 border-[#C8102E] bg-gradient-to-b from-[#003580] via-[#002766] to-[#001c4a] text-slate-300 ${className}`}
+      className={`w-full border-t-2 border-[#C8102E] bg-gradient-to-b from-[#002554] via-[#001e45] to-[#001533] text-slate-300 ${className}`}
     >
-      <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8 py-16 space-y-12">
-        {/* 1. Global Newsletter Signup Panel (Single source of truth) */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 pb-10 border-b border-white/10">
-          <div className="max-w-xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-blue-200 border border-white/15 mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] animate-pulse" />
-              <span>STAY INFORMED</span>
-            </div>
-            <h4 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
-              Subscribe to official ASTU updates
-            </h4>
-            <p className="mt-2 text-xs sm:text-sm text-blue-100/75 leading-relaxed">
-              Receive announcements, events, partner calls, tracer survey reminders, and campus circulars directly in your inbox.
-            </p>
-          </div>
-
-          <form onSubmit={handleNewsletterSubmit} className="w-full lg:w-auto max-w-md space-y-2">
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                type="email"
-                required
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full sm:w-72 h-12 px-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-blue-200/50 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E] transition-all"
-              />
-              <button
-                type="submit"
-                className="h-12 px-6 rounded-xl bg-[#C8102E] hover:bg-[#A60D26] text-white font-bold text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer shrink-0"
-              >
-                <span>Subscribe</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-            <p className="text-[11px] text-blue-200/60 flex items-center gap-1.5 pt-0.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-              <span>Official ASTU communications • Unsubscribe anytime</span>
-            </p>
-          </form>
-        </div>
-
-        {/* 2. Middle Information & Real Navigation Links */}
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5 items-start">
+      <div className="mx-auto max-w-[1140px] px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        {/* Main Grid: University Brand on Left + 3 Structured Link Columns */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5 items-start">
           {/* Brand & University Contact Details (2 cols on lg) */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#003580] font-black text-lg shadow-md">
-                {abbreviation[0]}
+          <div className="lg:col-span-2 space-y-3.5 pr-0 lg:pr-4">
+            <Link to="/" className="inline-flex items-center gap-3 group">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/20 shrink-0 group-hover:scale-105 transition-transform">
+                <img
+                  src={settings?.appearance?.logoUrl || "/images/astu-seal-logo.png"}
+                  alt={`${abbreviation} Logo`}
+                  className="h-full w-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/images/astu-logo.jpeg";
+                  }}
+                />
               </div>
               <div>
-                <span className="font-serif text-xl font-bold text-white tracking-tight block">
+                <span className="font-serif text-lg font-bold text-white tracking-tight block group-hover:text-blue-100 transition-colors">
                   {abbreviation}-AMS
                 </span>
-                <span className="text-[10px] text-blue-200 uppercase tracking-widest font-semibold block">
+                <span className="text-[10px] text-blue-200/90 uppercase tracking-widest font-semibold block">
                   Alumni Management System
                 </span>
               </div>
-            </div>
+            </Link>
 
-            <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed max-w-sm">
-              Connecting graduates, corporate employers, and academic departments into one unified ecosystem for career tracking and institutional excellence.
+            <p className="text-xs text-slate-300/85 leading-relaxed max-w-sm">
+              Adama Science and Technology University&apos;s institutional platform connecting graduates, corporate industry partners, and academic departments into one collaborative network.
             </p>
 
-            <div className="pt-2 space-y-2 text-xs text-slate-300">
-              <div className="flex items-start gap-2.5">
+            <div className="pt-1 space-y-2 text-xs text-slate-300/90">
+              <a
+                href="https://maps.google.com/?q=Adama+Science+and+Technology+University"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors flex items-start gap-2.5"
+                title="View ASTU Campus on Google Maps"
+              >
                 <MapPin className="h-4 w-4 text-[#C8102E] shrink-0 mt-0.5" />
                 <span>{address} • {postalCode}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
+              </a>
+
+              <a
+                href={`tel:${phoneNumber.replace(/[^+\d]/g, "")}`}
+                className="hover:text-white transition-colors flex items-center gap-2.5"
+                title="Call ASTU Office"
+              >
                 <Phone className="h-4 w-4 text-blue-300 shrink-0" />
                 <span>{phoneNumber}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
+              </a>
+
+              <a
+                href={`mailto:${contactEmail}`}
+                className="hover:text-white transition-colors flex items-center gap-2.5"
+                title="Send Email to ASTU Directorate"
+              >
                 <Mail className="h-4 w-4 text-blue-300 shrink-0" />
-                <a href={`mailto:${contactEmail}`} className="hover:text-white transition-colors">
-                  {contactEmail}
-                </a>
-              </div>
-              <div className="flex items-center gap-2.5">
+                <span>{contactEmail}</span>
+              </a>
+
+              <div className="flex items-center gap-2.5 text-slate-300/80">
                 <Clock className="h-4 w-4 text-blue-300 shrink-0" />
                 <span>Mon – Fri: 8:00 AM – 5:00 PM (EAT)</span>
               </div>
             </div>
           </div>
 
-          {/* Real Links Col 1: Portals */}
+          {/* Col 1: Portals & Services */}
           <div>
-            <h5 className="text-xs font-bold uppercase tracking-[0.16em] text-white border-b border-white/10 pb-2.5 mb-3.5">
+            <h5 className="text-xs font-bold uppercase tracking-[0.14em] text-white border-b border-white/10 pb-2 mb-3">
               Portals & Services
             </h5>
-            <ul className="space-y-2.5 text-xs text-slate-300">
+            <ul className="space-y-2 text-xs text-slate-300/90">
               <li>
                 <Link to="/info/alumni-portal" className="hover:text-white transition-colors block">
                   Alumni Portal
                 </Link>
               </li>
               <li>
-                <Link to="/info/employer-portal" className="hover:text-white transition-colors block">
-                  Employer Portal
+                <Link to="/partners" className="hover:text-white transition-colors block">
+                  Employer & Partner Hub
                 </Link>
               </li>
               <li>
@@ -199,15 +179,15 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
             </ul>
           </div>
 
-          {/* Real Links Col 2: Campus & Media */}
+          {/* Col 2: Campus & Stories */}
           <div>
-            <h5 className="text-xs font-bold uppercase tracking-[0.16em] text-white border-b border-white/10 pb-2.5 mb-3.5">
+            <h5 className="text-xs font-bold uppercase tracking-[0.14em] text-white border-b border-white/10 pb-2 mb-3">
               Campus & Stories
             </h5>
-            <ul className="space-y-2.5 text-xs text-slate-300">
+            <ul className="space-y-2 text-xs text-slate-300/90">
               <li>
                 <Link to="/info/campus-life" className="hover:text-white transition-colors block">
-                  Campus Life & Culture
+                  Campus Life
                 </Link>
               </li>
               <li>
@@ -226,24 +206,19 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
                 </Link>
               </li>
               <li>
-                <Link to="/partners" className="hover:text-white transition-colors block">
-                  Partner Companies
+                <Link to="/events" className="hover:text-white transition-colors block">
+                  Events & Workshops
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Real Links Col 3: Community & Legal */}
+          {/* Col 3: Community & Support */}
           <div>
-            <h5 className="text-xs font-bold uppercase tracking-[0.16em] text-white border-b border-white/10 pb-2.5 mb-3.5">
-              Community & Help
+            <h5 className="text-xs font-bold uppercase tracking-[0.14em] text-white border-b border-white/10 pb-2 mb-3">
+              Community & Support
             </h5>
-            <ul className="space-y-2.5 text-xs text-slate-300">
-              <li>
-                <Link to="/events" className="hover:text-white transition-colors block">
-                  Events & Workshops
-                </Link>
-              </li>
+            <ul className="space-y-2 text-xs text-slate-300/90">
               <li>
                 <Link to="/announcements" className="hover:text-white transition-colors block">
                   Official Announcements
@@ -256,7 +231,7 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
               </li>
               <li>
                 <Link to="/support" className="hover:text-white transition-colors block">
-                  Support Desk
+                  Help & Support Desk
                 </Link>
               </li>
               <li>
@@ -264,13 +239,18 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
                   Contact Registrar
                 </Link>
               </li>
+              <li>
+                <Link to="/info/overview" className="hover:text-white transition-colors block">
+                  About {abbreviation}-AMS
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        {/* 3. Bottom Legal, Social & Back to Top */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-white/10 text-xs text-slate-400">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-center sm:text-left">
+        {/* Bottom Legal, Social Media & Back to Top */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10 text-xs text-slate-400">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3.5 text-center sm:text-left text-[11px]">
             <p>&copy; {new Date().getFullYear()} {universityName}. All rights reserved.</p>
             <span className="hidden sm:inline text-slate-600">•</span>
             <Link to="/info/privacy-policy" className="hover:text-white transition-colors">
@@ -283,13 +263,14 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <a
                 href="https://facebook.com/adamaastu"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-                title="Facebook"
+                title="Follow ASTU on Facebook"
+                aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4" />
               </a>
@@ -298,16 +279,18 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
                 target="_blank"
                 rel="noopener noreferrer"
                 className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-                title="Telegram"
+                title="Join ASTU Telegram Channel"
+                aria-label="Telegram"
               >
                 <Send className="h-4 w-4" />
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/school/adama-science-and-technology-university/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
-                title="LinkedIn"
+                title="Connect on LinkedIn"
+                aria-label="LinkedIn"
               >
                 <Linkedin className="h-4 w-4" />
               </a>
@@ -317,6 +300,7 @@ export default function Footer({ variant = "full", className = "" }: FooterProps
               type="button"
               onClick={scrollToTop}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer text-xs"
+              title="Back to Top"
             >
               <span>Top</span>
               <ArrowUp className="h-3.5 w-3.5" />
