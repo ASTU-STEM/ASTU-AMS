@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Plus,
   Search,
@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import ImageUploader from '../components/ImageUploader';
 import CommunityMemberModal from '../components/CommunityMemberModal';
 import communityMembersService, { CommunityMember } from '../services/communityMembers.service';
@@ -55,6 +56,19 @@ export default function CommunityMembersManagement() {
       member.org.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Pagination Handler
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, categoryFilter]);
+
+  const paginatedMembers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredMembers.slice(start, start + pageSize);
+  }, [filteredMembers, currentPage, pageSize]);
 
   const handleAdd = () => {
     setFormData({
@@ -197,7 +211,7 @@ export default function CommunityMembersManagement() {
 
       {/* Members Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filteredMembers.map((member) => {
+        {paginatedMembers.map((member) => {
           const CategoryIcon = categoryIcons[member.category] || Users;
           return (
             <div
@@ -265,6 +279,19 @@ export default function CommunityMembersManagement() {
           );
         })}
       </div>
+
+      {filteredMembers.length > 0 && (
+        <AdminTablePagination
+          currentPage={currentPage}
+          totalItems={filteredMembers.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={setPageSize}
+          pageSizeOptions={[4, 8, 16, 32]}
+          itemName="community members"
+          className="rounded-xl border border-slate-200 dark:border-slate-800"
+        />
+      )}
 
       {filteredMembers.length === 0 && (
         <div className="text-center py-12">

@@ -45,6 +45,7 @@ import AdminBadge from '../components/AdminBadge';
 import ContentCard, { ContentCardItem, ContentStatus, ContentType } from '../components/ContentCard';
 import ScheduleDialog, { ScheduleValue } from '../components/ScheduleDialog';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import ImageUploader from '../components/ImageUploader';
 import contentService from '../services/content.service';
 import homepageCmsService from '../services/homepageCms.service';
@@ -793,6 +794,19 @@ export default function ContentList() {
     });
   }, [items, statusTab, typeFilter, search]);
 
+  // Pagination Handler
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusTab, typeFilter, search]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
+
   const counts = useMemo(() => {
     const result: Record<string, number> = { all: items.length };
     for (const tab of STATUS_TABS) {
@@ -951,6 +965,18 @@ export default function ContentList() {
       s.department?.toLowerCase().includes(q)
     );
   });
+
+  const [storyPage, setStoryPage] = useState(1);
+  const [storyPageSize, setStoryPageSize] = useState(6);
+
+  const paginatedStories = useMemo(() => {
+    const start = (storyPage - 1) * storyPageSize;
+    return filteredStories.slice(start, start + storyPageSize);
+  }, [filteredStories, storyPage, storyPageSize]);
+
+  useEffect(() => {
+    setStoryPage(1);
+  }, [storySearch]);
 
   return (
     <div className="space-y-6 font-sans">
@@ -1251,7 +1277,7 @@ export default function ContentList() {
           {/* Cards or Table */}
           {view === 'grid' ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((item) => (
+              {paginatedItems.map((item) => (
                 <ContentCard
                   key={item.id}
                   item={item}
@@ -1304,7 +1330,7 @@ export default function ContentList() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {filtered.map((item) => (
+                  {paginatedItems.map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="px-4 py-3">
                         <input
@@ -1388,6 +1414,20 @@ export default function ContentList() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {filtered.length > 0 && (
+            <div className="mt-5">
+              <AdminTablePagination
+                currentPage={currentPage}
+                totalItems={filtered.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={setPageSize}
+                pageSizeOptions={[6, 9, 18, 36]}
+                itemName="notices & announcements"
+              />
             </div>
           )}
 
@@ -1752,7 +1792,7 @@ export default function ContentList() {
             </div>
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredStories.map((story) => (
+              {paginatedStories.map((story) => (
                 <div key={story.id} className="cms-fade group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs hover:shadow-md hover:border-[#003580]/30 transition-all duration-200">
                   {/* Story Image */}
                   <div className="relative h-48 w-full overflow-hidden bg-slate-100 shrink-0">
@@ -1840,6 +1880,20 @@ export default function ContentList() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {filteredStories.length > 0 && (
+            <div className="mt-5">
+              <AdminTablePagination
+                currentPage={storyPage}
+                totalItems={filteredStories.length}
+                pageSize={storyPageSize}
+                onPageChange={setStoryPage}
+                onPageSizeChange={setStoryPageSize}
+                pageSizeOptions={[6, 9, 15, 30]}
+                itemName="alumni stories"
+              />
             </div>
           )}
 

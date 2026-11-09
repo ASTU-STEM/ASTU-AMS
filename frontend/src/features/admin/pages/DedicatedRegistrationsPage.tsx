@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import registrationService, { AlumniRegistration, RegistrationFormConfig } from '../services/registration.service';
 import contentService from '../services/content.service';
 import { ContentCardItem } from '../components/ContentCard';
@@ -52,6 +53,10 @@ export default function DedicatedRegistrationsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deptFilter, setDeptFilter] = useState<string>('all');
   const [employmentFilter, setEmploymentFilter] = useState<string>('all');
+
+  // Pagination Handler
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
 
   // Manual Add Modal
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -127,6 +132,17 @@ export default function DedicatedRegistrationsPage() {
       return matchStatus && matchDept && matchEmployment && matchSearch;
     });
   }, [activeList, statusFilter, deptFilter, employmentFilter, searchQuery]);
+
+  // Reset to first page whenever search query or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, deptFilter, employmentFilter, selectedContentId]);
+
+  // Paginated Roster Slice
+  const paginatedRegistrations = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredRegistrations.slice(start, start + pageSize);
+  }, [filteredRegistrations, currentPage, pageSize]);
 
   // Handlers
   const handleUpdateStatus = (id: string, status: AlumniRegistration['status']) => {
@@ -441,7 +457,7 @@ export default function DedicatedRegistrationsPage() {
                   </td>
                 </tr>
               ) : (
-                filteredRegistrations.map((reg) => (
+                paginatedRegistrations.map((reg) => (
                   <tr
                     key={reg.id}
                     onClick={() => setSelectedRegDetail(reg)}
@@ -572,15 +588,25 @@ export default function DedicatedRegistrationsPage() {
           </table>
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
-          <span>Showing {filteredRegistrations.length} of {activeList.length} registered members</span>
-          <div className="flex items-center gap-3">
-            <button onClick={handleExportPdf} className="font-bold text-rose-600 dark:text-rose-400 hover:underline inline-flex items-center gap-1 cursor-pointer">
-              <FileText className="h-3.5 w-3.5" /> Export PDF Audit Report
+        {/* Pagination & Export Footer */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-t border-slate-100 dark:border-slate-800">
+          <div className="flex-1">
+            <AdminTablePagination
+              currentPage={currentPage}
+              totalItems={filteredRegistrations.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 15, 25, 50, 100]}
+              itemName="registered members"
+            />
+          </div>
+          <div className="p-3 bg-slate-50/70 dark:bg-slate-900/60 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
+            <button onClick={handleExportPdf} className="font-bold text-rose-600 dark:text-rose-400 hover:underline inline-flex items-center gap-1 cursor-pointer text-xs">
+              <FileText className="h-3.5 w-3.5" /> PDF Audit
             </button>
-            <button onClick={handleExportCsv} className="font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1 cursor-pointer">
-              <FileSpreadsheet className="h-3.5 w-3.5" /> Export CSV Roster
+            <button onClick={handleExportCsv} className="font-bold text-amber-600 dark:text-amber-400 hover:underline inline-flex items-center gap-1 cursor-pointer text-xs">
+              <FileSpreadsheet className="h-3.5 w-3.5" /> CSV Roster
             </button>
           </div>
         </div>

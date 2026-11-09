@@ -25,6 +25,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import CommunityMemberModal from '../components/CommunityMemberModal';
 import CommunityLivePreviewCanvas from '../components/CommunityLivePreviewCanvas';
 import communityMembersService, { CommunityMember } from '../services/communityMembers.service';
@@ -255,6 +256,19 @@ export default function CommunityManagement() {
       m.org.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Community Roster Pagination
+  const [memberPage, setMemberPage] = useState(1);
+  const [memberPageSize, setMemberPageSize] = useState(6);
+
+  useEffect(() => {
+    setMemberPage(1);
+  }, [search, categoryFilter]);
+
+  const paginatedMembers = filteredMembers.slice(
+    (memberPage - 1) * memberPageSize,
+    memberPage * memberPageSize
+  );
 
   // Member CRUD handlers
   const handleAddMember = () => {
@@ -569,7 +583,7 @@ export default function CommunityManagement() {
 
               {/* Roster Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[520px] overflow-y-auto pr-1">
-                {filteredMembers.map((member) => (
+                {paginatedMembers.map((member) => (
                   <div
                     key={member.id}
                     className="p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 hover:border-slate-300 transition-all flex flex-col justify-between"
@@ -599,7 +613,26 @@ export default function CommunityManagement() {
                     </div>
                   </div>
                 ))}
+                {filteredMembers.length === 0 && (
+                  <div className="col-span-full py-12 text-center text-slate-400 text-xs">
+                    No community members found matching your filters.
+                  </div>
+                )}
               </div>
+
+              {/* Roster Pagination */}
+              <AdminTablePagination
+                currentPage={memberPage}
+                totalItems={filteredMembers.length}
+                pageSize={memberPageSize}
+                onPageChange={setMemberPage}
+                onPageSizeChange={(newSize) => {
+                  setMemberPageSize(newSize);
+                  setMemberPage(1);
+                }}
+                pageSizeOptions={[6, 12, 24, 48]}
+                itemName="community members"
+              />
             </div>
           )}
 

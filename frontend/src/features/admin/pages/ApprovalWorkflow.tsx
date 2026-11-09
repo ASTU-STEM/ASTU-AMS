@@ -31,6 +31,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import approvalService, {
   WorkflowItem,
   WorkflowStatus,
@@ -117,6 +118,19 @@ export default function ApprovalWorkflow() {
       return true;
     });
   }, [items, filter, typeFilter, priorityFilter, searchQuery]);
+
+  // Approval Queue Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, typeFilter, priorityFilter, searchQuery]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
 
   // Counts
   const counts = useMemo(() => {
@@ -385,7 +399,7 @@ export default function ApprovalWorkflow() {
               <p className="text-xs text-slate-400 mt-1">There are no items matching your current filters in the pipeline.</p>
             </div>
           ) : (
-            filtered.map((item) => (
+            paginatedItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => setSelectedId(item.id)}
@@ -455,6 +469,20 @@ export default function ApprovalWorkflow() {
               </div>
             ))
           )}
+
+          {/* Pagination Controls */}
+          <AdminTablePagination
+            currentPage={currentPage}
+            totalItems={filtered.length}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            pageSizeOptions={[6, 12, 24, 48]}
+            itemName="submissions"
+          />
         </div>
 
         {/* Right: Reviewer Detail Drawer */}

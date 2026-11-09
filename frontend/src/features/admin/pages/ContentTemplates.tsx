@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
@@ -24,6 +24,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import contentService from '../services/content.service';
 import type { ContentType } from '../components/ContentCard';
 
@@ -215,6 +216,19 @@ export default function ContentTemplates() {
       return true;
     });
   }, [templates, search, category]);
+
+  // Templates Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(8);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, category]);
+
+  const paginatedTemplates = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
 
   const stats = useMemo(() => {
     const total = templates.length;
@@ -422,7 +436,7 @@ export default function ContentTemplates() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {filtered.map((template) => {
+        {paginatedTemplates.map((template) => {
           const Icon = template.icon;
           return (
             <div
@@ -508,6 +522,20 @@ export default function ContentTemplates() {
           );
         })}
       </div>
+
+      {/* Templates Pagination */}
+      <AdminTablePagination
+        currentPage={currentPage}
+        totalItems={filtered.length}
+        pageSize={pageSize}
+        onPageChange={setCurrentPage}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          setCurrentPage(1);
+        }}
+        pageSizeOptions={[8, 16, 24, 48]}
+        itemName="templates"
+      />
 
       {/* Preview Modal */}
       {previewTemplate && (

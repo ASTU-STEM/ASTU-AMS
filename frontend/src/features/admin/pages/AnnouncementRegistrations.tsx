@@ -33,6 +33,7 @@ import {
 import toast from 'react-hot-toast';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
+import AdminTablePagination from '../components/AdminTablePagination';
 import registrationService, { AlumniRegistration, RegistrationFormConfig } from '../services/registration.service';
 import contentService from '../services/content.service';
 import { ContentCardItem } from '../components/ContentCard';
@@ -61,6 +62,12 @@ export default function AnnouncementRegistrations() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deptFilter, setDeptFilter] = useState<string>('all');
   const [employmentFilter, setEmploymentFilter] = useState<string>('all');
+
+  // Pagination Handler
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [fullScreenPage, setFullScreenPage] = useState(1);
+  const [fullScreenPageSize, setFullScreenPageSize] = useState(20);
 
   // Manual Add Modal
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -144,6 +151,23 @@ export default function AnnouncementRegistrations() {
       return matchStatus && matchDept && matchEmployment && matchSearch;
     });
   }, [activeList, statusFilter, deptFilter, employmentFilter, searchQuery]);
+
+  // Reset to first page whenever search query or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+    setFullScreenPage(1);
+  }, [searchQuery, statusFilter, deptFilter, employmentFilter, selectedContentId]);
+
+  // Paginated Roster Slices
+  const paginatedRegistrations = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredRegistrations.slice(start, start + pageSize);
+  }, [filteredRegistrations, currentPage, pageSize]);
+
+  const fullScreenPaginatedRegistrations = useMemo(() => {
+    const start = (fullScreenPage - 1) * fullScreenPageSize;
+    return filteredRegistrations.slice(start, start + fullScreenPageSize);
+  }, [filteredRegistrations, fullScreenPage, fullScreenPageSize]);
 
   // Handlers
   const handleUpdateStatus = (id: string, status: AlumniRegistration['status']) => {
@@ -708,21 +732,34 @@ export default function AnnouncementRegistrations() {
                   </td>
                 </tr>
               ) : (
-                filteredRegistrations.map((reg) => renderTableRow(reg))
+                paginatedRegistrations.map((reg) => renderTableRow(reg))
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-3.5 px-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500">
-          <span>Showing {filteredRegistrations.length} of {activeList.length} alumni registrations</span>
-          <button
-            onClick={handleExport}
-            className="inline-flex items-center gap-1 font-bold text-astu-navy dark:text-sky-400 hover:underline cursor-pointer"
-          >
-            <Download className="h-3 w-3" /> Export Roster to CSV
-          </button>
+        {/* Pagination & Export Footer */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-t border-slate-100 dark:border-slate-800">
+          <div className="flex-1">
+            <AdminTablePagination
+              currentPage={currentPage}
+              totalItems={filteredRegistrations.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 20, 50, 100]}
+              itemName="registrations"
+            />
+          </div>
+          <div className="p-3 bg-slate-50/70 dark:bg-slate-900/60 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-800 flex items-center justify-end">
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-astu-navy dark:text-sky-400 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer"
+            >
+              <Download className="h-3.5 w-3.5 text-[#FFCC00]" />
+              <span>Export CSV</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -797,9 +834,20 @@ export default function AnnouncementRegistrations() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/80">
-                  {filteredRegistrations.map((reg) => renderTableRow(reg))}
+                  {fullScreenPaginatedRegistrations.map((reg) => renderTableRow(reg))}
                 </tbody>
               </table>
+
+              <AdminTablePagination
+                currentPage={fullScreenPage}
+                totalItems={filteredRegistrations.length}
+                pageSize={fullScreenPageSize}
+                onPageChange={setFullScreenPage}
+                onPageSizeChange={setFullScreenPageSize}
+                pageSizeOptions={[15, 25, 50, 100]}
+                itemName="registrations"
+                className="bg-[#0b142e] border-slate-800 text-slate-300"
+              />
             </div>
           </div>
         </div>
