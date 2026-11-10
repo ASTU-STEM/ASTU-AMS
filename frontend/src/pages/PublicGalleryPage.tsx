@@ -213,7 +213,7 @@ export default function PublicGalleryPage() {
     };
   };
 
-  const loadMedia = (): GalleryItem[] => {
+  const loadMedia = useCallback((): GalleryItem[] => {
     try {
       const stored = localStorage.getItem('astu_ams_cms_gallery_items');
       if (stored) {
@@ -231,7 +231,7 @@ export default function PublicGalleryPage() {
     }
 
     return defaultGalleryItems.map(normalizeItem);
-  };
+  }, []);
 
   const [items, setItems] = useState<GalleryItem[]>(loadMedia);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -257,7 +257,7 @@ export default function PublicGalleryPage() {
       window.removeEventListener('astu-cms-homepage-updated', syncMedia);
       window.removeEventListener('astu-cms-gallery-settings-changed', syncSettings);
     };
-  }, []);
+  }, [loadMedia]);
 
   // Reset pagination when search or category changes
   useEffect(() => {

@@ -187,7 +187,7 @@ export default function PublicInfoPage() {
       window.removeEventListener("astu-cms-stories-changed", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
     };
-  }, []);
+  }, [navigate, slug]);
 
   const rawDefaultPage = defaultDetailPages[slug] ?? fallbackPage;
 

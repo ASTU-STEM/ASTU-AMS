@@ -54,9 +54,9 @@ export default function TelebirrDonationModal({
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
           const parsed = JSON.parse(storedUser);
-          if (parsed && !donorName) {
-            setDonorName(parsed.fullName || parsed.name || "");
-            if (parsed.phoneNumber) setPhoneNumber(parsed.phoneNumber);
+          if (parsed) {
+            setDonorName((prev) => prev || parsed.fullName || parsed.name || "");
+            if (parsed.phoneNumber) setPhoneNumber((prev) => prev || parsed.phoneNumber);
           }
         }
       } catch (e) {

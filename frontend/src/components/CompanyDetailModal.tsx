@@ -32,10 +32,6 @@ export default function CompanyDetailModal({
   partners,
   onSelectCompany,
 }: CompanyDetailModalProps) {
-  if (!company) return null;
-
-  const LogoComponent = partnerLogos[company.name];
-
   const currentIndex = partners && company ? partners.findIndex((p) => p.name === company.name) : -1;
   const prevCompany = currentIndex > 0 && partners ? partners[currentIndex - 1] : null;
   const nextCompany =
@@ -58,6 +54,10 @@ export default function CompanyDetailModal({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [company, prevCompany, nextCompany, onSelectCompany, onClose]);
+
+  if (!company) return null;
+
+  const LogoComponent = partnerLogos[company.name];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">

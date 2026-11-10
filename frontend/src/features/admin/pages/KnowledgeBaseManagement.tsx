@@ -88,7 +88,7 @@ export default function KnowledgeBaseManagement() {
   const [testResult, setTestResult] = useState<AdminTestQueryResult | null>(null);
   const [testing, setTesting] = useState(false);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     try {
       setLoading(true);
       const docs = await knowledgeService.getDocuments({
@@ -102,11 +102,11 @@ export default function KnowledgeBaseManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCat, selectedStatus, search]);
 
   useEffect(() => {
     fetchDocuments();
-  }, [selectedCat, selectedStatus]);
+  }, [fetchDocuments]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

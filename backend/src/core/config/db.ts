@@ -352,7 +352,6 @@ class FakePrisma {
       const store = readDevDb();
       return (store.departments || []).length;
     },
-    },
     create: async ({ data }: any) => {
       const store = readDevDb();
       const rec = { ...data, id: `dev-dept-${Date.now()}` };

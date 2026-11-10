@@ -1191,7 +1191,7 @@ export default function HomePage() {
     });
 
     return () => sectionObserver.disconnect();
-  }, []);
+  }, [liveNavSections]);
 
   // Sync liveCommunitySection from CMS
   useEffect(() => {

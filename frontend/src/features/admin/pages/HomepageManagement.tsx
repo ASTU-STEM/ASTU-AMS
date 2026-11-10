@@ -569,7 +569,7 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
   };
 
   // ── Save to Backend ──
-  const handleSaveAll = async (showToast = true) => {
+  const handleSaveAll = useCallback(async (showToast = true) => {
     setIsSaving(true);
     const payload: HomepageCmsConfig = {
       welcomeMessage,
@@ -630,7 +630,47 @@ export default function HomepageManagement({ initialCategory }: { initialCategor
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [
+    welcomeMessage,
+    welcomeEnabled,
+    heroBadge,
+    heroButtons,
+    heroSlides,
+    impactHeaders,
+    impactStats,
+    portalsHeaders,
+    portals,
+    campusLifeHeaders,
+    campusLife,
+    campuses,
+    gallery,
+    galleryHeaders,
+    videos,
+    industryBridge,
+    eventsHeaders,
+    events,
+    workshops,
+    announcementsHeaders,
+    announcements,
+    newsHeaders,
+    newsItems,
+    storiesHeaders,
+    stories,
+    testimonials,
+    partnersHeaders,
+    partners,
+    featuredEmployers,
+    accreditation,
+    faqHeaders,
+    faq,
+    ctaSection,
+    footer,
+    sectionLinks,
+    detailPages,
+    partnersPage,
+    liveCommunitySection,
+    liveCommunityPosts,
+  ]);
 
   // Keyboard shortcut Ctrl+S / Cmd+S
   useEffect(() => {
