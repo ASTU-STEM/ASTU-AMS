@@ -19,11 +19,13 @@ export const CurriculumTable: React.FC<CurriculumTableProps> = ({ records }) => 
 
   const itemsPerPage = 10;
 
+  const safeRecords = Array.isArray(records) ? records : [];
+
   // Filter and search
-  const filteredRecords = records.filter(record => {
+  const filteredRecords = safeRecords.filter(record => {
     const matchesSearch = 
-      record.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.department.toLowerCase().includes(searchTerm.toLowerCase());
+      (record.course || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (record.department || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDepartment = !filters.department || record.department === filters.department;
     const matchesStatus = !filters.status || record.status === filters.status;

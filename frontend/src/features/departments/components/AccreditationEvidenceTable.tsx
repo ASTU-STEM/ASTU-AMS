@@ -18,12 +18,14 @@ export const AccreditationEvidenceTable: React.FC<AccreditationEvidenceTableProp
 
   const itemsPerPage = 10;
 
+  const safeRecords = Array.isArray(records) ? records : [];
+
   // Filter and search
-  const filteredRecords = records.filter(record => {
+  const filteredRecords = safeRecords.filter(record => {
     const matchesSearch = 
-      record.evidenceItem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.source.toLowerCase().includes(searchTerm.toLowerCase());
+      (record.evidenceItem || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (record.category || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (record.source || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCategory = !filters.category || record.category === filters.category;
     const matchesStatus = !filters.status || record.status === filters.status;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lightbulb, AlertTriangle, CheckCircle, Info, ArrowRight } from 'lucide-react';
+import { Lightbulb, AlertTriangle, CheckCircle, Info, ArrowRight, AlertCircle } from 'lucide-react';
 import { EmployerInsight } from '../types/employerFeedback.types';
 
 interface EmployerInsightsPanelProps {
@@ -46,6 +46,8 @@ export const EmployerInsightsPanel: React.FC<EmployerInsightsPanelProps> = ({ in
     }
   };
 
+  const hasData = Array.isArray(insights) && insights.length > 0;
+
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200/60">
       <div className="flex items-center gap-3 mb-6">
@@ -53,43 +55,51 @@ export const EmployerInsightsPanel: React.FC<EmployerInsightsPanelProps> = ({ in
         <h3 className="text-xl font-bold text-gray-900">Executive Insights</h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {insights.map((insight) => (
-          <div
-            key={insight.id}
-            className={`p-5 bg-gradient-to-br ${getBgColor(insight.type)} border rounded-xl hover:shadow-lg transition-all duration-300 cursor-pointer`}
-          >
-            <div className="flex items-start gap-3 mb-3">
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                {getIcon(insight.type)}
+      {!hasData ? (
+        <div className="p-8 text-center bg-gray-50 border border-dashed border-gray-200 rounded-2xl">
+          <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+          <p className="text-sm font-semibold text-gray-700">No Executive Insights Available</p>
+          <p className="text-xs text-gray-500 mt-1">There are no employer evaluation insights generated for this department yet.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {insights.map((insight) => (
+            <div
+              key={insight.id}
+              className={`p-5 bg-gradient-to-br ${getBgColor(insight.type)} border rounded-xl hover:shadow-lg transition-all duration-300 cursor-pointer`}
+            >
+              <div className="flex items-start gap-3 mb-3">
+                <div className="p-2 bg-white rounded-lg shadow-sm">
+                  {getIcon(insight.type)}
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-bold text-gray-900 mb-1">{insight.title}</h4>
+                  <p className="text-xs text-gray-600">{insight.description}</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h4 className="text-sm font-bold text-gray-900 mb-1">{insight.title}</h4>
-                <p className="text-xs text-gray-600">{insight.description}</p>
+              
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200/50">
+                <div>
+                  <p className="text-xs text-gray-500">{insight.metric}</p>
+                  <p className={`text-lg font-bold ${getTextColor(insight.type)}`}>{insight.value}</p>
+                </div>
+                {insight.recommendation && (
+                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                    <ArrowRight className="h-3 w-3" />
+                    <span>View</span>
+                  </div>
+                )}
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200/50">
-              <div>
-                <p className="text-xs text-gray-500">{insight.metric}</p>
-                <p className={`text-lg font-bold ${getTextColor(insight.type)}`}>{insight.value}</p>
-              </div>
+
               {insight.recommendation && (
-                <div className="flex items-center gap-1 text-xs text-gray-600">
-                  <ArrowRight className="h-3 w-3" />
-                  <span>View</span>
+                <div className="mt-3 pt-3 border-t border-gray-200/50">
+                  <p className="text-xs text-gray-600 italic">{insight.recommendation}</p>
                 </div>
               )}
             </div>
-
-            {insight.recommendation && (
-              <div className="mt-3 pt-3 border-t border-gray-200/50">
-                <p className="text-xs text-gray-600 italic">{insight.recommendation}</p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

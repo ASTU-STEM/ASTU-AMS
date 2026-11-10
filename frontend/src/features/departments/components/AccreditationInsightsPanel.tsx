@@ -7,6 +7,8 @@ interface AccreditationInsightsPanelProps {
 }
 
 export const AccreditationInsightsPanel: React.FC<AccreditationInsightsPanelProps> = ({ insights }) => {
+  const safeInsights = Array.isArray(insights) ? insights : [];
+
   const getIcon = (type: AccreditationInsight['type']) => {
     switch (type) {
       case 'success':
@@ -54,7 +56,7 @@ export const AccreditationInsightsPanel: React.FC<AccreditationInsightsPanelProp
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {insights.map((insight) => (
+        {safeInsights.map((insight) => (
           <div
             key={insight.id}
             className={`p-5 bg-gradient-to-br ${getBgColor(insight.type)} border rounded-xl hover:shadow-lg transition-all duration-300 cursor-pointer`}

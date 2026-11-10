@@ -57,7 +57,7 @@ export const EmploymentOutcomeAnalytics: React.FC<EmploymentOutcomeAnalyticsProp
                     <td className="py-3 text-sm text-right">
                       <div className="flex items-center justify-end gap-1">
                         <TrendingUp className="h-3 w-3 text-astu-green" />
-                        <span className="text-astu-green font-medium">+{Math.floor(Math.random() * 10) + 1}%</span>
+                        <span className="text-astu-green font-medium">{outcome.trend ? (outcome.trend > 0 ? `+${outcome.trend}%` : `${outcome.trend}%`) : '+0%'}</span>
                       </div>
                     </td>
                   </tr>

@@ -1219,7 +1219,10 @@ export const TelegramChat: React.FC<TelegramChatProps> = ({ darkMode, initialTar
 
       if (u.role === 'ADMIN') return 'System Admin';
       if (u.role === 'REGISTRAR') return 'Office of Registrar';
-      if (u.role === 'DEPARTMENT_HEAD') return 'Department Head';
+      if (u.role === 'DEPARTMENT_HEAD') {
+        const dept = u.department || u.departmentHeadProfile?.department?.name || 'Software Engineering';
+        return `Department Head (${dept})`;
+      }
       if (u.role === 'CMS_MANAGER') return 'CMS Manager';
 
       if (u.email && u.email.includes('@')) {
