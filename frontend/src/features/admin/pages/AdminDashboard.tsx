@@ -53,6 +53,7 @@ import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import { adminService } from '../services/admin.service';
 import { useAuth } from '../../../contexts/AuthContext';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 
 type TrendTone = 'success' | 'warning';
 type TimeRange = '7d' | '30d' | '90d' | '1y';
@@ -397,6 +398,9 @@ export default function AdminDashboard() {
           </div>
         </div>
       </AdminPageHeader>
+
+      {/* Official Alumni Officer Broadcast Hero Banner */}
+      <DashboardBroadcastHero actorRole="ADMIN" className="mb-4" />
 
       {/* Admin Command Center */}
       <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">

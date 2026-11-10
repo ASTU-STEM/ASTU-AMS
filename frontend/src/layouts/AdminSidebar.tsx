@@ -21,6 +21,7 @@ import {
   Sparkles,
   Terminal,
   Users,
+  TrendingUp,
 } from 'lucide-react';
 import type { AdminNavItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';

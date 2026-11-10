@@ -862,6 +862,7 @@ export default function NotificationCenter() {
         filteredRows.reduce((acc, r) => acc + parseFloat(r.openRate || '0'), 0) / (filteredRows.length || 1)
       );
 
+      const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
       const pdfHtml = `<!DOCTYPE html>
 <html>
 <head>
@@ -870,8 +871,10 @@ export default function NotificationCenter() {
   <style>
     @page { size: A4 landscape; margin: 12mm; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 20px; color: #0f172a; background: #fff; }
-    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-    .header-title h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 18px 24px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .brand-group { display: flex; align-items: center; gap: 14px; }
+    .logo-img { height: 52px; width: 52px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .header-title h1 { margin: 0 0 4px 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
     .header-title p { margin: 0; opacity: 0.85; font-size: 11px; font-weight: 500; }
     .badge-official { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
     .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -895,9 +898,12 @@ export default function NotificationCenter() {
 </head>
 <body>
   <div class="header">
-    <div class="header-title">
-      <h1>Adama Science & Technology University (ASTU)</h1>
-      <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+    <div class="brand-group">
+      <img src="${logoUrl}" alt="ASTU Logo" class="logo-img" onerror="this.src='/images/astu-seal-logo.png'" />
+      <div class="header-title">
+        <h1>Adama Science & Technology University (ASTU)</h1>
+        <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+      </div>
     </div>
     <div class="badge-official">Official Control Center Report</div>
   </div>
@@ -974,6 +980,7 @@ export default function NotificationCenter() {
     }
 
     if (exportFormat === 'html') {
+      const logoUrl = window.location.origin + '/images/astu-seal-logo.png';
       const totalRecipients = filteredRows.reduce((acc, r) => acc + (r.recipients || 0), 0);
       const avgOpenRate = Math.round(
         filteredRows.reduce((acc, r) => acc + parseFloat(r.openRate || '0'), 0) / (filteredRows.length || 1)
@@ -986,9 +993,10 @@ export default function NotificationCenter() {
   <title>ASTU Broadcast Intelligence Report</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 30px; color: #1e293b; background: #f8fafc; }
-    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px; }
-    .header h1 { margin: 0 0 6px 0; font-size: 22px; }
-    .header p { margin: 0; opacity: 0.8; font-size: 13px; }
+    .header { background: linear-gradient(135deg, #00173d, #003580); color: white; padding: 22px 24px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+    .logo-img { height: 52px; width: 52px; object-fit: contain; background: white; border-radius: 50%; padding: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .header h1 { margin: 0 0 4px 0; font-size: 20px; font-weight: 800; }
+    .header p { margin: 0; opacity: 0.85; font-size: 12px; }
     .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     .card-val { font-size: 24px; font-weight: bold; color: #003580; margin-top: 4px; }
@@ -1002,8 +1010,11 @@ export default function NotificationCenter() {
 </head>
 <body>
   <div class="header">
-    <h1>Adama Science & Technology University</h1>
-    <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+    <img src="${logoUrl}" alt="ASTU Logo" class="logo-img" onerror="this.src='/images/astu-seal-logo.png'" />
+    <div>
+      <h1>Adama Science & Technology University</h1>
+      <p>Notification & Broadcast Intelligence Report • Generated: ${new Date().toLocaleString()}</p>
+    </div>
   </div>
   <div class="metrics">
     <div class="card"><div class="card-lbl">Total Broadcasts</div><div class="card-val">${filteredRows.length}</div></div>

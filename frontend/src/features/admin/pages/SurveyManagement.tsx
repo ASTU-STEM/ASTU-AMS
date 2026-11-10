@@ -9,6 +9,7 @@ import {
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminBadge from '../components/AdminBadge';
 import AdminStatCard from '../components/AdminStatCard';
+import AdminTablePagination from '../components/AdminTablePagination';
 import { surveyService } from '../../surveys/services/survey.service';
 import toast from 'react-hot-toast';
 import { adminMockData } from '../api/mockData';
@@ -141,6 +142,58 @@ export default function SurveyManagement() {
   const [surveyResponsesLoading, setSurveyResponsesLoading] = useState(false);
   const [detailsSubTab, setDetailsSubTab] = useState<'questions' | 'responses'>('questions');
   const [viewingResponseModal, setViewingResponseModal] = useState<any | null>(null);
+
+  // Pagination States
+  const [surveysPage, setSurveysPage] = useState(1);
+  const [surveysPageSize, setSurveysPageSize] = useState(10);
+
+  const [wavesPage, setWavesPage] = useState(1);
+  const [wavesPageSize, setWavesPageSize] = useState(15);
+
+  const [responsesPage, setResponsesPage] = useState(1);
+  const [responsesPageSize, setResponsesPageSize] = useState(10);
+
+  useEffect(() => {
+    setWavesPage(1);
+  }, [searchQuery, statusFilter, batchFilter]);
+
+  useEffect(() => {
+    setResponsesPage(1);
+  }, [selectedSurvey?.id, detailsSubTab]);
+
+  const paginatedSurveys = React.useMemo(() => {
+    const start = (surveysPage - 1) * surveysPageSize;
+    return surveys.slice(start, start + surveysPageSize);
+  }, [surveys, surveysPage, surveysPageSize]);
+
+  const filteredAssignments = React.useMemo(() => {
+    return assignments.filter((item) => {
+      const name = item.alumni?.fullName || '';
+      const email = item.alumni?.email || '';
+      const studentId = item.alumni?.studentId || '';
+      const surveyTitle = item.survey?.title || '';
+      const matchesSearch = 
+        name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        surveyTitle.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+      const matchesBatch = batchFilter === 'ALL' || String(item.alumni?.graduationYear) === batchFilter;
+
+      return matchesSearch && matchesStatus && matchesBatch;
+    });
+  }, [assignments, searchQuery, statusFilter, batchFilter]);
+
+  const paginatedAssignments = React.useMemo(() => {
+    const start = (wavesPage - 1) * wavesPageSize;
+    return filteredAssignments.slice(start, start + wavesPageSize);
+  }, [filteredAssignments, wavesPage, wavesPageSize]);
+
+  const paginatedResponses = React.useMemo(() => {
+    const start = (responsesPage - 1) * responsesPageSize;
+    return selectedSurveyResponses.slice(start, start + responsesPageSize);
+  }, [selectedSurveyResponses, responsesPage, responsesPageSize]);
 
   useEffect(() => {
     fetchSurveys(); // Always fetch on mount for stats
@@ -445,7 +498,7 @@ export default function SurveyManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {surveys.map(s => {
+                  {paginatedSurveys.map(s => {
                     const isFixed = ['SIX_MONTH', 'TWELVE_MONTH', 'EIGHTEEN_MONTH', 'TWENTY_FOUR_MONTH'].includes(s.type);
                     const qCount = (s.sections?.reduce((acc: number, sec: any) => acc + (sec.questions?.length || 0), 0) || 0) + (s.questions?.length || 0);
                     return (
@@ -480,6 +533,20 @@ export default function SurveyManagement() {
                   )}
                 </tbody>
               </table>
+              <div className="border-t border-slate-100 p-3">
+                <AdminTablePagination
+                  currentPage={surveysPage}
+                  totalItems={surveys.length}
+                  pageSize={surveysPageSize}
+                  onPageChange={setSurveysPage}
+                  onPageSizeChange={(newSize) => {
+                    setSurveysPageSize(newSize);
+                    setSurveysPage(1);
+                  }}
+                  pageSizeOptions={[5, 10, 20, 50]}
+                  itemName="surveys"
+                />
+              </div>
             </div>
           )}
         </section>
@@ -868,35 +935,14 @@ export default function SurveyManagement() {
                       </tr>
                     </thead>
                     <tbody>
-                      {(() => {
-                        const filtered = assignments.filter((item) => {
-                          const name = item.alumni?.fullName || '';
-                          const email = item.alumni?.email || '';
-                          const studentId = item.alumni?.studentId || '';
-                          const surveyTitle = item.survey?.title || '';
-                          const matchesSearch = 
-                            name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            studentId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            surveyTitle.toLowerCase().includes(searchQuery.toLowerCase());
-
-                          const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
-                          const matchesBatch = batchFilter === 'ALL' || String(item.alumni?.graduationYear) === batchFilter;
-
-                          return matchesSearch && matchesStatus && matchesBatch;
-                        });
-
-                        if (filtered.length === 0) {
-                          return (
-                            <tr>
-                              <td colSpan={6} className="p-8 text-center text-slate-500">
-                                No survey assignments match your filters.
-                              </td>
-                            </tr>
-                          );
-                        }
-
-                        return filtered.map((item, idx) => {
+                      {filteredAssignments.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-8 text-center text-slate-500">
+                            No survey assignments match your filters.
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedAssignments.map((item, idx) => {
                           const assignedDate = new Date(item.assignedAt).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'short',
@@ -957,10 +1003,24 @@ export default function SurveyManagement() {
                               </td>
                             </tr>
                           );
-                        });
-                      })()}
+                        })
+                      )}
                     </tbody>
                   </table>
+                </div>
+                <div className="border-t border-slate-100 p-3">
+                  <AdminTablePagination
+                    currentPage={wavesPage}
+                    totalItems={filteredAssignments.length}
+                    pageSize={wavesPageSize}
+                    onPageChange={setWavesPage}
+                    onPageSizeChange={(newSize) => {
+                      setWavesPageSize(newSize);
+                      setWavesPage(1);
+                    }}
+                    pageSizeOptions={[10, 15, 25, 50, 100]}
+                    itemName="assignments"
+                  />
                 </div>
               </section>
             </>
@@ -1177,7 +1237,7 @@ export default function SurveyManagement() {
                               </tr>
                             </thead>
                             <tbody>
-                              {selectedSurveyResponses.map((resItem: any) => {
+                              {paginatedResponses.map((resItem: any) => {
                                 const submittedDateStr = resItem.submittedAt
                                   ? new Date(resItem.submittedAt).toLocaleString()
                                   : 'Recently Submitted';
@@ -1216,6 +1276,20 @@ export default function SurveyManagement() {
                               })}
                             </tbody>
                           </table>
+                          <div className="border-t border-slate-100 p-3">
+                            <AdminTablePagination
+                              currentPage={responsesPage}
+                              totalItems={selectedSurveyResponses.length}
+                              pageSize={responsesPageSize}
+                              onPageChange={setResponsesPage}
+                              onPageSizeChange={(newSize) => {
+                                setResponsesPageSize(newSize);
+                                setResponsesPage(1);
+                              }}
+                              pageSizeOptions={[5, 10, 20, 50]}
+                              itemName="responses"
+                            />
+                          </div>
                         </div>
                       )}
                     </div>

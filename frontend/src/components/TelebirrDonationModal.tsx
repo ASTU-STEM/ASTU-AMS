@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   HiXMark,
   HiCheckCircle,
@@ -17,6 +17,9 @@ interface DonationCampaign {
   goal?: number;
   targetAmount?: number;
   donorCount?: number;
+  initialAmount?: number;
+  defaultAmount?: number;
+  tierName?: string;
 }
 
 export default function TelebirrDonationModal({
@@ -41,9 +44,37 @@ export default function TelebirrDonationModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [txRef, setTxRef] = useState("");
 
-  if (!isOpen || !campaign) return null;
+  useEffect(() => {
+    if (campaign && isOpen) {
+      const incomingAmt = campaign.initialAmount || campaign.defaultAmount;
+      if (incomingAmt && incomingAmt > 0) {
+        setAmount(incomingAmt.toString());
+      }
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          if (parsed) {
+            setDonorName((prev) => prev || parsed.fullName || parsed.name || "");
+            if (parsed.phoneNumber) setPhoneNumber((prev) => prev || parsed.phoneNumber);
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [campaign, isOpen]);
 
-  const presetAmounts = [100, 250, 500, 1000, 5000];
+  const presetAmounts = useMemo(() => {
+    const base = [500, 1000, 2500, 5000, 10000, 25000];
+    const incomingAmt = campaign?.initialAmount || campaign?.defaultAmount;
+    if (incomingAmt && !base.includes(incomingAmt)) {
+      return [...base, incomingAmt].sort((a, b) => a - b);
+    }
+    return base;
+  }, [campaign]);
+
+  if (!isOpen || !campaign) return null;
 
   const handlePresetAmount = (val: number) => {
     setAmount(val.toString());
@@ -111,7 +142,8 @@ export default function TelebirrDonationModal({
     setStep("form");
     setDonorName("");
     setPhoneNumber("");
-    setAmount("500");
+    const defaultAmt = campaign?.initialAmount || campaign?.defaultAmount;
+    setAmount(defaultAmt ? defaultAmt.toString() : "500");
     setShowFullChapaPage(false);
     onClose();
   };
@@ -144,7 +176,14 @@ export default function TelebirrDonationModal({
                     <HiXMark className="h-5 w-5" />
                   </button>
                 </div>
-                <h3 className="text-lg font-extrabold mt-2">{campaign.title}</h3>
+                <div className="mt-2 flex items-center gap-2 flex-wrap">
+                  <h3 className="text-lg font-extrabold leading-tight">{campaign.title}</h3>
+                  {campaign.tierName && (
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/20 text-emerald-200 border border-white/20">
+                      {campaign.tierName}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-white/80 mt-1 flex items-center gap-1">
                   <Lock className="h-3.5 w-3.5 text-emerald-400" />
                   256-bit Encrypted Chapa Payment
@@ -181,17 +220,22 @@ export default function TelebirrDonationModal({
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                    <MdMoney className="h-4 w-4 text-emerald-600" />
-                    Donation Amount (ETB)
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                      <MdMoney className="h-4 w-4 text-emerald-600" />
+                      Donation Amount (ETB)
+                    </label>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md">
+                      Editable · Custom Allowed
+                    </span>
+                  </div>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {presetAmounts.map((val) => (
                       <button
                         key={val}
                         type="button"
                         onClick={() => handlePresetAmount(val)}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border transition-all ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold border transition-all ${
                           amount === val.toString()
                             ? "bg-emerald-700 text-white border-emerald-700 shadow-sm"
                             : "bg-gray-50 text-gray-700 border-gray-200 hover:border-emerald-600/40"
@@ -201,14 +245,22 @@ export default function TelebirrDonationModal({
                       </button>
                     ))}
                   </div>
-                  <input
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-extrabold text-emerald-900 text-base"
-                    placeholder="Custom amount"
-                    type="text"
-                    inputMode="numeric"
-                  />
+                  <div className="relative">
+                    <input
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-base focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 transition-all font-extrabold text-emerald-900 pr-14"
+                      placeholder="Enter custom amount"
+                      type="text"
+                      inputMode="numeric"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-extrabold text-gray-400 pointer-events-none">
+                      ETB
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-gray-500">
+                    You can select any preset tier above or type your own custom amount in ETB.
+                  </p>
                 </div>
 
                 <div className="space-y-2">

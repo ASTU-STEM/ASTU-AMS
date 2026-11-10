@@ -1201,16 +1201,26 @@ Calculated Match Score: 84% Match
                   <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-md dark:border-slate-800 dark:bg-slate-950 font-sans space-y-6">
                     {/* Header Section */}
                     <div className="border-b border-slate-200 pb-4 dark:border-slate-800 text-center sm:text-left flex flex-col sm:flex-row justify-between items-start gap-4">
-                      <div>
-                        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white uppercase">
-                          {outputResult.cvData.fullName}
-                        </h1>
-                        <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
-                          {outputResult.cvData.targetRole}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Adama Science and Technology University (ASTU) Graduate
-                        </p>
+                      <div className="flex items-center gap-3 text-left">
+                        <img
+                          src="/images/astu-seal-logo.png"
+                          alt="ASTU Seal"
+                          className="h-14 w-14 object-contain shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                        <div>
+                          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white uppercase">
+                            {outputResult.cvData.fullName}
+                          </h1>
+                          <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+                            {outputResult.cvData.targetRole}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Adama Science and Technology University (ASTU) Graduate
+                          </p>
+                        </div>
                       </div>
 
                       <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1 sm:text-right">

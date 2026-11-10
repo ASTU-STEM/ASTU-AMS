@@ -13,6 +13,7 @@ import { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 // import { StudentIdInput } from '../components/StudentIdInput'; // Removed unused component
 import { useRegistration } from '../contexts/RegistrationContext';
+import registrationService from '../../admin/services/registration.service';
 import * as yup from 'yup';
 
 const alumniRegistrationSchema = yup.object().shape({
@@ -164,6 +165,26 @@ export default function AlumniRegistrationPage() {
           email: matchedEmail || '',
           phone: values.phone,
         });
+
+        // Add to global alumni registrations manager for real-time admin sync
+        try {
+          registrationService.addRegistration({
+            contentId: 'C-003',
+            contentTitle: 'ASTU Alumni Membership Portal Registration',
+            fullName: `${values.firstName} ${values.middleName || ''} ${values.lastName}`.trim(),
+            studentId: values.idNumber || `UGR/${Math.floor(10000 + Math.random() * 90000)}/24`,
+            email: values.email,
+            phone: values.phone || '+251 91 000 0000',
+            classYear: values.yearOfGraduation ? `Class of ${values.yearOfGraduation}` : 'Class of 2024',
+            department: values.fieldOfStudy || 'Software Engineering',
+            currentEmployer: values.workPlace || 'Pending Verification',
+            jobTitle: values.workPosition || 'Graduate Participant',
+            employmentStatus: 'Employed Full-time',
+            status: 'Pending Verification',
+            accreditationVerified: false,
+            notes: 'Submitted via ASTU Public Alumni Registration Portal.',
+          });
+        } catch { /* ignore */ }
 
         // Always navigate to OTP verification page. The OTP page will handle whether to show the OTP input based on email presence.
         if (!matchedEmail) {

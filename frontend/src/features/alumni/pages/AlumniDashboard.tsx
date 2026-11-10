@@ -5,6 +5,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, X, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
 import TelebirrDonationModal from '../../../components/TelebirrDonationModal';
+import Footer from '../../../components/Footer';
 import { surveyService } from '../../surveys/services/survey.service';
 import { notificationService } from '../../notifications/services/notification.service';
 
@@ -2055,6 +2056,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
           )}
           </div>
         </main>
+        <Footer variant="minimal" />
       </div>
 
       <JobDetailsModal job={selectedJobForModal} onClose={() => setSelectedJobForModal(null)} onApply={handleApplyJob} />

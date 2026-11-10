@@ -43,7 +43,7 @@ export const eventsService = {
       }
       return [];
     } catch (error) {
-      console.warn('Failed to fetch events from API, falling back to local list:', error);
+      console.warn('Failed to fetch events from API:', error);
       return [];
     }
   },
@@ -64,6 +64,19 @@ export const eventsService = {
     } catch (error) {
       console.error('Error creating event via API:', error);
       throw error;
+    }
+  },
+
+  async updateEvent(eventId: string, eventData: Partial<ApiEvent>): Promise<ApiEvent | null> {
+    try {
+      const response = await apiClient.put<{ success: boolean; data: ApiEvent }>(`/events/${eventId}`, eventData);
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      }
+      return null;
+    } catch (error) {
+      console.warn('Error updating event via API:', error);
+      return null;
     }
   },
 

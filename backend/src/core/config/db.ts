@@ -5,24 +5,65 @@ import path from 'path';
 
 // ─── In-memory dev DB helpers ───
 const DEV_DB_PATH = path.join(process.cwd(), 'data', 'dev-db.json');
+const CMS_CONTENT_PATH = path.join(process.cwd(), 'data', 'cms-content.json');
 
 function readDevDb(): any {
+  let store: any = null;
   try {
     if (fs.existsSync(DEV_DB_PATH)) {
-      return JSON.parse(fs.readFileSync(DEV_DB_PATH, 'utf-8'));
+      store = JSON.parse(fs.readFileSync(DEV_DB_PATH, 'utf-8'));
     }
   } catch { /* ignore */ }
-  return {
-    users: [],
-    alumniProfiles: [],
-    employerProfiles: [],
-    departments: [],
-    registrarStudents: [],
-    registrarSyncLogs: [],
-    auditLogs: [],
-    notifications: [],
-    documentRequests: [],
-  };
+  if (!store) {
+    store = {
+      users: [],
+      alumniProfiles: [],
+      employerProfiles: [],
+      departments: [],
+      registrarStudents: [],
+      registrarSyncLogs: [],
+      auditLogs: [],
+      notifications: [],
+      documentRequests: [],
+      contentItems: [],
+      mediaAssets: [],
+      homepageConfigs: [],
+      knowledgeDocuments: [],
+      knowledgeChunks: [],
+    };
+  }
+
+  if (!store.knowledgeDocuments) store.knowledgeDocuments = [];
+  if (!store.knowledgeChunks) store.knowledgeChunks = [];
+
+  // Auto-bootstrap CMS items from cms-content.json if empty
+  if (!store.contentItems || store.contentItems.length === 0) {
+    try {
+      if (fs.existsSync(CMS_CONTENT_PATH)) {
+        const raw = JSON.parse(fs.readFileSync(CMS_CONTENT_PATH, 'utf-8'));
+        if (Array.isArray(raw)) {
+          const configItem = raw.find((i: any) => i.title === 'Homepage CMS Configuration');
+          if (configItem && configItem.excerpt) {
+            try {
+              const parsed = typeof configItem.excerpt === 'string' ? JSON.parse(configItem.excerpt) : configItem.excerpt;
+              store.homepageConfigs = [{ id: 'hc-main', key: 'main', data: parsed, updatedAt: new Date().toISOString() }];
+            } catch { /* ignore */ }
+          }
+          store.contentItems = raw
+            .filter((i: any) => i.title !== 'Homepage CMS Configuration')
+            .map((i: any) => ({
+              ...i,
+              type: i.type?.toUpperCase() || 'POST',
+              status: i.status === 'Published' ? 'PUBLISHED' : i.status === 'Draft' ? 'DRAFT' : i.status === 'Needs Review' ? 'NEEDS_REVIEW' : i.status?.toUpperCase() || 'PUBLISHED',
+              createdAt: i.createdAt || new Date().toISOString(),
+              updatedAt: i.updatedAt || new Date().toISOString(),
+            }));
+        }
+      }
+    } catch { /* ignore fallback error */ }
+  }
+
+  return store;
 }
 
 function writeDevDb(store: any) {
@@ -150,6 +191,11 @@ class FakePrisma {
       const store = readDevDb();
       let profiles = store.alumniProfiles || [];
       if (where?.departmentId) profiles = profiles.filter((a: any) => a.departmentId === where.departmentId);
+      if (where?.isVerified !== undefined) profiles = profiles.filter((a: any) => Boolean(a.isVerified) === Boolean(where.isVerified));
+      if (where?.employmentStatus) {
+        if (typeof where.employmentStatus === 'string') profiles = profiles.filter((a: any) => a.employmentStatus === where.employmentStatus);
+        else if (where.employmentStatus?.in) profiles = profiles.filter((a: any) => where.employmentStatus.in.includes(a.employmentStatus));
+      }
       return profiles.length;
     },
     create: async ({ data }: any) => {
@@ -200,6 +246,20 @@ class FakePrisma {
       if (where?.userId) return (store.employerProfiles || []).find((e: any) => e.userId === where.userId) || null;
       if (where?.id) return (store.employerProfiles || []).find((e: any) => e.id === where.id) || null;
       return null;
+    },
+    findMany: async ({ where, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let employers = [...(store.employerProfiles || [])];
+      if (where?.isVerified !== undefined) employers = employers.filter((e: any) => Boolean(e.isVerified) === Boolean(where.isVerified));
+      if (skip) employers = employers.slice(skip);
+      if (take) employers = employers.slice(0, take);
+      return employers;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let employers = store.employerProfiles || [];
+      if (where?.isVerified !== undefined) employers = employers.filter((e: any) => Boolean(e.isVerified) === Boolean(where.isVerified));
+      return employers.length;
     },
     create: async ({ data }: any) => {
       const store = readDevDb();
@@ -287,6 +347,10 @@ class FakePrisma {
         writeDevDb(store);
       }
       return [...depts];
+    },
+    count: async () => {
+      const store = readDevDb();
+      return (store.departments || []).length;
     },
     create: async ({ data }: any) => {
       const store = readDevDb();
@@ -573,6 +637,7 @@ class FakePrisma {
       const store = readDevDb();
       let jobs = store.jobs || [];
       if (where?.employerId) jobs = jobs.filter((j: any) => j.employerId === where.employerId);
+      if (where?.isActive !== undefined) jobs = jobs.filter((j: any) => Boolean(j.isActive) === Boolean(where.isActive));
       return jobs.length;
     },
     create: async ({ data }: any) => {
@@ -767,6 +832,334 @@ class FakePrisma {
     },
   };
 
+  contentItem = {
+    findMany: async ({ where, orderBy, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let items = [...(store.contentItems || [])];
+      if (where?.status) items = items.filter((i: any) => i.status?.toUpperCase() === where.status?.toUpperCase());
+      if (where?.type) items = items.filter((i: any) => i.type?.toUpperCase() === where.type?.toUpperCase());
+      if (where?.featured !== undefined) items = items.filter((i: any) => i.featured === where.featured);
+      if (where?.pinned !== undefined) items = items.filter((i: any) => i.pinned === where.pinned);
+      if (where?.OR && Array.isArray(where.OR)) {
+        const query = (where.OR[0]?.title?.contains || where.OR[0]?.excerpt?.contains || '').toLowerCase();
+        if (query) {
+          items = items.filter((i: any) =>
+            (i.title || '').toLowerCase().includes(query) ||
+            (i.excerpt || '').toLowerCase().includes(query) ||
+            (i.tags || []).some((t: string) => t.toLowerCase().includes(query))
+          );
+        }
+      }
+      if (orderBy?.createdAt === 'desc') {
+        items.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      }
+      if (skip) items = items.slice(skip);
+      if (take) items = items.slice(0, take);
+      return items;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const items = store.contentItems || [];
+      if (where?.id) return items.find((i: any) => i.id === where.id) || null;
+      if (where?.slug) return items.find((i: any) => i.slug === where.slug) || null;
+      return null;
+    },
+    findFirst: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const items = store.contentItems || [];
+      if (where?.id) return items.find((i: any) => i.id === where.id) || null;
+      if (where?.slug) return items.find((i: any) => i.slug === where.slug) || null;
+      return items[0] || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let items = store.contentItems || [];
+      if (where?.status) items = items.filter((i: any) => i.status?.toUpperCase() === where.status?.toUpperCase());
+      if (where?.type) items = items.filter((i: any) => i.type?.toUpperCase() === where.type?.toUpperCase());
+      return items.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = {
+        id: data.id || `C-${Date.now().toString().slice(-4)}`,
+        ...data,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.contentItems) store.contentItems = [];
+      store.contentItems.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const idx = (store.contentItems || []).findIndex((i: any) => i.id === where.id || i.slug === where.slug);
+      if (idx === -1) throw new Error('Content item not found');
+      store.contentItems[idx] = { ...store.contentItems[idx], ...data, updatedAt: new Date().toISOString() };
+      writeDevDb(store);
+      return store.contentItems[idx];
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (store.contentItems) {
+        const idx = store.contentItems.findIndex((i: any) => i.id === where.id);
+        if (idx !== -1) {
+          const removed = store.contentItems.splice(idx, 1)[0];
+          writeDevDb(store);
+          return removed;
+        }
+      }
+      return {};
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      const existing = (store.contentItems || []).find((i: any) => i.id === where.id || i.slug === where.slug);
+      if (existing) {
+        return this.contentItem.update({ where, data: update });
+      }
+      return this.contentItem.create({ data: create });
+    },
+  };
+
+  mediaAsset = {
+    findMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let items = store.mediaAssets || [];
+      if (where?.album) items = items.filter((m: any) => m.album === where.album);
+      return items;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = { ...data, id: data.id || `media-${Date.now()}`, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      if (!store.mediaAssets) store.mediaAssets = [];
+      store.mediaAssets.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    delete: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (store.mediaAssets) {
+        store.mediaAssets = store.mediaAssets.filter((m: any) => m.id !== where.id);
+        writeDevDb(store);
+      }
+      return {};
+    },
+  };
+
+  homepageConfig = {
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const configs = store.homepageConfigs || [];
+      return configs.find((c: any) => c.key === (where?.key || 'main')) || null;
+    },
+    upsert: async ({ where, create, update }: any) => {
+      const store = readDevDb();
+      if (!store.homepageConfigs) store.homepageConfigs = [];
+      const key = where?.key || 'main';
+      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
+      if (idx !== -1) {
+        store.homepageConfigs[idx] = { ...store.homepageConfigs[idx], ...update, updatedAt: new Date().toISOString() };
+        writeDevDb(store);
+        return store.homepageConfigs[idx];
+      }
+      const rec = { id: `hc-${Date.now()}`, key, ...create, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.homepageConfigs.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      if (!store.homepageConfigs) store.homepageConfigs = [];
+      const key = where?.key || 'main';
+      const idx = store.homepageConfigs.findIndex((c: any) => c.key === key);
+      if (idx !== -1) {
+        store.homepageConfigs[idx] = { ...store.homepageConfigs[idx], ...data, updatedAt: new Date().toISOString() };
+        writeDevDb(store);
+        return store.homepageConfigs[idx];
+      }
+      const rec = { id: `hc-${Date.now()}`, key, ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      store.homepageConfigs.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+  };
+
+  verificationRequest = {
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let reqs = store.verificationRequests || [];
+      if (where?.status) reqs = reqs.filter((r: any) => r.status === where.status);
+      return reqs.length;
+    },
+    findMany: async () => (readDevDb().verificationRequests || []),
+  };
+
+  event = {
+    count: async () => {
+      const store = readDevDb();
+      return (store.events?.length || store.hiringEvents?.length || 18);
+    },
+    findMany: async () => (readDevDb().events || readDevDb().hiringEvents || []),
+  };
+
+  knowledgeDocument = {
+    findMany: async ({ where, orderBy, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let docs = [...(store.knowledgeDocuments || [])];
+      if (where?.id) docs = docs.filter((d: any) => d.id === where.id);
+      if (where?.status) docs = docs.filter((d: any) => d.status === where.status);
+      if (where?.accessLevel) docs = docs.filter((d: any) => d.accessLevel === where.accessLevel);
+      if (where?.category) docs = docs.filter((d: any) => d.category === where.category);
+      if (orderBy?.createdAt === 'desc') {
+        docs.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      }
+      if (skip) docs = docs.slice(skip);
+      if (take) docs = docs.slice(0, take);
+      return docs;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const docs = store.knowledgeDocuments || [];
+      if (where?.id) return docs.find((d: any) => d.id === where.id) || null;
+      return null;
+    },
+    findFirst: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const docs = store.knowledgeDocuments || [];
+      if (where?.id) return docs.find((d: any) => d.id === where.id) || null;
+      return docs[0] || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let docs = store.knowledgeDocuments || [];
+      if (where?.status) docs = docs.filter((d: any) => d.status === where.status);
+      if (where?.accessLevel) docs = docs.filter((d: any) => d.accessLevel === where.accessLevel);
+      return docs.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = {
+        id: data.id || `doc-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        ...data,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.knowledgeDocuments) store.knowledgeDocuments = [];
+      store.knowledgeDocuments.unshift(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    update: async ({ where, data }: any) => {
+      const store = readDevDb();
+      const docs = store.knowledgeDocuments || [];
+      const idx = docs.findIndex((d: any) => d.id === where.id);
+      if (idx !== -1) {
+        docs[idx] = { ...docs[idx], ...data, updatedAt: new Date().toISOString() };
+        writeDevDb(store);
+        return docs[idx];
+      }
+      return null;
+    },
+    delete: async ({ where }: any) => {
+      const store = readDevDb();
+      const docs = store.knowledgeDocuments || [];
+      const idx = docs.findIndex((d: any) => d.id === where.id);
+      if (idx !== -1) {
+        const [removed] = docs.splice(idx, 1);
+        if (store.knowledgeChunks) {
+          store.knowledgeChunks = store.knowledgeChunks.filter((c: any) => c.documentId !== where.id);
+        }
+        writeDevDb(store);
+        return removed;
+      }
+      return null;
+    },
+  };
+
+  knowledgeChunk = {
+    findMany: async ({ where, skip, take }: any = {}) => {
+      const store = readDevDb();
+      let chunks = [...(store.knowledgeChunks || [])];
+      if (where?.documentId) {
+        if (typeof where.documentId === 'object' && Array.isArray(where.documentId.in)) {
+          const allowedIds = new Set(where.documentId.in);
+          chunks = chunks.filter((c: any) => allowedIds.has(c.documentId));
+        } else {
+          chunks = chunks.filter((c: any) => c.documentId === where.documentId);
+        }
+      }
+      if (skip) chunks = chunks.slice(skip);
+      if (take) chunks = chunks.slice(0, take);
+      return chunks;
+    },
+    findUnique: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const chunks = store.knowledgeChunks || [];
+      if (where?.id) return chunks.find((c: any) => c.id === where.id) || null;
+      return null;
+    },
+    findFirst: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      const chunks = store.knowledgeChunks || [];
+      if (where?.id) return chunks.find((c: any) => c.id === where.id) || null;
+      if (where?.documentId) return chunks.find((c: any) => c.documentId === where.documentId) || null;
+      return chunks[0] || null;
+    },
+    count: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      let chunks = store.knowledgeChunks || [];
+      if (where?.documentId) {
+        if (typeof where.documentId === 'object' && Array.isArray(where.documentId.in)) {
+          const allowedIds = new Set(where.documentId.in);
+          chunks = chunks.filter((c: any) => allowedIds.has(c.documentId));
+        } else {
+          chunks = chunks.filter((c: any) => c.documentId === where.documentId);
+        }
+      }
+      return chunks.length;
+    },
+    create: async ({ data }: any) => {
+      const store = readDevDb();
+      const rec = {
+        id: data.id || `chk-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        ...data,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!store.knowledgeChunks) store.knowledgeChunks = [];
+      store.knowledgeChunks.push(rec);
+      writeDevDb(store);
+      return rec;
+    },
+    createMany: async ({ data }: any = {}) => {
+      const store = readDevDb();
+      const items = Array.isArray(data) ? data : [data];
+      if (!store.knowledgeChunks) store.knowledgeChunks = [];
+      const created = items.map((item: any) => {
+        const rec = {
+          id: item.id || `chk-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          ...item,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        store.knowledgeChunks.push(rec);
+        return rec;
+      });
+      writeDevDb(store);
+      return { count: created.length };
+    },
+    deleteMany: async ({ where }: any = {}) => {
+      const store = readDevDb();
+      if (!store.knowledgeChunks) store.knowledgeChunks = [];
+      const before = store.knowledgeChunks.length;
+      if (where?.documentId) {
+        store.knowledgeChunks = store.knowledgeChunks.filter((c: any) => c.documentId !== where.documentId);
+      }
+      writeDevDb(store);
+      return { count: before - store.knowledgeChunks.length };
+    },
+  };
+
   // Catch-all: for any model not explicitly defined, return safe no-ops
   [key: string]: any;
 
@@ -784,28 +1177,32 @@ let usingFallback = false;
 
 const createSafeModel = (name: string) => {
   const store: any[] = [];
+  const matchesWhere = (item: any, where: any) => {
+    if (!where || Object.keys(where).length === 0) return true;
+    return Object.entries(where).every(([k, v]) => {
+      if (v !== null && typeof v === 'object' && Array.isArray((v as any).in)) {
+        return (v as any).in.includes(item[k]);
+      }
+      return item[k] === v;
+    });
+  };
+
   return {
     findMany: async ({ where }: any = {}) => {
       if (!where || Object.keys(where).length === 0) return store;
-      return store.filter((item: any) => {
-        return Object.entries(where).every(([k, v]) => item[k] === v);
-      });
+      return store.filter((item: any) => matchesWhere(item, where));
     },
     findUnique: async ({ where }: any = {}) => {
       if (!where) return null;
-      return store.find((item: any) => {
-        return Object.entries(where).every(([k, v]) => item[k] === v);
-      }) || null;
+      return store.find((item: any) => matchesWhere(item, where)) || null;
     },
     findFirst: async ({ where }: any = {}) => {
       if (!where || Object.keys(where).length === 0) return store[0] || null;
-      return store.find((item: any) => {
-        return Object.entries(where).every(([k, v]) => item[k] === v);
-      }) || null;
+      return store.find((item: any) => matchesWhere(item, where)) || null;
     },
     count: async ({ where }: any = {}) => {
       if (!where || Object.keys(where).length === 0) return store.length;
-      return store.filter((item: any) => Object.entries(where).every(([k, v]) => item[k] === v)).length;
+      return store.filter((item: any) => matchesWhere(item, where)).length;
     },
     create: async ({ data }: any) => {
       const id = data?.id || `dev-${name}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;

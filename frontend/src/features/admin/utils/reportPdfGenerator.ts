@@ -283,7 +283,7 @@ export function generateAndDownloadReport(
         <div class="content-wrapper">
           <div class="header-banner">
             <div class="logo-title-group">
-              <img src="${logoUrl}" alt="ASTU Seal Logo" class="logo-img" />
+              <img src="${logoUrl}" alt="ASTU Seal Logo" class="logo-img" onerror="this.src='/images/astu-seal-logo.png'" />
               <div class="title-area">
                 <h1>Adama Science and Technology University</h1>
                 <h2>Institutional Reports & Quality Assurance Center</h2>

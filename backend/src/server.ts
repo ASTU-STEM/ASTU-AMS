@@ -7,7 +7,7 @@ import { initCronJobs } from './core/jobs/cron';
 import { createServer } from 'http';
 import { SocketServer } from './infrastructure/websocket/SocketServer';
 
-const PORT = env.PORT || 5000;
+const PORT = env.PORT || 5002;
 
 async function bootstrap() {
   try {

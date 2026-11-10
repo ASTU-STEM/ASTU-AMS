@@ -71,10 +71,13 @@ export class OpenRouterService {
         }
       } catch (error: any) {
         console.warn(`OpenRouter model [${currentModel}] call notice:`, error.response?.data?.error?.message || error.message);
+        const code = error?.code || error?.cause?.code;
+        if (code === 'ENOTFOUND' || code === 'ECONNREFUSED' || code === 'EAI_AGAIN') {
+          break; // Stop immediately if network/domain is unreachable
+        }
       }
     }
 
-    console.warn('All OpenRouter model candidates failed or timed out. Falling back to institutional telemetry response.');
     return this.generateMockResponse(prompt, systemInstruction);
   }
 
@@ -194,16 +197,56 @@ Maintain strong industry partnerships and continuously integrate emerging techni
 - Key Skill Gap: Cloud Computing`;
     }
 
-    return `### ASTU AI ASSISTANT TELEMETRY RESPONSE
+    if (lowPrompt.includes('location') || lowPrompt.includes('where is') || lowPrompt.includes('address') || lowPrompt.includes('campus')) {
+      return `Adama Science and Technology University (ASTU) Location:
+• City: Adama (Nazret), Oromia Region, Ethiopia (~100km southeast of Addis Ababa along the expressway).
+• Main Campus: Houses central administration, faculties, library, and student dining facilities.
+• Research Complex: Houses robotics, artificial intelligence, and renewable energy labs.
+• Convocation Hall: Hosts graduation ceremonies, research symposiums, and career fairs.`;
+    }
 
-Adama Science and Technology University (ASTU) live system database telemetry is active.
+    if (lowPrompt.includes('transcript') || (lowPrompt.includes('request') && lowPrompt.includes('document'))) {
+      return `How to Request Official Transcripts and Academic Documents:
+1. Sign in to your verified Alumni account on the ASTU Portal.
+2. Go to Document Services -> Request Document.
+3. Select the document: Official Transcript, Degree Certificate Copy, or English Medium of Instruction Letter.
+4. Provide the delivery recipient information and submit.
+5. Standard processing SLA is 24 to 48 business hours by the Registrar Directorate.
+6. Track progress under My Document Requests.`;
+    }
 
-#### Current Institutional Overview
-- Overall Employment Rate: 55.0%
-- Average Time to Hire: 16.3 months
-- Average Starting Salary: ETB 19,185 / month
-- Registered System Accounts: 45 (19 Active, 21 Pending, 5 Inactive)
-- Top Employers: Safaricom Ethiopia, Sunshine Construction, Ethio Telecom, Wabi Tena, INSA`;
+    if (lowPrompt.includes('register') || lowPrompt.includes('create account') || lowPrompt.includes('sign up')) {
+      return `How to Register on the ASTU-AMS Portal:
+1. Click the Register button in the top navigation bar.
+2. Select your role: Alumni, Student, or Partner Employer.
+3. Enter your full name, student ID / graduation year, and email address.
+4. Set a secure password and submit the registration form.
+5. Verify the code sent to your email to activate your account.`;
+    }
+
+    if (lowPrompt.includes('hello') || lowPrompt.includes('hi') || lowPrompt.includes('hey') || lowPrompt.includes('who are you') || lowPrompt.includes('what are you')) {
+      return `Hello! I am ASTU AI, the official verified assistant for Adama Science and Technology University (ASTU).
+
+I can assist you with:
+• Requesting official transcripts and academic documents
+• Completing graduate tracer surveys and reviewing employment telemetry
+• Finding jobs and browsing partner employer vacancies
+• Registering as alumni or employer
+• Campus locations, academic programs, and department information
+
+How may I help you today?`;
+    }
+
+    return `ASTU Assistant Guidance:
+Adama Science and Technology University (ASTU) is Ethiopia's premier center of excellence for Science, Technology, Engineering, and Mathematics (STEM).
+
+Core Services Available:
+• Official Transcripts: Submit online via Document Services (24-48h SLA).
+• Career Center: Browse openings from Safaricom, Ethio Telecom, Sunshine Construction, and INSA.
+• Tracer Studies: Complete active surveys to update university accreditation benchmarks.
+• Registration: Create verified Alumni or Employer accounts from the homepage.
+
+Please feel free to ask any specific question about ASTU or portal navigation.`;
   }
 
   private static generateMockJsonResponse<T>(prompt: string): T {

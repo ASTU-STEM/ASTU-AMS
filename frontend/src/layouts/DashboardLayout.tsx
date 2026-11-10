@@ -68,6 +68,7 @@ import AdminDashboard from '../features/admin/pages/AdminDashboard';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { useSystemSettings } from '../context/SystemSettingsContext';
+import Footer from '../components/Footer';
 
 // No backend call here (logout is purely local for now)
 const logoutLocally = () => {
@@ -233,6 +234,7 @@ export function DashboardLayout({
             children
           )}
         </main>
+        <Footer variant="minimal" />
       </div>
     </div>
   );

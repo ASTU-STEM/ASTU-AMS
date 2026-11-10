@@ -3,6 +3,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import Footer from '../../../components/Footer';
 
 // Types
 import {
@@ -23,6 +24,7 @@ import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTim
 import { JobPostingTab } from '../components/JobPostingTab';
 import { ApplicationsTab } from '../components/ApplicationsTab';
 import { TalentSearchTab } from '../components/TalentSearchTab';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 import { FeedbackTab } from '../components/FeedbackTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { AnalyticsTab } from '../components/AnalyticsTab';
@@ -862,7 +864,7 @@ const EmployerDashboard = () => {
         </aside>
 
         {/* Main Content Area */}
-        <div className={`min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+        <div className={`min-h-screen flex flex-col justify-between transition-[margin-left] duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
 
           {/* Header Section - Admin Layout Style */}
           <header
@@ -1144,6 +1146,8 @@ const EmployerDashboard = () => {
           <main className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
+                {/* Official Alumni Officer Broadcast Hero Banner */}
+                <DashboardBroadcastHero actorRole="EMPLOYER" className="mb-2" />
 
                 {/* Welcome banner */}
                 <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#233876,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
@@ -1517,6 +1521,7 @@ const EmployerDashboard = () => {
               />
             )}
           </main>
+          <Footer variant="minimal" />
         </div>
       </div>
 

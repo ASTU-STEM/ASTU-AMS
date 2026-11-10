@@ -109,6 +109,21 @@ export class PublicKnowledgeAssistantService {
       return `🎧 How to Contact Support:\n• Email Alumni Relations at: alumni@astu.edu.et\n• Call ASTU Campus Office: +251 22 110 0001\n• Or open a ticket in your dashboard under Help & Support.`;
     }
 
+    // Location / campus query
+    if (q.includes('where is astu') || q.includes('location') || q.includes('campus address') || q.includes('where is the campus') || q.includes('where is the university') || q.includes('how to get to astu')) {
+      return `📍 ASTU Campus Location & Directory:\n• City: Adama (Nazret), Oromia Region, Ethiopia (~100km southeast of Addis Ababa via the express tollway).\n• Main Campus: Central administration, library, student union, and lecture theatres.\n• Research Complex: Robotics and Mechatronics, AI & Computing, Renewable Energy, and Material Science Centers of Excellence.\n• Convocation Hall: Graduation ceremonies, national research conferences, and employer career fairs.`;
+    }
+
+    // Admission & enrollment
+    if (q.includes('admission') || q.includes('admit') || q.includes('enroll') || q.includes('entrance') || q.includes('apply to astu') || q.includes('join astu')) {
+      return `🎓 ASTU Admissions & Entrance Information:\n• Undergraduate (BSc): Regular admissions are determined through the Ministry of Education (MoE) national entrance exams and central university placement for top STEM students.\n• Postgraduate (MSc / PhD): Coordinated directly by the ASTU Directorate of Postgraduate Studies (call for applications announced each academic semester).\n• Contact Registrar: registrar@astu.edu.et | Campus Block 102.`;
+    }
+
+    // Tuition & cost
+    if (q.includes('tuition') || q.includes('cost') || q.includes('fee') || q.includes('price')) {
+      return `💵 Tuition & Cost Information:\n• Government-Sponsored Undergraduate: Admitted students study under the national university cost-sharing program established by the Ministry of Education.\n• ASTU-AMS Portal Services: 100% free of charge for alumni, students, and registered employer partners (transcripts, job applications, tracer studies, mentorship).`;
+    }
+
     // 3. Fast LLM Execution with 6.0s race timeout
     const liveContext = await this.getCachedContext();
     const systemPrompt = `You are ASTU AI, the official public AI assistant for Adama Science & Technology University.
@@ -125,7 +140,7 @@ DIRECTIVES:
       const timeoutPromise = new Promise<string>((res) => setTimeout(() => res(''), 6000));
       const llmPromise = OpenRouterService.generateText(query, systemPrompt);
       const rawRes = await Promise.race([llmPromise, timeoutPromise]);
-      if (rawRes && rawRes.trim().length > 5) {
+      if (rawRes && rawRes.trim().length > 5 && !rawRes.includes('ASTU AI ASSISTANT TELEMETRY RESPONSE')) {
         return rawRes.replace(/\*\*/g, '').replace(/\*/g, '').trim();
       }
     } catch {
