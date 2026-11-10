@@ -428,8 +428,8 @@ export default function KnowledgeBaseManagement() {
                             doc.status === 'PUBLISHED'
                               ? 'success'
                               : doc.status === 'DRAFT'
-                              ? 'warning'
-                              : 'neutral'
+                                ? 'warning'
+                                : 'neutral'
                           }
                         >
                           {doc.status}
@@ -438,11 +438,10 @@ export default function KnowledgeBaseManagement() {
                     </td>
                     <td className="py-3.5 px-4">
                       <span
-                        className={`text-[11px] font-medium px-2 py-0.5 rounded ${
-                          doc.accessLevel === 'PUBLIC'
+                        className={`text-[11px] font-medium px-2 py-0.5 rounded ${doc.accessLevel === 'PUBLIC'
                             ? 'bg-emerald-50 text-emerald-700'
                             : 'bg-purple-50 text-purple-700'
-                        }`}
+                          }`}
                       >
                         {doc.accessLevel}
                       </span>
