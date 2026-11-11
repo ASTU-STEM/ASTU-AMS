@@ -3,7 +3,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
-import Footer from '../../../components/Footer';
+import PageClosedView, { PortalClosedBadge } from '../../../components/PageClosedView';
+import { usePortalMenuControl } from '../../../context/PortalMenuControlContext';
 
 // Types
 import {
@@ -32,6 +33,7 @@ import { CandidateProfileModal } from '../components/CandidateProfileModal';
 
 const EmployerDashboard = () => {
   const { logout } = useAuth();
+  const { isPageClosed } = usePortalMenuControl();
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('employer_sidebar_collapsed') === 'true');
@@ -729,95 +731,91 @@ const EmployerDashboard = () => {
 
           {/* Navigation Links with Enhanced Features */}
           <nav className="relative z-10 flex-grow px-2 py-4 overflow-y-auto scrollbar-thin">
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-2 mb-2">
-                <p className="text-[9px] font-extrabold text-gray-400 dark:text-white/30 uppercase tracking-[0.2em]">Recruiting</p>
-              </div>
-            )}
-            <div className="space-y-0.5">
-              {[
-                { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & recruitment metrics' },
-                { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Jobs, candidates, events & analytics' },
-                { id: 'post_job', label: 'Job Scaffolder', icon: 'work', badge: jobBadge, tooltip: `${activeJobsCount} active job postings` },
-                { id: 'candidates', label: 'Applications', icon: 'description', badge: appBadge, tooltip: `${pendingApplicationsCount} pending reviews` },
-                { id: 'search_talent', label: 'Talent Search', icon: 'search', badge: null, tooltip: 'Search alumni by skills & criteria' },
-              ].map((item) => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-2 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'} ${activeTab === item.id ? 'bg-astu-navy/10 text-astu-navy font-bold shadow-sm ring-1 ring-astu-navy/20 dark:bg-white/15 dark:text-white dark:shadow-black/10 dark:ring-white/10' : 'text-gray-600 hover:text-astu-navy hover:bg-gray-50 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/5'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-astu-navy text-white dark:bg-emerald-400/20 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 group-hover:text-astu-navy dark:bg-white/5 dark:text-white/40 dark:group-hover:text-white/70'}`}>
-                    <span className="material-symbols-outlined">{item.icon}</span>
-                    {item.badge && sidebarCollapsed && (
-                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg animate-pulse">
-                        {item.badge > 9 ? '9+' : item.badge}
-                      </span>
-                    )}
-                  </span>
-                  {!sidebarCollapsed && (
-                    <>
-                      <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
-                      {item.badge && (
-                        <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg transition-all duration-300 transform scale-100 ${String(item.id) === 'candidates' ? 'bg-rose-500/20 text-rose-600 ring-1 ring-rose-500/30 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-500/30' : 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-white/70'}`}>
-                          {item.badge > 9 ? '9+' : item.badge}
+            {[
+              {
+                key: 'recruiting',
+                title: 'Recruiting',
+                showPulse: false,
+                itemSpacing: 'px-2 py-2',
+                gapClass: 'gap-2.5',
+                items: [
+                  { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', badge: null, tooltip: 'Overview & recruitment metrics' },
+                  { id: 'management', label: 'Management Hub', icon: 'dashboard_customize', badge: null, tooltip: 'Jobs, candidates, events & analytics' },
+                  { id: 'post_job', label: 'Job Scaffolder', icon: 'work', badge: jobBadge, tooltip: `${activeJobsCount} active job postings` },
+                  { id: 'candidates', label: 'Applications', icon: 'description', badge: appBadge, tooltip: `${pendingApplicationsCount} pending reviews` },
+                  { id: 'search_talent', label: 'Talent Search', icon: 'search', badge: null, tooltip: 'Search alumni by skills & criteria' },
+                ],
+              },
+              {
+                key: 'management',
+                title: 'Management',
+                showPulse: true,
+                itemSpacing: 'px-3 py-2.5',
+                gapClass: 'gap-3',
+                items: [
+                  { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbackBadge, tooltip: `${feedbacks.length} feedback submissions` },
+                  { id: 'chat', label: 'Messages', icon: 'forum', badge: msgBadge, tooltip: `${realUnreadMessages} unread messages` },
+                  { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
+                  { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
+                ],
+              },
+            ].map((section) => (
+              <React.Fragment key={section.key}>
+                {!sidebarCollapsed && (
+                  <div className={`flex items-center justify-between px-2 ${section.showPulse ? 'mt-5 ' : ''}mb-2`}>
+                    <p className="text-[9px] font-extrabold text-gray-400 dark:text-white/30 uppercase tracking-[0.2em]">{section.title}</p>
+                    {section.showPulse && <span className="w-1.5 h-1.5 rounded-full bg-astu-navy dark:bg-emerald-400 animate-pulse" />}
+                  </div>
+                )}
+                <div className="space-y-0.5">
+                  {section.items.map((item) => {
+                    const closed = isPageClosed('EMPLOYER', item.id);
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        title={sidebarCollapsed ? `${item.label}${closed ? ' (Closed)' : ''}` : item.tooltip}
+                        className={`nav-btn w-full flex items-center ${section.itemSpacing} rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : section.gapClass} ${activeTab === item.id ? 'bg-astu-navy/10 text-astu-navy font-bold shadow-sm ring-1 ring-astu-navy/20 dark:bg-white/15 dark:text-white dark:shadow-black/10 dark:ring-white/10' : 'text-gray-600 hover:text-astu-navy hover:bg-gray-50 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/5'}`}
+                      >
+                        <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-astu-navy text-white dark:bg-emerald-400/20 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 group-hover:text-astu-navy dark:bg-white/5 dark:text-white/40 dark:group-hover:text-white/70'}`}>
+                          <span className="material-symbols-outlined">{item.icon}</span>
+                          {closed && sidebarCollapsed ? (
+                            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900" />
+                          ) : item.badge && sidebarCollapsed ? (
+                            <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg animate-pulse">
+                              {item.badge > 9 ? '9+' : item.badge}
+                            </span>
+                          ) : null}
                         </span>
-                      )}
-                      {activeTab === item.id && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-astu-navy dark:bg-emerald-400 animate-pulse" />}
-                    </>
-                  )}
-                  {sidebarCollapsed && (
-                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                      {item.label}
-                      {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-2 mt-5 mb-2">
-                <p className="text-[9px] font-extrabold text-gray-400 dark:text-white/30 uppercase tracking-[0.2em]">Management</p>
-                <span className="w-1.5 h-1.5 rounded-full bg-astu-navy dark:bg-emerald-400 animate-pulse" />
-              </div>
-            )}
-            <div className="space-y-0.5">
-              {[
-                { id: 'feedback', label: 'Feedbacks', icon: 'rate_review', badge: feedbackBadge, tooltip: `${feedbacks.length} feedback submissions` },
-                { id: 'chat', label: 'Messages', icon: 'forum', badge: msgBadge, tooltip: `${realUnreadMessages} unread messages` },
-                { id: 'analytics', label: 'Analytics', icon: 'analytics', badge: null, tooltip: 'Recruitment analytics & insights' },
-                { id: 'profile', label: 'Company Profile', icon: 'business', badge: null, tooltip: 'Manage company profile & settings' },
-              ].map((item) => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : item.tooltip}
-                  className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3'} ${activeTab === item.id ? 'bg-astu-navy/10 text-astu-navy font-bold shadow-sm ring-1 ring-astu-navy/20 dark:bg-white/15 dark:text-white dark:shadow-black/10 dark:ring-white/10' : 'text-gray-600 hover:text-astu-navy hover:bg-gray-50 dark:text-white/60 dark:hover:text-white dark:hover:bg-white/5'}`}>
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-astu-navy text-white dark:bg-emerald-400/20 dark:text-emerald-400' : 'bg-gray-100 text-gray-500 group-hover:text-astu-navy dark:bg-white/5 dark:text-white/40 dark:group-hover:text-white/70'}`}>
-                    <span className="material-symbols-outlined">{item.icon}</span>
-                    {item.badge && sidebarCollapsed && (
-                      <span className="absolute -top-1 -right-1 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg animate-pulse">
-                        {item.badge > 9 ? '9+' : item.badge}
-                      </span>
-                    )}
-                  </span>
-                  {!sidebarCollapsed && (
-                    <>
-                      <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
-                      {item.badge && (
-                        <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg bg-rose-500/20 text-rose-600 ring-1 ring-rose-500/30 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-500/30 transition-all duration-300 transform scale-100">
-                          {item.badge > 9 ? '9+' : item.badge}
-                        </span>
-                      )}
-                      {activeTab === item.id && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-astu-navy dark:bg-emerald-400 animate-pulse" />}
-                    </>
-                  )}
-                  {sidebarCollapsed && (
-                    <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                      {item.label}
-                      {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
+                        {!sidebarCollapsed && (
+                          <>
+                            <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
+                            {closed ? (
+                              <PortalClosedBadge dark={darkMode} />
+                            ) : (
+                              <>
+                                {item.badge && (
+                                  <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[9px] font-extrabold shadow-lg transition-all duration-300 transform scale-100 ${String(item.id) === 'candidates' || section.showPulse ? 'bg-rose-500/20 text-rose-600 ring-1 ring-rose-500/30 dark:bg-rose-500/20 dark:text-rose-300 dark:ring-rose-500/30' : 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-white/70'}`}>
+                                    {item.badge > 9 ? '9+' : item.badge}
+                                  </span>
+                                )}
+                                {activeTab === item.id && !item.badge && <div className="ml-1 w-1.5 h-1.5 rounded-full bg-astu-navy dark:bg-emerald-400 animate-pulse" />}
+                              </>
+                            )}
+                          </>
+                        )}
+                        {sidebarCollapsed && (
+                          <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                            {item.label}
+                            {closed ? <span className="ml-1.5 text-rose-400 font-bold">(Closed)</span> : item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </React.Fragment>
+            ))}
 
             {sidebarCollapsed && (
               <div className="mt-4 px-2">
@@ -1144,6 +1142,19 @@ const EmployerDashboard = () => {
 
           {/* Main Content */}
           <main className="h-[calc(100dvh-4rem)] p-4 md:p-6 lg:p-8 overflow-y-auto overflow-x-hidden bg-slate-50 dark:bg-slate-950" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+            {isPageClosed('EMPLOYER', activeTab === 'messages' ? 'chat' : activeTab) ? (
+              <PageClosedView
+                actor="EMPLOYER"
+                pageId={activeTab === 'messages' ? 'chat' : activeTab}
+                onBackToDashboard={() => {
+                  const firstOpen = ['dashboard', 'management', 'post_job', 'candidates', 'search_talent', 'feedback', 'chat', 'analytics', 'profile'].find(
+                    (id) => !isPageClosed('EMPLOYER', id)
+                  );
+                  setActiveTab(firstOpen || 'dashboard');
+                }}
+              />
+            ) : (
+              <>
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
                 {/* Official Alumni Officer Broadcast Hero Banner */}
@@ -1520,8 +1531,9 @@ const EmployerDashboard = () => {
                 darkMode={darkMode}
               />
             )}
+              </>
+            )}
           </main>
-          <Footer variant="minimal" />
         </div>
       </div>
 

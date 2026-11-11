@@ -362,7 +362,7 @@ export default function SupportDeskManagement() {
                     {selectedTicket.attachments.map((att, i) => (
                       <a
                         key={i}
-                        href={`http://localhost:5000/uploads/Support/${att}`}
+                        href={`${(import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '')}/uploads/Support/${att}`}
                         target="_blank"
                         rel="noreferrer"
                         className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-800 rounded-xl text-xs font-bold border border-slate-250 shadow-2xs transition-all flex items-center gap-2 hover:border-astu-navy"

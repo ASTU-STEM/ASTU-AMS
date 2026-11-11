@@ -432,28 +432,28 @@ export default function CommunityManagement() {
   return (
     <div className="space-y-6">
       {/* ── UNIFIED MODERN TOP HERO BANNER ── */}
-      <div className="rounded-3xl bg-gradient-to-r from-astu-navy via-[#003366] to-[#001f3f] p-6 text-white shadow-xl relative overflow-hidden">
+      <div className="rounded-3xl bg-gradient-to-r from-astu-navy via-[#003366] to-[#001f3f] p-7 sm:p-9 text-white shadow-xl relative overflow-hidden">
         {/* Glow backdrop */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div>
-            <span className="inline-block text-[10px] font-black uppercase tracking-widest text-amber-400 bg-white/10 px-3 py-1 rounded-full border border-white/20">
+            <span className="inline-block text-xs font-black uppercase tracking-widest text-amber-400 bg-white/10 px-3.5 py-1.5 rounded-full border border-white/20">
               COMMUNITY CMS DASHBOARD
             </span>
-            <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white mt-1.5 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mt-2 tracking-tight leading-tight">
               Community Management & Live Page Editor
             </h1>
-            <p className="text-xs md:text-sm text-slate-200 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-sm md:text-base text-slate-200 mt-1.5 max-w-2xl leading-relaxed">
               Customize text, stats, sections, regional hubs, and member roster with real-time live preview.
             </p>
           </div>
 
           {/* Integrated Toolbar */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => setShowLivePreview(!showLivePreview)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 border transition-all cursor-pointer ${
+              className={`px-4 py-2.5 rounded-2xl text-sm font-bold flex items-center gap-2 border transition-all cursor-pointer ${
                 showLivePreview
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40 shadow-xs'
                   : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
@@ -467,7 +467,7 @@ export default function CommunityManagement() {
               <div className="flex items-center gap-1 bg-white/10 p-1 rounded-2xl border border-white/20">
                 <button
                   onClick={() => setDeviceView('desktop')}
-                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
                     deviceView === 'desktop' ? 'bg-white text-[#003366] font-bold shadow-xs' : 'text-slate-200 hover:text-white'
                   }`}
                 >
@@ -475,7 +475,7 @@ export default function CommunityManagement() {
                 </button>
                 <button
                   onClick={() => setDeviceView('tablet')}
-                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
                     deviceView === 'tablet' ? 'bg-white text-[#003366] font-bold shadow-xs' : 'text-slate-200 hover:text-white'
                   }`}
                 >
@@ -483,7 +483,7 @@ export default function CommunityManagement() {
                 </button>
                 <button
                   onClick={() => setDeviceView('mobile')}
-                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
                     deviceView === 'mobile' ? 'bg-white text-[#003366] font-bold shadow-xs' : 'text-slate-200 hover:text-white'
                   }`}
                 >
@@ -494,7 +494,7 @@ export default function CommunityManagement() {
 
             <button
               onClick={handleSaveAll}
-              className="px-5 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg transition-all cursor-pointer"
+              className="px-6 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm flex items-center gap-2 shadow-lg transition-all cursor-pointer"
             >
               <Save className="h-4 w-4" /> Save All Changes
             </button>

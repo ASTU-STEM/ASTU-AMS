@@ -13,6 +13,7 @@ const sizeClasses: Record<NonNullable<AdminModalProps['size']>, string> = {
 export default function AdminModal({
   open,
   title,
+  subtitle,
   children,
   onClose,
   footer,
@@ -103,7 +104,7 @@ export default function AdminModal({
                   </span>
                 </div>
                 <p className="text-[11px] font-medium text-blue-100/80 mt-0.5">
-                  Adama Science & Technology University • Control Center
+                  {subtitle || 'Adama Science & Technology University • Control Center'}
                 </p>
               </div>
             </div>

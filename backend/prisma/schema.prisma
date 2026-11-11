@@ -88,6 +88,7 @@ model User {
   role             Role
   isActive         Boolean           @default(false)
   twoFactorEnabled Boolean           @default(false)
+  adminNotes       String?           @db.Text
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   alumniProfile         AlumniProfile?
@@ -559,14 +560,21 @@ model RegistrarStudent {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  content   String
-  isRead    Boolean  @default(false)
-  status    String?  @default("Sent")
-  createdAt DateTime @default(now())
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  content     String    @db.Text
+  type        String    @default("In-App")
+  status      String    @default("Sent")
+  priority    String    @default("Normal")
+  category    String    @default("General")
+  imageUrl    String?
+  ctaLink     String?
+  ctaText     String?
+  scheduledAt DateTime?
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
 }
 
 model AuditLog {

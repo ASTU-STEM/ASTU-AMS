@@ -195,4 +195,16 @@ export const PageClosedView: React.FC<PageClosedViewProps> = ({
   );
 };
 
+export const PortalClosedBadge: React.FC<{ dark?: boolean }> = ({ dark = false }) => (
+  <span
+    className={`ml-auto inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider shrink-0 border ${
+      dark
+        ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+        : 'bg-rose-100 text-rose-700 border-rose-200'
+    }`}
+  >
+    Closed
+  </span>
+);
+
 export default PageClosedView;

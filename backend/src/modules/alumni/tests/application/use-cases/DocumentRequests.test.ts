@@ -3,12 +3,13 @@ import { IAlumniProfileRepository } from '../../../application/ports/IAlumniProf
 import { IDocumentRequestRepository } from '../../../application/ports/IDocumentRequestRepository';
 import { IAuditLogger } from '../../../application/ports/IAuditLogger';
 import { AlumniProfile, DocumentRequest } from '../../../domain/entities/Alumni';
-import { AlumniNotFoundError } from '../../../domain/errors/AlumniErrors';
+import { EmailService } from '../../../../../core/services/EmailService';
 
 describe('DocumentRequests Use Cases', () => {
   let mockAlumniRepo: jest.Mocked<IAlumniProfileRepository>;
   let mockDocRepo: jest.Mocked<IDocumentRequestRepository>;
   let mockLogger: jest.Mocked<IAuditLogger>;
+  let mockEmailService: jest.Mocked<Pick<EmailService, 'sendGenericNotification'>>;
 
   const mockProfile = new AlumniProfile('alumniId1', 'userId1', 'stu1', 'John Doe', 'email@test.com', 'ACTIVE', true);
 
@@ -16,6 +17,7 @@ describe('DocumentRequests Use Cases', () => {
     mockAlumniRepo = { findByUserId: jest.fn(), update: jest.fn() };
     mockDocRepo = { create: jest.fn(), findByAlumniId: jest.fn() };
     mockLogger = { log: jest.fn() };
+    mockEmailService = { sendGenericNotification: jest.fn().mockResolvedValue(true) };
   });
 
   describe('RequestDocument', () => {
@@ -24,7 +26,12 @@ describe('DocumentRequests Use Cases', () => {
       const newDoc = new DocumentRequest('doc1', 'alumniId1', 'Transcript', 'Please rush', 'PENDING', new Date());
       mockDocRepo.create.mockResolvedValue(newDoc);
 
-      const useCase = new RequestDocument(mockAlumniRepo, mockDocRepo, mockLogger);
+      const useCase = new RequestDocument(
+        mockAlumniRepo,
+        mockDocRepo,
+        mockLogger,
+        mockEmailService as unknown as EmailService
+      );
       const result = await useCase.execute('userId1', { documentType: 'Transcript', additionalInstructions: 'Please rush' }, '127.0.0.1');
 
       expect(result).toEqual(newDoc);

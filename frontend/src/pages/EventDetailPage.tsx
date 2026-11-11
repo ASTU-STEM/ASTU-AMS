@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Share2,
   Building,
+  CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';

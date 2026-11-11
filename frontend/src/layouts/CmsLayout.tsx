@@ -5,7 +5,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import CmsSidebar from './CmsSidebar';
 import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
-import Footer from '../components/Footer';
 
 class CmsRouteBoundary extends React.Component<
   { children: React.ReactNode },
@@ -355,7 +354,6 @@ export default function CmsLayout() {
               <Outlet />
             </CmsRouteBoundary>
           </main>
-          <Footer variant="minimal" />
         </div>
       </div>
 

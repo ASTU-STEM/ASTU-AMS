@@ -880,5 +880,18 @@ class PortalMenuControlService {
   }
 }
 
+export function getAdminMenuControlId(pathname: string): string | null {
+  const match = pathname.match(/^\/admin\/([^/?#]+)/);
+  if (!match) return null;
+  const segment = match[1];
+  if (segment === 'portal-controls' || segment === 'profile' || segment === 'ict-portal') {
+    return null;
+  }
+  if (segment === 'knowledge-base' || segment === 'knowledge-hub') {
+    return 'knowledge-hub';
+  }
+  return segment;
+}
+
 export const portalMenuControlService = new PortalMenuControlService();
 export default portalMenuControlService;

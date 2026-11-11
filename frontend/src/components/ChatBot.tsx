@@ -7,7 +7,6 @@ import {
   Send,
   Trash2,
   X,
-  Sparkles,
   Copy,
   Check,
   ArrowUpRight,
@@ -1125,11 +1124,9 @@ export default function ASTUCareerCopilot() {
               fontSize: 12,
               fontWeight: 700,
               alignItems: "center",
-              gap: 6,
               backdropFilter: "blur(8px)",
             }}
           >
-            <Sparkles size={13} color={COLORS.gold} aria-hidden="true" />
             <span>Need help? Ask ASTU</span>
           </div>
         )}
@@ -1169,15 +1166,7 @@ export default function ASTUCareerCopilot() {
           {isOpen ? (
             <X size={24} strokeWidth={2.25} aria-hidden="true" />
           ) : (
-            <span style={{ position: "relative", display: "flex" }}>
-              <Bot size={26} strokeWidth={2.2} aria-hidden="true" />
-              <Sparkles
-                size={11}
-                color="#FFD700"
-                style={{ position: "absolute", top: -5, right: -6 }}
-                aria-hidden="true"
-              />
-            </span>
+            <Bot size={26} strokeWidth={2.2} aria-hidden="true" />
           )}
           {!isOpen && unreadCount > 0 && (
             <span

@@ -22,6 +22,16 @@ const expRepo = new PrismaWorkExperienceRepository();
 const docRepo = new PrismaDocumentRequestRepository();
 const logger = new PrismaAuditLogger();
 
+const getBackendOrigin = (req: Request): string => {
+  const configured =
+    process.env.BACKEND_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    process.env.VITE_API_BASE_URL?.replace(/\/api\/?$/, '');
+  if (configured) return configured.replace(/\/+$/, '');
+  const host = req.get('host');
+  return host ? `${req.protocol}://${host}` : 'http://localhost:5000';
+};
+
 export class AlumniController {
   static async getMe(req: Request, res: Response, next: NextFunction) {
     try {
@@ -476,6 +486,7 @@ export class AlumniController {
         }
       }
       
+      const backendOrigin = getBackendOrigin(req);
       const formattedMentors = mentors.map((m: any) => ({
         id: m.id,
         name: m.alumni?.fullName || 'ASTU Senior Mentor',
@@ -484,7 +495,7 @@ export class AlumniController {
         batch: (m.alumni?.graduationYear || '2024').toString(),
         skills: Array.from(new Set([...(m.expertise || []), ...(m.alumni?.skills || [])])).slice(0, 5),
         status: m.status,
-        avatarUrl: m.alumni?.profilePicture ? `http://localhost:5000${m.alumni.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        avatarUrl: m.alumni?.profilePicture ? `${backendOrigin}${m.alumni.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
         bio: `Experienced ASTU alumnus with ${m.yearsExperience || 5} years in the tech industry. Ready to assist with system design, career roadmaps, and postgraduate research applications.`,
       }));
       
@@ -662,12 +673,13 @@ export class AlumniController {
         }
       });
 
+      const backendOrigin = getBackendOrigin(req);
       const topContributors = topContributorsRaw.map(a => ({
         id: a.id,
         userId: a.userId,
         name: a.fullName,
         title: `${(a as any).currentPosition || 'ASTU Senior Alumni'} ${(a as any).company ? '@ ' + (a as any).company : ''}`,
-        avatar: a.profilePicture ? `http://localhost:5000${a.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+        avatar: a.profilePicture ? `${backendOrigin}${a.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
         posts: `${a._count.forumPosts || 1} posts`
       }));
 
@@ -685,7 +697,7 @@ export class AlumniController {
           id: p.id,
           alumniId: p.alumniId,
           author: p.alumni?.fullName || 'ASTU Graduate',
-          authorAvatar: p.alumni?.profilePicture ? `http://localhost:5000${p.alumni.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+          authorAvatar: p.alumni?.profilePicture ? `${backendOrigin}${p.alumni.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
           authorRole: 'Alumni',
           category,
           content: cleanContent,
@@ -695,7 +707,7 @@ export class AlumniController {
           commentList: (p.comments || []).map((c: any) => ({
             id: c.id,
             author: c.alumni?.fullName || 'Alumni Member',
-            authorAvatar: c.alumni?.profilePicture ? `http://localhost:5000${c.alumni.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+            authorAvatar: c.alumni?.profilePicture ? `${backendOrigin}${c.profilePicture}` : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
             content: c.content,
             createdAt: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Recently'
           })),
@@ -1565,7 +1577,7 @@ export class AlumniController {
       }
       const uniqueProfiles = Array.from(uniqueProfilesMap.values());
 
-      const backendHost = process.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000';
+      const backendHost = getBackendOrigin(req);
 
       const directoryData = uniqueProfiles.map((p: any) => {
         const latestExp = p.experiences && p.experiences.length > 0 ? p.experiences[0] : null;

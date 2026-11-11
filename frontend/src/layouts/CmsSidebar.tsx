@@ -91,10 +91,10 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
         } ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* Logo Header */}
-        <div className="relative px-5 py-4.5 border-b border-slate-100 dark:border-slate-800">
+        <div className="relative px-4 py-4 border-b border-slate-100 dark:border-slate-800">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
             <div className="flex items-center gap-3 min-w-0">
-              <div className="relative shrink-0 flex items-center justify-center h-10 w-10">
+              <div className={`relative shrink-0 flex items-center justify-center ${collapsed ? 'h-12 w-12' : 'h-14 w-14'}`}>
                 <img
                   src="/images/astu-seal-logo.png"
                   alt="ASTU Logo"
@@ -103,10 +103,10 @@ export default function CmsSidebar({ onLogout, isOpen = false, onNavigate, colla
               </div>
               {!collapsed && (
                 <div className="min-w-0">
-                  <span className="text-[15px] font-bold text-slate-900 dark:text-white tracking-tight leading-none block">
+                  <span className="text-[19px] font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight block">
                     ASTU Alumni
                   </span>
-                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate mt-1">
+                  <p className="text-[13px] font-semibold text-slate-500 dark:text-slate-400 leading-snug mt-0.5">
                     Relations & Affairs Office
                   </p>
                 </div>

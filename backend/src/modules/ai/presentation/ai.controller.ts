@@ -35,36 +35,35 @@ export class AIController {
         }
       }
 
-      // Check RAG Knowledge Base first for institutional policy, documents, and verified answers
-      const isExplicitDbAction = /^(create agent|build agent|new agent|make agent|backup|vacuum|run sql|show table|db stats|database stats|reset password|delete user|suspend user)/i.test((combinedQuery || '').trim());
+      const result = await chatbotWorkflow.execute(combinedQuery, settings);
 
-      let ragResult: any = null;
-      if (!fileData && !isExplicitDbAction) {
+      // For general policy/handbook queries (not matched to database/analytics/report intents),
+      // prefer grounded RAG citations when relevant institutional chunks exist.
+      const isExplicitDbAction = /^(create agent|build agent|new agent|make agent|backup|vacuum|run sql|show table|db stats|database stats|reset password|delete user|suspend user)/i.test((combinedQuery || '').trim());
+      if (!fileData && !isExplicitDbAction && (result.intent || 'general') === 'general') {
         try {
-          ragResult = await RAGKnowledgeService.queryAndGenerate(combinedQuery, { allowDrafts: true });
+          const ragResult = await RAGKnowledgeService.queryAndGenerate(combinedQuery, { allowDrafts: true });
+          if (ragResult && ragResult.isGrounded && ragResult.retrievedChunksCount > 0) {
+            let formattedResponse = ragResult.response;
+            if (ragResult.citations && ragResult.citations.length > 0) {
+              formattedResponse += '\n\n**Verified Citations:**\n' + ragResult.citations.map((c: any) => `• ${c.title}${c.section ? ` (${c.section})` : ''}`).join('\n');
+            }
+            return sendSuccess(res, 'Chat response generated successfully.', {
+              query: message,
+              intent: 'knowledge_rag',
+              response: formattedResponse,
+              citations: ragResult.citations,
+              actions: ragResult.actions,
+              dbQueryResult: null,
+              processedDocSummary: null,
+              settingsApplied: settings || null,
+            });
+          }
         } catch (ragErr) {
           console.warn('RAG retrieval notice in AIController.chat:', ragErr);
         }
       }
 
-      if (ragResult && ragResult.isGrounded && ragResult.retrievedChunksCount > 0) {
-        let formattedResponse = ragResult.response;
-        if (ragResult.citations && ragResult.citations.length > 0) {
-          formattedResponse += '\n\n**Verified Citations:**\n' + ragResult.citations.map((c: any) => `• ${c.title}${c.section ? ` (${c.section})` : ''}`).join('\n');
-        }
-        return sendSuccess(res, 'Chat response generated successfully.', {
-          query: message,
-          intent: 'knowledge_rag',
-          response: formattedResponse,
-          citations: ragResult.citations,
-          actions: ragResult.actions,
-          dbQueryResult: null,
-          processedDocSummary: null,
-          settingsApplied: settings || null,
-        });
-      }
-
-      const result = await chatbotWorkflow.execute(combinedQuery, settings);
       return sendSuccess(res, 'Chat response generated successfully.', {
         query: result.query || message,
         intent: result.intent || 'general',

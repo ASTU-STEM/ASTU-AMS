@@ -22,7 +22,7 @@ interface PortalMenuControlContextType {
   ) => Promise<void>;
   saveControls: (items: ControlledMenuItem[]) => Promise<void>;
   resetControls: () => Promise<void>;
-  refreshControls: () => Promise<void>;
+  refreshControls: (silent?: boolean) => Promise<void>;
 }
 
 const PortalMenuControlContext = createContext<PortalMenuControlContextType>({
@@ -43,13 +43,17 @@ export const PortalMenuControlProvider: React.FC<{ children: React.ReactNode }> 
   );
   const [loading, setLoading] = useState(false);
 
-  const refreshControls = useCallback(async () => {
-    setLoading(true);
+  const refreshControls = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const updated = await portalMenuControlService.fetchControls();
       setControls(updated);
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -62,15 +66,32 @@ export const PortalMenuControlProvider: React.FC<{ children: React.ReactNode }> 
       }
     };
 
-    window.addEventListener(MENU_CONTROLS_EVENT, handleCustomEvent);
-    window.addEventListener('storage', (e) => {
+    const handleStorage = (e: StorageEvent) => {
       if (e.key === 'astu_portal_menu_controls') {
         setControls(portalMenuControlService.getCachedControls());
       }
-    });
+    };
+
+    const handleWindowFocus = () => {
+      refreshControls(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshControls(true);
+      }
+    };
+
+    window.addEventListener(MENU_CONTROLS_EVENT, handleCustomEvent);
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', handleWindowFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener(MENU_CONTROLS_EVENT, handleCustomEvent);
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleWindowFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [refreshControls]);
 

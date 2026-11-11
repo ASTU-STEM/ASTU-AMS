@@ -28,6 +28,9 @@ import AdminBadge from '../features/admin/components/AdminBadge';
 import { adminService } from '../features/admin/services/admin.service';
 import { useAuth } from '../contexts/AuthContext';
 import { useSystemSettings } from '../context/SystemSettingsContext';
+import { PortalClosedBadge } from '../components/PageClosedView';
+import { usePortalMenuControl } from '../context/PortalMenuControlContext';
+import { getAdminMenuControlId } from '../features/admin/services/portalMenuControl.service';
 
 interface AdminSidebarProps {
   onLogout: () => void;
@@ -73,6 +76,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
   const location = useLocation();
   const { user } = useAuth();
   const { settings } = useSystemSettings();
+  const { isPageClosed } = usePortalMenuControl();
 
   const [stats, setStats] = React.useState({
     users: 0,
@@ -221,6 +225,8 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                 <div className="space-y-1">
                   {items.map((item) => {
                     const Icon = item.icon;
+                    const controlId = getAdminMenuControlId(item.path);
+                    const closed = Boolean(controlId && isPageClosed('ADMIN', controlId));
                     const isActive = item.exact
                       ? location.pathname === item.path
                       : location.pathname.startsWith(item.path);
@@ -233,7 +239,7 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                           markAsSeen(item.path);
                           if (onNavigate) onNavigate();
                         }}
-                        title={collapsed ? item.tooltip || item.label : undefined}
+                        title={collapsed ? `${item.tooltip || item.label}${closed ? ' (Closed)' : ''}` : undefined}
                         className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${
                           collapsed ? 'justify-center' : 'gap-2.5'
                         } ${
@@ -246,29 +252,38 @@ export default function AdminSidebar({ onLogout, isOpen = false, onNavigate, col
                           isActive ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'
                         }`}>
                           <Icon className="h-4.5 w-4.5" />
+                          {closed && collapsed && (
+                            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white" />
+                          )}
                         </span>
                         {!collapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                        {item.badge && !collapsed && (
-                          <span className={`flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold shadow-xs ${
-                            isActive
-                              ? 'bg-rose-500 text-white'
-                              : 'bg-rose-100 text-rose-700'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        )}
-                        {item.badge && collapsed && (
-                          <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
-                            {item.badge}
-                          </span>
-                        )}
-                        {isActive && !item.badge && !collapsed && (
-                          <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
+                        {closed && !collapsed ? (
+                          <PortalClosedBadge />
+                        ) : (
+                          <>
+                            {item.badge && !collapsed && (
+                              <span className={`flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold shadow-xs ${
+                                isActive
+                                  ? 'bg-rose-500 text-white'
+                                  : 'bg-rose-100 text-rose-700'
+                              }`}>
+                                {item.badge}
+                              </span>
+                            )}
+                            {item.badge && collapsed && (
+                              <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[7px] font-extrabold text-white shadow-lg">
+                                {item.badge}
+                              </span>
+                            )}
+                            {isActive && !item.badge && !collapsed && (
+                              <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
+                            )}
+                          </>
                         )}
                         {collapsed && (
                           <div className="absolute left-full ml-2 px-2.5 py-1.5 bg-slate-900 text-white text-[10px] font-medium rounded-lg shadow-xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                             {item.label}
-                            {item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
+                            {closed ? <span className="ml-1.5 text-rose-400 font-bold">(Closed)</span> : item.badge && <span className="ml-1.5 text-rose-400 font-bold">({item.badge})</span>}
                           </div>
                         )}
                       </NavLink>

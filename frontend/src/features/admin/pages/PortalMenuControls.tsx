@@ -193,7 +193,7 @@ export const PortalMenuControls: React.FC = () => {
     setLocalItems((prev) =>
       prev.map((item) => {
         if (selectedActor === 'ALL' || item.actor === selectedActor) {
-          return { ...item, enabled: true, closedAt: null };
+          return { ...item, enabled: true, closedAt: null, closedBy: null };
         }
         return item;
       })
@@ -286,20 +286,20 @@ export const PortalMenuControls: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* ─── Hero Banner ─── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#003580] via-[#004899] to-[#1D9E75] p-6 sm:p-8 text-white shadow-xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#FFD700]/15 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#003580] via-[#004899] to-[#1D9E75] p-7 sm:p-10 text-white shadow-xl">
+        <div className="absolute top-0 right-0 w-[28rem] h-[28rem] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FFD700]/15 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white/90 backdrop-blur-md">
-              <SlidersHorizontal className="h-3.5 w-3.5" />
+          <div className="space-y-2.5 max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white/90 backdrop-blur-md">
+              <SlidersHorizontal className="h-4 w-4" />
               <span>Executive Portal Governance</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
               Portal Page & Sidebar Menu Control
             </h1>
-            <p className="text-sm leading-relaxed text-white/90">
+            <p className="text-sm sm:text-base leading-relaxed text-white/90">
               Govern accessibility for sidebar menu pages across all system actor dashboards
               (<strong>Alumni</strong>, <strong>Employer</strong>, <strong>Registrar</strong>,{' '}
               <strong>Department Head</strong>, and <strong>System Administrator</strong>). When an officer marks a page closed, a <strong>"Closed"</strong> badge displays in that actor's sidebar, and opening the page presents the customized reason notice you configure below.
@@ -312,7 +312,7 @@ export const PortalMenuControls: React.FC = () => {
                 type="button"
                 onClick={handleSaveChanges}
                 disabled={isSaving}
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-xs shadow-lg transition-all transform active:scale-95 animate-pulse cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm shadow-lg transition-all transform active:scale-95 animate-pulse cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>{isSaving ? 'Saving...' : 'Save Pending Changes'}</span>
@@ -323,10 +323,10 @@ export const PortalMenuControls: React.FC = () => {
               type="button"
               onClick={handleResetToDefaults}
               disabled={isSaving}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 backdrop-blur-md transition-all cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-sm border border-white/20 backdrop-blur-md transition-all cursor-pointer"
               title="Reset all menu controls to active state"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-4 h-4" />
               <span>Reset Defaults</span>
             </button>
           </div>
@@ -535,7 +535,7 @@ export const PortalMenuControls: React.FC = () => {
 
       {/* ─── Unsaved Changes Warning Banner ─── */}
       {hasUnsavedChanges && (
-        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl p-4 flex items-center justify-between gap-4">
+        <div className="sticky top-2 z-30 bg-amber-50 dark:bg-amber-950/90 border border-amber-300 dark:border-amber-800 rounded-xl p-4 flex items-center justify-between gap-4 shadow-lg backdrop-blur-xs">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
             <div>
@@ -732,14 +732,14 @@ export const PortalMenuControls: React.FC = () => {
                       </td>
 
                       {/* Menu Page */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 max-w-[240px]">
                         <div className="flex items-center gap-2.5">
-                          <span className="material-symbols-outlined text-[20px] text-[#003580] dark:text-sky-400">
+                          <span className="material-symbols-outlined text-[20px] shrink-0 text-[#003580] dark:text-sky-400">
                             {item.icon}
                           </span>
-                          <div>
-                            <p className="font-bold text-slate-900 dark:text-white">{item.label}</p>
-                            <p className="text-[11px] text-slate-400 line-clamp-1">{item.description}</p>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 dark:text-white truncate">{item.label}</p>
+                            <p className="text-[11px] text-slate-400 truncate">{item.description}</p>
                           </div>
                         </div>
                       </td>
@@ -842,7 +842,7 @@ export const PortalMenuControls: React.FC = () => {
 
       {/* ─── Modal 1: Prompt for Closure Reason when Officer Toggles OFF ─── */}
       <AdminModal
-        isOpen={Boolean(closingItem)}
+        open={Boolean(closingItem)}
         onClose={() => setClosingItem(null)}
         title={`Close Page: ${closingItem?.label || ''}`}
         subtitle={`${closingItem?.actorLabel || ''} Portal • Specify official closure reason`}
@@ -911,7 +911,7 @@ export const PortalMenuControls: React.FC = () => {
 
       {/* ─── Modal 2: Edit Custom Closed Notice ─── */}
       <AdminModal
-        isOpen={Boolean(editingItem)}
+        open={Boolean(editingItem)}
         onClose={() => setEditingItem(null)}
         title={`Closure Reason: ${editingItem?.label || ''}`}
         subtitle={`${editingItem?.actorLabel || ''} Portal • Update announcement message`}
@@ -978,7 +978,7 @@ export const PortalMenuControls: React.FC = () => {
 
       {/* ─── Modal 3: Preview Page Closed View ─── */}
       <AdminModal
-        isOpen={Boolean(previewItem)}
+        open={Boolean(previewItem)}
         onClose={() => setPreviewItem(null)}
         title={`Preview: ${previewItem?.label || ''}`}
         subtitle={`Live view of what ${previewItem?.actorLabel || ''} users see when this page is closed`}

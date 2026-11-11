@@ -37,6 +37,7 @@ export interface AdminTableColumn<T> {
 export interface AdminModalProps {
   open: boolean;
   title: string;
+  subtitle?: string;
   children: ReactNode;
   onClose: () => void;
   footer?: ReactNode;

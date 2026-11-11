@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
+import AdminPageHeader from '../components/AdminPageHeader';
 import AdminTablePagination from '../components/AdminTablePagination';
 
 interface Campaign {
@@ -532,35 +533,30 @@ export default function DonationsManagement() {
   return (
     <div className="space-y-6">
       {/* Header & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Heart className="h-7 w-7 text-rose-500 fill-rose-500" />
-            Donations & Giving Management
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Manage ASTU fundraising campaigns, create new causes, and monitor Chapa donor records.
-          </p>
-        </div>
+      <AdminPageHeader
+        title="Donations & Giving Management"
+        subtitle="Manage ASTU fundraising campaigns, create new causes, and monitor Chapa donor records."
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Donations & Giving' }]}
+        actions={
+          <div className="flex items-center gap-3">
+            <button
+              onClick={loadData}
+              className="p-3 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 text-white transition-colors shadow-sm cursor-pointer"
+              title="Refresh Data"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={loadData}
-            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors shadow-sm"
-            title="Refresh Data"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-
-          <button
-            onClick={handleOpenCreate}
-            className="px-4 py-2.5 rounded-xl bg-[#003580] text-white text-xs font-extrabold shadow-md hover:bg-[#002866] transition-all flex items-center gap-2 hover:scale-[1.01]"
-          >
-            <Plus className="h-4 w-4" />
-            Create Campaign
-          </button>
-        </div>
-      </div>
+            <button
+              onClick={handleOpenCreate}
+              className="px-5 py-3 rounded-xl bg-[#FFCC00] text-[#003366] text-sm font-extrabold shadow-md hover:bg-yellow-300 transition-all flex items-center gap-2 hover:scale-[1.01] cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              Create Campaign
+            </button>
+          </div>
+        }
+      />
 
       {/* Analytics Metric Cards (100% Dynamic Database Values) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

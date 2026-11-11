@@ -639,37 +639,37 @@ export default function CmsDashboard() {
         const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
         const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
         return (
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003366] via-[#004080] to-[#1a5276] shadow-sm">
-            <div className="pointer-events-none absolute -top-10 -right-10 h-48 w-48 rounded-full bg-white/5" />
-            <div className="pointer-events-none absolute bottom-0 left-1/2 h-32 w-32 rounded-full bg-[#FFCC00]/6" />
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#003366] via-[#004080] to-[#1a5276] shadow-md">
+            <div className="pointer-events-none absolute -top-12 -right-12 h-56 w-56 rounded-full bg-white/5" />
+            <div className="pointer-events-none absolute bottom-0 left-1/2 h-40 w-40 rounded-full bg-[#FFCC00]/6" />
 
-            <div className="relative px-6 py-5 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="relative px-7 py-7 sm:px-9 sm:py-9 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
               <div>
-                <p className="text-[11px] text-white/50 font-medium mb-0.5">{today}</p>
-                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                <p className="text-xs sm:text-sm text-white/60 font-medium mb-1">{today}</p>
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
                   {greeting}, <span className="text-[#FFCC00]">{officerName}</span>
                 </h1>
-                <div className="flex items-center gap-2 mt-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1 text-[11px] text-white/70 bg-white/10 rounded-lg px-2.5 py-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="flex items-center gap-2.5 mt-3 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-white/80 bg-white/10 rounded-lg px-3 py-1.5">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                     Portal Live
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[11px] text-white/70 bg-white/10 rounded-lg px-2.5 py-1">
-                    <ShieldCheck className="h-3 w-3 text-emerald-400" />
+                  <span className="inline-flex items-center gap-1.5 text-xs text-white/80 bg-white/10 rounded-lg px-3 py-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
                     ETA Active
                   </span>
                   {lastSyncTime && (
-                    <span className="text-[11px] text-white/40">Last sync {lastSyncTime}</span>
+                    <span className="text-xs text-white/50">Last sync {lastSyncTime}</span>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
                 <button
                   type="button"
                   onClick={() => refreshAllData(true)}
                   disabled={refreshing}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer disabled:opacity-50"
+                  className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer disabled:opacity-50"
                   title="Sync data"
                 >
                   <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
@@ -677,24 +677,24 @@ export default function CmsDashboard() {
                 <button
                   type="button"
                   onClick={handleExportDashboardPdf}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors cursor-pointer"
                   title="Export ASTU Executive Summary PDF with Official Seal"
                 >
-                  <Printer className="h-3.5 w-3.5 text-[#FFCC00]" />
+                  <Printer className="h-4 w-4 text-[#FFCC00]" />
                   <span>Export PDF</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => window.open('/', '_blank')}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors cursor-pointer"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-4 w-4" />
                   <span>View Site</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('/cms/content')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FFCC00] hover:bg-yellow-300 text-[#003366] text-xs font-extrabold transition-all shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#FFCC00] hover:bg-yellow-300 text-[#003366] text-sm font-extrabold transition-all shadow-xs cursor-pointer"
                 >
                   <Plus className="h-4 w-4" />
                   <span>New Notice</span>

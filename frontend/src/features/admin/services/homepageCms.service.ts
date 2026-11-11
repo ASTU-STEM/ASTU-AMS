@@ -133,8 +133,12 @@ export interface SuccessStory {
   id: string;
   name: string;
   role: string;
+  company?: string;
   text: string;
   image: string;
+  graduationYear?: string;
+  department?: string;
+  milestone?: string;
   active: boolean;
 }
 
@@ -791,6 +795,7 @@ export interface HomepageCmsConfig {
   detailPages?: Record<string, DetailPageItem>;
   navSections?: NavSection[];
   communityPosts?: CommunityPost[];
+  donationTiers?: any[];
 }
 
 export const defaultHomepageCmsConfig: HomepageCmsConfig = {

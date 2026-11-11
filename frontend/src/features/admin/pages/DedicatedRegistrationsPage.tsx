@@ -223,38 +223,38 @@ export default function DedicatedRegistrationsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 md:p-8 space-y-5 transition-colors font-sans">
       {/* ── Top Full-Page Header Bar ────────────────────────────────────────── */}
-      <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+      <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
         {/* Top Row: Back button, Title & Header Actions */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div className="flex items-start sm:items-center gap-4">
             <button
               type="button"
               onClick={() => navigate('/cms/registrations')}
-              className="inline-flex items-center gap-1.5 p-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors text-xs font-bold cursor-pointer shrink-0"
+              className="inline-flex items-center gap-2 py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors text-sm font-bold cursor-pointer shrink-0"
               title="Return to CMS Registrations Desk"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to CMS Desk</span>
             </button>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-extrabold text-[10px] uppercase tracking-wider">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="px-2.5 py-1 rounded bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-extrabold text-[11px] uppercase tracking-wider">
                   DEDICATED FULL PAGE
                 </span>
-                <h1 className="text-lg font-extrabold text-slate-900 dark:text-white">Registered Members Roster Desk</h1>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Registered Members Roster Desk</h1>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Full-width standalone management desk for registered alumni members & accreditation export.
               </p>
             </div>
           </div>
 
           {/* Top Action Buttons - Perfectly Aligned */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             <button
               type="button"
               onClick={handleExportPdf}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 text-xs font-bold transition-all shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 text-sm font-bold transition-all shadow-sm cursor-pointer"
               title="Export roster to official printable PDF document"
             >
               <FileText className="h-4 w-4" />
@@ -264,7 +264,7 @@ export default function DedicatedRegistrationsPage() {
             <button
               type="button"
               onClick={handleExportCsv}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3.5 py-2 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2.5 text-sm font-bold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
               title="Export roster to CSV"
             >
               <FileSpreadsheet className="h-4 w-4 text-amber-500" />
@@ -274,7 +274,7 @@ export default function DedicatedRegistrationsPage() {
             <button
               type="button"
               onClick={() => setCustomizerModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3.5 py-2 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-4 py-2.5 text-sm font-bold border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
             >
               <Settings className="h-4 w-4 text-blue-500" />
               <span>Customize Form</span>
@@ -283,7 +283,7 @@ export default function DedicatedRegistrationsPage() {
             <button
               type="button"
               onClick={() => setAddModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-[#FFCC00] hover:bg-[#FFD633] text-[#003366] px-4 py-2 text-xs font-extrabold transition-all shadow-sm cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#FFCC00] hover:bg-[#FFD633] text-[#003366] px-5 py-2.5 text-sm font-extrabold transition-all shadow-sm cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               <span>Register Alumnus</span>
@@ -292,28 +292,28 @@ export default function DedicatedRegistrationsPage() {
         </div>
 
         {/* Bottom Row: Sleek Real-time Stats Badges */}
-        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-sm">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2.5 bg-slate-50 dark:bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700">
               <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <span className="text-slate-500 dark:text-slate-400 font-medium">Total Registrants:</span>
               <span className="font-extrabold text-slate-900 dark:text-white">{stats.total}</span>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2.5 bg-slate-50 dark:bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700">
               <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <span className="text-slate-500 dark:text-slate-400 font-medium">ETA Compliance:</span>
               <span className="font-extrabold text-emerald-600 dark:text-emerald-400">{stats.etaComplianceRate}%</span>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2.5 bg-slate-50 dark:bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700">
               <Building2 className="h-4 w-4 text-astu-navy dark:text-sky-400" />
               <span className="text-slate-500 dark:text-slate-400 font-medium">Employability Rate:</span>
               <span className="font-extrabold text-astu-navy dark:text-sky-400">{stats.employabilityRate}%</span>
             </div>
           </div>
 
-          <span className="text-slate-400 text-[11px] font-medium">
+          <span className="text-slate-400 text-xs font-medium">
             Live synchronized with ASTU alumni portal
           </span>
         </div>

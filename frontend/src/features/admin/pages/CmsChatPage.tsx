@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TelegramChat } from '../../../components/TelegramChat';
+import AdminPageHeader from '../components/AdminPageHeader';
 
 export default function CmsChatPage() {
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
@@ -13,15 +14,12 @@ export default function CmsChatPage() {
   }, []);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">ASTU_AMS Hub & Direct Messages</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Real-time direct messaging center for CMS Content Managers with Alumni Candidates, Corporate Recruiters, Registrar, Departments, and Admins.
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="ASTU_AMS Hub & Direct Messages"
+        subtitle="Real-time direct messaging center for CMS Content Managers with Alumni Candidates, Corporate Recruiters, Registrar, Departments, and Admins."
+        breadcrumbs={[{ label: 'Alumni Office' }, { label: 'Communications Hub' }]}
+      />
       <TelegramChat darkMode={isDark} />
     </div>
   );

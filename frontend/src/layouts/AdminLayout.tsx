@@ -8,7 +8,9 @@ import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
-import Footer from '../components/Footer';
+import PageClosedView from '../components/PageClosedView';
+import { usePortalMenuControl } from '../context/PortalMenuControlContext';
+import { getAdminMenuControlId } from '../features/admin/services/portalMenuControl.service';
 import { notificationService } from '../features/notifications/services/notification.service';
 
 class AdminRouteBoundary extends React.Component<
@@ -107,6 +109,7 @@ export default function AdminLayout() {
   };
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isPageClosed } = usePortalMenuControl();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -450,10 +453,21 @@ export default function AdminLayout() {
 
         <main className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
-            <Outlet />
+            {(() => {
+              const currentControlId = getAdminMenuControlId(location.pathname);
+              if (currentControlId && isPageClosed('ADMIN', currentControlId)) {
+                return (
+                  <PageClosedView
+                    actor="ADMIN"
+                    pageId={currentControlId}
+                    onBackToDashboard={() => navigate('/admin/dashboard')}
+                  />
+                );
+              }
+              return <Outlet />;
+            })()}
           </AdminRouteBoundary>
         </main>
-        <Footer variant="minimal" />
       </div>
     </div>
 
