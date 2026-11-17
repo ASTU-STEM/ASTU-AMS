@@ -5,7 +5,7 @@ import { JobMatch } from '../types/alumni.types';
 interface JobsTabProps {
   jobs: JobMatch[];
   onViewJob: (job: JobMatch) => void;
-  onToggleSaveJob: (jobId: number) => void;
+  onToggleSaveJob: (jobId: string | number) => void;
 }
 
 export const JobsTab: React.FC<JobsTabProps> = ({
@@ -61,7 +61,7 @@ export const JobsTab: React.FC<JobsTabProps> = ({
 
   const formats = ['All', 'Full-Time', 'Internship', 'Contract', 'Part-Time'];
 
-  const handleToggleSave = (e: React.MouseEvent, id: number, saved: boolean) => {
+  const handleToggleSave = (e: React.MouseEvent, id: string | number, saved: boolean) => {
     e.stopPropagation();
     onToggleSaveJob(id);
     toast.success(
@@ -74,11 +74,12 @@ export const JobsTab: React.FC<JobsTabProps> = ({
   else if (innerTab === 'applied') tabJobs = jobs.filter(j => j.applied);
 
   const filteredJobs = tabJobs.filter(job => {
+    const query = searchQuery.toLowerCase();
     const matchesSearch =
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.skills?.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())) || false;
+      (job.title || '').toLowerCase().includes(query) ||
+      (job.company || '').toLowerCase().includes(query) ||
+      (job.description || '').toLowerCase().includes(query) ||
+      job.skills?.some(skill => (skill || '').toLowerCase().includes(query)) || false;
 
     const matchesLocation = (() => {
       if (selectedLocation === 'All') return true;
@@ -99,18 +100,22 @@ export const JobsTab: React.FC<JobsTabProps> = ({
       return false;
     })();
 
+    const normalizedJobType = (job.type || '').toLowerCase().replace(/[^a-z]/g, '');
+    const normalizedSelectedFormat = selectedFormat.toLowerCase().replace(/[^a-z]/g, '');
     const matchesFormat =
       selectedFormat === 'All' ||
-      job.type.toLowerCase().replace(/[^a-z]/g, '').includes(selectedFormat.toLowerCase().replace(/[^a-z]/g, '')) ||
-      selectedFormat.toLowerCase().replace(/[^a-z]/g, '').includes(job.type.toLowerCase().replace(/[^a-z]/g, ''));
+      (normalizedJobType && (
+        normalizedJobType.includes(normalizedSelectedFormat) ||
+        normalizedSelectedFormat.includes(normalizedJobType)
+      ));
 
     return matchesSearch && matchesLocation && matchesFormat;
   });
 
   const sortedJobs = [...filteredJobs].sort((a, b) => {
-    const parseSalary = (s: string) => parseInt(s.replace(/[^0-9]/g, '')) || 0;
+    const parseSalary = (s: string | number | undefined) => parseInt(String(s || '').replace(/[^0-9]/g, ''), 10) || 0;
     switch (sortBy) {
-      case 'match': return parseInt(b.match) - parseInt(a.match);
+      case 'match': return (parseInt(String(b.match || '0'), 10) || 0) - (parseInt(String(a.match || '0'), 10) || 0);
       case 'recent': return (b.views || 0) - (a.views || 0);
       case 'salary': return parseSalary(b.salary) - parseSalary(a.salary);
       case 'views': return (b.applications || 0) - (a.applications || 0);

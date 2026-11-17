@@ -8,6 +8,9 @@ import type { AdminBreadcrumbItem } from '../features/admin/types/admin.types';
 import AdminBadge from '../features/admin/components/AdminBadge';
 import HelpCenter from '../components/HelpCenter';
 import AdminAiAssistant from '../components/AdminAiAssistant';
+import PageClosedView from '../components/PageClosedView';
+import { usePortalMenuControl } from '../context/PortalMenuControlContext';
+import { getAdminMenuControlId } from '../features/admin/services/portalMenuControl.service';
 import { notificationService } from '../features/notifications/services/notification.service';
 
 class AdminRouteBoundary extends React.Component<
@@ -106,6 +109,7 @@ export default function AdminLayout() {
   };
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isPageClosed } = usePortalMenuControl();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -291,7 +295,7 @@ export default function AdminLayout() {
       />
 
        <div
-         className={`min-h-screen transition-[margin-left] duration-[250ms] ease-in-out ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}
+         className={`min-h-screen transition-[margin-left] duration-[250ms] ease-in-out ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'}`}
        >
         <header
           className="sticky top-0 z-20 flex h-16 items-center justify-between border-b px-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] sm:px-6"
@@ -449,7 +453,19 @@ export default function AdminLayout() {
 
         <main className="min-h-[calc(100dvh-4rem)] overflow-y-auto bg-slate-50/60 p-6 lg:p-8 space-y-6" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
           <AdminRouteBoundary key={location.pathname}>
-            <Outlet />
+            {(() => {
+              const currentControlId = getAdminMenuControlId(location.pathname);
+              if (currentControlId && isPageClosed('ADMIN', currentControlId)) {
+                return (
+                  <PageClosedView
+                    actor="ADMIN"
+                    pageId={currentControlId}
+                    onBackToDashboard={() => navigate('/admin/dashboard')}
+                  />
+                );
+              }
+              return <Outlet />;
+            })()}
           </AdminRouteBoundary>
         </main>
       </div>

@@ -18,7 +18,8 @@ import { useSystemSettings } from "../context/SystemSettingsContext";
 
 interface MegaMenuItem {
   label: string;
-  sectionId: string;
+  sectionId?: string;
+  route?: string;
   description?: string;
 }
 
@@ -33,32 +34,32 @@ const megaMenus: MegaMenu[] = [
     label: "About",
     icon: FaInfoCircle,
     items: [
-      { label: "About ASTU", sectionId: "impact", description: "Mission, vision & history" },
-      { label: "Campuses", sectionId: "campuses", description: "Our campuses & facilities" },
-      { label: "Campus Life", sectionId: "campus-life", description: "Student activities & culture" },
-      { label: "Research", sectionId: "research", description: "Innovation & discoveries" },
-      { label: "Success Stories", sectionId: "success-stories", description: "Alumni achievements" },
+      { label: "About ASTU", route: "/info/overview", description: "Mission, vision & history" },
+      { label: "Campuses", route: "/info/campuses", description: "Our campuses & facilities" },
+      { label: "Campus Life", route: "/info/campus-life", description: "Student activities & culture" },
+      { label: "Research", route: "/info/research", description: "Innovation & discoveries" },
+      { label: "Success Stories", route: "/info/alumni-stories", description: "Alumni achievements" },
     ],
   },
   {
     label: "Services",
     icon: MdDashboardCustomize,
     items: [
-      { label: "Stakeholders", sectionId: "stakeholders", description: "Partners & collaborators" },
-      { label: "Career Opportunities", sectionId: "career-opportunities", description: "Jobs & internships" },
-      { label: "Testimonials", sectionId: "testimonials", description: "What alumni say" },
+      { label: "Stakeholders", route: "/partners", description: "Partners & collaborators" },
+      { label: "Career Opportunities", route: "/employers", description: "Jobs & recruitment" },
+      { label: "Testimonials", route: "/community", description: "What alumni say" },
     ],
   },
   {
     label: "Media",
     icon: MdCampaign,
     items: [
-      { label: "Events", sectionId: "events", description: "Upcoming gatherings" },
-      { label: "Workshops", sectionId: "workshops", description: "Skill-building sessions" },
-      { label: "News", sectionId: "news", description: "Latest updates" },
-      { label: "Announcements", sectionId: "announcements", description: "Official notices" },
-      { label: "Gallery", sectionId: "gallery", description: "Photo moments" },
-      { label: "Video Gallery", sectionId: "video-gallery", description: "Video highlights" },
+      { label: "Events", route: "/events", description: "Upcoming gatherings" },
+      { label: "Workshops", route: "/workshops", description: "Skill-building sessions" },
+      { label: "News", route: "/news", description: "Latest updates" },
+      { label: "Announcements", route: "/announcements", description: "Official notices" },
+      { label: "Gallery", route: "/gallery", description: "Photo moments" },
+      { label: "Video Gallery", route: "/info/video-gallery", description: "Video highlights" },
     ],
   },
 ];
@@ -77,10 +78,11 @@ const simpleItems: SimpleNavItem[] = [
 
 const searchItems = [
   ...megaMenus.flatMap((m) => m.items),
-  ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId })),
+  ...simpleItems.map((s) => ({ label: s.label, sectionId: s.sectionId, route: s.route })),
 ].map((item) => ({
   label: item.label,
   sectionId: item.sectionId,
+  route: item.route,
 }));
 
 function scrollToSection(sectionId: string) {
@@ -131,7 +133,11 @@ export default function Navbar() {
   const handleSearchSelect = (item: (typeof searchItems)[number]) => {
     setSearchQuery("");
     setIsSearchOpen(false);
-    navigateToSection(item.sectionId);
+    if (item.route) {
+      navigate(item.route);
+    } else if (item.sectionId) {
+      navigateToSection(item.sectionId);
+    }
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -159,13 +165,24 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const navigateToSection = (sectionId: string) => {
+  const navigateToSection = (sectionId?: string, fallbackRoute?: string) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    if (location.pathname === "/") {
-      scrollToSection(sectionId);
-    } else {
-      navigate(`/?scrollTo=${sectionId}`);
+    if (!sectionId && fallbackRoute) {
+      navigate(fallbackRoute);
+      return;
+    }
+    if (sectionId) {
+      if (location.pathname === "/") {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          scrollToSection(sectionId);
+        } else if (fallbackRoute) {
+          navigate(fallbackRoute);
+        }
+      } else {
+        navigate(`/?scrollTo=${sectionId}`);
+      }
     }
   };
 
@@ -179,10 +196,16 @@ export default function Navbar() {
     }
   };
 
-  const handleMegaItemClick = (sectionId: string) => {
+  const handleMegaItemClick = (item: MegaMenuItem) => {
     setIsMobileNavOpen(false);
     setOpenMega(null);
-    navigateToSection(sectionId);
+    if (item.route) {
+      navigate(item.route);
+      return;
+    }
+    if (item.sectionId) {
+      navigateToSection(item.sectionId);
+    }
   };
 
   const handleMegaEnter = (label: string) => {
@@ -195,39 +218,9 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-      <div className="hidden bg-astu-navy text-white md:block">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 py-1">
-          <div className="flex items-center gap-4 text-xs text-white/80">
-            <a
-              href={`mailto:${settings.general?.contactEmail || 'admin@astu.edu.et'}`}
-              className="hover:text-white transition-colors font-medium"
-            >
-              {settings.general?.contactEmail || 'admin@astu.edu.et'}
-            </a>
-            <span className="text-white/20">|</span>
-            <span className="font-medium">{settings.general?.phoneNumber || '+251-221-110000'}</span>
-          </div>
-          <div className="flex items-center gap-3 text-[13px]">
-            <Link
-              to="/login"
-              className="text-white/80 hover:text-white transition-colors font-medium"
-            >
-              Login
-            </Link>
-            <span className="text-white/20">|</span>
-            <Link
-              to="/register"
-              className="text-white/80 hover:text-white transition-colors font-medium"
-            >
-              Register
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-3 py-3 group">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-4 md:px-6">
+        <Link to="/" className="flex items-center gap-3 py-2 group">
           <div className="flex items-center gap-2.5">
             <img
               src={settings.appearance?.logoUrl || "/images/astu-seal-logo.png"}
@@ -238,7 +231,7 @@ export default function Navbar() {
               <p className="text-sm font-bold text-astu-navy leading-tight">
                 {settings.general?.abbreviation || 'ASTU'}-AMS
               </p>
-              <p className="text-[9px] uppercase tracking-[0.2em] text-astu-green font-semibold">
+              <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-semibold">
                 {settings.general?.portalTitle || 'Alumni Management System'}
               </p>
             </div>
@@ -272,8 +265,8 @@ export default function Navbar() {
               >
                 <button
                   className={`relative flex items-center gap-1.5 px-4 py-4 text-[15px] font-bold tracking-wide transition-colors duration-200 ${isOpen
-                      ? "text-astu-navy"
-                      : "text-on-surface-variant hover:text-astu-navy"
+                    ? "text-astu-navy"
+                    : "text-on-surface-variant hover:text-astu-navy"
                     }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -290,8 +283,8 @@ export default function Navbar() {
                       <div className="p-2">
                         {menu.items.map((item) => (
                           <button
-                            key={item.sectionId}
-                            onClick={() => handleMegaItemClick(item.sectionId)}
+                            key={item.label}
+                            onClick={() => handleMegaItemClick(item)}
                             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-astu-navy/5"
                           >
                             <div>
@@ -315,7 +308,7 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div ref={searchWrapRef} className="relative hidden lg:block">
             <HiMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface-variant" />
             <input
@@ -327,7 +320,7 @@ export default function Navbar() {
               onFocus={() => setIsSearchOpen(true)}
               onKeyDown={handleSearchKeyDown}
               onBlur={() => setTimeout(() => setIsSearchOpen(false), 200)}
-              className="w-48 rounded-full border border-outline-variant bg-surface-container-low py-2.5 pl-8 pr-3 text-sm focus:w-60 focus:border-astu-navy focus:outline-none focus:ring-2 focus:ring-astu-navy/20 transition-all placeholder:text-on-surface-variant/60"
+              className="w-44 rounded-full border border-outline-variant bg-surface-container-low py-2 pl-8 pr-3 text-sm focus:w-56 focus:border-astu-navy focus:bg-white focus:outline-none transition-all placeholder:text-on-surface-variant/60"
               placeholder="Search sections..."
               type="text"
             />
@@ -357,9 +350,25 @@ export default function Navbar() {
             <Bell className="h-5 w-5" />
           </button>
 
+          {!user ? (
+            <Link
+              to="/login"
+              className="hidden sm:inline-flex items-center text-sm font-semibold text-[#003580] hover:text-[#C8102E] transition-colors px-2 py-1"
+            >
+              Login
+            </Link>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="hidden sm:inline-flex items-center text-sm font-semibold text-slate-600 hover:text-[#C8102E] transition-colors px-2 py-1 cursor-pointer"
+            >
+              Sign Out
+            </button>
+          )}
+
           <Link
             to="/register"
-            className="hidden sm:inline-flex rounded-lg bg-astu-navy px-5 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:bg-astu-navy/90 hover:shadow-lg"
+            className="hidden sm:inline-flex items-center justify-center h-11 sm:h-12 rounded-md bg-[#C8102E] hover:bg-[#A60D26] px-5 text-sm font-bold text-white transition-colors shadow-sm"
           >
             Join Network
           </Link>
@@ -394,7 +403,7 @@ export default function Navbar() {
                 <Link
                   to="/register"
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="rounded-lg bg-astu-navy px-3 py-2.5 text-sm font-bold text-white text-center hover:brightness-95"
+                  className="flex items-center justify-center h-12 rounded-lg bg-[#C8102E] hover:bg-[#A60D26] px-3 text-sm font-bold text-white text-center transition-colors shadow-sm"
                 >
                   Join Network
                 </Link>
@@ -483,8 +492,8 @@ export default function Navbar() {
                     <div className="ml-8 space-y-1 pb-1">
                       {menu.items.map((item) => (
                         <button
-                          key={item.sectionId}
-                          onClick={() => handleMegaItemClick(item.sectionId)}
+                          key={item.label}
+                          onClick={() => handleMegaItemClick(item)}
                           className="flex w-full items-center rounded-lg px-3 py-2.5 text-sm font-semibold text-on-surface-variant hover:bg-astu-navy/5 transition-all text-left"
                         >
                           {item.label}

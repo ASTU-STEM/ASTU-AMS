@@ -4,6 +4,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, X, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import PageClosedView, { PortalClosedBadge } from '../../../components/PageClosedView';
+import { usePortalMenuControl } from '../../../context/PortalMenuControlContext';
 import TelebirrDonationModal from '../../../components/TelebirrDonationModal';
 import { surveyService } from '../../surveys/services/survey.service';
 import { notificationService } from '../../notifications/services/notification.service';
@@ -44,6 +46,7 @@ interface AlumniDashboardProps {
 const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { isPageClosed } = usePortalMenuControl();
 
   const [activeTab, setActiveTab] = useState<string>(() => {
     if (defaultTab) return defaultTab;
@@ -876,111 +879,71 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
 
         {/* Navigation Links */}
         <nav className="relative z-10 flex-grow px-3 py-4 overflow-y-auto scrollbar-thin space-y-5">
-          {/* Section 1: Recruiting & Career */}
-          <div>
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-3 mb-2">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Recruiting & Career</p>
+          {[
+            {
+              key: 'recruiting',
+              title: 'Recruiting & Career',
+              items: recruitingItems as Array<{ id: string; label: string; icon: string; badge?: string | null }>,
+            },
+            {
+              key: 'community',
+              title: 'Community',
+              items: communityItems as Array<{ id: string; label: string; icon: string; badge?: string | null }>,
+            },
+            {
+              key: 'services',
+              title: 'Services',
+              items: serviceItems as Array<{ id: string; label: string; icon: string; badge?: string | null }>,
+            },
+          ].map((section, sectionIdx) => (
+            <div key={section.key}>
+              {!sidebarCollapsed && (
+                <div className={`flex items-center justify-between px-3 mb-2 ${sectionIdx > 0 ? 'pt-1' : ''}`}>
+                  <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">{section.title}</p>
+                </div>
+              )}
+              <div className="space-y-1">
+                {section.items.map((item) => {
+                  const closed = isPageClosed('ALUMNI', item.id);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      title={sidebarCollapsed ? `${item.label}${closed ? ' (Closed)' : ''}` : undefined}
+                      className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
+                        } ${activeTab === item.id
+                          ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
+                          : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
+                        }`}
+                    >
+                      <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
+                        }`}>
+                        <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
+                        {closed && sidebarCollapsed && (
+                          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white" />
+                        )}
+                      </span>
+                      {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
+                      {closed && !sidebarCollapsed ? (
+                        <PortalClosedBadge />
+                      ) : (
+                        <>
+                          {item.badge && !sidebarCollapsed && (
+                            <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                              {item.badge}
+                            </span>
+                          )}
+                          {activeTab === item.id && !sidebarCollapsed && !item.badge && (
+                            <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
+                          )}
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
-            )}
-            <div className="space-y-1">
-              {recruitingItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                      {item.badge}
-                    </span>
-                  )}
-                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
             </div>
-          </div>
-
-          {/* Section 2: Community & Network */}
-          <div>
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-3 mb-2 pt-1">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Community</p>
-              </div>
-            )}
-            <div className="space-y-1">
-              {communityItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {activeTab === item.id && !sidebarCollapsed && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 3: Services & Account */}
-          <div>
-            {!sidebarCollapsed && (
-              <div className="flex items-center justify-between px-3 mb-2 pt-1">
-                <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Services</p>
-              </div>
-            )}
-            <div className="space-y-1">
-              {serviceItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  title={sidebarCollapsed ? item.label : undefined}
-                  className={`nav-btn w-full flex items-center px-2.5 py-2 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-2.5'
-                    } ${activeTab === item.id
-                      ? 'bg-[#003366]/10 text-[#003366] font-bold shadow-2xs ring-1 ring-[#003366]/20'
-                      : 'text-slate-600 hover:text-[#003366] hover:bg-slate-50'
-                    }`}
-                >
-                  <span className={`relative w-8 h-8 rounded-lg flex items-center justify-center transition-all ${activeTab === item.id ? 'bg-[#003366] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003366]'
-                    }`}>
-                    <span className="material-symbols-outlined text-[19px]">{item.icon}</span>
-                  </span>
-                  {!sidebarCollapsed && <span className="text-sm font-medium flex-1 truncate text-left">{item.label}</span>}
-                  {item.badge && !sidebarCollapsed && (
-                    <span className="flex items-center justify-center min-w-[20px] h-4.5 px-1.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
-                      {item.badge}
-                    </span>
-                  )}
-                  {activeTab === item.id && !sidebarCollapsed && !item.badge && (
-                    <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003366] shrink-0"></div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+          ))}
         </nav>
 
         {/* Sidebar Footer */}
@@ -1150,6 +1113,17 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
             <div className="flex h-full items-center justify-center">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#003580] border-t-transparent"></div>
             </div>
+          ) : isPageClosed('ALUMNI', activeTab) ? (
+            <PageClosedView
+              actor="ALUMNI"
+              pageId={activeTab}
+              onBackToDashboard={() => {
+                const firstOpen = [...recruitingItems, ...communityItems, ...serviceItems].find(
+                  (item) => !isPageClosed('ALUMNI', item.id)
+                );
+                setActiveTab(firstOpen?.id || 'dashboard');
+              }}
+            />
           ) : (
             <>
               {activeTab === 'dashboard' && profile && (
@@ -1209,6 +1183,7 @@ const AlumniDashboard: React.FC<AlumniDashboardProps> = ({ defaultTab }) => {
                 />
               )}
               {activeTab === 'surveys' && <SurveysTab />}
+              {activeTab === 'jobs' && <JobsTab jobs={jobs} onViewJob={handleViewJob} onToggleSaveJob={handleToggleSaveJob} />}
               {activeTab === 'tools' && (
                 <AlumniToolsPage
                   profile={profile}

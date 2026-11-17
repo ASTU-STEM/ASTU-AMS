@@ -48,6 +48,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import AdminPageHeader from '../components/AdminPageHeader';
 import AdminModal from '../components/AdminModal';
 import AdminBadge from '../components/AdminBadge';
+import AdminTablePagination from '../components/AdminTablePagination';
 import { toast } from 'react-hot-toast';
 import { adminService } from '../services/admin.service';
 
@@ -182,7 +183,6 @@ const getUserAvatarUrl = (user: any): string | null => {
 const roles: Array<'All Roles' | Role> = ['All Roles', 'Alumni', 'Employer', 'Department Head', 'Registrar', 'CMS Manager', 'Super Admin', 'Admin'];
 const statuses: Array<'All' | Status> = ['All', 'Active', 'Inactive', 'Suspended', 'Pending Verification'];
 const departments = ['All Departments', 'Computer Science', 'Software Engineering', 'Electrical Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Chemical Engineering', 'Information Engineering', 'Registrar Office'];
-const pageSize = 25;
 
 const roleTone: Record<Role, 'default' | 'warning' | 'danger' | 'success' | 'neutral'> = {
   Alumni: 'default',
@@ -609,6 +609,7 @@ export default function UserManagement() {
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeUser, setActiveUser] = useState<UserRow | null>(null);
   const [menuUserId, setMenuUserId] = useState<string | null>(null);
@@ -1036,7 +1037,7 @@ export default function UserManagement() {
     } finally {
       setLoading(false);
     }
-  }, [page, query, selectedRole, selectedStatus, selectedDepartment]);
+  }, [page, pageSize, query, selectedRole, selectedStatus, selectedDepartment]);
 
   useEffect(() => {
     const roleParam = searchParams.get('role');
@@ -2395,34 +2396,19 @@ export default function UserManagement() {
           </table>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-500">
-            Showing {paginatedUsers.length} of {totalCount} filtered users
-          </p>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-              disabled={page === 1}
-              className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Prev
-            </button>
-            <div className="rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">
-              Page {page} of {totalPages}
-            </div>
-            <button
-              type="button"
-              onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
-              disabled={page === totalPages}
-              className="inline-flex items-center gap-2 rounded-[8px] border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+        <div className="border-t border-slate-200 p-3">
+          <AdminTablePagination
+            currentPage={page}
+            totalItems={totalCount}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setPage(1);
+            }}
+            pageSizeOptions={[10, 25, 50, 100]}
+            itemName="users"
+          />
         </div>
       </section>
 

@@ -7,6 +7,7 @@ import { globalErrorHandler } from './core/middleware/error.middleware';
 import { sendSuccess } from './core/utils/response.utils';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // 1. Basic Security Headers (Helmet) - ASTU AI Active
 app.use(helmet({
@@ -14,12 +15,29 @@ app.use(helmet({
 }));
 
 // 2. CORS Policy Configuration
+const allowedOrigins = new Set([
+  ...(process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((url) => url.trim().replace(/\/+$/, ''))
+    .filter(Boolean),
+  ...(process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((url) => url.trim().replace(/\/+$/, ''))
+    .filter(Boolean),
+  'https://astualumni.getastuye.com',
+  'http://localhost:5173',
+  'http://localhost:5174',
+]);
+
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'https://astualumni.getastuye.com',
-    'http://localhost:5173',
-    'http://localhost:5174',
-  ],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const normalizedOrigin = origin.replace(/\/+$/, '');
+    if (allowedOrigins.has(normalizedOrigin) || /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(normalizedOrigin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
   credentials: true,
 }));
 

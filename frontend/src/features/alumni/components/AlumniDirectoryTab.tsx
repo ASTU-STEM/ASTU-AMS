@@ -266,7 +266,8 @@ export const AlumniDirectoryTab: React.FC<AlumniDirectoryTabProps> = ({ onOpenCh
       return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || 'Alumni')}`;
     }
     if (avatar.startsWith('/')) {
-      return `http://localhost:5000${avatar}`;
+      const uploadBase = (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
+      return `${uploadBase}${avatar}`;
     }
     return avatar;
   };

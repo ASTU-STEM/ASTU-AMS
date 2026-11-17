@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationCap, Users, Briefcase, BarChart3, ShieldCheck } from 'lucide-react';
+import Footer from '../components/Footer';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -36,9 +37,9 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
   ];
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="flex min-h-screen flex-col bg-surface">
       {/* Top Navigation */}
-      <header className="border-b border-outline-variant bg-white/95 backdrop-blur">
+      <header className="border-b border-outline-variant bg-white/95 backdrop-blur shrink-0">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
           <Link to="/" className="flex items-center gap-2">
             <div className="rounded-full bg-astu-navy p-2 text-white">
@@ -53,9 +54,9 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
       </header>
 
       {/* Main Content */}
-      <div className="flex min-h-[calc(100vh-4rem)]">
+      <div className="flex flex-1 min-h-[calc(100vh-4rem)]">
         {/* Left Side - Branding & Features (Desktop) */}
-        <div 
+        <div
           className="hidden lg:flex lg:w-1/2 flex-col justify-start pt-24 px-12 pb-12 text-white relative overflow-hidden"
           style={{
             backgroundImage: 'url(/images/astuget.jpg)',
@@ -109,9 +110,9 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
             {/* Logo */}
             {showLogo && (
               <div className="flex justify-center mb-4">
-                <img 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH" 
-                  alt="ASTU Logo" 
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6deuYLZHNJiVCdbEUR2-fizVXzbqqy4MUBUQxxpgQcUdXNPyUaH_PmuawCgALD_doph1Fn2l0Qm3sEDaMoPuc2lMztO55CYrFDQZJjGQzLnLeSbraPgATab7DFeDHzQBXZ701F8IpJHwziWElvPY8ZCQ3zP6XJTuIzhgJQf-M-iSJw2mdrDUtfp4ha63XRYBjxmAonsb8n_vVPC8oR_VPGkiQfTNFY90SVNbxfDuq0vglrtVAwyP7P6GW9uQKJ7XaUGNCpUhOEFwH"
+                  alt="ASTU Logo"
                   className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 object-contain"
                   onError={(e) => {
                     e.currentTarget.src = "/images/astu-logo.jpeg";
@@ -133,6 +134,9 @@ export default function AuthLayout({ children, title, subtitle, showLogo = true,
           </div>
         </div>
       </div>
+
+      {/* Minimal Institutional Footer */}
+      <Footer variant="minimal" />
     </div>
   );
 }

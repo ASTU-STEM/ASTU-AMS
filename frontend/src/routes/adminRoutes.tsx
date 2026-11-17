@@ -19,6 +19,8 @@ import DonationsManagement from '../features/admin/pages/DonationsManagement';
 import AdminChatPage from '../features/admin/pages/AdminChatPage';
 import SupportDeskManagement from '../features/admin/pages/SupportDeskManagement';
 import IctAdminDashboard from '../features/admin/pages/IctAdminDashboard';
+import KnowledgeBaseManagement from '../features/admin/pages/KnowledgeBaseManagement';
+import PortalMenuControls from '../features/admin/pages/PortalMenuControls';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function AdminRoutes() {
@@ -43,6 +45,8 @@ export default function AdminRoutes() {
         <Route path="departments" element={<DepartmentManagement />} />
         <Route path="departments/:id" element={<DepartmentManagement />} />
         <Route path="donations" element={<DonationsManagement />} />
+        <Route path="portal-controls" element={<PortalMenuControls />} />
+        <Route path="knowledge-base" element={<KnowledgeBaseManagement />} />
         <Route path="notifications" element={<NotificationCenter />} />
         <Route path="logs" element={<SystemLogs />} />
         <Route path="backup" element={<BackupSecurity />} />

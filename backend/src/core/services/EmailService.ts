@@ -264,6 +264,9 @@ export class EmailService {
     };
 
     console.log(`[EMAIL DISPATCH] Delivered to (Dynamic DB/Role Resolved): ${message.to} | Subject: "${options.subject}"`);
+    if (process.env.NODE_ENV === 'test') {
+      return { messageId: 'test-mock-id', accepted: [message.to], response: '250 Test mock accepted' } as any;
+    }
     const info = await activeTransporter.sendMail(message);
     return info;
   }

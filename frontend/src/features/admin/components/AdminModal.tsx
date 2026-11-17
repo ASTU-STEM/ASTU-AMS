@@ -13,6 +13,7 @@ const sizeClasses: Record<NonNullable<AdminModalProps['size']>, string> = {
 export default function AdminModal({
   open,
   title,
+  subtitle,
   children,
   onClose,
   footer,
@@ -74,7 +75,7 @@ export default function AdminModal({
 
       <div
         className={[
-          'modal-panel my-auto flex max-h-[92vh] w-full flex-col overflow-hidden rounded-[16px] border border-slate-300/80 bg-white shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)]',
+          'modal-panel my-auto flex max-h-[92vh] w-full flex-col overflow-hidden rounded-[16px] border border-slate-300/80 bg-white dark:border-slate-700 dark:bg-slate-900 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.45)] dark:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.7)]',
           sizeClasses[size],
         ].join(' ')}
       >
@@ -103,7 +104,7 @@ export default function AdminModal({
                   </span>
                 </div>
                 <p className="text-[11px] font-medium text-blue-100/80 mt-0.5">
-                  Adama Science & Technology University • Control Center
+                  {subtitle || 'Adama Science & Technology University • Control Center'}
                 </p>
               </div>
             </div>
@@ -111,7 +112,7 @@ export default function AdminModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl p-2 text-white/70 hover:bg-white/15 hover:text-white transition-all border border-transparent hover:border-white/20 active:scale-95"
+              className="rounded-xl p-2 text-white/70 hover:bg-white/15 hover:text-white transition-all border border-transparent hover:border-white/20 active:scale-95 cursor-pointer"
               aria-label="Close modal"
             >
               <X className="h-4.5 w-4.5" />
@@ -120,13 +121,13 @@ export default function AdminModal({
         </div>
 
         {/* Modal Content Body */}
-        <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5 text-sm text-slate-600 bg-slate-50/30">
+        <div className="flex-1 overflow-y-auto min-h-0 px-6 py-5 text-sm text-slate-600 dark:text-slate-300 bg-slate-50/30 dark:bg-slate-900/50">
           {children}
         </div>
 
         {/* Modal Footer */}
         {footer && (
-          <div className="shrink-0 border-t border-slate-200/80 bg-white px-6 py-3.5 shadow-sm">
+          <div className="shrink-0 border-t border-slate-200/80 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-3.5 shadow-sm">
             {footer}
           </div>
         )}

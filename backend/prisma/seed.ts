@@ -517,6 +517,42 @@ async function main() {
     }
   }
 
+  // Seed fresh unregistered RegistrarStudent records for ID scan testing
+  const registrarTestRecords = [
+    {
+      studentId: 'UGR/55555/25',
+      fullName: 'Wabi Tena Regasa',
+      department: 'Software Engineering',
+      departmentCode: 'SWE',
+      cgpa: 3.75,
+      graduationYear: 2024,
+      email: null,
+      phone: null,
+      nationality: 'Ethiopian',
+      source: 'SIS_MANUAL_SEED',
+    },
+    {
+      studentId: 'UGR/66666/25',
+      fullName: 'Dawit Tesfaye Bekele',
+      department: 'Software Engineering',
+      departmentCode: 'SWE',
+      cgpa: 3.62,
+      graduationYear: 2024,
+      email: null,
+      phone: null,
+      nationality: 'Ethiopian',
+      source: 'SIS_MANUAL_SEED',
+    },
+  ];
+
+  for (const record of registrarTestRecords) {
+    await prisma.registrarStudent.upsert({
+      where: { studentId: record.studentId },
+      update: {},
+      create: record,
+    });
+  }
+
   console.log('🌱 Seeding completed successfully!');
 }
 

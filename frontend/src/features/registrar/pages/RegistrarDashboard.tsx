@@ -4,6 +4,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import toast, { Toaster } from 'react-hot-toast';
 import { Bell, ChevronDown, HelpCircle, LogOut, Menu, Moon, Search, Settings, Sun, User, FileText, BarChart3 } from 'lucide-react';
 import HelpCenter from '../../../components/HelpCenter';
+import PageClosedView, { PortalClosedBadge } from '../../../components/PageClosedView';
+import { usePortalMenuControl } from '../../../context/PortalMenuControlContext';
 
 
 // Types
@@ -20,6 +22,8 @@ import { DocumentProcessingTab } from '../components/DocumentProcessingTab';
 import { ReportingTab } from '../components/ReportingTab';
 import { MessagingTab } from '../components/MessagingTab';
 import { DataIssuesTab } from '../components/DataIssuesTab';
+import { RegistrarPublishingTab } from '../components/RegistrarPublishingTab';
+import { DashboardBroadcastHero } from '../../../components/DashboardBroadcastHero';
 import SurveyManagement from '../../surveys/components/SurveyManagement';
 import { AnalyticsChart } from '../../../components/AnalyticsChart';
 import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTimeline';
@@ -27,6 +31,7 @@ import { ActivityTimeline, ActivityEntry } from '../../../components/ActivityTim
 const RegistrarDashboard = () => {
    const navigate = useNavigate();
    const { user, logout } = useAuth();
+   const { isPageClosed } = usePortalMenuControl();
 
    // Dynamic authenticated Registrar profile state from database
    const registrarName = useMemo(() => {
@@ -809,8 +814,9 @@ useEffect(() => {
               },
               {
                 sectionKey: 'comm',
-                sectionLabel: 'Communication',
+                sectionLabel: 'Communication & Publishing',
                 items: [
+                  { id: 'bulletins', label: 'Announcements & Events', icon: 'campaign', badge: null, tooltip: 'Publish announcements & events (Subject to Alumni Officer approval)' },
                   { id: 'messages', label: 'Messages', icon: 'forum', badge: unreadChatMessagesCount > 0 ? unreadChatMessagesCount : null, tooltip: unreadChatMessagesCount > 0 ? `${unreadChatMessagesCount} unread messages` : 'Direct Messaging Hub' }
                 ]
               }
@@ -822,11 +828,13 @@ useEffect(() => {
                   </div>
                 )}
                 <div className="space-y-1">
-                  {group.items.map((item) => (
+                  {group.items.map((item) => {
+                    const closed = isPageClosed('REGISTRAR', item.id);
+                    return (
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      title={sidebarCollapsed ? item.label : item.tooltip}
+                      title={sidebarCollapsed ? `${item.label}${closed ? ' (Closed)' : ''}` : item.tooltip}
                       className={`nav-btn w-full flex items-center px-3 py-2.5 rounded-xl transition-all duration-200 text-left group relative ${sidebarCollapsed ? 'justify-center' : 'gap-3.5'} ${activeTab === item.id
                         ? 'bg-[#003580]/10 text-[#003580] font-bold shadow-2xs ring-1 ring-[#003580]/20'
                         : 'text-slate-600 hover:text-[#003580] hover:bg-slate-50'
@@ -834,27 +842,32 @@ useEffect(() => {
                     >
                       <span className={`relative w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all ${activeTab === item.id ? 'bg-[#003580] text-white shadow-xs' : 'bg-slate-100 text-slate-500 group-hover:text-[#003580]'}`}>
                         <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                        {item.badge && sidebarCollapsed && (
+                        {closed && sidebarCollapsed ? (
+                          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 border-2 border-white" />
+                        ) : item.badge && sidebarCollapsed ? (
                           <span className="absolute -top-1 -right-1 min-w-[15px] h-4 px-1 flex items-center justify-center rounded-full bg-rose-500 text-[8px] font-extrabold text-white shadow-lg">
                             {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                           </span>
-                        )}
+                        ) : null}
                       </span>
                       {!sidebarCollapsed && (
                         <>
                           <span className="text-sm font-semibold flex-1 truncate text-left">{item.label}</span>
-                          {item.badge && (
+                          {closed ? (
+                            <PortalClosedBadge />
+                          ) : item.badge ? (
                             <span className={`ml-auto flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-[10px] font-extrabold shadow-xs ${String(item.id) === 'verification' || String(item.id) === 'documents' || String(item.id) === 'data_issues' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
                               {typeof item.badge === 'number' && Number(item.badge) > 99 ? '99+' : item.badge}
                             </span>
-                          )}
+                          ) : null}
                         </>
                       )}
-                      {activeTab === item.id && !sidebarCollapsed && !item.badge && (
+                      {activeTab === item.id && !sidebarCollapsed && !item.badge && !closed && (
                         <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#003580] shrink-0" />
                       )}
                     </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -1070,6 +1083,19 @@ useEffect(() => {
 
           {/* Dynamic tabs routing */}
           <div className="flex-grow bg-slate-50/60 p-6 md:p-8 space-y-6 max-w-[1600px] mx-auto" style={{ animation: 'astu-admin-fade-in 150ms ease-out' }}>
+            {isPageClosed('REGISTRAR', activeTab) ? (
+              <PageClosedView
+                actor="REGISTRAR"
+                pageId={activeTab}
+                onBackToDashboard={() => {
+                  const firstOpen = ['dashboard', 'management', 'records', 'data_integration', 'verification', 'documents', 'data_issues', 'surveys', 'reporting', 'bulletins', 'messages'].find(
+                    (id) => !isPageClosed('REGISTRAR', id)
+                  );
+                  setActiveTab(firstOpen || 'dashboard');
+                }}
+              />
+            ) : (
+              <>
             {activeTab === 'management' && (
               <section className="space-y-6 p-4 md:p-6">
                 {/* Management Hub Hero */}
@@ -1181,6 +1207,8 @@ useEffect(() => {
 
             {activeTab === 'dashboard' && (
               <div className="space-y-6">
+                {/* Official Alumni Officer Broadcast Hero Banner */}
+                <DashboardBroadcastHero actorRole="REGISTRAR" className="mb-2" />
 
                 {/* Welcome banner */}
                 <section className="rounded-[20px] border border-[var(--border-color)] bg-[linear-gradient(135deg,#003580,#0f4f86,#1D9E75)] p-5 text-white shadow-[0_1px_3px_rgba(0,0,0,0.06)] md:p-6">
@@ -1442,9 +1470,14 @@ useEffect(() => {
             {activeTab === 'messages' && (
               <MessagingTab darkMode={darkMode} />
             )}
+
+            {activeTab === 'bulletins' && (
+              <RegistrarPublishingTab registrarName={registrarName} darkMode={darkMode} />
+            )}
+              </>
+            )}
           </div>
         </div>
-
       </div>
     </div>
 
