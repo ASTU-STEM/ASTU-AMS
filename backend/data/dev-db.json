@@ -34373,6 +34373,24 @@
       },
       "createdAt": "2026-10-09T06:47:37.941Z",
       "updatedAt": "2026-10-09T07:47:37.941Z"
+    },
+    {
+      "studentId": "UGR/TEST/9999_1794407234456",
+      "fullName": "Abebe Kebede Worku",
+      "email": "didit_test_1794407234456@alumni.astu.edu.et",
+      "status": "ACTIVE",
+      "isVerified": true,
+      "pendingPasswordHash": null,
+      "departmentId": "dept-swe",
+      "graduationYear": 2025,
+      "cgpa": 3.8,
+      "gender": "MALE",
+      "id": "dev-alumni-1794407234617",
+      "createdAt": "2026-11-11T14:27:14.617Z",
+      "updatedAt": "2026-11-11T14:27:15.454Z",
+      "pendingVerificationCode": null,
+      "verificationCodeExpiresAt": null,
+      "verificationChannel": "NATIONAL_ID"
     }
   ],
   "employerProfiles": [
@@ -64450,7 +64468,7 @@
           ]
         }
       },
-      "updatedAt": "2026-11-10T01:12:06.415Z",
+      "updatedAt": "2026-11-11T14:23:30.452Z",
       "updatedBy": "CMS Admin"
     }
   ],
